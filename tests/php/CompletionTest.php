@@ -131,6 +131,7 @@ final class CompletionTest extends TestCase
         $p=$this->create('resource',['interest'=>[$this->terms['interest']],'meta'=>['youtube_url'=>'https://youtu.be/abcdefghijk','resource_type'=>'Video','chatham'=>false]]);
         $data=Knowledge::videoMetadata($p['id']); self::assertSame('DEMO MODE',$data['mode']); self::assertSame(210,$data['duration_seconds']);
         $result=Knowledge::multimedia($p['id']); $this->posts=array_merge($this->posts,[$result['resource_id'],$result['hub_id']],$result['capsule_ids']);
+        self::assertGreaterThan(0,strtotime(Content::serialize(get_post($result['resource_id']))['date']));
         $draft=get_post_meta($result['resource_id'],'_ascla',true); self::assertNotEmpty($draft['moments']); self::assertNotEmpty($draft['tags']);
         self::assertSame([],wp_get_object_terms($result['resource_id'],'ascla_tag'));
         $name='Etiqueta revisada '.bin2hex(random_bytes(3));

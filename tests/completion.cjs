@@ -58,7 +58,7 @@ async function runJobs() {
     await member.screenshot({ path: path.join(root, 'test-results/completion-knowledge.png'), fullPage: true }); checks.push('Resource author, source, topic, category and keyword filters combined');
 
     const hub = await create(admin, 'hub', { meta: { media_ids: [file.id] } });
-    await go(member, 'hub'); await member.locator('.feed-images img').first().waitFor(); assert.equal(await member.locator('.feed-images img').first().evaluate(el => el.naturalWidth > 0), true);
+    await go(member, 'hub'); await member.locator('.feed-images img').first().waitFor(); assert.equal(await member.locator('.feed-images img').first().evaluate(async el => { await el.decode(); return el.naturalWidth > 0; }), true);
     checks.push('Private images appear directly in Hub feed');
     const upload2 = await admin.request.post(await admin.evaluate(() => ASCLA.api + 'media'), { headers: { 'X-WP-Nonce': await admin.evaluate(() => ASCLA.nonce) }, multipart: { file: { name: 'ally-test.png', mimeType: 'image/png', buffer: imageBuffer } } });
     const logo = await upload2.json(); media.push(logo.id); await create(admin, 'ally', { meta: { media_ids: [logo.id] } });
@@ -87,7 +87,9 @@ async function runJobs() {
     const hubItems = await request(admin, 'content/hub?mine=1'); ids.push(...hubItems.items.filter(p => p.meta.source_id === note.id).map(p => p.id));
     await admin.goto(note.url); await admin.locator('.generated-results').waitFor();
     for (const detail of await admin.locator('.generated-section').all()) { await detail.locator('summary').click(); }
-    await admin.locator('.modal').evaluate(el => el.scrollTop = 0);
+    assert.equal(await admin.locator('.modal').innerText().then(text => text.includes('Invalid Date')), false);
+    for (const detail of await admin.locator('.generated-section').all()) { if (!(await detail.locator('summary').innerText()).includes('Fragmentos')) await detail.locator('summary').click(); }
+    await admin.locator('.generated-results').scrollIntoViewIfNeeded();
     await admin.screenshot({ path: path.join(root, 'test-results/completion-generated.png') }); checks.push('Video metadata, editable keywords and structured generated results are visible');
 
     for (const route of ['directorio', 'centro-conocimiento', 'eventos', 'hub']) {
