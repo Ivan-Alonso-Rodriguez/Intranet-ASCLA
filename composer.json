@@ -1,0 +1,7 @@
+{
+  "name": "ascla/intranet-core",
+  "description": "ASCLA WordPress plugin development tools only",
+  "type": "project",
+  "require-dev": {"phpunit/phpunit": "^11.5"},
+  "scripts": {"test": "phpunit -c phpunit.xml"}
+}
