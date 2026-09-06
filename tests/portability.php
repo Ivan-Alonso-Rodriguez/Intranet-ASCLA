@@ -23,4 +23,4 @@ $checks=[
 ];
 global $wpdb;$tables=$wpdb->get_col($wpdb->prepare('SHOW TABLES LIKE %s',$wpdb->esc_like($wpdb->prefix.'ascla_').'%'));$checks['nine_tables']=count($tables)===9;
 foreach($checks as $name=>$passed)if(!$passed)WP_CLI::error('Portability failure: '.$name);
-echo wp_json_encode(['installation'=>get_option('ascla_portability_previous_plugin')==='none'?'fresh':'update','previous_plugin'=>get_option('ascla_portability_previous_plugin'),'wordpress'=>$GLOBALS['wp_version'],'plugin'=>ASCLA_VERSION,'php'=>PHP_VERSION,'checks'=>$checks,'intranet'=>ASCLA\Core\Domain\Catalog::url('intranet')],JSON_PRETTY_PRINT)."\n";
+echo wp_json_encode(['zip_sha256'=>hash_file('sha256','/dist/ascla-core.zip'),'installation'=>get_option('ascla_portability_previous_plugin')==='none'?'fresh':'update','previous_plugin'=>get_option('ascla_portability_previous_plugin'),'wordpress'=>$GLOBALS['wp_version'],'plugin'=>ASCLA_VERSION,'php'=>PHP_VERSION,'checks'=>$checks,'intranet'=>ASCLA\Core\Domain\Catalog::url('intranet')],JSON_PRETTY_PRINT)."\n";

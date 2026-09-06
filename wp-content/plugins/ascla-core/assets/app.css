@@ -91,8 +91,10 @@
 }
 .ascla-sidebar {
   width: 238px;
-  background: #fff;
-  border-right: 1px solid var(--line);
+  background: #233156;
+  color: #eef3ff;
+  border-right: 1px solid #233156;
+  overflow-y: auto;
   position: fixed;
   top: 0;
   bottom: 0;
@@ -108,6 +110,9 @@
   height: 65px;
   overflow: hidden;
   margin: 0 6px 23px;
+  background: #fff;
+  border-radius: 12px;
+  flex-shrink: 0;
 }
 .brand img {
   width: 223px;
@@ -118,7 +123,7 @@
 .brand-sub {
   font-size: 10px;
   letter-spacing: 2px;
-  color: #8090a1;
+  color: #c4cfe8;
   padding: 0 16px 11px;
 }
 .nav-link {
@@ -128,31 +133,34 @@
   padding: 10px 14px;
   margin: 3px 0;
   border-radius: 9px;
-  color: #6b7b8e !important;
+  color: #eef3ff !important;
   font-size: 12px;
   font-weight: 500;
   min-height: 40px;
 }
 .nav-link:hover {
-  background: #f6f8fa;
+  background: #34466e;
+}
+.ascla-sidebar a:focus-visible {
+  outline: 2px solid #b8d3ff;
 }
 .nav-link.active {
-  color: #1879b0 !important;
-  background: var(--blue-soft);
+  color: #14233e !important;
+  background: #7196de;
   font-weight: 650;
 }
 .nav-link.active svg {
-  stroke: #1879b0;
+  stroke: currentColor;
 }
 .nav-bottom {
   margin-top: auto;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid #ffffff30;
   padding-top: 14px;
 }
 .sidebar-label {
   font-size: 10px;
   letter-spacing: 1.6px;
-  color: #97a3af;
+  color: #c4cfe8;
   padding: 18px 14px 7px;
 }
 .ascla-main {
