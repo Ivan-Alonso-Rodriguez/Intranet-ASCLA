@@ -12,6 +12,7 @@ final class Installer
         self::migrate();
         self::migrateIndexes();
         self::migrateDiscovery();
+        self::migrateNotificationContext();
         self::pages();
         self::terms();
         if (!wp_next_scheduled('ascla_jobs')) { wp_schedule_event(time()+60, 'hourly', 'ascla_jobs'); }
@@ -53,6 +54,16 @@ final class Installer
             }
         } while (count($posts)===200);
         update_option('ascla_schema',3,false);
+    }
+    private static function migrateNotificationContext(): void
+    {
+        if ((int)get_option('ascla_schema',0)>=4) { return; }
+        global $wpdb; $table=$wpdb->prefix.'ascla_notifications';
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'context'))) {
+            $wpdb->query("ALTER TABLE $table ADD context longtext DEFAULT NULL");
+            if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'context'))) { throw new \RuntimeException('No se pudo actualizar el contexto de notificaciones.'); }
+        }
+        update_option('ascla_schema',4,false);
     }
     private static function roles(): void
     {

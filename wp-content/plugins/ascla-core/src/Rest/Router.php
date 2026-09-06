@@ -47,6 +47,12 @@ final class Router
         self::route('/events/(?P<id>\d+)/invite','POST',static fn($r)=>Events::invite((int)$r['id'],(array)$r['users']),'ascla_moderate');
         self::route('/events/(?P<id>\d+)/register','POST',static fn($r)=>Events::register((int)$r['id'],(string)$r['status']),'ascla_write');
         self::route('/notifications','GET',static fn()=>Notifications::list());
+        self::route('/notifications/feed','GET',static fn($r)=>Notifications::feed($r->get_params()));
+        self::route('/notifications/summary','GET',static fn()=>Notifications::summary());
+        self::route('/notifications/read-all','POST',static fn()=>Notifications::readAll());
+        self::route('/notifications/(?P<id>\d+)/open','POST',static fn($r)=>Notifications::open((int)$r['id']));
+        self::route('/answers','GET',static fn()=>Queue::answers());
+        self::route('/conversations/(?P<id>\d+)','GET',static fn($r)=>Messaging::conversation((int)$r['id']));
         self::route('/notifications/(?P<id>\d+)/read','POST',static fn($r)=>Notifications::read((int)$r['id']));
         self::route('/media','POST',static function($r) { $files=$r->get_file_params(); return Media::upload($files['file']??[]); },'ascla_write');
         self::route('/ask','POST',static function($r) { Access::limit('ask',6,300); $question=trim(Access::text($r['question']??'',2000)); Access::require(mb_strlen($question)>=4,'Escriba una pregunta más específica.',400); return Queue::enqueue('answer',['question'=>$question]); });

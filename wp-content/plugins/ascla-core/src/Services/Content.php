@@ -131,7 +131,7 @@ final class Content
         $approved=current_user_can('ascla_moderate')||!Settings::get()['moderate_comments'];
         $user=wp_get_current_user();
         $cid=wp_insert_comment(wp_slash(['comment_post_ID'=>$id,'user_id'=>$user->ID,'comment_author'=>$user->display_name,'comment_content'=>$body,'comment_approved'=>$approved?1:0,'comment_type'=>'comment']));
-        if ($approved) { Notifications::send((int)$post->post_author,'comment','Nuevo comentario en tu publicación.',Catalog::url(self::page(substr($post->post_type,6)),['item'=>$id])); }
+        if ($approved) { Notifications::send((int)$post->post_author,'comment','Nuevo comentario en tu publicación.',Catalog::url(self::page(substr($post->post_type,6)),['item'=>$id]),['type'=>'post','id'=>$id,'actor'=>get_current_user_id()]); }
         wp_update_post(['ID'=>$id,'post_modified'=>current_time('mysql')]);
         return ['id'=>$cid,'status'=>$approved?'publish':'pending'];
     }
@@ -143,7 +143,7 @@ final class Content
         Store::lock('reaction:'.implode(':',$where),static function () use($where,$active,$post,$kind) {
             if ($active && !Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where))) {
                 Store::insert('relations',$where+['created_at'=>current_time('mysql',true)]);
-                if ($kind==='like') { Notifications::send((int)$post->post_author,'reaction','Tu publicación recibió una reacción.'); }
+                if ($kind==='like') { Notifications::send((int)$post->post_author,'reaction','Tu publicación recibió una reacción.',Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID]),['type'=>'post','id'=>$post->ID,'actor'=>get_current_user_id()]); }
                 if ($kind==='report') { Audit::record('content_reported',$post->ID); }
             } elseif (!$active) { Store::delete('relations',$where); }
         });
@@ -161,7 +161,7 @@ final class Content
         if ($reviewed) { $meta['reviewed']=true; }
         update_post_meta($id,'_ascla',$meta); wp_update_post(['ID'=>$id,'post_status'=>$statuses[$decision]]);
         Audit::record('moderation',$id,$decision);
-        Notifications::send((int)$post->post_author,'moderation','Tu publicación fue '.($decision==='approve'?'aprobada':'revisada').'.',Catalog::url(self::page(substr($post->post_type,6)),['item'=>$id]));
+        Notifications::send((int)$post->post_author,'moderation','Tu publicación fue '.($decision==='approve'?'aprobada':'revisada').'.',Catalog::url(self::page(substr($post->post_type,6)),['item'=>$id]),['type'=>'post','id'=>$id,'actor'=>get_current_user_id()]);
         return self::serialize(get_post($id));
     }
     public static function guardPublication(array $data,array $postarr): array
@@ -184,7 +184,7 @@ final class Content
         }
         if ($post->post_type==='ascla_hub') {
             preg_match_all('/@\[(\d+)\]/',$post->post_content,$matches);
-            foreach (array_unique($matches[1]) as $id) { Notifications::send((int)$id,'mention','Te mencionaron en el Hub ASCLA.',Catalog::url('hub',['item'=>$post->ID])); }
+            foreach (array_unique($matches[1]) as $id) { Notifications::send((int)$id,'mention','Te mencionaron en el Hub ASCLA.',Catalog::url('hub',['item'=>$post->ID]),['type'=>'post','id'=>$post->ID,'actor'=>(int)$post->post_author]); }
         }
     }
 }

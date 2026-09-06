@@ -33,7 +33,7 @@ final class Events
             foreach ($users as $uid) {
                 if (Store::count('registrations',self::REGISTRATION,[$id,$uid])) { continue; }
                 Store::insert('registrations',['event_id'=>$id,'user_id'=>$uid,'status'=>'invited','created_at'=>current_time('mysql',true)]);
-                if (Notifications::once($uid,'event:'.$id,'event','Te invitaron a un evento de ASCLA.',\ASCLA\Core\Domain\Catalog::url('eventos',['item'=>$id]))) { $sent++; }
+                if (Notifications::once($uid,'event:'.$id,'event','Te invitaron a un evento de ASCLA.',\ASCLA\Core\Domain\Catalog::url('eventos',['item'=>$id]),['type'=>'post','id'=>$id])) { $sent++; }
             }
             return $sent;
         });

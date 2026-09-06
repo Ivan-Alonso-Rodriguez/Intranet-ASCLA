@@ -17,7 +17,7 @@ $checks=[
     'idempotent_pages'=>$pages===get_option('ascla_pages'),
     'foreign_content_preserved'=>get_post_field('post_content',$foreign)==='CONTENIDO_PREVIO_NO_SOBRESCRIBIR',
     'slug_collision_isolated'=>($pages['intranet']??0)!==$foreign,
-    'schema_version'=>get_option('ascla_schema')==3,
+    'schema_version'=>get_option('ascla_schema')==4,
     'member_role'=>(bool)get_role('ascla_member'),
     'private_cpt'=>!get_post_type_object('ascla_resource')->public && !get_post_type_object('ascla_resource')->show_in_rest,
 ];

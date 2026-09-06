@@ -17,7 +17,7 @@ final class Discovery
             if ($user->ID === (int)$post->post_author || !Content::canRead($post)) { return; }
             $profile = Profiles::raw($user->ID);
             if (array_intersect($terms, $profile['interests'] ?? [])) {
-                $sent += Notifications::once($user->ID, 'resource:' . $post->ID, 'resource', 'Hay un nuevo recurso relacionado con tus intereses.', Catalog::url('centro-conocimiento', ['item' => $post->ID])) ? 1 : 0;
+                $sent += Notifications::once($user->ID, 'resource:' . $post->ID, 'resource', 'Hay un nuevo recurso relacionado con tus intereses.', Catalog::url('centro-conocimiento', ['item' => $post->ID]),['type'=>'post','id'=>$post->ID]) ? 1 : 0;
             }
         });
         return ['sent' => $sent];
@@ -31,7 +31,7 @@ final class Discovery
             if (empty($profile['networking']) || empty($profile['directory'])) { return; }
             $suggestion = Matching::recommendations()[0] ?? null;
             if (!$suggestion || $suggestion['affinity']['score'] <= 0) { return; }
-            $sent += Notifications::once($user->ID, 'networking:' . wp_date('o-W'), 'networking', 'Descubre una conexión afín a tus intereses.', Catalog::url('perfil', ['member' => $suggestion['id']])) ? 1 : 0;
+            $sent += Notifications::once($user->ID, 'networking:' . wp_date('o-W'), 'networking', 'Descubre una conexión afín a tus intereses.', Catalog::url('perfil', ['member' => $suggestion['id']]),['type'=>'profile','id'=>$suggestion['id']]) ? 1 : 0;
         });
         return ['sent' => $sent];
     }

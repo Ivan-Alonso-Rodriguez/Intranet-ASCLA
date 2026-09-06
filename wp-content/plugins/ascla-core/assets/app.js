@@ -14,6 +14,8 @@
     calendar: new Date(),
     adminTab: "moderacion",
     poll: null,
+    noticeFilter: "all",
+    noticePage: 1,
   };
   const icons = {
     home: "M3 10 12 3l9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z",
@@ -198,7 +200,7 @@
   ];
   function shell() {
     const p = S.boot.me;
-    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(C.pages.intranet.url)}" aria-label="ASCLA inicio"><img src="${E(C.logo)}" alt="ASCLA"></a><div class="brand-sub">COMUNIDAD DE ASOCIADOS</div><nav aria-label="Navegación principal">${navOrder.map((k) => `<a class="nav-link ${S.page === k ? "active" : ""}" href="${E(C.pages[k].url)}">${I(pageIcon[k])}<span>${E(C.pages[k].label)}</span></a>`).join("")}</nav><div class="nav-bottom">${S.boot.moderator ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}Administración</a>` : ""}<a class="nav-link" href="${E(C.logout)}">${I("logout")}Cerrar sesión</a></div></aside><div class="ascla-main"><header class="ascla-header">${btn(I("menu"), "menu", 'aria-label="Abrir navegación"', "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="Buscar en ASCLA" placeholder="Buscar en tu comunidad…" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${btn(`${I("bell")}<i class="unread-dot" hidden></i>`, "notifications", 'aria-label="Notificaciones"', "icon-button")}<a class="header-profile" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || "Comunidad ASCLA")}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || "Administración")}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · Conectamos conocimiento, fortalecemos la gobernanza.${S.boot.demo ? " · Datos ficticios de demostración." : ""}</div></main></div>`;
+    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(C.pages.intranet.url)}" aria-label="ASCLA inicio"><img src="${E(C.logo)}" alt="ASCLA"></a><div class="brand-sub">COMUNIDAD DE ASOCIADOS</div><nav aria-label="Navegación principal">${navOrder.map((k) => `<a class="nav-link ${S.page === k ? "active" : ""}" href="${E(C.pages[k].url)}">${I(pageIcon[k])}<span>${E(C.pages[k].label)}</span></a>`).join("")}</nav><div class="nav-bottom">${S.boot.moderator ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}Administración</a>` : ""}<a class="nav-link" href="${E(C.logout)}">${I("logout")}Cerrar sesión</a></div></aside><div class="ascla-main"><header class="ascla-header">${btn(I("menu"), "menu", 'aria-label="Abrir navegación"', "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="Buscar en ASCLA" placeholder="Buscar en tu comunidad…" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${btn(`${I("bell")}<span class="notification-count" hidden></span>`, "notifications", 'aria-label="Notificaciones"', "icon-button")}<a class="header-profile" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || "Comunidad ASCLA")}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || "Administración")}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · Conectamos conocimiento, fortalecemos la gobernanza.${S.boot.demo ? " · Datos ficticios de demostración." : ""}</div></main></div>`;
     refreshNotifications();
   }
   function heading(title, subtitle, action = "") {
@@ -244,7 +246,7 @@
         api("content/resource?recommended=1"),
         api("content/hub"),
         api("profiles"),
-        api("notifications"),
+        api("notifications/summary"),
         calendarEvents(),
         api("content/resource?status=publish"),
       ]);
@@ -257,7 +259,7 @@
       [directory.total, "Asociados en la comunidad", "users"],
       [events.total, "Próximos encuentros", "calendar"],
       [recentResources.total, "Recursos para aprender", "book"],
-      [notes.filter((n) => !n.read_at).length, "Nuevas notificaciones", "bell"],
+      [notes.unread_total, "Nuevas notificaciones", "bell"],
     ]
       .map(
         ([num, label, icon]) =>
@@ -588,7 +590,11 @@
       Number(S.conversations[0]?.id) ||
       0;
     S.conversation = selected;
-    const current = S.conversations.find((c) => Number(c.id) === selected);
+    let current = S.conversations.find((c) => Number(c.id) === selected);
+    if (selected && !current) {
+      current = await api("conversations/" + selected);
+      S.conversations.unshift(current);
+    }
     content().innerHTML =
       heading(
         "Mensajería",
@@ -638,7 +644,7 @@
     );
   }
   async function assistant() {
-    content().innerHTML = `<section class="assistant-intro"><div class="assistant-mark">${I("spark")}</div><div class="eyebrow">ASISTENTE ASCLA</div><h1>El conocimiento de tu comunidad,<br>a una pregunta de distancia.</h1><p>Explora ideas y encuentra respuestas basadas en el Centro de Conocimiento, siempre con sus fuentes.</p><span class="demo-badge" style="display:inline-block;margin-top:15px">${E(S.boot.ai_mode)}</span></section><div class="ask-suggestions">${["¿Cómo puede la junta supervisar los riesgos de inteligencia artificial?", "¿Cuál es el rol de la secretaría corporativa?", "¿Cómo mejorar el seguimiento de acuerdos?", "¿Qué recursos tenemos sobre gobierno corporativo?"].map((q) => btn(E(q) + " " + I("arrow"), "ask-suggestion", `data-question="${E(q)}"`)).join("")}</div><form class="card" data-form="ask" style="max-width:820px;margin:auto">${field("question", "Tu pregunta", "", "textarea", 'placeholder="¿Qué te gustaría conocer?" required maxlength="2000"')}<div class="form-actions"><button class="btn primary">${I("spark")} Consultar al asistente</button></div><p class="private-note">El asistente usa recursos publicados de ASCLA. Si no encuentra evidencia suficiente, te lo indicará.</p></form><div id="answers"></div>`;
+    content().innerHTML = `<section class="assistant-intro"><div class="assistant-mark">${I("spark")}</div><div class="eyebrow">ASISTENTE ASCLA</div><h1>El conocimiento de tu comunidad,<br>a una pregunta de distancia.</h1><p>Explora ideas y encuentra respuestas basadas en el Centro de Conocimiento, siempre con sus fuentes.</p><span class="demo-badge" style="display:inline-block;margin-top:15px">${E(S.boot.ai_mode)}</span></section><div class="ask-suggestions">${["¿Cómo puede la junta supervisar los riesgos de inteligencia artificial?", "¿Cuál es el rol de la secretaría corporativa?", "¿Cómo mejorar el seguimiento de acuerdos?", "¿Qué recursos tenemos sobre gobierno corporativo?"].map((q) => btn(E(q) + " " + I("arrow"), "ask-suggestion", `data-question="${E(q)}"`)).join("")}</div><form class="card" data-form="ask" style="max-width:820px;margin:auto">${field("question", "Tu pregunta", "", "textarea", 'placeholder="¿Qué te gustaría conocer?" required maxlength="2000"')}<div class="form-actions"><button class="btn primary">${I("spark")} Consultar al asistente</button></div><p class="private-note">El asistente usa recursos publicados de ASCLA. Si no encuentra evidencia suficiente, te lo indicará.</p></form>${btn(I("clock") + " Mis consultas anteriores", "answer-history", "", "ghost answer-history-button")}<div id="answers"></div>`;
   }
   async function watchJob(id, target, onDone) {
     let attempts = 0;
@@ -660,7 +666,7 @@
         if (++attempts < 90) setTimeout(poll, 2500);
         else
           target.innerHTML =
-            '<div class="alert">El trabajo continúa en segundo plano. Puedes consultar su estado en administración.</div>';
+            '<div class="alert">El trabajo continúa en segundo plano. Recibirás una notificación cuando esté listo.</div>';
       } catch (e) {
         target.innerHTML = `<div class="error">${E(e.message)}</div>`;
       }
@@ -696,24 +702,46 @@
           "",
         )}</div><div class="card"><h3>Mis solicitudes</h3>${list.items.map((p) => `<div class="notification-row"><div><strong>${E(p.title)}</strong><p class="private-note">${date(p.date)}</p></div><span class="tag">${E({ closed: "Resuelta", progress: "En atención", open: "Recibida" }[p.meta.request_status] || "Recibida")}</span></div>`).join("") || '<p class="private-note">Aún no has enviado solicitudes.</p>'}</div></div></div>`;
   }
+  function notificationCount(total) {
+    const badge = document.querySelector(".notification-count"), bell = document.querySelector('[data-action="notifications"]');
+    if (badge) { badge.hidden = !total; badge.textContent = total > 99 ? "99+" : total; }
+    bell?.setAttribute("aria-label", `Notificaciones${total ? `, ${total} sin leer` : ", estás al día"}`);
+  }
   async function refreshNotifications() {
-    try {
-      const list = await api("notifications");
-      const dot = document.querySelector(".unread-dot");
-      if (dot) dot.hidden = !list.some((n) => !n.read_at);
-    } catch {}
+    try { notificationCount((await api("notifications/summary")).unread_total); } catch {}
   }
   async function notifications() {
-    const list = await api("notifications");
-    modal(
-      "Tus notificaciones",
-      list
-        .map(
-          (n) =>
-            `<div class="notification-row ${n.read_at ? "" : "unread"}"><div>${n.url ? `<a href="${E(safeURL(n.url))}">${E(n.label)}</a>` : E(n.label)}<p class="private-note">${date(n.created_at)}</p></div>${!n.read_at ? btn(I("check"), "notification-read", `data-id="${n.id}" aria-label="Marcar como leída"`, "ghost") : ""}</div>`,
-        )
-        .join("") || empty("Estás al día"),
-    );
+    const feed = await api("notifications/feed?" + new URLSearchParams({ filter: S.noticeFilter, page: S.noticePage }));
+    S.noticePage = feed.page;
+    notificationCount(feed.unread_total);
+    const html = window.ASCLANotifications({ E, I, btn }).panel(feed, S.noticeFilter);
+    const existing = document.querySelector(".notification-modal .modal-content");
+    if (existing) { existing.innerHTML = html; document.querySelector(`.activity-filters [data-filter="${S.noticeFilter}"]`)?.focus(); }
+    else { modal("Tus notificaciones", html); document.querySelector(".modal").classList.add("notification-modal"); S.focus = document.querySelector('[data-action="notifications"]'); }
+  }
+  function answerHTML(question, r) {
+    return `<small class="demo-badge">${E(r.mode)}</small><h3 style="margin:16px 0">${E(question)}</h3><p>${E(r.answer)}</p>${r.sources?.length ? `<div class="sources">${r.sources.map(source => `<a href="${E(safeURL(source.url))}">${I("book")} ${E(source.title)}</a>`).join("")}</div>` : ""}`;
+  }
+  function answerTarget() {
+    const target = document.createElement("div"); target.className = "card answer-card";
+    document.getElementById("answers").prepend(target); return target;
+  }
+  async function restoreAnswer(id) {
+    const j = await api("jobs/" + id);
+    if (j.kind !== "answer") { toast("Este aviso corresponde a una tarea de administración."); return; }
+    const target = answerTarget();
+    document.querySelector('[name="question"]').value = j.question || "";
+    if (j.status === "completed") target.innerHTML = answerHTML(j.question, j.result);
+    else await watchJob(id, target, result => { target.innerHTML = answerHTML(j.question, result); });
+    target.scrollIntoView({ block: "center" });
+  }
+  async function answerHistory() {
+    const rows = await api("answers");
+    modal("Mis consultas anteriores", `<p class="private-note">Tus últimas 50 consultas, guardadas para volver a ellas cuando las necesites.</p>${rows.map(j => {
+      const url = new URL(C.pages.asistente.url); url.searchParams.set("job", j.id);
+      const status = { completed: "Respuesta lista", pending: "Pendiente", processing: "Preparando respuesta", error: "Necesita atención" }[j.status];
+      return `<a class="answer-history-entry" href="${E(url.href)}"><span>${I("spark")}</span><span><strong>${E(j.question)}</strong><small>${E(status)} · ${date(j.created_at)}</small></span>${I("arrow")}</a>`;
+    }).join("") || empty("Aún no tienes consultas", "Haz tu primera pregunta al asistente para empezar.")}`);
   }
   async function admin() {
     const d = await api("admin");
@@ -918,6 +946,7 @@
   root.addEventListener("click", async (event) => {
     const b = event.target.closest("[data-action]");
     if (!b) return;
+    if (b.dataset.action === "notification-open" && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) return;
     event.preventDefault();
     const a = b.dataset.action,
       id = Number(b.dataset.id || 0);
@@ -931,7 +960,12 @@
       else if (a === "member") await member(id);
       else if (a === "item") await item(id);
       else if (a === "editor") await editor(b.dataset.type, id);
-      else if (a === "notifications") await notifications();
+      else if (a === "notifications") { S.noticePage = 1; await notifications(); }
+      else if (a === "notification-filter") { S.noticeFilter = b.dataset.filter; S.noticePage = 1; await notifications(); }
+      else if (a === "notification-page") { S.noticePage = Number(b.dataset.page); await notifications(); }
+      else if (a === "notifications-read-all") { await api("notifications/read-all", {}); await notifications(); }
+      else if (a === "notification-open") { const destination = await api("notifications/" + id + "/open", {}); location.assign(safeURL(destination.url)); }
+      else if (a === "answer-history") await answerHistory();
       else if (["like", "follow", "report"].includes(a)) {
         await api(`items/${id}/reaction`, {
           kind: a,
@@ -949,7 +983,7 @@
       } else if (a === "intro") await intro(id);
       else if (a === "message-start") {
         const c = await api("conversations", { target: id });
-        location.href = C.pages.mensajeria.url + "?conversation=" + c.id;
+        const destination = new URL(C.pages.mensajeria.url); destination.searchParams.set("conversation", c.id); location.href = destination.href;
       } else if (a === "conversation") {
         S.conversation = id;
         S.messagesLoaded = false;
@@ -1075,6 +1109,9 @@
         if (S.page === "admin") {
           closeModal();
           await admin();
+        } else if (S.page === "asistente") {
+          document.getElementById("answers").innerHTML = "";
+          await restoreAnswer(id);
         }
       } else if (a === "google-connect") {
         const r = await api("google/connect", { service: b.dataset.service });
@@ -1208,12 +1245,8 @@
         toast("Mensaje enviado.");
       } else if (action === "ask") {
         const j = await api("ask", { question: data.question });
-        const target = document.createElement("div");
-        target.className = "card answer-card";
-        document.getElementById("answers").prepend(target);
-        watchJob(j.id, target, (r) => {
-          target.innerHTML = `<small class="demo-badge">${E(r.mode)}</small><h3 style="margin:16px 0">${E(data.question)}</h3><p>${E(r.answer)}</p>${r.sources.length ? `<div class="sources">${r.sources.map((s) => `<a href="${E(safeURL(s.url))}">${I("book")} ${E(s.title)}</a>`).join("")}</div>` : ""}`;
-        });
+        const target = answerTarget();
+        watchJob(j.id, target, (r) => { target.innerHTML = answerHTML(data.question, r); });
       } else if (action === "contact") {
         if (data.website_confirm) throw new Error("Solicitud no válida.");
         await api("content/contact", {
@@ -1342,6 +1375,14 @@
       }
       shell();
       await render();
+      if (q.get("notification")) { await api("notifications/" + Number(q.get("notification")) + "/read", {}); await refreshNotifications(); }
+      setInterval(() => { if (!document.hidden) refreshNotifications(); }, 30000);
+      document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshNotifications(); });
+      if (S.page === "asistente" && q.get("job")) {
+        try { await restoreAnswer(Number(q.get("job"))); } catch (error) { toast(error.message); }
+      }
+      if (S.page === "asistente" && q.get("history")) await answerHistory();
+      if (q.get("notice") === "unavailable") toast("El contenido de este aviso ya no está disponible. Puedes continuar en esta sección.");
       if (q.get("item")) await item(Number(q.get("item")));
       if (q.get("member")) await member(Number(q.get("member")));
     } catch (e) {

@@ -14,7 +14,26 @@ final class Queue
     public static function get(int $id): array
     {
         $row=Store::one('jobs',$id); Access::require($row && ((int)$row['user_id']===get_current_user_id()||current_user_can('ascla_moderate')),'Trabajo no encontrado.',404);
-        unset($row['payload']); $row['result']=json_decode($row['result']??'null',true); return $row;
+        $payload=json_decode($row['payload'],true)?:[];
+        unset($row['payload']); $row['result']=json_decode($row['result']??'null',true);
+        if ($row['kind']==='answer') {
+            $row['question']=Access::text($payload['question']??'',2000);
+            foreach ($row['result']['sources']??[] as $source) {
+                $post=get_post((int)($source['id']??0));
+                if (!$post || $post->post_status==='trash' || !Content::canRead($post)) {
+                    $row['result']=['answer'=>'Una fuente de esta respuesta ya no está disponible. Puedes volver a consultar con los recursos actuales.','sources'=>[],'mode'=>'Fuentes actualizadas']; break;
+                }
+            }
+        }
+        return $row;
+    }
+    public static function answers(): array
+    {
+        $rows=Store::rows('jobs','user_id=%d AND kind=%s',[get_current_user_id(),'answer'],'ORDER BY id DESC LIMIT 50');
+        return array_map(static function($row) {
+            $payload=json_decode($row['payload'],true)?:[];
+            return ['id'=>(int)$row['id'],'question'=>Access::text($payload['question']??'Consulta al asistente',2000),'status'=>$row['status'],'created_at'=>$row['created_at']];
+        },$rows);
     }
     public static function retry(int $id): array
     {
@@ -44,10 +63,11 @@ final class Queue
                     'video_metadata'=>Knowledge::videoMetadata((int)($p['resource_id']??0)),
                 };
                 Store::update('jobs',['status'=>'completed','result'=>wp_json_encode($result),'error'=>null,'locked_at'=>null],['id'=>$row['id']]);
-                Notifications::send((int)$row['user_id'],'job','Tu trabajo en segundo plano ha finalizado.'); Audit::record('job_completed',(int)$row['id'],$row['kind']);
+                Notifications::send((int)$row['user_id'],'job','Tu trabajo en segundo plano ha finalizado.','',['type'=>'job','id'=>(int)$row['id']]); Audit::record('job_completed',(int)$row['id'],$row['kind']);
             } catch (\Throwable $e) {
                 $safe=$e instanceof \ASCLA\Core\Rest\ApiException||get_class($e)===\RuntimeException::class?$e->getMessage():'No se pudo completar el trabajo. Revise la configuración o reintente.';
                 Store::update('jobs',['status'=>'error','error'=>substr(sanitize_text_field($safe),0,255),'locked_at'=>null],['id'=>$row['id']]); Audit::record('job_failed',(int)$row['id'],$row['kind']);
+                Notifications::send((int)$row['user_id'],'job_error','Una tarea necesita revisión.','',['type'=>'job','id'=>(int)$row['id']]);
             } finally { wp_set_current_user($original); }
         }
         // WordPress deduplicates identical single events; use a continuation hook for backlog.

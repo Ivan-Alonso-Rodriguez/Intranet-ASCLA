@@ -47,7 +47,7 @@ final class MicroEvents
             if (!Access::member($uid)) { continue; }
             $p=Profiles::raw($uid); if (empty($p['microevents'])) { continue; }
             if (!Store::count('registrations','event_id=%d AND user_id=%d',[$id,$uid])) { Store::insert('registrations',['event_id'=>$id,'user_id'=>$uid,'status'=>'invited','created_at'=>current_time('mysql',true)]); }
-            Notifications::send($uid,'microevent','Te invitaron a un círculo ASCLA.',Catalog::url('eventos',['item'=>$id]));
+            Notifications::send($uid,'microevent','Te invitaron a un círculo ASCLA.',Catalog::url('eventos',['item'=>$id]),['type'=>'post','id'=>$id]);
         }
         $meta['invited']=true; update_post_meta($id,'_ascla',$meta);
     }

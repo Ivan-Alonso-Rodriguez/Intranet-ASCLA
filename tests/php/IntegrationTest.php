@@ -74,7 +74,7 @@ final class IntegrationTest extends TestCase
 
         foreach($before as $slug=>$id)self::assertSame($slug,get_post_meta($id,'_ascla_page',true));
 
-        update_option('ascla_schema',0);Installer::activate(false);self::assertSame(3,(int)get_option('ascla_schema'));
+        update_option('ascla_schema',0);Installer::activate(false);self::assertSame(4,(int)get_option('ascla_schema'));
 
     }
 
