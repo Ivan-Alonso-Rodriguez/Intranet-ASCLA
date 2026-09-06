@@ -1,0 +1,104 @@
+/* Authentication only: native fields, errors, reset links and password controls stay intact. */
+body.login.ascla-login {
+  --ascla-navy: #102f50;
+  --ascla-blue: #116da3;
+  --ascla-muted: #53677e;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: auto;
+  padding: 48px 24px 32px calc(45% + 24px);
+  background: #f4f7fb;
+  color: var(--ascla-navy);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.ascla-login *, .ascla-login *::before, .ascla-login *::after { box-sizing: border-box; }
+.ascla-login a, .ascla-login button, .ascla-login input { outline-offset: 4px; }
+.ascla-login .ascla-welcome {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 45%;
+  padding: clamp(32px, 4.5vw, 76px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 100% 90%, #195b81 0, transparent 60%), #102f50;
+  color: #fff;
+}
+.ascla-welcome > :not(.ascla-welcome-orbit) { position: relative; z-index: 1; }
+.ascla-welcome-brand { display: flex; gap: 14px; align-items: center; font-size: 29px; font-weight: 700; letter-spacing: 2px; }
+.ascla-brand-mark { width: 38px; height: 38px; border: 1px solid #8bcbe9; border-radius: 50%; position: relative; }
+.ascla-brand-mark::before, .ascla-brand-mark::after { content: ""; position: absolute; border: 1px solid #8bcbe9; border-radius: 50%; inset: 5px 12px; transform: rotate(35deg); }
+.ascla-brand-mark::after { inset: 12px 5px; }
+.ascla-brand-caption { display: block; margin-top: 4px; color: #bfdae9; font-size: 9px; font-weight: 500; letter-spacing: 2.3px; }
+.ascla-welcome-copy { max-width: 455px; margin: 42px 0; }
+.ascla-welcome-eyebrow { color: #9dd9f4; font-size: 11px; font-weight: 600; letter-spacing: 2.1px; margin-bottom: 25px; }
+.ascla-welcome-copy h2 { color: #fff; font-size: clamp(32px, 3.3vw, 52px); line-height: 1.12; font-weight: 600; letter-spacing: -1.7px; margin: 0 0 25px; }
+.ascla-welcome-copy > p:not(.ascla-welcome-eyebrow) { max-width: 370px; font-size: 16px; line-height: 1.8; color: #d0e0ec; }
+.ascla-welcome-topics { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 30px; }
+.ascla-welcome-topics span { padding: 8px 12px; border: 1px solid #638099; border-radius: 30px; color: #dbeaf3; font-size: 11px; }
+.ascla-welcome-footer { color: #c3d8e6; font-size: 12px; line-height: 1.7; }
+.ascla-welcome-line { display: block; width: 34px; height: 2px; background: #60b7e0; margin-bottom: 16px; }
+.ascla-welcome-orbit { position: absolute; width: 480px; height: 480px; border: 1px solid #87c5e32b; border-radius: 50%; bottom: -185px; right: -200px; }
+.ascla-welcome-orbit::before, .ascla-welcome-orbit::after { content: ""; position: absolute; inset: 60px; border: 1px solid #87c5e32b; border-radius: 50%; }
+.ascla-welcome-orbit::after { inset: 120px; }
+.ascla-welcome-orbit i { position: absolute; width: 9px; height: 9px; border-radius: 50%; background: #88c9e8; left: 63px; top: 70px; }
+.ascla-welcome-orbit i:nth-child(2) { left: 110px; top: 295px; width: 6px; height: 6px; }
+.ascla-welcome-orbit i:nth-child(3) { left: 286px; top: 65px; width: 6px; height: 6px; }
+.ascla-login #login { width: min(440px, 100%); margin: 0 auto; padding: 27px 36px 28px; background: #fff; border: 1px solid #e0e8f1; border-radius: 24px; box-shadow: 0 16px 55px #102f5009; }
+.ascla-login #login h1 a { width: 100%; height: 88px; margin: 0 auto 18px; background: url("ascla-logo.png") center center / min(340px, 100%) auto no-repeat; }
+.ascla-login-intro { text-align: center; margin-bottom: 27px; }
+.ascla-login-intro .ascla-login-eyebrow { color: var(--ascla-blue); font-size: 10px; font-weight: 700; letter-spacing: 2px; margin-bottom: 10px; }
+.ascla-login-intro h2 { font-size: 25px; letter-spacing: -0.6px; line-height: 1.25; font-weight: 650; margin: 0 0 12px; }
+.ascla-login-intro > p:last-child { color: var(--ascla-muted); font-size: 14px; line-height: 1.6; }
+.ascla-login #login form { padding: 0; margin: 0; background: transparent; border: 0; box-shadow: none; overflow: visible; }
+.ascla-login #login label { font-size: 13px; font-weight: 600; color: #29435c; margin-bottom: 8px; }
+.ascla-login #login form .input { width: 100%; border: 1px solid #bccbd9; border-radius: 9px; background: #fbfcfe; color: var(--ascla-navy); font-size: 16px; min-height: 48px; padding: 10px 12px; margin-bottom: 21px; }
+.ascla-login #login form .input:focus { border-color: var(--ascla-blue); box-shadow: 0 0 0 3px #116da31c; outline: 2px solid transparent; }
+.ascla-login #login form .password-input { padding-right: 45px; }
+.ascla-login #login .wp-pwd button { color: var(--ascla-muted); height: 48px; width: 44px; top: 0; }
+.ascla-login #login form .forgetmenot { float: none; margin: 0 0 24px; }
+.ascla-login #login form .forgetmenot label { font-weight: 400; color: var(--ascla-muted); }
+.ascla-login #rememberme { border-color: #91a6bb; border-radius: 4px; width: 17px; height: 17px; }
+.ascla-login #login .submit { clear: both; }
+.ascla-login #login .button-primary { float: none; width: 100%; min-height: 48px; padding: 10px 16px; border: 1px solid var(--ascla-blue); border-radius: 9px; background: var(--ascla-blue); color: #fff; font-size: 14px; font-weight: 600; line-height: 1.6; text-shadow: none; box-shadow: 0 4px 10px #116da320; }
+.ascla-login #login .button-primary:hover { background: #105981; border-color: #105981; }
+.ascla-login #login .button-primary:focus-visible { outline: 3px solid #73b9de; }
+.ascla-login #login .button-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.ascla-login #nav { padding: 0; margin: 23px 0 0; text-align: center; font-size: 13px; }
+.ascla-login #nav a, .ascla-login #backtoblog a, .ascla-login .privacy-policy-link { color: var(--ascla-blue); text-decoration: none; }
+.ascla-login #nav a:hover, .ascla-login #backtoblog a:hover { text-decoration: underline; }
+.ascla-login #backtoblog { padding: 0; text-align: center; margin: 18px 0 0; font-size: 12px; }
+.ascla-login #login .message, .ascla-login #login #login_error, .ascla-login #login .success, .ascla-login #login .notice { border-radius: 7px; padding: 13px; margin: 0 0 20px; box-shadow: none; background: #f2f7fc; color: #29435c; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.ascla-login #login #login_error { background: #fff3f3; }
+.ascla-login #login .message a, .ascla-login #login #login_error a { color: var(--ascla-blue); }
+.ascla-login .ascla-login-help { width: min(390px, 100%); margin: 22px auto 0; text-align: center; color: var(--ascla-muted); font-size: 12px; line-height: 1.7; }
+.ascla-login .language-switcher { margin: 20px auto 0; padding: 0; max-width: 100%; }
+.ascla-login #language-switcher { margin: 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; }
+.ascla-login #language-switcher select { max-width: 180px; border-radius: 6px; border-color: #bccbd9; background-color: transparent; color: var(--ascla-muted); }
+.ascla-login #language-switcher .button { border-color: #bccbd9; border-radius: 6px; color: var(--ascla-blue); }
+.ascla-login .privacy-policy-page-link { margin: 20px 0 0; }
+.ascla-login #pass-strength-result { margin-bottom: 14px; }
+.ascla-login .pw-weak, .ascla-login .indicator-hint { margin-bottom: 18px; line-height: 1.6; }
+body.ascla-login.interim-login { padding: 20px; }
+.ascla-login.interim-login .ascla-welcome, .ascla-login.interim-login .ascla-login-help { display: none; }
+@media (max-width: 900px) {
+  body.login.ascla-login { padding: 32px 20px; }
+  .ascla-login .ascla-welcome { display: none; }
+}
+@media (max-width: 480px) {
+  body.login.ascla-login { padding: 24px 16px; }
+  .ascla-login #login { padding: 22px 24px 25px; border-radius: 18px; }
+  .ascla-login #login h1 a { background-size: min(290px, 100%) auto; height: 78px; }
+  .ascla-login-intro h2 { font-size: 23px; }
+}
+@media (max-height: 640px) and (min-width: 901px) {
+  .ascla-welcome-copy { margin: 22px 0; }
+  .ascla-welcome-copy h2 { font-size: 32px; }
+  .ascla-welcome-topics { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .ascla-login #login { animation: none; } }

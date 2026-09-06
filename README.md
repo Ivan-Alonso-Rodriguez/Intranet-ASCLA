@@ -4,6 +4,10 @@ Plugin WordPress portable para una comunidad profesional privada. Incluye perfil
 
 Toda la funcionalidad propia está en `wp-content/plugins/ascla-core/`. Elementor es opcional. No se modifica WordPress Core ni se necesita un tema específico. El plugin conserva sus datos al desactivarse o desinstalarse.
 
+## Acceso ASCLA
+
+La versión 1.0.4 incorpora inicio de sesión y recuperación con logo, colores y textos de ASCLA, adaptados a móvil. Abre `/intranet/` para acceder: se conserva la sección solicitada después del login y el cierre de sesión vuelve al formulario. Se utiliza la autenticación nativa de WordPress; no se cambian las cuentas ni las contraseñas. [Cambios y validación del acceso](docs/LOGIN_UPDATE.md).
+
 ## Requisitos
 
 - WordPress 6.6 o posterior; PHP 8.2 o posterior con `mbstring`, `openssl`, `fileinfo` y extensiones habituales de WordPress.
