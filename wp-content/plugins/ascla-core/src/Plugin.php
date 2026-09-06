@@ -7,6 +7,7 @@ final class Plugin
     {
         add_action('init', [Domain\Catalog::class, 'register']);
         add_action('init', [Database\Installer::class, 'upgrade'], 20);
+        add_filter('posts_search',[Repositories\ContentQuery::class,'search'],10,2);
         Frontend\App::boot();
         Admin\Panel::boot();
         Rest\Router::boot();

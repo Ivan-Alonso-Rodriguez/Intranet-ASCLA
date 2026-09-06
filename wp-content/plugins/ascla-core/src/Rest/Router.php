@@ -23,6 +23,7 @@ final class Router
     public static function routes(): void
     {
         self::route('/bootstrap','GET',static fn()=>['me'=>Profiles::visible(get_current_user_id()),'catalogs'=>Profiles::catalogs(),'moderator'=>current_user_can('ascla_moderate'),'admin'=>current_user_can('ascla_manage'),'demo'=>Settings::get()['demo'],'ai_mode'=>Knowledge::provider()->mode(),'google_connected'=>\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='']);
+        self::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
         self::route('/profiles','GET',static fn($r)=>Profiles::directory($r->get_params()));
         self::route('/profiles/me','POST',static fn($r)=>Profiles::save($r->get_json_params()?:[]),'ascla_write');
         self::route('/profiles/(?P<id>\d+)','GET',static fn($r)=>Profiles::visible((int)$r['id']));
@@ -43,6 +44,7 @@ final class Router
         self::route('/conversations/(?P<id>\d+)/messages','GET',static fn($r)=>Messaging::messages((int)$r['id'],(int)$r['before']));
         self::route('/conversations/(?P<id>\d+)/messages','POST',static fn($r)=>Messaging::send((int)$r['id'],(string)$r['body']),'ascla_write');
         self::route('/events/(?P<id>\d+)','GET',static fn($r)=>Events::detail((int)$r['id']));
+        self::route('/events/(?P<id>\d+)/invite','POST',static fn($r)=>Events::invite((int)$r['id'],(array)$r['users']),'ascla_moderate');
         self::route('/events/(?P<id>\d+)/register','POST',static fn($r)=>Events::register((int)$r['id'],(string)$r['status']),'ascla_write');
         self::route('/notifications','GET',static fn()=>Notifications::list());
         self::route('/notifications/(?P<id>\d+)/read','POST',static fn($r)=>Notifications::read((int)$r['id']));
@@ -51,9 +53,9 @@ final class Router
         self::route('/jobs/(?P<id>\d+)','GET',static fn($r)=>Queue::get((int)$r['id']));
         self::route('/jobs/(?P<id>\d+)/retry','POST',static fn($r)=>Queue::retry((int)$r['id']));
         self::route('/jobs','POST',static function($r) {
-            $kind=(string)$r['kind']; Access::require(in_array($kind,['multimedia','microevents','social'],true),'Tipo de trabajo no válido.',400);
+            $kind=(string)$r['kind']; Access::require(in_array($kind,['multimedia','microevents','social','video_metadata'],true),'Tipo de trabajo no válido.',400);
             if ($kind==='microevents') { Access::require(current_user_can('ascla_manage')); }
-            if ($kind==='multimedia') { Content::get((int)$r['resource_id']); }
+            if (in_array($kind,['multimedia','video_metadata'],true)) { Content::get((int)$r['resource_id']); }
             Access::limit('admin_job',10,300); return Queue::enqueue($kind,['resource_id'=>(int)$r['resource_id']]);
         },'ascla_moderate');
         self::route('/settings','GET',static fn()=>Settings::status(),'ascla_manage');

@@ -93,7 +93,7 @@ final class Profiles
     public static function catalogs(): array
     {
         $out=[];
-        foreach (Catalog::TAXONOMIES as $key=>$label) { $out[$key]=array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name],get_terms(['taxonomy'=>'ascla_'.$key,'hide_empty'=>false])); }
+        foreach (Catalog::TAXONOMIES as $key=>$label) { $out[$key]=array_values(array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name],get_terms(['taxonomy'=>'ascla_'.$key,'hide_empty'=>$key==='tag'&&!current_user_can('ascla_moderate')]))); }
         return $out;
     }
 }

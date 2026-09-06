@@ -545,21 +545,21 @@ async function goto(page, route) {
         } catch {}
       }
     await browser.close();
-    const zipCoverage=path.join(root,'coverage/zip-v8.json');
-    if(fs.existsSync(zipCoverage)) {
-      const currentSource=fs.readFileSync(path.join(root,'wp-content/plugins/ascla-core/assets/app.js'),'utf8');
-      coverage.push(...JSON.parse(fs.readFileSync(zipCoverage,'utf8')).filter(entry=>entry.source===currentSource));
+    const assetRoot = path.join(root, "wp-content/plugins/ascla-core/assets");
+    const productionScript = entry => {
+      if (!entry.url.includes("/ascla-core/assets/")) return null;
+      const name = new URL(entry.url).pathname.split("/").pop();
+      const file = path.join(assetRoot, name);
+      return name.endsWith(".js") && fs.existsSync(file) && entry.source === fs.readFileSync(file, "utf8") ? file : null;
+    };
+    for (const report of ["zip-v8.json", "completion-v8.json"]) {
+      const file = path.join(root, "coverage", report);
+      if (fs.existsSync(file)) coverage.push(...JSON.parse(fs.readFileSync(file, "utf8")).filter(productionScript));
     }
-    fs.writeFileSync(path.join(root,'coverage/raw-v8.json'),JSON.stringify(coverage.filter(c=>c.url.includes('/ascla-core/assets/app.js'))));
+    fs.writeFileSync(path.join(root,"coverage/raw-v8.json"), JSON.stringify(coverage.filter(productionScript)));
     const map = libCoverage.createCoverageMap({});
-    for (const entry of coverage.filter((c) =>
-      c.url.includes("/ascla-core/assets/app.js"),
-    )) {
-      const target = path.join(
-        root,
-        "wp-content/plugins/ascla-core/assets/app.js",
-      );
-      const converter = v8toIstanbul(target, 0, { source: entry.source });
+    for (const entry of coverage.filter(productionScript)) {
+      const converter = v8toIstanbul(productionScript(entry), 0, { source: entry.source });
       await converter.load();
       converter.applyCoverage(entry.functions);
       map.merge(converter.toIstanbul());

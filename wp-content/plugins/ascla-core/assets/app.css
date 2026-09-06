@@ -1645,3 +1645,30 @@
     min-width: 0;
   }
 }
+
+/* Content discovery and structured resources. */
+.filter-control { display:flex; flex-direction:column; gap:5px; min-width:150px; flex:1; }
+.filter-control > span { font-size:11px; color:var(--muted); }
+.filter-control select { width:100%; }
+.advanced-filters { flex-basis:100%; font-size:13px; }
+.advanced-filters summary { cursor:pointer; color:var(--blue); padding:8px 0; }
+.filter-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; padding:10px 0; }
+.feed-images { display:flex; gap:8px; margin:18px 0; overflow:hidden; border-radius:12px; }
+.feed-images a { flex:1; min-width:0; }
+#ascla-root .feed-images img { width:100%; height:220px; object-fit:cover; display:block; }
+#ascla-root .ally-logo { width:100%; height:80px; object-fit:contain; object-position:left center; margin-bottom:18px; }
+.generated-results { margin:24px 0; padding:20px; background:var(--bg); border:1px solid var(--line); border-radius:12px; }
+.generated-section { padding:12px 0; border-bottom:1px solid var(--line); line-height:1.7; overflow-wrap:anywhere; }
+.generated-section summary { cursor:pointer; font-weight:600; }
+.generated-section ul { padding-left:20px; margin:10px 0; }
+.generated-results > .btn { margin-top:16px; }
+.resource-thumbnail { width:100%; height:190px; object-fit:cover; display:block; }
+.video-metadata { display:flex; align-items:center; gap:10px; margin:12px 0; flex-wrap:wrap; }
+.invite-options { display:grid; gap:10px; max-height:330px; overflow:auto; padding:12px 0; }
+@media(max-width:600px) { #ascla-root .feed-images img { height:160px; } .filter-control { min-width:130px; } }
+
+#ascla-root .calendar-day { border:0; background:transparent; color:inherit; font:inherit; cursor:pointer; width:100%; height:100%; border-radius:50%; }
+#ascla-root .calendar-day:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
+
+.resource-video-cover { display:block; position:relative; background:var(--navy); }
+.resource-video-cover > span { position:absolute; bottom:10px; right:10px; background:#102f50e6; color:white; border-radius:6px; padding:5px 9px; font-size:12px; }

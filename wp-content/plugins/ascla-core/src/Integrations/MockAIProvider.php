@@ -18,7 +18,9 @@ final class MockAIProvider implements AIProviderInterface
         $sentences=preg_split('/(?<=[.!?])\s+/u',$text,-1,PREG_SPLIT_NO_EMPTY)?:[];
         $points=array_slice(array_map(static fn($s)=>mb_substr($s,0,400),$sentences),0,5);
         $summary=implode(' ',array_slice($points,0,3));
+        preg_match_all('/gobernanza|inteligencia artificial|supervisión|directorio|riesgos|responsabilidades|secretaría corporativa|cumplimiento|sostenibilidad|transformación digital|acuerdos/iu',$text,$keywords);
+        $tags=array_slice(array_values(array_unique(array_map('mb_strtolower',$keywords[0]))),0,12);
         // Extract only source material. Empty statistics/norms are intentional.
-        return ['summary'=>$summary,'technical_note'=>"Ideas recogidas en la transcripción:\n\n".implode("\n\n",$points),'frameworks'=>[],'conclusions'=>$points,'norms'=>[],'concepts'=>$points,'tags'=>[],'suggested_hub'=>$summary,'infographic'=>['title'=>'Claves de la sesión','sections'=>$points,'statistics'=>[],'timeline'=>[],'key_points'=>$points,'source'=>$context['source_id']??0],'moments'=>\ASCLA\Core\Domain\Transcript::moments($text),'excerpts'=>\ASCLA\Core\Domain\Transcript::moments($text),'mode'=>$this->mode()];
+        return ['summary'=>$summary,'technical_note'=>"Ideas recogidas en la transcripción:\n\n".implode("\n\n",$points),'frameworks'=>[],'conclusions'=>$points,'norms'=>[],'concepts'=>$points,'tags'=>$tags,'suggested_hub'=>$summary,'infographic'=>['title'=>'Claves de la sesión','sections'=>$points,'statistics'=>[],'timeline'=>[],'key_points'=>$points,'source'=>$context['source_id']??0],'moments'=>\ASCLA\Core\Domain\Transcript::moments($text),'excerpts'=>\ASCLA\Core\Domain\Transcript::moments($text),'mode'=>$this->mode()];
     }
 }

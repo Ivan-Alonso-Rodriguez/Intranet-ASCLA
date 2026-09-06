@@ -2,6 +2,7 @@
 namespace ASCLA\Core\Integrations;
 final class YouTubeVideoProvider implements VideoProviderInterface
 {
+    private const BEARER='Bearer ';
     public static function videoId(string $url): string
     {
         $p=wp_parse_url($url); $host=strtolower($p['host']??''); $id='';
@@ -12,14 +13,32 @@ final class YouTubeVideoProvider implements VideoProviderInterface
         }
         return is_string($id)&&preg_match('/^[A-Za-z0-9_-]{11}$/',$id)?$id:'';
     }
+    public static function thumbnail(string $videoId): string
+    {
+        return preg_match('/^[A-Za-z0-9_-]{11}$/',$videoId)?'https://i.ytimg.com/vi/'.$videoId.'/hqdefault.jpg':'';
+    }
+    public function metadata(string $videoId): array
+    {
+        if (!self::thumbnail($videoId)) { throw new \RuntimeException('ID de video no válido.'); }
+        $token=GoogleOAuth::accessToken(get_current_user_id());
+        $response=wp_remote_get('https://www.googleapis.com/youtube/v3/videos?'.http_build_query(['part'=>'snippet,contentDetails','id'=>$videoId]),['headers'=>['Authorization'=>self::BEARER.$token],'timeout'=>25,'redirection'=>0,'limit_response_size'=>1048576]);
+        if (is_wp_error($response)||wp_remote_retrieve_response_code($response)!==200) { throw new \RuntimeException('No se pudieron consultar los datos de YouTube. Revise permisos y conexión.'); }
+        $data=json_decode(wp_remote_retrieve_body($response),true); $item=$data['items'][0]??null;
+        if (!$item) { throw new \RuntimeException('Video no disponible para esta cuenta.'); }
+        try {
+            $interval=new \DateInterval($item['contentDetails']['duration']??'PT0S');
+            $duration=$interval->d*86400+$interval->h*3600+$interval->i*60+$interval->s;
+        } catch (\Exception $e) { throw new \RuntimeException('YouTube devolvió una duración no válida.'); }
+        return ['mode'=>'API REAL YouTube','duration_seconds'=>$duration,'thumbnail_url'=>self::thumbnail($videoId),'source_title'=>sanitize_text_field($item['snippet']['title']??'')];
+    }
     public function transcript(string $videoId): array
     {
         $token=GoogleOAuth::accessToken(get_current_user_id());
-        $response=wp_remote_get('https://www.googleapis.com/youtube/v3/captions?'.http_build_query(['part'=>'snippet','videoId'=>$videoId]),['headers'=>['Authorization'=>'Bearer '.$token],'timeout'=>25,'redirection'=>0,'limit_response_size'=>1048576]);
+        $response=wp_remote_get('https://www.googleapis.com/youtube/v3/captions?'.http_build_query(['part'=>'snippet','videoId'=>$videoId]),['headers'=>['Authorization'=>self::BEARER.$token],'timeout'=>25,'redirection'=>0,'limit_response_size'=>1048576]);
         if (is_wp_error($response)||wp_remote_retrieve_response_code($response)!==200) { throw new \RuntimeException('YouTube: permisos insuficientes o API no configurada. Puede cargar una transcripción autorizada manualmente.'); }
         $data=json_decode(wp_remote_retrieve_body($response),true); $caption=$data['items'][0]['id']??'';
         if (!$caption) { throw new \RuntimeException('No se encontraron subtítulos accesibles para este video.'); }
-        $response=wp_remote_get('https://www.googleapis.com/youtube/v3/captions/'.rawurlencode($caption).'?tfmt=srt',['headers'=>['Authorization'=>'Bearer '.$token],'timeout'=>30,'redirection'=>0,'limit_response_size'=>524288]);
+        $response=wp_remote_get('https://www.googleapis.com/youtube/v3/captions/'.rawurlencode($caption).'?tfmt=srt',['headers'=>['Authorization'=>self::BEARER.$token],'timeout'=>30,'redirection'=>0,'limit_response_size'=>524288]);
         if (is_wp_error($response)||wp_remote_retrieve_response_code($response)!==200) { throw new \RuntimeException('No tiene permisos para descargar estos subtítulos.'); }
         return ['mode'=>'API REAL YouTube','text'=>wp_strip_all_tags(wp_remote_retrieve_body($response))];
     }

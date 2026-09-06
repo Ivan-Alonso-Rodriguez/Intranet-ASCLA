@@ -1,124 +1,141 @@
-"""Consolidate measured local evidence; never substitutes for executing the suites."""
+"""Consolidate only measured, successful current-release evidence."""
 from pathlib import Path
-import hashlib,json,re,shutil
+from zipfile import ZipFile
+import datetime, hashlib, json, re, shutil, xml.etree.ElementTree as ET
 ROOT=Path(__file__).resolve().parents[1]
 RESULT=ROOT/'test-results'
-def read(name): return json.loads((RESULT/name).read_text(encoding='utf8'))
+
+def read(name):
+    raw=(RESULT/name).read_bytes()
+    return json.loads(raw.decode('utf-16' if raw.startswith(b'\xff\xfe') else 'utf-8-sig'))
+
 def generate():
     metrics={m['metric']:m.get('value','N/D') for m in read('sonar-metrics.json')['component']['measures']}
-    e2e=read('e2e.json');load=read('performance.json');port=read('portability.json');browser=read('portability-browser.json');gate=read('sonar-gate.json')['projectStatus']
-    assert not e2e['failure'] and not e2e['errors'] and browser['passed']
-    assert all(port['checks'].values()) and all(r['errors']==0 for r in load['profiles'])
-    php=(ROOT/'coverage/php-summary.txt').read_text(encoding='utf8')
-    php_percent=re.search(r'Lines:\s+([\d.]+)%\s+(\([^)]+\))',php)
-    lcov=(ROOT/'coverage/lcov.info').read_text(encoding='utf8');total=sum(map(int,re.findall(r'^LF:(\d+)',lcov,re.M)));covered=sum(map(int,re.findall(r'^LH:(\d+)',lcov,re.M)))
-    js_percent=f'{100*covered/total:.2f}'
-    digest=hashlib.sha256((ROOT/'dist/ascla-core.zip').read_bytes()).hexdigest()
-    table='\n'.join(f"| {r['name']} | {r['concurrency']} | {r['requests']} | {r['seconds']} | {r['p95_ms']} | {r['requests_per_second']} | {r['errors']} |" for r in load['profiles'])
-    ratings={key:chr(64+int(float(metrics[key]))) for key in ['security_rating','reliability_rating','sqale_rating']}
-    report=f'''# Informe de calidad — ASCLA Core {port['plugin']}
+    e2e=read('e2e.json'); completion=read('completion.json'); load=read('performance.json')
+    port=read('portability.json'); browser=read('portability-browser.json'); volume=read('volume-current.json')
+    gate=read('sonar-gate.json')['projectStatus']
+    junit=ET.parse(ROOT/'coverage/junit.xml').getroot().find('testsuite').attrib
+    assert not e2e['failure'] and not e2e['errors'] and completion['passed'] and browser['passed']
+    assert all(port['checks'].values()) and port['installation']=='fresh'
+    assert int(junit['failures'])==0 and int(junit['errors'])==0
+    assert all(r['errors']==0 for r in load['profiles'])
+    assert all(c['status']=='OK' for c in gate['conditions'] if c['metricKey']!='new_violations')
+    php=re.search(r'Lines:\s+([\d.]+)%\s+(\([^)]+\))',(ROOT/'coverage/php-summary.txt').read_text())
+    lcov=(ROOT/'coverage/lcov.info').read_text()
+    total=sum(map(int,re.findall(r'^LF:(\d+)',lcov,re.M))); covered=sum(map(int,re.findall(r'^LH:(\d+)',lcov,re.M)))
+    assert float(php[1])>=80 and 100*covered/total>=80
+    archive=ROOT/'dist/ascla-core.zip'; digest=hashlib.sha256(archive.read_bytes()).hexdigest()
+    with ZipFile(archive) as z:
+        files=z.namelist()
+        for name in files:
+            relative=Path(name).relative_to('ascla-core')
+            assert z.read(name)==(ROOT/'wp-content/plugins/ascla-core'/relative).read_bytes(), name
+    ratings={k:chr(64+int(float(metrics[k]))) for k in ['security_rating','reliability_rating','sqale_rating']}
+    table='\n'.join(f"| {r['name']} | {r['concurrency']} | {r['requests']} | {r['seconds']} | {r['p95_ms']} | {r['errors']} |" for r in load['profiles'])
+    largest=volume['profiles'][-1]
+    volume_table='\n'.join(f"| {m['operation']} | {m['ms']} | {m['queries']} | {m['max_query_ms']} | {m['slow_queries_over_100ms']} |" for m in largest['measurements'])
+    login=json.loads((ROOT/'docs/evidence/login.json').read_text(encoding='utf-8-sig'))
+    assert login['status']=='passed'
+    report=f"""# Informe de calidad — ASCLA Core {port['plugin']}
 
-Fecha: 5 de septiembre de 2026. Código propio del plugin; WordPress Core, Elementor, plugins externos, vendor y node_modules no forman parte de las métricas de producción. Las pruebas se realizaron exclusivamente con datos ficticios locales.
+Fecha: {datetime.date.today().isoformat()}. Este informe corresponde al ZIP actual y sustituye las métricas anteriores. Pruebas con datos ficticios locales. WordPress Core, Elementor, terceros y dependencias de desarrollo quedan fuera del código propio medido.
 
-## Resultado medido
+## Resultados medidos
 
 | Control | Resultado |
 |---|---|
-| PHPUnit | 42 pruebas, 2807 aserciones, 0 fallos/errores |
-| Navegador principal | {len(e2e['results'])} comprobaciones aprobadas; 0 errores JavaScript |
-| Portabilidad en navegador | 12 páginas aprobadas con enlaces predeterminados |
-| Cobertura PHP, clases/servicios | {php_percent[1]}% {php_percent[2]} líneas |
-| Cobertura JavaScript | {js_percent}% ({covered}/{total}) líneas |
-| Sonar, cobertura combinada | {metrics['coverage']}%; cobertura de líneas {metrics['line_coverage']}% |
+| PHPUnit | {junit['tests']} pruebas, {junit['assertions']} aserciones; cero fallos/errores |
+| Regresión de navegador | {len(e2e['results'])} comprobaciones; cero errores JavaScript |
+| Aceptación 1.1.0 | {len(completion['checks'])} comprobaciones en escritorio y móvil |
+| Acceso y recuperación | {len(login['checks'])} comprobaciones; sin correo real |
+| ZIP en instalación nueva | {len(browser['pages'])} páginas con enlaces predeterminados |
+| Cobertura PHP | {php[1]}% {php[2]} líneas de clases/servicios |
+| Cobertura JavaScript | {100*covered/total:.2f}% ({covered}/{total}) líneas |
+| Sonar, cobertura combinada | {metrics['coverage']}%; líneas {metrics['line_coverage']}% |
 | Duplicación | {metrics['duplicated_lines_density']}% |
 | Seguridad / Fiabilidad / Mantenibilidad | {ratings['security_rating']} / {ratings['reliability_rating']} / {ratings['sqale_rating']} |
 | Bugs / Vulnerabilidades | {metrics['bugs']} / {metrics['vulnerabilities']} |
-| Code smells pendientes | {metrics['code_smells']} |
-| Security hotspots | {metrics['security_hotspots']} detectados; ninguno pendiente de revisión |
-| Accepted issues | {metrics['accepted_issues']} |
+| Avisos de mantenimiento abiertos | {metrics['code_smells']} |
+| Security hotspots / Accepted issues | {metrics['security_hotspots']} / {metrics['accepted_issues']} |
 | Quality Gate ASCLA Release | {gate['status']} |
 
-SonarQube Community Build 26.9.0.129388, scanner 8.0.1.6346, perfiles Sonar way. El gate aplica cobertura >=80%, duplicación <5%, seguridad/fiabilidad A/B, mantenibilidad hasta C, cero bugs/vulnerabilidades/accepted issues y revisión de hotspots cuando existen. No se excluyeron archivos propios para mejorar el resultado ni se aceptaron/silenciaron issues. La cobertura combinada de Sonar incluye líneas y condiciones; no equivale al porcentaje de líneas de PHPUnit o V8.
+SonarQube Community Build 26.9.0.129388, scanner 8.0.1.6346 y perfiles Sonar way. Gate: cobertura >=80%, duplicación <5%, seguridad/fiabilidad A/B, mantenibilidad hasta C, cero bugs/vulnerabilidades/accepted issues y revisión de hotspots cuando existen. No se excluyeron archivos propios ni se aceptaron/silenciaron issues para mejorar las métricas. La cobertura combinada incluye condiciones.
 
-Los {metrics['code_smells']} avisos de mantenimiento permanecen abiertos: principalmente plantillas JavaScript anidadas, complejidad de funciones y excepciones genéricas. Hay avisos de severidad Critical por complejidad/duplicación de literales. Constituyen trabajo de refactorización pendiente; las calificaciones A no significan que el código carezca de deuda técnica.
+El gate estricto mantiene su condición adicional de cero avisos nuevos: {next((c.get('actualValue','0') for c in gate['conditions'] if c['metricKey']=='new_violations'),'0')} avisos nuevos impiden su aprobación. No se ha relajado esa condición. Los objetivos numéricos del prompt sí se cumplen.
 
-## Pruebas y alcance
+Los {metrics['code_smells']} avisos de mantenimiento siguen abiertos, incluidos avisos Critical de complejidad y literales repetidos. Son deuda de refactorización; las calificaciones no significan ausencia de deuda. Detalle en evidence/sonar-issues-summary.json.
 
-PHPUnit 11.5.56 y PCOV 1.0.12 contra WordPress real: matching determinístico y límites, grupos 4–6 e historial, ICS/UTC, autorización, privacidad de perfil/búsqueda, IDOR, bloqueo de mensajes, cupos, moderación, medios, secretos, fuentes y abstención, Chatham House, jobs, seed y migraciones idempotentes. Los proveedores HTTP se comprobaron con respuestas simuladas, incluidos errores y refresh; no se utilizaron cuentas externas reales.
+## Alcance
 
-Playwright con Microsoft Edge sin interfaz: login, doce secciones, cambios de perfil, Hub y revisión, comentarios/reacciones, protección de REST/RSS/formulario nativo, foro y respuesta, mensajes y bloqueo, calendario/ICS, subida privada, multimedia y revisión IA, asistente con fuentes/abstención, contacto, configuración, escritorio y móvil. Se captura V8 antes de cada navegación; también se incorpora la instalación desde ZIP sólo cuando su código fuente coincide exactamente. Las pruebas restauran el perfil y retiran sus propios contenidos/archivos/mensajes.
+PHPUnit 11.5.56/PCOV 1.0.12: matching, grupos, autorización/IDOR, privacidad, bloqueo, cupos, moderación, medios, secretos, fuentes antiguas y abstención, Chatham House, cola e instalador. La regresión nueva cubre filtros combinados, listas JSON de etiquetas, autores/fuentes, más de una página de eventos, mes y zona horaria, invitaciones/avisos idempotentes, consentimiento, subtítulos densos, tiempos no sustentados, metadatos y continuación de cola.
 
-Desarrollo: WordPress 7.1, PHP 8.3.28, MariaDB 11.4. La instalación limpia desde ZIP usa WordPress {port['wordpress']}, PHP {port['php']} y MariaDB 11.4. Se comprobaron ocho condiciones de instalación: doce páginas, activación idempotente, contenido previo preservado, colisión de slug resuelta, esquema, rol, CPT privados y nueve tablas. También se comprobó actualización del plugin y seed repetido. No se ha validado multisitio de red ni la combinación real de plugins/cachés de SiteGround.
+Playwright/Edge: doce secciones, perfil, Hub, foros, mensajería, calendario/ICS, uploads privados, generación/revisión, asistente, contacto y configuración. Aceptación específica: filtros nuevos, imágenes, logos, invitaciones, agenda y resultados estructurados. Acceso: escritorio y 320/390/768 px, error, destino permitido, logout, recuperación y renovación de sesión.
+
+V8 se captura antes de navegar. Se incorpora evidencia del ZIP y de aceptación sólo si el código fuente coincide exactamente, incluido content-ui.js. Los proveedores HTTP se probaron con respuestas simuladas; no con cuentas reales.
+
+Desarrollo: WordPress 7.1/PHP 8.3.28/MariaDB 11.4. Instalación desde cero: WordPress {port['wordpress']}/PHP {port['php']}/MariaDB 11.4 en volúmenes nuevos, exclusivamente desde ZIP. Verifica doce páginas, activación idempotente, página ajena y colisión de slug, rol, CPT privados, esquema 3 y nueve tablas. También se ejecutó actualización en el entorno previo y seed repetido: evidence/portability-update.json.
 
 ## Rendimiento HTTP
 
-Seis endpoints de lectura autenticados, sesiones independientes, Docker en este equipo Windows/WSL. Transporte IPv4 explícito al puerto publicado, conservando Host y cookies localhost. Los primeros intentos con resolución IPv6 de Windows introducían unos 2 segundos de conexión; se descartaron como medida del servidor. El total de tiempo incluye login; la latencia mide cada solicitud. El tramo sostenido incluye pausa de 250 ms por usuario.
+Seis endpoints autenticados, sesiones independientes, Docker Windows/WSL. IPv4 con Host/cookies localhost. Tiempo total incluye login; latencia por solicitud; tramo sostenido con pausa de 250 ms por usuario. SonarQube y la instalación aislada compartieron el equipo durante parte de la ejecución.
 
-| Perfil | Sesiones | Solicitudes | Segundos | p95 ms | req/s | Errores |
-|---|---:|---:|---:|---:|---:|---:|
+| Perfil | Sesiones | Solicitudes | Segundos | p95 ms | Errores |
+|---|---:|---:|---:|---:|---:|
 {table}
 
-Total: {sum(r['requests'] for r in load['profiles'])} solicitudes sin errores. La concurrencia de 1, 4, 12 y 18 sesiones sirve como escalabilidad básica. El perfil de estrés es acotado; no determina el punto de saturación. No son cifras de producción ni de rendimiento de APIs externas. SonarQube estaba presente en el equipo durante la comprobación final. Las instantáneas de memoria de WordPress/MariaDB al cerrar cada perfil están en `evidence/performance.json`; no representan un muestreo continuo de picos.
+Total: {sum(r['requests'] for r in load['profiles'])} solicitudes, cero errores. Hasta 18 sesiones prueban escalabilidad básica y estrés acotado; no determinan saturación ni capacidad de producción. Instantáneas de memoria al final de cada perfil en evidence/performance.json; no son muestreo continuo de picos.
 
-## Volumen, consultas y memoria
+## Volumen y SQL
 
-Se añadieron y retiraron 100/600 recursos y 30/120 asociados ficticios. Cada operación comenzó con caché de objetos vacía; el matching cálido conserva transients de la llamada previa. SQL observado con SAVEQUERIES y umbral de consulta lenta >100 ms. Los resultados completos están en `evidence/volume-before.json` y `evidence/volume-after.json`.
+Se añadieron y retiraron 100/600 recursos y 30/120 asociados. Caché de objetos vacía por operación; matching caliente conserva transients. SQL observado con SAVEQUERIES. Tramo con {largest['extra_resources']} recursos y {largest['extra_members']} asociados adicionales:
 
-Con 600 recursos adicionales y 120 asociados adicionales, el matching pasó de 753 a 479 consultas en frío (204,97 → 153,76 ms) y de 573 a 299 en caliente (65,14 → 39,43 ms). Directorio: 11,67 ms; listado de recursos: 9,42 ms; recuperación de fuente antigua: 18,09 ms. Se observaron cero consultas SQL individuales por encima de 100 ms; la más lenta de la recuperación fue 16,49 ms. Pico del proceso PHP del benchmark final: 54 MB, acumulado incluyendo preparación de fixtures. Estas mediciones son del experimento antes/después de la optimización, no de una ejecución HTTP prolongada.
+| Operación | Tiempo ms | Consultas | SQL máximo ms | SQL >100 ms |
+|---|---:|---:|---:|---:|
+{volume_table}
 
-El experimento detectó que una fuente antigua desaparecía al superar 300 recursos. Se corrigió la selección para puntuar el corpus publicado antes de limitar candidatos; una regresión verifica el caso. El motor sigue siendo lexical: para corpus grandes conviene estudiar índices de búsqueda especializados y una estrategia de caché del ranking.
+Pico acumulado PHP: {max(m['peak_memory_mb'] for p in volume['profiles'] for m in p['measurements'])} MB, incluyendo fixtures. Evidencia: evidence/volume-current.json. Los archivos volume-before.json/volume-after.json anteriores son un experimento histórico de 1.0.3. El asistente sigue siendo lexical; debe medirse con el corpus real.
 
-## Defectos corregidos durante la fase final
+## Límites pendientes
 
-- Fechas ISO del navegador con milisegundos y rechazo de fechas de calendario inválidas.
-- Filtros de recursos/eventos aplicados antes de paginar; índice de invitaciones privadas.
-- Fuentes antiguas omitidas por un límite de recuperación y consultas repetidas del matching.
-- Exposición de comentarios privados por RSS y componentes de comentarios recientes; bloqueo del formulario nativo para contenido ASCLA.
-- URLs REST con enlaces predeterminados de WordPress, verificadas en instalación limpia.
-- Precedencia de expresión regular de zonas horarias y SHA-256 para identificadores de caché/bloqueos, respetando el límite de nombre de GET_LOCK.
-- Desbordamiento móvil, contraste del botón principal y ejecución del cron local.
+Staging https://wordpress.ingsoftware.lat/ no fue modificado: falta una sesión administrativa accesible y el controlador falla por ACL. No se validó la combinación real de cachés/plugins de SiteGround ni multisitio de red.
 
-## Límites y trabajo pendiente
+OpenAI, YouTube y Calendar necesitan credenciales, consentimiento y prueba real. LinkedIn/X reales, publicación de podcasts y RSVP externo avanzado siguen pendientes. Cápsulas: referencias temporales, no archivos cortados/subidos. Chatham House exige revisión humana. No se envió correo real de recuperación. Cargas pequeñas: 3 MB imágenes y 5 MB PDF, sujetas al hosting.
 
-Staging `https://wordpress.ingsoftware.lat/`: instalación remota pendiente; no hay sesión administrativa accesible y el controlador de navegador de esta sesión falla al iniciar por ACL del entorno. No se modificó ese servidor ni producción. La entrega local y la instalación limpia sí se verificaron.
+## Reproducir
 
-OpenAI, YouTube y Calendar necesitan credenciales/consentimiento y una prueba con cuenta real. LinkedIn/X son adaptadores pendientes de implementar según permisos oficiales. Subida automática de podcasts, invitados/RSVP externos, disponibilidad horaria y sincronización masiva no están implementados. Las cápsulas actuales son referencias temporales a la fuente, sin cortar ni subir audio/video. Chatham House exige revisión humana; no garantiza anonimización perfecta. Los límites de PHP/hosting deben admitir las cargas pequeñas anunciadas (3 MB imágenes, 5 MB PDF).
+    pnpm install --frozen-lockfile
+    docker compose up -d
+    powershell -NoProfile -ExecutionPolicy Bypass -File scripts/quality.ps1 -SkipBrowser
+    node tests/login.cjs
+    node tests/completion.cjs
+    python scripts/build.py
+    powershell -NoProfile -ExecutionPolicy Bypass -File scripts/portability.ps1
+    node tests/portability-browser.cjs
+    node tests/e2e.cjs
+    python tests/performance.py
+    docker compose exec -T wordpress php /opt/ascla-tests/volume.php
+    python scripts/sonar.py scan
+    python scripts/sonar.py report
+    python scripts/report.py
 
-## Reproducción y evidencia
+Guarda el JSON de volumen en test-results/volume-current.json con UTF-8. Para instalación nueva usa scripts/portability.ps1 -Project NOMBRE_NUEVO después de detener el entorno que ocupa 8089; conserva sus volúmenes. Sonar requiere el servicio de compose.quality.yaml en estado UP y configuración inicial mediante scripts/sonar.py init y gate. Los siguientes análisis reutilizan el token ignorado por Git, que vence el 12 de septiembre de 2026.
 
-```text
-pnpm install --frozen-lockfile
-docker compose up -d
-powershell -File scripts/quality.ps1
-python tests/performance.py
-docker compose exec -T wordpress php /opt/ascla-tests/volume.php
-python scripts/build.py
-powershell -File scripts/portability.ps1
-node tests/portability-browser.cjs
-docker compose -f compose.quality.yaml up -d sonar
-python scripts/sonar.py init
-python scripts/sonar.py gate
-python scripts/sonar.py scan
-python scripts/sonar.py report
-python scripts/report.py
-```
+ZIP: **{len(files)} archivos**, **{archive.stat().st_size} bytes**, SHA-256 **{digest}**. Este generador verifica que el ZIP coincide con los archivos actuales. El build es reproducible.
 
-Para incorporar la cobertura de enlaces predeterminados, ejecuta la prueba de portabilidad antes del E2E final. PHPUnit/PCOV se preparan por el script dentro del contenedor; Playwright usa Edge instalado. Espera que `/api/system/status` de Sonar indique UP antes de inicializar. Las credenciales de Sonar se guardan únicamente en `secrets/sonar-local.json`, ignorado por Git. Su token local vence a los siete días; renueva el token en Sonar y actualiza ese archivo local para análisis posteriores. Configuraciones de análisis no son resultados: conserva los informes generados.
-
-ZIP `{port['plugin']}`: 48 archivos de ejecución, sin pruebas, dependencias ni secretos. SHA-256: `{digest}`. Repetir el build con el mismo código produce el mismo archivo.
-
-Evidencia compacta en `docs/evidence/`; XML/LCOV completos disponibles localmente en `coverage/`. [Documentación oficial de Web API SonarQube](https://docs.sonarsource.com/sonarqube-community-build/extension-guide/web-api).
-'''
+Evidencias compactas en docs/evidence/; XML y LCOV completos en coverage/. [Detalle de la entrega](COMPLETION_1.1.0.md).
+"""
     (ROOT/'docs/QUALITY_REPORT.md').write_text(report,encoding='utf8')
-    evidence=ROOT/'docs/evidence';evidence.mkdir(exist_ok=True)
-    for name in ['sonar-metrics.json','sonar-gate.json','sonar-hotspots.json','performance.json','volume-before.json','volume-after.json','portability.json','portability-browser.json','e2e.json']:
-        shutil.copyfile(RESULT/name,evidence/name)
+    evidence=ROOT/'docs/evidence'; evidence.mkdir(exist_ok=True)
+    for name in ['sonar-metrics.json','sonar-gate.json','sonar-hotspots.json','performance.json','volume-current.json','portability.json','portability-update.json','portability-browser.json','e2e.json','completion.json']:
+        (evidence/name).write_text(json.dumps(read(name),indent=2,ensure_ascii=False),encoding='utf8')
     issues=read('sonar-issues.json')
-    summary=[{k:item.get(k) for k in ['key','rule','type','severity','component','line','message','status']} for item in issues['issues']]
+    summary=[{k:i.get(k) for k in ['key','rule','type','severity','component','line','message','status']} for i in issues['issues']]
     (evidence/'sonar-issues-summary.json').write_text(json.dumps(summary,indent=2,ensure_ascii=False),encoding='utf8')
     shutil.copyfile(ROOT/'coverage/php-summary.txt',evidence/'php-coverage.txt')
-    for name in ['dashboard-desktop.png','dashboard-mobile.png']:
-        shutil.copyfile(ROOT/'tmp/screens'/name,evidence/name)
-    print('Quality report and compact evidence saved.')
+    for name in ['dashboard-desktop.png','dashboard-mobile.png','completion-knowledge.png','completion-generated.png']:
+        shutil.copyfile(RESULT/name,evidence/name)
+    release={'version':port['plugin'],'date':datetime.datetime.now(datetime.timezone.utc).isoformat(),'sha256':digest,'bytes':archive.stat().st_size,'files':len(files),'php_tests':int(junit['tests']),'php_assertions':int(junit['assertions']),'php_coverage':float(php[1]),'js_coverage':round(100*covered/total,2),'sonar_gate':gate['status']}
+    (evidence/'release.json').write_text(json.dumps(release,indent=2),encoding='utf8')
+    print(json.dumps(release))
 
 if __name__=='__main__':generate()

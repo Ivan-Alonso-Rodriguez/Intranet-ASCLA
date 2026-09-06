@@ -16,6 +16,15 @@ final class Media
         Access::require($file && ((int)$file['user_id']===get_current_user_id()||(int)$file['post_id']===$post),'Archivo no autorizado.');
         Store::update('media',['post_id'=>$post],['id'=>$id]);
     }
+    public static function metadata(int $post,array $ids): array
+    {
+        global $wpdb;
+        $ids=array_values(array_filter(array_map('absint',array_slice($ids,0,12))));
+        if (!$ids) { return []; }
+        $in=implode(',',array_fill(0,count($ids),'%d'));
+        $rows=$wpdb->get_results($wpdb->prepare('SELECT id,name,mime FROM '.Store::table('media')." WHERE post_id=%d AND id IN ($in) ORDER BY id LIMIT 12",$post,...$ids),ARRAY_A);
+        return array_map(static fn($row)=>['id'=>(int)$row['id'],'name'=>$row['name'],'mime'=>$row['mime'],'url'=>self::url((int)$row['id'])],$rows);
+    }
     public static function upload(array $file): array
     {
         Access::limit('upload',10,300);

@@ -4,10 +4,10 @@ use ASCLA\Core\Integrations\{RealAIProvider,YouTubeVideoProvider,GoogleOAuth,Sec
 use ASCLA\Core\Services\{Settings,Content};
 final class ProvidersTest extends TestCase
 {
-    private int $user; private $http; private array $settings; private array $posts=[];
+    private int $user; private $http; private array $settings; private array $posts=[]; private array $savedSecrets=[];
     protected function setUp(): void
     {
-        $this->settings=Settings::get();$this->user=wp_insert_user(['user_login'=>'test_provider_'.bin2hex(random_bytes(4)),'user_pass'=>wp_generate_password(30),'role'=>'administrator']);wp_set_current_user($this->user);
+        $this->settings=Settings::get();foreach(['ai_key','google_client_secret'] as $key)$this->savedSecrets[$key]=Secrets::get($key);$this->user=wp_insert_user(['user_login'=>'test_provider_'.bin2hex(random_bytes(4)),'user_pass'=>wp_generate_password(30),'role'=>'administrator']);wp_set_current_user($this->user);
         Settings::save(['ai_mode'=>'real','ai_model'=>'configured-test-model','ai_key'=>'fake-key-for-http-mock','google_client_id'=>'fake-client-id','google_client_secret'=>'fake-client-secret']);
     }
     protected function tearDown(): void
@@ -15,6 +15,7 @@ final class ProvidersTest extends TestCase
         if($this->http)remove_filter('pre_http_request',$this->http,10);
         foreach($this->posts as $id)wp_delete_post($id,true);
         foreach(['ai_key','google_client_secret','google_calendar_'.$this->user,'google_youtube_'.$this->user] as $key)Secrets::remove($key);
+        foreach($this->savedSecrets as $key=>$value){if($value!=='')Secrets::set($key,$value);}
         wp_delete_user($this->user);update_option('ascla_settings',$this->settings,false);wp_set_current_user(0);
     }
     private function mock(callable $handler): void
@@ -48,6 +49,16 @@ final class ProvidersTest extends TestCase
     public function testYouTubeDoesNotInventUnavailableCaptions(): void
     {
         Secrets::set('google_youtube_'.$this->user,wp_json_encode(['access_token'=>'fake','expires_at'=>time()+3600]));$this->mock(static fn()=>self::response(['items'=>[]]));$this->expectException(RuntimeException::class);$this->expectExceptionMessage('No se encontraron subtítulos');(new YouTubeVideoProvider())->transcript('abcdefghijk');
+    }
+    public function testYouTubeMetadataUsesOfficialEndpointAndDuration(): void
+    {
+        Secrets::set('google_youtube_'.$this->user,wp_json_encode(['access_token'=>'fake','expires_at'=>time()+3600]));
+        $this->mock(static function($args,$url){self::assertStringStartsWith('https://www.googleapis.com/youtube/v3/videos?',$url);self::assertSame('Bearer fake',$args['headers']['Authorization']);return self::response(['items'=>[['snippet'=>['title'=>'Video autorizado'],'contentDetails'=>['duration'=>'PT1H2M3S']]]]);});
+        $data=(new YouTubeVideoProvider())->metadata('abcdefghijk');self::assertSame(3723,$data['duration_seconds']);self::assertSame('API REAL YouTube',$data['mode']);self::assertSame('https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg',$data['thumbnail_url']);
+    }
+    public function testYouTubeMetadataReportsMissingVideoWithoutInventingDuration(): void
+    {
+        Secrets::set('google_youtube_'.$this->user,wp_json_encode(['access_token'=>'fake','expires_at'=>time()+3600]));$this->mock(static fn()=>self::response(['items'=>[]]));$this->expectException(RuntimeException::class);(new YouTubeVideoProvider())->metadata('abcdefghijk');
     }
     public function testGoogleConnectScopesAndPerUserTokenRefresh(): void
     {

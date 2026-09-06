@@ -75,7 +75,7 @@ const env = Object.fromEntries(fs.readFileSync(path.join(root, '.env'), 'utf8').
     checks.push('External redirect rejected in real login');
     assert.deepEqual(errors, []);
     checks.push('No browser JavaScript errors');
-    const report = { version: '1.0.4', checkedAt: new Date().toISOString(), status: 'passed', checks, jsErrors: errors };
+    const report = { version: '1.1.0', checkedAt: new Date().toISOString(), status: 'passed', checks, jsErrors: errors };
     fs.writeFileSync(path.join(evidence, 'login.json'), JSON.stringify(report, null, 2) + '\n');
     console.log(JSON.stringify(report, null, 2));
   } finally { await browser.close(); }

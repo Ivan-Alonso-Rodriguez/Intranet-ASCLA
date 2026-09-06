@@ -34,6 +34,19 @@ final class Knowledge
         if (!$used) { return ['answer'=>'No existe suficiente información verificable para responder esta consulta.','sources'=>[],'mode'=>self::provider()->mode()]; }
         return ['answer'=>Access::text($result['answer']??'',20000),'sources'=>array_map(static fn($s)=>['id'=>$s['id'],'title'=>$s['title'],'url'=>$s['url']],$used),'mode'=>self::provider()->mode()];
     }
+    public static function videoMetadata(int $id): array
+    {
+        Access::require(current_user_can('ascla_moderate'));
+        $post=Content::get($id); $meta=(array)get_post_meta($id,'_ascla',true);
+        Access::require($post->post_type==='ascla_resource' && !empty($meta['video_id']),'Seleccione un recurso con video de YouTube.',400);
+        $provider=Settings::get()['youtube_mode']==='real'?new YouTubeVideoProvider():new MockVideoProvider();
+        $data=$provider->metadata($meta['video_id']);
+        $meta['duration_seconds']=max(0,min(604800,(int)$data['duration_seconds']));
+        $meta['thumbnail_url']=YouTubeVideoProvider::thumbnail($meta['video_id']);
+        $meta['video_metadata_mode']=$data['mode'];
+        update_post_meta($id,'_ascla',$meta); Audit::record('video_metadata_updated',$id,$data['mode']);
+        return ['resource_id'=>$id,'mode'=>$data['mode'],'duration_seconds'=>$meta['duration_seconds'],'message'=>'Duración y miniatura actualizadas.'];
+    }
     public static function multimedia(int $id): array
     {
         $post=Content::get($id); Access::require($post->post_type==='ascla_resource','Seleccione un recurso.',400);
@@ -64,19 +77,26 @@ final class Knowledge
         };
         $derived=$clean($derived);
         // Keep only timed excerpts grounded in timestamps actually present in the source.
-        $grounded=\ASCLA\Core\Domain\Transcript::moments($transcript);
+        $grounded=\ASCLA\Core\Domain\Transcript::moments($transcript,array_merge((array)($result['moments']??[]),(array)($result['excerpts']??[])));
         $derived['moments']=$grounded; $derived['excerpts']=$grounded;
         $derived['video_id']=$meta['video_id']??'';
+        $derived['thumbnail_url']=YouTubeVideoProvider::thumbnail($derived['video_id']);
+        $derived['duration_seconds']=(int)($meta['duration_seconds']??0);
         $new=wp_insert_post(wp_slash(['post_type'=>'ascla_resource','post_title'=>'Nota técnica · '.(!empty($meta['chatham'])?'Sesión ASCLA':$post->post_title),'post_content'=>$note,'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
         if (is_wp_error($new)) { throw new \RuntimeException('No fue posible guardar el borrador.'); }
         update_post_meta($new,'_ascla',$derived);
-        $hub=wp_insert_post(wp_slash(['post_type'=>'ascla_hub','post_title'=>'Ideas para conversar · Sesión ASCLA','post_content'=>$summary,'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
+        $topics=wp_get_object_terms($id,'ascla_interest',['fields'=>'ids']);
+        if (!is_wp_error($topics)) { wp_set_object_terms($new,array_map('intval',$topics),'ascla_interest'); }
+        $suggested=Access::text($result['suggested_hub']??$summary,10000);
+        if (!empty($meta['chatham'])) { $suggested=Anonymizer::redact($suggested,$identities); }
+        $hub=wp_insert_post(wp_slash(['post_type'=>'ascla_hub','post_title'=>'Ideas para conversar · Sesión ASCLA','post_content'=>$suggested,'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
         if (!is_wp_error($hub)) { update_post_meta($hub,'_ascla',['generated'=>true,'reviewed'=>false,'chatham'=>$derived['chatham'],'source_id'=>$new,'ai_mode'=>self::provider()->mode()]); }
         $capsules=[];
         foreach (array_slice($grounded,0,3) as $index=>$clip) {
             $capsule=wp_insert_post(wp_slash(['post_type'=>'ascla_resource','post_title'=>'Cápsula '.($index+1).' · Sesión ASCLA','post_content'=>$summary,'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
             if (!is_wp_error($capsule)) {
-                update_post_meta($capsule,'_ascla',['resource_type'=>'Podcast','generated'=>true,'reviewed'=>false,'chatham'=>$derived['chatham'],'source_id'=>$id,'video_id'=>$meta['video_id']??'','clip'=>$clip,'copyright'=>Settings::get()['copyright'],'ai_mode'=>self::provider()->mode()]);
+                update_post_meta($capsule,'_ascla',['resource_type'=>'Podcast','generated'=>true,'reviewed'=>false,'chatham'=>$derived['chatham'],'source_id'=>$id,'video_id'=>$meta['video_id']??'','clip'=>$clip,'duration_seconds'=>$clip['end']-$clip['start'],'thumbnail_url'=>YouTubeVideoProvider::thumbnail($meta['video_id']??''),'copyright'=>Settings::get()['copyright'],'ai_mode'=>self::provider()->mode()]);
+                if (!is_wp_error($topics)) { wp_set_object_terms($capsule,array_map('intval',$topics),'ascla_interest'); }
                 $capsules[]=$capsule;
             }
         }

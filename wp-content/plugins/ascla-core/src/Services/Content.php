@@ -8,7 +8,7 @@ final class Content
     public static function indexMeta(int $metaId,int $postId,string $key,mixed $value): void
     {
         if ($key!=='_ascla' || !is_array($value)) { return; }
-        foreach (['resource_type','start','end'] as $field) { update_post_meta($postId,'_ascla_'.$field,$value[$field]??''); }
+        foreach (['resource_type','start','end','source'] as $field) { update_post_meta($postId,'_ascla_'.$field,$value[$field]??''); }
         update_post_meta($postId,'_ascla_micro',empty($value['micro'])?'0':'1');
         delete_post_meta($postId,'_ascla_invitee');
         foreach (array_unique(array_map('absint',$value['invitees']??[])) as $uid) { add_post_meta($postId,'_ascla_invitee',$uid); }
@@ -31,8 +31,8 @@ final class Content
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
         if (!current_user_can('ascla_moderate')) { unset($meta['transcript'],$meta['identities'],$meta['invitees'],$meta['moderation']); }
         $author=get_userdata($post->post_author);
-        $terms=wp_get_object_terms($post->ID,['ascla_interest','ascla_category']);
-        return ['id'=>$post->ID,'type'=>substr($post->post_type,6),'title'=>$post->post_title,'body'=>$post->post_content,'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?$author->display_name:'ASCLA'],'date'=>$post->post_date_gmt,'parent'=>(int)$post->post_parent,'meta'=>$meta,'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name],$terms),'reactions'=>Store::count('relations',"target_id=%d AND kind='like'",[$post->ID]),'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='like'",[$post->ID,get_current_user_id()])>0,'following'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='follow'",[$post->ID,get_current_user_id()])>0,'comments'=>(int)$post->comment_count,'url'=>Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID])];
+        $terms=wp_get_object_terms($post->ID,['ascla_interest','ascla_category','ascla_tag']);
+        return ['id'=>$post->ID,'type'=>substr($post->post_type,6),'title'=>$post->post_title,'body'=>$post->post_content,'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?$author->display_name:'ASCLA'],'date'=>$post->post_date_gmt,'parent'=>(int)$post->post_parent,'meta'=>$meta,'media'=>Media::metadata($post->ID,(array)($meta['media_ids']??[])),'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name,'taxonomy'=>$t->taxonomy],$terms),'reactions'=>Store::count('relations',"target_id=%d AND kind='like'",[$post->ID]),'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='like'",[$post->ID,get_current_user_id()])>0,'following'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='follow'",[$post->ID,get_current_user_id()])>0,'comments'=>(int)$post->comment_count,'url'=>Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID])];
     }
     public static function page(string $type): string { return ['resource'=>'centro-conocimiento','event'=>'eventos','topic'=>'foros','forum'=>'foros','gallery'=>'galeria','ally'=>'aliados','contact'=>'contacto'][$type]??'hub'; }
     public static function listing(string $type,array $filter=[]): array
@@ -45,12 +45,11 @@ final class Content
         if ($mine || ($type==='contact'&&!current_user_can('ascla_moderate'))) { $args['author']=get_current_user_id(); }
         elseif (!current_user_can('ascla_moderate')) { $args['post_status']=['publish']; }
         if (!empty($filter['author']) && !$mine && ($type!=='contact'||current_user_can('ascla_moderate'))) { $args['author']=absint($filter['author']); }
-        if (!empty($filter['parent'])) { $args['post_parent']=absint($filter['parent']); }
-        if (!empty($filter['tag'])) { $args['tax_query']=[['taxonomy'=>'ascla_interest','field'=>'term_id','terms'=>absint($filter['tag'])]]; }
+        if (isset($filter['parent']) && $filter['parent']!=='') { $args['post_parent']=absint($filter['parent']); }
         if (!empty($filter['after']) && preg_match('/^\d{4}-\d{2}-\d{2}$/',$filter['after'])) { $args['date_query']=[['after'=>$filter['after'],'inclusive'=>true]]; }
         if ($type==='resource' && !empty($filter['recommended'])) {
             $profile=Profiles::raw(get_current_user_id());
-            if (!empty($profile['interests'])) { $args['tax_query']=[['taxonomy'=>'ascla_interest','field'=>'term_id','terms'=>$profile['interests']]]; }
+            if (!empty($profile['interests'])) { $args['tax_query'][]=['taxonomy'=>'ascla_interest','field'=>'term_id','terms'=>$profile['interests']]; }
         }
         if ($type==='resource' && !empty($filter['resource_type'])) { $args['meta_query'][]=['key'=>'_ascla_resource_type','value'=>Access::text($filter['resource_type'],30)]; }
         if ($type==='event') {
@@ -59,6 +58,7 @@ final class Content
             }
             if (array_key_exists('past',$filter)) { $args['meta_query'][]=['key'=>'_ascla_end','value'=>gmdate('c'),'compare'=>!empty($filter['past'])?'<':'>=']; }
         }
+        $args=\ASCLA\Core\Repositories\ContentQuery::filters($args,$type,$filter);
         // Private editorial content is additionally checked through canRead.
         $query=new \WP_Query($args); $items=[];
         foreach ($query->posts as $post) {
@@ -80,6 +80,7 @@ final class Content
         $title=trim(Access::text($input['title']??'',200)); $body=trim(Access::text($input['body']??'',30000));
         Access::require($title!=='' && $body!=='','Complete título y contenido.',400);
         $meta=ContentMeta::sanitize($type,(array)($input['meta']??[]),$id);
+        if (!empty($meta['generated']) && isset($input['tag_names'])) { $meta['tags']=array_map(static fn($name)=>Access::text($name,60),array_slice((array)$input['tag_names'],0,20)); }
         $requested=$input['status']??'pending'; $status=$requested==='draft'?'draft':'pending';
         if ($type==='contact') { $status='private'; }
         elseif ($editor && $requested==='publish' && empty($meta['generated'])) { $status='publish'; }
@@ -93,15 +94,28 @@ final class Content
         $postData['post_status']='draft';
         $saved=wp_insert_post(wp_slash($postData),true); Access::require(!is_wp_error($saved),'No se pudo guardar el contenido.',500);
         update_post_meta($saved,'_ascla',$meta);
-        foreach (['interest','category'] as $tax) {
+        foreach (['interest','category','tag'] as $tax) {
             $ids=array_values(array_unique(array_map('absint',(array)($input[$tax]??[]))));
             foreach ($ids as $tid) { Access::require((bool)term_exists($tid,'ascla_'.$tax),'Categoría no válida.',400); }
             wp_set_object_terms($saved,$ids,'ascla_'.$tax);
         }
+        if (!empty($input['tag_names'])) { self::tags($saved,(array)$input['tag_names']); }
         foreach ($meta['media_ids']??[] as $media) { Media::attach($media,$saved); }
         wp_update_post(['ID'=>$saved,'post_status'=>$status]);
         Audit::record('content_saved',$saved,$status);
         return self::serialize(get_post($saved));
+    }
+    public static function tags(int $id,array $names): void
+    {
+        $ids=[];
+        foreach (array_slice($names,0,20) as $name) {
+            if (!is_string($name)) { continue; }
+            $name=trim(Access::text($name,60)); if ($name==='') { continue; }
+            $term=term_exists($name,'ascla_tag');
+            if (!$term) { $term=wp_insert_term($name,'ascla_tag'); }
+            if (!is_wp_error($term)) { $ids[]=(int)(is_array($term)?$term['term_id']:$term); }
+        }
+        wp_set_object_terms($id,$ids,'ascla_tag');
     }
     public static function comments(int $id): array
     {
@@ -161,6 +175,11 @@ final class Content
         if ($new!=='publish'||$old==='publish'||!str_starts_with($post->post_type,'ascla_')) { return; }
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
         if (!empty($meta['micro'])) { MicroEvents::invite($post->ID); }
+        if ($post->post_type==='ascla_resource') {
+            if (!empty($meta['generated']) && !empty($meta['reviewed'])) { self::tags($post->ID,(array)($meta['tags']??[])); }
+            $topics=wp_get_object_terms($post->ID,'ascla_interest',['fields'=>'ids']);
+            if (!is_wp_error($topics) && $topics) { \ASCLA\Core\Jobs\Queue::enqueue('resource_notifications',['resource_id'=>$post->ID],0); }
+        }
         if ($post->post_type==='ascla_hub') {
             preg_match_all('/@\[(\d+)\]/',$post->post_content,$matches);
             foreach (array_unique($matches[1]) as $id) { Notifications::send((int)$id,'mention','Te mencionaron en el Hub ASCLA.',Catalog::url('hub',['item'=>$post->ID])); }

@@ -11,10 +11,12 @@ final class Installer
         self::roles();
         self::migrate();
         self::migrateIndexes();
+        self::migrateDiscovery();
         self::pages();
         self::terms();
         if (!wp_next_scheduled('ascla_jobs')) { wp_schedule_event(time()+60, 'hourly', 'ascla_jobs'); }
         if (!wp_next_scheduled('ascla_monthly')) { wp_schedule_event(time()+120, 'daily', 'ascla_monthly'); }
+        if (!wp_next_scheduled('ascla_discovery')) { wp_schedule_event(time()+300,'daily','ascla_discovery'); }
         update_option('ascla_version', ASCLA_VERSION, false);
         flush_rewrite_rules();
     }
@@ -31,6 +33,26 @@ final class Installer
             foreach ($posts as $post) { \ASCLA\Core\Services\Content::indexMeta(0,$post->ID,'_ascla',(array)get_post_meta($post->ID,'_ascla',true)); }
         } while (count($posts)===200);
         update_option('ascla_schema',2,false);
+    }
+    private static function migrateDiscovery(): void
+    {
+        if ((int)get_option('ascla_schema',0)>=3) { return; }
+        global $wpdb;
+        $table=$wpdb->prefix.'ascla_notifications';
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'event_key'))) {
+            $wpdb->query("ALTER TABLE $table ADD event_key varchar(96) DEFAULT NULL, ADD UNIQUE KEY delivery (user_id,event_key)");
+            if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'event_key'))) { throw new \RuntimeException('No se pudo actualizar el índice de notificaciones.'); }
+        }
+        $page=1;
+        do {
+            $posts=get_posts(['post_type'=>'ascla_resource','post_status'=>['publish','draft','pending','ascla_hidden','ascla_rejected'],'numberposts'=>200,'paged'=>$page++]);
+            foreach ($posts as $post) {
+                $meta=(array)get_post_meta($post->ID,'_ascla',true);
+                \ASCLA\Core\Services\Content::indexMeta(0,$post->ID,'_ascla',$meta);
+                if ($post->post_status==='publish' && !empty($meta['reviewed'])) { \ASCLA\Core\Services\Content::tags($post->ID,(array)($meta['tags']??[])); }
+            }
+        } while (count($posts)===200);
+        update_option('ascla_schema',3,false);
     }
     private static function roles(): void
     {

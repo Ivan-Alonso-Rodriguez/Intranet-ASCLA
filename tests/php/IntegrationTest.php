@@ -74,7 +74,7 @@ final class IntegrationTest extends TestCase
 
         foreach($before as $slug=>$id)self::assertSame($slug,get_post_meta($id,'_ascla_page',true));
 
-        update_option('ascla_schema',0);Installer::activate(false);self::assertSame(2,(int)get_option('ascla_schema'));
+        update_option('ascla_schema',0);Installer::activate(false);self::assertSame(3,(int)get_option('ascla_schema'));
 
     }
 
@@ -196,9 +196,9 @@ final class IntegrationTest extends TestCase
 
     {
 
-        $this->user(1);$j=Queue::enqueue('answer',['question'=>'ZXCV1234444']);$this->user(2);self::assertSame(404,$this->api('GET','/jobs/'.$j['id'])->get_status());Queue::run();$this->user(1);self::assertSame('completed',Queue::get($j['id'])['status']);self::assertArrayNotHasKey('payload',Queue::get($j['id']));
+        $this->user(1);$j=Queue::enqueue('answer',['question'=>'ZXCV1234444']);$this->user(2);self::assertSame(404,$this->api('GET','/jobs/'.$j['id'])->get_status());$this->user(1);for($attempt=0;$attempt<30&&Queue::get($j['id'])['status']==='pending';$attempt++){Queue::run();}self::assertSame('completed',Queue::get($j['id'])['status']);self::assertArrayNotHasKey('payload',Queue::get($j['id']));
 
-        $this->user(0);$j=Queue::enqueue('multimedia',['resource_id'=>99999999]);Queue::run();self::assertSame('error',Queue::get($j['id'])['status']);self::assertSame('pending',Queue::retry($j['id'])['status']);Store::delete('jobs',['id'=>$j['id']]);
+        $this->user(0);$j=Queue::enqueue('multimedia',['resource_id'=>99999999]);for($attempt=0;$attempt<30&&Queue::get($j['id'])['status']==='pending';$attempt++){Queue::run();}self::assertSame('error',Queue::get($j['id'])['status']);self::assertSame('pending',Queue::retry($j['id'])['status']);Store::delete('jobs',['id'=>$j['id']]);
 
     }
 

@@ -1,13 +1,13 @@
 <?php
 namespace ASCLA\Core\Jobs;
 use ASCLA\Core\Repositories\Store;
-use ASCLA\Core\Services\{Access,Audit,Knowledge,MicroEvents,Notifications,Content};
+use ASCLA\Core\Services\{Access,Audit,Knowledge,MicroEvents,Notifications,Content,Discovery};
 final class Queue
 {
-    public static function boot(): void { add_action('ascla_jobs',[self::class,'run']); add_action('ascla_monthly',[MicroEvents::class,'monthly']); }
+    public static function boot(): void { add_action('ascla_jobs',[self::class,'run']); add_action('ascla_jobs_continue',[self::class,'run']); add_action('ascla_monthly',[MicroEvents::class,'monthly']); add_action('ascla_discovery',static fn()=>self::enqueue('discovery',[],0)); }
     public static function enqueue(string $kind,array $payload,int $user=-1): array
     {
-        Access::require(in_array($kind,['multimedia','answer','microevents','social'],true),'Trabajo no válido.',400);
+        Access::require(in_array($kind,['multimedia','answer','microevents','social','resource_notifications','discovery','video_metadata'],true),'Trabajo no válido.',400);
         $id=Store::insert('jobs',['kind'=>$kind,'user_id'=>$user<0?get_current_user_id():$user,'payload'=>wp_json_encode($payload),'status'=>'pending','created_at'=>current_time('mysql',true)]);
         wp_schedule_single_event(time()+1,'ascla_jobs'); return ['id'=>$id,'status'=>'pending'];
     }
@@ -31,14 +31,17 @@ final class Queue
             if ($claimed!==1) { continue; }
             try {
                 wp_set_current_user((int)$row['user_id']); $p=json_decode($row['payload'],true)?:[];
-                if ($row['kind']!=='microevents' || (int)$row['user_id']!==0) { Access::require(Access::member(),'La cuenta ya no tiene acceso.'); }
+                if (!in_array($row['kind'],['microevents','resource_notifications','discovery'],true) || (int)$row['user_id']!==0) { Access::require(Access::member(),'La cuenta ya no tiene acceso.'); }
                 if ($row['kind']==='microevents' && (int)$row['user_id']!==0) { Access::require(current_user_can('ascla_manage'),'Permiso de administración revocado.'); }
-                if (in_array($row['kind'],['multimedia','social'],true)) { Access::require(current_user_can('ascla_moderate'),'Permiso de moderación revocado.'); }
+                if (in_array($row['kind'],['multimedia','social','video_metadata'],true)) { Access::require(current_user_can('ascla_moderate'),'Permiso de moderación revocado.'); }
                 $result=match($row['kind']) {
                     'answer'=>Knowledge::answer($p['question']??''),
                     'multimedia'=>Knowledge::multimedia((int)($p['resource_id']??0)),
                     'microevents'=>MicroEvents::create(),
                     'social'=>self::social(),
+                    'resource_notifications'=>Discovery::resource((int)($p['resource_id']??0)),
+                    'discovery'=>Discovery::networking(),
+                    'video_metadata'=>Knowledge::videoMetadata((int)($p['resource_id']??0)),
                 };
                 Store::update('jobs',['status'=>'completed','result'=>wp_json_encode($result),'error'=>null,'locked_at'=>null],['id'=>$row['id']]);
                 Notifications::send((int)$row['user_id'],'job','Tu trabajo en segundo plano ha finalizado.'); Audit::record('job_completed',(int)$row['id'],$row['kind']);
@@ -46,6 +49,10 @@ final class Queue
                 $safe=$e instanceof \ASCLA\Core\Rest\ApiException||get_class($e)===\RuntimeException::class?$e->getMessage():'No se pudo completar el trabajo. Revise la configuración o reintente.';
                 Store::update('jobs',['status'=>'error','error'=>substr(sanitize_text_field($safe),0,255),'locked_at'=>null],['id'=>$row['id']]); Audit::record('job_failed',(int)$row['id'],$row['kind']);
             } finally { wp_set_current_user($original); }
+        }
+        // WordPress deduplicates identical single events; use a continuation hook for backlog.
+        if (Store::count('jobs','status=%s AND attempts<3',['pending']) && !wp_next_scheduled('ascla_jobs_continue')) {
+            wp_schedule_single_event(time()+5,'ascla_jobs_continue');
         }
     }
     private static function social(): array

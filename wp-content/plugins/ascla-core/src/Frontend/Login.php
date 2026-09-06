@@ -18,7 +18,7 @@ final class Login
         add_filter('login_headerurl', static fn() => Catalog::url('intranet'));
         add_filter('login_headertext', static fn() => 'ASCLA · Comunidad profesional');
         add_filter('login_title', static fn($title, $screen) => esc_html($screen . ' · ASCLA'), 10, 2);
-        add_action('login_header', static function () { require ASCLA_PATH . 'templates/login-welcome.php'; });
+        add_action('login_header', static function () { require_once ASCLA_PATH . 'templates/login-welcome.php'; });
         add_filter('login_message', [self::class, 'welcome']);
         add_action('login_footer', static function () {
             echo '<p class="ascla-login-help">¿Aún no tienes una cuenta? Solicita tu acceso a la administración de ASCLA.</p>';
