@@ -89,7 +89,7 @@ async function api(page, route, body) {
     assert.equal(await page.locator('[data-action=notifications]').evaluate(e => e === document.activeElement), true);
     checks.push('Escape closes inbox and restores keyboard focus to the bell');
     assert.deepEqual(errors, []);
-    fs.writeFileSync(path.join(root, 'test-results/notifications.json'), JSON.stringify({ version: '1.2.0', date: new Date().toISOString(), checks, browserErrors: errors }, null, 2));
+    fs.writeFileSync(path.join(root, 'test-results/notifications.json'), JSON.stringify({ version: fs.readFileSync(path.join(root, 'wp-content/plugins/ascla-core/ascla-core.php'), 'utf8').match(/Version: ([\d.]+)/)[1], date: new Date().toISOString(), checks, browserErrors: errors }, null, 2));
     console.log(JSON.stringify({ checks, browserErrors: errors }, null, 2));
   } finally {
     await browser.close(); fixture('cleanup', JSON.stringify({ posts: data.posts, users: data.users, conversation: data.conversation }));

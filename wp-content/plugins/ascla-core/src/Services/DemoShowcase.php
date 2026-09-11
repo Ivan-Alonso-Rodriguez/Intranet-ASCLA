@@ -11,7 +11,7 @@ final class DemoShowcase
     }
     public static function seed(callable $make,array $users): void
     {
-        $previous=get_current_user_id();wp_set_current_user($users[0]);
+        $previous=get_current_user_id();Access::require(current_user_can('ascla_manage'),'Solo administradores pueden crear la demo multimedia.',403);
         try {
             $id=$make('sprint-multimedia','resource','Laboratorio multimedia · Demo ficticia','Ejemplo para revisar transcripción, anonimización, fuentes, nota técnica, infografía y cápsulas. El video externo es únicamente ilustrativo y no contiene esta transcripción.',[
                 'resource_type'=>'Video','video_id'=>'M7lc1UVf-VE','youtube_url'=>'https://www.youtube.com/watch?v=M7lc1UVf-VE','thumbnail_url'=>'https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg','duration_seconds'=>240,'source'=>'Transcripción sintética ASCLA para pruebas','transcript'=>self::transcript(),'chatham'=>true,'demo_source_note'=>'Video ilustrativo de la documentación oficial de YouTube. La transcripción, estadísticas y cápsulas son datos ficticios de prueba; no corresponden a su audio.'

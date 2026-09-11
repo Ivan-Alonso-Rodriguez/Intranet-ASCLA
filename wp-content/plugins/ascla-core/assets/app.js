@@ -4,6 +4,11 @@
   const root = document.getElementById("ascla-root");
   if (!root || !window.ASCLA) return;
   const C = window.ASCLA;
+  const T = text => C.translations?.[text] || text;
+  // Translate interface labels only; source content and user input keep their original language.
+  const labelHTML = label => String(label).replace(/(^|>)([^<>]+)(?=<|$)/g, (all, prefix, text) => {
+    const trimmed = text.trim();return prefix + text.replace(trimmed, T(trimmed));
+  });
   let navigation;
   const S = {
     boot: null,
@@ -50,11 +55,11 @@
           /(?:Z|[+-]\d\d:\d\d)$/.test(value)
             ? value
             : value.replace(" ", "T") + "Z",
-        ).toLocaleDateString("es-PE", opts)
+        ).toLocaleDateString(C.locale || "es-PE", opts)
       : "Por confirmar";
   const time = (value) =>
     value
-      ? new Date(value).toLocaleTimeString("es-PE", {
+      ? new Date(value).toLocaleTimeString(C.locale || "es-PE", {
           hour: "2-digit",
           minute: "2-digit",
         })
@@ -76,11 +81,11 @@
     if (event.target.matches?.('.avatar img')) event.target.remove();
   }, true);
   const btn = (label, action, extra = "", kind = "") =>
-    `<button type="button" class="btn ${kind}" data-action="${action}" ${extra}>${label}</button>`;
+    `<button type="button" class="btn ${kind}" data-action="${action}" ${extra}>${labelHTML(label)}</button>`;
   const link = (page, label, kind = "") =>
-    `<a class="btn ${kind}" href="${E(C.pages[page]?.url || "#")}">${label}</a>`;
+    `<a class="btn ${kind}" href="${E(C.pages[page]?.url || "#")}">${labelHTML(label)}</a>`;
   const empty = (title, text = "") =>
-    `<div class="empty">${I("users")}<strong>${E(title)}</strong><p>${E(text)}</p></div>`;
+    `<div class="empty">${I("users")}<strong>${E(T(title))}</strong><p>${E(T(text))}</p></div>`;
   const UI = window.ASCLAContent({ escape: E, icon: I, config: C });
   function apiURL(path) {
     const url = new URL(C.api, location.href);
@@ -139,12 +144,12 @@
     S.focus?.focus();
   }
   function field(name, label, value = "", type = "text", extra = "") {
-    return `<div class="field"><label for="f-${E(name)}">${E(label)}</label>${type === "textarea" ? `<textarea id="f-${E(name)}" name="${E(name)}" ${extra}>${E(value)}</textarea>` : `<input id="f-${E(name)}" name="${E(name)}" type="${type}" value="${E(value)}" ${extra}>`}</div>`;
+    return `<div class="field"><label for="f-${E(name)}">${E(T(label))}</label>${type === "textarea" ? `<textarea id="f-${E(name)}" name="${E(name)}" ${extra}>${E(value)}</textarea>` : `<input id="f-${E(name)}" name="${E(name)}" type="${type}" value="${E(value)}" ${extra}>`}</div>`;
   }
   const check = (name, label, value) =>
-    `<label class="check"><input type="checkbox" name="${E(name)}" ${value ? "checked" : ""}> <span>${E(label)}</span></label>`;
+    `<label class="check"><input type="checkbox" name="${E(name)}" ${value ? "checked" : ""}> <span>${E(T(label))}</span></label>`;
   const select = (name, label, values, value = "") =>
-    `<div class="field"><label for="f-${E(name)}">${E(label)}</label><select name="${E(name)}" id="f-${E(name)}">${values
+    `<div class="field"><label for="f-${E(name)}">${E(T(label))}</label><select name="${E(name)}" id="f-${E(name)}">${values
       .map((v) => {
         const pair = Array.isArray(v) ? v : [v, v];
         return `<option value="${E(pair[0])}" ${String(value) === String(pair[0]) ? "selected" : ""}>${E(pair[1])}</option>`;
@@ -190,7 +195,7 @@
     refreshNotifications();
   }
   function heading(title, subtitle, action = "") {
-    return `<div class="page-heading"><div><h1>${E(title)}</h1><p>${E(subtitle)}</p></div>${action}</div>`;
+    return `<div class="page-heading"><div><h1>${E(T(title))}</h1><p>${E(T(subtitle))}</p></div>${action}</div>`;
   }
   const content = () => document.getElementById("page-content");
   function connectionActions(p, suggested = false) {
@@ -248,7 +253,7 @@
   }
   function eventMini(p) {
     const d = new Date(p.meta.start);
-    return `<div class="event-mini"><div class="date-box"><small>${d.toLocaleDateString("es", { month: "short" })}</small><strong>${d.getDate()}</strong></div><div><h3>${E(p.title)}</h3><p>${E(p.meta.modality || "Virtual")} · ${time(p.meta.start)}</p><a href="${E(p.url)}">Ver evento ${I("arrow")}</a></div></div>`;
+    return `<div class="event-mini"><div class="date-box"><small>${d.toLocaleDateString(C.locale || "es-PE", { month: "short" })}</small><strong>${d.getDate()}</strong></div><div><h3>${E(p.title)}</h3><p>${E(p.meta.modality || "Virtual")} · ${time(p.meta.start)}</p><a href="${E(p.url)}">Ver evento ${I("arrow")}</a></div></div>`;
   }
   function calendar(events) {
     const d = S.calendar;
@@ -259,7 +264,7 @@
       const from = new Date(d.getFullYear(), d.getMonth(), day), to = new Date(d.getFullYear(), d.getMonth(), day + 1);
       return events.some(p => new Date(p.meta.start) < to && new Date(p.meta.end) > from);
     });
-    return `<div class="calendar-head"><strong>${E(d.toLocaleDateString("es-PE", { month: "long", year: "numeric" }))}</strong><span>${btn("‹", "calendar-prev", 'aria-label="Mes anterior"', "ghost")}${btn("›", "calendar-next", 'aria-label="Mes siguiente"', "ghost")}</span></div><div class="calendar">${["L", "M", "M", "J", "V", "S", "D"].map((x) => `<span class="weekday">${x}</span>`).join("")}${"<span></span>".repeat(first)}${Array.from({ length: days }, (_, i) => `<span class="${today.getFullYear() === d.getFullYear() && today.getMonth() === d.getMonth() && today.getDate() === i + 1 ? "today" : eventDays.includes(i + 1) ? "event-day" : ""}">${eventDays.includes(i + 1) ? `<button class="calendar-day" data-action="calendar-day" data-day="${i + 1}" aria-label="Ver eventos del día ${i + 1}">${i + 1}</button>` : i + 1}</span>`).join("")}</div><div class="calendar-legend"><i></i> Eventos de la comunidad</div>`;
+    return `<div class="calendar-head"><strong>${E(d.toLocaleDateString(C.locale || "es-PE", { month: "long", year: "numeric" }))}</strong><span>${btn("‹", "calendar-prev", 'aria-label="Mes anterior"', "ghost")}${btn("›", "calendar-next", 'aria-label="Mes siguiente"', "ghost")}</span></div><div class="calendar">${["L", "M", "M", "J", "V", "S", "D"].map((x) => `<span class="weekday">${x}</span>`).join("")}${"<span></span>".repeat(first)}${Array.from({ length: days }, (_, i) => `<span class="${today.getFullYear() === d.getFullYear() && today.getMonth() === d.getMonth() && today.getDate() === i + 1 ? "today" : eventDays.includes(i + 1) ? "event-day" : ""}">${eventDays.includes(i + 1) ? `<button class="calendar-day" data-action="calendar-day" data-day="${i + 1}" aria-label="Ver eventos del día ${i + 1}">${i + 1}</button>` : i + 1}</span>`).join("")}</div><div class="calendar-legend"><i></i> Eventos de la comunidad</div>`;
   }
   async function dashboard() {
     const [people, events, resources, hub, directory, notes, monthEvents, recentResources] =
@@ -406,7 +411,7 @@
     const fields = ["company", "position", "city", "country", "bio", "experience", "linkedin", "twitter", "website", "interests", "areas", "industries", "photo_id"];
     const controls = fields.map(key => {
       const label = key === "photo_id" ? "Fotografía" : profileLabels[key];
-      return `<label class="visibility-option"><input type="checkbox" name="hidden" value="${key}" aria-label="Ocultar ${E(label)}" ${(p.hidden || []).includes(key) ? "checked" : ""}><span class="visibility-label">${E(label)}</span><span class="visibility-state"><span class="is-visible">Visible</span><span class="is-hidden">${I("shield")}Oculto</span></span></label>`;
+      return `<label class="visibility-option"><input type="checkbox" name="hidden" value="${key}" aria-label="Ocultar ${E(T(label))}" ${(p.hidden || []).includes(key) ? "checked" : ""}><span class="visibility-label">${E(T(label))}</span><span class="visibility-state"><span class="is-visible">Visible</span><span class="is-hidden">${I("shield")}Oculto</span></span></label>`;
     }).join("");
     // Preserve privacy choices outside this view instead of silently clearing them on save.
     const preserved = (p.hidden || []).filter(key => !fields.includes(key)).map(key => `<input type="hidden" name="hidden" value="${E(key)}">`).join("");
@@ -428,7 +433,7 @@
         "Mi perfil",
         "Tu experiencia es el punto de partida de nuevas conexiones.",
       ) +
-      `<form class="card" data-form="profile"><div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small" style="margin-top:10px">${I("edit")} Cambiar fotografía<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">JPG, PNG o WebP. Máximo 3 MB.</div></div></div><div class="form-section">Información profesional</div><div class="form-grid">${["first_name", "last_name", "position", "company", "country", "city", "member_type", "linkedin", "twitter", "website"].map((k) => field(k, profileLabels[k], p[k] || "", k === "linkedin" || k === "twitter" || k === "website" ? "url" : "text", 'maxlength="200"')).join("")}<div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>${profileKnowledge(p)}${profilePrivacy(p)}<div class="form-actions"><button class="btn primary">${I("check")} Guardar perfil</button></div></form><div class="card section-gap"><h3>Mi calendario</h3><p class="private-note">${S.boot.google_connected ? "Tu calendario Google está conectado." : "Integración Google Calendar no configurada para tu cuenta. Los enlaces e ICS siempre están disponibles."}</p><div class="admin-actions">${btn("Conectar Google Calendar", "google-connect", 'data-service="calendar"')}${S.boot.google_connected ? btn("Desconectar", "google-disconnect", 'data-service="calendar"') : ""}</div></div>`;
+      `<form class="card" data-form="profile"><div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small" style="margin-top:10px">${I("edit")} Cambiar fotografía<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">JPG, PNG o WebP. Máximo 3 MB.</div></div></div><div class="form-section">Información profesional</div><div class="form-grid">${["first_name", "last_name", "position", "company", "country", "city", "member_type", "linkedin", "twitter", "website"].map((k) => field(k, profileLabels[k], p[k] || "", k === "linkedin" || k === "twitter" || k === "website" ? "url" : "text", 'maxlength="200"')).join("")}<div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>${profileKnowledge(p)}${profilePrivacy(p)}<div class="form-actions"><button class="btn primary">${I("check")} Guardar perfil</button></div></form><div class="card section-gap"><h3>Mis archivos</h3><p class="private-note">Consulta tus archivos y elimina los que ya no necesitas. Los archivos eliminados también se retiran de las publicaciones y de tu fotografía de perfil.</p>${btn("Administrar archivos", "files", "", "small")}<h3 class="section-gap">Mi calendario</h3><p class="private-note">${S.boot.google_connected ? "Tu calendario Google está conectado." : "Integración Google Calendar no configurada para tu cuenta. Los enlaces e ICS siempre están disponibles."}</p><div class="admin-actions">${btn("Conectar Google Calendar", "google-connect", 'data-service="calendar"')}${S.boot.google_connected ? btn("Desconectar", "google-disconnect", 'data-service="calendar"') : ""}</div></div>`;
   }
   const typeByPage = {
     hub: "hub",
@@ -475,7 +480,7 @@
     );
     S.list = list;
     const canWrite =
-      ["gallery", "resource"].includes(type) ? S.boot.admin : S.boot.moderator || ["hub", "topic"].includes(type);
+      ["gallery", "resource", "event"].includes(type) ? S.boot.admin : S.boot.moderator || ["hub", "topic"].includes(type);
     const labels = {
       hub: [
         "Hub ASCLA",
@@ -517,7 +522,7 @@
             )
           : "",
       ) +
-      `<form class="filters" data-form="filters"><input name="q" aria-label="Buscar contenido" value="${E(S.filter.q || "")}" placeholder="${type === "resource" ? "Buscar por tema, autor o contenido…" : "Buscar en esta sección…"}">${type === "resource" ? `<select name="resource_type" aria-label="Tipo de recurso" style="max-width:180px"><option value="">Todos los tipos</option>${["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"].map((t) => `<option ${S.filter.resource_type === t ? "selected" : ""}>${t}</option>`).join("")}</select><input type="date" name="after" value="${E(S.filter.after || "")}" aria-label="Desde fecha" style="max-width:160px;min-width:100px">` : ""}${UI.filters(type, S.filter, S.boot.catalogs, authors, forums)}<button class="btn">${I("search")} Buscar</button></form><div class="tabs">${btn(type === "event" ? "Próximos eventos" : "Comunidad", "filter-all", "", "tab " + (!S.filter.mine && !S.filter.past ? "active" : ""))}${type === "event" ? btn("Eventos anteriores", "filter-past", "", "tab " + (S.filter.past ? "active" : "")) : ""}${canWrite ? btn("Mis publicaciones", "filter-mine", "", "tab " + (S.filter.mine ? "active" : "")) : ""}${type === "topic" && S.boot.moderator ? btn(I("plus") + " Crear foro", "editor", 'data-type="forum"', "tab") : ""}</div>${type === "resource" ? `<div class="cards">${items.map(resourceCard).join("")}</div>` : type === "event" ? `<div class="cards two">${items.map(eventCard).join("")}</div>` : type === "gallery" ? `<div class="cards">${items.map(galleryCard).join("")}</div>` : type === "ally" ? `<div class="cards">${items.map(allyCard).join("")}</div>` : items.map(feedCard).join("")}${!items.length ? empty("Aún no hay contenido aquí", S.filter.q ? "Prueba una búsqueda diferente." : "Comparte un aporte o vuelve pronto para ver novedades.") : ""}${pager(list)}`;
+      `<form class="filters" data-form="filters"><input name="q" aria-label="Buscar contenido" value="${E(S.filter.q || "")}" placeholder="${type === "resource" ? "Buscar por tema, autor o contenido…" : "Buscar en esta sección…"}">${type === "resource" ? `<select name="resource_type" aria-label="Tipo de recurso" style="max-width:180px"><option value="">Todos los tipos</option>${["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"].map((t) => `<option ${S.filter.resource_type === t ? "selected" : ""}>${t}</option>`).join("")}</select><input type="date" name="after" value="${E(S.filter.after || "")}" aria-label="Desde fecha" style="max-width:160px;min-width:100px">` : ""}${UI.filters(type, S.filter, S.boot.catalogs, authors, forums)}<button class="btn">${I("search")} Buscar</button></form><div class="tabs">${btn(type === "event" ? "Próximos eventos" : "Comunidad", "filter-all", "", "tab " + (!S.filter.mine && !S.filter.past ? "active" : ""))}${type === "event" ? btn("Eventos anteriores", "filter-past", "", "tab " + (S.filter.past ? "active" : "")) : ""}${canWrite ? btn("Mis publicaciones", "filter-mine", "", "tab " + (S.filter.mine ? "active" : "")) : ""}${type === "topic" && S.boot.moderator ? btn(I("plus") + " Crear foro", "editor", 'data-type="forum"', "tab") : ""}</div>${type === "topic" && forums.length ? `<details class="card forum-directory"><summary>Explorar foros (${forums.length})</summary><div class="form-actions">${forums.map(f => btn(E(f.name), "item", `data-id="${f.id}"`, "small")).join("")}</div></details>` : ""}${type === "resource" ? `<div class="cards">${items.map(resourceCard).join("")}</div>` : type === "event" ? `<div class="cards two">${items.map(eventCard).join("")}</div>` : type === "gallery" ? `<div class="cards">${items.map(galleryCard).join("")}</div>` : type === "ally" ? `<div class="cards">${items.map(allyCard).join("")}</div>` : items.map(feedCard).join("")}${!items.length ? empty("Aún no hay contenido aquí", S.filter.q ? "Prueba una búsqueda diferente." : "Comparte un aporte o vuelve pronto para ver novedades.") : ""}${pager(list)}`;
   }
   function eventCard(p) {
     return `<article class="card"><div class="section-top"><span class="tag">${I("calendar")} ${E(p.meta.modality || "Virtual")}</span>${p.status !== "publish" ? status(p.status) : ""}</div><h3>${E(p.title)}</h3><p class="detail-body" style="font-size:12px">${E(p.body.slice(0, 160))}</p><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start)}</span><span>${I("clock")} ${time(p.meta.start)}</span></div><div class="form-actions" style="justify-content:space-between">${p.meta.chatham ? '<span class="tag">Chatham House</span>' : "<span></span>"}${btn("Ver encuentro " + I("arrow"), "item", `data-id="${p.id}"`, "small primary")}</div></article>`;
@@ -537,7 +542,7 @@
       S.event = d;
       extra = `<div class="card" style="background:var(--bg);margin:20px 0"><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span><span>${I("clock")} ${time(p.meta.start)} – ${time(p.meta.end)}</span><span>${I("pin")} ${E(p.meta.location || "Por confirmar")}</span></div><p class="private-note">${d.attending} inscritos${p.meta.capacity ? " · " + p.meta.capacity + " cupos" : " · Sin límite de cupos"} · ${status(d.registered)}</p>${p.meta.agenda ? `<p class="detail-body">${E(p.meta.agenda).replace(/\\n/g, "<br>")}</p>` : ""}<div class="form-actions">${d.registered === "accepted" ? btn("Cancelar inscripción", "register", `data-id="${id}" data-status="cancelled"`) : btn("Registrarme", "register", `data-id="${id}" data-status="accepted"`, "primary")}${d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : ""}<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">Añadir a Google Calendar ↗</a>${btn(I("download") + " ICS", "ics", `data-id="${id}"`, "small")}${S.boot.google_connected ? btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small") + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small") : ""}</div>${d.participants ? `<details><summary class="private-note">Participantes (moderación)</summary>${d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("")}</details>` : ""}</div>`;
     }
-    const canEdit = ["gallery", "resource"].includes(p.type) ? S.boot.admin : S.boot.moderator || p.author.id === S.boot.me.id;
+    const canEdit = ["gallery", "resource", "event"].includes(p.type) ? S.boot.admin : S.boot.moderator || p.author.id === S.boot.me.id;
     const reviewedLabel = p.meta.reviewed ? "Revisado" : "Requiere revisión de fuentes, anonimización y derechos.";
     const clipQuery = p.meta.clip ? "?start=" + Number(p.meta.clip.start) + "&end=" + Number(p.meta.clip.end) : "";
     const videoDuration = p.meta.duration_seconds ? E(UI.duration(p.meta.duration_seconds)) : "Duración por confirmar";
@@ -546,7 +551,7 @@
 
     modal(
       p.title,
-      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${p.meta.demo ? '<span class="demo-badge">DATOS DEMO</span>' : ""}</div>${p.meta.chatham ? '<div class="alert chatham" style="margin-top:18px">' + I("shield") + " Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones.</div>" : ""}${p.meta.generated ? ("<div class=\"alert\">Contenido generado · " + (E(p.meta.ai_mode || p.meta.social_mode || "IA")) + " · " + (reviewedLabel) + "</div>") : ""}<p class="detail-body">${E(p.body)}</p>${p.meta.video_id ? ("<div class=\"video-wrap\"><iframe loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" src=\"https://www.youtube-nocookie.com/embed/" + (E(p.meta.video_id)) + "" + (clipQuery) + "\" title=\"" + (E(p.title)) + "\" allow=\"accelerometer; encrypted-media; picture-in-picture\" allowfullscreen></iframe></div>") : ""}${p.meta.video_id ? ("<div class=\"video-metadata\"><span>" + (videoDuration) + "</span>" + (videoModeTag) + "</div>") : ""}${extra}${UI.attachments(p)}${UI.generated(p)}${UI.agenda(p)}${p.meta.demo_source_note ? ("<p class=\"alert\">" + (E(p.meta.demo_source_note)) + "</p>") : ""}${p.meta.url ? ("<a class=\"btn\" href=\"" + (E(safeURL(p.meta.url))) + "\" target=\"_blank\" rel=\"noopener noreferrer\">Abrir enlace ↗</a>") : ""}${p.meta.benefits ? ("<h3>Beneficios</h3><p class=\"detail-body\">" + (E(p.meta.benefits)) + "</p>") : ""}${p.meta.initiatives ? ("<h3>Iniciativas</h3><p class=\"detail-body\">" + (E(p.meta.initiatives)) + "</p>") : ""}${p.meta.clip ? ("<div class=\"alert\">Cápsula sugerida: " + (p.meta.clip.start) + "s – " + (p.meta.clip.end) + "s · Referencia temporal al video de origen. No existe un archivo recortado.</div>") : ""}${p.meta.infographic ? btn(I("download") + " Descargar infografía", "infographic", ("data-id=\"" + (id) + "\"")) : ""}${p.meta.copyright ? ("<p class=\"private-note\">" + (E(p.meta.copyright)) + "</p>") : ""}<div class="form-actions">${canEdit ? btn(I("edit") + " Editar", "editor", ("data-type=\"" + (p.type) + "\" data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type === "event" && p.status === "publish" && !p.meta.micro ? btn("Invitar asociados", "event-invite", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.admin && p.type === "resource" && p.meta.video_id ? btn("Actualizar datos de YouTube", "video-metadata", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.admin && p.type === "resource" ? btn(I("spark") + " Generar resumen y nota", "generate", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type !== "contact" && (!["gallery", "resource"].includes(p.type) || S.boot.admin) ? btn(I("shield") + " Moderar", "moderate", ("data-id=\"" + (id) + "\"")) : ""}${p.status === "publish" ? ("" + (btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.liked) + "\""))) + "" + (btn(followingLabel, "follow", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.following) + "\""))) + "" + (btn("Reportar", "report", ("data-id=\"" + (id) + "\""), "ghost")) + "") : ""}</div>${p.status === "publish" ? ("<section class=\"comments\"><h3>Conversación</h3><div id=\"comments-list\">Cargando comentarios…</div><form data-form=\"comment\" data-id=\"" + (id) + "\" style=\"margin-top:18px\">" + (field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')) + "<button class=\"btn primary small\">Publicar comentario</button></form></section>") : ""}`,
+      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${p.meta.demo ? '<span class="demo-badge">DATOS DEMO</span>' : ""}</div>${p.meta.chatham ? '<div class="alert chatham" style="margin-top:18px">' + I("shield") + " Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones.</div>" : ""}${p.meta.generated ? ("<div class=\"alert\">Contenido generado · " + (E(p.meta.ai_mode || p.meta.social_mode || "IA")) + " · " + (reviewedLabel) + "</div>") : ""}<p class="detail-body">${E(p.body)}</p>${p.meta.video_id ? ("<div class=\"video-wrap\"><iframe loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" src=\"https://www.youtube-nocookie.com/embed/" + (E(p.meta.video_id)) + "" + (clipQuery) + "\" title=\"" + (E(p.title)) + "\" allow=\"accelerometer; encrypted-media; picture-in-picture\" allowfullscreen></iframe></div>") : ""}${p.meta.video_id ? ("<div class=\"video-metadata\"><span>" + (videoDuration) + "</span>" + (videoModeTag) + "</div>") : ""}${extra}${UI.attachments(p)}${(p.media || []).filter(m => m.can_delete).map(m => btn("Eliminar archivo: " + E(m.name), "delete-media", `data-id="${m.id}" data-post="${id}" data-name="${E(m.name)}"`, "ghost danger small")).join("")}${UI.generated(p)}${UI.agenda(p)}${p.meta.demo_source_note ? ("<p class=\"alert\">" + (E(p.meta.demo_source_note)) + "</p>") : ""}${p.meta.url ? ("<a class=\"btn\" href=\"" + (E(safeURL(p.meta.url))) + "\" target=\"_blank\" rel=\"noopener noreferrer\">Abrir enlace ↗</a>") : ""}${p.meta.benefits ? ("<h3>Beneficios</h3><p class=\"detail-body\">" + (E(p.meta.benefits)) + "</p>") : ""}${p.meta.initiatives ? ("<h3>Iniciativas</h3><p class=\"detail-body\">" + (E(p.meta.initiatives)) + "</p>") : ""}${p.meta.clip ? ("<div class=\"alert\">Cápsula sugerida: " + (p.meta.clip.start) + "s – " + (p.meta.clip.end) + "s · Referencia temporal al video de origen. No existe un archivo recortado.</div>") : ""}${p.meta.infographic ? btn(I("download") + " Descargar infografía", "infographic", ("data-id=\"" + (id) + "\"")) : ""}${p.meta.copyright ? ("<p class=\"private-note\">" + (E(p.meta.copyright)) + "</p>") : ""}<div class="form-actions">${p.can_delete ? btn("Eliminar", "delete-content", `data-id="${id}"`, "danger") : ""}${canEdit ? btn(I("edit") + " Editar", "editor", ("data-type=\"" + (p.type) + "\" data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type === "event" && p.status === "publish" && !p.meta.micro ? btn("Invitar asociados", "event-invite", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.admin && p.type === "resource" && p.meta.video_id ? btn("Actualizar datos de YouTube", "video-metadata", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.admin && p.type === "resource" ? btn(I("spark") + " Generar resumen y nota", "generate", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type !== "contact" && (!["gallery", "resource", "event"].includes(p.type) || S.boot.admin) ? btn(I("shield") + " Moderar", "moderate", ("data-id=\"" + (id) + "\"")) : ""}${p.status === "publish" ? ("" + (btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.liked) + "\""))) + "" + (btn(followingLabel, "follow", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.following) + "\""))) + "" + (btn("Reportar", "report", ("data-id=\"" + (id) + "\""), "ghost")) + "") : ""}</div>${p.status === "publish" ? ("<section class=\"comments\"><h3>Conversación</h3><div id=\"comments-list\">Cargando comentarios…</div><form data-form=\"comment\" data-id=\"" + (id) + "\" style=\"margin-top:18px\">" + (field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')) + "<button class=\"btn primary small\">Publicar comentario</button></form></section>") : ""}`,
       true,
     );
     if (p.status === "publish") {
@@ -557,7 +562,7 @@
           comments
             .map(
               (c) =>
-                `<article class="comment"><strong>${E(c.author)}</strong> <small class="muted">${date(c.date)}</small><p>${E(c.body)}</p></article>`,
+                `<article class="comment"><strong>${E(c.author)}</strong> <small class="muted">${date(c.date)}</small><p>${E(c.body)}</p>${c.status === "pending" ? status(c.status) : ""}${c.can_delete ? btn("Eliminar comentario", "delete-comment", `data-id="${c.id}" data-post="${id}"`, "ghost danger small") : ""}</article>`,
             )
             .join("") ||
           '<p class="private-note">Sé la primera persona en compartir una idea.</p>';
@@ -620,10 +625,10 @@
     }
     modal(
       (id ? "Editar " : "Crear ") + typeLabel[type],
-      `<form data-form="editor" data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${extra}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => `<label class="chip-check"><input type="checkbox" name="interest" value="${t.id}" ${p.tags.some((x) => x.id === t.id) ? "checked" : ""}>${E(t.name)}</label>`).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? `<label class="btn small">${I("plus")} Adjuntar imagen o PDF<input type="file" data-upload="content" accept="image/jpeg,image/png,image/webp,application/pdf" hidden></label><div id="attachments">${(m.media_ids || []).map((mid) => `<span class="attached-file" data-media="${mid}">Archivo #${mid}</span>`).join("")}</div><p class="private-note">Imágenes hasta 3 MB; PDF hasta 5 MB. Sólo acceso autenticado.</p>` : ""}${S.boot.moderator ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${select(
+      `<form data-form="editor" data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${extra}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => `<label class="chip-check"><input type="checkbox" name="interest" value="${t.id}" ${p.tags.some((x) => x.id === t.id) ? "checked" : ""}>${E(t.name)}</label>`).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? `<label class="btn small">${I("plus")} Adjuntar imagen o PDF<input type="file" data-upload="content" accept="image/jpeg,image/png,image/webp,application/pdf" hidden></label><div id="attachments">${(m.media_ids || []).map((mid) => `<span class="attached-file" data-media="${mid}">Archivo #${mid}${btn("Quitar", "detach-media", `data-id="${mid}"`, "ghost small")}</span>`).join("")}</div><p class="private-note">Imágenes hasta 3 MB; PDF hasta 5 MB. Sólo acceso autenticado.</p>` : ""}${S.boot.moderator ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${select(
         "status",
         "Guardar como",
-        ["topic", "forum"].includes(type) ? [["draft", "Borrador"], ["publish", "Publicar ahora"]] : S.boot.moderator && !m.generated
+        (["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated)) ? [["draft", "Borrador"], ["publish", "Publicar ahora"]] : S.boot.moderator && !m.generated
           ? [
               ["draft", "Borrador"],
               ["pending", "Pendiente de revisión"],
@@ -633,10 +638,19 @@
               ["draft", "Borrador"],
               ["pending", "Enviar a revisión"],
             ],
-        ["topic", "forum"].includes(type) ? (id && p.status === "draft" ? "draft" : "publish") : p.status === "publish" ? "pending" : p.status,
+        (["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated)) ? (id && p.status === "draft" ? "draft" : "publish") : p.status === "publish" ? "pending" : p.status,
       )}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar ${typeLabel[type]}</button></div></form>`,
       true,
     );
+  }
+  async function files(page = 1, q = "") {
+    const list = await api("media?" + new URLSearchParams({page, q}));
+    S.files = {page, q};
+    modal(S.boot.admin ? "Archivos de la comunidad" : "Mis archivos", `<form data-form="file-search" class="filters"><input name="q" aria-label="Buscar archivos" placeholder="Buscar por nombre…" value="${E(q)}"><button class="btn">Buscar</button></form><p class="private-note">${list.total} archivos · La eliminación es permanente y retira sus referencias.</p><div class="file-library">${list.items.map(m => `<article class="file-row" data-file="${m.id}"><div>${I(m.mime.startsWith('image/') ? 'gallery' : 'book')}<strong>${E(m.name)}</strong><small>${E(m.author)} · ${Math.ceil(m.size / 1024)} KB · ${date(m.date)}</small></div><div class="form-actions"><a class="btn small" href="${E(m.url)}" target="_blank" rel="noopener">Abrir archivo</a>${btn("Eliminar archivo", "delete-media", `data-id="${m.id}" data-name="${E(m.name)}" data-library="true"`, "danger small")}</div></article>`).join("") || empty("No hay archivos")}</div><div class="pagination">${btn("Anterior", "files", `data-page="${page-1}" ${page<=1?'disabled':''}`)}<span>${page} / ${list.pages}</span>${btn("Siguiente", "files", `data-page="${page+1}" ${page>=list.pages?'disabled':''}`)}</div>`, true);
+  }
+  function confirmDeletion(kind, id, {post = 0, title = "", library = false, forum = false} = {}) {
+    const description = kind === 'media' ? 'El archivo se eliminará permanentemente y se retirará de las publicaciones y de la foto de perfil que lo utilicen.' : kind === 'comment' ? 'El comentario dejará de mostrarse en la conversación.' : 'El contenido dejará de estar disponible en la comunidad.';
+    modal(T('Confirmar eliminación'), `<p class="detail-body">${E(title)}</p><p>${E(T(description))}</p>${forum?'<p>Los temas de este foro se conservarán en la lista general.</p>':''}<div class="form-actions">${btn('Cancelar','delete-cancel',`data-kind="${kind}" data-id="${id}" data-post="${post}" data-library="${library}"`)}${btn('Eliminar','delete-confirm',`data-kind="${kind}" data-id="${id}" data-post="${post}" data-library="${library}"`,'danger primary')}</div>`);
   }
   async function inviteMembers(id, page = 1, query = "") {
     if (!S.invite || S.invite.id !== id) S.invite = { id, selected: new Set() };
@@ -907,12 +921,13 @@
   async function admin() {
     const d = await api("admin"); S.admin=d;
     const tab=S.adminTab;
-    const tabs=[["moderacion","Moderación","shield"],["solicitudes","Solicitudes","contact"],...(S.boot.admin?[["usuarios","Usuarios","users"]]:[]),["trabajos","IA y trabajos","spark"],["microeventos","Microeventos","calendar"],["logs","Auditoría","clock"],...(S.boot.admin?[["configuracion","Configuración","settings"]]:[])];
+    const tabs=[["moderacion","Moderación","shield"],["solicitudes","Solicitudes","contact"],...(S.boot.admin?[["usuarios","Usuarios","users"],["archivos","Archivos","book"]]:[]),["trabajos","IA y trabajos","spark"],["microeventos","Microeventos","calendar"],["logs","Auditoría","clock"],...(S.boot.admin?[["configuracion","Configuración","settings"]]:[])];
     content().innerHTML=`<div class="admin-workspace"><header class="admin-hero"><div><span class="eyebrow">GESTIÓN DE LA COMUNIDAD</span><h1>Administración ASCLA</h1><p>Personas, contenido y atención en un mismo lugar.</p></div><div>${link('intranet','Ver intranet '+I('arrow'),'ghost')}${btn(I('refresh')+' Actualizar','admin-refresh','','small')}</div></header><div class="admin-overview">${[[d.counts.members,'Miembros','users',S.boot.admin?'usuarios':'moderacion'],[d.pending.length,'Contenidos por revisar','shield','moderacion'],[d.jobs.filter(j=>['pending','processing'].includes(j.status)).length,'Trabajos activos','spark','trabajos'],[d.reports.length,'Reportes de la comunidad','bell','moderacion']].map(([n,label,icon,target])=>btn(`<span class="stat-icon">${I(icon)}</span><span><strong>${n}</strong><small>${label}</small></span>`,'admin-tab',`data-tab="${target}"`,'admin-stat')).join('')}</div><nav class="admin-tabs" aria-label="Secciones de administración">${tabs.map(([key,label,icon])=>btn(I(icon)+label,'admin-tab',`data-tab="${key}" aria-pressed="${tab===key}"`,'admin-tab'+(tab===key?' active':''))).join('')}</nav><section id="admin-panel" class="admin-panel"></section></div>`;
     const panel=document.getElementById('admin-panel');
     if(tab==='solicitudes') await adminContacts(panel);
     else if(tab==='usuarios' && S.boot.admin) await adminUsers(panel);
-    else if(tab==='moderacion') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">CALIDAD Y CONVIVENCIA</span><h2>Revisión de contenido</h2><p>Los foros se publican directamente. Galería y Conocimiento los gestionan administradores.</p></div></div><div class="card"><h3>Contenido pendiente y borradores</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>Contenido</th><th>Autor</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${d.pending.map(p=>`<tr><td><strong>${E(p.title)}</strong><br><small>${E(typeLabel[p.type])}${p.meta.generated?' · IA':''}${p.meta.chatham?' · Chatham House':''}</small></td><td>${E(p.author.name)}</td><td>${status(p.status)}</td><td>${btn('Revisar','item',`data-id="${p.id}"`,'small')}${!S.boot.admin&&['gallery','resource'].includes(p.type)?'<small>Publicación administrativa</small>':''}</td></tr>`).join('')||'<tr><td colspan="4">Todo al día. No hay contenido pendiente.</td></tr>'}</tbody></table></div></div><div class="admin-review-grid"><div class="card"><h3>Reportes de la comunidad</h3>${d.reports.map(r=>`<div class="admin-report"><span>Publicación #${r.target_id}</span>${btn('Revisar','item',`data-id="${r.target_id}"`,'small')}</div>`).join('')||'<p class="private-note">No hay reportes por revisar.</p>'}</div><div class="card"><h3>Comentarios pendientes</h3>${d.comments.map(c=>`<div class="comment"><strong>${E(c.author)}</strong><p>${E(c.body)}</p>${btn('Aprobar','comment-moderate',`data-id="${c.id}" data-decision="approve"`,'small')}${btn('Mantener oculto','comment-moderate',`data-id="${c.id}" data-decision="reject"`,'small')}</div>`).join('')||'<p class="private-note">No hay comentarios pendientes.</p>'}</div></div>`;
+    else if(tab==='archivos' && S.boot.admin) panel.innerHTML='<h2>Archivos de la comunidad</h2><p>Consulta los archivos privados de la intranet y elimina los que corresponda.</p>'+btn('Administrar archivos','files','','primary');
+    else if(tab==='moderacion') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">CALIDAD Y CONVIVENCIA</span><h2>Revisión de contenido</h2><p>Los foros se publican directamente. Galería y Conocimiento los gestionan administradores.</p></div></div><div class="card"><h3>Contenido pendiente y borradores</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>Contenido</th><th>Autor</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${d.pending.map(p=>`<tr><td><strong>${E(p.title)}</strong><br><small>${E(typeLabel[p.type])}${p.meta.generated?' · IA':''}${p.meta.chatham?' · Chatham House':''}</small></td><td>${E(p.author.name)}</td><td>${status(p.status)}</td><td>${btn('Revisar','item',`data-id="${p.id}"`,'small')}${!S.boot.admin&&['gallery','resource'].includes(p.type)?'<small>Publicación administrativa</small>':''}</td></tr>`).join('')||'<tr><td colspan="4">Todo al día. No hay contenido pendiente.</td></tr>'}</tbody></table></div></div><div class="admin-review-grid"><div class="card"><h3>Reportes de la comunidad</h3>${d.reports.map(r=>`<div class="admin-report"><span>Publicación #${r.target_id}</span>${btn('Revisar','item',`data-id="${r.target_id}"`,'small')}</div>`).join('')||'<p class="private-note">No hay reportes por revisar.</p>'}</div><div class="card"><h3>Comentarios pendientes</h3>${d.comments.map(c=>`<div class="comment"><strong>${E(c.author)}</strong><p>${E(c.body)}</p>${btn('Aprobar','comment-moderate',`data-id="${c.id}" data-decision="approve"`,'small')}${btn('Mantener oculto','comment-moderate',`data-id="${c.id}" data-decision="reject"`,'small')}${c.can_delete?btn('Eliminar comentario','delete-comment',`data-id="${c.id}"`,'danger small'):''}</div>`).join('')||'<p class="private-note">No hay comentarios pendientes.</p>'}</div></div>`;
     else if(tab==='trabajos') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PROCESAMIENTO Y RESULTADOS</span><h2>IA y trabajos</h2><p>Consulta el avance, abre resultados y reintenta los trabajos con error.</p></div></div><div class="alert">Los derivados de IA quedan en borrador para revisión.</div><div class="admin-actions">${link('centro-conocimiento','Ver recursos','primary')}${btn('Curaduría social demo','social-job')}${S.boot.admin?btn('Conectar YouTube OAuth','google-connect','data-service="youtube"'):''}${btn('Actualizar estados','admin-refresh')}</div><div class="card table-wrap"><table class="data-table"><thead><tr><th>Trabajo</th><th>Estado</th><th>Detalle</th><th>Acción</th></tr></thead><tbody>${d.jobs.map(j=>`<tr><td><strong>#${j.id}</strong><br>${E(j.kind)}</td><td>${status(j.status)}</td><td>${E(j.error||date(j.created_at))}</td><td>${btn('Ver','job-detail',`data-id="${j.id}"`,'small')}${j.status==='error'?btn('Reintentar','retry-job',`data-id="${j.id}"`,'small'):''}</td></tr>`).join('')||'<tr><td colspan="4">No hay trabajos registrados.</td></tr>'}</tbody></table></div>`;
     else if(tab==='microeventos') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ENCUENTROS ENTRE ASOCIADOS</span><h2>Círculos de conversación</h2><p>Grupos de 4 a 6 personas, con intereses comunes y una agenda para conversar.</p></div></div><div class="card"><h3>Preparar los encuentros del mes</h3><p class="detail-body">Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.</p><div class="admin-actions">${S.boot.admin?btn(I('spark')+' Preparar propuesta del mes','micro-job','','primary'):''}${link('eventos','Ver encuentros','small')}</div><div id="micro-job-result"></div></div>`;
     else if(tab==='logs') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">TRAZABILIDAD</span><h2>Auditoría</h2><p>Últimas acciones registradas. No incluye contraseñas ni contenido de mensajes privados.</p></div></div><div class="card table-wrap"><table class="data-table"><thead><tr><th>Fecha UTC</th><th>Acción</th><th>Actor</th><th>Objeto</th><th>Detalle</th></tr></thead><tbody>${d.audit.map(a=>`<tr><td>${E(a.created_at)}</td><td>${E(a.action)}</td><td>#${a.actor_id}</td><td>${a.object_id||'—'}</td><td>${E(a.detail)}</td></tr>`).join('')||'<tr><td colspan="5">No hay acciones registradas.</td></tr>'}</tbody></table></div>`;
@@ -1073,6 +1088,25 @@
       else if (a === "rules") rules();
       else if (a === "member") await member(id);
       else if (a === "item") await item(id);
+      else if (a === "files") await files(Number(b.dataset.page) || 1, S.files?.q || "");
+      else if (a === "detach-media") b.closest('[data-media]').remove();
+      else if (a === "delete-content") { const p = await api('items/' + id); confirmDeletion('content',id,{title:p.title,forum:p.type==='forum'}); }
+      else if (a === "delete-comment") confirmDeletion('comment',id,{post:Number(b.dataset.post)||0});
+      else if (a === "delete-media") confirmDeletion('media',id,{post:Number(b.dataset.post)||0,title:b.dataset.name,library:b.dataset.library==='true'});
+      else if (a === "delete-cancel") {
+        if(b.dataset.library==='true') await files(S.files.page,S.files.q);
+        else if(Number(b.dataset.post)) await item(Number(b.dataset.post));
+        else if(b.dataset.kind==='content') await item(id);
+        else closeModal();
+      }
+      else if (a === "delete-confirm") {
+        const kind=b.dataset.kind, post=Number(b.dataset.post), library=b.dataset.library==='true';
+        await api((kind==='content'?'items':kind==='comment'?'comments':'media')+'/'+id,{},'DELETE');
+        closeModal();toast(T('Eliminado correctamente.'));
+        if(library) await files(S.files.page,S.files.q);
+        else if(post) await item(post);
+        else { const url=new URL(location.href);url.searchParams.delete('item');history.replaceState(history.state,'',url);S.item=null;await render(); }
+      }
       else if (a === "editor") await editor(b.dataset.type, id);
       else if (a === "notifications") { S.noticePage = 1; await notifications(); }
       else if (a === "notification-filter") { S.noticeFilter = b.dataset.filter; S.noticePage = 1; await notifications(); }
@@ -1279,6 +1313,8 @@
         await render();
       } else if (action === "invite-search") {
         await inviteMembers(Number(form.dataset.id), 1, data.q);
+      } else if (action === "file-search") {
+        await files(1, data.q);
       } else if (action === "event-invite") {
         const r = await api("events/" + form.dataset.id + "/invite", { users: [...S.invite.selected] });
         closeModal(); S.invite = null;
@@ -1453,7 +1489,7 @@
           .getElementById("attachments")
           .insertAdjacentHTML(
             "beforeend",
-            `<span class="attached-file" data-media="${m.id}">${E(m.name)}</span>`,
+            `<span class="attached-file" data-media="${m.id}">${E(m.name)}${btn("Quitar", "detach-media", `data-id="${m.id}"`, "ghost small")}</span>`,
           );
       toast("Archivo cargado.");
     } catch (e) {

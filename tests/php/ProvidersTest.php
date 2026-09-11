@@ -8,7 +8,7 @@ final class ProvidersTest extends TestCase
     protected function setUp(): void
     {
         $this->settings=Settings::get();foreach(['ai_key','google_client_secret'] as $key)$this->savedSecrets[$key]=Secrets::get($key);$this->user=wp_insert_user(['user_login'=>'test_provider_'.bin2hex(random_bytes(4)),'user_pass'=>wp_generate_password(30),'role'=>'administrator']);wp_set_current_user($this->user);
-        Settings::save(['ai_mode'=>'real','ai_model'=>'configured-test-model','ai_key'=>'fake-key-for-http-mock','google_client_id'=>'fake-client-id','google_client_secret'=>'fake-client-secret']);
+        Settings::save(['ai_mode'=>'real','ai_model'=>'gemini-test-model','ai_key'=>'fake-key-for-http-mock','google_client_id'=>'fake-client-id','google_client_secret'=>'fake-client-secret']);
     }
     protected function tearDown(): void
     {
@@ -23,14 +23,22 @@ final class ProvidersTest extends TestCase
         $this->http=static fn($pre,$args,$url)=>$handler($args,$url);add_filter('pre_http_request',$this->http,10,3);
     }
     private static function response(mixed $body,int $code=200): array {return ['response'=>['code'=>$code],'headers'=>[],'body'=>is_string($body)?$body:wp_json_encode($body)];}
-    public function testRealAITransportUsesFixedEndpointNoPersistenceAndValidJSON(): void
+    public function testGeminiTransportUsesHeaderKeyConfiguredModelAndStructuredJSON(): void
     {
-        $this->mock(static function($args,$url){self::assertSame('https://api.openai.com/v1/responses',$url);$body=json_decode($args['body'],true);self::assertFalse($body['store']);self::assertSame('configured-test-model',$body['model']);self::assertSame('json_object',$body['text']['format']['type']);return self::response(['output'=>[['content'=>[['type'=>'output_text','text'=>wp_json_encode(['answer'=>'Respuesta de prueba','source_ids'=>[22]])]]]]]);});
-        $r=(new RealAIProvider())->generate('answer',['sources'=>[['id'=>22]]]);self::assertSame('API REAL',$r['mode']);self::assertSame([22],$r['source_ids']);
+        $this->mock(static function($args,$url){
+            self::assertSame('https://generativelanguage.googleapis.com/v1beta/models/gemini-test-model:generateContent',$url);
+            self::assertSame('fake-key-for-http-mock',$args['headers']['x-goog-api-key']);self::assertArrayNotHasKey('Authorization',$args['headers']);
+            self::assertStringNotContainsString('fake-key',$url);$body=json_decode($args['body'],true);
+            self::assertSame('application/json',$body['generationConfig']['responseMimeType']);
+            self::assertStringContainsString(RealAIProvider::SYSTEM_PROMPT,$body['systemInstruction']['parts'][0]['text']);
+            self::assertSame('answer',json_decode($body['contents'][0]['parts'][0]['text'],true)['task']);
+            return self::response(['candidates'=>[['content'=>['parts'=>[['text'=>wp_json_encode(['answer'=>'Respuesta de prueba','source_ids'=>[22]])]]],'finishReason'=>'STOP']]]);
+        });
+        $r=(new RealAIProvider())->generate('answer',['sources'=>[['id'=>22]]]);self::assertSame('Google Gemini · API real',$r['mode']);self::assertSame([22],$r['source_ids']);
     }
     public function testRealAIPropagatesSafeQuotaError(): void
     {
-        $this->mock(static fn()=>self::response('sensitive upstream body',429));$this->expectException(RuntimeException::class);$this->expectExceptionMessage('Revise configuración, cuota');(new RealAIProvider())->generate('answer',[]);
+        $this->mock(static fn()=>self::response('sensitive upstream body',429));$this->expectException(RuntimeException::class);$this->expectExceptionMessage('cuota o el límite');(new RealAIProvider())->generate('answer',[]);
     }
     public function testRealAIRejectsMalformedResponse(): void
     {
@@ -38,7 +46,7 @@ final class ProvidersTest extends TestCase
     }
     public function testUnconfiguredAIReportsConfigurationFailure(): void
     {
-        Secrets::remove('ai_key');$this->expectException(RuntimeException::class);$this->expectExceptionMessage('IA no configurada');(new RealAIProvider())->generate('answer',[]);
+        Secrets::remove('ai_key');$this->expectException(RuntimeException::class);$this->expectExceptionMessage('Configura una Gemini API Key');(new RealAIProvider())->generate('answer',[]);
     }
     public function testYouTubeUsesAuthorizedCaptionsDownload(): void
     {

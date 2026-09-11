@@ -37,6 +37,8 @@ final class Router
         self::route('/content/(?P<type>[a-z]+)','POST',static fn($r)=>Content::save($r['type'],$r->get_json_params()?:[]),'ascla_write');
         self::route('/content/(?P<type>[a-z]+)/(?P<id>\d+)','POST',static fn($r)=>Content::save($r['type'],$r->get_json_params()?:[],(int)$r['id']),'ascla_write');
         self::route('/items/(?P<id>\d+)','GET',static fn($r)=>Content::serialize(Content::get((int)$r['id'])));
+        self::route('/items/(?P<id>\d+)','DELETE',static fn($r)=>Content::remove((int)$r['id']),'ascla_write');
+        self::route('/comments/(?P<id>\d+)','DELETE',static fn($r)=>Content::removeComment((int)$r['id']),'ascla_write');
         self::route('/items/(?P<id>\d+)/comments','GET',static fn($r)=>Content::comments((int)$r['id']));
         self::route('/items/(?P<id>\d+)/comments','POST',static fn($r)=>Content::comment((int)$r['id'],(string)$r['body']),'ascla_write');
         self::route('/items/(?P<id>\d+)/reaction','POST',static fn($r)=>Content::react((int)$r['id'],(string)$r['kind'],rest_sanitize_boolean($r['active'])),'ascla_write');
@@ -56,6 +58,8 @@ final class Router
         self::route('/answers','GET',static fn()=>Queue::answers());
         self::route('/conversations/(?P<id>\d+)','GET',static fn($r)=>Messaging::conversation((int)$r['id']));
         self::route('/notifications/(?P<id>\d+)/read','POST',static fn($r)=>Notifications::read((int)$r['id']));
+        self::route('/media','GET',static fn($r)=>Media::listing($r->get_params()));
+        self::route('/media/(?P<id>\d+)','DELETE',static fn($r)=>Media::remove((int)$r['id']),'ascla_write');
         self::route('/media','POST',static function($r) { $files=$r->get_file_params(); return Media::upload($files['file']??[]); },'ascla_write');
         self::route('/ask','POST',static function($r) { Access::limit('ask',6,300); $question=trim(Access::text($r['question']??'',2000)); Access::require(mb_strlen($question)>=4,'Escriba una pregunta más específica.',400); return Queue::enqueue('answer',['question'=>$question]); });
         self::route('/jobs/(?P<id>\d+)','GET',static fn($r)=>Queue::get((int)$r['id']));
@@ -91,7 +95,7 @@ final class Router
             foreach (get_posts(['post_type'=>'ascla_'.$key,'post_status'=>['pending','draft'],'numberposts'=>50]) as $post) { $pending[]=Content::serialize($post); }
         }
         $comments=[];
-        foreach (get_comments(['status'=>'hold','number'=>100]) as $c) { $post=get_post($c->comment_post_ID); if ($post&&str_starts_with($post->post_type,'ascla_')) { $comments[]=['id'=>(int)$c->comment_ID,'body'=>$c->comment_content,'author'=>$c->user_id?Profiles::publicName((int)$c->user_id):'Comunidad ASCLA']; } }
+        foreach (get_comments(['status'=>'hold','number'=>100]) as $c) { $post=get_post($c->comment_post_ID); if ($post&&str_starts_with($post->post_type,'ascla_')) { $comments[]=['id'=>(int)$c->comment_ID,'body'=>$c->comment_content,'can_delete'=>current_user_can('ascla_manage')||(int)$c->user_id===get_current_user_id(),'author'=>$c->user_id?Profiles::publicName((int)$c->user_id):'Comunidad ASCLA']; } }
         $jobs=Store::rows('jobs'); foreach ($jobs as &$job) { unset($job['payload'],$job['result']); } unset($job);
         return ['pending'=>$pending,'comments'=>$comments,'reports'=>Store::rows('relations',"kind='report'"),'jobs'=>$jobs,'audit'=>Store::rows('audit'),'counts'=>['members'=>count(get_users(['capability'=>'ascla_access','fields'=>'ID'])),'pending'=>count($pending)]];
     }

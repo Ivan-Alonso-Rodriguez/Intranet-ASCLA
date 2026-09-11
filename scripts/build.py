@@ -14,7 +14,7 @@ def build():
     with ZipFile(DEST, 'w', ZIP_DEFLATED, compresslevel=9) as archive:
         for path in files:
             relative = path.relative_to(SOURCE)
-            if path.suffix not in ALLOWED or any(part.startswith('.') for part in relative.parts):
+            if (path.suffix not in ALLOWED and relative.as_posix() != 'languages/en.json') or any(part.startswith('.') for part in relative.parts):
                 continue
             if any(part in {'tests', 'node_modules', 'vendor', 'logs', 'tmp'} for part in relative.parts):
                 continue

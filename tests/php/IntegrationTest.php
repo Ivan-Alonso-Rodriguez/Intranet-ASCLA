@@ -126,7 +126,7 @@ final class IntegrationTest extends TestCase
 
     {
 
-        $this->user(1);$c=Messaging::start($this->users[2]);self::assertSame($c['id'],Messaging::start($this->users[2])['id']);Messaging::send((int)$c['id'],'Mensaje sólo entre dos miembros.');
+        Store::insert('relations',['user_id'=>$this->users[1],'target_id'=>$this->users[2],'kind'=>'connected','created_at'=>current_time('mysql',true)]);$this->user(1);$c=Messaging::start($this->users[2]);self::assertSame($c['id'],Messaging::start($this->users[2])['id']);Messaging::send((int)$c['id'],'Mensaje sólo entre dos miembros.');
 
         $this->user(3);self::assertSame(404,$this->api('GET','/conversations/'.$c['id'].'/messages')->get_status());self::assertSame(404,$this->api('POST','/conversations/'.$c['id'].'/messages',['body'=>'Intrusión'])->get_status());
 

@@ -57,7 +57,8 @@ final class Knowledge
             }
             $sources[]=['id'=>$post->ID,'body'=>$body,'title'=>$title,'url'=>Content::serialize($post)['url']];
         }
-        if(!$originalIds || count($sources)!==count($originalIds)) return ['answer'=>'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar el Centro de Conocimiento.','sources'=>[],'mode'=>$result['mode']??'Fuentes actualizadas'];
+        if(!$originalIds) return ['answer'=>'No existe suficiente información en el Centro de Conocimiento para responder esta consulta.','sources'=>[],'mode'=>$result['mode']??'Fuentes actualizadas'];
+        if(count($sources)!==count($originalIds)) return ['answer'=>'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar el Centro de Conocimiento.','sources'=>[],'mode'=>$result['mode']??'Fuentes actualizadas'];
         $candidate=['answer'=>$result['answer']??'','source_ids'=>array_column($result['sources']??[],'id')];
         if($protected){ $candidate=EntityRedactor::tree($candidate,$identities); }
         $verified=Grounding::answer($candidate,$sources);

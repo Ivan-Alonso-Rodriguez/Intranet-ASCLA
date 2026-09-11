@@ -9,7 +9,7 @@ final class Queue
     {
         Access::require(in_array($kind,['multimedia','answer','microevents','social','resource_notifications','discovery','video_metadata'],true),'Trabajo no válido.',400);
         $id=Store::insert('jobs',['kind'=>$kind,'user_id'=>$user<0?get_current_user_id():$user,'payload'=>wp_json_encode($payload),'status'=>'pending','created_at'=>current_time('mysql',true)]);
-        wp_schedule_single_event(time()+1,'ascla_jobs'); return ['id'=>$id,'status'=>'pending'];
+        self::wake(); return ['id'=>$id,'status'=>'pending'];
     }
     public static function get(int $id): array
     {
@@ -33,7 +33,7 @@ final class Queue
     public static function retry(int $id): array
     {
         $row=self::get($id); Access::require($row['status']==='error','Sólo se pueden reintentar trabajos fallidos.',400);
-        Store::update('jobs',['status'=>'pending','attempts'=>0,'error'=>null,'locked_at'=>null],['id'=>$id]); wp_schedule_single_event(time()+1,'ascla_jobs'); return self::get($id);
+        Store::update('jobs',['status'=>'pending','attempts'=>0,'error'=>null,'locked_at'=>null],['id'=>$id]); self::wake(); return self::get($id);
     }
     public static function run(): void
     {
@@ -66,9 +66,18 @@ final class Queue
             } finally { wp_set_current_user($original); }
         }
         // WordPress deduplicates identical single events; use a continuation hook for backlog.
-        if (Store::count('jobs','status=%s AND attempts<3',['pending']) && !wp_next_scheduled('ascla_jobs_continue')) {
-            wp_schedule_single_event(time()+5,'ascla_jobs_continue');
-        }
+        if (Store::count('jobs','status=%s AND attempts<3',['pending'])) { self::wake(5); }
+    }
+    /** A dedicated one-shot wakeup avoids WordPress deduplicating against the hourly safety event. */
+    private static function wake(int $delay=1): void
+    {
+        Store::lock('queue-wakeup',static function()use($delay){
+            $at=time()+$delay;$next=wp_next_scheduled('ascla_jobs_continue');
+            if($next && $next>time() && $next<=$at)return;
+            // CLI may still expose the currently executing tick. Replace it before scheduling its successor.
+            if($next)wp_unschedule_event($next,'ascla_jobs_continue');
+            wp_schedule_single_event($at,'ascla_jobs_continue');
+        });
     }
     private static function social(): array
     {

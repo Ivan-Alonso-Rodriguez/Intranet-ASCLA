@@ -1903,3 +1903,15 @@ output.view-loading{display:block}
 #ascla-root .admin-panel .alert.success{background:#e9f5ef;color:#27674d}
 @media(max-width:1050px){#ascla-root .admin-overview{grid-template-columns:repeat(2,minmax(0,1fr))}#ascla-root .admin-user{grid-template-columns:1fr 1fr}#ascla-root .admin-user-actions{grid-column:1/-1;justify-content:flex-start}}
 @media(max-width:640px){#ascla-root .admin-hero{padding:24px;align-items:flex-start;flex-direction:column}#ascla-root .admin-hero h1{font-size:25px}#ascla-root .admin-stat{padding:14px;gap:9px}#ascla-root .admin-stat .stat-icon{width:30px;height:30px}#ascla-root .admin-tabs{gap:3px}#ascla-root .admin-tab{padding:10px;font-size:11px}#ascla-root .admin-section-heading{align-items:flex-start;flex-direction:column}#ascla-root .admin-review-grid,#ascla-root .admin-user{grid-template-columns:1fr}#ascla-root .request-stats{gap:7px}#ascla-root .request-stat{padding:12px 8px;display:block}#ascla-root .request-stat strong,#ascla-root .request-stat span{display:block}#ascla-root .request-stat span{font-size:10px}#ascla-root .request-card{padding:19px}#ascla-root .request-footer{align-items:flex-start;flex-direction:column}#ascla-root .admin-filters>input,#ascla-root .admin-filters>.field{width:100%;flex-basis:100%}#ascla-root .admin-user-actions{grid-column:auto}}
+
+/* Explicit, reversible content removal and private file management. */
+#ascla-root .btn.danger{color:#a52a37;border-color:#ebc5cb}
+#ascla-root .btn.primary.danger{background:#a52a37;color:#fff;border-color:#a52a37}
+#ascla-root .file-library{display:grid;gap:12px}
+#ascla-root .file-row{padding:16px;border:1px solid var(--line);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+#ascla-root .file-row>div:first-child{min-width:0;display:grid;gap:7px;overflow-wrap:anywhere}
+#ascla-root .file-row small{color:var(--muted)}
+#ascla-root .file-row svg{width:24px;height:24px}
+#ascla-root .forum-directory{margin:16px 0}
+#ascla-root .forum-directory summary{cursor:pointer;font-weight:600}
+@media(max-width:640px){#ascla-root .file-row{align-items:stretch;flex-direction:column}}

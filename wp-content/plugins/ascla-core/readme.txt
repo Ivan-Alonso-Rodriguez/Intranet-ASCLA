@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,9 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.7.0 =
+Eliminación de contenido y comentarios por autor o administrador; biblioteca y eliminación de archivos privados; eventos exclusivos de administradores con publicación directa; idioma de WordPress guardado por cuenta y navegación inglés/español. Corrección de abstenciones guardadas.
 
 = 1.6.0 =
 Panel de administración con solicitudes y usuarios; mensajería cada 2 segundos; Foros sin aprobación; Galería y Conocimiento administrados por administradores. Google Gemini REST configurable, prueba de conexión y respuestas naturales con hasta seis fuentes relevantes.

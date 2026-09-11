@@ -23,9 +23,10 @@ foreach (['Elena Torres','Diego Salazar'] as $i=>$name) {
 }
 $posts=[];
 foreach (['hub'=>'Cómo preparar una junta con mejores decisiones','event'=>'Conversatorio: gobernanza e inteligencia artificial','resource'=>'Guía para el seguimiento de acuerdos'] as $type=>$title) {
-    $id=wp_insert_post(['post_type'=>'ascla_'.$type,'post_title'=>$title,'post_content'=>'Contenido ficticio para comprobar los destinos de las notificaciones.','post_status'=>'publish','post_author'=>$users[1]]); $posts[]=$id;
+    $id=wp_insert_post(['post_type'=>'ascla_'.$type,'post_title'=>$title,'post_content'=>$type==='resource'?'Define responsables y plazos claros, y revisa el avance en cada sesión. Respuesta ficticia de prueba.':'Contenido ficticio para comprobar los destinos de las notificaciones.','post_status'=>'publish','post_author'=>$users[1]]); $posts[]=$id;
     if ($type==='event') { update_post_meta($id,'_ascla',['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000),'capacity'=>10,'modality'=>'Virtual']); }
 }
+Store::insert('relations',['user_id'=>$users[1],'target_id'=>$users[0],'kind'=>'connected','created_at'=>current_time('mysql',true)]);
 wp_set_current_user($users[1]); $conversation=Messaging::start($users[0]);
 Messaging::send((int)$conversation['id'],'Hola Elena, conversemos sobre el seguimiento de acuerdos de la junta.');
 $job=Store::insert('jobs',['user_id'=>$users[0],'kind'=>'answer','payload'=>wp_json_encode(['question'=>'¿Cómo mejorar el seguimiento de acuerdos?']),'status'=>'completed','result'=>wp_json_encode(['answer'=>'Define responsables y plazos claros, y revisa el avance en cada sesión. Respuesta ficticia de prueba.','sources'=>[['id'=>$posts[2],'title'=>'Guía para el seguimiento de acuerdos','url'=>ASCLA\Core\Domain\Catalog::url('centro-conocimiento',['item'=>$posts[2]])]],'mode'=>'DEMO MODE']),'created_at'=>current_time('mysql',true)]);

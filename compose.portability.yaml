@@ -15,6 +15,11 @@ services:
   wordpress:
     image: wordpress:6.8.3-php8.3-apache
     ports: ["127.0.0.1:8089:80"]
+    healthcheck:
+      test: ["CMD-SHELL", "test -s /var/www/html/wp-config.php"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: wordpress
@@ -42,11 +47,13 @@ services:
       WORDPRESS_CONFIG_EXTRA: "define('WP_ENVIRONMENT_TYPE', 'local'); define('AUTOMATIC_UPDATER_DISABLED', true);"
       ASCLA_ADMIN_PASSWORD: ${ASCLA_ADMIN_PASSWORD}
       ASCLA_DEMO_PASSWORD: ${ASCLA_DEMO_PASSWORD}
+      ASCLA_IVAN_DEMO_PASSWORD: ${ASCLA_IVAN_DEMO_PASSWORD:-}
     volumes:
       - zip_wordpress:/var/www/html
       - ./dist:/dist:ro
       - ./tests:/opt/ascla-tests:ro
-    depends_on: [wordpress]
+    depends_on:
+      wordpress: {condition: service_healthy}
 volumes:
   zip_db:
   zip_wordpress:

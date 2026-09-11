@@ -97,7 +97,7 @@ async function runJobs() {
       assert.equal(await member.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     }
     checks.push('New controls fit mobile viewport'); assert.deepEqual(errors, []);
-    fs.writeFileSync(path.join(root, 'test-results/completion.json'), JSON.stringify({ version: '1.1.0', date: new Date().toISOString(), passed: true, checks, jsErrors: errors }, null, 2));
+    fs.writeFileSync(path.join(root, 'test-results/completion.json'), JSON.stringify({ version: fs.readFileSync(path.join(root, 'wp-content/plugins/ascla-core/ascla-core.php'), 'utf8').match(/Version: ([\d.]+)/)[1], date: new Date().toISOString(), passed: true, checks, jsErrors: errors }, null, 2));
     console.log(JSON.stringify({ passed: true, checks, jsErrors: errors }, null, 2));
   } catch (error) {
     console.error(JSON.stringify({errors, checks, admin: admin?.url(), member: member?.url()}));

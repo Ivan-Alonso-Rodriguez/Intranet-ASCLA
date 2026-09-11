@@ -16,7 +16,7 @@ final class Content
     }
     public static function canRead(\WP_Post $post): bool
     {
-        if (!Access::member() || !str_starts_with($post->post_type,'ascla_')) { return false; }
+        if (!Access::member() || $post->post_status==='trash' || !str_starts_with($post->post_type,'ascla_') || !isset(Catalog::TYPES[substr($post->post_type,6)])) { return false; }
         if (current_user_can('ascla_moderate') || (int)$post->post_author===get_current_user_id()) { return true; }
         if ($post->post_type==='ascla_contact' || $post->post_status!=='publish') { return false; }
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
@@ -35,7 +35,7 @@ final class Content
         $date=$post->post_date_gmt;
         if (!$date || str_starts_with($date,'0000-')) { $date=get_gmt_from_date($post->post_date); }
         $terms=wp_get_object_terms($post->ID,['ascla_interest','ascla_category','ascla_tag']);
-        return ['id'=>$post->ID,'type'=>substr($post->post_type,6),'title'=>$post->post_title,'body'=>$post->post_content,'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?Profiles::publicName((int)$author->ID):'ASCLA'],'date'=>$date,'parent'=>(int)$post->post_parent,'meta'=>$meta,'media'=>Media::metadata($post->ID,(array)($meta['media_ids']??[])),'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name,'taxonomy'=>$t->taxonomy],$terms),'reactions'=>Store::count('relations',"target_id=%d AND kind='like'",[$post->ID]),'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='like'",[$post->ID,get_current_user_id()])>0,'following'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='follow'",[$post->ID,get_current_user_id()])>0,'comments'=>(int)$post->comment_count,'url'=>Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID])];
+        return ['id'=>$post->ID,'can_delete'=>self::canDelete($post),'type'=>substr($post->post_type,6),'title'=>$post->post_title,'body'=>$post->post_content,'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?Profiles::publicName((int)$author->ID):'ASCLA'],'date'=>$date,'parent'=>(int)$post->post_parent,'meta'=>$meta,'media'=>Media::metadata($post->ID,(array)($meta['media_ids']??[])),'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name,'taxonomy'=>$t->taxonomy],$terms),'reactions'=>Store::count('relations',"target_id=%d AND kind='like'",[$post->ID]),'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='like'",[$post->ID,get_current_user_id()])>0,'following'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='follow'",[$post->ID,get_current_user_id()])>0,'comments'=>(int)$post->comment_count,'url'=>Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID])];
     }
     public static function page(string $type): string { return ['resource'=>'centro-conocimiento','event'=>'eventos','topic'=>'foros','forum'=>'foros','gallery'=>'galeria','ally'=>'aliados','contact'=>'contacto'][$type]??'hub'; }
     public static function listing(string $type,array $filter=[]): array
@@ -76,7 +76,7 @@ final class Content
     {
         Access::require(isset(Catalog::TYPES[$type]),'Tipo no válido.',400);
         $editor=current_user_can('ascla_moderate');
-        Access::require(!in_array($type,['gallery','resource'],true)||current_user_can('ascla_manage'),'Solo administradores pueden crear o editar Galería y Centro de Conocimiento.',403);
+        Access::require(!in_array($type,['gallery','resource','event'],true)||current_user_can('ascla_manage'),'Solo administradores pueden crear o editar eventos, Galería y Centro de Conocimiento.',403);
         Access::require($editor||in_array($type,['hub','topic','gallery','contact'],true),'Se requiere moderación.',403);
         if ($id) {
             $post=self::get($id); Access::require($post->post_type==='ascla_'.$type && ($editor||(int)$post->post_author===get_current_user_id()),'No puede editar este contenido.');
@@ -101,7 +101,7 @@ final class Content
         $requested=$input['status']??'pending';
         Access::require(in_array($requested,['draft','pending','publish'],true),'Estado no válido.',400); $status=$requested==='draft'?'draft':'pending';
         if ($type==='contact') { $status='private'; }
-        elseif (in_array($type,['topic','forum'],true) && $requested!=='draft') { $status='publish'; }
+        elseif (($type==='event' && empty($meta['micro']) && empty($meta['generated']) || in_array($type,['topic','forum'],true)) && $requested!=='draft') { $status='publish'; }
         elseif ($editor && $requested==='publish' && empty($meta['generated'])) { $status='publish'; }
         elseif (!$editor && !Settings::get()['moderation_required'] && $requested!=='draft' && $type==='hub') { $status='publish'; }
         $parent=absint($input['parent']??0);
@@ -120,6 +120,34 @@ final class Content
         Audit::record('content_saved',$saved,$status);
         return self::serialize(get_post($saved));
     }
+    public static function canDelete(\WP_Post $post): bool
+    {
+        return Access::member() && str_starts_with($post->post_type,'ascla_') && isset(Catalog::TYPES[substr($post->post_type,6)]) && $post->post_status!=='trash'
+            && (current_user_can('ascla_manage') || (int)$post->post_author===get_current_user_id());
+    }
+    /** Trash the selected contribution; other authors' forum topics remain in the general list. */
+    public static function remove(int $id): array
+    {
+        $post=self::get($id); Access::require(self::canDelete($post),'Solo el autor o un administrador puede eliminar este contenido.',403);
+        return Store::lock('content:'.$id,static function()use($id,$post){
+            Access::require((bool)wp_trash_post($id),'No se pudo eliminar el contenido.',500);
+            if($post->post_type==='ascla_forum') {
+                foreach(get_posts(['post_type'=>'ascla_topic','post_parent'=>$id,'post_status'=>['publish','pending','draft','ascla_hidden','ascla_rejected'],'numberposts'=>-1]) as $child) wp_update_post(['ID'=>$child->ID,'post_parent'=>0]);
+            }
+            foreach(['like','follow','report'] as $kind) Store::delete('relations',['target_id'=>$id,'kind'=>$kind]);
+            Audit::record('content_trashed',$id,$post->post_type);
+            return ['id'=>$id,'deleted'=>true,'message'=>'Contenido enviado a la papelera.'];
+        });
+    }
+    public static function removeComment(int $id): array
+    {
+        $comment=get_comment($id);Access::require($comment && !in_array((string)$comment->comment_approved,['trash','post-trashed'],true),'Comentario no encontrado.',404);
+        self::get((int)$comment->comment_post_ID);
+        Access::require(current_user_can('ascla_manage') || (int)$comment->user_id===get_current_user_id(),'Solo el autor o un administrador puede eliminar este comentario.',403);
+        Access::require((bool)wp_trash_comment($id),'No se pudo eliminar el comentario.',500);
+        Audit::record('comment_trashed',$id);
+        return ['id'=>$id,'deleted'=>true];
+    }
     public static function tags(int $id,array $names): void
     {
         $ids=[];
@@ -134,8 +162,8 @@ final class Content
     }
     public static function comments(int $id): array
     {
-        self::get($id); $comments=get_comments(['post_id'=>$id,'status'=>'approve','number'=>100,'order'=>'ASC']);
-        return array_map(static fn($c)=>['id'=>(int)$c->comment_ID,'author'=>$c->user_id?Profiles::publicName((int)$c->user_id):'Comunidad ASCLA','body'=>$c->comment_content,'date'=>$c->comment_date_gmt],$comments);
+        self::get($id); $comments=get_comments(['post_id'=>$id,'status'=>'approve','include_unapproved'=>[get_current_user_id()],'number'=>100,'order'=>'ASC']);
+        return array_map(static fn($c)=>['id'=>(int)$c->comment_ID,'can_delete'=>current_user_can('ascla_manage')||(int)$c->user_id===get_current_user_id(),'status'=>(string)$c->comment_approved==='1'?'publish':'pending','author'=>$c->user_id?Profiles::publicName((int)$c->user_id):'Comunidad ASCLA','body'=>$c->comment_content,'date'=>$c->comment_date_gmt],$comments);
     }
     public static function comment(int $id,string $body): array
     {
@@ -179,7 +207,7 @@ final class Content
         Access::require(current_user_can('ascla_moderate'));
         $post=self::get($id); $statuses=['approve'=>'publish','reject'=>'ascla_rejected','hide'=>'ascla_hidden','suspend'=>'ascla_hidden'];
         Access::require(isset($statuses[$decision])&&$post->post_type!=='ascla_contact','Decisión no válida.',400);
-        Access::require(!in_array($post->post_type,['ascla_gallery','ascla_resource'],true)||current_user_can('ascla_manage'),'Solo administradores pueden gestionar estas publicaciones.',403);
+        Access::require(!in_array($post->post_type,['ascla_gallery','ascla_resource','ascla_event'],true)||current_user_can('ascla_manage'),'Solo administradores pueden gestionar estas publicaciones.',403);
         $reason=Access::text($reason,1000); Access::require(trim($reason)!=='','Indique un motivo de moderación.',400);
         $meta=(array)get_post_meta($id,'_ascla',true);
         Access::require($decision!=='approve'||empty($meta['generated'])||$reviewed,'Debe confirmar revisión de fuentes, identidades y derechos.',400);
@@ -193,7 +221,7 @@ final class Content
     }
     public static function guardPublication(array $data,array $postarr): array
     {
-        if (($data['post_status']??'')==='publish' && in_array($data['post_type']??'',['ascla_gallery','ascla_resource'],true) && !current_user_can('ascla_manage') && (empty($postarr['ID']) || get_post_status($postarr['ID'])!=='publish')) $data['post_status']='pending';
+        if (($data['post_status']??'')==='publish' && in_array($data['post_type']??'',['ascla_gallery','ascla_resource','ascla_event'],true) && !current_user_can('ascla_manage') && (empty($postarr['ID']) || get_post_status($postarr['ID'])!=='publish')) $data['post_status']='pending';
         if (($data['post_status']??'')==='publish' && str_starts_with($data['post_type']??'','ascla_') && !empty($postarr['ID'])) {
             $meta=(array)get_post_meta($postarr['ID'],'_ascla',true);
             if (!empty($meta['generated']) && empty($meta['reviewed'])) { $data['post_status']='pending'; }

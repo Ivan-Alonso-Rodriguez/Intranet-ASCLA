@@ -95,7 +95,7 @@ final class NotificationsTest extends TestCase
     }
     public function testDirectConversationAndProfileDestinationsCheckAccess(): void
     {
-        $c=Messaging::start($this->users[1]); $this->conversations[]=(int)$c['id']; Messaging::send((int)$c['id'],'Mensaje de prueba');
+        Store::insert('relations',['user_id'=>$this->users[0],'target_id'=>$this->users[1],'kind'=>'connected','created_at'=>current_time('mysql',true)]); $c=Messaging::start($this->users[1]); $this->conversations[]=(int)$c['id']; Messaging::send((int)$c['id'],'Mensaje de prueba');
         wp_set_current_user($this->users[1]); $notice=Notifications::list()[0];
         self::assertSame('Elena Prueba te envió un mensaje',$notice['title']);
         self::assertStringContainsString('conversation='.$c['id'],$notice['url']);

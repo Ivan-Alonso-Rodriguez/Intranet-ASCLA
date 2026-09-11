@@ -8,20 +8,21 @@ final class Login
 {
     public static function boot(): void
     {
-        add_action('login_init', static function () { add_filter('gettext', [self::class, 'translate'], 10, 3); add_filter('language_attributes', static fn($attributes) => str_replace('lang="en-US"', 'lang="es"', $attributes)); });
+        Language::boot();
+        add_action('login_init', static function () { add_filter('gettext', [self::class, 'translate'], 10, 3); });
         add_action('login_enqueue_scripts', static function () {
             wp_enqueue_style('ascla-login', ASCLA_URL . 'assets/login.css', ['login'], ASCLA_VERSION);
         });
         add_filter('login_body_class', static fn($classes) => array_merge($classes, ['ascla-login']));
-        add_filter('login_site_html_link', static fn() => '<a href="' . esc_url(Catalog::url('intranet')) . '">&larr; Volver a ASCLA</a>');
-        add_filter('login_remember_me_help_text', static fn() => 'Mantiene tu sesión durante más tiempo. Usa esta opción solo en tus dispositivos personales.');
+        add_filter('login_site_html_link', static fn() => '<a href="' . esc_url(Catalog::url('intranet')) . '">&larr; '.esc_html(Language::label('Volver a ASCLA')).'</a>');
+        add_filter('login_remember_me_help_text', static fn() => Language::text('Mantiene tu sesión durante más tiempo. Usa esta opción solo en tus dispositivos personales.','Keeps you signed in longer. Use this only on your own devices.'));
         add_filter('login_headerurl', static fn() => Catalog::url('intranet'));
-        add_filter('login_headertext', static fn() => 'ASCLA · Comunidad profesional');
+        add_filter('login_headertext', static fn() => Language::text('ASCLA · Comunidad profesional','ASCLA · Professional community'));
         add_filter('login_title', static fn($title, $screen) => esc_html($screen . ' · ASCLA'), 10, 2);
         add_action('login_header', static function () { require_once ASCLA_PATH . 'templates/login-welcome.php'; });
         add_filter('login_message', [self::class, 'welcome']);
         add_action('login_footer', static function () {
-            echo '<p class="ascla-login-help">¿Aún no tienes una cuenta? Solicita tu acceso a la administración de ASCLA.</p>';
+            echo '<p class="ascla-login-help">'.esc_html(Language::text('¿Aún no tienes una cuenta? Solicita tu acceso a la administración de ASCLA.','Need an account? Request access from ASCLA administration.')).'</p>';
         });
         add_filter('login_redirect', [self::class, 'redirect'], 10, 3);
     }
@@ -29,7 +30,7 @@ final class Login
     /** Spanish UI copy is scoped to wp-login.php; native form handling stays with WordPress. */
     public static function translate(string $translation, string $text, string $domain): string
     {
-        if ($domain !== 'default') { return $translation; }
+        if ($domain !== 'default' || Language::english()) { return $translation; }
         static $labels = [
             'Log In' => 'Entrar a la comunidad',
             'Log in' => 'Volver al inicio de sesión',
@@ -74,6 +75,13 @@ final class Login
             'resetpass', 'rp' => ['Elige tu nueva contraseña', 'Protege tu cuenta con una contraseña única.'],
             'register' => ['Únete a la comunidad', 'Completa los datos para solicitar tu cuenta.'],
             default => ['Tu cuenta ASCLA', 'Gestiona tu acceso a la comunidad.'],
+        };
+        if(Language::english()) $copy=match($GLOBALS['action']??'login') {
+            'login'=>['Welcome to ASCLA','Sign in to access your community.'],
+            'lostpassword','retrievepassword'=>['Recover your access','Let us help you return to your community.'],
+            'resetpass','rp'=>['Choose a new password','Protect your account with a unique password.'],
+            'register'=>['Join the community','Complete your account details.'],
+            default=>['Your ASCLA account','Manage access to your community.'],
         };
         return '<div class="ascla-login-intro"><p class="ascla-login-eyebrow">INTRANET ASCLA</p><h2>'
             . esc_html($copy[0]) . '</h2><p>' . esc_html($copy[1]) . '</p></div>' . $message;

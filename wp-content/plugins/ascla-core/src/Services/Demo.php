@@ -3,11 +3,13 @@ namespace ASCLA\Core\Services;
 use ASCLA\Core\Repositories\Store;
 final class Demo
 {
-    public static function seed(string $password): array
+    public static function seed(#[\SensitiveParameter] string $password): array
     {
+        Access::require(current_user_can('ascla_manage'),'Solo administradores pueden crear la demo.',403);
         Access::require(Settings::get()['demo'],'Active modo demo antes de crear datos ficticios.',400);
         Access::require(strlen($password)>=12,'La contraseña demo necesita al menos 12 caracteres.',400);
-        return Store::lock('demo-seed',static function () use($password) {
+        $actor=get_current_user_id();
+        try { return Store::lock('demo-seed',static function () use($password) {
             $names=['Valentina Ríos','Mateo Salazar','Lucía Ferrer','Santiago Vidal','Camila Soler','Daniel Robles','Mariana Costa','Andrés Luna','Isabel Molina','Nicolás Vega','Elena Pardo','Gabriel Campos','Paula Méndez','Sebastián León','Renata Silva','Diego Mora','Clara Navarro','Tomás Duarte'];
             $companies=['Andina Horizonte','Nova Consejo','Grupo Brisa','Lumen Capital','Nexo Sur','Prisma Gestión','Altamar Energía','Cumbre Digital','Arco Consultores'];
             $countries=['Perú','Colombia','México','Chile','Argentina','Brasil']; $positions=['Secretaría corporativa','Dirección de gobernanza','Gerencia de cumplimiento'];
@@ -31,7 +33,7 @@ final class Demo
             $make=static function ($key,$type,$title,$body,$meta=[],$author=0) use($users) {
                 $existing=get_posts(['post_type'=>'ascla_'.$type,'post_status'=>'any','meta_key'=>'_ascla_demo_key','meta_value'=>$key,'numberposts'=>1]);
                 if ($existing) { return $existing[0]->ID; }
-                $id=wp_insert_post(wp_slash(['post_type'=>'ascla_'.$type,'post_title'=>$title,'post_content'=>$body,'post_status'=>'draft','post_author'=>$author?:$users[0],'comment_status'=>'open']));
+                $id=wp_insert_post(wp_slash(['post_type'=>'ascla_'.$type,'post_title'=>$title,'post_content'=>$body,'post_status'=>'draft','post_author'=>$author?:(in_array($type,['event','resource','gallery'],true)?get_current_user_id():$users[0]),'comment_status'=>'open']));
                 update_post_meta($id,'_ascla_demo_key',$key); update_post_meta($id,'_ascla',array_merge(['demo'=>true,'chatham'=>true],$meta)); wp_update_post(['ID'=>$id,'post_status'=>'publish']); return $id;
             };
             $topics=['Gobierno de inteligencia artificial','El rol de la secretaría corporativa','Juntas directivas que aprenden','Sostenibilidad en la agenda del directorio','Gestión de riesgos y nuevas tecnologías','Una comunidad que comparte conocimiento'];
@@ -61,9 +63,10 @@ final class Demo
                 wp_set_current_user($users[1]); $c=Messaging::start($users[0]); Messaging::send((int)$c['id'],'Hola, bienvenida a la comunidad de demostración. ¿Conversamos sobre gobierno de IA?');
                 wp_set_current_user($users[0]); Notifications::send($users[0],'welcome','Tu comunidad ASCLA está lista para explorar.'); update_option('ascla_demo_messages',true,false);
             }
+            wp_set_current_user($original);
             $ivan=DemoUser::ivan($password);
             DemoShowcase::seed($make,array_merge($users,[$ivan['id']],$ivan['peer_ids']));
             wp_set_current_user($original); Audit::record('demo_seeded'); return ['users'=>21,'fictional_users'=>20,'ivan'=>$ivan['login'],'companies'=>9,'login'=>'demo.asociado','message'=>'Datos ficticios preparados. Una segunda ejecución conserva cambios y contraseñas existentes.'];
-        });
+        }); } finally { wp_set_current_user($actor); }
     }
 }

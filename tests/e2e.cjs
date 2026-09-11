@@ -73,14 +73,24 @@ async function test(name, fn) {
   console.log("PASS " + name);
 }
 async function goto(page, route) {
-  await page.goto(base + "/" + route + "/");
-  await page.locator("#page-content h1").waitFor();
+  const url = base + "/" + route + "/";
+  const anchor = page.locator('.ascla-sidebar .nav-link[href="' + url + '"]');
+  if (await anchor.count()) {
+    const origin = await page.evaluate(() => performance.timeOrigin);
+    await anchor.evaluate(link => link.click());
+    await page.locator("#page-content h1").waitFor();
+    assert.equal(await page.evaluate(() => performance.timeOrigin), origin);
+    assert.equal(page.url(), url);
+  } else {
+    await page.goto(url);
+    await page.locator("#page-content h1").waitFor();
+  }
 }
 (async () => {
   fs.mkdirSync(path.join(root, "test-results"), { recursive: true });
   fs.mkdirSync(path.join(root, "coverage"), { recursive: true });
   const browser = await chromium.launch({ headless: true, channel: "msedge" });
-  let member, admin, originalProfile;
+  let member, admin, originalProfile, confirmedPair;
   const errors = [];
   let failed = null;
   try {
@@ -257,16 +267,18 @@ async function goto(page, route) {
       }
       assert.equal(await p.locator(".modal").count(), 0);
     });
-    await test("Forum topic, moderation and reply", async () => {
+    await test("Forum topic and reply publish immediately", async () => {
       await goto(p,"foros");await p.getByRole("button",{name:"Nuevo tema",exact:true}).click();
       await p.locator('.modal [name=parent]').selectOption({index:1});await p.locator('.modal [name=title]').fill('E2E Tema de foro');await p.locator('.modal [name=body]').fill('E2E Consulta sobre prácticas de supervisión.');
       const saving=p.waitForResponse(r=>r.url().includes('/content/topic')&&r.request().method()==='POST');await p.getByRole('button',{name:'Guardar tema',exact:true}).click();
-      const topic=await(await saving).json();fixtures.push(topic.id);assert.equal(topic.status,'pending');assert.ok(topic.parent>0);
-      await request(a,'items/'+topic.id+'/moderate',{decision:'approve',reason:'Consulta pertinente al foro.'});await p.goto(base+'/foros/?item='+topic.id);await p.locator('.modal [name=body]').fill('E2E Respuesta de la comunidad.');await p.getByRole('button',{name:'Publicar comentario'}).click();await p.locator('#comments-list').getByText('E2E Respuesta de la comunidad.').waitFor();
+      const topic=await(await saving).json();fixtures.push(topic.id);assert.equal(topic.status,'publish');assert.ok(topic.parent>0);
+      await p.goto(base+'/foros/?item='+topic.id);await p.locator('.modal [name=body]').fill('E2E Respuesta de la comunidad.');await p.getByRole('button',{name:'Publicar comentario'}).click();await p.locator('#comments-list').getByText('E2E Respuesta de la comunidad.').waitFor();
     });
     let conversation;
     await test("Private message delivery, read state and blocking", async () => {
       const target = (await request(p, "profiles?q=Tomás")).body.items[0];
+      const me = (await request(p, "bootstrap")).body.me.id;
+      confirmedPair = JSON.parse(execFileSync('docker', ['compose','exec','-T','wordpress','php','/opt/ascla-tests/confirmed-pair-fixture.php'], {input:JSON.stringify({action:'setup',a:me,b:target.id}),encoding:'utf8'}));
       conversation = (await request(p, "conversations", { target: target.id }))
         .body;
       await p.goto(base + "/mensajeria/?conversation=" + conversation.id);
@@ -338,16 +350,16 @@ async function goto(page, route) {
         .waitFor();
     });
     await test("Authorized upload stays private before publication", async () => {
-      await goto(p, "galeria");
-      await p.getByRole("button", { name: "Nueva galería" }).click();
-      await p.locator(".modal [name=title]").fill("E2E Galería privada");
-      await p
+      await a.goto(base + "/galeria/"); await a.locator("#page-content h1").waitFor();
+      await a.getByRole("button", { name: "Nueva galería" }).click();
+      await a.locator(".modal [name=title]").fill("E2E Galería privada");
+      await a
         .locator(".modal [name=body]")
         .fill("E2E Imágenes ficticias para comprobar privacidad.");
-      const uploaded = p.waitForResponse(
+      const uploaded = a.waitForResponse(
         (r) => r.url().endsWith("/media") && r.request().method() === "POST",
       );
-      await p
+      await a
         .locator(".modal [data-upload=content]")
         .setInputFiles(
           path.join(
@@ -362,12 +374,12 @@ async function goto(page, route) {
       const response = await guest.request.get(media.url);
       assert.notEqual(response.headers()["content-type"], "image/png");
       await guest.close();
-      const save = p.waitForResponse(
+      const save = a.waitForResponse(
         (r) =>
           r.url().includes("/content/gallery") &&
           r.request().method() === "POST",
       );
-      await p.getByRole("button", { name: "Guardar galería" }).click();
+      await a.getByRole("button", { name: "Guardar galería" }).click();
       const gal = await (await save).json();
       fixtures.push(gal.id);
       assert.equal(gal.status, "pending");
@@ -545,6 +557,7 @@ async function goto(page, route) {
         } catch {}
       }
     await browser.close();
+    if (confirmedPair) execFileSync('docker', ['compose','exec','-T','wordpress','php','/opt/ascla-tests/confirmed-pair-fixture.php'], {input:JSON.stringify({...confirmedPair,action:'cleanup'}),encoding:'utf8'});
     const assetRoot = path.join(root, "wp-content/plugins/ascla-core/assets");
     const productionScript = entry => {
       if (!entry.url.includes("/ascla-core/assets/")) return null;
@@ -552,7 +565,7 @@ async function goto(page, route) {
       const file = path.join(assetRoot, name);
       return name.endsWith(".js") && fs.existsSync(file) && entry.source === fs.readFileSync(file, "utf8") ? file : null;
     };
-    for (const report of ["zip-v8.json", "completion-v8.json"]) {
+    for (const report of ["zip-v8.json", "completion-v8.json", "sprint-v8.json", "navigation-v8.json"]) {
       const file = path.join(root, "coverage", report);
       if (fs.existsSync(file)) coverage.push(...JSON.parse(fs.readFileSync(file, "utf8")).filter(productionScript));
     }
