@@ -16,6 +16,7 @@
     conversations: [],
     calendar: new Date(),
     adminTab: "moderacion",
+    adminFilters: {users: {}, contacts: {}},
     poll: null,
     noticeFilter: "all",
     noticePage: 1,
@@ -474,7 +475,7 @@
     );
     S.list = list;
     const canWrite =
-      S.boot.moderator || ["hub", "topic", "gallery"].includes(type);
+      ["gallery", "resource"].includes(type) ? S.boot.admin : S.boot.moderator || ["hub", "topic"].includes(type);
     const labels = {
       hub: [
         "Hub ASCLA",
@@ -536,7 +537,7 @@
       S.event = d;
       extra = `<div class="card" style="background:var(--bg);margin:20px 0"><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span><span>${I("clock")} ${time(p.meta.start)} – ${time(p.meta.end)}</span><span>${I("pin")} ${E(p.meta.location || "Por confirmar")}</span></div><p class="private-note">${d.attending} inscritos${p.meta.capacity ? " · " + p.meta.capacity + " cupos" : " · Sin límite de cupos"} · ${status(d.registered)}</p>${p.meta.agenda ? `<p class="detail-body">${E(p.meta.agenda).replace(/\\n/g, "<br>")}</p>` : ""}<div class="form-actions">${d.registered === "accepted" ? btn("Cancelar inscripción", "register", `data-id="${id}" data-status="cancelled"`) : btn("Registrarme", "register", `data-id="${id}" data-status="accepted"`, "primary")}${d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : ""}<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">Añadir a Google Calendar ↗</a>${btn(I("download") + " ICS", "ics", `data-id="${id}"`, "small")}${S.boot.google_connected ? btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small") + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small") : ""}</div>${d.participants ? `<details><summary class="private-note">Participantes (moderación)</summary>${d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("")}</details>` : ""}</div>`;
     }
-    const canEdit = S.boot.moderator || p.author.id === S.boot.me.id;
+    const canEdit = ["gallery", "resource"].includes(p.type) ? S.boot.admin : S.boot.moderator || p.author.id === S.boot.me.id;
     const reviewedLabel = p.meta.reviewed ? "Revisado" : "Requiere revisión de fuentes, anonimización y derechos.";
     const clipQuery = p.meta.clip ? "?start=" + Number(p.meta.clip.start) + "&end=" + Number(p.meta.clip.end) : "";
     const videoDuration = p.meta.duration_seconds ? E(UI.duration(p.meta.duration_seconds)) : "Duración por confirmar";
@@ -545,7 +546,7 @@
 
     modal(
       p.title,
-      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${p.meta.demo ? '<span class="demo-badge">DATOS DEMO</span>' : ""}</div>${p.meta.chatham ? '<div class="alert chatham" style="margin-top:18px">' + I("shield") + " Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones.</div>" : ""}${p.meta.generated ? ("<div class=\"alert\">Contenido generado · " + (E(p.meta.ai_mode || p.meta.social_mode || "IA")) + " · " + (reviewedLabel) + "</div>") : ""}<p class="detail-body">${E(p.body)}</p>${p.meta.video_id ? ("<div class=\"video-wrap\"><iframe loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" src=\"https://www.youtube-nocookie.com/embed/" + (E(p.meta.video_id)) + "" + (clipQuery) + "\" title=\"" + (E(p.title)) + "\" allow=\"accelerometer; encrypted-media; picture-in-picture\" allowfullscreen></iframe></div>") : ""}${p.meta.video_id ? ("<div class=\"video-metadata\"><span>" + (videoDuration) + "</span>" + (videoModeTag) + "</div>") : ""}${extra}${UI.attachments(p)}${UI.generated(p)}${UI.agenda(p)}${p.meta.demo_source_note ? ("<p class=\"alert\">" + (E(p.meta.demo_source_note)) + "</p>") : ""}${p.meta.url ? ("<a class=\"btn\" href=\"" + (E(safeURL(p.meta.url))) + "\" target=\"_blank\" rel=\"noopener noreferrer\">Abrir enlace ↗</a>") : ""}${p.meta.benefits ? ("<h3>Beneficios</h3><p class=\"detail-body\">" + (E(p.meta.benefits)) + "</p>") : ""}${p.meta.initiatives ? ("<h3>Iniciativas</h3><p class=\"detail-body\">" + (E(p.meta.initiatives)) + "</p>") : ""}${p.meta.clip ? ("<div class=\"alert\">Cápsula sugerida: " + (p.meta.clip.start) + "s – " + (p.meta.clip.end) + "s · Referencia temporal al video de origen. No existe un archivo recortado.</div>") : ""}${p.meta.infographic ? btn(I("download") + " Descargar infografía", "infographic", ("data-id=\"" + (id) + "\"")) : ""}${p.meta.copyright ? ("<p class=\"private-note\">" + (E(p.meta.copyright)) + "</p>") : ""}<div class="form-actions">${canEdit ? btn(I("edit") + " Editar", "editor", ("data-type=\"" + (p.type) + "\" data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type === "event" && p.status === "publish" && !p.meta.micro ? btn("Invitar asociados", "event-invite", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type === "resource" && p.meta.video_id ? btn("Actualizar datos de YouTube", "video-metadata", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type === "resource" ? btn(I("spark") + " Generar resumen y nota", "generate", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type !== "contact" ? btn(I("shield") + " Moderar", "moderate", ("data-id=\"" + (id) + "\"")) : ""}${p.status === "publish" ? ("" + (btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.liked) + "\""))) + "" + (btn(followingLabel, "follow", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.following) + "\""))) + "" + (btn("Reportar", "report", ("data-id=\"" + (id) + "\""), "ghost")) + "") : ""}</div>${p.status === "publish" ? ("<section class=\"comments\"><h3>Conversación</h3><div id=\"comments-list\">Cargando comentarios…</div><form data-form=\"comment\" data-id=\"" + (id) + "\" style=\"margin-top:18px\">" + (field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')) + "<button class=\"btn primary small\">Publicar comentario</button></form></section>") : ""}`,
+      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${p.meta.demo ? '<span class="demo-badge">DATOS DEMO</span>' : ""}</div>${p.meta.chatham ? '<div class="alert chatham" style="margin-top:18px">' + I("shield") + " Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones.</div>" : ""}${p.meta.generated ? ("<div class=\"alert\">Contenido generado · " + (E(p.meta.ai_mode || p.meta.social_mode || "IA")) + " · " + (reviewedLabel) + "</div>") : ""}<p class="detail-body">${E(p.body)}</p>${p.meta.video_id ? ("<div class=\"video-wrap\"><iframe loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" src=\"https://www.youtube-nocookie.com/embed/" + (E(p.meta.video_id)) + "" + (clipQuery) + "\" title=\"" + (E(p.title)) + "\" allow=\"accelerometer; encrypted-media; picture-in-picture\" allowfullscreen></iframe></div>") : ""}${p.meta.video_id ? ("<div class=\"video-metadata\"><span>" + (videoDuration) + "</span>" + (videoModeTag) + "</div>") : ""}${extra}${UI.attachments(p)}${UI.generated(p)}${UI.agenda(p)}${p.meta.demo_source_note ? ("<p class=\"alert\">" + (E(p.meta.demo_source_note)) + "</p>") : ""}${p.meta.url ? ("<a class=\"btn\" href=\"" + (E(safeURL(p.meta.url))) + "\" target=\"_blank\" rel=\"noopener noreferrer\">Abrir enlace ↗</a>") : ""}${p.meta.benefits ? ("<h3>Beneficios</h3><p class=\"detail-body\">" + (E(p.meta.benefits)) + "</p>") : ""}${p.meta.initiatives ? ("<h3>Iniciativas</h3><p class=\"detail-body\">" + (E(p.meta.initiatives)) + "</p>") : ""}${p.meta.clip ? ("<div class=\"alert\">Cápsula sugerida: " + (p.meta.clip.start) + "s – " + (p.meta.clip.end) + "s · Referencia temporal al video de origen. No existe un archivo recortado.</div>") : ""}${p.meta.infographic ? btn(I("download") + " Descargar infografía", "infographic", ("data-id=\"" + (id) + "\"")) : ""}${p.meta.copyright ? ("<p class=\"private-note\">" + (E(p.meta.copyright)) + "</p>") : ""}<div class="form-actions">${canEdit ? btn(I("edit") + " Editar", "editor", ("data-type=\"" + (p.type) + "\" data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type === "event" && p.status === "publish" && !p.meta.micro ? btn("Invitar asociados", "event-invite", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.admin && p.type === "resource" && p.meta.video_id ? btn("Actualizar datos de YouTube", "video-metadata", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.admin && p.type === "resource" ? btn(I("spark") + " Generar resumen y nota", "generate", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type !== "contact" && (!["gallery", "resource"].includes(p.type) || S.boot.admin) ? btn(I("shield") + " Moderar", "moderate", ("data-id=\"" + (id) + "\"")) : ""}${p.status === "publish" ? ("" + (btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.liked) + "\""))) + "" + (btn(followingLabel, "follow", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.following) + "\""))) + "" + (btn("Reportar", "report", ("data-id=\"" + (id) + "\""), "ghost")) + "") : ""}</div>${p.status === "publish" ? ("<section class=\"comments\"><h3>Conversación</h3><div id=\"comments-list\">Cargando comentarios…</div><form data-form=\"comment\" data-id=\"" + (id) + "\" style=\"margin-top:18px\">" + (field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')) + "<button class=\"btn primary small\">Publicar comentario</button></form></section>") : ""}`,
       true,
     );
     if (p.status === "publish") {
@@ -622,7 +623,7 @@
       `<form data-form="editor" data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${extra}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => `<label class="chip-check"><input type="checkbox" name="interest" value="${t.id}" ${p.tags.some((x) => x.id === t.id) ? "checked" : ""}>${E(t.name)}</label>`).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? `<label class="btn small">${I("plus")} Adjuntar imagen o PDF<input type="file" data-upload="content" accept="image/jpeg,image/png,image/webp,application/pdf" hidden></label><div id="attachments">${(m.media_ids || []).map((mid) => `<span class="attached-file" data-media="${mid}">Archivo #${mid}</span>`).join("")}</div><p class="private-note">Imágenes hasta 3 MB; PDF hasta 5 MB. Sólo acceso autenticado.</p>` : ""}${S.boot.moderator ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${select(
         "status",
         "Guardar como",
-        S.boot.moderator && !m.generated
+        ["topic", "forum"].includes(type) ? [["draft", "Borrador"], ["publish", "Publicar ahora"]] : S.boot.moderator && !m.generated
           ? [
               ["draft", "Borrador"],
               ["pending", "Pendiente de revisión"],
@@ -632,7 +633,7 @@
               ["draft", "Borrador"],
               ["pending", "Enviar a revisión"],
             ],
-        p.status === "publish" ? "pending" : p.status,
+        ["topic", "forum"].includes(type) ? (id && p.status === "draft" ? "draft" : "publish") : p.status === "publish" ? "pending" : p.status,
       )}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar ${typeLabel[type]}</button></div></form>`,
       true,
     );
@@ -747,7 +748,7 @@
     clearTimeout(S.poll);
     if (document.hidden) return;
     chat.syncing = true;
-    let delay = 4000;
+    let delay = 2000;
     try {
       const conversations = await api('conversations?' + new URLSearchParams({q: S.filter.q || ''}));
       if (!chatAlive(chat)) return;
@@ -760,7 +761,7 @@
       await loadMessages(chat);
       if (!chatAlive(chat)) return;
       if (current && !chat.more) current.unread = 0;
-      chatSidebar(); chatStatus('Actualización automática activada · cada 4 segundos');
+      chatSidebar(); chatStatus('Actualización automática activada · cada 2 segundos');
       if (chat.more) delay = 100;
     } catch (error) {
       if (!chatAlive(chat) || error.name === 'AbortError') return;
@@ -886,75 +887,36 @@
       return `<a class="answer-history-entry" href="${E(url.href)}"><span>${I("spark")}</span><span><strong>${E(j.question)}</strong><small>${E(status)} · ${date(j.created_at)}</small></span>${I("arrow")}</a>`;
     }).join("") || empty("Aún no tienes consultas", "Haz tu primera pregunta al asistente para empezar.")}`);
   }
+  const requestLabels = {open: "Recibida", progress: "En atención", closed: "Resuelta"};
+  function adminPager(list, area) {
+    if (list.pages < 2) return '';
+    return `<div class="admin-pager">${btn("Anterior", "admin-page", `data-area="${area}" data-page="${list.page-1}" ${list.page===1?'disabled':''}`, "small")}<span>Página ${list.page} de ${list.pages}</span>${btn("Siguiente", "admin-page", `data-area="${area}" data-page="${list.page+1}" ${list.page===list.pages?'disabled':''}`, "small")}</div>`;
+  }
+  async function adminContacts(panel) {
+    const f=S.adminFilters.contacts, list=await api('admin/contacts?'+new URLSearchParams(f));
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ATENCIÓN A LA COMUNIDAD</span><h2>Solicitudes</h2><p>Revisa cada caso y registra su avance. El asociado verá el estado actualizado.</p></div><span class="admin-total">${list.total} resultados</span></div><div class="request-stats">${Object.entries(requestLabels).map(([k,label])=>btn(`<strong>${list.counts[k]}</strong><span>${label}</span>`, 'request-filter', `data-state="${k}" aria-pressed="${f.state===k}"`, 'request-stat '+k+(f.state===k?' selected':''))).join('')}</div><form class="filters admin-filters" data-form="admin-filter" data-area="contacts"><input name="q" aria-label="Buscar solicitudes" placeholder="Buscar por asunto o contenido…" value="${E(f.q||'')}">${select('state','Estado',[['','Todos los estados'],...Object.entries(requestLabels)],f.state||'')}<button class="btn primary">${I('search')} Buscar</button></form><div class="request-list">${list.items.map(p=>{
+      const state=p.meta.request_status||'open';
+      return `<article class="request-card ${E(state)}" data-contact="${p.id}" data-state="${E(state)}"><div class="request-card-top"><span class="request-number">SOLICITUD #${p.id}</span><span class="request-status ${E(state)}">${E(requestLabels[state])}</span></div><h3>${E(p.title)}</h3><div class="request-author">${I('users')}<strong>${E(p.author.name)}</strong><span>· ${date(p.date)}</span>${p.meta.description?`<span class="tag">${E(p.meta.description)}</span>`:''}</div><p class="request-body">${E(p.body)}</p><div class="request-footer"><div><small>Cambiar estado</small><div class="request-actions">${Object.entries(requestLabels).map(([key,label])=>btn((state===key?'✓ ':'')+label,'contact-status',`data-id="${p.id}" data-status="${key}" ${state===key?'disabled aria-pressed="true"':'aria-pressed="false"'}`,'small '+(state===key?'selected':''))).join('')}</div></div>${p.meta.request_updated_at?`<small>Actualizada ${date(p.meta.request_updated_at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</small>`:''}</div>${p.meta.request_history?.length?`<details class="request-history"><summary>Historial de atención</summary><ol>${p.meta.request_history.slice().reverse().map(h=>`<li><strong>${E(requestLabels[h.to])}</strong><span>${E(h.actor)} · ${date(h.at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span></li>`).join('')}</ol></details>`:''}</article>`;
+    }).join('')||empty('No hay solicitudes en esta vista','Prueba otro estado o modifica la búsqueda.')}</div>${adminPager(list,'contacts')}`;
+  }
+  async function adminUsers(panel) {
+    const f=S.adminFilters.users,list=await api('admin/users?'+new URLSearchParams(f));
+    const roles=Object.fromEntries(list.roles.map(r=>[r.id,r.name]));
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PERSONAS Y ACCESOS</span><h2>Usuarios de la comunidad</h2><p>Encuentra cuentas, consulta sus roles y administra su acceso.</p></div>${list.create_url?`<a class="btn primary" data-native href="${E(list.create_url)}">${I('plus')} Añadir usuario</a>`:''}</div><form class="filters admin-filters" data-form="admin-filter" data-area="users"><input name="q" aria-label="Buscar usuarios" placeholder="Nombre, usuario o correo…" value="${E(f.q||'')}">${select('role','Rol',[['','Todos los roles'],...list.roles.map(r=>[r.id,r.name])],f.role||'')}${select('state','Acceso',[['','Todos'],['active','Activo'],['suspended','Suspendido']],f.state||'')}<button class="btn primary">${I('search')} Buscar</button></form><p class="private-note">${list.total} usuarios encontrados</p><div class="admin-users">${list.items.map(u=>`<article class="admin-user" data-admin-user="${u.id}"><div class="admin-user-person">${avatar(u)}<div><h3>${E(u.name)}</h3><span>@${E(u.login)}</span><a href="mailto:${E(u.email)}">${E(u.email)}</a></div></div><div class="admin-user-access">${u.roles.map(r=>`<span class="tag">${E(roles[r]||r)}</span>`).join('')}<span class="request-status ${u.suspended?'closed':'open'}">${u.suspended?'Acceso suspendido':'Acceso activo'}</span><small>Registro: ${date(u.registered)}</small></div><div class="admin-user-actions">${u.profile_url?`<a class="btn small" href="${E(u.profile_url)}">Ver perfil</a>`:''}${u.edit_url?`<a class="btn small" data-native href="${E(u.edit_url)}">Editar cuenta</a>`:''}${u.can_suspend?btn(u.suspended?'Reactivar acceso':'Suspender acceso','user-access',`data-id="${u.id}" data-suspended="${!u.suspended}" data-name="${E(u.name)}"`,'ghost small'):''}</div></article>`).join('')||empty('No encontramos usuarios','Prueba otro nombre o cambia los filtros.')}</div>${adminPager(list,'users')}`;
+  }
   async function admin() {
-    const d = await api("admin");
-    S.admin = d;
-    const tab = S.adminTab;
-    const tabs = [
-      ["moderacion", "Moderación"],
-      ["trabajos", "IA y trabajos"],
-      ["microeventos", "Microeventos"],
-      ["solicitudes", "Solicitudes"],
-      ["logs", "Auditoría"],
-      ...(S.boot.admin ? [["configuracion", "Configuración"]] : []),
-    ];
-    content().innerHTML =
-      heading(
-        "Administración ASCLA",
-        "Herramientas para cuidar y hacer crecer la comunidad.",
-        link("intranet", "Ver intranet " + I("arrow")),
-      ) +
-      `<div class="stat-grid">${[
-        [d.counts.members, "Miembros", "users"],
-        [d.pending.length, "Contenidos por revisar", "shield"],
-        [
-          d.jobs.filter((j) => ["pending", "processing"].includes(j.status))
-            .length,
-          "Trabajos activos",
-          "spark",
-        ],
-        [d.reports.length, "Reportes", "bell"],
-      ]
-        .map(
-          ([n, l, i]) =>
-            `<div class="stat"><span class="stat-icon">${I(i)}</span><div><strong>${n}</strong><small>${l}</small></div></div>`,
-        )
-        .join(
-          "",
-        )}</div><div class="tabs">${tabs.map(([k, l]) => btn(l, "admin-tab", `data-tab="${k}"`, "tab " + (tab === k ? "active" : ""))).join("")}</div><div id="admin-panel"></div>`;
-    const panel = document.getElementById("admin-panel");
-    if (tab === "moderacion")
-      panel.innerHTML = `<div class="card"><h2>Contenido pendiente y borradores</h2><div class="table-wrap"><table class="data-table"><thead><tr><th>CONTENIDO</th><th>AUTOR</th><th>ESTADO</th><th>ACCIÓN</th></tr></thead><tbody>${d.pending.map((p) => `<tr><td><strong>${E(p.title)}</strong><br><small>${E(typeLabel[p.type])}${p.meta.generated ? " · IA" : ""}${p.meta.chatham ? " · Chatham House" : ""}</small></td><td>${E(p.author.name)}</td><td>${status(p.status)}</td><td>${btn("Revisar", "item", `data-id="${p.id}"`, "small")}</td></tr>`).join("") || '<tr><td colspan="4">No hay contenido pendiente.</td></tr>'}</tbody></table></div></div><div class="card"><h3>Reportes de la comunidad</h3>${d.reports.map((r) => `<p style="padding:10px 0">Publicación #${r.target_id} ${btn("Revisar", "item", `data-id="${r.target_id}"`, "small")}</p>`).join("") || '<p class="private-note">Sin reportes.</p>'}</div><div class="card"><h3>Comentarios pendientes</h3>${d.comments.map((c) => `<div class="comment"><strong>${E(c.author)}</strong><p>${E(c.body)}</p>${btn("Aprobar", "comment-moderate", `data-id="${c.id}" data-decision="approve"`, "small")}${btn("Mantener oculto", "comment-moderate", `data-id="${c.id}" data-decision="reject"`, "small")}</div>`).join("") || '<p class="private-note">Sin comentarios pendientes.</p>'}</div>`;
-    if (tab === "trabajos")
-      panel.innerHTML = `<div class="alert">La IA y las transcripciones se procesan en segundo plano. Ningún borrador IA se publica sin revisión.</div><div class="admin-actions">${link("centro-conocimiento", "Gestionar recursos", "primary")}${btn("Curaduría social demo", "social-job")}${btn("Conectar YouTube OAuth", "google-connect", 'data-service="youtube"')}${btn("Actualizar estados", "admin-refresh")}</div><div class="card table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>TIPO</th><th>ESTADO</th><th>DETALLE</th><th></th></tr></thead><tbody>${d.jobs.map((j) => `<tr><td>#${j.id}</td><td>${E(j.kind)}</td><td>${status(j.status)}</td><td>${E(j.error || date(j.created_at))}</td><td>${btn("Ver", "job-detail", `data-id="${j.id}"`, "small")}${j.status === "error" ? btn("Reintentar", "retry-job", `data-id="${j.id}"`, "small") : ""}</td></tr>`).join("")}</tbody></table></div>`;
-    if (tab === "microeventos")
-      panel.innerHTML = `<div class="card"><h2>Círculos de conversación ASCLA</h2><p class="detail-body">Prepara grupos de 4 a 6 asociados que aceptaron participar. El sistema considera intereses comunes y el historial para reducir la repetición. La propuesta mensual incluye tema, agenda y fecha ajustable.</p><div class="alert">La propuesta se genera una vez por mes. En modo de aprobación, revisa y publica cada microevento para enviar sus invitaciones internas.</div>${S.boot.admin ? btn(I("spark") + " Preparar propuesta del mes", "micro-job", "", "primary") : ""}<div id="micro-job-result" style="margin-top:18px"></div></div>`;
-    if (tab === "logs")
-      panel.innerHTML = `<div class="card table-wrap"><table class="data-table"><thead><tr><th>FECHA UTC</th><th>ACCIÓN</th><th>ACTOR</th><th>OBJETO</th><th>CLASIFICACIÓN</th></tr></thead><tbody>${d.audit.map((a) => `<tr><td>${E(a.created_at)}</td><td>${E(a.action)}</td><td>${a.actor_id}</td><td>${a.object_id}</td><td>${E(a.detail)}</td></tr>`).join("")}</tbody></table></div>`;
-    if (tab === "solicitudes") {
-      const list = await api("content/contact");
-      panel.innerHTML =
-        list.items
-          .map(
-            (p) =>
-              `<div class="card"><h3>${E(p.title)}</h3><p class="detail-body">${E(p.body)}</p><p class="private-note">${E(p.author.name)} · ${date(p.date)}</p><div class="admin-actions">${[
-                ["open", "Recibida"],
-                ["progress", "En atención"],
-                ["closed", "Resuelta"],
-              ]
-                .map(([k, l]) =>
-                  btn(
-                    l,
-                    "contact-status",
-                    `data-id="${p.id}" data-status="${k}"`,
-                    "small",
-                  ),
-                )
-                .join("")}</div></div>`,
-          )
-          .join("") || empty("No hay solicitudes pendientes");
-    }
-    if (tab === "configuracion") await settings(panel);
+    const d = await api("admin"); S.admin=d;
+    const tab=S.adminTab;
+    const tabs=[["moderacion","Moderación","shield"],["solicitudes","Solicitudes","contact"],...(S.boot.admin?[["usuarios","Usuarios","users"]]:[]),["trabajos","IA y trabajos","spark"],["microeventos","Microeventos","calendar"],["logs","Auditoría","clock"],...(S.boot.admin?[["configuracion","Configuración","settings"]]:[])];
+    content().innerHTML=`<div class="admin-workspace"><header class="admin-hero"><div><span class="eyebrow">GESTIÓN DE LA COMUNIDAD</span><h1>Administración ASCLA</h1><p>Personas, contenido y atención en un mismo lugar.</p></div><div>${link('intranet','Ver intranet '+I('arrow'),'ghost')}${btn(I('refresh')+' Actualizar','admin-refresh','','small')}</div></header><div class="admin-overview">${[[d.counts.members,'Miembros','users',S.boot.admin?'usuarios':'moderacion'],[d.pending.length,'Contenidos por revisar','shield','moderacion'],[d.jobs.filter(j=>['pending','processing'].includes(j.status)).length,'Trabajos activos','spark','trabajos'],[d.reports.length,'Reportes de la comunidad','bell','moderacion']].map(([n,label,icon,target])=>btn(`<span class="stat-icon">${I(icon)}</span><span><strong>${n}</strong><small>${label}</small></span>`,'admin-tab',`data-tab="${target}"`,'admin-stat')).join('')}</div><nav class="admin-tabs" aria-label="Secciones de administración">${tabs.map(([key,label,icon])=>btn(I(icon)+label,'admin-tab',`data-tab="${key}" aria-pressed="${tab===key}"`,'admin-tab'+(tab===key?' active':''))).join('')}</nav><section id="admin-panel" class="admin-panel"></section></div>`;
+    const panel=document.getElementById('admin-panel');
+    if(tab==='solicitudes') await adminContacts(panel);
+    else if(tab==='usuarios' && S.boot.admin) await adminUsers(panel);
+    else if(tab==='moderacion') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">CALIDAD Y CONVIVENCIA</span><h2>Revisión de contenido</h2><p>Los foros se publican directamente. Galería y Conocimiento los gestionan administradores.</p></div></div><div class="card"><h3>Contenido pendiente y borradores</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>Contenido</th><th>Autor</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${d.pending.map(p=>`<tr><td><strong>${E(p.title)}</strong><br><small>${E(typeLabel[p.type])}${p.meta.generated?' · IA':''}${p.meta.chatham?' · Chatham House':''}</small></td><td>${E(p.author.name)}</td><td>${status(p.status)}</td><td>${btn('Revisar','item',`data-id="${p.id}"`,'small')}${!S.boot.admin&&['gallery','resource'].includes(p.type)?'<small>Publicación administrativa</small>':''}</td></tr>`).join('')||'<tr><td colspan="4">Todo al día. No hay contenido pendiente.</td></tr>'}</tbody></table></div></div><div class="admin-review-grid"><div class="card"><h3>Reportes de la comunidad</h3>${d.reports.map(r=>`<div class="admin-report"><span>Publicación #${r.target_id}</span>${btn('Revisar','item',`data-id="${r.target_id}"`,'small')}</div>`).join('')||'<p class="private-note">No hay reportes por revisar.</p>'}</div><div class="card"><h3>Comentarios pendientes</h3>${d.comments.map(c=>`<div class="comment"><strong>${E(c.author)}</strong><p>${E(c.body)}</p>${btn('Aprobar','comment-moderate',`data-id="${c.id}" data-decision="approve"`,'small')}${btn('Mantener oculto','comment-moderate',`data-id="${c.id}" data-decision="reject"`,'small')}</div>`).join('')||'<p class="private-note">No hay comentarios pendientes.</p>'}</div></div>`;
+    else if(tab==='trabajos') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PROCESAMIENTO Y RESULTADOS</span><h2>IA y trabajos</h2><p>Consulta el avance, abre resultados y reintenta los trabajos con error.</p></div></div><div class="alert">Los derivados de IA quedan en borrador para revisión.</div><div class="admin-actions">${link('centro-conocimiento','Ver recursos','primary')}${btn('Curaduría social demo','social-job')}${S.boot.admin?btn('Conectar YouTube OAuth','google-connect','data-service="youtube"'):''}${btn('Actualizar estados','admin-refresh')}</div><div class="card table-wrap"><table class="data-table"><thead><tr><th>Trabajo</th><th>Estado</th><th>Detalle</th><th>Acción</th></tr></thead><tbody>${d.jobs.map(j=>`<tr><td><strong>#${j.id}</strong><br>${E(j.kind)}</td><td>${status(j.status)}</td><td>${E(j.error||date(j.created_at))}</td><td>${btn('Ver','job-detail',`data-id="${j.id}"`,'small')}${j.status==='error'?btn('Reintentar','retry-job',`data-id="${j.id}"`,'small'):''}</td></tr>`).join('')||'<tr><td colspan="4">No hay trabajos registrados.</td></tr>'}</tbody></table></div>`;
+    else if(tab==='microeventos') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ENCUENTROS ENTRE ASOCIADOS</span><h2>Círculos de conversación</h2><p>Grupos de 4 a 6 personas, con intereses comunes y una agenda para conversar.</p></div></div><div class="card"><h3>Preparar los encuentros del mes</h3><p class="detail-body">Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.</p><div class="admin-actions">${S.boot.admin?btn(I('spark')+' Preparar propuesta del mes','micro-job','','primary'):''}${link('eventos','Ver encuentros','small')}</div><div id="micro-job-result"></div></div>`;
+    else if(tab==='logs') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">TRAZABILIDAD</span><h2>Auditoría</h2><p>Últimas acciones registradas. No incluye contraseñas ni contenido de mensajes privados.</p></div></div><div class="card table-wrap"><table class="data-table"><thead><tr><th>Fecha UTC</th><th>Acción</th><th>Actor</th><th>Objeto</th><th>Detalle</th></tr></thead><tbody>${d.audit.map(a=>`<tr><td>${E(a.created_at)}</td><td>${E(a.action)}</td><td>#${a.actor_id}</td><td>${a.object_id||'—'}</td><td>${E(a.detail)}</td></tr>`).join('')||'<tr><td colspan="5">No hay acciones registradas.</td></tr>'}</tbody></table></div>`;
+    else if(tab==='configuracion' && S.boot.admin) await settings(panel);
   }
   function mailSettings(s) {
     const local = s.mail_local ? '<div class="alert">Buzón local activo: los correos se consultan en <a href="http://localhost:8025/" target="_blank" rel="noopener">Abrir buzón de pruebas</a>. No llegan a una bandeja externa.</div>' : '';
@@ -963,7 +925,7 @@
   }
   async function settings(panel) {
     const s = await api("settings");
-    panel.innerHTML = `<form class="card" data-form="settings"><h2>Comunidad e integraciones</h2><div class="form-section">Participación y revisión</div>${check("demo", "Modo demo (datos e integraciones identificados)", s.demo)}${check("moderation_required", "Revisar publicaciones del Hub antes de publicarlas", s.moderation_required)}${check("moderate_comments", "Revisar comentarios antes de publicarlos", s.moderate_comments)}${check("chatham_default", "Aplicar Chatham House por defecto", s.chatham_default)}${check("micro_enabled", "Preparar microeventos mensualmente con WP-Cron", s.micro_enabled)}${check("micro_approval", "Exigir aprobación administrativa de microeventos", s.micro_approval)}<div class="form-section">Motor de afinidad</div><div class="form-grid">${Object.entries(
+    panel.innerHTML = `<form class="card" data-form="settings"><h2>Comunidad e integraciones</h2><div class="form-section">Participación y revisión</div>${check("demo", "Modo demo (datos e integraciones identificados)", s.demo)}${check("moderation_required", "Revisar publicaciones del Hub antes de publicarlas", s.moderation_required)}${check("moderate_comments", "Revisar comentarios del Hub y otras secciones (excepto Foros)", s.moderate_comments)}${check("chatham_default", "Aplicar Chatham House por defecto", s.chatham_default)}${check("micro_enabled", "Preparar microeventos mensualmente con WP-Cron", s.micro_enabled)}${check("micro_approval", "Exigir aprobación administrativa de microeventos", s.micro_approval)}<div class="form-section">Motor de afinidad</div><div class="form-grid">${Object.entries(
       s.matching_weights,
     )
       .map(([k, v]) =>
@@ -982,10 +944,10 @@
       "Proveedor",
       [
         ["mock", "DEMO MODE · sin API"],
-        ["real", "API real · OpenAI Responses"],
+        ["real", "Google Gemini · API real"],
       ],
       s.ai_mode,
-    )}${field("ai_model", "Modelo habilitado en tu cuenta", s.ai_model)}${field("ai_key", s.has_ai_key ? "API key (configurada; vacío para conservar)" : "API key", "", "password", 'autocomplete="new-password"')}${select(
+    )}${field("ai_model", "ID del modelo Gemini", s.ai_model, "text", 'placeholder="gemini-2.5-flash" autocomplete="off"')}${field("ai_key", s.has_ai_key ? "Gemini API Key (guardada; vacío para conservar)" : "Gemini API Key", "", "password", 'autocomplete="new-password"')}${select(
       "youtube_mode",
       "Transcripciones YouTube",
       [
@@ -993,7 +955,7 @@
         ["real", "YouTube OAuth real"],
       ],
       s.youtube_mode,
-    )}</div>${check("clear_ai_key", "Eliminar API key guardada", false)}<div class="form-section">Google OAuth</div><div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert">URI de redirección: <code>${E(s.google_redirect)}</code></div><p class="private-note">Cada asociado conecta su calendario desde Perfil. YouTube se conecta desde IA y trabajos.</p><div class="form-section">Social Listening</div><div class="alert">LinkedIn y X: DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; no se realiza scraping ni se envían respuestas externas.</div>${mailSettings(s)}${field("copyright", "Propiedad intelectual", s.copyright)}<div class="form-actions"><button class="btn primary">Guardar configuración</button></div></form><form class="card section-gap" data-form="demo"><h2>Preparar datos de demostración</h2><p class="private-note">Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes.</p>${field("password", "Contraseña para nuevas cuentas demo", "", "password", 'required minlength="12" autocomplete="new-password"')}<button class="btn">Crear / completar demo</button></form>`;
+    )}</div>${check("clear_ai_key", "Eliminar Gemini API Key guardada", false)}<p class="private-note">Usa un modelo Gemini disponible para tu cuenta. Guarda la configuración antes de probar. Las claves de OpenAI no son compatibles.</p>${btn("Probar conexión", "gemini-test", "", "small")}<p id="gemini-test-result" class="private-note" role="status" aria-live="polite"></p><div class="form-section">Google OAuth</div><div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert">URI de redirección: <code>${E(s.google_redirect)}</code></div><p class="private-note">Cada asociado conecta su calendario desde Perfil. YouTube se conecta desde IA y trabajos.</p><div class="form-section">Social Listening</div><div class="alert">LinkedIn y X: DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; no se realiza scraping ni se envían respuestas externas.</div>${mailSettings(s)}${field("copyright", "Propiedad intelectual", s.copyright)}<div class="form-actions"><button class="btn primary">Guardar configuración</button></div></form><form class="card section-gap" data-form="demo"><h2>Preparar datos de demostración</h2><p class="private-note">Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes.</p>${field("password", "Contraseña para nuevas cuentas demo", "", "password", 'required minlength="12" autocomplete="new-password"')}<button class="btn">Crear / completar demo</button></form>`;
   }
   function rules() {
     modal(
@@ -1196,6 +1158,19 @@
       } else if (a === "ask-suggestion") {
         document.querySelector("[name=question]").value = b.dataset.question;
         document.querySelector("[data-form=ask]").requestSubmit();
+      } else if (a === "gemini-test") {
+        const target=document.getElementById('gemini-test-result'); target.textContent='Probando el modelo y la clave guardados…';
+        try { const r=await api('ai/test',{}); target.textContent=r.message+' Modelo: '+r.model; target.className='alert success'; }
+        catch(error) { target.textContent=error.message; target.className='alert error'; }
+      } else if (a === "request-filter") {
+        S.adminFilters.contacts={...S.adminFilters.contacts,state:b.dataset.state,page:1}; await adminContacts(document.getElementById('admin-panel'));
+      } else if (a === "admin-page") {
+        const area=b.dataset.area;S.adminFilters[area].page=Number(b.dataset.page);await (area==='users'?adminUsers:adminContacts)(document.getElementById('admin-panel'));
+      } else if (a === "user-access") {
+        const suspended=b.dataset.suspended==='true';
+        modal(suspended?'Suspender acceso':'Reactivar acceso',`<p>¿${suspended?'Suspender':'Reactivar'} el acceso de <strong>${E(b.dataset.name)}</strong> a la comunidad?</p><p class="private-note">La cuenta y su contenido se conservan.</p><div class="form-actions">${btn('Cancelar','close')}${btn('Confirmar','user-status',`data-id="${id}" data-suspended="${suspended}"`,'primary')}</div>`);
+      } else if (a === "user-status") {
+        await api('admin/member/'+id,{suspended:b.dataset.suspended==='true'}); closeModal();toast('Acceso actualizado.');await adminUsers(document.getElementById('admin-panel'));
       } else if (a === "admin-tab") {
         S.adminTab = b.dataset.tab;
         await admin();
@@ -1221,8 +1196,8 @@
         await admin();
       } else if (a === "contact-status") {
         await api("admin/contact/" + id, { status: b.dataset.status });
-        toast("Estado actualizado.");
-        await admin();
+        toast("Solicitud #"+id+": "+requestLabels[b.dataset.status]+".");
+        await adminContacts(document.getElementById('admin-panel'));
       } else if (a === "generate") {
         const j = await api("jobs", { kind: "multimedia", resource_id: id });
         modal("Procesar conferencia", '<div id="job-result"></div>');
@@ -1422,6 +1397,8 @@
         closeModal();
         toast("Decisión registrada.");
         await render();
+      } else if (action === "admin-filter") {
+        const area=form.dataset.area; S.adminFilters[area]={...data,page:1}; await (area==='users'?adminUsers:adminContacts)(document.getElementById('admin-panel'));
       } else if (action === "settings") {
         for (const k of [
           "demo",
@@ -1514,7 +1491,6 @@
       if (S.page === "admin") {
         const menu = q.get("page") || "",
           maps = {
-            "ascla-miembros": "directorio",
             "ascla-hub": "hub",
             "ascla-eventos": "eventos",
             "ascla-conocimiento": "centro-conocimiento",
@@ -1525,6 +1501,8 @@
         S.page = maps[menu] || "admin";
         S.adminTab =
           {
+            "ascla-miembros": "usuarios",
+            "ascla-solicitudes": "solicitudes",
             "ascla-ia": "trabajos",
             "ascla-microeventos": "microeventos",
             "ascla-logs": "logs",

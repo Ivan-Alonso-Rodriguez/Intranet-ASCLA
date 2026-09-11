@@ -47,9 +47,9 @@
         (x) => typeof x === "string",
       ),
     );
-    if (p.meta.grounding?.policy === "extractive-source-sentences-v1") {
+    if (["extractive-source-sentences-v1", "source-references-v2"].includes(p.meta.grounding?.policy)) {
       section(
-        "Estadísticas sustentadas en la fuente",
+        "Estadísticas de la sesión",
         (info.statistics || []).filter((x) => typeof x === "string"),
       );
       const timeline = (info.timeline || []).filter(

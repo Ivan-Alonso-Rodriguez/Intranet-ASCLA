@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.5.0
+Stable tag: 1.6.0
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,9 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.6.0 =
+Panel de administración con solicitudes y usuarios; mensajería cada 2 segundos; Foros sin aprobación; Galería y Conocimiento administrados por administradores. Google Gemini REST configurable, prueba de conexión y respuestas naturales con hasta seis fuentes relevantes.
 = 1.5.0 =
 * Solicitudes de conexión: aceptar, rechazar, estado entrante/saliente y conexiones confirmadas.
 * RN-010: mensajería privada solo entre conexiones confirmadas, con validación en todas las rutas.

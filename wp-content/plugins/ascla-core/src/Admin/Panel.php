@@ -6,8 +6,8 @@ final class Panel
     {
         add_action('admin_menu',static function () {
             add_menu_page('ASCLA','ASCLA','ascla_moderate','ascla',[self::class,'render'],'dashicons-groups',3);
-            foreach (['Dashboard','Miembros','Hub','Moderación','Eventos','Microeventos','Conocimiento','IA','Networking','Galería','Aliados','Integraciones','Logs','Configuración'] as $label) {
-                add_submenu_page('ascla',$label,$label,'ascla_moderate','ascla-'.sanitize_title($label),[self::class,'render']);
+            foreach (['Dashboard','Miembros','Hub','Moderación','Eventos','Microeventos','Solicitudes','Conocimiento','IA','Networking','Galería','Aliados','Integraciones','Logs','Configuración'] as $label) {
+                add_submenu_page('ascla',$label,$label,in_array($label,['Miembros','Integraciones','Configuración'],true)?'ascla_manage':'ascla_moderate','ascla-'.sanitize_title($label),[self::class,'render']);
             }
         });
         add_action('admin_enqueue_scripts',static function ($hook) {

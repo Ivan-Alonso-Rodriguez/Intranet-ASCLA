@@ -8,6 +8,7 @@ final class Content
     public static function indexMeta(int $metaId,int $postId,string $key,mixed $value): void
     {
         if ($key!=='_ascla' || !is_array($value)) { return; }
+        if(get_post_type($postId)==='ascla_contact') update_post_meta($postId,'_ascla_request_status',$value['request_status']??'open');
         foreach (['resource_type','start','end','source'] as $field) { update_post_meta($postId,'_ascla_'.$field,$value[$field]??''); }
         update_post_meta($postId,'_ascla_micro',empty($value['micro'])?'0':'1');
         delete_post_meta($postId,'_ascla_invitee');
@@ -75,6 +76,7 @@ final class Content
     {
         Access::require(isset(Catalog::TYPES[$type]),'Tipo no válido.',400);
         $editor=current_user_can('ascla_moderate');
+        Access::require(!in_array($type,['gallery','resource'],true)||current_user_can('ascla_manage'),'Solo administradores pueden crear o editar Galería y Centro de Conocimiento.',403);
         Access::require($editor||in_array($type,['hub','topic','gallery','contact'],true),'Se requiere moderación.',403);
         if ($id) {
             $post=self::get($id); Access::require($post->post_type==='ascla_'.$type && ($editor||(int)$post->post_author===get_current_user_id()),'No puede editar este contenido.');
@@ -99,6 +101,7 @@ final class Content
         $requested=$input['status']??'pending';
         Access::require(in_array($requested,['draft','pending','publish'],true),'Estado no válido.',400); $status=$requested==='draft'?'draft':'pending';
         if ($type==='contact') { $status='private'; }
+        elseif (in_array($type,['topic','forum'],true) && $requested!=='draft') { $status='publish'; }
         elseif ($editor && $requested==='publish' && empty($meta['generated'])) { $status='publish'; }
         elseif (!$editor && !Settings::get()['moderation_required'] && $requested!=='draft' && $type==='hub') { $status='publish'; }
         $parent=absint($input['parent']??0);
@@ -138,7 +141,7 @@ final class Content
     {
         Access::limit('comment',15); $post=self::get($id); Access::require($post->post_status==='publish','El contenido aún no está publicado.',400);
         $body=trim(Access::text($body,5000)); Access::require($body!=='','Escriba un comentario.',400);
-        $approved=current_user_can('ascla_moderate')||!Settings::get()['moderate_comments'];
+        $approved=in_array($post->post_type,['ascla_topic','ascla_forum'],true)||current_user_can('ascla_moderate')||!Settings::get()['moderate_comments'];
         $user=wp_get_current_user();
         $cid=wp_insert_comment(wp_slash(['comment_post_ID'=>$id,'user_id'=>$user->ID,'comment_author'=>$user->display_name,'comment_content'=>$body,'comment_approved'=>$approved?1:0,'comment_type'=>'comment']));
         if ($approved) { self::notifyComment((int)$cid); }
@@ -176,6 +179,7 @@ final class Content
         Access::require(current_user_can('ascla_moderate'));
         $post=self::get($id); $statuses=['approve'=>'publish','reject'=>'ascla_rejected','hide'=>'ascla_hidden','suspend'=>'ascla_hidden'];
         Access::require(isset($statuses[$decision])&&$post->post_type!=='ascla_contact','Decisión no válida.',400);
+        Access::require(!in_array($post->post_type,['ascla_gallery','ascla_resource'],true)||current_user_can('ascla_manage'),'Solo administradores pueden gestionar estas publicaciones.',403);
         $reason=Access::text($reason,1000); Access::require(trim($reason)!=='','Indique un motivo de moderación.',400);
         $meta=(array)get_post_meta($id,'_ascla',true);
         Access::require($decision!=='approve'||empty($meta['generated'])||$reviewed,'Debe confirmar revisión de fuentes, identidades y derechos.',400);
@@ -189,6 +193,7 @@ final class Content
     }
     public static function guardPublication(array $data,array $postarr): array
     {
+        if (($data['post_status']??'')==='publish' && in_array($data['post_type']??'',['ascla_gallery','ascla_resource'],true) && !current_user_can('ascla_manage') && (empty($postarr['ID']) || get_post_status($postarr['ID'])!=='publish')) $data['post_status']='pending';
         if (($data['post_status']??'')==='publish' && str_starts_with($data['post_type']??'','ascla_') && !empty($postarr['ID'])) {
             $meta=(array)get_post_meta($postarr['ID'],'_ascla',true);
             if (!empty($meta['generated']) && empty($meta['reviewed'])) { $data['post_status']='pending'; }

@@ -9,8 +9,7 @@ final class Knowledge
     public static function answer(string $question): array
     {
         $question=Access::text($question,2000);
-        $tokens=array_values(array_unique(array_filter(preg_split('/[^\p{L}\p{N}]+/u',mb_strtolower($question))?:[],static fn($w)=>mb_strlen($w)>3&&!in_array($w,['como','cómo','para','sobre','puedo','quiero','tiene','donde','cuáles','ascla'],true))));
-        $tokens=array_slice($tokens,0,16);
+        $tokens=\ASCLA\Core\Repositories\KnowledgeSearch::tokens($question);
         $ranked=[]; $protected=false; $allIdentities=[];
         $posts=\ASCLA\Core\Repositories\KnowledgeSearch::candidates($tokens);
         foreach ($posts as $post) {
@@ -24,17 +23,16 @@ final class Knowledge
                 $body=Anonymizer::redact($body,$identities);
             }
             $title=!empty($meta['chatham'])?Anonymizer::redact($post->post_title,$identities):$post->post_title;
-            $hay=mb_strtolower($title.' '.$body); $score=0;
-            foreach ($tokens as $token) { if (str_contains($hay,$token)) { $score++; } }
-            if ($score>=max(1,(int)ceil(count($tokens)*0.5))) { $ranked[]=['id'=>$post->ID,'title'=>$title,'body'=>mb_substr($body,0,5000),'score'=>$score,'url'=>Content::serialize($post)['url']]; }
+            $score=\ASCLA\Core\Repositories\KnowledgeSearch::score($title,$body,$tokens);
+            if($score>0) $ranked[]=['id'=>$post->ID,'title'=>$title,'body'=>\ASCLA\Core\Repositories\KnowledgeSearch::excerpt($body,$tokens),'score'=>$score,'url'=>Content::serialize($post)['url']];
         }
-        usort($ranked,static fn($a,$b)=>$b['score']<=>$a['score']); $sources=array_slice($ranked,0,4);
+        usort($ranked,static fn($a,$b)=>($b['score']<=>$a['score'])?:($b['id']<=>$a['id'])); $sources=array_slice($ranked,0,6);
         if (!$sources) { return ['answer'=>'No existe suficiente información en el Centro de Conocimiento para responder esta consulta.','sources'=>[],'mode'=>self::provider()->mode()]; }
         $inputQuestion=$protected?EntityRedactor::redact($question,$allIdentities):$question;
         $result=self::provider()->generate('answer',['question'=>$inputQuestion,'sources'=>$sources]);
         if($protected){ $result=EntityRedactor::tree($result,$allIdentities); }
         $verified=Grounding::answer($result,$sources);
-        if (!$verified['answer']) { return ['answer'=>'No existe suficiente información verificable para responder esta consulta. Las afirmaciones propuestas no pudieron sustentarse en las fuentes.','sources'=>[],'mode'=>self::provider()->mode(),'grounding'=>$verified['grounding']]; }
+        if (!$verified['answer']) { return ['answer'=>'No existe suficiente información verificable para responder esta consulta. El proveedor no devolvió una respuesta utilizable.','sources'=>[],'mode'=>self::provider()->mode(),'grounding'=>$verified['grounding']]; }
         $answer=$protected?EntityRedactor::redact($verified['answer'],$allIdentities):$verified['answer'];
         if($protected){ Access::require(EntityRedactor::validateRedaction($answer,$allIdentities)['valid'],'La respuesta requiere revisión de anonimización.',502); }
         return ['answer'=>Access::text($answer,20000),'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url']],$verified['sources']),'mode'=>self::provider()->mode(),'grounding'=>$verified['grounding']];
@@ -44,9 +42,11 @@ final class Knowledge
     public static function storedAnswer(array $result): array
     {
         $sources=[];$identities=[];$protected=false;
-        foreach ($result['sources']??[] as $source) {
+        $originalIds=array_values(array_unique(array_map('intval',$result['grounding']['context_source_ids']??array_column($result['sources']??[],'id'))));
+        foreach ($originalIds as $sourceId) {
+            $source=['id'=>$sourceId];
             $post=get_post((int)($source['id']??0));
-            if (!$post || $post->post_status==='trash' || !Content::canRead($post)) { continue; }
+            if (!$post || $post->post_status!=='publish' || !Content::canRead($post)) { continue; }
             $meta=(array)get_post_meta($post->ID,'_ascla',true);
             if (!empty($meta['generated']) && empty($meta['reviewed'])) { continue; }
             $body=wp_strip_all_tags($post->post_content);$title=$post->post_title;
@@ -57,7 +57,8 @@ final class Knowledge
             }
             $sources[]=['id'=>$post->ID,'body'=>$body,'title'=>$title,'url'=>Content::serialize($post)['url']];
         }
-        $candidate=['answer'=>$result['answer']??'','source_ids'=>array_column($sources,'id')];
+        if(!$originalIds || count($sources)!==count($originalIds)) return ['answer'=>'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar el Centro de Conocimiento.','sources'=>[],'mode'=>$result['mode']??'Fuentes actualizadas'];
+        $candidate=['answer'=>$result['answer']??'','source_ids'=>array_column($result['sources']??[],'id')];
         if($protected){ $candidate=EntityRedactor::tree($candidate,$identities); }
         $verified=Grounding::answer($candidate,$sources);
         $answer=$verified['answer']?:'No existe suficiente información verificable en las fuentes actuales. Puedes volver a consultar el Centro de Conocimiento.';
@@ -66,7 +67,7 @@ final class Knowledge
 
     public static function videoMetadata(int $id): array
     {
-        Access::require(current_user_can('ascla_moderate'));
+        Access::require(current_user_can('ascla_manage'));
         $post=Content::get($id); $meta=(array)get_post_meta($id,'_ascla',true);
         Access::require($post->post_type==='ascla_resource' && !empty($meta['video_id']),'Seleccione un recurso con video de YouTube.',400);
         $provider=Settings::get()['youtube_mode']==='real'?new YouTubeVideoProvider():new MockVideoProvider();
@@ -79,6 +80,7 @@ final class Knowledge
     }
     public static function multimedia(int $id,?AIProviderInterface $ai=null): array
     {
+        Access::require(current_user_can('ascla_manage'),'Solo administradores pueden generar recursos.',403);
         $ai=$ai??self::provider();
         $post=Content::get($id); Access::require($post->post_type==='ascla_resource','Seleccione un recurso.',400);
         $meta=(array)get_post_meta($id,'_ascla',true);

@@ -63,9 +63,12 @@ final class Router
         self::route('/jobs','POST',static function($r) {
             $kind=(string)$r['kind']; Access::require(in_array($kind,['multimedia','microevents','social','video_metadata'],true),'Tipo de trabajo no válido.',400);
             if ($kind==='microevents') { Access::require(current_user_can('ascla_manage')); }
-            if (in_array($kind,['multimedia','video_metadata'],true)) { Content::get((int)$r['resource_id']); }
+            if (in_array($kind,['multimedia','video_metadata'],true)) { Access::require(current_user_can('ascla_manage'),'Solo administradores pueden gestionar recursos.',403); Content::get((int)$r['resource_id']); }
             Access::limit('admin_job',10,300); return Queue::enqueue($kind,['resource_id'=>(int)$r['resource_id']]);
         },'ascla_moderate');
+        self::route('/ai/test','POST',static fn()=>\ASCLA\Core\Integrations\RealAIProvider::test(),'ascla_manage');
+        self::route('/admin/users','GET',static fn($r)=>\ASCLA\Core\Services\Administration::users($r->get_params()),'ascla_manage');
+        self::route('/admin/contacts','GET',static fn($r)=>\ASCLA\Core\Services\Administration::contacts($r->get_params()),'ascla_moderate');
         self::route('/mail/test','POST',static fn()=>\ASCLA\Core\Integrations\Mailer::test(),'ascla_manage');
         self::route('/settings','GET',static fn()=>Settings::status(),'ascla_manage');
         self::route('/settings','POST',static fn($r)=>Settings::save($r->get_json_params()?:[]),'ascla_manage');
@@ -74,13 +77,8 @@ final class Router
             $comment=get_comment((int)$r['id']); Access::require($comment && Content::get((int)$comment->comment_post_ID),'Comentario no válido.',404);
             $status=$r['decision']==='approve'?'approve':'hold'; wp_set_comment_status($comment->comment_ID,$status); Audit::record('comment_moderation',(int)$comment->comment_ID,$status); return ['ok'=>true];
         },'ascla_moderate');
-        self::route('/admin/contact/(?P<id>\d+)','POST',static function($r) {
-            $post=Content::get((int)$r['id']); Access::require($post->post_type==='ascla_contact','Solicitud no válida.',400);
-            $status=(string)$r['status']; Access::require(in_array($status,['open','progress','closed'],true),'Estado no válido.',400); $meta=(array)get_post_meta($post->ID,'_ascla',true); $meta['request_status']=$status; update_post_meta($post->ID,'_ascla',$meta); Audit::record('contact_status',$post->ID,$status); return ['ok'=>true];
-        },'ascla_moderate');
-        self::route('/admin/member/(?P<id>\d+)','POST',static function($r) {
-            $id=(int)$r['id']; Access::require($id!==get_current_user_id()&&!user_can($id,'manage_options')&&user_can($id,'ascla_access'),'Cuenta no disponible.',400); update_user_meta($id,'_ascla_suspended',rest_sanitize_boolean($r['suspended'])); Audit::record('member_suspended',$id); return ['ok'=>true];
-        },'ascla_manage');
+        self::route('/admin/contact/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Administration::contactStatus((int)$r['id'],(string)$r['status']),'ascla_moderate');
+        self::route('/admin/member/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Administration::suspend((int)$r['id'],rest_sanitize_boolean($r['suspended'])),'ascla_manage');
         self::route('/demo','POST',static fn($r)=>\ASCLA\Core\Services\Demo::seed((string)$r['password']),'ascla_manage');
         self::route('/google/connect','POST',static fn($r)=>GoogleOAuth::connect((string)$r['service']));
         self::route('/google/disconnect','POST',static fn($r)=>GoogleOAuth::disconnect((string)$r['service']));

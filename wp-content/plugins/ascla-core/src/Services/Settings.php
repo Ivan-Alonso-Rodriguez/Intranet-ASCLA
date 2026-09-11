@@ -13,6 +13,7 @@ final class Settings
         foreach (['demo','moderation_required','moderate_comments','chatham_default','micro_enabled','micro_approval'] as $flag) { if (isset($input[$flag])) { $data[$flag]=rest_sanitize_boolean($input[$flag]); } }
         foreach (['ai_mode','youtube_mode'] as $field) { if (isset($input[$field])) { Access::require(in_array($input[$field],['mock','real'],true),'Modo no válido.',400); $data[$field]=$input[$field]; } }
         foreach (['ai_model','google_client_id','copyright'] as $field) { if (isset($input[$field])) { $data[$field]=Access::text($input[$field],300); } }
+        if (isset($input['ai_model']) && $data['ai_model']!=='') { $data['ai_model']=\ASCLA\Core\Integrations\RealAIProvider::model($data['ai_model']); }
         if (isset($input['matching_weights'])) {
             $weights=[];
             foreach (MatchScore::WEIGHTS as $key=>$default) { $weights[$key]=max(0,min(100,(int)($input['matching_weights'][$key]??$default))); }
