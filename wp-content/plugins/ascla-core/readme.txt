@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,9 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+= 1.4.1 =
+* Perfil: etiquetas de intereses, grupos desplegables, interruptores y estados de privacidad accesibles.
+
 = 1.4.0 =
 Navegación interna sin recarga con History API, shell inicial desde WordPress y usuario Ivan idempotente con contraseña configurable.
 = 1.3.0 =

@@ -327,6 +327,56 @@
     help: "area",
     connect_topics: "interest",
   };
+  const profileTopics = {
+    interests: ["spark", "Los temas que te interesan"],
+    areas: ["book", "Tu experiencia y especialidad"],
+    industries: ["ally", "Los sectores que conoces"],
+    goals: ["users", "Lo que buscas en la comunidad"],
+    languages: ["hub", "Idiomas para conversar"],
+    learn: ["book", "Lo que te gustaría aprender"],
+    help: ["heart", "El conocimiento que puedes compartir"],
+    connect_topics: ["users", "Conversaciones que quieres iniciar"],
+  };
+  function profileTopic(key, tax, p) {
+    const terms = S.boot.catalogs[tax], selected = new Set(p[key] || []);
+    const names = terms.filter(t => selected.has(t.id)).map(t => t.name);
+    const [icon, hint] = profileTopics[key];
+    const choices = terms.map(t => `<label class="topic-choice"><input type="checkbox" name="${key}" value="${t.id}" data-choice-label="${E(t.name)}" ${selected.has(t.id) ? "checked" : ""}><span>${I("check")}${E(t.name)}</span></label>`).join("");
+    return `<details class="profile-topic" ${["interests", "areas"].includes(key) ? "open" : ""}>
+      <summary><span class="topic-icon">${I(icon)}</span><span class="topic-caption"><span class="topic-title">${E(profileLabels[key])}</span><span class="topic-selection">${E(names.join(" · ") || "Aún no has elegido opciones")}</span></span><span class="topic-count" aria-label="${names.length} seleccionados">${names.length}</span><span class="topic-chevron">${I("chevron")}</span></summary>
+      <div class="topic-options"><p>${E(hint)}. Puedes elegir varias opciones.</p><div class="topic-choices">${choices || '<span class="muted">No hay opciones disponibles.</span>'}</div></div>
+    </details>`;
+  }
+  function profileKnowledge(p) {
+    return `<section class="profile-preferences" aria-labelledby="profile-knowledge-title"><div class="preference-heading"><span class="preference-emblem">${I("spark")}</span><div><h2 id="profile-knowledge-title">Conocimiento e intereses</h2><p>Haz que tu perfil conecte con las personas y las ideas que te interesan.</p></div></div><div class="profile-topics">${Object.entries(profileTax).map(([key, tax]) => profileTopic(key, tax, p)).join("")}</div></section>`;
+  }
+  function profileParticipation(p) {
+    const options = [
+      ["directory", "users", "Aparecer en el directorio", "Permite que otros asociados encuentren tu perfil."],
+      ["networking", "spark", "Descubrir nuevas conexiones", "Recibe recomendaciones de personas afines a tus intereses."],
+      ["microevents", "calendar", "Participar en microeventos", "Recibe propuestas para conversar en grupos de 4 a 6 personas."],
+    ];
+    return options.map(([key, icon, title, description]) => `<label class="participation-option"><span class="participation-icon">${I(icon)}</span><span class="participation-copy"><strong>${title}</strong><span>${description}</span></span><span class="preference-switch"><input type="checkbox" role="switch" name="${key}" aria-label="${title}" ${p[key] ? "checked" : ""}><span class="switch-track" aria-hidden="true"></span></span></label>`).join("");
+  }
+  function profilePrivacy(p) {
+    const fields = ["company", "position", "city", "country", "bio", "experience", "linkedin", "twitter", "website", "interests", "areas", "industries", "photo_id"];
+    const controls = fields.map(key => {
+      const label = key === "photo_id" ? "Fotografía" : profileLabels[key];
+      return `<label class="visibility-option"><input type="checkbox" name="hidden" value="${key}" aria-label="Ocultar ${E(label)}" ${(p.hidden || []).includes(key) ? "checked" : ""}><span class="visibility-label">${E(label)}</span><span class="visibility-state"><span class="is-visible">Visible</span><span class="is-hidden">${I("shield")}Oculto</span></span></label>`;
+    }).join("");
+    // Preserve privacy choices outside this view instead of silently clearing them on save.
+    const preserved = (p.hidden || []).filter(key => !fields.includes(key)).map(key => `<input type="hidden" name="hidden" value="${E(key)}">`).join("");
+    return `<section class="profile-preferences" aria-labelledby="profile-privacy-title"><div class="preference-heading"><span class="preference-emblem privacy-emblem">${I("shield")}</span><div><h2 id="profile-privacy-title">Privacidad y participación</h2><p>Tú eliges cómo participar y qué información compartir con la comunidad.</p></div></div><div class="profile-privacy-layout"><div class="participation-panel"><h3>Tu lugar en la comunidad</h3>${profileParticipation(p)}<div class="profile-privacy-note">${I("shield")}<p>Tus objetivos y preferencias de aprendizaje se utilizan internamente para ayudarte a conectar.</p></div></div><div class="visibility-panel"><h3>Qué ven otros asociados</h3><p>Pulsa un dato para cambiar entre visible y oculto. La moderación puede consultarlo.</p><div class="visibility-options">${controls}</div>${preserved}<span class="profile-save-hint">Los cambios se aplican al guardar tu perfil.</span></div></div></section>`;
+  }
+  function updateProfilePreference(input) {
+    const topic = input.closest(".profile-topic");
+    if (!topic) return;
+    const selected = [...topic.querySelectorAll("input:checked")];
+    const count = topic.querySelector(".topic-count");
+    count.textContent = selected.length;
+    count.setAttribute("aria-label", selected.length + " seleccionados");
+    topic.querySelector(".topic-selection").textContent = selected.map(choice => choice.dataset.choiceLabel).join(" · ") || "Aún no has elegido opciones";
+  }
   async function profile() {
     const p = await api("profiles/" + S.boot.me.id);
     content().innerHTML =
@@ -334,16 +384,7 @@
         "Mi perfil",
         "Tu experiencia es el punto de partida de nuevas conexiones.",
       ) +
-      `<form class="card" data-form="profile"><div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small" style="margin-top:10px">${I("edit")} Cambiar fotografía<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">JPG, PNG o WebP. Máximo 3 MB.</div></div></div><div class="form-section">Información profesional</div><div class="form-grid">${["first_name", "last_name", "position", "company", "country", "city", "member_type", "linkedin", "twitter", "website"].map((k) => field(k, profileLabels[k], p[k] || "", k === "linkedin" || k === "twitter" || k === "website" ? "url" : "text", 'maxlength="200"')).join("")}<div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div><div class="form-section">Conocimiento e intereses</div>${Object.entries(
-        profileTax,
-      )
-        .map(
-          ([key, tax]) =>
-            `<label style="font-size:12px;font-weight:600">${profileLabels[key]}</label><div class="multi-select">${S.boot.catalogs[tax].map((t) => `<label class="chip-check"><input type="checkbox" name="${key}" value="${t.id}" ${(p[key] || []).includes(t.id) ? "checked" : ""}>${E(t.name)}</label>`).join("")}</div>`,
-        )
-        .join(
-          "",
-        )}<div class="form-section">Privacidad y participación</div>${check("directory", "Mostrar mi perfil en el directorio de asociados", p.directory)}${check("networking", "Quiero recibir sugerencias de networking", p.networking)}${check("microevents", "Acepto participar en propuestas de microeventos", p.microevents)}<p class="private-note">Selecciona la información que deseas ocultar a otros asociados. Tus objetivos y preferencias de aprendizaje se usan de forma interna para networking.</p><div class="multi-select">${["company", "position", "city", "country", "bio", "experience", "linkedin", "twitter", "website", "interests", "areas", "industries", "photo_id"].map((k) => `<label class="chip-check"><input type="checkbox" name="hidden" value="${k}" ${(p.hidden || []).includes(k) ? "checked" : ""}>Ocultar ${E(profileLabels[k] || "fotografía")}</label>`).join("")}</div><div class="form-actions"><button class="btn primary">${I("check")} Guardar perfil</button></div></form><div class="card section-gap"><h3>Mi calendario</h3><p class="private-note">${S.boot.google_connected ? "Tu calendario Google está conectado." : "Integración Google Calendar no configurada para tu cuenta. Los enlaces e ICS siempre están disponibles."}</p><div class="admin-actions">${btn("Conectar Google Calendar", "google-connect", 'data-service="calendar"')}${S.boot.google_connected ? btn("Desconectar", "google-disconnect", 'data-service="calendar"') : ""}</div></div>`;
+      `<form class="card" data-form="profile"><div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small" style="margin-top:10px">${I("edit")} Cambiar fotografía<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">JPG, PNG o WebP. Máximo 3 MB.</div></div></div><div class="form-section">Información profesional</div><div class="form-grid">${["first_name", "last_name", "position", "company", "country", "city", "member_type", "linkedin", "twitter", "website"].map((k) => field(k, profileLabels[k], p[k] || "", k === "linkedin" || k === "twitter" || k === "website" ? "url" : "text", 'maxlength="200"')).join("")}<div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>${profileKnowledge(p)}${profilePrivacy(p)}<div class="form-actions"><button class="btn primary">${I("check")} Guardar perfil</button></div></form><div class="card section-gap"><h3>Mi calendario</h3><p class="private-note">${S.boot.google_connected ? "Tu calendario Google está conectado." : "Integración Google Calendar no configurada para tu cuenta. Los enlaces e ICS siempre están disponibles."}</p><div class="admin-actions">${btn("Conectar Google Calendar", "google-connect", 'data-service="calendar"')}${S.boot.google_connected ? btn("Desconectar", "google-disconnect", 'data-service="calendar"') : ""}</div></div>`;
   }
   const typeByPage = {
     hub: "hub",
@@ -1296,6 +1337,7 @@
   });
   root.addEventListener("change", async (event) => {
     const input = event.target;
+    updateProfilePreference(input);
     if (!input.dataset.upload || !input.files?.length) return;
     try {
       const fd = new FormData();

@@ -1733,3 +1733,73 @@
 .header-profile.active { color:#116da3; }
 
 output.view-loading{display:block}
+
+/* Profile preferences: native controls with clearer selection and visibility states. */
+.profile-preferences{margin-top:36px;padding-top:30px;border-top:1px solid var(--line)}
+.preference-heading{display:flex;gap:14px;align-items:center;margin-bottom:22px}
+.preference-heading h2{font-size:20px;letter-spacing:-.45px;margin:0 0 5px}
+.preference-heading p{color:#62758a;font-size:13px;line-height:1.65;margin:0}
+.preference-emblem{display:grid;place-items:center;width:44px;height:44px;flex:0 0 44px;background:#e8f3fb;color:#147dad;border-radius:14px}
+.preference-emblem svg{width:22px;height:22px}
+.privacy-emblem{background:#edf2fb;color:#486493}
+.profile-topics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.profile-topic{min-width:0;background:#f7f9fc;border:1px solid #e8eef5;border-radius:15px;overflow:hidden}
+.profile-topic[open]{background:#fff;border-color:#d3e3ee;box-shadow:0 3px 12px #17354c04}
+.profile-topic summary{list-style:none;display:flex;align-items:center;gap:10px;padding:18px;cursor:pointer;min-height:82px}
+.profile-topic summary::-webkit-details-marker{display:none}
+.profile-topic summary:focus-visible{outline:3px solid #328ac0;outline-offset:-3px;border-radius:14px}
+.topic-icon{width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;background:#eaf0f8;color:#5b7898;border-radius:10px}
+.topic-icon svg{width:17px;height:17px}
+.profile-topic[open] .topic-icon{background:#e6f3fa;color:#147dad}
+.topic-caption{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.topic-title{font-weight:650;font-size:13px;color:#243e56}
+.topic-selection{font-size:11px;line-height:1.5;color:#667e91;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.topic-count{font-size:11px;font-weight:700;min-width:24px;height:24px;display:grid;place-items:center;color:#357596;background:#e6f1f8;border-radius:50%;flex-shrink:0}
+.topic-chevron{display:flex;color:#6f8296}.topic-chevron svg{width:14px;height:14px;transition:transform .16s}
+.profile-topic[open] .topic-chevron svg{transform:rotate(90deg)}
+.topic-options{padding:0 18px 18px}.topic-options>p{font-size:11px;line-height:1.6;color:#63798c;margin:0 0 12px}
+.topic-choices{display:flex;flex-wrap:wrap;gap:8px}
+.topic-choice{position:relative;display:inline-flex;max-width:100%;cursor:pointer}
+.topic-choice input,.visibility-option input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
+.topic-choice>span{display:flex;align-items:center;gap:6px;font-size:12px;line-height:1.45;padding:8px 12px 8px 9px;border:1px solid #e0e8f0;border-radius:22px;color:#526a7f;background:#fff;transition:background .15s,border-color .15s,color .15s;min-height:36px}
+.topic-choice svg{width:13px;height:13px;flex-shrink:0;opacity:.22}
+.topic-choice input:checked+span{color:#096c9c;background:#e8f5fc;border-color:#90c9e4;font-weight:600}
+.topic-choice input:checked+span svg{opacity:1}.topic-choice:hover>span{border-color:#83bddb}
+.topic-choice input:focus-visible+span,.preference-switch input:focus-visible+.switch-track{outline:3px solid #328ac0;outline-offset:3px}
+.profile-privacy-layout{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:30px}
+.profile-privacy-layout h3{font-size:14px;font-weight:650;margin:0 0 7px;color:#29435b}
+.participation-option{display:flex;gap:11px;align-items:center;padding:19px 0;border-bottom:1px solid #edf1f6;cursor:pointer}
+.participation-icon{display:flex;align-self:flex-start;padding-top:3px;color:#7c91a4}.participation-icon svg{width:19px;height:19px}
+.participation-copy{min-width:0;flex:1}.participation-copy strong{display:block;font-size:12px;font-weight:600;line-height:1.6;color:#2d4860}
+.participation-copy>span{display:block;font-size:11px;color:#718497;line-height:1.7;margin-top:3px}
+.preference-switch{position:relative;display:inline-flex;width:40px;height:24px;flex-shrink:0}
+.preference-switch input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:1}
+.switch-track{width:40px;height:24px;border-radius:20px;background:#b7c4d1;border:1px solid #aebdcc;transition:background .18s}
+.switch-track:after{content:"";display:block;width:18px;height:18px;border-radius:50%;background:#fff;margin:2px;box-shadow:0 1px 3px #1d41522b;transition:transform .18s}
+.preference-switch input:checked+.switch-track{background:#1482b1;border-color:#1482b1}.preference-switch input:checked+.switch-track:after{transform:translateX(16px)}
+.profile-privacy-note{display:flex;gap:9px;align-items:flex-start;margin-top:19px;padding:13px 14px;background:#f1f6fb;border-radius:12px;color:#5b7690}
+.profile-privacy-note svg{width:16px;height:16px;flex-shrink:0;margin-top:2px}.profile-privacy-note p{font-size:11px;line-height:1.75;margin:0}
+.visibility-panel{padding:20px 22px;background:#f7f9fc;border-radius:16px;border:1px solid #e8eef5}
+.visibility-panel>p{font-size:11px;line-height:1.7;color:#687f92;margin:0 0 11px}
+.visibility-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:19px}
+.visibility-option{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:42px;border-bottom:1px solid #e6edf4;cursor:pointer}
+.visibility-option:has(input:focus-visible){outline:3px solid #328ac0;outline-offset:2px;border-radius:4px}
+.visibility-label{font-size:11px;color:#3d586f;overflow-wrap:anywhere}
+.visibility-state{display:flex;align-items:center;flex-shrink:0;font-size:10px;letter-spacing:.05px;color:#547c75}
+.is-visible:before{content:"";display:inline-block;width:5px;height:5px;background:#649a8d;border-radius:50%;margin-right:5px;vertical-align:middle}
+.visibility-state .is-hidden{display:none;align-items:center;gap:3px;color:#6b7699}.visibility-state svg{width:12px;height:12px}
+.visibility-option input:checked~.visibility-state .is-visible{display:none}.visibility-option input:checked~.visibility-state .is-hidden{display:inline-flex}
+.visibility-option:hover .visibility-label{color:#117bab}.profile-save-hint{display:block;color:#7b8da0;font-size:10px;line-height:1.6;margin-top:15px}
+@media(max-width:1100px){.profile-privacy-layout{grid-template-columns:1fr;gap:24px}.participation-option{padding:15px 0}}
+@media(max-width:900px){.profile-topics{grid-template-columns:1fr}}
+@media(max-width:480px){.profile-preferences{margin-top:28px;padding-top:25px}.preference-heading{align-items:flex-start;gap:10px}.preference-heading h2{font-size:17px}.preference-heading p{font-size:12px}.preference-emblem{width:35px;height:35px;flex-basis:35px;border-radius:11px}.preference-emblem svg{width:19px;height:19px}.profile-topic summary{padding:15px;gap:8px}.topic-options{padding:0 15px 16px}.visibility-panel{padding:18px 16px}.visibility-options{column-gap:12px}.topic-choice>span{min-height:40px}.visibility-option{min-height:44px}}
+@media(max-width:360px){.visibility-options{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.topic-chevron svg,.topic-choice>span,.switch-track,.switch-track:after{transition:none}}
+
+.profile-preferences .topic-selection{font-size:12px}
+.profile-preferences .participation-copy strong{font-size:13px}
+.profile-preferences .participation-copy>span,.profile-preferences .visibility-label,.profile-preferences .profile-privacy-note p{font-size:12px}
+.visibility-state{font-size:11px}
+.visibility-state .is-visible{background:#eaf3f0;color:#386d60;padding:4px 6px;border-radius:6px;white-space:nowrap}
+.visibility-state .is-hidden{background:#eaeef7;padding:4px 6px;border-radius:6px;white-space:nowrap}
+.profile-save-hint{font-size:11px}
