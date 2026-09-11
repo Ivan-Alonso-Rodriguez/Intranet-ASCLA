@@ -33,13 +33,23 @@ final class App
         if (!defined('DONOTCACHEPAGE')) { define('DONOTCACHEPAGE',true); }
         nocache_headers(); header('X-Robots-Tag: noindex, nofollow'); header('X-Content-Type-Options: nosniff'); header('Referrer-Policy: same-origin');
     }
+    public static function shell(): void
+    {
+        load_template(ASCLA_PATH.'templates/shell.php',false,[
+            'page'=>self::page(),
+            'profile'=>\ASCLA\Core\Services\Profiles::visible(get_current_user_id()),
+            'settings'=>\ASCLA\Core\Services\Settings::get()
+        ]);
+    }
+
     public static function assets(string $page): void
     {
         wp_enqueue_style('ascla-app',ASCLA_URL.'assets/app.css',[],ASCLA_VERSION);
         wp_enqueue_script('ascla-content',ASCLA_URL.'assets/content-ui.js',[],ASCLA_VERSION,true);
         wp_enqueue_script('ascla-notifications',ASCLA_URL.'assets/notifications-ui.js',[],ASCLA_VERSION,true);
-        wp_enqueue_script('ascla-app',ASCLA_URL.'assets/app.js',['ascla-content','ascla-notifications'],ASCLA_VERSION,true);
+        wp_enqueue_script('ascla-navigation',ASCLA_URL.'assets/navigation.js',[],ASCLA_VERSION,true);
+        wp_enqueue_script('ascla-app',ASCLA_URL.'assets/app.js',['ascla-content','ascla-notifications','ascla-navigation'],ASCLA_VERSION,true);
         $pages=[]; foreach (Catalog::PAGES as $slug=>$label) { $pages[$slug]=['label'=>$label,'url'=>Catalog::url($slug)]; }
-        wp_localize_script('ascla-app','ASCLA',['api'=>esc_url_raw(rest_url('ascla/v1/')),'nonce'=>wp_create_nonce('wp_rest'),'page'=>$page,'pages'=>$pages,'logo'=>ASCLA_URL.'assets/ascla-logo.png','logout'=>wp_logout_url(wp_login_url()),'adminUrl'=>admin_url('admin.php?page=ascla'),'mediaUrl'=>admin_url('admin-post.php?action=ascla_media&id=')]);
+        wp_localize_script('ascla-app','ASCLA',['api'=>esc_url_raw(rest_url('ascla/v1/')),'nonce'=>wp_create_nonce('wp_rest'),'page'=>$page,'pages'=>$pages,'icons'=>Icons::PATHS,'logo'=>ASCLA_URL.'assets/ascla-logo.png','logout'=>wp_logout_url(wp_login_url()),'adminUrl'=>admin_url('admin.php?page=ascla'),'mediaUrl'=>admin_url('admin-post.php?action=ascla_media&id=')]);
     }
 }

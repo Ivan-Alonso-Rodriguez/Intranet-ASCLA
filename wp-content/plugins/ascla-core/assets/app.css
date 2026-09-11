@@ -1727,3 +1727,9 @@
  .header-search, .header-right .demo-badge { display: none; }
  .header-profile strong { max-width: 130px; }
 }
+
+.view-loading { min-height: min(55vh, 500px); display:flex; align-items:flex-start; gap:12px; padding:36px 0; color:#526078; }
+.loading-dot { display:inline-block; width:12px; height:12px; border-radius:50%; background:#147bb5; margin-top:5px; }
+.header-profile.active { color:#116da3; }
+
+output.view-loading{display:block}

@@ -4,8 +4,11 @@
   const root = document.getElementById("ascla-root");
   if (!root || !window.ASCLA) return;
   const C = window.ASCLA;
+  let navigation;
   const S = {
     boot: null,
+    viewVersion: 0,
+    controller: new AbortController(),
     page: C.page,
     filter: {},
     list: null,
@@ -17,41 +20,7 @@
     noticeFilter: "all",
     noticePage: 1,
   };
-  const icons = {
-    home: "M3 10 12 3l9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z",
-    users:
-      "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
-    calendar:
-      "M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z",
-    hub: "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8Z",
-    gallery:
-      "M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1ZM3 16l5-5 4 4 4-5 5 6M8 7h.01",
-    book: "M12 7v14M3 3h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5v17h-5a4 4 0 0 0-4 1 4 4 0 0 0-4-1H3Z",
-    spark:
-      "m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4ZM20 2v4M18 4h4",
-    ally: "m12 3 3 5 6 1-4 5 1 7-6-3-6 3 1-7-4-5 6-1Z",
-    mail: "M3 5h18v14H3ZM3 5l9 7 9-7",
-    contact: "M22 2 9 15M22 2l-7 20-6-7-7-6Z",
-    search: "M21 21l-5-5M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14",
-    bell: "M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4",
-    arrow: "M5 12h14m-6-6 6 6-6 6",
-    chevron: "m9 5 7 7-7 7",
-    plus: "M12 5v14M5 12h14",
-    close: "m6 6 12 12M6 18 18 6",
-    pin: "M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0ZM12 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6",
-    clock: "M12 8v4l3 3M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20",
-    heart:
-      "M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z",
-    logout: "M9 21H4V3h5M15 17l5-5-5-5M20 12H9",
-    shield: "m12 2 9 4v6c0 6-9 10-9 10S3 18 3 12V6ZM8 12l3 3 5-6",
-    menu: "M3 6h18M3 12h18M3 18h18",
-    download: "M12 3v12m-5-5 5 5 5-5M5 17v4h14v-4",
-    play: "m8 5 12 7-12 7Z",
-    settings:
-      "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2",
-    check: "m5 12 4 4L19 6",
-    edit: "m15 4 5 5M4 20l4-1L21 6l-4-4L4 15Z",
-  };
+  const icons = C.icons;
   const I = (name) =>
     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${icons[name] || icons.hub}"/></svg>`;
   const E = (v) =>
@@ -118,6 +87,7 @@
     return url.href;
   }
   async function api(path, body, method) {
+    const version = S.viewVersion;
     const options = {
       method: method || (body ? "POST" : "GET"),
       credentials: "same-origin",
@@ -128,10 +98,15 @@
       options.headers["Content-Type"] = "application/json";
       options.body = JSON.stringify(body);
     }
+    if (options.method === "GET") options.signal = S.controller.signal;
     const response = await fetch(apiURL(path), options);
     const data = await response.json();
-    if (!response.ok)
-      throw new Error(data.message || "No se pudo completar la solicitud.");
+    if (version !== S.viewVersion) throw new DOMException("La vista cambió", "AbortError");
+    if (!response.ok) {
+      const error = new Error(data.message || "No se pudo completar la solicitud.");
+      error.status = response.status; error.code = data.code;
+      throw error;
+    }
     return data;
   }
   function toast(message) {
@@ -187,6 +162,7 @@
   };
   const navOrder = [
     "intranet",
+    "perfil",
     "eventos",
     "hub",
     "galeria",
@@ -199,6 +175,7 @@
     "contacto",
   ];
   function shell() {
+    if (root.querySelector(".ascla-sidebar")) { refreshNotifications(); return; }
     const p = S.boot.me;
     const links = navOrder.map((k) => `<a class="nav-link ${S.page === k ? "active" : ""}" href="${E(C.pages[k].url)}">${I(pageIcon[k])}<span>${E(C.pages[k].label)}</span></a>`).join("");
     const adminLink = S.boot.moderator ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}Administración</a>` : "";
@@ -294,7 +271,7 @@
     let match = null;
     try {
       match = await api("matching/" + id);
-    } catch {}
+    } catch (error) { if (error.name === "AbortError") throw error; }
     const networking = match ? btn("Mensaje sugerido", "intro", `data-id="${id}"`) + btn("Conectar", "connect", `data-id="${id}"`) : '';
     const actions = Number(id) !== S.boot.me.id ? networking + btn(I("mail") + " Enviar mensaje", "message-start", `data-id="${id}"`, "primary") : link("perfil", "Editar perfil", "primary");
     modal(
@@ -911,8 +888,10 @@
     download("ascla-infografia-" + S.item.id + ".svg", UI.infographic(S.item), "image/svg+xml");
   }
   async function render() {
+    const version = S.viewVersion;
     clearInterval(S.poll);
-    content().innerHTML = '<div class="loading">Cargando…</div>';
+    content().innerHTML = '<div class="view-loading" role="status"><span class="loading-dot"></span> Cargando sección…</div>';
+    content().setAttribute('aria-busy', 'true');
     try {
       if (S.page === "intranet") await dashboard();
       else if (S.page === "directorio") await directory();
@@ -923,8 +902,39 @@
       else if (S.page === "admin") await admin();
       else await listing();
     } catch (e) {
-      content().innerHTML = `<div class="error">${E(e.message)} ${btn("Reintentar", "refresh", "", "small")}</div>`;
+      if (e.name === "AbortError" || version !== S.viewVersion) return;
+      if (e.status === 401 || e.code === "rest_cookie_invalid_nonce") { location.assign(location.href); return; }
+      content().innerHTML = `<div class="error">${E(e.message)} ${btn("Reintentar", "refresh", "", "small")} <a data-native href="${E(location.href)}">Recargar esta página</a></div>`;
+    } finally {
+      if (version === S.viewVersion) content().removeAttribute('aria-busy');
     }
+  }
+  async function navigateTo(url) {
+    if (navigation?.matches(url)) await navigation.navigate(url);
+    else location.assign(safeURL(url));
+  }
+  function prepareView(page) {
+    S.controller.abort(); S.controller = new AbortController(); S.viewVersion++;
+    clearInterval(S.poll); closeModal(); document.querySelector('.toast')?.remove();
+    S.page = page; S.filter = {}; S.item = null; S.conversation = 0; S.messagesLoaded = false;
+    const q = new URLSearchParams(location.search); if (q.has('q')) S.filter.q = q.get('q');
+    root.querySelector('.ascla-sidebar')?.classList.remove('open');
+  }
+  async function routeDetails() {
+    const q = new URLSearchParams(location.search);
+    if (q.get("notification")) { await api("notifications/" + Number(q.get("notification")) + "/read", {}); await refreshNotifications(); }
+    if (S.page === "asistente" && q.get("job")) await restoreAnswer(Number(q.get("job")));
+    if (S.page === "asistente" && q.get("history")) await answerHistory();
+    if (q.get("notice") === "unavailable") toast("El contenido de este aviso ya no está disponible. Puedes continuar en esta sección.");
+    if (q.get("item")) await item(Number(q.get("item")));
+    if (q.get("member")) await member(Number(q.get("member")));
+  }
+  function enableNavigation() {
+    if (C.page === 'admin') return;
+    navigation = window.ASCLANavigation({root, pages: C.pages, prepare: prepareView,
+      load: async () => { const version = S.viewVersion; await render(); if (version === S.viewVersion) await routeDetails(); },
+      error: error => { if (error.name !== 'AbortError') toast(error.message); }
+    });
   }
   root.addEventListener("click", async (event) => {
     const b = event.target.closest("[data-action]");
@@ -947,7 +957,7 @@
       else if (a === "notification-filter") { S.noticeFilter = b.dataset.filter; S.noticePage = 1; await notifications(); }
       else if (a === "notification-page") { S.noticePage = Number(b.dataset.page); await notifications(); }
       else if (a === "notifications-read-all") { await api("notifications/read-all", {}); await notifications(); }
-      else if (a === "notification-open") { const destination = await api("notifications/" + id + "/open", {}); location.assign(safeURL(destination.url)); }
+      else if (a === "notification-open") { const destination = await api("notifications/" + id + "/open", {}); await navigateTo(destination.url); }
       else if (a === "answer-history") await answerHistory();
       else if (["like", "follow", "report"].includes(a)) {
         await api(`items/${id}/reaction`, {
@@ -966,7 +976,7 @@
       } else if (a === "intro") await intro(id);
       else if (a === "message-start") {
         const c = await api("conversations", { target: id });
-        const destination = new URL(C.pages.mensajeria.url); destination.searchParams.set("conversation", c.id); location.href = destination.href;
+        const destination = new URL(C.pages.mensajeria.url); destination.searchParams.set("conversation", c.id); await navigateTo(destination.href);
       } else if (a === "conversation") {
         S.conversation = id;
         S.messagesLoaded = false;
@@ -1098,7 +1108,7 @@
         }
       } else if (a === "google-connect") {
         const r = await api("google/connect", { service: b.dataset.service });
-        location.href = safeURL(r.url);
+        await navigateTo(r.url);
       } else if (a === "google-disconnect") {
         await api("google/disconnect", { service: b.dataset.service });
         toast("Conexión eliminada.");
@@ -1109,7 +1119,7 @@
         toast("Google Calendar actualizado.");
       } else if (a === "infographic") infographic();
     } catch (e) {
-      toast(e.message);
+      if (e.name !== "AbortError") toast(e.message);
     } finally {
       b.disabled = false;
     }
@@ -1126,7 +1136,7 @@
       if (action === "global-search") {
         const url = new URL(C.pages["centro-conocimiento"].url, location.href);
         url.searchParams.set("q", data.q);
-        location.href = url.href;
+        await navigateTo(url.href);
       }
       else if (action === "filters") {
         S.filter = { ...S.filter, ...data, page: 1 };
@@ -1147,6 +1157,7 @@
         delete data.photo;
         await api("profiles/me", data);
         S.boot = await api("bootstrap");
+        const label = root.querySelector(".header-profile strong"); if (label) label.textContent = S.boot.me.name;
         toast("Perfil actualizado.");
         await profile();
       } else if (action === "editor") {
@@ -1278,7 +1289,7 @@
         await admin();
       }
     } catch (e) {
-      toast(e.message);
+      if (e.name !== "AbortError") toast(e.message);
     } finally {
       if (submit) submit.disabled = false;
     }
@@ -1304,7 +1315,7 @@
           );
       toast("Archivo cargado.");
     } catch (e) {
-      toast(e.message);
+      if (e.name !== "AbortError") toast(e.message);
     } finally {
       input.value = "";
     }
@@ -1358,18 +1369,12 @@
       }
       shell();
       await render();
-      if (q.get("notification")) { await api("notifications/" + Number(q.get("notification")) + "/read", {}); await refreshNotifications(); }
+      enableNavigation();
       setInterval(() => { if (!document.hidden) refreshNotifications(); }, 30000);
       document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshNotifications(); });
-      if (S.page === "asistente" && q.get("job")) {
-        try { await restoreAnswer(Number(q.get("job"))); } catch (error) { toast(error.message); }
-      }
-      if (S.page === "asistente" && q.get("history")) await answerHistory();
-      if (q.get("notice") === "unavailable") toast("El contenido de este aviso ya no está disponible. Puedes continuar en esta sección.");
-      if (q.get("item")) await item(Number(q.get("item")));
-      if (q.get("member")) await member(Number(q.get("member")));
+      await routeDetails();
     } catch (e) {
-      root.innerHTML = `<div class="error">${E(e.message)} Recarga la página para renovar tu sesión.</div>`;
+      (content() || root).innerHTML = `<div class="error">${E(e.message)} <a data-native href="${E(location.href)}">Recarga la página para renovar tu sesión.</a></div>`;
     }
   }
   start();

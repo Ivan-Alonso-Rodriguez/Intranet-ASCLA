@@ -42,15 +42,22 @@ final class Plugin
             }
             return $response;
         }, 10, 3);
-        if (defined('WP_CLI') && WP_CLI) {
+        if (defined('WP_CLI') && WP_CLI) { self::cli(); }
+    }
+    private static function cli(): void
+    {
             \WP_CLI::add_command('ascla seed', static function () {
                 $password = getenv('ASCLA_DEMO_PASSWORD');
                 if (!$password || strlen($password) < 12) { \WP_CLI::error('Configure ASCLA_DEMO_PASSWORD (12 caracteres mínimo).'); }
                 Services\Demo::seed($password);
-                \WP_CLI::success('Demo idempotente preparada. Usuario: demo.asociado.');
+                \WP_CLI::success('Demo preparada: demo.asociado e ivan.alonso2602. Contraseñas existentes conservadas.');
+            });
+            \WP_CLI::add_command('ascla demo-user',static function($args,$options){
+                if(($args[0]??'')!=='ivan'){\WP_CLI::error('Uso: wp ascla demo-user ivan [--reset-password]');}
+                $result=Services\DemoUser::ivan(getenv('ASCLA_DEMO_PASSWORD')?:'',isset($options['reset-password']));
+                \WP_CLI::success('Usuario '.Services\DemoUser::EMAIL.' preparado. '.($result['password_reset']?'Contraseña actualizada desde ASCLA_IVAN_DEMO_PASSWORD.':'El seed conserva la contraseña existente.'));
             });
             \WP_CLI::add_command('ascla migrate', static function () { Database\Installer::activate(false); \WP_CLI::success('Migraciones aplicadas.'); });
             \WP_CLI::add_command('ascla jobs', [Jobs\Queue::class, 'run']);
-        }
     }
 }

@@ -7,7 +7,8 @@ final class MicroEvents
 {
     public static function create(array $onlyIds=[]): array
     {
-        $month=($onlyIds?'demo-':'').wp_date('Y-m');
+        sort($onlyIds);
+        $month=($onlyIds?'demo-'.substr(hash('sha256',wp_json_encode($onlyIds)),0,12).'-':'').wp_date('Y-m');
         return Store::lock('micro:'.$month,static function () use($month,$onlyIds) {
             $existing=get_option('ascla_micro_'.$month);
             if ($existing) { return $existing; }
