@@ -14,21 +14,21 @@ El proveedor real es **Google Gemini**, mediante REST oficial y cabecera `x-goog
 
 Las conexiones requieren aceptación antes de habilitar mensajes; el chat consulta novedades cada **2 segundos** con cursores, conservación de borradores y backoff tras errores. Recuperación de contraseña nativa y SMTP configurable; Mailpit recibe los correos únicamente en el desarrollo local. Sigue pendiente configurar un proveedor para entrega a bandejas externas.
 
-Informe, pruebas actuales y paquete: [RELEASE_1.7.0.md](docs/RELEASE_1.7.0.md). Historial comprobado de conexiones: [CONNECTIONS_1.5.0.md](docs/CONNECTIONS_1.5.0.md). Las métricas de Sonar/coverage/performance históricas no acreditan automáticamente esta versión.
+El historial técnico de las entregas se resume en `VERSION_HISTORY.md`. Las métricas históricas de Sonar, cobertura y rendimiento no acreditan automáticamente la versión actual.
 
 No se han desplegado estos cambios en el servidor remoto. Gemini, YouTube OAuth y Calendar OAuth requieren credenciales y pruebas con cuentas reales. LinkedIn/X reales siguen sin implementar.
 
 ## Historial: versión 1.2.0
 
-La campana abre un panel de actividad con asunto, origen, categoría y acción. Los avisos enlazan a publicaciones, eventos, recursos, perfiles, conversaciones y respuestas guardadas del asistente. Incluye filtros, paginación, contador real y lectura individual o total. Los avisos antiguos sin referencia ofrecen acceso a su sección o al historial de consultas. [Detalle y validación](docs/NOTIFICATIONS_UPDATE.md).
+La campana abre un panel de actividad con asunto, origen, categoría y acción. Los avisos enlazan a publicaciones, eventos, recursos, perfiles, conversaciones y respuestas guardadas del asistente. Incluye filtros, paginación, contador real y lectura individual o total. Los avisos antiguos sin referencia ofrecen acceso a su sección o al historial de consultas.
 
 ## Historial: versión 1.1.0
 
-Incluye filtros combinados por autor, fuente, tema, etiqueta y categoría; navegación por foros; intereses y áreas en el directorio; agenda mensual completa y eventos ordenados antes de paginar. Incorpora invitaciones internas a eventos, avisos de recursos afines y sugerencias semanales de networking, imágenes en el Hub, logos de aliados y resultados multimedia estructurados. [Detalle de esta entrega](docs/COMPLETION_1.1.0.md).
+Incluye filtros combinados por autor, fuente, tema, etiqueta y categoría; navegación por foros; intereses y áreas en el directorio; agenda mensual completa y eventos ordenados antes de paginar. Incorpora invitaciones internas a eventos, avisos de recursos afines y sugerencias semanales de networking, imágenes en el Hub, logos de aliados y resultados multimedia estructurados.
 
 ## Acceso ASCLA
 
-La versión 1.0.4 incorpora inicio de sesión y recuperación con logo, colores y textos de ASCLA, adaptados a móvil. Abre `/intranet/` para acceder: se conserva la sección solicitada después del login y el cierre de sesión vuelve al formulario. Se utiliza la autenticación nativa de WordPress; no se cambian las cuentas ni las contraseñas. [Cambios y validación del acceso](docs/LOGIN_UPDATE.md).
+La versión 1.0.4 incorpora inicio de sesión y recuperación con logo, colores y textos de ASCLA, adaptados a móvil. Abre `/intranet/` para acceder: se conserva la sección solicitada después del login y el cierre de sesión vuelve al formulario. Se utiliza la autenticación nativa de WordPress; no se cambian las cuentas ni las contraseñas.
 
 ## Requisitos
 
@@ -75,7 +75,7 @@ Los secretos se cifran con AES-256-GCM y una clave derivada de las salts de Word
 
 ## Calidad y operación
 
-Las pruebas están en `tests/`; deben ejecutarse exclusivamente contra WordPress local desechable. Los resultados actuales y límites se documentan en `docs/FINAL_STATUS.md` y `docs/QUALITY_REPORT.md`. Las configuraciones de herramientas no sustituyen sus resultados medidos.
+Las pruebas están en `tests/`; deben ejecutarse exclusivamente contra WordPress local desechable. Las configuraciones de herramientas no sustituyen resultados medidos.
 
 El entorno Docker incluye un servicio `cron` que ejecuta los eventos pendientes cada diez segundos. Se desactivan las actualizaciones automáticas sólo en los contenedores de pruebas para conservar una versión reproducible; mantén el sitio real actualizado mediante su procedimiento de operación.
 
@@ -83,6 +83,4 @@ Jobs: WordPress cron ejecuta `ascla_jobs`, continúa la cola pendiente con `ascl
 
 Si faltan páginas, reactiva el plugin o ejecuta `wp ascla migrate`. Si aparecen respuestas antiguas o sesiones mezcladas, excluye todas las páginas ASCLA y `/wp-json/ascla/v1/` del caché y purga la caché. Si falla una integración, comprueba modo, permisos, expiración y conectividad; nunca pegues tokens en logs o capturas. Si la demo ya existe, cambiar el password del formulario no reinicia contraseñas: usa la recuperación de WordPress.
 
-Resultados verificados: [informe de calidad](docs/QUALITY_REPORT.md) y [evidencias](docs/evidence/).
-
-Documentación: `docs/IMPLEMENTATION_PLAN.md`, `docs/ARCHITECTURE.md`, `docs/DATA_MODEL.md`, `docs/INSTALL.md`, `docs/DEPLOY_SITEGROUND.md`, `docs/EXTERNAL_INTEGRATIONS.md`, `docs/SECURITY.md`, `docs/DEMO.md`.
+La documentación interna de desarrollo se conserva localmente en `docs/`, pero esa carpeta está excluida deliberadamente del repositorio de GitHub.
