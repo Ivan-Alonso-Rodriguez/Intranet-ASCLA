@@ -105,21 +105,27 @@
   z-index: 30;
 }
 .brand {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 192px;
-  height: 65px;
-  overflow: hidden;
-  margin: 0 6px 23px;
-  background: #fff;
-  border-radius: 12px;
+  height: auto;
+  aspect-ratio: 1672 / 941;
+  position: relative;
+  margin: 0 6px 8px;
+  background: transparent;
   flex-shrink: 0;
 }
 .brand img {
-  width: 223px;
-  max-width: none !important;
-  margin-top: -33px;
-  margin-left: -16px;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+
 }
+.header-brand { display: flex; width: 115px; height: 60px; flex-shrink: 0; }
+.header-brand img { width: 100%; height: 100%; object-fit: contain; }
+.header-profile strong { display: block; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 760px) { .header-brand { width: 76px; height: 44px; } }
 .brand-sub {
   font-size: 10px;
   letter-spacing: 2px;
@@ -1230,12 +1236,15 @@
 }
 .ask-suggestions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   max-width: 700px;
   margin: 28px auto;
 }
 .ask-suggestions button {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
   border: 1px solid var(--line);
   background: white;
   border-radius: 10px;
@@ -1693,6 +1702,28 @@
 .activity-toolbar>button{font-size:11px}.activity-group{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#6b7689;margin:24px 0 10px}
 .activity-card{position:relative;display:flex;border:1px solid #e5e9f1;border-radius:12px;margin-bottom:9px;background:white;transition:background .15s,border-color .15s}.activity-card:hover{border-color:#9bb7dc;background:#f6f9ff}.activity-card.is-unread{background:#f3f7ff;border-color:#d8e4f6;box-shadow:inset 3px 0 #477aba}.activity-link{display:flex;gap:14px;width:100%;padding:18px 47px 17px 18px;color:#233156;text-decoration:none;border-radius:12px;min-width:0}.activity-link:focus-visible,.activity-filters button:focus-visible{outline:3px solid #477aba;outline-offset:2px}.activity-icon{width:40px;height:40px;display:grid;place-items:center;background:#e5edf9;color:#315787;border-radius:12px;flex-shrink:0}.activity-icon svg{width:20px;height:20px}.activity-spark{background:#eee7fa;color:#7752a0}.activity-heart{background:#fbeaf0;color:#a94069}.activity-mail{background:#dfefef;color:#286b6a}.activity-calendar{background:#fff0df;color:#96621b}.activity-book{background:#e5eeff;color:#3265a7}
 .activity-copy{min-width:0;display:flex;flex-direction:column;gap:7px}.activity-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:#6d7788;font-size:10px}.activity-meta>span:first-child{font-weight:700;color:#49627e}.activity-meta time{white-space:nowrap}.activity-new{color:#2c6099;background:#deebff;border-radius:4px;font-size:9px;padding:2px 5px;font-weight:700}.activity-copy>strong{font-size:14px;line-height:1.4;overflow-wrap:anywhere}.activity-description{font-size:12px;line-height:1.55;color:#66738a;overflow-wrap:anywhere}.activity-destination{display:flex;align-items:center;gap:7px;color:#255d91;font-size:11px;font-weight:650;margin-top:3px}.activity-destination svg{width:14px;height:14px}.activity-read{position:absolute;right:8px;top:13px;padding:8px;color:#6a7c96}.activity-read svg{width:17px;height:17px}
-.activity-empty{text-align:center;padding:48px 22px;color:#607087}.activity-empty>svg{width:42px;height:42px;border-radius:50%;padding:10px;background:#e5f2ed;color:#38846a;margin-bottom:10px}.activity-empty h3{color:#233156}.activity-empty p{font-size:13px;line-height:1.65}.activity-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid #e6ebf1;padding-top:17px;margin-top:20px;color:#68768c;font-size:11px}.activity-footer button:disabled{opacity:.35;cursor:default}.activity-footer>div{display:flex;gap:5px}
+.activity-empty{text-align:center;padding:48px 22px;color:#607087}.activity-empty>svg{width:42px;height:42px;border-radius:50%;padding:10px;background:#e5f2ed;color:#27664f;margin-bottom:10px}.activity-empty h3{color:#233156}.activity-empty p{font-size:13px;line-height:1.65}.activity-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid #e6ebf1;padding-top:17px;margin-top:20px;color:#68768c;font-size:11px}.activity-footer button:disabled{opacity:.35;cursor:default}.activity-footer>div{display:flex;gap:5px}
 .answer-history-button{display:flex;margin:16px auto}.answer-history-entry{display:flex;gap:13px;align-items:center;padding:18px 8px;border-bottom:1px solid #e7ecf2;text-decoration:none;color:#233156}.answer-history-entry>span:nth-child(2){flex:1;min-width:0;overflow-wrap:anywhere}.answer-history-entry small{display:block;color:#6d7b90;margin-top:7px}.answer-history-entry svg{width:20px;height:20px}.answer-history-entry:hover{background:#f2f6fd}
 @media(max-width:600px){.notification-modal .modal-content{padding:0 14px 16px}.activity-intro{padding:17px 13px;gap:12px}.activity-intro p>span{font-size:12px}.activity-emblem{width:38px;height:38px}.activity-link{padding:16px 39px 16px 13px;gap:10px}.activity-icon{width:33px;height:33px;border-radius:9px}.activity-copy>strong{font-size:13px}.activity-read{right:3px}.activity-footer{flex-wrap:wrap}.activity-meta{gap:6px}.activity-toolbar>button{padding-left:0}}
+
+/* Preserve the blue globe; recolor only the wordmark on dark surfaces. */
+.brand::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: #fff;
+  mask: url("ascla-logo.png") center / contain no-repeat;
+  clip-path: polygon(27% 0, 100% 0, 100% 100%, 0 100%, 0 66%, 27% 66%);
+}
+
+@media (max-width: 480px) {
+  .header-profile > span:not(.avatar) { display: none; }
+  .header-profile { gap: 5px; padding-left: 8px; }
+}
+
+@media (min-width: 761px) and (max-width: 1000px) {
+ .ascla-header { gap: 12px; padding: 0 20px; }
+ .header-search, .header-right .demo-badge { display: none; }
+ .header-profile strong { max-width: 130px; }
+}

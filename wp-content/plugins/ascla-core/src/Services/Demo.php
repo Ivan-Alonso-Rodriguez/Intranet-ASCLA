@@ -53,6 +53,7 @@ final class Demo
                 wp_set_current_user($users[1]); $c=Messaging::start($users[0]); Messaging::send((int)$c['id'],'Hola, bienvenida a la comunidad de demostración. ¿Conversamos sobre gobierno de IA?');
                 wp_set_current_user($users[0]); Notifications::send($users[0],'welcome','Tu comunidad ASCLA está lista para explorar.'); update_option('ascla_demo_messages',true,false);
             }
+            DemoShowcase::seed($make,$users);
             wp_set_current_user($original); Audit::record('demo_seeded'); return ['users'=>18,'companies'=>9,'login'=>'demo.asociado','message'=>'Datos ficticios preparados. Una segunda ejecución conserva cambios y contraseñas existentes.'];
         });
     }

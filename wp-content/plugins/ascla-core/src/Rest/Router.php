@@ -90,7 +90,7 @@ final class Router
             foreach (get_posts(['post_type'=>'ascla_'.$key,'post_status'=>['pending','draft'],'numberposts'=>50]) as $post) { $pending[]=Content::serialize($post); }
         }
         $comments=[];
-        foreach (get_comments(['status'=>'hold','number'=>100]) as $c) { $post=get_post($c->comment_post_ID); if ($post&&str_starts_with($post->post_type,'ascla_')) { $comments[]=['id'=>(int)$c->comment_ID,'body'=>$c->comment_content,'author'=>$c->comment_author]; } }
+        foreach (get_comments(['status'=>'hold','number'=>100]) as $c) { $post=get_post($c->comment_post_ID); if ($post&&str_starts_with($post->post_type,'ascla_')) { $comments[]=['id'=>(int)$c->comment_ID,'body'=>$c->comment_content,'author'=>$c->user_id?Profiles::publicName((int)$c->user_id):'Comunidad ASCLA']; } }
         $jobs=Store::rows('jobs'); foreach ($jobs as &$job) { unset($job['payload'],$job['result']); } unset($job);
         return ['pending'=>$pending,'comments'=>$comments,'reports'=>Store::rows('relations',"kind='report'"),'jobs'=>$jobs,'audit'=>Store::rows('audit'),'counts'=>['members'=>count(get_users(['capability'=>'ascla_access','fields'=>'ID'])),'pending'=>count($pending)]];
     }

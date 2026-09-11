@@ -3,7 +3,7 @@ namespace ASCLA\Core\Services;
 use ASCLA\Core\Domain\MatchScore;
 final class Matching
 {
-    public static function between(int $a,int $b): array
+    public static function between(int $a,int $b,bool $explain=true): array
     {
         $left=Profiles::raw($a); $right=Profiles::raw($b);
         Access::require($a!==$b && !empty($left['networking']) && !empty($right['networking']) && !empty($right['directory']) && !Messaging::blocked($a,$b),'Active networking; ambos perfiles deben aceptar participar.',400);
@@ -19,7 +19,14 @@ final class Matching
         foreach (['interests'=>'interest','areas'=>'area','industries'=>'industry'] as $field=>$tax) {
             foreach ($result['factors'][$field]['common'] as $tid) { $term=get_term($tid,'ascla_'.$tax); if ($term && !is_wp_error($term)) { $names[]=$term->name; } }
         }
-        return ['score'=>$result['score'],'shared'=>$names,'explanation'=>$names?'Comparten '.implode(', ',array_slice($names,0,4)).'.':'Completen sus intereses para descubrir más afinidades.'];
+        $affinity=['score'=>$result['score'],'shared'=>$names,'explanation'=>$names?'Comparten '.implode(', ',array_slice($names,0,4)).'.':'Completen sus intereses para descubrir más afinidades.'];
+        if($explain){
+            $prose=NetworkingAI::generate('matching',NetworkingAI::context($a,$b,$affinity));
+            $affinity['explanation']=Access::excerpt($prose['explanation']??$affinity['explanation'],2000);
+            $affinity['conversation_proposal']=Access::excerpt($prose['conversation_proposal']??'',2000);
+            $affinity['mode']=$prose['mode'];$affinity['fallback']=$prose['fallback'];
+        }
+        return $affinity;
     }
     public static function recommendations(): array
     {
@@ -29,14 +36,15 @@ final class Matching
         foreach (get_users(['capability'=>'ascla_access']) as $candidate) {
             $id=$candidate->ID;
             if ((int)$id===$me) { continue; }
-            try { $affinity=self::between($me,(int)$id); $items[]=array_merge(Profiles::visible((int)$id),['affinity'=>$affinity]); } catch (\ASCLA\Core\Rest\ApiException $e) { continue; }
+            try { $affinity=self::between($me,(int)$id,false); $items[]=array_merge(Profiles::visible((int)$id),['affinity'=>$affinity]); } catch (\ASCLA\Core\Rest\ApiException $e) { continue; }
         }
         usort($items,static fn($a,$b)=>($b['affinity']['score']<=>$a['affinity']['score'])?:($a['id']<=>$b['id']));
         return array_slice($items,0,6);
     }
     public static function intro(int $id): array
     {
-        $affinity=self::between(get_current_user_id(),$id); $profile=Profiles::visible($id);
-        return ['text'=>'Hola '.($profile['first_name']??$profile['name']).', vi tu perfil en ASCLA. '.($affinity['shared']?'Compartimos interés en '.implode(' y ',array_slice($affinity['shared'],0,2)).'. ':'').'Me gustaría conectar e intercambiar experiencias. ¿Te interesaría conversar?','mode'=>'Plantilla determinística','sent'=>false];
+        $me=get_current_user_id();$affinity=self::between($me,$id,false);
+        $result=NetworkingAI::generate('intro',NetworkingAI::context($me,$id,$affinity));
+        return ['text'=>Access::excerpt($result['text']??'',5000),'conversation_proposal'=>Access::excerpt($result['conversation_proposal']??'',2000),'mode'=>$result['mode'],'fallback'=>$result['fallback'],'sent'=>false];
     }
 }

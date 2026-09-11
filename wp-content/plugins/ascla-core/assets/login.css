@@ -30,7 +30,6 @@ body.login.ascla-login {
   color: #fff;
 }
 .ascla-welcome > :not(.ascla-welcome-orbit) { position: relative; z-index: 1; }
-.ascla-welcome-brand { display: flex; gap: 14px; align-items: center; font-size: 29px; font-weight: 700; letter-spacing: 2px; }
 .ascla-brand-mark { width: 38px; height: 38px; border: 1px solid #8bcbe9; border-radius: 50%; position: relative; }
 .ascla-brand-mark::before, .ascla-brand-mark::after { content: ""; position: absolute; border: 1px solid #8bcbe9; border-radius: 50%; inset: 5px 12px; transform: rotate(35deg); }
 .ascla-brand-mark::after { inset: 12px 5px; }
@@ -102,3 +101,8 @@ body.ascla-login.interim-login { padding: 20px; }
   .ascla-welcome-topics { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .ascla-login #login { animation: none; } }
+
+.ascla-official-logo { width: min(320px, 100%); height: auto; object-fit: contain;  }
+
+.ascla-welcome-brand { width: min(320px, 100%); aspect-ratio: 1672 / 941; position: relative; }
+.ascla-welcome-brand::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: #fff; mask: url("ascla-logo.png") center / contain no-repeat; clip-path: polygon(27% 0, 100% 0, 100% 100%, 0 100%, 0 66%, 27% 66%); }

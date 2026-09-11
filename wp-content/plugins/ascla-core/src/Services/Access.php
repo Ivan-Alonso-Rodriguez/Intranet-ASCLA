@@ -16,6 +16,11 @@ final class Access
             set_transient($cache,$count+1,$seconds);
         });
     }
+    public static function excerpt(mixed $value,int $max=180): string
+    {
+        $text=is_scalar($value)?sanitize_textarea_field((string)$value):'';
+        return mb_strlen($text)>$max?mb_substr($text,0,max(0,$max-1)).'…':$text;
+    }
     public static function text(mixed $value,int $max=2000): string
     {
         self::require(is_scalar($value)||$value===null,'Texto no válido.',400);

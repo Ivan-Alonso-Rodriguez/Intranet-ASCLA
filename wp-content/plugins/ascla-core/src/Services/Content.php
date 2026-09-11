@@ -34,7 +34,7 @@ final class Content
         $date=$post->post_date_gmt;
         if (!$date || str_starts_with($date,'0000-')) { $date=get_gmt_from_date($post->post_date); }
         $terms=wp_get_object_terms($post->ID,['ascla_interest','ascla_category','ascla_tag']);
-        return ['id'=>$post->ID,'type'=>substr($post->post_type,6),'title'=>$post->post_title,'body'=>$post->post_content,'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?$author->display_name:'ASCLA'],'date'=>$date,'parent'=>(int)$post->post_parent,'meta'=>$meta,'media'=>Media::metadata($post->ID,(array)($meta['media_ids']??[])),'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name,'taxonomy'=>$t->taxonomy],$terms),'reactions'=>Store::count('relations',"target_id=%d AND kind='like'",[$post->ID]),'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='like'",[$post->ID,get_current_user_id()])>0,'following'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='follow'",[$post->ID,get_current_user_id()])>0,'comments'=>(int)$post->comment_count,'url'=>Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID])];
+        return ['id'=>$post->ID,'type'=>substr($post->post_type,6),'title'=>$post->post_title,'body'=>$post->post_content,'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?Profiles::publicName((int)$author->ID):'ASCLA'],'date'=>$date,'parent'=>(int)$post->post_parent,'meta'=>$meta,'media'=>Media::metadata($post->ID,(array)($meta['media_ids']??[])),'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name,'taxonomy'=>$t->taxonomy],$terms),'reactions'=>Store::count('relations',"target_id=%d AND kind='like'",[$post->ID]),'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='like'",[$post->ID,get_current_user_id()])>0,'following'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='follow'",[$post->ID,get_current_user_id()])>0,'comments'=>(int)$post->comment_count,'url'=>Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID])];
     }
     public static function page(string $type): string { return ['resource'=>'centro-conocimiento','event'=>'eventos','topic'=>'foros','forum'=>'foros','gallery'=>'galeria','ally'=>'aliados','contact'=>'contacto'][$type]??'hub'; }
     public static function listing(string $type,array $filter=[]): array
@@ -83,7 +83,21 @@ final class Content
         Access::require($title!=='' && $body!=='','Complete título y contenido.',400);
         $meta=ContentMeta::sanitize($type,(array)($input['meta']??[]),$id);
         if (!empty($meta['generated']) && isset($input['tag_names'])) { $meta['tags']=array_map(static fn($name)=>Access::text($name,60),array_slice((array)$input['tag_names'],0,20)); }
-        $requested=$input['status']??'pending'; $status=$requested==='draft'?'draft':'pending';
+        $taxonomies=[];
+        foreach (['interest','category','tag'] as $tax) {
+            Access::require(!isset($input[$tax])||is_array($input[$tax]),'Categoría no válida.',400);
+            $ids=array_values(array_unique(array_map('absint',$input[$tax]??[])));
+            foreach ($ids as $tid) { Access::require((bool)term_exists($tid,'ascla_'.$tax),'Categoría no válida.',400); }
+            $taxonomies[$tax]=$ids;
+        }
+        Access::require(!isset($input['tag_names'])||is_array($input['tag_names']),'Etiquetas no válidas.',400);
+        $tagNames=array_map(static fn($name)=>trim(Access::text($name,60)),array_slice($input['tag_names']??[],0,20));
+        foreach ($meta['media_ids']??[] as $media) {
+            $file=Store::one('media',(int)$media);
+            Access::require($file && ((int)$file['user_id']===get_current_user_id()||($id&&(int)$file['post_id']===$id)),'Archivo no autorizado.');
+        }
+        $requested=$input['status']??'pending';
+        Access::require(in_array($requested,['draft','pending','publish'],true),'Estado no válido.',400); $status=$requested==='draft'?'draft':'pending';
         if ($type==='contact') { $status='private'; }
         elseif ($editor && $requested==='publish' && empty($meta['generated'])) { $status='publish'; }
         elseif (!$editor && !Settings::get()['moderation_required'] && $requested!=='draft' && $type==='hub') { $status='publish'; }
@@ -94,14 +108,10 @@ final class Content
         if ($id) { $postData['ID']=$id; } else { $postData['post_author']=get_current_user_id(); }
         // Store as draft first so publication hooks see validated metadata.
         $postData['post_status']='draft';
-        $saved=wp_insert_post(wp_slash($postData),true); Access::require(!is_wp_error($saved),'No se pudo guardar el contenido.',500);
+        $saved=$id?wp_update_post(wp_slash($postData),true):wp_insert_post(wp_slash($postData),true); Access::require(!is_wp_error($saved),'No se pudo guardar el contenido.',500);
         update_post_meta($saved,'_ascla',$meta);
-        foreach (['interest','category','tag'] as $tax) {
-            $ids=array_values(array_unique(array_map('absint',(array)($input[$tax]??[]))));
-            foreach ($ids as $tid) { Access::require((bool)term_exists($tid,'ascla_'.$tax),'Categoría no válida.',400); }
-            wp_set_object_terms($saved,$ids,'ascla_'.$tax);
-        }
-        if (!empty($input['tag_names'])) { self::tags($saved,(array)$input['tag_names']); }
+        foreach ($taxonomies as $tax=>$ids) { wp_set_object_terms($saved,$ids,'ascla_'.$tax); }
+        if ($tagNames) { self::tags($saved,$tagNames); }
         foreach ($meta['media_ids']??[] as $media) { Media::attach($media,$saved); }
         wp_update_post(['ID'=>$saved,'post_status'=>$status]);
         Audit::record('content_saved',$saved,$status);
@@ -122,7 +132,7 @@ final class Content
     public static function comments(int $id): array
     {
         self::get($id); $comments=get_comments(['post_id'=>$id,'status'=>'approve','number'=>100,'order'=>'ASC']);
-        return array_map(static fn($c)=>['id'=>(int)$c->comment_ID,'author'=>$c->comment_author,'body'=>$c->comment_content,'date'=>$c->comment_date_gmt],$comments);
+        return array_map(static fn($c)=>['id'=>(int)$c->comment_ID,'author'=>$c->user_id?Profiles::publicName((int)$c->user_id):'Comunidad ASCLA','body'=>$c->comment_content,'date'=>$c->comment_date_gmt],$comments);
     }
     public static function comment(int $id,string $body): array
     {
@@ -131,9 +141,21 @@ final class Content
         $approved=current_user_can('ascla_moderate')||!Settings::get()['moderate_comments'];
         $user=wp_get_current_user();
         $cid=wp_insert_comment(wp_slash(['comment_post_ID'=>$id,'user_id'=>$user->ID,'comment_author'=>$user->display_name,'comment_content'=>$body,'comment_approved'=>$approved?1:0,'comment_type'=>'comment']));
-        if ($approved) { Notifications::send((int)$post->post_author,'comment','Nuevo comentario en tu publicación.',Catalog::url(self::page(substr($post->post_type,6)),['item'=>$id]),['type'=>'post','id'=>$id,'actor'=>get_current_user_id()]); }
+        if ($approved) { self::notifyComment((int)$cid); }
         wp_update_post(['ID'=>$id,'post_modified'=>current_time('mysql')]);
         return ['id'=>$cid,'status'=>$approved?'publish':'pending'];
+    }
+    public static function commentTransition(string $new,string $old,\WP_Comment $comment): void
+    {
+        if ($new==='approved' && $old!=='approved') { self::notifyComment((int)$comment->comment_ID); }
+    }
+    public static function notifyComment(int $id): void
+    {
+        $comment=get_comment($id);
+        if (!$comment || (string)$comment->comment_approved!=='1') { return; }
+        $post=get_post((int)$comment->comment_post_ID);
+        if (!$post || !str_starts_with($post->post_type,'ascla_')) { return; }
+        Notifications::once((int)$post->post_author,'comment:'.$id,'comment','Nuevo comentario en tu publicación.',Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID]),['type'=>'post','id'=>$post->ID,'actor'=>(int)$comment->user_id]);
     }
     public static function react(int $id,string $kind,bool $active): array
     {
@@ -157,6 +179,7 @@ final class Content
         $reason=Access::text($reason,1000); Access::require(trim($reason)!=='','Indique un motivo de moderación.',400);
         $meta=(array)get_post_meta($id,'_ascla',true);
         Access::require($decision!=='approve'||empty($meta['generated'])||$reviewed,'Debe confirmar revisión de fuentes, identidades y derechos.',400);
+        if($decision==='approve'&&!empty($meta['micro'])){ MicroEvents::validateInvitees($meta); }
         $meta['moderation']=['moderator'=>get_current_user_id(),'date'=>gmdate('c'),'decision'=>$decision,'reason'=>$reason];
         if ($reviewed) { $meta['reviewed']=true; }
         update_post_meta($id,'_ascla',$meta); wp_update_post(['ID'=>$id,'post_status'=>$statuses[$decision]]);

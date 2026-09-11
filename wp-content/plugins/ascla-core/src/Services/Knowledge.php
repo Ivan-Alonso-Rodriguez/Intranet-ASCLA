@@ -1,16 +1,17 @@
 <?php
 namespace ASCLA\Core\Services;
 use ASCLA\Core\Integrations\{AIProviderInterface,MockAIProvider,RealAIProvider,MockVideoProvider,YouTubeVideoProvider};
-use ASCLA\Core\Domain\Anonymizer;
+use ASCLA\Core\Domain\{Anonymizer,EntityRedactor,Grounding};
 final class Knowledge
 {
+    private const IDENTITIES_SEPARATOR='/[\n,;]+/u';
     public static function provider(): AIProviderInterface { return Settings::get()['ai_mode']==='real'?new RealAIProvider():new MockAIProvider(); }
     public static function answer(string $question): array
     {
         $question=Access::text($question,2000);
         $tokens=array_values(array_unique(array_filter(preg_split('/[^\p{L}\p{N}]+/u',mb_strtolower($question))?:[],static fn($w)=>mb_strlen($w)>3&&!in_array($w,['como','cómo','para','sobre','puedo','quiero','tiene','donde','cuáles','ascla'],true))));
         $tokens=array_slice($tokens,0,16);
-        $ranked=[];
+        $ranked=[]; $protected=false; $allIdentities=[];
         $posts=\ASCLA\Core\Repositories\KnowledgeSearch::candidates($tokens);
         foreach ($posts as $post) {
             if (!Content::canRead($post)) { continue; }
@@ -18,7 +19,8 @@ final class Knowledge
             if (!empty($meta['generated'])&&empty($meta['reviewed'])) { continue; }
             $body=wp_strip_all_tags($post->post_content);
             if (!empty($meta['chatham'])) {
-                $identities=preg_split('/[\n,;]+/u',$meta['identities']??'')?:[];
+                $identities=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];
+                $protected=true; $allIdentities=array_merge($allIdentities,$identities);
                 $body=Anonymizer::redact($body,$identities);
             }
             $title=!empty($meta['chatham'])?Anonymizer::redact($post->post_title,$identities):$post->post_title;
@@ -28,12 +30,40 @@ final class Knowledge
         }
         usort($ranked,static fn($a,$b)=>$b['score']<=>$a['score']); $sources=array_slice($ranked,0,4);
         if (!$sources) { return ['answer'=>'No existe suficiente información en el Centro de Conocimiento para responder esta consulta.','sources'=>[],'mode'=>self::provider()->mode()]; }
-        $result=self::provider()->generate('answer',['question'=>$question,'sources'=>$sources]);
-        $ids=array_map('intval',(array)($result['source_ids']??[]));
-        $used=array_values(array_filter($sources,static fn($s)=>in_array($s['id'],$ids,true)));
-        if (!$used) { return ['answer'=>'No existe suficiente información verificable para responder esta consulta.','sources'=>[],'mode'=>self::provider()->mode()]; }
-        return ['answer'=>Access::text($result['answer']??'',20000),'sources'=>array_map(static fn($s)=>['id'=>$s['id'],'title'=>$s['title'],'url'=>$s['url']],$used),'mode'=>self::provider()->mode()];
+        $inputQuestion=$protected?EntityRedactor::redact($question,$allIdentities):$question;
+        $result=self::provider()->generate('answer',['question'=>$inputQuestion,'sources'=>$sources]);
+        if($protected){ $result=EntityRedactor::tree($result,$allIdentities); }
+        $verified=Grounding::answer($result,$sources);
+        if (!$verified['answer']) { return ['answer'=>'No existe suficiente información verificable para responder esta consulta. Las afirmaciones propuestas no pudieron sustentarse en las fuentes.','sources'=>[],'mode'=>self::provider()->mode(),'grounding'=>$verified['grounding']]; }
+        $answer=$protected?EntityRedactor::redact($verified['answer'],$allIdentities):$verified['answer'];
+        if($protected){ Access::require(EntityRedactor::validateRedaction($answer,$allIdentities)['valid'],'La respuesta requiere revisión de anonimización.',502); }
+        return ['answer'=>Access::text($answer,20000),'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url']],$verified['sources']),'mode'=>self::provider()->mode(),'grounding'=>$verified['grounding']];
     }
+
+    /** Revalidate saved answers against the currently readable, reviewed evidence. */
+    public static function storedAnswer(array $result): array
+    {
+        $sources=[];$identities=[];$protected=false;
+        foreach ($result['sources']??[] as $source) {
+            $post=get_post((int)($source['id']??0));
+            if (!$post || $post->post_status==='trash' || !Content::canRead($post)) { continue; }
+            $meta=(array)get_post_meta($post->ID,'_ascla',true);
+            if (!empty($meta['generated']) && empty($meta['reviewed'])) { continue; }
+            $body=wp_strip_all_tags($post->post_content);$title=$post->post_title;
+            if (!empty($meta['chatham'])) {
+                $protected=true;$known=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];
+                $identities=array_merge($identities,$known);
+                $body=EntityRedactor::redact($body,$known);$title=EntityRedactor::redact($title,$known);
+            }
+            $sources[]=['id'=>$post->ID,'body'=>$body,'title'=>$title,'url'=>Content::serialize($post)['url']];
+        }
+        $candidate=['answer'=>$result['answer']??'','source_ids'=>array_column($sources,'id')];
+        if($protected){ $candidate=EntityRedactor::tree($candidate,$identities); }
+        $verified=Grounding::answer($candidate,$sources);
+        $answer=$verified['answer']?:'No existe suficiente información verificable en las fuentes actuales. Puedes volver a consultar el Centro de Conocimiento.';
+        return ['answer'=>$answer,'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url']],$verified['sources']),'mode'=>$result['mode']??'Fuentes actualizadas','grounding'=>$verified['grounding']];
+    }
+
     public static function videoMetadata(int $id): array
     {
         Access::require(current_user_can('ascla_moderate'));
@@ -47,37 +77,35 @@ final class Knowledge
         update_post_meta($id,'_ascla',$meta); Audit::record('video_metadata_updated',$id,$data['mode']);
         return ['resource_id'=>$id,'mode'=>$data['mode'],'duration_seconds'=>$meta['duration_seconds'],'message'=>'Duración y miniatura actualizadas.'];
     }
-    public static function multimedia(int $id): array
+    public static function multimedia(int $id,?AIProviderInterface $ai=null): array
     {
+        $ai=$ai??self::provider();
         $post=Content::get($id); Access::require($post->post_type==='ascla_resource','Seleccione un recurso.',400);
-        $meta=(array)get_post_meta($id,'_ascla',true); $transcript=$meta['transcript']??''; $videoMode='Transcripción manual';
-        if (!$transcript) {
-            $provider=Settings::get()['youtube_mode']==='real'?new YouTubeVideoProvider():new MockVideoProvider();
-            $video=$provider->transcript($meta['video_id']??''); $transcript=$video['text']; $videoMode=$video['mode'];
-        }
-        Access::require(mb_strlen($transcript)>=30,'La transcripción es insuficiente.',400);
-        $identities=preg_split('/[\n,;]+/u',$meta['identities']??'')?:[];
-        if (!empty($meta['chatham'])) {
-            foreach (get_users(['capability'=>'ascla_access']) as $user) {
-                $p=(array)get_user_meta($user->ID,'_ascla_profile',true);
-                $identities[]=$user->display_name; $identities[]=$p['company']??''; $identities[]=$p['position']??'';
-            }
-            $transcript=Anonymizer::redact($transcript,$identities);
-        }
-        $result=self::provider()->generate('multimedia',['source_id'=>$id,'transcript'=>$transcript,'chatham'=>!empty($meta['chatham'])]);
+        $meta=(array)get_post_meta($id,'_ascla',true);
+        [$transcript,$videoMode,$identities]=self::editorialContext($meta);
+        $result=$ai->generate('multimedia',['source_id'=>$id,'transcript'=>$transcript,'chatham'=>!empty($meta['chatham'])]);
+        if (!empty($meta['chatham'])) { $result=EntityRedactor::tree($result,$identities); }
+        $result=Grounding::multimedia($result,$transcript);
         $summary=Access::text($result['summary']??'',15000); $note=Access::text($result['technical_note']??'',30000);
         Access::require($summary!==''&&$note!=='','La IA no devolvió resumen y nota técnica válidos.',502);
         if (!empty($meta['chatham'])) { $summary=Anonymizer::redact($summary,$identities); $note=Anonymizer::redact($note,$identities); }
-        $derived=['resource_type'=>'Nota técnica','generated'=>true,'reviewed'=>false,'chatham'=>!empty($meta['chatham']),'source_id'=>$id,'summary'=>$summary,'copyright'=>Settings::get()['copyright'],'ai_mode'=>self::provider()->mode(),'video_mode'=>$videoMode,'infographic'=>$result['infographic']??[],'moments'=>$result['moments']??[],'excerpts'=>$result['excerpts']??[],'frameworks'=>$result['frameworks']??[],'norms'=>$result['norms']??[],'conclusions'=>$result['conclusions']??[],'concepts'=>$result['concepts']??[],'tags'=>$result['tags']??[]];
-        // Recursively sanitize every generated field before persistence; metadata is never executable.
-        $clean=static function($value) use (&$clean,$identities,$meta) {
-            if (is_array($value)) { return array_map($clean,array_slice($value,0,80)); }
-            if (is_string($value)) { $text=mb_substr(sanitize_textarea_field($value),0,10000); return !empty($meta['chatham'])?Anonymizer::redact($text,$identities):$text; }
-            return is_scalar($value)?$value:null;
-        };
-        $derived=$clean($derived);
+        $derived=['resource_type'=>'Nota técnica','generated'=>true,'reviewed'=>false,'chatham'=>!empty($meta['chatham']),'source_id'=>$id,'summary'=>$summary,'copyright'=>Settings::get()['copyright'],'ai_mode'=>$ai->mode(),'video_mode'=>$videoMode,'infographic'=>$result['infographic']??[],'moments'=>$result['moments']??[],'excerpts'=>$result['excerpts']??[],'frameworks'=>$result['frameworks']??[],'norms'=>$result['norms']??[],'conclusions'=>$result['conclusions']??[],'concepts'=>$result['concepts']??[],'tags'=>$result['tags']??[],'demo_source_note'=>$meta['demo_source_note']??'','grounding'=>$result['grounding'],'redaction'=>['policy'=>'pre-and-post-entities-v1','review_required'=>true]];
+        $derived=self::cleanGenerated($derived,!empty($meta['chatham']),$identities);
+        // Copyright and provenance are controlled metadata, not model-generated prose.
+        $derived['copyright']='© ASCLA – Asociación de Secretarios Corporativos de América Latina';
+        $derived['ai_mode']=$ai->mode();
+        if (!empty($meta['chatham'])) {
+            $summary=EntityRedactor::redact($summary,$identities);$note=EntityRedactor::redact($note,$identities);
+            Access::require(EntityRedactor::validateRedaction($summary.' '.$note.' '.wp_json_encode($result,JSON_UNESCAPED_UNICODE),$identities)['valid'],'El borrador requiere revisión adicional de identidades.',502);
+        }
         // Keep only timed excerpts grounded in timestamps actually present in the source.
         $grounded=\ASCLA\Core\Domain\Transcript::moments($transcript,array_merge((array)($result['moments']??[]),(array)($result['excerpts']??[])));
+        $grounded=array_map(static function($clip) use($id,$meta) {
+            $clip['duration']=$clip['end']-$clip['start'];$clip['source_id']=$id;
+            $clip['description']=$clip['title'];$clip['reason']=$clip['selection'];
+            $clip['youtube_url']=empty($meta['video_id'])?'':'https://www.youtube.com/watch?v='.$meta['video_id'].'&t='.$clip['start'].'s';
+            return $clip;
+        },$grounded);
         $derived['moments']=$grounded; $derived['excerpts']=$grounded;
         $derived['video_id']=$meta['video_id']??'';
         $derived['thumbnail_url']=YouTubeVideoProvider::thumbnail($derived['video_id']);
@@ -90,16 +118,49 @@ final class Knowledge
         $suggested=Access::text($result['suggested_hub']??$summary,10000);
         if (!empty($meta['chatham'])) { $suggested=Anonymizer::redact($suggested,$identities); }
         $hub=wp_insert_post(wp_slash(['post_type'=>'ascla_hub','post_title'=>'Ideas para conversar · Sesión ASCLA','post_content'=>$suggested,'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
-        if (!is_wp_error($hub)) { update_post_meta($hub,'_ascla',['generated'=>true,'reviewed'=>false,'chatham'=>$derived['chatham'],'source_id'=>$new,'ai_mode'=>self::provider()->mode()]); }
+        if (!is_wp_error($hub)) { update_post_meta($hub,'_ascla',['generated'=>true,'reviewed'=>false,'chatham'=>$derived['chatham'],'source_id'=>$new,'ai_mode'=>$ai->mode()]); }
+        $capsules=self::capsules($grounded,$id,$meta,$derived,$summary,$topics,$ai);
+        Audit::record('ai_generated',$new); return ['resource_id'=>$new,'capsule_ids'=>$capsules,'hub_id'=>is_wp_error($hub)?0:$hub,'mode'=>$ai->mode(),'video_mode'=>$videoMode,'message'=>'Borradores creados. Revise fuentes, anonimización y derechos antes de publicar.'];
+    }
+    private static function editorialContext(array $meta): array
+    {
+        $transcript=$meta['transcript']??''; $videoMode='Transcripción manual';
+        if (!$transcript) {
+            $provider=Settings::get()['youtube_mode']==='real'?new YouTubeVideoProvider():new MockVideoProvider();
+            $video=$provider->transcript($meta['video_id']??''); $transcript=$video['text']; $videoMode=$video['mode'];
+        }
+        Access::require(mb_strlen($transcript)>=30,'La transcripción es insuficiente.',400);
+        $identities=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];
+        if (!empty($meta['chatham'])) {
+            foreach (get_users(['capability'=>'ascla_access']) as $user) {
+                $p=(array)get_user_meta($user->ID,'_ascla_profile',true);
+                $identities[]=$user->display_name; $identities[]=$p['company']??'';
+            }
+            $transcript=Anonymizer::redact($transcript,$identities);
+        }
+        return [$transcript,$videoMode,$identities];
+    }
+    private static function cleanGenerated(mixed $value,bool $chatham,array $identities): mixed
+    {
+        if (is_array($value)) { return array_map(static fn($item)=>self::cleanGenerated($item,$chatham,$identities),array_slice($value,0,80)); }
+        if (is_string($value)) {
+            $text=mb_substr(sanitize_textarea_field($value),0,10000);
+            return $chatham?EntityRedactor::redact($text,$identities):$text;
+        }
+        return is_scalar($value)?$value:null;
+    }
+    private static function capsules(array $grounded,int $id,array $meta,array $derived,string $summary,array|\WP_Error $topics,AIProviderInterface $ai): array
+    {
         $capsules=[];
         foreach (array_slice($grounded,0,3) as $index=>$clip) {
             $capsule=wp_insert_post(wp_slash(['post_type'=>'ascla_resource','post_title'=>'Cápsula '.($index+1).' · Sesión ASCLA','post_content'=>$summary,'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
             if (!is_wp_error($capsule)) {
-                update_post_meta($capsule,'_ascla',['resource_type'=>'Podcast','generated'=>true,'reviewed'=>false,'chatham'=>$derived['chatham'],'source_id'=>$id,'video_id'=>$meta['video_id']??'','clip'=>$clip,'duration_seconds'=>$clip['end']-$clip['start'],'thumbnail_url'=>YouTubeVideoProvider::thumbnail($meta['video_id']??''),'copyright'=>Settings::get()['copyright'],'ai_mode'=>self::provider()->mode()]);
+                update_post_meta($capsule,'_ascla',['resource_type'=>'Podcast','generated'=>true,'reviewed'=>false,'chatham'=>$derived['chatham'],'source_id'=>$id,'video_id'=>$meta['video_id']??'','clip'=>$clip,'demo_source_note'=>$meta['demo_source_note']??'','duration_seconds'=>$clip['end']-$clip['start'],'thumbnail_url'=>YouTubeVideoProvider::thumbnail($meta['video_id']??''),'copyright'=>Settings::get()['copyright'],'ai_mode'=>$ai->mode()]);
                 if (!is_wp_error($topics)) { wp_set_object_terms($capsule,array_map('intval',$topics),'ascla_interest'); }
                 $capsules[]=$capsule;
             }
         }
-        Audit::record('ai_generated',$new); return ['resource_id'=>$new,'capsule_ids'=>$capsules,'hub_id'=>is_wp_error($hub)?0:$hub,'mode'=>self::provider()->mode(),'video_mode'=>$videoMode,'message'=>'Borradores creados. Revise fuentes, anonimización y derechos antes de publicar.'];
+        return $capsules;
     }
+
 }

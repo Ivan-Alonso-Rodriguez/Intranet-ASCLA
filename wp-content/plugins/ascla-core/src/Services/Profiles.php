@@ -6,6 +6,39 @@ final class Profiles
 {
     public const TEXT=['first_name','last_name','position','company','country','city','member_type','bio','experience','linkedin','twitter','website'];
     public const TERMS=['interests'=>'interest','areas'=>'area','industries'=>'industry','goals'=>'goal','languages'=>'language','learn'=>'area','help'=>'area','connect_topics'=>'interest'];
+    public static function privateName(int $id): bool
+    {
+        $data=(array)get_user_meta($id,'_ascla_profile',true);
+        return (bool)array_intersect(['first_name','last_name'],(array)($data['hidden']??[]));
+    }
+    public static function publicName(int $id): string
+    {
+        $user=get_userdata($id);
+        if (!$user) { return 'Asociado no disponible'; }
+        return self::privateName($id)?'Asociado ASCLA '.$id:$user->display_name;
+    }
+    public static function matchingProfile(int $id): array
+    {
+        $data=self::raw($id);
+        foreach((array)$data['hidden'] as $field){ unset($data[$field]); }
+        unset($data['first_name'],$data['last_name'],$data['bio'],$data['experience'],$data['company'],$data['linkedin'],$data['twitter'],$data['website']);
+        $data['name']=self::publicName($id);
+        return $data;
+    }
+    public static function networkingContext(int $id): array
+    {
+        $data=self::matchingProfile($id);$context=['name'=>self::publicName($id),'position'=>$data['position']??''];
+        foreach(self::labels($data) as $field=>$labels){ $context[$field]=$labels; }
+        return $context;
+    }
+    public static function searchableAuthors(string $query): array
+    {
+        $ids=[];
+        foreach(get_users(['capability'=>'ascla_access','fields'=>'ID']) as $id) {
+            if (mb_stripos(self::publicName((int)$id),$query)!==false) { $ids[]=(int)$id; }
+        }
+        return $ids;
+    }
     public static function raw(int $id): array
     {
         $user=get_userdata($id); Access::require($user && Access::member($id),'Perfil no encontrado.',404);
@@ -19,6 +52,10 @@ final class Profiles
         if (!$own && !current_user_can('ascla_moderate')) {
             foreach ((array)($data['hidden']??[]) as $field) { unset($data[$field]); }
             unset($data['learn'],$data['help'],$data['goals'],$data['connect_topics'],$data['microevents']);
+        }
+        if (!$own && self::privateName($id)) {
+            unset($data['first_name'],$data['last_name'],$data['display_name']);
+            $data['name']=self::publicName($id);
         }
         unset($data['revision']);
         $data['photo_url']=!empty($data['photo_id'])?Media::url((int)$data['photo_id']):'';

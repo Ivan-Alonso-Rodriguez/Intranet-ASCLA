@@ -18,12 +18,7 @@ final class Queue
         unset($row['payload']); $row['result']=json_decode($row['result']??'null',true);
         if ($row['kind']==='answer') {
             $row['question']=Access::text($payload['question']??'',2000);
-            foreach ($row['result']['sources']??[] as $source) {
-                $post=get_post((int)($source['id']??0));
-                if (!$post || $post->post_status==='trash' || !Content::canRead($post)) {
-                    $row['result']=['answer'=>'Una fuente de esta respuesta ya no está disponible. Puedes volver a consultar con los recursos actuales.','sources'=>[],'mode'=>'Fuentes actualizadas']; break;
-                }
-            }
+            if ($row['status']==='completed' && is_array($row['result'])) { $row['result']=Knowledge::storedAnswer($row['result']); }
         }
         return $row;
     }

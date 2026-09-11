@@ -14,7 +14,7 @@ final class Events
         $item['google_url']=Calendar::google($post->post_title,$meta,!empty($meta['chatham'])?'Sesión bajo la Regla de Chatham House.':$post->post_content);
         $item['ics']=Calendar::ics($id,$post->post_title,$meta,'Evento privado ASCLA.',wp_parse_url(home_url(),PHP_URL_HOST));
         if (current_user_can('ascla_moderate')) {
-            $item['participants']=array_map(static function ($r) { $u=get_userdata($r['user_id']); return ['id'=>(int)$r['user_id'],'name'=>$u?$u->display_name:'Miembro','status'=>$r['status']]; },Store::rows('registrations','event_id=%d',[$id]));
+            $item['participants']=array_map(static function ($r) { $u=get_userdata($r['user_id']); return ['id'=>(int)$r['user_id'],'name'=>$u?Profiles::publicName((int)$u->ID):'Miembro','status'=>$r['status']]; },Store::rows('registrations','event_id=%d',[$id]));
         }
         return $item;
     }

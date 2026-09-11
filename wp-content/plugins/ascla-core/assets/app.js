@@ -200,7 +200,9 @@
   ];
   function shell() {
     const p = S.boot.me;
-    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(C.pages.intranet.url)}" aria-label="ASCLA inicio"><img src="${E(C.logo)}" alt="ASCLA"></a><div class="brand-sub">COMUNIDAD DE ASOCIADOS</div><nav aria-label="Navegación principal">${navOrder.map((k) => `<a class="nav-link ${S.page === k ? "active" : ""}" href="${E(C.pages[k].url)}">${I(pageIcon[k])}<span>${E(C.pages[k].label)}</span></a>`).join("")}</nav><div class="nav-bottom">${S.boot.moderator ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}Administración</a>` : ""}<a class="nav-link" href="${E(C.logout)}">${I("logout")}Cerrar sesión</a></div></aside><div class="ascla-main"><header class="ascla-header">${btn(I("menu"), "menu", 'aria-label="Abrir navegación"', "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="Buscar en ASCLA" placeholder="Buscar en tu comunidad…" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${btn(`${I("bell")}<span class="notification-count" hidden></span>`, "notifications", 'aria-label="Notificaciones"', "icon-button")}<a class="header-profile" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || "Comunidad ASCLA")}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || "Administración")}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · Conectamos conocimiento, fortalecemos la gobernanza.${S.boot.demo ? " · Datos ficticios de demostración." : ""}</div></main></div>`;
+    const links = navOrder.map((k) => `<a class="nav-link ${S.page === k ? "active" : ""}" href="${E(C.pages[k].url)}">${I(pageIcon[k])}<span>${E(C.pages[k].label)}</span></a>`).join("");
+    const adminLink = S.boot.moderator ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}Administración</a>` : "";
+    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(C.pages.intranet.url)}" aria-label="ASCLA inicio"><img src="${E(C.logo)}" alt="ASCLA"></a><div class="brand-sub">COMUNIDAD DE ASOCIADOS</div><nav aria-label="Navegación principal">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}Cerrar sesión</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(C.pages.intranet.url)}" aria-label="ASCLA inicio"><img src="${E(C.logo)}" alt="ASCLA"></a>${btn(I("menu"), "menu", 'aria-label="Abrir navegación"', "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="Buscar en ASCLA" placeholder="Buscar en tu comunidad…" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", 'aria-label="Notificaciones"', "icon-button")}<a class="header-profile" aria-label="Mi perfil" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || "Comunidad ASCLA")}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || "Administración")}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · Conectamos conocimiento, fortalecemos la gobernanza.${S.boot.demo ? " · Datos ficticios de demostración." : ""}</div></main></div>`;
     refreshNotifications();
   }
   function heading(title, subtitle, action = "") {
@@ -293,9 +295,11 @@
     try {
       match = await api("matching/" + id);
     } catch {}
+    const networking = match ? btn("Mensaje sugerido", "intro", `data-id="${id}"`) + btn("Conectar", "connect", `data-id="${id}"`) : '';
+    const actions = Number(id) !== S.boot.me.id ? networking + btn(I("mail") + " Enviar mensaje", "message-start", `data-id="${id}"`, "primary") : link("perfil", "Editar perfil", "primary");
     modal(
       p.name,
-      `<div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.position || "Miembro ASCLA")}</h2><p class="muted">${E(p.company || "")}</p><p class="muted">${E(p.country || "")} ${E(p.city || "")}</p>${match ? `<span class="match-pill">${I("spark")}${match.score}% de afinidad</span>` : ""}</div></div>${match ? `<div class="alert">${E(match.explanation)}</div>` : ""}<p class="detail-body">${E(p.bio || "Este miembro aún no ha añadido su biografía.")}</p>${p.experience ? `<h3>Experiencia profesional</h3><p class="detail-body">${E(p.experience)}</p>` : ""}${Object.entries(
+      `<div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.position || "Miembro ASCLA")}</h2><p class="muted">${E(p.company || "")}</p><p class="muted">${E(p.country || "")} ${E(p.city || "")}</p>${match ? ("<span class=\"match-pill\">" + (I("spark")) + "" + (match.score) + "% de afinidad</span>") : ""}</div></div>${match ? ("<div class=\"alert\">" + (E(match.explanation)) + "<p class=\"private-note\">" + (E(match.mode || "Afinidad determinística")) + "</p><p>" + (E(match.conversation_proposal || "")) + "</p></div>") : ""}<p class="detail-body">${E(p.bio || "Este miembro aún no ha añadido su biografía.")}</p>${p.experience ? ("<h3>Experiencia profesional</h3><p class=\"detail-body\">" + (E(p.experience)) + "</p>") : ""}${Object.entries(
         p.terms || {},
       )
         .filter(([, v]) => v.length)
@@ -311,7 +315,7 @@
         )
         .join(
           "",
-        )}</div><div class="form-actions">${Number(id) !== S.boot.me.id ? `${btn("Mensaje sugerido", "intro", `data-id="${id}"`)}${match ? btn("Conectar", "connect", `data-id="${id}"`) : ""}${btn(I("mail") + " Enviar mensaje", "message-start", `data-id="${id}"`, "primary")}` : link("perfil", "Editar perfil", "primary")}</div>`,
+        )}</div><div class="form-actions">${actions}</div>`,
     );
   }
   const profileLabels = {
@@ -472,9 +476,15 @@
       extra = `<div class="card" style="background:var(--bg);margin:20px 0"><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span><span>${I("clock")} ${time(p.meta.start)} – ${time(p.meta.end)}</span><span>${I("pin")} ${E(p.meta.location || "Por confirmar")}</span></div><p class="private-note">${d.attending} inscritos${p.meta.capacity ? " · " + p.meta.capacity + " cupos" : " · Sin límite de cupos"} · ${status(d.registered)}</p>${p.meta.agenda ? `<p class="detail-body">${E(p.meta.agenda).replace(/\\n/g, "<br>")}</p>` : ""}<div class="form-actions">${d.registered === "accepted" ? btn("Cancelar inscripción", "register", `data-id="${id}" data-status="cancelled"`) : btn("Registrarme", "register", `data-id="${id}" data-status="accepted"`, "primary")}${d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : ""}<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">Añadir a Google Calendar ↗</a>${btn(I("download") + " ICS", "ics", `data-id="${id}"`, "small")}${S.boot.google_connected ? btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small") + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small") : ""}</div>${d.participants ? `<details><summary class="private-note">Participantes (moderación)</summary>${d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("")}</details>` : ""}</div>`;
     }
     const canEdit = S.boot.moderator || p.author.id === S.boot.me.id;
+    const reviewedLabel = p.meta.reviewed ? "Revisado" : "Requiere revisión de fuentes, anonimización y derechos.";
+    const clipQuery = p.meta.clip ? "?start=" + Number(p.meta.clip.start) + "&end=" + Number(p.meta.clip.end) : "";
+    const videoDuration = p.meta.duration_seconds ? E(UI.duration(p.meta.duration_seconds)) : "Duración por confirmar";
+    const followingLabel = p.following ? "Dejar de seguir" : "Seguir conversación";
+    const videoModeTag = p.meta.video_metadata_mode ? ("<span class=\"tag\">" + (E(p.meta.video_metadata_mode)) + "</span>") : "";
+
     modal(
       p.title,
-      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${p.meta.demo ? '<span class="demo-badge">DATOS DEMO</span>' : ""}</div>${p.meta.chatham ? '<div class="alert chatham" style="margin-top:18px">' + I("shield") + " Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones.</div>" : ""}${p.meta.generated ? `<div class="alert">Contenido generado · ${E(p.meta.ai_mode || p.meta.social_mode || "IA")} · ${p.meta.reviewed ? "Revisado" : "Requiere revisión de fuentes, anonimización y derechos."}</div>` : ""}<p class="detail-body">${E(p.body)}</p>${p.meta.video_id ? `<div class="video-wrap"><iframe loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/${E(p.meta.video_id)}${p.meta.clip ? "?start=" + Number(p.meta.clip.start) + "&end=" + Number(p.meta.clip.end) : ""}" title="${E(p.title)}" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : ""}${p.meta.video_id ? `<div class="video-metadata"><span>${p.meta.duration_seconds ? E(UI.duration(p.meta.duration_seconds)) : "Duración por confirmar"}</span>${p.meta.video_metadata_mode ? `<span class="tag">${E(p.meta.video_metadata_mode)}</span>` : ""}</div>` : ""}${extra}${UI.attachments(p)}${UI.generated(p)}${p.meta.url ? `<a class="btn" href="${E(safeURL(p.meta.url))}" target="_blank" rel="noopener noreferrer">Abrir enlace ↗</a>` : ""}${p.meta.benefits ? `<h3>Beneficios</h3><p class="detail-body">${E(p.meta.benefits)}</p>` : ""}${p.meta.initiatives ? `<h3>Iniciativas</h3><p class="detail-body">${E(p.meta.initiatives)}</p>` : ""}${p.meta.clip ? `<div class="alert">Cápsula: ${p.meta.clip.start}s – ${p.meta.clip.end}s · Referencia externa. No se almacena el video completo.</div>` : ""}${p.meta.infographic ? btn(I("download") + " Descargar infografía", "infographic", `data-id="${id}"`) : ""}${p.meta.copyright ? `<p class="private-note">${E(p.meta.copyright)}</p>` : ""}<div class="form-actions">${canEdit ? btn(I("edit") + " Editar", "editor", `data-type="${p.type}" data-id="${id}"`) : ""}${S.boot.moderator && p.type === "event" && p.status === "publish" && !p.meta.micro ? btn("Invitar asociados", "event-invite", `data-id="${id}"`) : ""}${S.boot.moderator && p.type === "resource" && p.meta.video_id ? btn("Actualizar datos de YouTube", "video-metadata", `data-id="${id}"`) : ""}${S.boot.moderator && p.type === "resource" ? btn(I("spark") + " Generar resumen y nota", "generate", `data-id="${id}"`) : ""}${S.boot.moderator && p.type !== "contact" ? btn(I("shield") + " Moderar", "moderate", `data-id="${id}"`) : ""}${p.status === "publish" ? `${btn(I("heart") + " " + p.reactions, "like", `data-id="${id}" data-active="${!p.liked}"`)}${btn(p.following ? "Dejar de seguir" : "Seguir conversación", "follow", `data-id="${id}" data-active="${!p.following}"`)}${btn("Reportar", "report", `data-id="${id}"`, "ghost")}` : ""}</div>${p.status === "publish" ? `<section class="comments"><h3>Conversación</h3><div id="comments-list">Cargando comentarios…</div><form data-form="comment" data-id="${id}" style="margin-top:18px">${field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')}<button class="btn primary small">Publicar comentario</button></form></section>` : ""}`,
+      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${p.meta.demo ? '<span class="demo-badge">DATOS DEMO</span>' : ""}</div>${p.meta.chatham ? '<div class="alert chatham" style="margin-top:18px">' + I("shield") + " Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones.</div>" : ""}${p.meta.generated ? ("<div class=\"alert\">Contenido generado · " + (E(p.meta.ai_mode || p.meta.social_mode || "IA")) + " · " + (reviewedLabel) + "</div>") : ""}<p class="detail-body">${E(p.body)}</p>${p.meta.video_id ? ("<div class=\"video-wrap\"><iframe loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" src=\"https://www.youtube-nocookie.com/embed/" + (E(p.meta.video_id)) + "" + (clipQuery) + "\" title=\"" + (E(p.title)) + "\" allow=\"accelerometer; encrypted-media; picture-in-picture\" allowfullscreen></iframe></div>") : ""}${p.meta.video_id ? ("<div class=\"video-metadata\"><span>" + (videoDuration) + "</span>" + (videoModeTag) + "</div>") : ""}${extra}${UI.attachments(p)}${UI.generated(p)}${UI.agenda(p)}${p.meta.demo_source_note ? ("<p class=\"alert\">" + (E(p.meta.demo_source_note)) + "</p>") : ""}${p.meta.url ? ("<a class=\"btn\" href=\"" + (E(safeURL(p.meta.url))) + "\" target=\"_blank\" rel=\"noopener noreferrer\">Abrir enlace ↗</a>") : ""}${p.meta.benefits ? ("<h3>Beneficios</h3><p class=\"detail-body\">" + (E(p.meta.benefits)) + "</p>") : ""}${p.meta.initiatives ? ("<h3>Iniciativas</h3><p class=\"detail-body\">" + (E(p.meta.initiatives)) + "</p>") : ""}${p.meta.clip ? ("<div class=\"alert\">Cápsula sugerida: " + (p.meta.clip.start) + "s – " + (p.meta.clip.end) + "s · Referencia temporal al video de origen. No existe un archivo recortado.</div>") : ""}${p.meta.infographic ? btn(I("download") + " Descargar infografía", "infographic", ("data-id=\"" + (id) + "\"")) : ""}${p.meta.copyright ? ("<p class=\"private-note\">" + (E(p.meta.copyright)) + "</p>") : ""}<div class="form-actions">${canEdit ? btn(I("edit") + " Editar", "editor", ("data-type=\"" + (p.type) + "\" data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type === "event" && p.status === "publish" && !p.meta.micro ? btn("Invitar asociados", "event-invite", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type === "resource" && p.meta.video_id ? btn("Actualizar datos de YouTube", "video-metadata", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type === "resource" ? btn(I("spark") + " Generar resumen y nota", "generate", ("data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type !== "contact" ? btn(I("shield") + " Moderar", "moderate", ("data-id=\"" + (id) + "\"")) : ""}${p.status === "publish" ? ("" + (btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.liked) + "\""))) + "" + (btn(followingLabel, "follow", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.following) + "\""))) + "" + (btn("Reportar", "report", ("data-id=\"" + (id) + "\""), "ghost")) + "") : ""}</div>${p.status === "publish" ? ("<section class=\"comments\"><h3>Conversación</h3><div id=\"comments-list\">Cargando comentarios…</div><form data-form=\"comment\" data-id=\"" + (id) + "\" style=\"margin-top:18px\">" + (field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')) + "<button class=\"btn primary small\">Publicar comentario</button></form></section>") : ""}`,
       true,
     );
     if (p.status === "publish") {
@@ -644,7 +654,7 @@
     );
   }
   async function assistant() {
-    content().innerHTML = `<section class="assistant-intro"><div class="assistant-mark">${I("spark")}</div><div class="eyebrow">ASISTENTE ASCLA</div><h1>El conocimiento de tu comunidad,<br>a una pregunta de distancia.</h1><p>Explora ideas y encuentra respuestas basadas en el Centro de Conocimiento, siempre con sus fuentes.</p><span class="demo-badge" style="display:inline-block;margin-top:15px">${E(S.boot.ai_mode)}</span></section><div class="ask-suggestions">${["¿Cómo puede la junta supervisar los riesgos de inteligencia artificial?", "¿Cuál es el rol de la secretaría corporativa?", "¿Cómo mejorar el seguimiento de acuerdos?", "¿Qué recursos tenemos sobre gobierno corporativo?"].map((q) => btn(E(q) + " " + I("arrow"), "ask-suggestion", `data-question="${E(q)}"`)).join("")}</div><form class="card" data-form="ask" style="max-width:820px;margin:auto">${field("question", "Tu pregunta", "", "textarea", 'placeholder="¿Qué te gustaría conocer?" required maxlength="2000"')}<div class="form-actions"><button class="btn primary">${I("spark")} Consultar al asistente</button></div><p class="private-note">El asistente usa recursos publicados de ASCLA. Si no encuentra evidencia suficiente, te lo indicará.</p></form>${btn(I("clock") + " Mis consultas anteriores", "answer-history", "", "ghost answer-history-button")}<div id="answers"></div>`;
+    content().innerHTML = `<section class="assistant-intro"><div class="assistant-mark">${I("spark")}</div><div class="eyebrow">ASISTENTE ASCLA</div><h1>El conocimiento de tu comunidad,<br>a una pregunta de distancia.</h1><p>Explora ideas y encuentra respuestas basadas en el Centro de Conocimiento, siempre con sus fuentes.</p><span class="demo-badge" style="display:inline-block;margin-top:15px">${E(S.boot.ai_mode)}</span></section><div class="ask-suggestions">${["¿Cómo puede la junta supervisar los riesgos de inteligencia artificial?", "¿Cuál es el rol de la secretaría corporativa?", "¿Cómo mejorar el seguimiento de acuerdos?", "¿Qué recursos tenemos sobre gobierno corporativo?"].map((q) => btn(E(q) + " " + I("arrow"), "ask-suggestion", ("data-question=\"" + (E(q)) + "\""))).join("")}</div><form class="card" data-form="ask" style="max-width:820px;margin:auto">${field("question", "Tu pregunta", "", "textarea", 'placeholder="¿Qué te gustaría conocer?" required maxlength="2000"')}<div class="form-actions"><button class="btn primary">${I("spark")} Consultar al asistente</button></div><p class="private-note">El asistente selecciona fragmentos sustentados en recursos publicados de ASCLA. Si no puede verificar una afirmación, se abstiene.</p></form>${btn(I("clock") + " Mis consultas anteriores", "answer-history", "", "ghost answer-history-button")}<div id="answers"></div>`;
   }
   async function watchJob(id, target, onDone) {
     let attempts = 0;
@@ -659,7 +669,7 @@
           return;
         }
         if (j.status === "error") {
-          target.innerHTML = `<div class="error">${E(j.error)} ${btn("Reintentar", "retry-job", `data-id="${id}"`, "small")}</div>`;
+          target.innerHTML = `<div class="error">${E(j.error)} ${btn("Reintentar", "retry-job", 'data-id="' + id + '"', "small")}</div>`;
           return;
         }
         target.innerHTML = `<div class="alert">${I("clock")} ${j.status === "processing" ? "Procesando" : "Pendiente"} · Trabajo #${id}</div>`;
@@ -705,7 +715,7 @@
   function notificationCount(total) {
     const badge = document.querySelector(".notification-count"), bell = document.querySelector('[data-action="notifications"]');
     if (badge) { badge.hidden = !total; badge.textContent = total > 99 ? "99+" : total; }
-    bell?.setAttribute("aria-label", `Notificaciones${total ? `, ${total} sin leer` : ", estás al día"}`);
+    bell?.setAttribute("aria-label", "Notificaciones" + (total ? `, ${total} sin leer` : ", estás al día"));
   }
   async function refreshNotifications() {
     try { notificationCount((await api("notifications/summary")).unread_total); } catch {}
@@ -720,7 +730,9 @@
     else { modal("Tus notificaciones", html); document.querySelector(".modal").classList.add("notification-modal"); S.focus = document.querySelector('[data-action="notifications"]'); }
   }
   function answerHTML(question, r) {
-    return `<small class="demo-badge">${E(r.mode)}</small><h3 style="margin:16px 0">${E(question)}</h3><p>${E(r.answer)}</p>${r.sources?.length ? `<div class="sources">${r.sources.map(source => `<a href="${E(safeURL(source.url))}">${I("book")} ${E(source.title)}</a>`).join("")}</div>` : ""}`;
+    const links = (r.sources || []).map(source => `<a href="${E(safeURL(source.url))}">${I("book")} ${E(source.title)}</a>`).join("");
+    const sources = links ? '<div class="sources">' + links + '</div>' : '';
+    return `<small class="demo-badge">${E(r.mode)}</small><h3 style="margin:16px 0">${E(question)}</h3><p>${E(r.answer)}</p>${sources}`;
   }
   function answerTarget() {
     const target = document.createElement("div"); target.className = "card answer-card";
@@ -896,36 +908,7 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   function infographic() {
-    const p = S.item,
-      info = p.meta.infographic || {};
-    const points = (info.key_points || info.sections || [])
-      .slice(0, 6)
-      .map((v) => (typeof v === "string" ? v : JSON.stringify(v)));
-    const lines = [];
-    points.forEach((p, i) => {
-      let line = "",
-        row = 0;
-      p.split(" ").forEach((w) => {
-        if ((line + w).length > 65) {
-          lines.push(
-            `<text x="70" y="${190 + i * 120 + row * 22}" fill="#527088" font-size="16">${E(line)}</text>`,
-          );
-          row++;
-          line = "";
-        }
-        if (row < 4) line += w + " ";
-      });
-      if (row < 4)
-        lines.push(
-          `<text x="70" y="${190 + i * 120 + row * 22}" fill="#527088" font-size="16">${E(line)}</text>`,
-        );
-    });
-    const height = 250 + points.length * 120;
-    download(
-      "ascla-infografia-" + p.id + ".svg",
-      `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="${height}"><rect width="760" height="${height}" fill="#f4f8fb"/><rect width="760" height="110" fill="#103554"/><text x="50" y="45" font-family="Arial" font-size="16" fill="#9ecce8">ASCLA · CENTRO DE CONOCIMIENTO</text><text x="50" y="80" font-family="Arial" font-size="24" fill="white">${E(String(info.title || "Claves de la sesión").slice(0, 48))}</text><g font-family="Arial">${lines.join("")}</g><text x="50" y="${height - 60}" font-family="Arial" font-size="12" fill="#65859b">Fuente interna ASCLA #${p.meta.source_id || p.id} · ${E(p.meta.ai_mode || "")}</text><text x="50" y="${height - 35}" font-family="Arial" font-size="10" fill="#65859b">© ASCLA – Asociación de Secretarios Corporativos de América Latina</text></svg>`,
-      "image/svg+xml",
-    );
+    download("ascla-infografia-" + S.item.id + ".svg", UI.infographic(S.item), "image/svg+xml");
   }
   async function render() {
     clearInterval(S.poll);

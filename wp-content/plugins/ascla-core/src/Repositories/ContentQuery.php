@@ -2,6 +2,7 @@
 namespace ASCLA\Core\Repositories;
 
 use ASCLA\Core\Services\Access;
+use ASCLA\Core\Services\Profiles;
 
 /** Search and sorting run before pagination, inside the private content query. */
 final class ContentQuery
@@ -13,17 +14,20 @@ final class ContentQuery
         if ($text === '') { return $sql; }
         global $wpdb;
         $like = '%' . $wpdb->esc_like($text) . '%';
+        $authorIds=Profiles::searchableAuthors($text);
+        $authorSql=$authorIds?' OR '.$wpdb->posts.'.post_author IN ('.implode(',',array_map('intval',$authorIds)).')':'';
         return $wpdb->prepare(" AND ({$wpdb->posts}.post_title LIKE %s OR {$wpdb->posts}.post_content LIKE %s
-            OR EXISTS (SELECT 1 FROM {$wpdb->users} au WHERE au.ID={$wpdb->posts}.post_author AND au.display_name LIKE %s)
+            $authorSql
             OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} am WHERE am.post_id={$wpdb->posts}.ID AND am.meta_key='_ascla_source' AND am.meta_value LIKE %s)
-            OR EXISTS (SELECT 1 FROM {$wpdb->term_relationships} ar INNER JOIN {$wpdb->term_taxonomy} atx ON ar.term_taxonomy_id=atx.term_taxonomy_id INNER JOIN {$wpdb->terms} atr ON atr.term_id=atx.term_id WHERE ar.object_id={$wpdb->posts}.ID AND atx.taxonomy IN ('ascla_interest','ascla_category','ascla_tag') AND atr.name LIKE %s))", $like, $like, $like, $like, $like);
+            OR EXISTS (SELECT 1 FROM {$wpdb->term_relationships} ar INNER JOIN {$wpdb->term_taxonomy} atx ON ar.term_taxonomy_id=atx.term_taxonomy_id INNER JOIN {$wpdb->terms} atr ON atr.term_id=atx.term_id WHERE ar.object_id={$wpdb->posts}.ID AND atx.taxonomy IN ('ascla_interest','ascla_category','ascla_tag') AND atr.name LIKE %s))", $like, $like, $like, $like);
     }
 
     public static function authors(): array
     {
         global $wpdb;
         $visibility = current_user_can('ascla_moderate') ? "p.post_status IN ('publish','draft','pending','ascla_rejected','ascla_hidden')" : "p.post_status='publish'";
-        return $wpdb->get_results("SELECT DISTINCT u.ID AS id,u.display_name AS name FROM {$wpdb->users} u INNER JOIN {$wpdb->posts} p ON p.post_author=u.ID WHERE p.post_type='ascla_resource' AND $visibility ORDER BY u.display_name,u.ID", ARRAY_A);
+        $authors=$wpdb->get_results("SELECT DISTINCT u.ID AS id,u.display_name AS name FROM {$wpdb->users} u INNER JOIN {$wpdb->posts} p ON p.post_author=u.ID WHERE p.post_type='ascla_resource' AND $visibility ORDER BY u.display_name,u.ID", ARRAY_A);
+        return array_map(static fn($author)=>['id'=>$author['id'],'name'=>Profiles::publicName((int)$author['id'])],$authors);
     }
 
     public static function filters(array $args, string $type, array $filter): array

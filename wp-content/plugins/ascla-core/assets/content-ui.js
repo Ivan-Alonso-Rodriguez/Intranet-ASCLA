@@ -1,3 +1,92 @@
+  function asclaInfographic(p) {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    const info = p.meta.infographic || {};
+    let y = 165;
+    function add(tag, attrs, text = "") {
+      const node = document.createElementNS(ns, tag);
+      for (const [key, val] of Object.entries(attrs))
+        node.setAttribute(key, String(val));
+      node.textContent = text;
+      svg.append(node);
+      return node;
+    }
+    function paragraph(text, x = 54, color = "#324860", size = 17) {
+      const words = String(text).match(/.{1,68}(?:\s|$)|.{1,68}/g) || [];
+      for (const line of words) {
+        add("text", { x, y, fill: color, "font-size": size }, line.trim());
+        y += 25;
+      }
+      y += 12;
+    }
+    function section(title, entries) {
+      if (!entries.length) return;
+      y += 15;
+      paragraph(title, 54, "#116da3", 21);
+      for (const text of entries.slice(0, 8)) paragraph(text);
+    }
+    const background = add("rect", {
+      width: 760,
+      height: 10000,
+      fill: "#f4f8fb",
+    });
+    add("rect", { width: 760, height: 110, fill: "#233156" });
+    add(
+      "text",
+      { x: 54, y: 40, fill: "#bcd5ef", "font-size": 14 },
+      "ASCLA · CENTRO DE CONOCIMIENTO",
+    );
+    add(
+      "text",
+      { x: 54, y: 80, fill: "white", "font-size": 25 },
+      String(info.title || "Claves de la sesión").slice(0, 45),
+    );
+    section(
+      "Puntos clave",
+      (info.key_points || info.sections || []).filter(
+        (x) => typeof x === "string",
+      ),
+    );
+    if (p.meta.grounding?.policy === "extractive-source-sentences-v1") {
+      section(
+        "Estadísticas sustentadas en la fuente",
+        (info.statistics || []).filter((x) => typeof x === "string"),
+      );
+      const timeline = (info.timeline || []).filter(
+        (x) => x && typeof x.text === "string",
+      );
+      if (timeline.length) {
+        y += 15;
+        paragraph("Cronología de la fuente", 54, "#116da3", 21);
+        for (const item of timeline.slice(0, 8)) {
+          add("circle", { cx: 60, cy: y - 6, r: 5, fill: "#116da3" });
+          paragraph(`${item.date} · ${item.text}`, 82);
+        }
+      }
+    }
+    if (p.meta.demo_source_note)
+      section("Datos ficticios de demostración", [p.meta.demo_source_note]);
+    y += 18;
+    paragraph(
+      `Fuente: Centro de Conocimiento ASCLA #${p.meta.source_id || p.id}`,
+      54,
+      "#526078",
+      13,
+    );
+    paragraph(
+      "© ASCLA – Asociación de Secretarios Corporativos de América Latina",
+      54,
+      "#526078",
+      12,
+    );
+    const height = y + 20;
+    svg.setAttribute("width", "760");
+    svg.setAttribute("height", String(height));
+    svg.setAttribute("viewBox", `0 0 760 ${height}`);
+    svg.setAttribute("font-family", "Arial, sans-serif");
+    background.setAttribute("height", String(height));
+    return new XMLSerializer().serializeToString(svg);
+  }
 /* Content views share the app's escaping and controls. */
 window.ASCLAContent = function ({ escape: E, icon: I, config: C }) {
   const option = (name, label, values, selected = "") =>
@@ -62,8 +151,27 @@ window.ASCLAContent = function ({ escape: E, icon: I, config: C }) {
     const total = Math.max(0, Math.floor(Number(seconds) || 0));
     return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
   };
-  const fragments = (moments) =>
-    `<ol>${moments.map((m) => `<li><strong>${timestamp(m.start)} – ${timestamp(m.end)}</strong><p>${E(m.title)}</p><small>${E(m.selection)}</small></li>`).join("")}</ol>`;
+  function fragments(moments) {
+    const items = moments.map((m) => {
+      const timing = `${timestamp(m.start)} – ${timestamp(m.end)} · ${duration(m.end - m.start)}`;
+      let link = "";
+      if (
+        /^https:\/\/www\.youtube\.com\/watch\?v=[\w-]{11}&t=\d+s$/.test(
+          m.youtube_url || "",
+        )
+      ) {
+        link = `<a class="btn small" href="${E(m.youtube_url)}" target="_blank" rel="noopener noreferrer">Abrir referencia en YouTube ↗</a>`;
+      }
+      return `<li><strong>Cápsula sugerida · ${timing}</strong><p>${E(m.description || m.title)}</p><small>${E(m.reason || m.selection)}</small><p>${link}</p></li>`;
+    });
+    return `<ol>${items.join("")}</ol><p class="private-note">Referencias temporales al video de origen; no son archivos recortados.</p>`;
+  }
+  function agenda(p) {
+    const data = p.meta.agenda_ai;
+    if (!data) return "";
+    const mode = `<span class="tag">${E(data.mode || "DEMO MODE")}</span>`;
+    return `<section class="generated-results"><h3>Agenda de conversación ${mode}</h3><p>${E(data.objective)}</p><p><strong>Para comenzar:</strong> ${E(data.icebreaker)}</p><p><strong>Para cerrar:</strong> ${E(data.closing_question)}</p><p class="private-note">Propuesta de ${Number(data.duration_minutes)} minutos. Revisa la agenda y la fecha antes de aprobar.</p></section>`;
+  }
   function value(data, depth = 0) {
     if (depth > 3 || data == null) return "";
     if (Array.isArray(data))
@@ -90,7 +198,7 @@ window.ASCLAContent = function ({ escape: E, icon: I, config: C }) {
       norms: "Normativas mencionadas",
       concepts: "Conceptos importantes",
       tags: "Palabras clave",
-      moments: "Fragmentos propuestos",
+      moments: "Cápsulas sugeridas",
     };
     let html = Object.entries(sections)
       .filter(([key]) => p.meta[key]?.length)
@@ -114,5 +222,7 @@ window.ASCLAContent = function ({ escape: E, icon: I, config: C }) {
     attachments,
     filters,
     generated,
+    infographic: asclaInfographic,
+    agenda,
   };
 };

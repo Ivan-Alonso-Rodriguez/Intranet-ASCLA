@@ -9,7 +9,7 @@ final class Notifications
         if (in_array($context['type']??'', ['post','profile','conversation','job'],true)) {
             $safe=['type'=>$context['type'],'id'=>absint($context['id']??0),'actor'=>absint($context['actor']??0)];
         }
-        return ['user_id'=>$user,'kind'=>sanitize_key($kind),'label'=>Access::text($label,255),'url'=>esc_url_raw($url),'context'=>wp_json_encode($safe),'created_at'=>current_time('mysql',true)];
+        return ['user_id'=>$user,'kind'=>sanitize_key($kind),'label'=>Access::excerpt($label,255),'url'=>esc_url_raw($url),'context'=>wp_json_encode($safe),'created_at'=>current_time('mysql',true)];
     }
     public static function send(int $user,string $kind,string $label,string $url='',array $context=[]): void
     {

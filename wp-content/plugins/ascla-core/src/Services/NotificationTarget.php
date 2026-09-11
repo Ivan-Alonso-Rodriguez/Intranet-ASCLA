@@ -7,11 +7,12 @@ use ASCLA\Core\Repositories\Store;
 /** Resolve notification destinations against the recipient's current permissions. */
 final class NotificationTarget
 {
+    private const HUB_ACTION='Ver el Hub';
     private const TYPES = [
         'message'=>['Mensajes','mail','mensajeria','Abrir mensajería'],
-        'comment'=>['Comunidad','hub','hub','Ver el Hub'],
-        'reaction'=>['Comunidad','heart','hub','Ver el Hub'],
-        'mention'=>['Comunidad','hub','hub','Ver el Hub'],
+        'comment'=>['Comunidad','hub','hub',self::HUB_ACTION],
+        'reaction'=>['Comunidad','heart','hub',self::HUB_ACTION],
+        'mention'=>['Comunidad','hub','hub',self::HUB_ACTION],
         'moderation'=>['Publicaciones','shield','hub','Ver mis publicaciones'],
         'event'=>['Eventos','calendar','eventos','Ver eventos'],
         'microevent'=>['Eventos','calendar','eventos','Ver eventos'],
@@ -24,6 +25,15 @@ final class NotificationTarget
     ];
 
     public static function view(array $row): array
+    {
+        try { return self::resolve($row); }
+        catch (\Throwable $error) {
+            // A corrupt legacy row must not prevent other notices from being read.
+            return ['id'=>(int)($row['id']??0),'kind'=>'unknown','title'=>'Aviso no disponible','label'=>'Aviso no disponible','description'=>'Abre la sección para consultar la actividad.','category'=>'ASCLA','icon'=>'bell','url'=>Catalog::url('intranet'),'action_label'=>'Ir al inicio','available'=>false,'read_at'=>$row['read_at']??null,'created_at'=>$row['created_at']??null];
+        }
+    }
+
+    private static function resolve(array $row): array
     {
         [$category,$icon,$page,$action]=self::TYPES[$row['kind']]??['ASCLA','bell','intranet','Ir al inicio'];
         $view=['id'=>(int)$row['id'],'kind'=>$row['kind'],'title'=>$row['label'],'description'=>'','category'=>$category,'icon'=>$icon,'url'=>Catalog::url($page),'action_label'=>$action,'available'=>true,'read_at'=>$row['read_at']??null,'created_at'=>$row['created_at']];
@@ -48,8 +58,7 @@ final class NotificationTarget
         foreach (['item'=>'post','conversation'=>'conversation','member'=>'profile','job'=>'job'] as $key=>$type) {
             if (!empty($query[$key]) && is_scalar($query[$key])) { return ['type'=>$type,'id'=>absint($query[$key])]; }
         }
-        if (preg_match('/^(?:resource|event):(\d+)$/',$row['event_key']??'',$match)) { return ['type'=>'post','id'=>(int)$match[1]]; }
-        return [];
+        return preg_match('/^(?:resource|event):(\d+)$/',$row['event_key']??'',$match)?['type'=>'post','id'=>(int)$match[1]]:[];
     }
 
     private static function unavailable(array $view): array
@@ -64,7 +73,7 @@ final class NotificationTarget
     private static function actor(array $context): string
     {
         $user=get_userdata(absint($context['actor']??0));
-        return $user?Access::text($user->display_name,80):'Un asociado';
+        return $user?Access::excerpt(Profiles::publicName((int)$user->ID),80):'Un asociado';
     }
 
     private static function post(array $view,array $context): array
@@ -82,7 +91,7 @@ final class NotificationTarget
             'microevent'=>'Tu círculo ASCLA te espera',
             default=>$view['title'],
         };
-        $view['description']=Access::text($post->post_title,180);
+        $view['description']=Access::excerpt($post->post_title,180);
         $view['url']=Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$post->ID]);
         $view['action_label']=match($post->post_type) {
             'ascla_event'=>'Ver encuentro e invitación',
@@ -108,10 +117,11 @@ final class NotificationTarget
     {
         try {
             $profile=Profiles::visible(absint($context['id']??0));
-            if (Messaging::blocked(get_current_user_id(),(int)$profile['id'])) { return self::unavailable($view); }
-            if ($view['kind']==='networking' && (empty($profile['networking']) || empty(Profiles::raw(get_current_user_id())['networking']))) { return self::unavailable($view); }
+            $blocked=Messaging::blocked(get_current_user_id(),(int)$profile['id']);
+            $optedOut=$view['kind']==='networking' && (empty($profile['networking']) || empty(Profiles::raw(get_current_user_id())['networking']));
+            if ($blocked || $optedOut) { return self::unavailable($view); }
         } catch (\ASCLA\Core\Rest\ApiException $e) { return self::unavailable($view); }
-        $name=Access::text($profile['name'],80);
+        $name=Access::excerpt($profile['name'],80);
         $view['title']=$view['kind']==='connection'?$name.' quiere conectar contigo':'Una conexión para ti: '.$name;
         $view['description']='Conoce su experiencia y encuentra temas para conversar.';
         $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
@@ -127,12 +137,17 @@ final class NotificationTarget
         $result=json_decode($job['result']??'null',true)?:[];
         if ($job['kind']==='answer') {
             $view['title']=match($job['status']) { 'error'=>'Tu consulta necesita atención', 'completed'=>'Tu respuesta del asistente está lista', default=>'Estamos preparando tu respuesta' };
-            $view['description']=Access::text($payload['question']??'Consulta al asistente',180);
+            $view['description']=Access::excerpt($payload['question']??'Consulta al asistente',180);
             $view['url']=Catalog::url('asistente',['job'=>(int)$job['id']]);
             $view['action_label']=$job['status']==='error'?'Revisar y reintentar':'Leer respuesta';
             return $view;
         }
         $id=absint($result['resource_id']??$result['items'][0]['draft_id']??0);
+        return self::jobResult($view,$job,$id);
+    }
+
+    private static function jobResult(array $view,array $job,int $id): array
+    {
         if ($job['status']==='completed' && $id) {
             $view['title']=$job['kind']==='video_metadata'?'Los datos del video están actualizados':'Tu contenido está listo para revisar';
             return self::post($view,['id'=>$id]);

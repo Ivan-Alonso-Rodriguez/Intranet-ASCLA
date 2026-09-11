@@ -16,6 +16,7 @@ final class Plugin
         add_action('added_post_meta',[Services\Content::class,'indexMeta'],10,4);
         add_action('updated_post_meta',[Services\Content::class,'indexMeta'],10,4);
         Integrations\GoogleOAuth::boot();
+        add_action('transition_comment_status',[Services\Content::class,'commentTransition'],10,3);
         add_action('transition_post_status', [Services\Content::class, 'published'], 10, 3);
         add_filter('wp_insert_post_data', [Services\Content::class, 'guardPublication'], 10, 2);
         add_filter('preprocess_comment', static function ($comment) {

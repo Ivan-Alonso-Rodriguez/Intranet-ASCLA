@@ -1,6 +1,6 @@
 <?php defined('ABSPATH') || exit; ?>
 <aside class="ascla-welcome" aria-label="Comunidad ASCLA">
-    <div class="ascla-welcome-brand"><span class="ascla-brand-mark" aria-hidden="true"></span><span>ASCLA<span class="ascla-brand-caption">COMUNIDAD PROFESIONAL</span></span></div>
+    <div class="ascla-welcome-brand"><img src="<?php echo esc_url(ASCLA_URL.'assets/ascla-logo.png'); ?>" alt="ASCLA" class="ascla-official-logo"></div>
     <div class="ascla-welcome-copy">
         <p class="ascla-welcome-eyebrow">CONECTA · COMPARTE · CRECE</p>
         <h2>El conocimiento<br>nos conecta.</h2>

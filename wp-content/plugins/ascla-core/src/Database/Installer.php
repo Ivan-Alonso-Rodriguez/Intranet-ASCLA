@@ -61,7 +61,7 @@ final class Installer
         global $wpdb; $table=$wpdb->prefix.'ascla_notifications';
         if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'context'))) {
             $wpdb->query("ALTER TABLE $table ADD context longtext DEFAULT NULL");
-            if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'context'))) { throw new \RuntimeException('No se pudo actualizar el contexto de notificaciones.'); }
+            if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'context'))) { throw new MigrationException('No se pudo actualizar el contexto de notificaciones.'); }
         }
         update_option('ascla_schema',4,false);
     }

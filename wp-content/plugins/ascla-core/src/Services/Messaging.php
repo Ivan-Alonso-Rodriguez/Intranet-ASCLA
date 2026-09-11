@@ -4,6 +4,7 @@ use ASCLA\Core\Repositories\Store;
 use ASCLA\Core\Domain\Catalog;
 final class Messaging
 {
+    private const NOT_FOUND='Conversación no encontrada.';
     public static function blocked(int $a,int $b): bool
     {
         return Store::count('relations',"kind='block' AND ((user_id=%d AND target_id=%d) OR (user_id=%d AND target_id=%d))",[$a,$b,$b,$a])>0;
@@ -25,7 +26,7 @@ final class Messaging
     private static function participant(int $id): array
     {
         $rows=Store::rows('participants','conversation_id=%d AND user_id=%d',[$id,get_current_user_id()],'LIMIT 1');
-        Access::require((bool)$rows,'Conversación no encontrada.',404); return $rows[0];
+        Access::require((bool)$rows,self::NOT_FOUND,404); return $rows[0];
     }
     public static function conversations(string $query=''): array
     {
@@ -43,7 +44,7 @@ final class Messaging
     {
         $other=Store::rows('participants','conversation_id=%d AND user_id<>%d',[$row['id'],get_current_user_id()],'LIMIT 1')[0]??null;
         if (!$other) { return null; }
-        $user=get_userdata($other['user_id']); $row['other']=['id'=>(int)$other['user_id'],'name'=>$user?$user->display_name:'Miembro no disponible'];
+        $user=get_userdata($other['user_id']); $row['other']=['id'=>(int)$other['user_id'],'name'=>$user?Profiles::publicName((int)$user->ID):'Miembro no disponible'];
         $row['unread']=Store::count('messages','conversation_id=%d AND id>%d AND sender_id<>%d',[$row['id'],$row['last_read'],get_current_user_id()]);
         $last=Store::rows('messages','conversation_id=%d',[$row['id']],'ORDER BY id DESC LIMIT 1')[0]??null; $row['preview']=$last?mb_substr($last['body'],0,100):'Conversación nueva';
         $row['blocked']=self::blocked(get_current_user_id(),(int)$other['user_id']);
@@ -52,9 +53,9 @@ final class Messaging
     public static function conversation(int $id): array
     {
         $participant=self::participant($id); $row=Store::one('conversations',$id);
-        Access::require((bool)$row,'Conversación no encontrada.',404);
+        Access::require((bool)$row,self::NOT_FOUND,404);
         $result=self::decorate($row+['last_read'=>$participant['last_read']]);
-        Access::require((bool)$result,'Conversación no encontrada.',404); return $result;
+        Access::require((bool)$result,self::NOT_FOUND,404); return $result;
     }
     public static function messages(int $id,int $before=0): array
     {
@@ -85,7 +86,7 @@ final class Messaging
             Store::lock('relation:'.implode(':',$where),static function () use($where,$kind,$target) {
                 if (!Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where))) {
                     Store::insert('relations',$where+['created_at'=>current_time('mysql',true)]);
-                    if ($kind==='connect') { Notifications::send($target,'connection',wp_get_current_user()->display_name.' quiere conectar contigo.',Catalog::url('perfil',['member'=>get_current_user_id()]),['type'=>'profile','id'=>get_current_user_id()]); }
+                    if ($kind==='connect') { Notifications::send($target,'connection',Profiles::publicName(get_current_user_id()).' quiere conectar contigo.',Catalog::url('perfil',['member'=>get_current_user_id()]),['type'=>'profile','id'=>get_current_user_id()]); }
                 }
             });
         } else { Store::delete('relations',$where); }
