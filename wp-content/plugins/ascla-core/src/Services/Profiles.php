@@ -58,10 +58,17 @@ final class Profiles
             $data['name']=self::publicName($id);
         }
         unset($data['revision']);
-        $data['photo_url']=!empty($data['photo_id'])?Media::url((int)$data['photo_id']):'';
+        $data['photo_url']=!empty($data['photo_id'])?Media::profilePhotoUrl((int)$data['photo_id'],$id):'';
         if ($own) { $data['email']=wp_get_current_user()->user_email; }
         $data['terms']=self::labels($data);
         return $data;
+    }
+    public static function card(int $id): array
+    {
+        $card=['id'=>$id,'name'=>self::publicName($id),'photo_url'=>'','profile_url'=>Catalog::url('perfil',['member'=>$id])];
+        try { $profile=self::visible($id); $card['photo_url']=$profile['photo_url']; }
+        catch (\ASCLA\Core\Rest\ApiException $e) { $card['profile_url']=''; }
+        return $card;
     }
     public static function labels(array $data): array
     {
@@ -125,7 +132,7 @@ final class Profiles
                 if ($match) { $results[]=$data; }
             }
         } while (count($users)===200);
-        return ['items'=>array_slice($results,($page-1)*18,18),'total'=>count($results),'page'=>$page,'pages'=>max(1,(int)ceil(count($results)/18))];
+        return ['items'=>Connections::attach(array_slice($results,($page-1)*18,18)),'total'=>count($results),'page'=>$page,'pages'=>max(1,(int)ceil(count($results)/18))];
     }
     public static function catalogs(): array
     {

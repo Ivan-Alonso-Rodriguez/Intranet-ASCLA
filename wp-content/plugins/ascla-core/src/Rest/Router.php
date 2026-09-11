@@ -26,10 +26,12 @@ final class Router
         self::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
         self::route('/profiles','GET',static fn($r)=>Profiles::directory($r->get_params()));
         self::route('/profiles/me','POST',static fn($r)=>Profiles::save($r->get_json_params()?:[]),'ascla_write');
-        self::route('/profiles/(?P<id>\d+)','GET',static fn($r)=>Profiles::visible((int)$r['id']));
+        self::route('/profiles/(?P<id>\d+)','GET',static fn($r)=>\ASCLA\Core\Services\Connections::profile((int)$r['id']));
         self::route('/matching','GET',static fn()=>Matching::recommendations());
         self::route('/matching/(?P<id>\d+)','GET',static fn($r)=>Matching::between(get_current_user_id(),(int)$r['id']));
         self::route('/matching/(?P<id>\d+)/intro','GET',static fn($r)=>Matching::intro((int)$r['id']));
+        self::route('/connections','GET',static fn()=>\ASCLA\Core\Services\Connections::listing());
+        self::route('/connections/(?P<id>\d+)/respond','POST',static fn($r)=>\ASCLA\Core\Services\Connections::respond((int)$r['id'],(string)$r['decision']),'ascla_write');
         self::route('/relations','POST',static fn($r)=>Messaging::relation((int)$r['target'],(string)$r['kind'],rest_sanitize_boolean($r['active'])),'ascla_write');
         self::route('/content/(?P<type>[a-z]+)','GET',static fn($r)=>Content::listing($r['type'],$r->get_params()));
         self::route('/content/(?P<type>[a-z]+)','POST',static fn($r)=>Content::save($r['type'],$r->get_json_params()?:[]),'ascla_write');
@@ -41,7 +43,7 @@ final class Router
         self::route('/items/(?P<id>\d+)/moderate','POST',static fn($r)=>Content::moderate((int)$r['id'],(string)$r['decision'],(string)$r['reason'],rest_sanitize_boolean($r['reviewed'])),'ascla_moderate');
         self::route('/conversations','GET',static fn($r)=>Messaging::conversations(Access::text($r['q']??'',120)));
         self::route('/conversations','POST',static fn($r)=>Messaging::start((int)$r['target']),'ascla_write');
-        self::route('/conversations/(?P<id>\d+)/messages','GET',static fn($r)=>Messaging::messages((int)$r['id'],(int)$r['before']));
+        self::route('/conversations/(?P<id>\d+)/messages','GET',static fn($r)=>Messaging::messages((int)$r['id'],(int)$r['before'],$r->has_param('after')?(int)$r['after']:null));
         self::route('/conversations/(?P<id>\d+)/messages','POST',static fn($r)=>Messaging::send((int)$r['id'],(string)$r['body']),'ascla_write');
         self::route('/events/(?P<id>\d+)','GET',static fn($r)=>Events::detail((int)$r['id']));
         self::route('/events/(?P<id>\d+)/invite','POST',static fn($r)=>Events::invite((int)$r['id'],(array)$r['users']),'ascla_moderate');
@@ -64,6 +66,7 @@ final class Router
             if (in_array($kind,['multimedia','video_metadata'],true)) { Content::get((int)$r['resource_id']); }
             Access::limit('admin_job',10,300); return Queue::enqueue($kind,['resource_id'=>(int)$r['resource_id']]);
         },'ascla_moderate');
+        self::route('/mail/test','POST',static fn()=>\ASCLA\Core\Integrations\Mailer::test(),'ascla_manage');
         self::route('/settings','GET',static fn()=>Settings::status(),'ascla_manage');
         self::route('/settings','POST',static fn($r)=>Settings::save($r->get_json_params()?:[]),'ascla_manage');
         self::route('/admin','GET',static fn()=>self::admin(),'ascla_moderate');

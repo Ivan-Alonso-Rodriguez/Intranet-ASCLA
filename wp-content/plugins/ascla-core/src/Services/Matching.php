@@ -39,7 +39,7 @@ final class Matching
             try { $affinity=self::between($me,(int)$id,false); $items[]=array_merge(Profiles::visible((int)$id),['affinity'=>$affinity]); } catch (\ASCLA\Core\Rest\ApiException $e) { continue; }
         }
         usort($items,static fn($a,$b)=>($b['affinity']['score']<=>$a['affinity']['score'])?:($a['id']<=>$b['id']));
-        return array_slice($items,0,6);
+        return Connections::attach(array_slice($items,0,6));
     }
     public static function intro(int $id): array
     {

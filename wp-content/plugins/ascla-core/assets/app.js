@@ -66,8 +66,14 @@
       .slice(0, 2)
       .map((x) => x[0])
       .join("");
-  const avatar = (p, size = "") =>
-    `<span class="avatar ${size}">${p.photo_url ? `<img src="${E(safeURL(p.photo_url))}" alt="${E(p.name)}">` : E(initials(p.name))}</span>`;
+  const avatar = (p, size = "") => {
+    let url = '';
+    try { const candidate = new URL(p.photo_url); if (['http:', 'https:'].includes(candidate.protocol)) url = candidate.href; } catch { /* Initials are the shared fallback. */ }
+    return `<span class="avatar ${size}">${url ? `<img src="${E(url)}" alt="${E(p.name)}">` : ''}<span class="avatar-initials">${E(initials(p.name))}</span></span>`;
+  };
+  root.addEventListener('error', event => {
+    if (event.target.matches?.('.avatar img')) event.target.remove();
+  }, true);
   const btn = (label, action, extra = "", kind = "") =>
     `<button type="button" class="btn ${kind}" data-action="${action}" ${extra}>${label}</button>`;
   const link = (page, label, kind = "") =>
@@ -186,6 +192,43 @@
     return `<div class="page-heading"><div><h1>${E(title)}</h1><p>${E(subtitle)}</p></div>${action}</div>`;
   }
   const content = () => document.getElementById("page-content");
+  function connectionActions(p, suggested = false) {
+    if (Number(p.id) === S.boot.me.id || !p.connection) return '';
+    const c = p.connection, id = Number(p.id);
+    let actions = '';
+    if (c.state === 'incoming_pending') {
+      actions = btn('Aceptar conexión', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="accept" ${c.blocked ? 'disabled' : ''}`, 'primary small') + btn('Rechazar solicitud', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="reject"`, 'small');
+    } else if (c.state === 'outgoing_pending') actions = '<span class="connection-state pending">Solicitud enviada · Pendiente</span>';
+    else if (c.state === 'connected') {
+      actions = '<span class="connection-state connected">' + I('check') + ' Conectados</span>';
+      if (c.can_message) actions += btn(I('mail') + ' Enviar mensaje', 'message-start', `data-id="${id}"`, 'primary small') + (suggested ? btn('Mensaje sugerido', 'intro', `data-id="${id}"`, 'small') : '');
+    } else actions = btn('Enviar solicitud de conexión', 'connect', `data-id="${id}" ${c.can_request ? '' : 'disabled'}`, 'small');
+    const note = c.blocked ? 'La mensajería está bloqueada entre estas cuentas.' : c.state !== 'connected' ? (c.state === 'none' && !c.can_request ? 'Ambos asociados deben tener activado networking para conectar.' : 'La mensajería se habilita al aceptar la conexión.') : '';
+    if (c.blocked_by_me) actions += btn('Desbloquear', 'block', `data-id="${id}" data-active="false"`, 'small');
+    return `<div class="connection-controls" data-member-connection="${id}" data-suggested="${suggested}" data-state="${E(c.state)}"><div class="connection-actions">${actions}</div>${note ? '<p class="private-note">' + E(note) + '</p>' : ''}</div>`;
+  }
+  function updateConnectionState(id, state) {
+    for (const element of root.querySelectorAll(`[data-member-connection="${Number(id)}"]`)) element.outerHTML = connectionActions({id, connection: state}, element.dataset.suggested === 'true');
+  }
+  function connectionRow(p) {
+    return `<article class="connection-row"><div class="connection-person">${avatar(p)}<div><strong>${E(p.name)}</strong>${p.profile_url ? `<a href="${E(p.profile_url)}">Ver perfil</a>` : '<small>Perfil no disponible</small>'}</div></div>${connectionActions(p)}</article>`;
+  }
+  async function refreshConnectionsPanel() {
+    const panel = document.getElementById('connections-panel'); if (!panel) return;
+    const data = await api('connections'); if (!panel.isConnected) return;
+    panel.innerHTML = `<div class="section-top"><h2>Mis conexiones</h2>${btn('Actualizar conexiones','connections-refresh','','ghost small')}</div><h3>Solicitudes recibidas (${data.incoming.length})</h3>${data.incoming.map(connectionRow).join('') || '<p class="private-note">No tienes solicitudes pendientes.</p>'}<details><summary>Solicitudes enviadas (${data.outgoing.length})</summary>${data.outgoing.map(connectionRow).join('') || '<p class="private-note">No hay solicitudes enviadas pendientes.</p>'}</details><details><summary>Conexiones confirmadas (${data.connected.length})</summary>${data.connected.map(connectionRow).join('') || '<p class="private-note">Tus conexiones aparecerán aquí cuando acepten la solicitud.</p>'}</details>`;
+  }
+  let relationshipRefreshing = false;
+  async function refreshOpenConnection() {
+    const element = root.querySelector('.modal [data-member-connection]');
+    if (!element || relationshipRefreshing || document.hidden) return;
+    relationshipRefreshing = true;
+    try {
+      const p = await api('profiles/' + element.dataset.memberConnection);
+      if (element.isConnected) updateConnectionState(p.id, p.connection);
+    } catch { /* The action endpoints still validate the latest state and permissions. */ }
+    finally { relationshipRefreshing = false; }
+  }
   function memberCard(p) {
     return `<article class="card member-card">${avatar(p, "lg")}<h3>${E(p.name)}</h3><div class="role">${E(p.position || "Miembro ASCLA")}</div><div class="company">${E(p.company || "Comunidad profesional")}</div><span class="country">${I("pin")}${E(p.country || "América Latina")}</span>${
       p.affinity
@@ -194,7 +237,7 @@
             .slice(0, 2)
             .map((t) => `<span class="tag">${E(t)}</span>`)
             .join("")}</div>`
-    }${btn("Ver perfil " + I("arrow"), "member", `data-id="${p.id}"`, "small")}</article>`;
+    }${btn("Ver perfil " + I("arrow"), "member", `data-id="${p.id}"`, "small")}${connectionActions(p)}</article>`;
   }
   function resourceCard(p, i = 0) {
     const cover = p.meta.thumbnail_url
@@ -264,7 +307,8 @@
         "Tu red profesional",
         "Conecta con quienes comparten tus retos, intereses y conocimientos.",
       ) +
-      `<form class="filters" data-form="filters"><input aria-label="Buscar perfiles" name="q" placeholder="Nombre, cargo, empresa o experiencia…" value="${E(S.filter.q || "")}"><input aria-label="País" name="country" placeholder="País" value="${E(S.filter.country || "")}" style="max-width:180px;min-width:120px"><select name="industries" aria-label="Industria" style="max-width:200px"><option value="">Todas las industrias</option>${S.boot.catalogs.industry.map((t) => `<option value="${t.id}" ${String(S.filter.industries) === String(t.id) ? "selected" : ""}>${E(t.name)}</option>`).join("")}</select>${UI.termFilter("interests", "Interés", S.boot.catalogs.interest, S.filter)}${UI.termFilter("areas", "Área de conocimiento", S.boot.catalogs.area, S.filter)}<button class="btn primary">${I("search")} Buscar</button></form><div class="section-top"><span class="muted" style="font-size:12px">${list.total} perfiles en la comunidad</span>${link("perfil", "Editar mis intereses", "ghost")}</div><div class="cards directory">${list.items.map(memberCard).join("")}</div>${!list.items.length ? empty("No encontramos perfiles", "Prueba con otro nombre, país o interés.") : ""}${pager(list)}`;
+      `<section class="card connections-panel" id="connections-panel" aria-label="Mis conexiones"></section><form class="filters" data-form="filters"><input aria-label="Buscar perfiles" name="q" placeholder="Nombre, cargo, empresa o experiencia…" value="${E(S.filter.q || "")}"><input aria-label="País" name="country" placeholder="País" value="${E(S.filter.country || "")}" style="max-width:180px;min-width:120px"><select name="industries" aria-label="Industria" style="max-width:200px"><option value="">Todas las industrias</option>${S.boot.catalogs.industry.map((t) => `<option value="${t.id}" ${String(S.filter.industries) === String(t.id) ? "selected" : ""}>${E(t.name)}</option>`).join("")}</select>${UI.termFilter("interests", "Interés", S.boot.catalogs.interest, S.filter)}${UI.termFilter("areas", "Área de conocimiento", S.boot.catalogs.area, S.filter)}<button class="btn primary">${I("search")} Buscar</button></form><div class="section-top"><span class="muted" style="font-size:12px">${list.total} perfiles en la comunidad</span>${link("perfil", "Editar mis intereses", "ghost")}</div><div class="cards directory">${list.items.map(memberCard).join("")}</div>${!list.items.length ? empty("No encontramos perfiles", "Prueba con otro nombre, país o interés.") : ""}${pager(list)}`;
+    await refreshConnectionsPanel();
   }
   async function member(id) {
     const p = await api("profiles/" + id);
@@ -272,8 +316,7 @@
     try {
       match = await api("matching/" + id);
     } catch (error) { if (error.name === "AbortError") throw error; }
-    const networking = match ? btn("Mensaje sugerido", "intro", `data-id="${id}"`) + btn("Conectar", "connect", `data-id="${id}"`) : '';
-    const actions = Number(id) !== S.boot.me.id ? networking + btn(I("mail") + " Enviar mensaje", "message-start", `data-id="${id}"`, "primary") : link("perfil", "Editar perfil", "primary");
+    const actions = Number(id) !== S.boot.me.id ? connectionActions(p, !!match) : link("perfil", "Editar perfil", "primary");
     modal(
       p.name,
       `<div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.position || "Miembro ASCLA")}</h2><p class="muted">${E(p.company || "")}</p><p class="muted">${E(p.country || "")} ${E(p.city || "")}</p>${match ? ("<span class=\"match-pill\">" + (I("spark")) + "" + (match.score) + "% de afinidad</span>") : ""}</div></div>${match ? ("<div class=\"alert\">" + (E(match.explanation)) + "<p class=\"private-note\">" + (E(match.mode || "Afinidad determinística")) + "</p><p>" + (E(match.conversation_proposal || "")) + "</p></div>") : ""}<p class="detail-body">${E(p.bio || "Este miembro aún no ha añadido su biografía.")}</p>${p.experience ? ("<h3>Experiencia profesional</h3><p class=\"detail-body\">" + (E(p.experience)) + "</p>") : ""}${Object.entries(
@@ -608,60 +651,130 @@
     if (input.checked) S.invite.selected.add(id); else S.invite.selected.delete(id);
     document.getElementById("invite-selected").textContent = S.invite.selected.size;
   });
-  async function messages() {
-    S.conversations = await api(
-      "conversations?" + new URLSearchParams({ q: S.filter.q || "" }),
-    );
-    const selected =
-      S.conversation ||
-      Number(new URLSearchParams(location.search).get("conversation")) ||
-      Number(S.conversations[0]?.id) ||
-      0;
-    S.conversation = selected;
-    let current = S.conversations.find((c) => Number(c.id) === selected);
-    if (selected && !current) {
-      current = await api("conversations/" + selected);
-      S.conversations.unshift(current);
-    }
-    content().innerHTML =
-      heading(
-        "Mensajería",
-        "Una conversación puede ser el inicio de una gran colaboración.",
-        link("directorio", I("plus") + " Nueva conversación", "primary"),
-      ) +
-      `<form class="filters" data-form="filters"><input name="q" aria-label="Buscar conversaciones" placeholder="Buscar conversaciones…" value="${E(S.filter.q || "")}"><button class="btn">Buscar</button></form><div class="chat-layout"><aside class="chat-sidebar">${S.conversations.map((c) => `<button class="chat-person ${Number(c.id) === selected ? "active" : ""}" data-action="conversation" data-id="${c.id}">${avatar(c.other)}<span><strong>${E(c.other.name)} ${c.unread ? '<span class="tag">' + c.unread + "</span>" : ""}</strong><small>${E(c.preview.slice(0, 42))}</small></span></button>`).join("") || '<p class="private-note">Busca un asociado en el directorio para iniciar una conversación.</p>'}</aside><section class="chat-conversation">${current ? `<div class="chat-title"><strong>${E(current.other.name)}</strong>${btn(current.blocked ? "Desbloquear" : "Bloquear", "block", `data-id="${current.other.id}" data-active="${!current.blocked}"`, "ghost small")}</div><div class="chat-messages" id="chat-messages"></div><form class="chat-compose" data-form="message" data-id="${selected}"><textarea name="body" aria-label="Escribir mensaje" placeholder="Escribe un mensaje…" required maxlength="5000" ${current.blocked ? "disabled" : ""}></textarea><button class="btn primary" ${current.blocked ? "disabled" : ""}>${I("contact")} Enviar</button></form>` : empty("Inicia una conversación", "Tus mensajes privados aparecerán aquí.")}</section></div>`;
-    if (current) {
-      await loadMessages();
-      clearInterval(S.poll);
-      S.poll = setInterval(() => {
-        if (!document.hidden && S.page === "mensajeria")
-          loadMessages().catch(() => {});
-      }, 12000);
+  const chatDrafts = new Map();
+  root.addEventListener('input', event => {
+    const form = event.target.closest('.chat-compose');
+    if (form) chatDrafts.set(Number(form.dataset.id), form.elements.body.value);
+  });
+  function stopChat() {
+    clearTimeout(S.poll);
+    if (S.chat) S.chat.active = false;
+    S.chat = null;
+  }
+  function chatAlive(chat) { return chat?.active && S.chat === chat && S.page === "mensajeria"; }
+  function chatStatus(text, failed = false) {
+    const label = document.getElementById("chat-sync");
+    if (label) { label.textContent = text; label.classList.toggle("is-error", failed); }
+  }
+  function messageBubble(m) {
+    return `<div data-message-id="${Number(m.id)}" class="bubble ${Number(m.sender_id) === S.boot.me.id ? "me" : ""}">${E(m.body)}<small>${date(m.created_at, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small></div>`;
+  }
+  function chatSidebar() {
+    const aside = document.querySelector(".chat-sidebar");
+    if (!aside) return;
+    const markup = S.conversations.map(c => `<button class="chat-person ${Number(c.id) === S.conversation ? "active" : ""}" data-action="conversation" data-id="${Number(c.id)}">${avatar(c.other)}<span><strong>${E(c.other.name)} ${c.unread ? '<span class="tag" aria-label="' + Number(c.unread) + ' sin leer">' + Number(c.unread) + '</span>' : ''}</strong><small>${E(c.preview.slice(0, 42))}</small></span></button>`).join("") || '<p class="private-note">No hay conversaciones para mostrar. Puedes iniciar una desde el directorio.</p>';
+    if (aside.innerHTML !== markup) {
+      const focused = aside.contains(document.activeElement) ? document.activeElement.dataset.id : null;
+      aside.innerHTML = markup;
+      if (focused) aside.querySelector(`[data-id="${Number(focused)}"]`)?.focus({ preventScroll: true });
     }
   }
-  async function loadMessages() {
-    const data = await api(`conversations/${S.conversation}/messages`);
-    const area = document.getElementById("chat-messages");
-    if (!area) return;
-    const bottom = area.scrollHeight - area.scrollTop - area.clientHeight < 100;
-    area.innerHTML =
-      (data.items.length >= 60
-        ? btn(
-            "Cargar anteriores",
-            "older-messages",
-            `data-before="${data.before}"`,
-            "small",
-          )
-        : "") +
-      data.items
-        .map(
-          (m) =>
-            `<div class="bubble ${Number(m.sender_id) === S.boot.me.id ? "me" : ""}">${E(m.body)}<small>${date(m.created_at, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small></div>`,
-        )
-        .join("");
-    if (bottom || !S.messagesLoaded) {
-      area.scrollTop = area.scrollHeight;
-      S.messagesLoaded = true;
+  function chatControls(current) {
+    const form = document.querySelector('.chat-compose');
+    if (!form) return;
+    form.querySelectorAll('textarea, button').forEach(el => { el.disabled = !!current.blocked || (el.tagName === 'BUTTON' && form.dataset.sending === 'true'); });
+    const block = document.querySelector('.chat-title [data-action="block"]');
+    if (block) { block.textContent = current.blocked_by_me ? 'Desbloquear' : 'Bloquear'; block.dataset.active = String(!current.blocked_by_me); }
+  }
+  function openChat(chat, current) {
+    S.conversation = Number(current.id); chat.id = S.conversation;
+    chat.last = 0; chat.loaded = false; chat.ids = new Set();
+    document.querySelector('.chat-conversation').innerHTML = `<div class="chat-title">${current.other.profile_url ? `<a class="chat-profile" href="${E(current.other.profile_url)}" aria-label="Ver perfil de ${E(current.other.name)}">${avatar(current.other)}<span><strong>${E(current.other.name)}</strong><small>Ver perfil</small></span></a>` : `<span class="chat-profile">${avatar(current.other)}<strong>${E(current.other.name)}</strong></span>`}${btn(current.blocked_by_me ? "Desbloquear" : "Bloquear", "block", `data-id="${Number(current.other.id)}" data-active="${!current.blocked_by_me}"`, "ghost small")}</div><div class="chat-messages" id="chat-messages" role="log" aria-label="Mensajes de la conversación" aria-live="polite" aria-relevant="additions"></div><form class="chat-compose" data-form="message" data-id="${chat.id}"><textarea name="body" aria-label="Escribir mensaje" placeholder="Escribe un mensaje…" required maxlength="5000"></textarea><button class="btn primary">${I("contact")} Enviar</button></form>`;
+    document.querySelector('.chat-compose textarea').value = chatDrafts.get(chat.id) || '';
+    chatControls(current); chatSidebar();
+  }
+  async function messages() {
+    const previous = document.querySelector('.chat-compose');
+    if (previous) chatDrafts.set(Number(previous.dataset.id), previous.elements.body.value);
+    stopChat();
+    const chat = S.chat = { active: true, id: 0, pending: null, syncing: false, halted: false };
+    const conversations = await api('conversations?' + new URLSearchParams({q: S.filter.q || ''}));
+    if (!chatAlive(chat)) return;
+    S.conversations = conversations;
+    const selected = S.conversation || Number(new URLSearchParams(location.search).get('conversation')) || Number(conversations[0]?.id) || 0;
+    let current = conversations.find(c => Number(c.id) === selected);
+    if (selected && !current) current = await api('conversations/' + selected);
+    if (!chatAlive(chat)) return;
+    content().innerHTML = heading('Mensajería', 'Una conversación puede ser el inicio de una gran colaboración.', link('directorio', I('plus') + ' Nueva conversación', 'primary')) + `<div class="chat-sync" id="chat-sync" role="status">Actualizando mensajes…</div><form class="filters" data-form="filters"><input name="q" aria-label="Buscar conversaciones" placeholder="Buscar conversaciones…" value="${E(S.filter.q || '')}"><button class="btn">Buscar</button></form><div class="chat-layout"><aside class="chat-sidebar" aria-label="Conversaciones"></aside><section class="chat-conversation">${empty('Inicia una conversación', 'Podrás conversar aquí con tus conexiones confirmadas.')}</section></div>`;
+    chatSidebar();
+    if (current) openChat(chat, current);
+    await syncChat();
+  }
+  async function loadMessages(chat = S.chat) {
+    if (!chatAlive(chat) || !chat.id) return;
+    if (chat.pending) return chat.pending;
+    chat.pending = (async () => {
+      const initial = !chat.loaded;
+      const data = await api(`conversations/${chat.id}/messages${initial ? '' : '?after=' + chat.last}`);
+      if (!chatAlive(chat)) return;
+      const area = document.getElementById('chat-messages');
+      if (!area) return;
+      const bottom = area.scrollHeight - area.scrollTop - area.clientHeight < 100;
+      if (initial && data.has_more) area.insertAdjacentHTML('afterbegin', btn('Cargar anteriores', 'older-messages', `data-before="${data.before}"`, 'small'));
+      for (const m of data.items) {
+        if (chat.ids.has(Number(m.id))) continue;
+        chat.ids.add(Number(m.id)); area.insertAdjacentHTML('beforeend', messageBubble(m));
+      }
+      chat.last = Math.max(chat.last, Number(data.after)); chat.loaded = true;
+      chat.more = !initial && data.has_more;
+      if (initial || bottom) area.scrollTop = area.scrollHeight;
+    })();
+    try { await chat.pending; } finally { chat.pending = null; }
+  }
+  async function olderMessages(button) {
+    const chat = S.chat;
+    const data = await api(`conversations/${chat.id}/messages?before=${button.dataset.before}`);
+    if (!chatAlive(chat) || !button.isConnected) return;
+    const area = document.getElementById('chat-messages'), height = area.scrollHeight, top = area.scrollTop;
+    const items = data.items.filter(m => !chat.ids.has(Number(m.id)));
+    items.forEach(m => chat.ids.add(Number(m.id)));
+    button.outerHTML = (data.has_more ? btn('Cargar anteriores', 'older-messages', `data-before="${data.before}"`, 'small') : '') + items.map(messageBubble).join('');
+    area.scrollTop = top + area.scrollHeight - height;
+  }
+  async function syncChat() {
+    const chat = S.chat;
+    if (!chatAlive(chat) || chat.syncing || chat.halted) return;
+    clearTimeout(S.poll);
+    if (document.hidden) return;
+    chat.syncing = true;
+    let delay = 4000;
+    try {
+      const conversations = await api('conversations?' + new URLSearchParams({q: S.filter.q || ''}));
+      if (!chatAlive(chat)) return;
+      S.conversations = conversations;
+      if (!chat.id && conversations.length) openChat(chat, conversations[0]);
+      let current = conversations.find(c => Number(c.id) === chat.id);
+      if (chat.id && !current) current = await api('conversations/' + chat.id);
+      if (!chatAlive(chat)) return;
+      if (current) chatControls(current);
+      await loadMessages(chat);
+      if (!chatAlive(chat)) return;
+      if (current && !chat.more) current.unread = 0;
+      chatSidebar(); chatStatus('Actualización automática activada · cada 4 segundos');
+      if (chat.more) delay = 100;
+    } catch (error) {
+      if (!chatAlive(chat) || error.name === 'AbortError') return;
+      if ([401, 403, 404].includes(error.status)) {
+        chat.halted = true;
+        const form = document.querySelector('.chat-compose');
+        if (form) chatDrafts.set(Number(form.dataset.id), form.elements.body.value);
+        const pane = document.querySelector('.chat-conversation');
+        if (pane) pane.innerHTML = empty('Conversación no disponible', error.message) + link('directorio', 'Revisar mis conexiones', 'small');
+        chatStatus(error.message || 'No se puede acceder a los mensajes. Recarga la página para revisar tu sesión.', true);
+      } else { chatStatus('Sin conexión con el servidor. Reintentando…', true); delay = 8000; }
+    } finally {
+      chat.syncing = false;
+      if (chatAlive(chat) && !chat.halted && !document.hidden) S.poll = setTimeout(syncChat, delay);
     }
   }
   async function intro(id) {
@@ -843,6 +956,11 @@
     }
     if (tab === "configuracion") await settings(panel);
   }
+  function mailSettings(s) {
+    const local = s.mail_local ? '<div class="alert">Buzón local activo: los correos se consultan en <a href="http://localhost:8025/" target="_blank" rel="noopener">Abrir buzón de pruebas</a>. No llegan a una bandeja externa.</div>' : '';
+    const last = s.mail_last_result;
+    return `<div class="form-section">Correo y recuperación de contraseña</div>${local}<p class="private-note">Usa el servicio de correo de tu hosting o un proveedor SMTP. Si otro plugin ya gestiona los envíos, conserva “Transporte de WordPress”. Guarda los cambios antes de enviar una prueba a tu correo de administrador.</p><div class="form-grid">${select('mail_mode', 'Envío de correos', [['wordpress', 'Transporte de WordPress / otro plugin'], ['smtp', 'Servidor SMTP']], s.mail_mode)}${field('smtp_host', 'Servidor SMTP', s.smtp_host, 'text', 'placeholder="smtp.tuproveedor.com" autocomplete="off"')}${select('smtp_port', 'Puerto', [[587,'587'],[465,'465'],[2525,'2525']], s.smtp_port)}${select('smtp_security', 'Cifrado', [['tls', 'STARTTLS (587 / 2525)'],['ssl', 'SSL/TLS (465)']], s.smtp_security)}${field('smtp_user','Usuario SMTP',s.smtp_user,'text','autocomplete="off"')}${field('smtp_password', s.has_smtp_password ? 'Contraseña SMTP (guardada; vacío para conservar)' : 'Contraseña SMTP', '', 'password', 'autocomplete="new-password"')}${field('smtp_from','Correo remitente autorizado',s.smtp_from,'email')}${field('smtp_name','Nombre del remitente',s.smtp_name)}</div>${check('clear_smtp_password','Eliminar contraseña SMTP guardada',false)}<p class="private-note">La contraseña se guarda cifrada. Para eliminarla, cambia primero al transporte de WordPress. ${last ? 'Último intento: ' + E(last.status === 'accepted' ? 'aceptado por el transporte' : 'falló el envío') + ' · ' + E(date(last.at, {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})) : 'Aún no hay intentos registrados.'}</p>${btn('Enviar correo de prueba a mi cuenta','mail-test','','small')}`;
+  }
   async function settings(panel) {
     const s = await api("settings");
     panel.innerHTML = `<form class="card" data-form="settings"><h2>Comunidad e integraciones</h2><div class="form-section">Participación y revisión</div>${check("demo", "Modo demo (datos e integraciones identificados)", s.demo)}${check("moderation_required", "Revisar publicaciones del Hub antes de publicarlas", s.moderation_required)}${check("moderate_comments", "Revisar comentarios antes de publicarlos", s.moderate_comments)}${check("chatham_default", "Aplicar Chatham House por defecto", s.chatham_default)}${check("micro_enabled", "Preparar microeventos mensualmente con WP-Cron", s.micro_enabled)}${check("micro_approval", "Exigir aprobación administrativa de microeventos", s.micro_approval)}<div class="form-section">Motor de afinidad</div><div class="form-grid">${Object.entries(
@@ -875,7 +993,7 @@
         ["real", "YouTube OAuth real"],
       ],
       s.youtube_mode,
-    )}</div>${check("clear_ai_key", "Eliminar API key guardada", false)}<div class="form-section">Google OAuth</div><div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert">URI de redirección: <code>${E(s.google_redirect)}</code></div><p class="private-note">Cada asociado conecta su calendario desde Perfil. YouTube se conecta desde IA y trabajos.</p><div class="form-section">Social Listening</div><div class="alert">LinkedIn y X: DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; no se realiza scraping ni se envían respuestas externas.</div>${field("copyright", "Propiedad intelectual", s.copyright)}<div class="form-actions"><button class="btn primary">Guardar configuración</button></div></form><form class="card section-gap" data-form="demo"><h2>Preparar datos de demostración</h2><p class="private-note">Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes.</p>${field("password", "Contraseña para nuevas cuentas demo", "", "password", 'required minlength="12" autocomplete="new-password"')}<button class="btn">Crear / completar demo</button></form>`;
+    )}</div>${check("clear_ai_key", "Eliminar API key guardada", false)}<div class="form-section">Google OAuth</div><div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert">URI de redirección: <code>${E(s.google_redirect)}</code></div><p class="private-note">Cada asociado conecta su calendario desde Perfil. YouTube se conecta desde IA y trabajos.</p><div class="form-section">Social Listening</div><div class="alert">LinkedIn y X: DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; no se realiza scraping ni se envían respuestas externas.</div>${mailSettings(s)}${field("copyright", "Propiedad intelectual", s.copyright)}<div class="form-actions"><button class="btn primary">Guardar configuración</button></div></form><form class="card section-gap" data-form="demo"><h2>Preparar datos de demostración</h2><p class="private-note">Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes.</p>${field("password", "Contraseña para nuevas cuentas demo", "", "password", 'required minlength="12" autocomplete="new-password"')}<button class="btn">Crear / completar demo</button></form>`;
   }
   function rules() {
     modal(
@@ -930,7 +1048,7 @@
   }
   async function render() {
     const version = S.viewVersion;
-    clearInterval(S.poll);
+    stopChat();
     content().innerHTML = '<div class="view-loading" role="status"><span class="loading-dot"></span> Cargando sección…</div>';
     content().setAttribute('aria-busy', 'true');
     try {
@@ -956,7 +1074,7 @@
   }
   function prepareView(page) {
     S.controller.abort(); S.controller = new AbortController(); S.viewVersion++;
-    clearInterval(S.poll); closeModal(); document.querySelector('.toast')?.remove();
+    stopChat(); closeModal(); document.querySelector('.toast')?.remove();
     S.page = page; S.filter = {}; S.item = null; S.conversation = 0; S.messagesLoaded = false;
     const q = new URLSearchParams(location.search); if (q.has('q')) S.filter.q = q.get('q');
     root.querySelector('.ascla-sidebar')?.classList.remove('open');
@@ -1012,8 +1130,15 @@
           await item(id);
         else await render();
       } else if (a === "connect") {
-        await api("relations", { target: id, kind: "connect", active: true });
+        const state = await api("relations", { target: id, kind: "connect", active: true });
+        updateConnectionState(id, state); await refreshConnectionsPanel();
         toast("Solicitud de conexión enviada.");
+      } else if (a === "connection-respond") {
+        const state = await api(`connections/${Number(b.dataset.request)}/respond`, {decision: b.dataset.decision});
+        updateConnectionState(id, state); await refreshConnectionsPanel(); await refreshNotifications();
+        toast(b.dataset.decision === 'accept' ? 'Conexión confirmada. Ya pueden enviarse mensajes.' : 'Solicitud rechazada.');
+      } else if (a === "connections-refresh") {
+        await refreshConnectionsPanel(); await refreshOpenConnection();
       } else if (a === "intro") await intro(id);
       else if (a === "message-start") {
         const c = await api("conversations", { target: id });
@@ -1028,17 +1153,10 @@
           kind: "block",
           active: b.dataset.active === "true",
         });
-        await messages();
+        if (S.page === 'mensajeria') await messages();
+        else { const p = await api('profiles/' + id); updateConnectionState(id, p.connection); await refreshConnectionsPanel(); }
       } else if (a === "older-messages") {
-        const d = await api(
-          `conversations/${S.conversation}/messages?before=${b.dataset.before}`,
-        );
-        b.outerHTML = d.items
-          .map(
-            (m) =>
-              `<div class="bubble ${Number(m.sender_id) === S.boot.me.id ? "me" : ""}">${E(m.body)}<small>${date(m.created_at)}</small></div>`,
-          )
-          .join("");
+        await olderMessages(b);
       } else if (a === "register") {
         await api(`events/${id}/register`, { status: b.dataset.status });
         toast("Inscripción actualizada.");
@@ -1158,8 +1276,10 @@
       } else if (a === "google-event") {
         await api(`events/${id}/google`, { operation: b.dataset.operation });
         toast("Google Calendar actualizado.");
-      } else if (a === "infographic") infographic();
+      } else if (a === "mail-test") { const result = await api("mail/test", {}); toast(result.message); }
+      else if (a === "infographic") infographic();
     } catch (e) {
+      if (['connect','connection-respond'].includes(a) && [404,409].includes(e.status)) { await refreshOpenConnection(); await refreshConnectionsPanel(); }
       if (e.name !== "AbortError") toast(e.message);
     } finally {
       b.disabled = false;
@@ -1266,11 +1386,13 @@
         );
         await item(Number(form.dataset.id));
       } else if (action === "message") {
-        await api("conversations/" + form.dataset.id + "/messages", {
-          body: data.body,
-        });
-        form.reset();
-        await loadMessages();
+        const chat = S.chat;
+        form.dataset.sending = 'true';
+        try {
+          await api("conversations/" + form.dataset.id + "/messages", { body: data.body });
+          if (form.elements.body.value === data.body) { form.reset(); chatDrafts.delete(Number(form.dataset.id)); }
+          if (chatAlive(chat)) { await loadMessages(chat); await syncChat(); }
+        } finally { delete form.dataset.sending; }
       } else if (action === "intro") {
         const c = await api("conversations", {
           target: Number(form.dataset.id),
@@ -1309,6 +1431,7 @@
           "micro_enabled",
           "micro_approval",
           "clear_ai_key",
+          "clear_smtp_password",
         ])
           data[k] = form.elements[k].checked;
         data.matching_weights = {};
@@ -1413,7 +1536,13 @@
       await render();
       enableNavigation();
       setInterval(() => { if (!document.hidden) refreshNotifications(); }, 30000);
-      document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshNotifications(); });
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) clearTimeout(S.poll);
+        else { refreshNotifications(); syncChat(); }
+      });
+      setInterval(refreshOpenConnection, 8000);
+      window.addEventListener('focus', () => { syncChat(); refreshOpenConnection(); });
+      window.addEventListener('online', () => { syncChat(); });
       await routeDetails();
     } catch (e) {
       (content() || root).innerHTML = `<div class="error">${E(e.message)} <a data-native href="${E(location.href)}">Recarga la página para renovar tu sesión.</a></div>`;

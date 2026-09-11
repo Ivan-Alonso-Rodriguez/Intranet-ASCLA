@@ -5,6 +5,12 @@ final class Media
 {
     public static function boot(): void { add_action('admin_post_ascla_media',[self::class,'serve']); }
     public static function url(int $id): string { return add_query_arg(['action'=>'ascla_media','id'=>$id],admin_url('admin-post.php')); }
+    public static function profilePhotoUrl(int $id,int $owner): string
+    {
+        global $wpdb;
+        $valid=$wpdb->get_var($wpdb->prepare('SELECT id FROM '.Store::table('media')." WHERE id=%d AND user_id=%d AND mime IN ('image/jpeg','image/png','image/webp')",$id,$owner));
+        return $valid?self::url($id):'';
+    }
     public static function requireOwned(int $id,int $user,bool $image=false): void
     {
         $row=Store::one('media',$id);

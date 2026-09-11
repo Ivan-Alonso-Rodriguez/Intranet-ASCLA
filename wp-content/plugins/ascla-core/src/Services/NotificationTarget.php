@@ -18,6 +18,7 @@ final class NotificationTarget
         'microevent'=>['Eventos','calendar','eventos','Ver eventos'],
         'resource'=>['Conocimiento','book','centro-conocimiento','Explorar recursos'],
         'networking'=>['Tu red','users','directorio','Explorar directorio'],
+        'connection_accepted'=>['Tu red','users','directorio','Ver conexión'],
         'connection'=>['Tu red','users','directorio','Explorar directorio'],
         'job'=>['Asistente y contenidos','spark','asistente','Ver mis consultas'],
         'job_error'=>['Asistente y contenidos','spark','asistente','Revisar consulta'],
@@ -104,8 +105,8 @@ final class NotificationTarget
     private static function conversation(array $view,array $context): array
     {
         $id=absint($context['id']??0);
-        if (!Store::one('conversations',$id) || !Store::count('participants','conversation_id=%d AND user_id=%d',[$id,get_current_user_id()])) { return self::unavailable($view); }
-        $other=Store::rows('participants','conversation_id=%d AND user_id<>%d',[$id,get_current_user_id()],'LIMIT 1')[0]??null;
+        try { $conversation=Messaging::conversation($id); } catch (\ASCLA\Core\Rest\ApiException $e) { return self::unavailable($view); }
+        $other=['user_id'=>$conversation['other']['id']];
         $view['title']=self::actor(['actor'=>$other['user_id']??0]).' te envió un mensaje';
         $view['description']='Continúa la conversación privada en Mensajería.';
         $view['url']=Catalog::url('mensajeria',['conversation'=>$id]);
@@ -122,10 +123,11 @@ final class NotificationTarget
             if ($blocked || $optedOut) { return self::unavailable($view); }
         } catch (\ASCLA\Core\Rest\ApiException $e) { return self::unavailable($view); }
         $name=Access::excerpt($profile['name'],80);
-        $view['title']=$view['kind']==='connection'?$name.' quiere conectar contigo':'Una conexión para ti: '.$name;
+        $state=Connections::between(get_current_user_id(),(int)$profile['id']);
+        $view['title']=in_array($view['kind'],['connection','connection_accepted'],true)?match($state['state']) { 'incoming_pending'=>$name.' quiere conectar contigo', 'outgoing_pending'=>'Tu solicitud a '.$name.' está pendiente', 'connected'=>'Ya estás conectado con '.$name, default=>'Solicitud de conexión cerrada' }:'Una conexión para ti: '.$name;
         $view['description']='Conoce su experiencia y encuentra temas para conversar.';
         $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
-        $view['action_label']='Ver perfil';
+        $view['action_label']=$state['state']==='incoming_pending'?'Aceptar o rechazar solicitud':'Ver perfil';
         return $view;
     }
 

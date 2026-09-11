@@ -1803,3 +1803,30 @@ output.view-loading{display:block}
 .visibility-state .is-visible{background:#eaf3f0;color:#386d60;padding:4px 6px;border-radius:6px;white-space:nowrap}
 .visibility-state .is-hidden{background:#eaeef7;padding:4px 6px;border-radius:6px;white-space:nowrap}
 .profile-save-hint{font-size:11px}
+
+.chat-sync { color: #52677b; font-size: .85rem; margin: -.5rem 0 1rem; }
+.chat-sync::before { content: ""; display: inline-block; width: .5rem; height: .5rem; border-radius: 50%; background: #249276; margin-right: .5rem; }
+.chat-sync.is-error { color: #975117; }
+.chat-sync.is-error::before { background: #c67922; }
+
+.avatar img + .avatar-initials { display: none; }
+.connection-controls { width: 100%; margin-top: 12px; }
+.connection-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.connection-controls .private-note { margin: 8px 0 0; }
+.connection-state { display: inline-flex; align-items: center; gap: 6px; border-radius: 18px; padding: 7px 11px; font-size: 12px; }
+.connection-state.connected { background: #e4f4ed; color: #216952; }
+.connection-state.pending { background: #fff2dc; color: #805818; }
+.connection-state svg { width: 16px; height: 16px; }
+.connections-panel { margin-bottom: 24px; }
+.connections-panel details { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 16px; }
+.connections-panel summary { cursor: pointer; font-weight: 600; }
+.connection-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0; border-top: 1px solid var(--line); }
+.connection-row .connection-controls { width: auto; margin: 0; }
+.connection-person { display: flex; align-items: center; gap: 12px; }
+.connection-person a, .connection-person small { display: block; margin-top: 4px; font-size: 12px; }
+.chat-profile { display: flex; gap: 12px; align-items: center; color: inherit; min-width: 0; text-decoration: none; }
+.chat-profile > span { min-width: 0; }
+.chat-profile strong { overflow-wrap: anywhere; }
+.chat-profile small { display: block; font-size: 11px; color: var(--blue); margin-top: 3px; }
+.chat-profile:hover strong { text-decoration: underline; }
+@media (max-width: 760px) { .connection-row { flex-direction: column; align-items: stretch; gap: 12px; } .chat-title { gap: 10px; } }

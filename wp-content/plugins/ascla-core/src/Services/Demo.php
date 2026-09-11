@@ -50,6 +50,14 @@ final class Demo
             $make('gallery-1','gallery','Encuentros que nos conectan','Galería de demostración. Añade fotografías autorizadas desde Nueva galería.');
             foreach (['Instituto Horizonte','Red de Gobernanza Abierta','Centro Andino de Estudios'] as $i=>$name) { $make('ally-'.$i,'ally',$name.' · Demo','Organización ficticia para demostrar las alianzas profesionales.',['alliance_type'=>$i===1?'Convenio':'Socio estratégico','benefits'=>'Intercambio de conocimiento y participación en encuentros.','initiatives'=>'Conversaciones y recursos para la comunidad.']); }
             if (!get_option('ascla_demo_messages')) {
+                // This consent is part of the explicitly requested fictitious seed only.
+                wp_set_current_user($users[1]);
+                if (!Connections::areConnected($users[1],$users[0])) {
+                    $state=Connections::between($users[1],$users[0]);
+                    if ($state['state']==='none') $state=Connections::request($users[0]);
+                    wp_set_current_user($state['state']==='incoming_pending'?$users[1]:$users[0]);
+                    Connections::respond($state['request_id'],'accept');
+                }
                 wp_set_current_user($users[1]); $c=Messaging::start($users[0]); Messaging::send((int)$c['id'],'Hola, bienvenida a la comunidad de demostración. ¿Conversamos sobre gobierno de IA?');
                 wp_set_current_user($users[0]); Notifications::send($users[0],'welcome','Tu comunidad ASCLA está lista para explorar.'); update_option('ascla_demo_messages',true,false);
             }
