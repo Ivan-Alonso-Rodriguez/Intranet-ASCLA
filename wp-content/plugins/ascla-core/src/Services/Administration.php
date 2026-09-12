@@ -60,7 +60,7 @@ final class Administration
             $id=(int)$user->ID;$card=Profiles::card($id);
             $items[]=['id'=>$id,'name'=>$user->display_name,'login'=>$user->user_login,'email'=>$user->user_email,'roles'=>array_values($user->roles),'registered'=>$user->user_registered,'suspended'=>(bool)get_user_meta($id,'_ascla_suspended',true),'photo_url'=>$card['photo_url'],'profile_url'=>$card['profile_url'],'edit_url'=>current_user_can('edit_user',$id)?get_edit_user_link($id):'','can_suspend'=>$id!==get_current_user_id()&&!user_can($id,'manage_options')&&user_can($id,'ascla_access')];
         }
-        $roles=[];foreach(wp_roles()->roles as $id=>$roleData)$roles[]=['id'=>$id,'name'=>['administrator'=>'Administrador','ascla_member'=>'Asociado ASCLA','ascla_moderator'=>'Moderador ASCLA'][$id]??translate_user_role($roleData['name'])];
+        $roles=[];foreach(wp_roles()->roles as $id=>$roleData)$roles[]=['id'=>$id,'name'=>['administrator'=>'Administrador','ascla_member'=>'Asociado ASCLA','ascla_executive'=>'Ejecutivo ASCLA','ascla_moderator'=>'Moderador ASCLA'][$id]??translate_user_role($roleData['name'])];
         return ['items'=>$items,'page'=>$page,'total'=>$query->get_total(),'pages'=>(int)ceil($query->get_total()/20),'roles'=>$roles,'create_url'=>current_user_can('create_users')?admin_url('user-new.php'):''];
     }
     public static function suspend(int $id,bool $suspended): array

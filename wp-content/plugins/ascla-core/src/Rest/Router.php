@@ -22,7 +22,7 @@ final class Router
     }
     public static function routes(): void
     {
-        self::route('/bootstrap','GET',static fn()=>['me'=>Profiles::visible(get_current_user_id()),'catalogs'=>Profiles::catalogs(),'moderator'=>current_user_can('ascla_moderate'),'admin'=>current_user_can('ascla_manage'),'demo'=>Settings::get()['demo'],'ai_mode'=>Knowledge::provider()->mode(),'google_connected'=>\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='']);
+        self::route('/bootstrap','GET',static fn()=>['me'=>Profiles::visible(get_current_user_id()),'catalogs'=>Profiles::catalogs(),'moderator'=>current_user_can('ascla_moderate'),'executive'=>current_user_can('ascla_publish'),'admin'=>current_user_can('ascla_manage'),'demo'=>Settings::get()['demo'],'ai_mode'=>Knowledge::provider()->mode(),'google_connected'=>\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='']);
         self::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
         self::route('/profiles','GET',static fn($r)=>Profiles::directory($r->get_params()));
         self::route('/profiles/me','POST',static fn($r)=>Profiles::save($r->get_json_params()?:[]),'ascla_write');
@@ -67,16 +67,17 @@ final class Router
         self::route('/jobs','POST',static function($r) {
             $kind=(string)$r['kind']; Access::require(in_array($kind,['multimedia','microevents','social','video_metadata'],true),'Tipo de trabajo no válido.',400);
             if ($kind==='microevents') { Access::require(current_user_can('ascla_manage')); }
-            if (in_array($kind,['multimedia','video_metadata'],true)) { Access::require(current_user_can('ascla_manage'),'Solo administradores pueden gestionar recursos.',403); Content::get((int)$r['resource_id']); }
+            if ($kind==='social') { Access::require(current_user_can('ascla_moderate')); }
+            if (in_array($kind,['multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden gestionar recursos.',403); Content::get((int)$r['resource_id']); }
             Access::limit('admin_job',10,300); return Queue::enqueue($kind,['resource_id'=>(int)$r['resource_id']]);
-        },'ascla_moderate');
+        },'ascla_admin_area');
         self::route('/ai/test','POST',static fn()=>\ASCLA\Core\Integrations\RealAIProvider::test(),'ascla_manage');
         self::route('/admin/users','GET',static fn($r)=>\ASCLA\Core\Services\Administration::users($r->get_params()),'ascla_manage');
         self::route('/admin/contacts','GET',static fn($r)=>\ASCLA\Core\Services\Administration::contacts($r->get_params()),'ascla_moderate');
         self::route('/mail/test','POST',static fn()=>\ASCLA\Core\Integrations\Mailer::test(),'ascla_manage');
         self::route('/settings','GET',static fn()=>Settings::status(),'ascla_manage');
         self::route('/settings','POST',static fn($r)=>Settings::save($r->get_json_params()?:[]),'ascla_manage');
-        self::route('/admin','GET',static fn()=>self::admin(),'ascla_moderate');
+        self::route('/admin','GET',static fn()=>self::admin(),'ascla_admin_area');
         self::route('/admin/comments/(?P<id>\d+)','POST',static function($r) {
             $comment=get_comment((int)$r['id']); Access::require($comment && Content::get((int)$comment->comment_post_ID),'Comentario no válido.',404);
             $status=$r['decision']==='approve'?'approve':'hold'; wp_set_comment_status($comment->comment_ID,$status); Audit::record('comment_moderation',(int)$comment->comment_ID,$status); return ['ok'=>true];

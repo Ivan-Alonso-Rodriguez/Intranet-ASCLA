@@ -68,7 +68,7 @@ final class Knowledge
 
     public static function videoMetadata(int $id): array
     {
-        Access::require(current_user_can('ascla_manage'));
+        Access::require(Access::canPublish());
         $post=Content::get($id); $meta=(array)get_post_meta($id,'_ascla',true);
         Access::require($post->post_type==='ascla_resource' && !empty($meta['video_id']),'Seleccione un recurso con video de YouTube.',400);
         $provider=Settings::get()['youtube_mode']==='real'?new YouTubeVideoProvider():new MockVideoProvider();
@@ -81,7 +81,7 @@ final class Knowledge
     }
     public static function multimedia(int $id,?AIProviderInterface $ai=null): array
     {
-        Access::require(current_user_can('ascla_manage'),'Solo administradores pueden generar recursos.',403);
+        Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden generar recursos.',403);
         $ai=$ai??self::provider();
         $post=Content::get($id); Access::require($post->post_type==='ascla_resource','Seleccione un recurso.',400);
         $meta=(array)get_post_meta($id,'_ascla',true);

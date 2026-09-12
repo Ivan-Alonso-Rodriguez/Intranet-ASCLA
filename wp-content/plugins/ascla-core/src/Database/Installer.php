@@ -65,12 +65,32 @@ final class Installer
         }
         update_option('ascla_schema',4,false);
     }
+    /**
+     * Four ASCLA roles map directly onto the process diagram's swimlanes:
+     *  - Asociado (ascla_member): base community access, no publishing/moderation power.
+     *  - Ejecutivo (ascla_executive): publishes and manages events, uploads session recordings
+     *    and publishes technical notes/resources (ascla_publish), without touching site config.
+     *  - Moderador (ascla_moderator): audits forum threads/comments and approves or removes them
+     *    (ascla_moderate), independent of event/resource publishing.
+     *  - Administrator: retains every capability (system administration, plugin/source management,
+     *    deployment) plus the Ejecutivo and Moderador capabilities, so nothing that worked before
+     *    for site admins stops working.
+     * ascla_admin_area is a shared "may enter the wp-admin ASCLA panel" flag for the three staff
+     * roles (Ejecutivo, Moderador, Administrator); plain Asociados never see it.
+     */
     private static function roles(): void
     {
         $base=['read'=>true,'ascla_access'=>true,'ascla_write'=>true];
+        $staff=$base+['ascla_admin_area'=>true];
         add_role('ascla_member', 'Asociado ASCLA', $base);
-        add_role('ascla_moderator','Moderador ASCLA', $base+['ascla_moderate'=>true]);
-        foreach (['ascla_member'=>$base, 'ascla_moderator'=>$base+['ascla_moderate'=>true], 'administrator'=>$base+['ascla_moderate'=>true,'ascla_manage'=>true]] as $name=>$caps) {
+        add_role('ascla_executive','Ejecutivo ASCLA', $staff+['ascla_publish'=>true]);
+        add_role('ascla_moderator','Moderador ASCLA', $staff+['ascla_moderate'=>true]);
+        foreach ([
+            'ascla_member'=>$base,
+            'ascla_executive'=>$staff+['ascla_publish'=>true],
+            'ascla_moderator'=>$staff+['ascla_moderate'=>true],
+            'administrator'=>$staff+['ascla_publish'=>true,'ascla_moderate'=>true,'ascla_manage'=>true],
+        ] as $name=>$caps) {
             $role=get_role($name);
             if ($role) { foreach ($caps as $cap=>$grant) { $role->add_cap($cap); } }
         }

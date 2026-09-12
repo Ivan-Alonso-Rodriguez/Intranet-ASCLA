@@ -47,7 +47,8 @@ final class Queue
                 wp_set_current_user((int)$row['user_id']); $p=json_decode($row['payload'],true)?:[];
                 if (!in_array($row['kind'],['microevents','resource_notifications','discovery'],true) || (int)$row['user_id']!==0) { Access::require(Access::member(),'La cuenta ya no tiene acceso.'); }
                 if ($row['kind']==='microevents' && (int)$row['user_id']!==0) { Access::require(current_user_can('ascla_manage'),'Permiso de administración revocado.'); }
-                if (in_array($row['kind'],['multimedia','social','video_metadata'],true)) { Access::require(current_user_can('ascla_moderate'),'Permiso de moderación revocado.'); }
+                if ($row['kind']==='social') { Access::require(current_user_can('ascla_moderate'),'Permiso de moderación revocado.'); }
+                if (in_array($row['kind'],['multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Permiso de publicación revocado.'); }
                 $result=match($row['kind']) {
                     'answer'=>Knowledge::answer($p['question']??''),
                     'multimedia'=>Knowledge::multimedia((int)($p['resource_id']??0)),

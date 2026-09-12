@@ -15,7 +15,7 @@ final class App
         });
         add_filter('show_admin_bar',static fn($show)=>self::page()?false:$show);
         add_action('admin_init',static function () {
-            if (Access::member()&&!current_user_can('ascla_moderate')&&!wp_doing_ajax()&&basename($_SERVER['PHP_SELF']??'')!=='admin-post.php') { wp_safe_redirect(Catalog::url('intranet')); exit; }
+            if (Access::member()&&!current_user_can('ascla_admin_area')&&!wp_doing_ajax()&&basename($_SERVER['PHP_SELF']??'')!=='admin-post.php') { wp_safe_redirect(Catalog::url('intranet')); exit; }
         });
         Login::boot();
         add_filter('wp_robots',static function ($robots) { if (self::page()) { $robots['noindex']=true; $robots['nofollow']=true; } return $robots; });

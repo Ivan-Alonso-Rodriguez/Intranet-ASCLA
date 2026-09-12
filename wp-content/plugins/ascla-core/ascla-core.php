@@ -10,7 +10,7 @@
  * Text Domain: ascla-core
  */
 defined('ABSPATH') || exit;
-define('ASCLA_VERSION', '1.7.0');
+define('ASCLA_VERSION', '1.8.0');
 define('ASCLA_PATH', plugin_dir_path(__FILE__));
 define('ASCLA_URL', plugin_dir_url(__FILE__));
 spl_autoload_register(static function (string $class): void {
