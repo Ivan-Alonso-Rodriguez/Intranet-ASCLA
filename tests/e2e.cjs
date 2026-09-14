@@ -314,7 +314,7 @@ async function goto(page, route) {
       await p.getByRole("button", { name: "Desbloquear", exact: true }).click();
     });
     let event;
-    await test("Event registration, cancellation and ICS download", async () => {
+    await test("Event registration and calendar controls", async () => {
       const r = await request(a, "content/event", {
         title: "E2E Evento con calendario",
         body: "Encuentro ficticio E2E",
@@ -331,23 +331,11 @@ async function goto(page, route) {
       fixtures.push(event.id);
       await p.goto(base + "/eventos/?item=" + event.id);
       await p.getByRole("button", { name: "Registrarme", exact: true }).click();
-      await p
-        .getByRole("button", { name: "Cancelar inscripción", exact: true })
-        .waitFor();
-      const downloadEvent = p.waitForEvent("download");
-      await p.getByRole("button", { name: "ICS", exact: true }).click();
-      const file = await downloadEvent;
-      await file.saveAs(path.join(root, "test-results/event.ics"));
-      assert.match(
-        fs.readFileSync(path.join(root, "test-results/event.ics"), "utf8"),
-        /BEGIN:VCALENDAR/,
-      );
-      await p
-        .getByRole("button", { name: "Cancelar inscripción", exact: true })
-        .click();
-      await p
-        .getByRole("button", { name: "Registrarme", exact: true })
-        .waitFor();
+      await p.getByRole("button", { name: "Cancelar inscripción", exact: true }).waitFor();
+      assert.equal(await p.getByRole("button", { name: "ICS", exact: true }).count(), 0);
+      assert.equal(await p.getByRole("link", { name: /Añadir a Google Calendar/ }).count(), 1);
+      await p.getByRole("button", { name: "Cancelar inscripción", exact: true }).click();
+      await p.getByRole("button", { name: "Registrarme", exact: true }).waitFor();
     });
     await test("Authorized upload stays private before publication", async () => {
       await a.goto(base + "/galeria/"); await a.locator("#page-content h1").waitFor();
@@ -460,14 +448,14 @@ async function goto(page, route) {
         .fill("¿Cómo supervisar los riesgos de inteligencia artificial?");
       await p.getByRole("button", { name: "Consultar al asistente" }).click();
       await p
-        .locator(".answer-card .sources a")
+        .locator(".assistant-message.assistant .sources a")
         .first()
         .waitFor({ timeout: 90000 });
       await p.locator("[name=question]").fill("ZXCV987654321INEXISTENTE");
       await p.getByRole("button", { name: "Consultar al asistente" }).click();
       await p
-        .locator(".answer-card")
-        .first()
+        .locator(".assistant-message.assistant")
+        .last()
         .getByText(/No existe suficiente información/)
         .waitFor({ timeout: 90000 });
     });

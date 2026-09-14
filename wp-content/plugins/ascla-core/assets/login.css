@@ -106,3 +106,38 @@ body.ascla-login.interim-login { padding: 20px; }
 
 .ascla-welcome-brand { width: min(320px, 100%); aspect-ratio: 1672 / 941; position: relative; }
 .ascla-welcome-brand::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: #fff; mask: url("ascla-logo.png") center / contain no-repeat; clip-path: polygon(27% 0, 100% 0, 100% 100%, 0 100%, 0 66%, 27% 66%); }
+
+/* ASCLA login follows the same appearance preference as the intranet. */
+html[data-ascla-theme="dark"] body.login.ascla-login {
+  --ascla-navy: #e4edf6;
+  --ascla-blue: #66b9e5;
+  --ascla-muted: #9dafc0;
+  background: #0f171f;
+  color: #e8eef5;
+}
+html[data-ascla-theme="dark"] .ascla-login #login { background: #17222d; border-color: #2d3d4b; box-shadow: 0 16px 55px #0005; }
+html[data-ascla-theme="dark"] .ascla-login #login h1 a { filter: brightness(1.5) contrast(.9); }
+html[data-ascla-theme="dark"] .ascla-login #login label { color: #c6d2de; }
+html[data-ascla-theme="dark"] .ascla-login #login form .input { background: #101a23; color: #e8eef5; border-color: #3a4d5d; }
+html[data-ascla-theme="dark"] .ascla-login #login form .input:focus { border-color: #66b9e5; box-shadow: 0 0 0 3px #66b9e528; }
+html[data-ascla-theme="dark"] .ascla-login #login .message,
+html[data-ascla-theme="dark"] .ascla-login #login .success,
+html[data-ascla-theme="dark"] .ascla-login #login .notice { background: #152733; color: #c4d2de; border-color: #294251; }
+html[data-ascla-theme="dark"] .ascla-login #login #login_error { background: #321f24; color: #f0b6bb; border-color: #60343a; }
+html[data-ascla-theme="dark"] .ascla-login #language-switcher select { background: #101a23; color: #c3d0db; border-color: #3a4d5d; }
+html[data-ascla-theme="dark"] .ascla-login #language-switcher .button { background: #1b2935; color: #7cc7eb; border-color: #3a4d5d; }
+html[data-ascla-theme="dark"] .ascla-login #rememberme { background: #101a23; border-color: #536c80; }
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-ascla-theme]) body.login.ascla-login { background: #0f171f; color: #e8eef5; }
+}
+html[data-ascla-theme="dark"] .ascla-login #login h1 a { position: relative; filter: none; }
+html[data-ascla-theme="dark"] .ascla-login #login h1 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: #fff;
+  mask: url("ascla-logo.png") center / min(340px, 100%) auto no-repeat;
+  clip-path: polygon(27% 0, 100% 0, 100% 100%, 0 100%, 0 66%, 27% 66%);
+}

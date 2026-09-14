@@ -5,6 +5,27 @@ use ASCLA\Core\Repositories\Store;
 
 final class Content
 {
+    private const REPORT_REASONS=[
+        'harassment'=>'Acoso',
+        'fraud'=>'Fraude o estafa',
+        'spam'=>'Mensaje no deseado (spam)',
+        'false_information'=>'Información falsa',
+        'hate'=>'Incitación al odio',
+        'violence'=>'Amenazas o violencia',
+        'self_harm'=>'Autolesiones',
+        'explicit'=>'Contenido explícito',
+        'extremism'=>'Organizaciones extremistas o peligrosas',
+        'sexual'=>'Contenido sexual',
+        'fake_account'=>'Cuenta falsa',
+        'child_exploitation'=>'Explotación infantil',
+        'restricted_goods'=>'Bienes y servicios restringidos',
+        'intimate_images'=>'Difusión de imágenes íntimas sin consentimiento',
+        'other'=>'Otro motivo',
+    ];
+    public static function reportLabel(string $reason): string
+    {
+        return self::REPORT_REASONS[$reason]??($reason!==''?$reason:'Sin motivo registrado');
+    }
     public static function indexMeta(int $metaId,int $postId,string $key,mixed $value): void
     {
         if ($key!=='_ascla' || !is_array($value)) { return; }
@@ -146,6 +167,8 @@ final class Content
         self::get((int)$comment->comment_post_ID);
         Access::require(current_user_can('ascla_manage') || (int)$comment->user_id===get_current_user_id(),'Solo el autor o un administrador puede eliminar este comentario.',403);
         Access::require((bool)wp_trash_comment($id),'No se pudo eliminar el comentario.',500);
+        Store::delete('relations',['target_id'=>$id,'kind'=>'comment_like']);
+        Store::delete('relations',['target_id'=>$id,'kind'=>'comment_report']);
         Audit::record('comment_trashed',$id);
         return ['id'=>$id,'deleted'=>true];
     }
@@ -164,18 +187,52 @@ final class Content
     public static function comments(int $id): array
     {
         self::get($id); $comments=get_comments(['post_id'=>$id,'status'=>'approve','include_unapproved'=>[get_current_user_id()],'number'=>100,'order'=>'ASC']);
-        return array_map(static fn($c)=>['id'=>(int)$c->comment_ID,'can_delete'=>current_user_can('ascla_manage')||(int)$c->user_id===get_current_user_id(),'status'=>(string)$c->comment_approved==='1'?'publish':'pending','author'=>$c->user_id?Profiles::publicName((int)$c->user_id):'Comunidad ASCLA','body'=>$c->comment_content,'date'=>$c->comment_date_gmt],$comments);
+        $me=get_current_user_id();
+        return array_map(static function($c) use($me) {
+            $cid=(int)$c->comment_ID;
+            return [
+                'id'=>$cid,
+                'parent'=>(int)$c->comment_parent,
+                'author_id'=>(int)$c->user_id,
+                'can_delete'=>current_user_can('ascla_manage')||(int)$c->user_id===$me,
+                'can_report'=>(string)$c->comment_approved==='1' && (int)$c->user_id!==$me,
+                'status'=>(string)$c->comment_approved==='1'?'publish':'pending',
+                'author'=>$c->user_id?Profiles::publicName((int)$c->user_id):'Comunidad ASCLA',
+                'body'=>$c->comment_content,
+                'date'=>$c->comment_date_gmt,
+                'likes'=>Store::count('relations',"target_id=%d AND kind='comment_like'",[$cid]),
+                'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='comment_like'",[$cid,$me])>0,
+            ];
+        },$comments);
     }
-    public static function comment(int $id,string $body): array
+    public static function comment(int $id,string $body,int $parent=0): array
     {
         Access::limit('comment',15); $post=self::get($id); Access::require($post->post_status==='publish','El contenido aún no está publicado.',400);
         $body=trim(Access::text($body,5000)); Access::require($body!=='','Escriba un comentario.',400);
+        if ($parent>0) {
+            $parentComment=get_comment($parent);
+            Access::require($parentComment && (int)$parentComment->comment_post_ID===$id && (string)$parentComment->comment_approved==='1','El comentario al que intentas responder ya no está disponible.',404);
+        }
         $approved=in_array($post->post_type,['ascla_topic','ascla_forum'],true)||current_user_can('ascla_moderate')||!Settings::get()['moderate_comments'];
         $user=wp_get_current_user();
-        $cid=wp_insert_comment(wp_slash(['comment_post_ID'=>$id,'user_id'=>$user->ID,'comment_author'=>$user->display_name,'comment_content'=>$body,'comment_approved'=>$approved?1:0,'comment_type'=>'comment']));
+        $cid=wp_insert_comment(wp_slash(['comment_post_ID'=>$id,'comment_parent'=>$parent,'user_id'=>$user->ID,'comment_author'=>$user->display_name,'comment_content'=>$body,'comment_approved'=>$approved?1:0,'comment_type'=>'comment']));
+        Access::require((int)$cid>0,'No se pudo guardar el comentario.',500);
         if ($approved) { self::notifyComment((int)$cid); }
         wp_update_post(['ID'=>$id,'post_modified'=>current_time('mysql')]);
-        return ['id'=>$cid,'status'=>$approved?'publish':'pending'];
+        return ['id'=>(int)$cid,'status'=>$approved?'publish':'pending'];
+    }
+    public static function reactComment(int $id,bool $active): array
+    {
+        $comment=get_comment($id);
+        Access::require($comment && (string)$comment->comment_approved==='1','Comentario no encontrado.',404);
+        self::get((int)$comment->comment_post_ID);
+        $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>'comment_like'];
+        Store::lock('comment-reaction:'.get_current_user_id().':'.$id,static function()use($where,$active){
+            if ($active && !Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where))) {
+                Store::insert('relations',$where+['created_at'=>current_time('mysql',true)]);
+            } elseif (!$active) { Store::delete('relations',$where); }
+        });
+        return ['active'=>$active,'likes'=>Store::count('relations',"target_id=%d AND kind='comment_like'",[$id])];
     }
     public static function commentTransition(string $new,string $old,\WP_Comment $comment): void
     {
@@ -187,21 +244,81 @@ final class Content
         if (!$comment || (string)$comment->comment_approved!=='1') { return; }
         $post=get_post((int)$comment->comment_post_ID);
         if (!$post || !str_starts_with($post->post_type,'ascla_')) { return; }
-        Notifications::once((int)$post->post_author,'comment:'.$id,'comment','Nuevo comentario en tu publicación.',Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID]),['type'=>'post','id'=>$post->ID,'actor'=>(int)$comment->user_id]);
+        $actor=(int)$comment->user_id;
+        $url=Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID]);
+        $parentAuthor=0;
+        if ((int)$comment->comment_parent>0) {
+            $parent=get_comment((int)$comment->comment_parent);
+            if ($parent && (int)$parent->comment_post_ID===(int)$post->ID) {
+                $parentAuthor=(int)$parent->user_id;
+                if ($parentAuthor>0 && $parentAuthor!==$actor) {
+                    $actorName=$actor>0?Profiles::publicName($actor):'Un asociado';
+                    Notifications::once($parentAuthor,'comment-reply:'.$id,'comment_reply',$actorName.' respondió a tu comentario.',$url,['type'=>'post','id'=>$post->ID,'actor'=>$actor]);
+                }
+            }
+        }
+        $postAuthor=(int)$post->post_author;
+        if ($postAuthor>0 && $postAuthor!==$actor && $postAuthor!==$parentAuthor) {
+            $actorName=$actor>0?Profiles::publicName($actor):'Un asociado';
+            Notifications::once($postAuthor,'comment:'.$id,'comment',$actorName.' comentó tu publicación.',$url,['type'=>'post','id'=>$post->ID,'actor'=>$actor]);
+        }
+    }
+    public static function reportComment(int $id,string $reason,string $detail=''): array
+    {
+        Access::limit('comment_report',8,300);
+        $comment=get_comment($id);
+        Access::require($comment && (string)$comment->comment_approved==='1','Comentario no encontrado.',404);
+        $post=self::get((int)$comment->comment_post_ID);
+        Access::require($post->post_status==='publish','Contenido no publicado.',400);
+        Access::require((int)$comment->user_id!==get_current_user_id(),'No puedes reportar tu propio comentario.',400);
+        $reason=trim(Access::text($reason,64));
+        Access::require(isset(self::REPORT_REASONS[$reason]),'Selecciona un motivo de reporte válido.',400);
+        $detail=trim(Access::text($detail,1000));
+        $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>'comment_report'];
+        Store::lock('comment-report:'.implode(':',$where),static function () use($where,$reason,$detail,$comment) {
+            $existing=Store::rows('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where),'LIMIT 1')[0]??null;
+            $data=['reason'=>$reason,'detail'=>$detail,'created_at'=>current_time('mysql',true)];
+            if ($existing) Store::update('relations',$data,['id'=>(int)$existing['id']]);
+            else Store::insert('relations',$where+$data);
+            Audit::record('comment_reported',(int)$comment->comment_ID,self::reportLabel($reason));
+        });
+        return ['reported'=>true,'reason'=>$reason,'reason_label'=>self::reportLabel($reason)];
     }
     public static function react(int $id,string $kind,bool $active): array
     {
-        Access::require(in_array($kind,['like','follow','report'],true),'Acción no válida.',400);
+        Access::require(in_array($kind,['like','follow'],true),'Acción no válida.',400);
         $post=self::get($id); Access::require($post->post_status==='publish','Contenido no publicado.',400);
+        if ($kind==='follow' && $active && $post->post_type==='ascla_event') {
+            $meta=(array)get_post_meta($id,'_ascla',true); $end=strtotime((string)($meta['end']??''));
+            Access::require($end===false || $end>time(),'No puedes seguir un evento que ya finalizó.',400);
+        }
         $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>$kind];
         Store::lock('reaction:'.implode(':',$where),static function () use($where,$active,$post,$kind) {
             if ($active && !Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where))) {
                 Store::insert('relations',$where+['created_at'=>current_time('mysql',true)]);
                 if ($kind==='like') { Notifications::send((int)$post->post_author,'reaction','Tu publicación recibió una reacción.',Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID]),['type'=>'post','id'=>$post->ID,'actor'=>get_current_user_id()]); }
-                if ($kind==='report') { Audit::record('content_reported',$post->ID); }
             } elseif (!$active) { Store::delete('relations',$where); }
         });
         return ['active'=>$active];
+    }
+    public static function report(int $id,string $reason,string $detail=''): array
+    {
+        Access::limit('content_report',8,300);
+        $post=self::get($id);
+        Access::require($post->post_status==='publish','Contenido no publicado.',400);
+        Access::require((int)$post->post_author!==get_current_user_id(),'No puedes reportar tu propia publicación.',400);
+        $reason=trim(Access::text($reason,64));
+        Access::require(isset(self::REPORT_REASONS[$reason]),'Selecciona un motivo de reporte válido.',400);
+        $detail=trim(Access::text($detail,1000));
+        $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>'report'];
+        Store::lock('report:'.implode(':',$where),static function () use($where,$reason,$detail,$post) {
+            $existing=Store::rows('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where),'LIMIT 1')[0]??null;
+            $data=['reason'=>$reason,'detail'=>$detail,'created_at'=>current_time('mysql',true)];
+            if ($existing) Store::update('relations',$data,['id'=>(int)$existing['id']]);
+            else Store::insert('relations',$where+$data);
+            Audit::record('content_reported',$post->ID,self::reportLabel($reason));
+        });
+        return ['reported'=>true,'reason'=>$reason,'reason_label'=>self::reportLabel($reason)];
     }
     public static function moderate(int $id,string $decision,string $reason,bool $reviewed=false): array
     {

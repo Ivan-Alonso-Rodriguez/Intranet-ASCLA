@@ -10,6 +10,7 @@ final class Login
     {
         Language::boot();
         add_action('login_init', static function () { add_filter('gettext', [self::class, 'translate'], 10, 3); });
+        add_action('login_head', [Theme::class, 'printScript'], 0);
         add_action('login_enqueue_scripts', static function () {
             wp_enqueue_style('ascla-login', ASCLA_URL . 'assets/login.css', ['login'], ASCLA_VERSION);
         });

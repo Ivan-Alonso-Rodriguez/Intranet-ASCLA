@@ -17,6 +17,10 @@ final class Panel
         add_action('admin_enqueue_scripts',static function ($hook) {
             if (str_contains($hook,'ascla')) { \ASCLA\Core\Frontend\App::assets('admin'); }
         });
+        add_action('admin_head',static function () {
+            $screen=get_current_screen();
+            if ($screen && str_contains((string)$screen->id,'ascla')) { \ASCLA\Core\Frontend\Theme::printScript(); }
+        },0);
     }
     public static function render(): void { echo '<div id="ascla-root" class="ascla-admin"><div class="loading">Cargando ASCLA…</div></div>'; }
 }

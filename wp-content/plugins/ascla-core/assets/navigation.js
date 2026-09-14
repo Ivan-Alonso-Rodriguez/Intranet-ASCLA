@@ -1,7 +1,8 @@
 /* Small router: retain the authenticated WordPress shell; load only REST-backed views. */
-window.ASCLANavigation = ({ root, pages, prepare, load, error }) => {
+window.ASCLANavigation = ({ root, pages, prepare, load, error, beforeNavigate }) => {
   const routes = Object.entries(pages).map(([key, page]) => ({ key, page, url: new URL(page.url, location.href) }));
   let sequence = 0;
+  let activeUrl = location.href;
   const path = url => { let value = url.pathname; while (value.length > 1 && value.endsWith('/')) { value = value.slice(0, -1); } return value; };
   function matches(value) {
     const url = new URL(value, location.href);
@@ -20,11 +21,20 @@ window.ASCLANavigation = ({ root, pages, prepare, load, error }) => {
   }
   async function navigate(value, { pop = false, state = null } = {}) {
     const route = matches(value); if (!route) return false;
-    const url = new URL(value, location.href), current = ++sequence;
+    const url = new URL(value, location.href);
+    if (beforeNavigate && !beforeNavigate({ url: url.href, pop })) {
+      if (pop && location.href !== activeUrl) {
+        history.pushState({ ascla: true, scroll: scrollY }, '', activeUrl);
+        const activeRoute = matches(activeUrl); if (activeRoute) activate(activeRoute);
+      }
+      return false;
+    }
+    const current = ++sequence;
     if (!pop) {
       history.replaceState({ ...history.state, ascla: true, scroll: scrollY }, '', location.href);
       if (url.href !== location.href) history.pushState({ ascla: true, scroll: 0 }, '', url.href);
     }
+    activeUrl = url.href;
     activate(route); prepare(route.key); window.scrollTo(0, 0);
     try {
       await load();

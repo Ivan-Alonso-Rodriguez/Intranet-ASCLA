@@ -13,6 +13,7 @@ final class Installer
         self::migrateIndexes();
         self::migrateDiscovery();
         self::migrateNotificationContext();
+        self::migrateReportReasons();
         self::pages();
         self::terms();
         if (!wp_next_scheduled('ascla_jobs')) { wp_schedule_event(time()+60, 'hourly', 'ascla_jobs'); }
@@ -64,6 +65,21 @@ final class Installer
             if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'context'))) { throw new MigrationException('No se pudo actualizar el contexto de notificaciones.'); }
         }
         update_option('ascla_schema',4,false);
+    }
+    private static function migrateReportReasons(): void
+    {
+        if ((int)get_option('ascla_schema',0)>=5) { return; }
+        global $wpdb; $table=$wpdb->prefix.'ascla_relations';
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'reason'))) {
+            $wpdb->query("ALTER TABLE $table ADD reason varchar(64) NOT NULL DEFAULT ''");
+        }
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'detail'))) {
+            $wpdb->query("ALTER TABLE $table ADD detail text NULL");
+        }
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'reason')) || !$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'detail'))) {
+            throw new MigrationException('No se pudo actualizar el registro de reportes.');
+        }
+        update_option('ascla_schema',5,false);
     }
     /**
      * Four ASCLA roles map directly onto the process diagram's swimlanes:

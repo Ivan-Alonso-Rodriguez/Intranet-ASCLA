@@ -2,6 +2,7 @@
 namespace ASCLA\Core\Services;
 
 use ASCLA\Core\Domain\Catalog;
+use ASCLA\Core\Frontend\Language;
 use ASCLA\Core\Repositories\Store;
 
 /** Resolve notification destinations against the recipient's current permissions. */
@@ -11,6 +12,7 @@ final class NotificationTarget
     private const TYPES = [
         'message'=>['Mensajes','mail','mensajeria','Abrir mensajería'],
         'comment'=>['Comunidad','hub','hub',self::HUB_ACTION],
+        'comment_reply'=>['Comunidad','reply','hub',self::HUB_ACTION],
         'reaction'=>['Comunidad','heart','hub',self::HUB_ACTION],
         'mention'=>['Comunidad','hub','hub',self::HUB_ACTION],
         'moderation'=>['Publicaciones','shield','hub','Ver mis publicaciones'],
@@ -25,19 +27,21 @@ final class NotificationTarget
         'welcome'=>['Comunidad','users','intranet','Explorar la comunidad'],
     ];
 
+    private static function tr(string $es,string $en): string { return Language::text($es,$en); }
+
     public static function view(array $row): array
     {
         try { return self::resolve($row); }
         catch (\Throwable $error) {
             // A corrupt legacy row must not prevent other notices from being read.
-            return ['id'=>(int)($row['id']??0),'kind'=>'unknown','title'=>'Aviso no disponible','label'=>'Aviso no disponible','description'=>'Abre la sección para consultar la actividad.','category'=>'ASCLA','icon'=>'bell','url'=>Catalog::url('intranet'),'action_label'=>'Ir al inicio','available'=>false,'read_at'=>$row['read_at']??null,'created_at'=>$row['created_at']??null];
+            return ['id'=>(int)($row['id']??0),'kind'=>'unknown','title'=>self::tr('Aviso no disponible','Notification unavailable'),'label'=>self::tr('Aviso no disponible','Notification unavailable'),'description'=>self::tr('Abre la sección para consultar la actividad.','Open the section to review this activity.'),'category'=>'ASCLA','icon'=>'bell','url'=>Catalog::url('intranet'),'action_label'=>self::tr('Ir al inicio','Go to Home'),'available'=>false,'read_at'=>$row['read_at']??null,'created_at'=>$row['created_at']??null];
         }
     }
 
     private static function resolve(array $row): array
     {
         [$category,$icon,$page,$action]=self::TYPES[$row['kind']]??['ASCLA','bell','intranet','Ir al inicio'];
-        $view=['id'=>(int)$row['id'],'kind'=>$row['kind'],'title'=>$row['label'],'description'=>'','category'=>$category,'icon'=>$icon,'url'=>Catalog::url($page),'action_label'=>$action,'available'=>true,'read_at'=>$row['read_at']??null,'created_at'=>$row['created_at']];
+        $view=['id'=>(int)$row['id'],'kind'=>$row['kind'],'title'=>Language::label((string)$row['label']),'description'=>'','category'=>Language::label($category),'icon'=>$icon,'url'=>Catalog::url($page),'action_label'=>Language::label($action),'available'=>true,'read_at'=>$row['read_at']??null,'created_at'=>$row['created_at']];
         $context=self::context($row);
         $view=match($context['type']??'') {
             'post'=>self::post($view,$context),
@@ -64,8 +68,8 @@ final class NotificationTarget
 
     private static function unavailable(array $view): array
     {
-        $view['title']='Este contenido ya no está disponible';
-        $view['description']='Puede haber sido retirado o haber cambiado sus permisos. Puedes continuar en la sección.';
+        $view['title']=self::tr('Este contenido ya no está disponible','This content is no longer available');
+        $view['description']=self::tr('Puede haber sido retirado o haber cambiado sus permisos. Puedes continuar en la sección.','It may have been removed or its permissions may have changed. You can continue in the section.');
         $view['available']=false;
         $view['url']=add_query_arg('notice','unavailable',$view['url']);
         return $view;
@@ -74,7 +78,7 @@ final class NotificationTarget
     private static function actor(array $context): string
     {
         $user=get_userdata(absint($context['actor']??0));
-        return $user?Access::excerpt(Profiles::publicName((int)$user->ID),80):'Un asociado';
+        return $user?Access::excerpt(Profiles::publicName((int)$user->ID),80):self::tr('Un asociado','A member');
     }
 
     private static function post(array $view,array $context): array
@@ -82,22 +86,23 @@ final class NotificationTarget
         $post=get_post(absint($context['id']??0));
         if (!$post || in_array($post->post_status,['trash','auto-draft'],true) || !Content::canRead($post)) { return self::unavailable($view); }
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
-        $actor=empty($meta['chatham'])?self::actor($context):'Un asociado';
+        $actor=empty($meta['chatham'])?self::actor($context):self::tr('Un asociado','A member');
         $view['title']=match($view['kind']) {
-            'comment'=>$actor.' comentó en tu publicación',
-            'reaction'=>$actor.' reaccionó a tu publicación',
-            'mention'=>empty($meta['chatham'])?$actor.' te mencionó en el Hub':'Te mencionaron en una conversación privada',
-            'resource'=>'Un nuevo recurso para tus intereses',
-            'event'=>'Tienes una invitación a un evento',
-            'microevent'=>'Tu círculo ASCLA te espera',
+            'comment'=>Language::english()?$actor.' commented on your post':$actor.' comentó en tu publicación',
+            'comment_reply'=>Language::english()?$actor.' replied to your comment':$actor.' respondió a tu comentario',
+            'reaction'=>Language::english()?$actor.' reacted to your post':$actor.' reaccionó a tu publicación',
+            'mention'=>empty($meta['chatham'])?(Language::english()?$actor.' mentioned you in the Hub':$actor.' te mencionó en el Hub'):self::tr('Te mencionaron en una conversación privada','You were mentioned in a private conversation'),
+            'resource'=>self::tr('Un nuevo recurso para tus intereses','A new resource for your interests'),
+            'event'=>self::tr('Tienes una invitación a un evento','You have an event invitation'),
+            'microevent'=>self::tr('Tu círculo ASCLA te espera','Your ASCLA circle is waiting'),
             default=>$view['title'],
         };
         $view['description']=Access::excerpt($post->post_title,180);
         $view['url']=Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$post->ID]);
         $view['action_label']=match($post->post_type) {
-            'ascla_event'=>'Ver encuentro e invitación',
-            'ascla_resource'=>'Abrir recurso',
-            default=>'Ver publicación',
+            'ascla_event'=>self::tr('Ver encuentro e invitación','View event and invitation'),
+            'ascla_resource'=>self::tr('Abrir recurso','Open resource'),
+            default=>self::tr('Ver publicación','View post'),
         };
         return $view;
     }
@@ -107,10 +112,11 @@ final class NotificationTarget
         $id=absint($context['id']??0);
         try { $conversation=Messaging::conversation($id); } catch (\ASCLA\Core\Rest\ApiException $e) { return self::unavailable($view); }
         $other=['user_id'=>$conversation['other']['id']];
-        $view['title']=self::actor(['actor'=>$other['user_id']??0]).' te envió un mensaje';
-        $view['description']='Continúa la conversación privada en Mensajería.';
+        $actor=self::actor(['actor'=>$other['user_id']??0]);
+        $view['title']=Language::english()?$actor.' sent you a message':$actor.' te envió un mensaje';
+        $view['description']=self::tr('Continúa la conversación privada en Mensajería.','Continue the private conversation in Messages.');
         $view['url']=Catalog::url('mensajeria',['conversation'=>$id]);
-        $view['action_label']='Leer mensaje';
+        $view['action_label']=self::tr('Leer mensaje','Read message');
         return $view;
     }
 
@@ -124,10 +130,10 @@ final class NotificationTarget
         } catch (\ASCLA\Core\Rest\ApiException $e) { return self::unavailable($view); }
         $name=Access::excerpt($profile['name'],80);
         $state=Connections::between(get_current_user_id(),(int)$profile['id']);
-        $view['title']=in_array($view['kind'],['connection','connection_accepted'],true)?match($state['state']) { 'incoming_pending'=>$name.' quiere conectar contigo', 'outgoing_pending'=>'Tu solicitud a '.$name.' está pendiente', 'connected'=>'Ya estás conectado con '.$name, default=>'Solicitud de conexión cerrada' }:'Una conexión para ti: '.$name;
-        $view['description']='Conoce su experiencia y encuentra temas para conversar.';
+        $view['title']=in_array($view['kind'],['connection','connection_accepted'],true)?match($state['state']) { 'incoming_pending'=>Language::english()?$name.' wants to connect with you':$name.' quiere conectar contigo', 'outgoing_pending'=>Language::english()?'Your request to '.$name.' is pending':'Tu solicitud a '.$name.' está pendiente', 'connected'=>Language::english()?'You are now connected with '.$name:'Ya estás conectado con '.$name, default=>self::tr('Solicitud de conexión cerrada','Connection request closed') }:(Language::english()?'A connection for you: '.$name:'Una conexión para ti: '.$name);
+        $view['description']=self::tr('Conoce su experiencia y encuentra temas para conversar.','Explore their experience and find topics to discuss.');
         $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
-        $view['action_label']=$state['state']==='incoming_pending'?'Aceptar o rechazar solicitud':'Ver perfil';
+        $view['action_label']=$state['state']==='incoming_pending'?self::tr('Aceptar o rechazar solicitud','Accept or reject request'):self::tr('Ver perfil','View profile');
         return $view;
     }
 
@@ -138,10 +144,10 @@ final class NotificationTarget
         $payload=json_decode($job['payload'],true)?:[];
         $result=json_decode($job['result']??'null',true)?:[];
         if ($job['kind']==='answer') {
-            $view['title']=match($job['status']) { 'error'=>'Tu consulta necesita atención', 'completed'=>'Tu respuesta del asistente está lista', default=>'Estamos preparando tu respuesta' };
-            $view['description']=Access::excerpt($payload['question']??'Consulta al asistente',180);
+            $view['title']=match($job['status']) { 'error'=>self::tr('Tu consulta necesita atención','Your question needs attention'), 'completed'=>self::tr('Tu respuesta del asistente está lista','Your assistant answer is ready'), default=>self::tr('Estamos preparando tu respuesta','We are preparing your answer') };
+            $view['description']=Access::excerpt($payload['question']??self::tr('Consulta al asistente','Assistant question'),180);
             $view['url']=Catalog::url('asistente',['job'=>(int)$job['id']]);
-            $view['action_label']=$job['status']==='error'?'Revisar y reintentar':'Leer respuesta';
+            $view['action_label']=$job['status']==='error'?self::tr('Revisar y reintentar','Review and retry'):self::tr('Leer respuesta','Read answer');
             return $view;
         }
         $id=absint($result['resource_id']??$result['items'][0]['draft_id']??0);
@@ -151,13 +157,13 @@ final class NotificationTarget
     private static function jobResult(array $view,array $job,int $id): array
     {
         if ($job['status']==='completed' && $id) {
-            $view['title']=$job['kind']==='video_metadata'?'Los datos del video están actualizados':'Tu contenido está listo para revisar';
+            $view['title']=$job['kind']==='video_metadata'?self::tr('Los datos del video están actualizados','The video data has been updated'):self::tr('Tu contenido está listo para revisar','Your content is ready to review');
             return self::post($view,['id'=>$id]);
         }
-        $view['title']=$job['status']==='error'?'Una tarea necesita revisión':'Tu tarea se ha completado';
-        $view['description']=['microevents'=>'Propuesta de círculos de conversación','social'=>'Curaduría de contenidos','multimedia'=>'Resumen y derivados multimedia','video_metadata'=>'Datos del video'][$job['kind']]??'Revisa el estado y el resultado.';
+        $view['title']=$job['status']==='error'?self::tr('Una tarea necesita revisión','A task needs review'):self::tr('Tu tarea se ha completado','Your task is complete');
+        $view['description']=Language::english()?(['microevents'=>'Conversation circle proposal','social'=>'Content curation','multimedia'=>'Summary and multimedia derivatives','video_metadata'=>'Video data'][$job['kind']]??'Review the status and result.'):(['microevents'=>'Propuesta de círculos de conversación','social'=>'Curaduría de contenidos','multimedia'=>'Resumen y derivados multimedia','video_metadata'=>'Datos del video'][$job['kind']]??'Revisa el estado y el resultado.');
         $view['url']=self::activityUrl();
-        $view['action_label']='Revisar actividad';
+        $view['action_label']=self::tr('Revisar actividad','Review activity');
         return $view;
     }
 
@@ -169,15 +175,15 @@ final class NotificationTarget
     private static function legacy(array $view): array
     {
         if (in_array($view['kind'],['job','job_error'],true)) {
-            $view['title']='Revisa tus consultas y tareas anteriores';
-            $view['description']='Este aviso anterior no guardó un resultado concreto. Abre tu historial para encontrarlo.';
+            $view['title']=self::tr('Revisa tus consultas y tareas anteriores','Review your previous questions and tasks');
+            $view['description']=self::tr('Este aviso anterior no guardó un resultado concreto. Abre tu historial para encontrarlo.','This older notification did not store a specific result. Open your history to find it.');
             $view['url']=self::activityUrl();
-            $view['action_label']='Abrir historial';
+            $view['action_label']=self::tr('Abrir historial','Open history');
         } elseif ($view['kind']==='welcome') {
-            $view['title']='Bienvenido a tu comunidad ASCLA';
-            $view['description']='Encuentra encuentros, recursos y nuevas conexiones desde el inicio.';
+            $view['title']=self::tr('Bienvenido a tu comunidad ASCLA','Welcome to your ASCLA community');
+            $view['description']=self::tr('Encuentra encuentros, recursos y nuevas conexiones desde el inicio.','Find events, resources and new connections from Home.');
         } else {
-            $view['description']='Aviso anterior sin referencia al contenido. Puedes continuar en su sección.';
+            $view['description']=self::tr('Aviso anterior sin referencia al contenido. Puedes continuar en su sección.','Older notification without a content reference. You can continue in its section.');
         }
         return $view;
     }

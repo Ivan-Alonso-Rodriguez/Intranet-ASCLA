@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.7.0
+Stable tag: 1.9.9
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,46 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.9.9 =
+* Convierte el Asistente ASCLA en una experiencia de chat con conversaciones separadas e historial por hilo.
+* Consulta contexto vivo y autorizado de la intranet para responder sobre próximos eventos, publicaciones recientes, notificaciones y recomendaciones de asociados.
+* Mantiene el Centro de Conocimiento como fuente verificable y prioriza los datos internos actuales sobre el historial conversacional.
+* Conserva Chatham House y los permisos del usuario al construir el contexto enviado al proveedor de IA.
+= 1.9.8 =
+* Los menús contextuales de tres puntos son exclusivos: al abrir uno se cierra cualquier otro menú abierto y al pulsar fuera se cierran.
+* Revisión de traducciones inglés/español en Inicio, Perfil, comentarios, eventos, filtros, contenido generado y centro de notificaciones, incluidas fechas relativas y avisos dinámicos.
+
+= 1.9.7 =
+* Los comentarios ajenos pueden reportarse desde el menú de tres puntos; los comentarios propios nunca muestran esa opción y el servidor también la bloquea.
+* Las notificaciones de comentarios y respuestas incluyen el nombre del asociado remitente cuando las reglas de privacidad permiten mostrarlo.
+
+= 1.9.6 =
+* Menús discretos de tres puntos para eliminar mensajes propios y comentarios.
+* Respuestas anidadas y Me gusta en comentarios; las respuestas notifican al autor del comentario respondido.
+
+
+= 1.9.5 =
+* Se elimina la descarga ICS, los eventos finalizados ya no ofrecen acciones para añadirlos a Google Calendar y el administrador puede definir la afinidad mínima para recomendaciones.
+
+= 1.9.4 =
+* Activa por defecto Descubrir nuevas conexiones y Participar en microeventos, respetando cambios posteriores del usuario.
+* Los eventos finalizados ya no permiten inscripción, invitaciones ni comenzar a seguir la conversación.
+* Los comentarios del autor en su propia publicación no generan una notificación para sí mismo.
+
+= 1.9.3 =
+* Corrige contrastes del modo oscuro en Inicio y Perfil, incluidos “Publicados recientemente”, la tarjeta “Un espacio de confianza” y los estados Visible/Oculto.
+* El control de apariencia muestra un sol en modo claro y una luna en modo oscuro.
+
+= 1.9.2 =
+* Añade apariencia automática/clara/oscura con detección del dispositivo y persistencia local.
+* Simplifica el texto de recuperación de contraseña del perfil.
+
+= 1.9.1 =
+Ajuste visual del cambio de contraseña: contraseña actual en una fila y nueva contraseña con confirmación en paralelo. Aviso de cambios sin guardar al salir del Perfil o de Configuración administrativa, incluyendo navegación interna y cierre/recarga del navegador.
+
+= 1.9.0 =
+Cambio de contraseña dentro de la intranet con validación de la contraseña actual y recuperación por correo; reportes con motivo y detalle opcional, visibles para moderación. Se conserva el selector de idioma ASCLA con Español e English.
 
 = 1.7.0 =
 Eliminación de contenido y comentarios por autor o administrador; biblioteca y eliminación de archivos privados; eventos exclusivos de administradores con publicación directa; idioma de WordPress guardado por cuenta y navegación inglés/español. Corrección de abstenciones guardadas.

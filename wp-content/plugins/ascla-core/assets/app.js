@@ -5,6 +5,35 @@
   if (!root || !window.ASCLA) return;
   const C = window.ASCLA;
   const T = text => C.translations?.[text] || text;
+  const THEME_KEY = "ascla-theme";
+  const themeMedia = window.matchMedia?.("(prefers-color-scheme: dark)");
+  const themeMode = () => {
+    try {
+      const mode = localStorage.getItem(THEME_KEY);
+      return ["light", "dark", "system"].includes(mode) ? mode : "system";
+    } catch { return "system"; }
+  };
+  const effectiveTheme = (mode = themeMode()) => mode === "system" ? (themeMedia?.matches ? "dark" : "light") : mode;
+  function applyTheme(mode = themeMode(), persist = false) {
+    if (!["light", "dark", "system"].includes(mode)) mode = "system";
+    if (persist) { try { localStorage.setItem(THEME_KEY, mode); } catch {} }
+    const active = effectiveTheme(mode);
+    document.documentElement.dataset.asclaTheme = active;
+    document.documentElement.dataset.asclaThemeMode = mode;
+    document.documentElement.style.colorScheme = active;
+    const button = root.querySelector('[data-action="theme-menu"]');
+    if (button) {
+      const labels = { system: T("Automático (sistema)"), light: T("Claro"), dark: T("Oscuro") };
+      button.setAttribute("aria-label", `${T("Apariencia")}: ${labels[mode]}`);
+      button.setAttribute("title", `${T("Apariencia")}: ${labels[mode]}`);
+      button.dataset.theme = active;
+    }
+  }
+  function themeDialog() {
+    const current = themeMode();
+    const option = (mode, title, description) => `<button type="button" class="theme-choice ${current === mode ? "selected" : ""}" data-action="theme-set" data-theme="${mode}" aria-pressed="${current === mode}"><span class="theme-choice-title">${E(T(title))}</span><span>${E(T(description))}</span></button>`;
+    modal(T("Apariencia"), `<p class="private-note">${E(T("Elige cómo quieres ver la intranet. En Automático, ASCLA sigue la preferencia de tu dispositivo."))}</p><div class="theme-options">${option("system", "Automático (sistema)", "Usa el modo claro u oscuro configurado en tu dispositivo.")}${option("light", "Claro", "Mantiene la interfaz clara en este navegador.")}${option("dark", "Oscuro", "Mantiene la interfaz oscura en este navegador.")}</div>`);
+  }
   // Translate interface labels only; source content and user input keep their original language.
   const labelHTML = label => String(label).replace(/(^|>)([^<>]+)(?=<|$)/g, (all, prefix, text) => {
     const trimmed = text.trim();return prefix + text.replace(trimmed, T(trimmed));
@@ -25,10 +54,25 @@
     poll: null,
     noticeFilter: "all",
     noticePage: 1,
+    assistantThread: "",
   };
+  const ASSISTANT_THREAD_PREFIX = "ascla-assistant-thread-";
+  function assistantThread(reset = false, forced = "") {
+    const key = ASSISTANT_THREAD_PREFIX + String(S.boot?.me?.id || "member");
+    let value = forced;
+    if (!value && !reset) { try { value = localStorage.getItem(key) || ""; } catch {} }
+    if (!/^[a-zA-Z0-9_-]{6,80}$/.test(value)) {
+      const random = globalThis.crypto?.randomUUID?.() || (Date.now().toString(36) + Math.random().toString(36).slice(2));
+      value = "chat_" + random.replace(/[^a-zA-Z0-9_-]/g, "");
+    }
+    S.assistantThread = value;
+    try { localStorage.setItem(key, value); } catch {}
+    return value;
+  }
   const icons = C.icons;
   const I = (name) =>
     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${icons[name] || icons.hub}"/></svg>`;
+  const themeIcons = () => `<span class="theme-icon theme-icon-light">${I("sun")}</span><span class="theme-icon theme-icon-dark">${I("moon")}</span>`;
   const E = (v) =>
     String(v ?? "").replace(
       /[&<>"']/g,
@@ -56,7 +100,7 @@
             ? value
             : value.replace(" ", "T") + "Z",
         ).toLocaleDateString(C.locale || "es-PE", opts)
-      : "Por confirmar";
+      : T("Por confirmar");
   const time = (value) =>
     value
       ? new Date(value).toLocaleTimeString(C.locale || "es-PE", {
@@ -65,7 +109,7 @@
         })
       : "";
   const status = (value) =>
-    `<span class="status ${E(value)}">${E({ publish: "Publicado", draft: "Borrador", pending: "Pendiente de revisión", private: "Solicitud privada", ascla_rejected: "Rechazado", ascla_hidden: "Oculto", completed: "Completado", processing: "Procesando", error: "Error", accepted: "Inscrito", invited: "Invitado", cancelled: "Cancelado", declined: "Rechazado" }[value] || value)}</span>`;
+    `<span class="status ${E(value)}">${E(T({ publish: "Publicado", draft: "Borrador", pending: "Pendiente de revisión", private: "Solicitud privada", ascla_rejected: "Rechazado", ascla_hidden: "Oculto", completed: "Completado", processing: "Procesando", error: "Error", accepted: "Inscrito", invited: "Invitado", cancelled: "Cancelado", declined: "Rechazado" }[value] || value))}</span>`;
   const initials = (name) =>
     String(name || "AS")
       .split(" ")
@@ -86,7 +130,7 @@
     `<a class="btn ${kind}" href="${E(C.pages[page]?.url || "#")}">${labelHTML(label)}</a>`;
   const empty = (title, text = "") =>
     `<div class="empty">${I("users")}<strong>${E(T(title))}</strong><p>${E(T(text))}</p></div>`;
-  const UI = window.ASCLAContent({ escape: E, icon: I, config: C });
+  const UI = window.ASCLAContent({ escape: E, icon: I, config: C, T });
   function apiURL(path) {
     const url = new URL(C.api, location.href);
     const [route, query = ""] = path.split("?", 2);
@@ -115,7 +159,7 @@
     const data = await response.json();
     if (version !== S.viewVersion) throw new DOMException("La vista cambió", "AbortError");
     if (!response.ok) {
-      const error = new Error(data.message || "No se pudo completar la solicitud.");
+      const error = new Error(T(data.message || "No se pudo completar la solicitud."));
       error.status = response.status; error.code = data.code;
       throw error;
     }
@@ -126,7 +170,7 @@
     const t = document.createElement("div");
     t.className = "toast";
     t.role = "status";
-    t.textContent = message;
+    t.textContent = T(message);
     root.append(t);
     setTimeout(() => t.remove(), 5500);
   }
@@ -134,7 +178,7 @@
     closeModal();
     const div = document.createElement("div");
     div.className = "modal-backdrop";
-    div.innerHTML = `<section role="dialog" aria-modal="true" aria-label="${E(title)}" class="modal ${wide ? "wide" : ""}"><div class="modal-top"><h2>${E(title)}</h2>${btn(I("close"), "close", 'aria-label="Cerrar"', "ghost")}</div><div class="modal-content">${body}</div></section>`;
+    div.innerHTML = `<section role="dialog" aria-modal="true" aria-label="${E(title)}" class="modal ${wide ? "wide" : ""}"><div class="modal-top"><h2>${E(title)}</h2>${btn(I("close"), "close", `aria-label="${E(T("Cerrar"))}"`, "ghost")}</div><div class="modal-content">${body}</div></section>`;
     root.append(div);
     S.focus = document.activeElement;
     div.querySelector("button,input")?.focus();
@@ -152,11 +196,75 @@
     `<div class="field"><label for="f-${E(name)}">${E(T(label))}</label><select name="${E(name)}" id="f-${E(name)}">${values
       .map((v) => {
         const pair = Array.isArray(v) ? v : [v, v];
-        return `<option value="${E(pair[0])}" ${String(value) === String(pair[0]) ? "selected" : ""}>${E(pair[1])}</option>`;
+        return `<option value="${E(pair[0])}" ${String(value) === String(pair[0]) ? "selected" : ""}>${E(T(pair[1]))}</option>`;
       })
       .join("")}</select></div>`;
   function formData(form) {
     return Object.fromEntries(new FormData(form));
+  }
+  const unsavedGuard = { form: null, baseline: "", dirty: false };
+  function formSnapshot(form) {
+    if (!form) return "";
+    const values = [...form.elements].map((element) => {
+      if (!element.name || element.disabled || ["button", "submit", "reset", "file"].includes(element.type)) return null;
+      if (element.type === "checkbox" || element.type === "radio") return [element.name, element.value, element.checked];
+      if (element.tagName === "SELECT" && element.multiple) return [element.name, [...element.selectedOptions].map((option) => option.value)];
+      return [element.name, element.value];
+    }).filter(Boolean);
+    return JSON.stringify(values);
+  }
+  function registerUnsavedForm(form) {
+    unsavedGuard.form = form || null;
+    unsavedGuard.baseline = formSnapshot(form);
+    unsavedGuard.dirty = false;
+  }
+  function refreshUnsavedGuard(target = null) {
+    const form = target?.closest?.('form[data-guard-unsaved]') || unsavedGuard.form;
+    if (!form || form !== unsavedGuard.form || !form.isConnected) return;
+    unsavedGuard.dirty = formSnapshot(form) !== unsavedGuard.baseline;
+  }
+  function clearUnsavedGuard(form = unsavedGuard.form) {
+    if (form && form === unsavedGuard.form) {
+      unsavedGuard.baseline = formSnapshot(form);
+      unsavedGuard.dirty = false;
+    } else if (!form) {
+      unsavedGuard.form = null; unsavedGuard.baseline = ""; unsavedGuard.dirty = false;
+    }
+  }
+  function hasUnsavedChanges() {
+    if (!unsavedGuard.form?.isConnected) { clearUnsavedGuard(null); return false; }
+    refreshUnsavedGuard();
+    return unsavedGuard.dirty;
+  }
+  function confirmUnsavedExit() {
+    if (!hasUnsavedChanges()) return true;
+    const leave = window.confirm(T("Tienes cambios sin guardar. Si sales ahora, se perderán. ¿Quieres salir sin guardar?"));
+    if (leave) clearUnsavedGuard(null);
+    return leave;
+  }
+  const reportReasons = [
+    ["harassment", "Acoso"],
+    ["fraud", "Fraude o estafa"],
+    ["spam", "Mensaje no deseado (spam)"],
+    ["false_information", "Información falsa"],
+    ["hate", "Incitación al odio"],
+    ["violence", "Amenazas o violencia"],
+    ["self_harm", "Autolesiones"],
+    ["explicit", "Contenido explícito"],
+    ["extremism", "Organizaciones extremistas o peligrosas"],
+    ["sexual", "Contenido sexual"],
+    ["fake_account", "Cuenta falsa"],
+    ["child_exploitation", "Explotación infantil"],
+    ["restricted_goods", "Bienes y servicios restringidos"],
+    ["intimate_images", "Difusión de imágenes íntimas sin consentimiento"],
+    ["other", "Otro motivo"],
+  ];
+  function reportDialog(id, kind = "content") {
+    const isComment = kind === "comment";
+    modal(
+      T(isComment ? "Denuncia este comentario" : "Denuncia esta publicación"),
+      `<form data-form="report" data-kind="${isComment ? 'comment' : 'content'}" data-id="${Number(id)}" class="report-form"><h3>${E(T("Selecciona el motivo de la denuncia"))}</h3><p class="private-note">${E(T("Tu reporte será revisado por el equipo de moderación de ASCLA."))}</p><div class="report-reasons">${reportReasons.map(([value, label]) => `<label class="report-reason"><input type="radio" name="reason" value="${E(value)}" required><span>${E(T(label))}</span></label>`).join("")}</div>${field("detail", "Información adicional (opcional)", "", "textarea", 'maxlength="1000" placeholder="${E(T("Añade contexto que ayude al equipo de moderación…"))}"')}<div class="form-actions"><button type="button" class="btn" data-action="close">${E(T("Cancelar"))}</button><button class="btn primary">${E(T("Enviar reporte"))}</button></div></form>`,
+    );
   }
   const pageIcon = {
     intranet: "home",
@@ -190,8 +298,8 @@
     if (root.querySelector(".ascla-sidebar")) { refreshNotifications(); return; }
     const p = S.boot.me;
     const links = navOrder.map((k) => `<a class="nav-link ${S.page === k ? "active" : ""}" href="${E(C.pages[k].url)}">${I(pageIcon[k])}<span>${E(C.pages[k].label)}</span></a>`).join("");
-    const adminLink = (S.boot.moderator || S.boot.executive) ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}Administración</a>` : "";
-    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(C.pages.intranet.url)}" aria-label="ASCLA inicio"><img src="${E(C.logo)}" alt="ASCLA"></a><div class="brand-sub">COMUNIDAD DE ASOCIADOS</div><nav aria-label="Navegación principal">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}Cerrar sesión</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(C.pages.intranet.url)}" aria-label="ASCLA inicio"><img src="${E(C.logo)}" alt="ASCLA"></a>${btn(I("menu"), "menu", 'aria-label="Abrir navegación"', "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="Buscar en ASCLA" placeholder="Buscar en tu comunidad…" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", 'aria-label="Notificaciones"', "icon-button")}<a class="header-profile" aria-label="Mi perfil" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || "Comunidad ASCLA")}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || "Administración")}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · Conectamos conocimiento, fortalecemos la gobernanza.${S.boot.demo ? " · Datos ficticios de demostración." : ""}</div></main></div>`;
+    const adminLink = (S.boot.moderator || S.boot.executive) ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}${E(T("Administración"))}</a>` : "";
+    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logo)}" alt="ASCLA"></a><div class="brand-sub">${E(T("COMUNIDAD DE ASOCIADOS"))}</div><nav aria-label="${E(T("Navegación principal"))}">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}${E(T("Cerrar sesión"))}</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logo)}" alt="ASCLA"></a>${btn(I("menu"), "menu", `aria-label="${E(T("Abrir navegación"))}"`, "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="${E(T("Buscar en ASCLA"))}" placeholder="${E(T("Buscar en tu comunidad…"))}" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", `aria-label="${E(T("Notificaciones"))}"`, "icon-button")}<a class="header-profile" aria-label="${E(T("Mi perfil"))}" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || T("Comunidad ASCLA"))}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || T("Administración"))}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · ${E(T("Conectamos conocimiento, fortalecemos la gobernanza."))}${S.boot.demo ? " · " + E(T("Datos ficticios de demostración.")) : ""}</div></main></div>`;
     refreshNotifications();
   }
   function heading(title, subtitle, action = "") {
@@ -204,12 +312,12 @@
     let actions = '';
     if (c.state === 'incoming_pending') {
       actions = btn('Aceptar conexión', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="accept" ${c.blocked ? 'disabled' : ''}`, 'primary small') + btn('Rechazar solicitud', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="reject"`, 'small');
-    } else if (c.state === 'outgoing_pending') actions = '<span class="connection-state pending">Solicitud enviada · Pendiente</span>';
+    } else if (c.state === 'outgoing_pending') actions = `<span class="connection-state pending">${E(T('Solicitud enviada · Pendiente'))}</span>`;
     else if (c.state === 'connected') {
-      actions = '<span class="connection-state connected">' + I('check') + ' Conectados</span>';
+      actions = '<span class="connection-state connected">' + I('check') + ' ' + E(T('Conectados')) + '</span>';
       if (c.can_message) actions += btn(I('mail') + ' Enviar mensaje', 'message-start', `data-id="${id}"`, 'primary small') + (suggested ? btn('Mensaje sugerido', 'intro', `data-id="${id}"`, 'small') : '');
     } else actions = btn('Enviar solicitud de conexión', 'connect', `data-id="${id}" ${c.can_request ? '' : 'disabled'}`, 'small');
-    const note = c.blocked ? 'La mensajería está bloqueada entre estas cuentas.' : c.state !== 'connected' ? (c.state === 'none' && !c.can_request ? 'Ambos asociados deben tener activado networking para conectar.' : 'La mensajería se habilita al aceptar la conexión.') : '';
+    const note = c.blocked ? T('La mensajería está bloqueada entre estas cuentas.') : c.state !== 'connected' ? (c.state === 'none' && !c.can_request ? T('Ambos asociados deben tener activado networking para conectar.') : T('La mensajería se habilita al aceptar la conexión.')) : '';
     if (c.blocked_by_me) actions += btn('Desbloquear', 'block', `data-id="${id}" data-active="false"`, 'small');
     return `<div class="connection-controls" data-member-connection="${id}" data-suggested="${suggested}" data-state="${E(c.state)}"><div class="connection-actions">${actions}</div>${note ? '<p class="private-note">' + E(note) + '</p>' : ''}</div>`;
   }
@@ -217,12 +325,12 @@
     for (const element of root.querySelectorAll(`[data-member-connection="${Number(id)}"]`)) element.outerHTML = connectionActions({id, connection: state}, element.dataset.suggested === 'true');
   }
   function connectionRow(p) {
-    return `<article class="connection-row"><div class="connection-person">${avatar(p)}<div><strong>${E(p.name)}</strong>${p.profile_url ? `<a href="${E(p.profile_url)}">Ver perfil</a>` : '<small>Perfil no disponible</small>'}</div></div>${connectionActions(p)}</article>`;
+    return `<article class="connection-row"><div class="connection-person">${avatar(p)}<div><strong>${E(p.name)}</strong>${p.profile_url ? `<a href="${E(p.profile_url)}">${E(T('Ver perfil'))}</a>` : `<small>${E(T('Perfil no disponible'))}</small>`}</div></div>${connectionActions(p)}</article>`;
   }
   async function refreshConnectionsPanel() {
     const panel = document.getElementById('connections-panel'); if (!panel) return;
     const data = await api('connections'); if (!panel.isConnected) return;
-    panel.innerHTML = `<div class="section-top"><h2>Mis conexiones</h2>${btn('Actualizar conexiones','connections-refresh','','ghost small')}</div><h3>Solicitudes recibidas (${data.incoming.length})</h3>${data.incoming.map(connectionRow).join('') || '<p class="private-note">No tienes solicitudes pendientes.</p>'}<details><summary>Solicitudes enviadas (${data.outgoing.length})</summary>${data.outgoing.map(connectionRow).join('') || '<p class="private-note">No hay solicitudes enviadas pendientes.</p>'}</details><details><summary>Conexiones confirmadas (${data.connected.length})</summary>${data.connected.map(connectionRow).join('') || '<p class="private-note">Tus conexiones aparecerán aquí cuando acepten la solicitud.</p>'}</details>`;
+    panel.innerHTML = `<div class="section-top"><h2>${E(T('Mis conexiones'))}</h2>${btn('Actualizar conexiones','connections-refresh','','ghost small')}</div><h3>${E(T('Solicitudes recibidas'))} (${data.incoming.length})</h3>${data.incoming.map(connectionRow).join('') || `<p class="private-note">${E(T('No tienes solicitudes pendientes.'))}</p>`}<details><summary>${E(T('Solicitudes enviadas'))} (${data.outgoing.length})</summary>${data.outgoing.map(connectionRow).join('') || `<p class="private-note">${E(T('No hay solicitudes enviadas pendientes.'))}</p>`}</details><details><summary>${E(T('Conexiones confirmadas'))} (${data.connected.length})</summary>${data.connected.map(connectionRow).join('') || `<p class="private-note">${E(T('Tus conexiones aparecerán aquí cuando acepten la solicitud.'))}</p>`}</details>`;
   }
   let relationshipRefreshing = false;
   async function refreshOpenConnection() {
@@ -236,9 +344,9 @@
     finally { relationshipRefreshing = false; }
   }
   function memberCard(p) {
-    return `<article class="card member-card">${avatar(p, "lg")}<h3>${E(p.name)}</h3><div class="role">${E(p.position || "Miembro ASCLA")}</div><div class="company">${E(p.company || "Comunidad profesional")}</div><span class="country">${I("pin")}${E(p.country || "América Latina")}</span>${
+    return `<article class="card member-card">${avatar(p, "lg")}<h3>${E(p.name)}</h3><div class="role">${E(p.position || T("Miembro ASCLA"))}</div><div class="company">${E(p.company || T("Comunidad profesional"))}</div><span class="country">${I("pin")}${E(p.country || T("América Latina"))}</span>${
       p.affinity
-        ? `<div class="match-pill">${I("spark")}${p.affinity.score}% de afinidad</div>`
+        ? `<div class="match-pill">${I("spark")}${p.affinity.score}% ${E(T("de afinidad"))}</div>`
         : `<div class="tag-row">${(p.terms?.interests || [])
             .slice(0, 2)
             .map((t) => `<span class="tag">${E(t)}</span>`)
@@ -247,13 +355,13 @@
   }
   function resourceCard(p, i = 0) {
     const cover = p.meta.thumbnail_url
-      ? `<a href="${E(p.url)}" class="resource-video-cover"><img class="resource-thumbnail" src="${E(p.meta.thumbnail_url)}" alt="Miniatura de ${E(p.title)}" loading="lazy"><span>${I("play")} ${E(UI.duration(p.meta.duration_seconds))}</span></a>`
-      : `<a href="${E(p.url)}" class="resource-cover v${i % 3}"><div class="cover-label">ASCLA · CONOCIMIENTO</div><strong>${E(p.title.split(":")[0])}</strong><span class="cover-icon">${I(p.meta.resource_type === "Video" ? "play" : "book")}</span></a>`;
-    return `<article class="card resource-card">${cover}<div class="resource-content"><span class="tag" style="align-self:flex-start;margin-bottom:10px">${E(p.meta.resource_type || "Artículo")}</span><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E((p.meta.summary || p.body).slice(0, 115))}${p.body.length > 115 ? "…" : ""}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Explorar " + I("arrow"), "item", `data-id="${p.id}"`, "ghost")}</div></div></article>`;
+      ? `<a href="${E(p.url)}" class="resource-video-cover"><img class="resource-thumbnail" src="${E(p.meta.thumbnail_url)}" alt="${E(T("Miniatura de"))} ${E(p.title)}" loading="lazy"><span>${I("play")} ${E(UI.duration(p.meta.duration_seconds))}</span></a>`
+      : `<a href="${E(p.url)}" class="resource-cover v${i % 3}"><div class="cover-label">${E(T("ASCLA · CONOCIMIENTO"))}</div><strong>${E(p.title.split(":")[0])}</strong><span class="cover-icon">${I(p.meta.resource_type === "Video" ? "play" : "book")}</span></a>`;
+    return `<article class="card resource-card">${cover}<div class="resource-content"><span class="tag" style="align-self:flex-start;margin-bottom:10px">${E(T(p.meta.resource_type || "Artículo"))}</span><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E((p.meta.summary || p.body).slice(0, 115))}${p.body.length > 115 ? "…" : ""}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Explorar " + I("arrow"), "item", `data-id="${p.id}"`, "ghost")}</div></div></article>`;
   }
   function eventMini(p) {
     const d = new Date(p.meta.start);
-    return `<div class="event-mini"><div class="date-box"><small>${d.toLocaleDateString(C.locale || "es-PE", { month: "short" })}</small><strong>${d.getDate()}</strong></div><div><h3>${E(p.title)}</h3><p>${E(p.meta.modality || "Virtual")} · ${time(p.meta.start)}</p><a href="${E(p.url)}">Ver evento ${I("arrow")}</a></div></div>`;
+    return `<div class="event-mini"><div class="date-box"><small>${d.toLocaleDateString(C.locale || "es-PE", { month: "short" })}</small><strong>${d.getDate()}</strong></div><div><h3>${E(p.title)}</h3><p>${E(T(p.meta.modality || "Virtual"))} · ${time(p.meta.start)}</p><a href="${E(p.url)}">${E(T("Ver evento"))} ${I("arrow")}</a></div></div>`;
   }
   function calendar(events) {
     const d = S.calendar;
@@ -264,7 +372,8 @@
       const from = new Date(d.getFullYear(), d.getMonth(), day), to = new Date(d.getFullYear(), d.getMonth(), day + 1);
       return events.some(p => new Date(p.meta.start) < to && new Date(p.meta.end) > from);
     });
-    return `<div class="calendar-head"><strong>${E(d.toLocaleDateString(C.locale || "es-PE", { month: "long", year: "numeric" }))}</strong><span>${btn("‹", "calendar-prev", 'aria-label="Mes anterior"', "ghost")}${btn("›", "calendar-next", 'aria-label="Mes siguiente"', "ghost")}</span></div><div class="calendar">${["L", "M", "M", "J", "V", "S", "D"].map((x) => `<span class="weekday">${x}</span>`).join("")}${"<span></span>".repeat(first)}${Array.from({ length: days }, (_, i) => `<span class="${today.getFullYear() === d.getFullYear() && today.getMonth() === d.getMonth() && today.getDate() === i + 1 ? "today" : eventDays.includes(i + 1) ? "event-day" : ""}">${eventDays.includes(i + 1) ? `<button class="calendar-day" data-action="calendar-day" data-day="${i + 1}" aria-label="Ver eventos del día ${i + 1}">${i + 1}</button>` : i + 1}</span>`).join("")}</div><div class="calendar-legend"><i></i> Eventos de la comunidad</div>`;
+    const weekdays = Array.from({length:7},(_,i)=>new Intl.DateTimeFormat(C.locale || "es-PE",{weekday:"narrow"}).format(new Date(2024,0,1+i)));
+    return `<div class="calendar-head"><strong>${E(d.toLocaleDateString(C.locale || "es-PE", { month: "long", year: "numeric" }))}</strong><span>${btn("‹", "calendar-prev", `aria-label="${E(T("Mes anterior"))}"`, "ghost")}${btn("›", "calendar-next", `aria-label="${E(T("Mes siguiente"))}"`, "ghost")}</span></div><div class="calendar">${weekdays.map((x) => `<span class="weekday">${E(x)}</span>`).join("")}${"<span></span>".repeat(first)}${Array.from({ length: days }, (_, i) => `<span class="${today.getFullYear() === d.getFullYear() && today.getMonth() === d.getMonth() && today.getDate() === i + 1 ? "today" : eventDays.includes(i + 1) ? "event-day" : ""}">${eventDays.includes(i + 1) ? `<button class="calendar-day" data-action="calendar-day" data-day="${i + 1}" aria-label="${E(T("Ver eventos del día"))} ${i + 1}">${i + 1}</button>` : i + 1}</span>`).join("")}</div><div class="calendar-legend"><i></i> ${E(T("Eventos de la comunidad"))}</div>`;
   }
   async function dashboard() {
     const [people, events, resources, hub, directory, notes, monthEvents, recentResources] =
@@ -283,7 +392,7 @@
       .filter((p) => new Date(p.meta.end) > new Date())
       .sort((a, b) => new Date(a.meta.start) - new Date(b.meta.start));
     const p = S.boot.me;
-    content().innerHTML = `<section class="hero"><div class="hero-copy"><div class="eyebrow">TU COMUNIDAD, MÁS CERCA</div><h1>Hola ${E(p.first_name || p.name.split(" ")[0])},<br>sigamos conectando ideas.</h1><p>Un espacio para compartir experiencias, fortalecer tu red y construir el futuro del gobierno corporativo.</p>${link("directorio", "Explorar la comunidad " + I("arrow"), "white small")}</div><svg class="hero-art" viewBox="0 0 300 260" fill="none" aria-hidden="true"><g stroke="#7ac0e5" stroke-width=".7"><circle cx="160" cy="130" r="105"/><circle cx="160" cy="130" r="77"/><ellipse cx="160" cy="130" rx="45" ry="105"/><path d="M55 130h210M80 64l170 134M80 196 247 65M68 80l191 89M70 173l180-89"/></g><g fill="#8dc4e3" stroke="#c7edff" stroke-width="4"><circle cx="90" cy="76" r="9"/><circle cx="236" cy="70" r="7"/><circle cx="160" cy="130" r="11"/><circle cx="87" cy="195" r="7"/><circle cx="244" cy="193" r="10"/><circle cx="181" cy="27" r="5"/></g></svg><div class="hero-tag"><i></i> Una red que crece contigo</div></section><div class="stat-grid">${[
+    content().innerHTML = `<section class="hero"><div class="hero-copy"><div class="eyebrow">${E(T("TU COMUNIDAD, MÁS CERCA"))}</div><h1>${E(T("Hola"))} ${E(p.first_name || p.name.split(" ")[0])},<br>${E(T("sigamos conectando ideas."))}</h1><p>${E(T("Un espacio para compartir experiencias, fortalecer tu red y construir el futuro del gobierno corporativo."))}</p>${link("directorio", "Explorar la comunidad " + I("arrow"), "white small")}</div><svg class="hero-art" viewBox="0 0 300 260" fill="none" aria-hidden="true"><g stroke="#7ac0e5" stroke-width=".7"><circle cx="160" cy="130" r="105"/><circle cx="160" cy="130" r="77"/><ellipse cx="160" cy="130" rx="45" ry="105"/><path d="M55 130h210M80 64l170 134M80 196 247 65M68 80l191 89M70 173l180-89"/></g><g fill="#8dc4e3" stroke="#c7edff" stroke-width="4"><circle cx="90" cy="76" r="9"/><circle cx="236" cy="70" r="7"/><circle cx="160" cy="130" r="11"/><circle cx="87" cy="195" r="7"/><circle cx="244" cy="193" r="10"/><circle cx="181" cy="27" r="5"/></g></svg><div class="hero-tag"><i></i> ${E(T("Una red que crece contigo"))}</div></section><div class="stat-grid">${[
       [directory.total, "Asociados en la comunidad", "users"],
       [events.total, "Próximos encuentros", "calendar"],
       [recentResources.total, "Recursos para aprender", "book"],
@@ -291,18 +400,18 @@
     ]
       .map(
         ([num, label, icon]) =>
-          `<div class="stat"><span class="stat-icon">${I(icon)}</span><div><strong>${num}</strong><small>${label}</small></div></div>`,
+          `<div class="stat"><span class="stat-icon">${I(icon)}</span><div><strong>${num}</strong><small>${E(T(label))}</small></div></div>`,
       )
       .join(
         "",
-      )}</div><div class="dashboard-columns"><div><div class="section-top"><h2>Conexiones que suman</h2>${link("directorio", "Ver directorio " + I("arrow"), "ghost")}</div><div class="cards">${people.slice(0, 3).map(memberCard).join("") || empty("Activa tu networking", "Completa tus intereses en Perfil para descubrir conexiones.")}</div><div class="section-gap"><div class="section-top"><h2>Conocimiento para tu día a día</h2>${link("centro-conocimiento", "Ver todo " + I("arrow"), "ghost")}</div><div class="cards two">${resources.items.slice(0, 2).map(resourceCard).join("") || empty("Completa tus intereses para ver recomendaciones")}</div><h3 class="section-gap">Publicados recientemente</h3><div class="cards two">${recentResources.items.slice(0, 2).map(resourceCard).join("") || empty("Tu biblioteca está por comenzar")}</div></div><div class="section-gap"><div class="section-top"><h2>La conversación en nuestra comunidad</h2>${link("hub", "Ir al Hub " + I("arrow"), "ghost")}</div>${hub.items.slice(0, 1).map(feedCard).join("") || empty("Comparte la primera idea")}</div></div><aside class="dashboard-aside"><div><div class="section-top"><h2>Tu agenda ASCLA</h2>${I("calendar")}</div><div class="card calendar-card"><div id="calendar-body">${calendar(monthEvents)}</div><div style="border-top:1px solid var(--line);margin-top:16px;padding-top:8px">${upcoming.slice(0, 2).map(eventMini).join("") || '<p class="muted">Sin próximos eventos.</p>'}</div></div></div><div class="notice-card">${I("spark")}<h3>El conocimiento, a una pregunta</h3><p>Encuentra respuestas en los recursos de nuestra comunidad con el Asistente ASCLA.</p>${link("asistente", "Hacer una pregunta " + I("arrow"), "ghost small")}</div><div class="notice-card" style="background:white;border-color:var(--line)">${I("shield")}<h3>Un espacio de confianza</h3><p>Compartimos conocimiento con respeto, confidencialidad y bajo la Regla de Chatham House.</p>${btn("Normas de la comunidad " + I("arrow"), "rules", "", "ghost small")}</div></aside></div>`;
+      )}</div><div class="dashboard-columns"><div><div class="section-top"><h2>${E(T("Conexiones que suman"))}</h2>${link("directorio", "Ver directorio " + I("arrow"), "ghost")}</div><div class="cards">${people.slice(0, 3).map(memberCard).join("") || (S.boot.me.networking ? empty("Aún no hay coincidencias suficientes", "Las recomendaciones aparecen cuando alcanzan el mínimo de afinidad definido por la comunidad.") : empty("Activa tu networking", "Completa tus intereses en Perfil para descubrir conexiones."))}</div><div class="section-gap"><div class="section-top"><h2>${E(T("Conocimiento para tu día a día"))}</h2>${link("centro-conocimiento", "Ver todo " + I("arrow"), "ghost")}</div><div class="cards two">${resources.items.slice(0, 2).map(resourceCard).join("") || empty("Completa tus intereses para ver recomendaciones")}</div><h3 class="section-gap recent-heading">${E(T("Publicados recientemente"))}</h3><div class="cards two">${recentResources.items.slice(0, 2).map(resourceCard).join("") || empty("Tu biblioteca está por comenzar")}</div></div><div class="section-gap"><div class="section-top"><h2>${E(T("La conversación en nuestra comunidad"))}</h2>${link("hub", "Ir al Hub " + I("arrow"), "ghost")}</div>${hub.items.slice(0, 1).map(feedCard).join("") || empty("Comparte la primera idea")}</div></div><aside class="dashboard-aside"><div><div class="section-top"><h2>${E(T("Tu agenda ASCLA"))}</h2>${I("calendar")}</div><div class="card calendar-card"><div id="calendar-body">${calendar(monthEvents)}</div><div style="border-top:1px solid var(--line);margin-top:16px;padding-top:8px">${upcoming.slice(0, 2).map(eventMini).join("") || `<p class="muted">${E(T("Sin próximos eventos."))}</p>`}</div></div></div><div class="notice-card">${I("spark")}<h3>${E(T("El conocimiento, a una pregunta"))}</h3><p>${E(T("Encuentra respuestas en los recursos de nuestra comunidad con el Asistente ASCLA."))}</p>${link("asistente", "Hacer una pregunta " + I("arrow"), "ghost small")}</div><div class="notice-card trust-card">${I("shield")}<h3>${E(T("Un espacio de confianza"))}</h3><p>${E(T("Compartimos conocimiento con respeto, confidencialidad y bajo la Regla de Chatham House."))}</p>${btn("Normas de la comunidad " + I("arrow"), "rules", "", "ghost small")}</div></aside></div>`;
   }
   function feedCard(p) {
-    return `<article class="card feed-card"><div class="feed-top">${avatar({ name: p.author.name })}<div><strong>${E(p.author.name)}</strong><small>${date(p.date)} · Comunidad ASCLA</small></div><span style="margin-left:auto">${p.status !== "publish" ? status(p.status) : ""}</span></div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(p.body.slice(0, 450))}${p.body.length > 450 ? "…" : ""}</p>${UI.attachments(p, true)}${p.tags.length ? `<div class="tag-row">${p.tags.map((t) => `<span class="tag">${E(t.name)}</span>`).join("")}</div>` : ""}<div class="feed-actions">${btn(I("heart") + " " + p.reactions, "like", `data-id="${p.id}" data-active="${!p.liked}" aria-label="Me gusta"`)}${btn(I("hub") + " " + p.comments + " comentarios", "item", `data-id="${p.id}"`)}${btn(I("arrow") + " Ver conversación", "item", `data-id="${p.id}"`)}</div></article>`;
+    return `<article class="card feed-card"><div class="feed-top">${avatar({ name: p.author.name })}<div><strong>${E(p.author.name)}</strong><small>${date(p.date)} · Comunidad ASCLA</small></div><span style="margin-left:auto">${p.status !== "publish" ? status(p.status) : ""}</span></div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(p.body.slice(0, 450))}${p.body.length > 450 ? "…" : ""}</p>${UI.attachments(p, true)}${p.tags.length ? `<div class="tag-row">${p.tags.map((t) => `<span class="tag">${E(t.name)}</span>`).join("")}</div>` : ""}<div class="feed-actions">${btn(I("heart") + " " + p.reactions, "like", `data-id="${p.id}" data-active="${!p.liked}" aria-label="${E(T("Me gusta"))}"`)}${btn(I("hub") + " " + p.comments + " " + T(p.comments === 1 ? "comentario" : "comentarios"), "item", `data-id="${p.id}"`)}${btn(I("arrow") + " " + T("Ver conversación"), "item", `data-id="${p.id}"`)}</div></article>`;
   }
   function pager(list) {
     return list.pages > 1
-      ? `<div class="pagination">${btn("Anterior", "page", `data-page="${list.page - 1}" ${list.page <= 1 ? "disabled" : ""}`, "small")}<span>Página ${list.page} de ${list.pages}</span>${btn("Siguiente", "page", `data-page="${list.page + 1}" ${list.page >= list.pages ? "disabled" : ""}`, "small")}</div>`
+      ? `<div class="pagination">${btn("Anterior", "page", `data-page="${list.page - 1}" ${list.page <= 1 ? "disabled" : ""}`, "small")}<span>${E(T("Página"))} ${list.page} ${E(T("de"))} ${list.pages}</span>${btn("Siguiente", "page", `data-page="${list.page + 1}" ${list.page >= list.pages ? "disabled" : ""}`, "small")}</div>`
       : "";
   }
   async function directory() {
@@ -313,7 +422,7 @@
         "Tu red profesional",
         "Conecta con quienes comparten tus retos, intereses y conocimientos.",
       ) +
-      `<section class="card connections-panel" id="connections-panel" aria-label="Mis conexiones"></section><form class="filters" data-form="filters"><input aria-label="Buscar perfiles" name="q" placeholder="Nombre, cargo, empresa o experiencia…" value="${E(S.filter.q || "")}"><input aria-label="País" name="country" placeholder="País" value="${E(S.filter.country || "")}" style="max-width:180px;min-width:120px"><select name="industries" aria-label="Industria" style="max-width:200px"><option value="">Todas las industrias</option>${S.boot.catalogs.industry.map((t) => `<option value="${t.id}" ${String(S.filter.industries) === String(t.id) ? "selected" : ""}>${E(t.name)}</option>`).join("")}</select>${UI.termFilter("interests", "Interés", S.boot.catalogs.interest, S.filter)}${UI.termFilter("areas", "Área de conocimiento", S.boot.catalogs.area, S.filter)}<button class="btn primary">${I("search")} Buscar</button></form><div class="section-top"><span class="muted" style="font-size:12px">${list.total} perfiles en la comunidad</span>${link("perfil", "Editar mis intereses", "ghost")}</div><div class="cards directory">${list.items.map(memberCard).join("")}</div>${!list.items.length ? empty("No encontramos perfiles", "Prueba con otro nombre, país o interés.") : ""}${pager(list)}`;
+      `<section class="card connections-panel" id="connections-panel" aria-label="${E(T("Mis conexiones"))}"></section><form class="filters" data-form="filters"><input aria-label="${E(T("Buscar perfiles"))}" name="q" placeholder="${E(T("Nombre, cargo, empresa o experiencia…"))}" value="${E(S.filter.q || "")}"><input aria-label="${E(T("País"))}" name="country" placeholder="${E(T("País"))}" value="${E(S.filter.country || "")}" style="max-width:180px;min-width:120px"><select name="industries" aria-label="${E(T("Industria"))}" style="max-width:200px"><option value="">${E(T("Todas las industrias"))}</option>${S.boot.catalogs.industry.map((t) => `<option value="${t.id}" ${String(S.filter.industries) === String(t.id) ? "selected" : ""}>${E(t.name)}</option>`).join("")}</select>${UI.termFilter("interests", "Interés", S.boot.catalogs.interest, S.filter)}${UI.termFilter("areas", "Área de conocimiento", S.boot.catalogs.area, S.filter)}<button class="btn primary">${I("search")} ${E(T("Buscar"))}</button></form><div class="section-top"><span class="muted" style="font-size:12px">${list.total} ${E(T("perfiles en la comunidad"))}</span>${link("perfil", "Editar mis intereses", "ghost")}</div><div class="cards directory">${list.items.map(memberCard).join("")}</div>${!list.items.length ? empty("No encontramos perfiles", "Prueba con otro nombre, país o interés.") : ""}${pager(list)}`;
     await refreshConnectionsPanel();
   }
   async function member(id) {
@@ -323,25 +432,13 @@
       match = await api("matching/" + id);
     } catch (error) { if (error.name === "AbortError") throw error; }
     const actions = Number(id) !== S.boot.me.id ? connectionActions(p, !!match) : link("perfil", "Editar perfil", "primary");
+    const affinity = match ? `<span class="match-pill">${I("spark")}${match.score}% ${E(T("de afinidad"))}</span>` : "";
+    const matchInfo = match ? `<div class="alert">${E(match.explanation)}<p class="private-note">${E(match.mode || T("Afinidad determinística"))}</p><p>${E(match.conversation_proposal || "")}</p></div>` : "";
+    const terms = Object.entries(p.terms || {}).filter(([, v]) => v.length).map(([k, v]) => `<h3>${E(T(profileLabels[k] || k))}</h3><div class="tag-row">${v.map((t) => `<span class="tag">${E(t)}</span>`).join("")}</div>`).join("");
+    const sources = ["linkedin", "twitter", "website"].filter((k) => p[k]).map((k) => `<a href="${E(safeURL(p[k]))}" target="_blank" rel="noopener noreferrer">${E({ linkedin: "LinkedIn", twitter: "X / Twitter", website: T("Sitio personal") }[k])} ↗</a>`).join("");
     modal(
       p.name,
-      `<div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.position || "Miembro ASCLA")}</h2><p class="muted">${E(p.company || "")}</p><p class="muted">${E(p.country || "")} ${E(p.city || "")}</p>${match ? ("<span class=\"match-pill\">" + (I("spark")) + "" + (match.score) + "% de afinidad</span>") : ""}</div></div>${match ? ("<div class=\"alert\">" + (E(match.explanation)) + "<p class=\"private-note\">" + (E(match.mode || "Afinidad determinística")) + "</p><p>" + (E(match.conversation_proposal || "")) + "</p></div>") : ""}<p class="detail-body">${E(p.bio || "Este miembro aún no ha añadido su biografía.")}</p>${p.experience ? ("<h3>Experiencia profesional</h3><p class=\"detail-body\">" + (E(p.experience)) + "</p>") : ""}${Object.entries(
-        p.terms || {},
-      )
-        .filter(([, v]) => v.length)
-        .map(
-          ([k, v]) =>
-            `<h3>${E(profileLabels[k] || k)}</h3><div class="tag-row">${v.map((t) => `<span class="tag">${E(t)}</span>`).join("")}</div>`,
-        )
-        .join("")}<div class="sources">${["linkedin", "twitter", "website"]
-        .filter((k) => p[k])
-        .map(
-          (k) =>
-            `<a href="${E(safeURL(p[k]))}" target="_blank" rel="noopener noreferrer">${E({ linkedin: "LinkedIn", twitter: "X / Twitter", website: "Sitio personal" }[k])} ↗</a>`,
-        )
-        .join(
-          "",
-        )}</div><div class="form-actions">${actions}</div>`,
+      `<div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.position || T("Miembro ASCLA"))}</h2><p class="muted">${E(p.company || "")}</p><p class="muted">${E(p.country || "")} ${E(p.city || "")}</p>${affinity}</div></div>${matchInfo}<p class="detail-body">${E(p.bio || T("Este miembro aún no ha añadido su biografía."))}</p>${p.experience ? `<h3>${E(T("Experiencia profesional"))}</h3><p class="detail-body">${E(p.experience)}</p>` : ""}${terms}<div class="sources">${sources}</div><div class="form-actions">${actions}</div>`,
     );
   }
   const profileLabels = {
@@ -392,12 +489,12 @@
     const [icon, hint] = profileTopics[key];
     const choices = terms.map(t => `<label class="topic-choice"><input type="checkbox" name="${key}" value="${t.id}" data-choice-label="${E(t.name)}" ${selected.has(t.id) ? "checked" : ""}><span>${I("check")}${E(t.name)}</span></label>`).join("");
     return `<details class="profile-topic" ${["interests", "areas"].includes(key) ? "open" : ""}>
-      <summary><span class="topic-icon">${I(icon)}</span><span class="topic-caption"><span class="topic-title">${E(profileLabels[key])}</span><span class="topic-selection">${E(names.join(" · ") || "Aún no has elegido opciones")}</span></span><span class="topic-count" aria-label="${names.length} seleccionados">${names.length}</span><span class="topic-chevron">${I("chevron")}</span></summary>
-      <div class="topic-options"><p>${E(hint)}. Puedes elegir varias opciones.</p><div class="topic-choices">${choices || '<span class="muted">No hay opciones disponibles.</span>'}</div></div>
+      <summary><span class="topic-icon">${I(icon)}</span><span class="topic-caption"><span class="topic-title">${E(T(profileLabels[key]))}</span><span class="topic-selection">${E(names.join(" · ") || T("Aún no has elegido opciones"))}</span></span><span class="topic-count" aria-label="${names.length} ${E(T("seleccionados"))}">${names.length}</span><span class="topic-chevron">${I("chevron")}</span></summary>
+      <div class="topic-options"><p>${E(T(hint))}. ${E(T("Puedes elegir varias opciones."))}</p><div class="topic-choices">${choices || `<span class="muted">${E(T("No hay opciones disponibles."))}</span>`}</div></div>
     </details>`;
   }
   function profileKnowledge(p) {
-    return `<section class="profile-preferences" aria-labelledby="profile-knowledge-title"><div class="preference-heading"><span class="preference-emblem">${I("spark")}</span><div><h2 id="profile-knowledge-title">Conocimiento e intereses</h2><p>Haz que tu perfil conecte con las personas y las ideas que te interesan.</p></div></div><div class="profile-topics">${Object.entries(profileTax).map(([key, tax]) => profileTopic(key, tax, p)).join("")}</div></section>`;
+    return `<section class="profile-preferences" aria-labelledby="profile-knowledge-title"><div class="preference-heading"><span class="preference-emblem">${I("spark")}</span><div><h2 id="profile-knowledge-title">${E(T("Conocimiento e intereses"))}</h2><p>${E(T("Haz que tu perfil conecte con las personas y las ideas que te interesan."))}</p></div></div><div class="profile-topics">${Object.entries(profileTax).map(([key, tax]) => profileTopic(key, tax, p)).join("")}</div></section>`;
   }
   function profileParticipation(p) {
     const options = [
@@ -405,17 +502,17 @@
       ["networking", "spark", "Descubrir nuevas conexiones", "Recibe recomendaciones de personas afines a tus intereses."],
       ["microevents", "calendar", "Participar en microeventos", "Recibe propuestas para conversar en grupos de 4 a 6 personas."],
     ];
-    return options.map(([key, icon, title, description]) => `<label class="participation-option"><span class="participation-icon">${I(icon)}</span><span class="participation-copy"><strong>${title}</strong><span>${description}</span></span><span class="preference-switch"><input type="checkbox" role="switch" name="${key}" aria-label="${title}" ${p[key] ? "checked" : ""}><span class="switch-track" aria-hidden="true"></span></span></label>`).join("");
+    return options.map(([key, icon, title, description]) => `<label class="participation-option"><span class="participation-icon">${I(icon)}</span><span class="participation-copy"><strong>${E(T(title))}</strong><span>${E(T(description))}</span></span><span class="preference-switch"><input type="checkbox" role="switch" name="${key}" aria-label="${E(T(title))}" ${p[key] ? "checked" : ""}><span class="switch-track" aria-hidden="true"></span></span></label>`).join("");
   }
   function profilePrivacy(p) {
     const fields = ["company", "position", "city", "country", "bio", "experience", "linkedin", "twitter", "website", "interests", "areas", "industries", "photo_id"];
     const controls = fields.map(key => {
       const label = key === "photo_id" ? "Fotografía" : profileLabels[key];
-      return `<label class="visibility-option"><input type="checkbox" name="hidden" value="${key}" aria-label="Ocultar ${E(T(label))}" ${(p.hidden || []).includes(key) ? "checked" : ""}><span class="visibility-label">${E(T(label))}</span><span class="visibility-state"><span class="is-visible">Visible</span><span class="is-hidden">${I("shield")}Oculto</span></span></label>`;
+      return `<label class="visibility-option"><input type="checkbox" name="hidden" value="${key}" aria-label="${E(T("Ocultar"))} ${E(T(label))}" ${(p.hidden || []).includes(key) ? "checked" : ""}><span class="visibility-label">${E(T(label))}</span><span class="visibility-state"><span class="is-visible">${E(T("Visible"))}</span><span class="is-hidden">${I("shield")}${E(T("Oculto"))}</span></span></label>`;
     }).join("");
     // Preserve privacy choices outside this view instead of silently clearing them on save.
     const preserved = (p.hidden || []).filter(key => !fields.includes(key)).map(key => `<input type="hidden" name="hidden" value="${E(key)}">`).join("");
-    return `<section class="profile-preferences" aria-labelledby="profile-privacy-title"><div class="preference-heading"><span class="preference-emblem privacy-emblem">${I("shield")}</span><div><h2 id="profile-privacy-title">Privacidad y participación</h2><p>Tú eliges cómo participar y qué información compartir con la comunidad.</p></div></div><div class="profile-privacy-layout"><div class="participation-panel"><h3>Tu lugar en la comunidad</h3>${profileParticipation(p)}<div class="profile-privacy-note">${I("shield")}<p>Tus objetivos y preferencias de aprendizaje se utilizan internamente para ayudarte a conectar.</p></div></div><div class="visibility-panel"><h3>Qué ven otros asociados</h3><p>Pulsa un dato para cambiar entre visible y oculto. La moderación puede consultarlo.</p><div class="visibility-options">${controls}</div>${preserved}<span class="profile-save-hint">Los cambios se aplican al guardar tu perfil.</span></div></div></section>`;
+    return `<section class="profile-preferences" aria-labelledby="profile-privacy-title"><div class="preference-heading"><span class="preference-emblem privacy-emblem">${I("shield")}</span><div><h2 id="profile-privacy-title">${E(T("Privacidad y participación"))}</h2><p>${E(T("Tú eliges cómo participar y qué información compartir con la comunidad."))}</p></div></div><div class="profile-privacy-layout"><div class="participation-panel"><h3>${E(T("Tu lugar en la comunidad"))}</h3>${profileParticipation(p)}<div class="profile-privacy-note">${I("shield")}<p>${E(T("Tus objetivos y preferencias de aprendizaje se utilizan internamente para ayudarte a conectar."))}</p></div></div><div class="visibility-panel"><h3>${E(T("Qué ven otros asociados"))}</h3><p>${E(T("Pulsa un dato para cambiar entre visible y oculto. La moderación puede consultarlo."))}</p><div class="visibility-options">${controls}</div>${preserved}<span class="profile-save-hint">${E(T("Los cambios se aplican al guardar tu perfil."))}</span></div></div></section>`;
   }
   function updateProfilePreference(input) {
     const topic = input.closest(".profile-topic");
@@ -423,8 +520,8 @@
     const selected = [...topic.querySelectorAll("input:checked")];
     const count = topic.querySelector(".topic-count");
     count.textContent = selected.length;
-    count.setAttribute("aria-label", selected.length + " seleccionados");
-    topic.querySelector(".topic-selection").textContent = selected.map(choice => choice.dataset.choiceLabel).join(" · ") || "Aún no has elegido opciones";
+    count.setAttribute("aria-label", selected.length + " " + T("seleccionados"));
+    topic.querySelector(".topic-selection").textContent = selected.map(choice => choice.dataset.choiceLabel).join(" · ") || T("Aún no has elegido opciones");
   }
   async function profile() {
     const p = await api("profiles/" + S.boot.me.id);
@@ -433,7 +530,8 @@
         "Mi perfil",
         "Tu experiencia es el punto de partida de nuevas conexiones.",
       ) +
-      `<form class="card" data-form="profile"><div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small" style="margin-top:10px">${I("edit")} Cambiar fotografía<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">JPG, PNG o WebP. Máximo 3 MB.</div></div></div><div class="form-section">Información profesional</div><div class="form-grid">${["first_name", "last_name", "position", "company", "country", "city", "member_type", "linkedin", "twitter", "website"].map((k) => field(k, profileLabels[k], p[k] || "", k === "linkedin" || k === "twitter" || k === "website" ? "url" : "text", 'maxlength="200"')).join("")}<div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>${profileKnowledge(p)}${profilePrivacy(p)}<div class="form-actions"><button class="btn primary">${I("check")} Guardar perfil</button></div></form><div class="card section-gap"><h3>Mis archivos</h3><p class="private-note">Consulta tus archivos y elimina los que ya no necesitas. Los archivos eliminados también se retiran de las publicaciones y de tu fotografía de perfil.</p>${btn("Administrar archivos", "files", "", "small")}<h3 class="section-gap">Mi calendario</h3><p class="private-note">${S.boot.google_connected ? "Tu calendario Google está conectado." : "Integración Google Calendar no configurada para tu cuenta. Los enlaces e ICS siempre están disponibles."}</p><div class="admin-actions">${btn("Conectar Google Calendar", "google-connect", 'data-service="calendar"')}${S.boot.google_connected ? btn("Desconectar", "google-disconnect", 'data-service="calendar"') : ""}</div></div>`;
+      `<form class="card" data-form="profile" data-guard-unsaved><div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small" style="margin-top:10px">${I("edit")} ${E(T("Cambiar fotografía"))}<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">${E(T("JPG, PNG o WebP. Máximo 3 MB."))}</div></div></div><div class="form-section">${E(T("Información profesional"))}</div><div class="form-grid">${["first_name", "last_name", "position", "company", "country", "city", "member_type", "linkedin", "twitter", "website"].map((k) => field(k, profileLabels[k], p[k] || "", k === "linkedin" || k === "twitter" || k === "website" ? "url" : "text", 'maxlength="200"')).join("")}<div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>${profileKnowledge(p)}${profilePrivacy(p)}<div class="form-actions"><button class="btn primary">${I("check")} ${E(T("Guardar perfil"))}</button></div></form><div class="card section-gap account-security"><div class="form-section">${E(T("Seguridad de la cuenta"))}</div><h3>${E(T("Cambiar contraseña"))}</h3><p class="private-note">${E(T("Para cambiarla desde la intranet, confirma primero tu contraseña actual."))}</p><form data-form="password-change"><div class="password-current">${field("current_password", "Contraseña actual", "", "password", 'required autocomplete="current-password"')}</div><div class="form-grid password-new-grid">${field("new_password", "Nueva contraseña", "", "password", 'required minlength="12" autocomplete="new-password"')}${field("confirm_password", "Confirmar nueva contraseña", "", "password", 'required minlength="12" autocomplete="new-password"')}</div><div class="form-actions"><button class="btn primary">${E(T("Cambiar contraseña"))}</button></div></form><div class="password-recovery"><h3>${E(T("¿No recuerdas tu contraseña actual?"))}</h3><p class="private-note">${E(T("Puedes recibir un enlace seguro de recuperación en"))} <strong>${E(p.email || S.boot.me.email || T("tu correo registrado"))}</strong>.</p>${btn(I("mail") + " Enviar enlace de recuperación", "password-reset-email", "", "small")}</div></div><div class="card section-gap"><h3>${E(T("Mis archivos"))}</h3><p class="private-note">${E(T("Consulta tus archivos y elimina los que ya no necesitas. Los archivos eliminados también se retiran de las publicaciones y de tu fotografía de perfil."))}</p>${btn("Administrar archivos", "files", "", "small")}<h3 class="section-gap">${E(T("Mi calendario"))}</h3><p class="private-note">${E(T(S.boot.google_connected ? "Tu calendario Google está conectado." : "Integración Google Calendar no configurada para tu cuenta. Puedes conectarlo para guardar próximos eventos."))}</p><div class="admin-actions">${btn("Conectar Google Calendar", "google-connect", 'data-service="calendar"')}${S.boot.google_connected ? btn("Desconectar", "google-disconnect", 'data-service="calendar"') : ""}</div></div>`;
+    registerUnsavedForm(content().querySelector('[data-form="profile"]'));
   }
   const typeByPage = {
     hub: "hub",
@@ -522,16 +620,58 @@
             )
           : "",
       ) +
-      `<form class="filters" data-form="filters"><input name="q" aria-label="Buscar contenido" value="${E(S.filter.q || "")}" placeholder="${type === "resource" ? "Buscar por tema, autor o contenido…" : "Buscar en esta sección…"}">${type === "resource" ? `<select name="resource_type" aria-label="Tipo de recurso" style="max-width:180px"><option value="">Todos los tipos</option>${["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"].map((t) => `<option ${S.filter.resource_type === t ? "selected" : ""}>${t}</option>`).join("")}</select><input type="date" name="after" value="${E(S.filter.after || "")}" aria-label="Desde fecha" style="max-width:160px;min-width:100px">` : ""}${UI.filters(type, S.filter, S.boot.catalogs, authors, forums)}<button class="btn">${I("search")} Buscar</button></form><div class="tabs">${btn(type === "event" ? "Próximos eventos" : "Comunidad", "filter-all", "", "tab " + (!S.filter.mine && !S.filter.past ? "active" : ""))}${type === "event" ? btn("Eventos anteriores", "filter-past", "", "tab " + (S.filter.past ? "active" : "")) : ""}${canWrite ? btn("Mis publicaciones", "filter-mine", "", "tab " + (S.filter.mine ? "active" : "")) : ""}${type === "topic" && S.boot.moderator ? btn(I("plus") + " Crear foro", "editor", 'data-type="forum"', "tab") : ""}</div>${type === "topic" && forums.length ? `<details class="card forum-directory"><summary>Explorar foros (${forums.length})</summary><div class="form-actions">${forums.map(f => btn(E(f.name), "item", `data-id="${f.id}"`, "small")).join("")}</div></details>` : ""}${type === "resource" ? `<div class="cards">${items.map(resourceCard).join("")}</div>` : type === "event" ? `<div class="cards two">${items.map(eventCard).join("")}</div>` : type === "gallery" ? `<div class="cards">${items.map(galleryCard).join("")}</div>` : type === "ally" ? `<div class="cards">${items.map(allyCard).join("")}</div>` : items.map(feedCard).join("")}${!items.length ? empty("Aún no hay contenido aquí", S.filter.q ? "Prueba una búsqueda diferente." : "Comparte un aporte o vuelve pronto para ver novedades.") : ""}${pager(list)}`;
+      `<form class="filters" data-form="filters"><input name="q" aria-label="${E(T("Buscar contenido"))}" value="${E(S.filter.q || "")}" placeholder="${E(T(type === "resource" ? "Buscar por tema, autor o contenido…" : "Buscar en esta sección…"))}">${type === "resource" ? `<select name="resource_type" aria-label="${E(T("Tipo de recurso"))}" style="max-width:180px"><option value="">${E(T("Todos los tipos"))}</option>${["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"].map((t) => `<option value="${E(t)}" ${S.filter.resource_type === t ? "selected" : ""}>${E(T(t))}</option>`).join("")}</select><input type="date" name="after" value="${E(S.filter.after || "")}" aria-label="${E(T("Desde fecha"))}" style="max-width:160px;min-width:100px">` : ""}${UI.filters(type, S.filter, S.boot.catalogs, authors, forums)}<button class="btn">${I("search")} ${E(T("Buscar"))}</button></form><div class="tabs">${btn(type === "event" ? "Próximos eventos" : "Comunidad", "filter-all", "", "tab " + (!S.filter.mine && !S.filter.past ? "active" : ""))}${type === "event" ? btn("Eventos anteriores", "filter-past", "", "tab " + (S.filter.past ? "active" : "")) : ""}${canWrite ? btn("Mis publicaciones", "filter-mine", "", "tab " + (S.filter.mine ? "active" : "")) : ""}${type === "topic" && S.boot.moderator ? btn(I("plus") + " Crear foro", "editor", 'data-type="forum"', "tab") : ""}</div>${type === "topic" && forums.length ? `<details class="card forum-directory"><summary>${E(T("Explorar foros"))} (${forums.length})</summary><div class="form-actions">${forums.map(f => btn(E(f.name), "item", `data-id="${f.id}"`, "small")).join("")}</div></details>` : ""}${type === "resource" ? `<div class="cards">${items.map(resourceCard).join("")}</div>` : type === "event" ? `<div class="cards two">${items.map(eventCard).join("")}</div>` : type === "gallery" ? `<div class="cards">${items.map(galleryCard).join("")}</div>` : type === "ally" ? `<div class="cards">${items.map(allyCard).join("")}</div>` : items.map(feedCard).join("")}${!items.length ? empty("Aún no hay contenido aquí", S.filter.q ? "Prueba una búsqueda diferente." : "Comparte un aporte o vuelve pronto para ver novedades.") : ""}${pager(list)}`;
   }
   function eventCard(p) {
-    return `<article class="card"><div class="section-top"><span class="tag">${I("calendar")} ${E(p.meta.modality || "Virtual")}</span>${p.status !== "publish" ? status(p.status) : ""}</div><h3>${E(p.title)}</h3><p class="detail-body" style="font-size:12px">${E(p.body.slice(0, 160))}</p><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start)}</span><span>${I("clock")} ${time(p.meta.start)}</span></div><div class="form-actions" style="justify-content:space-between">${p.meta.chatham ? '<span class="tag">Chatham House</span>' : "<span></span>"}${btn("Ver encuentro " + I("arrow"), "item", `data-id="${p.id}"`, "small primary")}</div></article>`;
+    return `<article class="card"><div class="section-top"><span class="tag">${I("calendar")} ${E(T(p.meta.modality || "Virtual"))}</span>${p.status !== "publish" ? status(p.status) : ""}</div><h3>${E(p.title)}</h3><p class="detail-body" style="font-size:12px">${E(p.body.slice(0, 160))}</p><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start)}</span><span>${I("clock")} ${time(p.meta.start)}</span></div><div class="form-actions" style="justify-content:space-between">${p.meta.chatham ? '<span class="tag">Chatham House</span>' : "<span></span>"}${btn("Ver encuentro " + I("arrow"), "item", `data-id="${p.id}"`, "small primary")}</div></article>`;
   }
   function galleryCard(p) {
-    return `<article class="card resource-card">${p.meta.media_ids?.length ? `<img src="${E(C.mediaUrl + p.meta.media_ids[0])}" alt="${E(p.title)}" style="height:190px;object-fit:cover;width:100%">` : `<div class="resource-cover v1"><div class="cover-label">ASCLA · ENCUENTROS</div><strong>${E(p.title)}</strong><span class="cover-icon">${I("gallery")}</span></div>`}<div class="resource-content"><h3>${E(p.title)}</h3><p>${E(p.body.slice(0, 120))}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Ver galería", "item", `data-id="${p.id}"`, "ghost")}</div></div></article>`;
+    return `<article class="card resource-card">${p.meta.media_ids?.length ? `<img src="${E(C.mediaUrl + p.meta.media_ids[0])}" alt="${E(p.title)}" style="height:190px;object-fit:cover;width:100%">` : `<div class="resource-cover v1"><div class="cover-label">${E(T("ASCLA · ENCUENTROS"))}</div><strong>${E(p.title)}</strong><span class="cover-icon">${I("gallery")}</span></div>`}<div class="resource-content"><h3>${E(p.title)}</h3><p>${E(p.body.slice(0, 120))}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Ver galería", "item", `data-id="${p.id}"`, "ghost")}</div></div></article>`;
   }
   function allyCard(p) {
-    return `<article class="card">${UI.images(p).length ? `<img class="ally-logo" src="${E(UI.images(p)[0].url)}" alt="Logo de ${E(p.title)}" loading="lazy">` : `<div class="stat-icon" style="margin-bottom:17px">${I("ally")}</div>`}<span class="tag">${E(p.meta.alliance_type || "Alianza")}</span><h3 style="margin-top:12px">${E(p.title)}</h3><p class="detail-body" style="font-size:12px">${E(p.body)}</p>${btn("Conoce más " + I("arrow"), "item", `data-id="${p.id}"`, "ghost")}</article>`;
+    return `<article class="card">${UI.images(p).length ? `<img class="ally-logo" src="${E(UI.images(p)[0].url)}" alt="${E(T("Logo de"))} ${E(p.title)}" loading="lazy">` : `<div class="stat-icon" style="margin-bottom:17px">${I("ally")}</div>`}<span class="tag">${E(T(p.meta.alliance_type || "Alianza"))}</span><h3 style="margin-top:12px">${E(p.title)}</h3><p class="detail-body" style="font-size:12px">${E(p.body)}</p>${btn("Conoce más " + I("arrow"), "item", `data-id="${p.id}"`, "ghost")}</article>`;
+  }
+  function overflowDelete(action, id, extra = "", label = "Eliminar") {
+    return `<details class="overflow-menu"><summary aria-label="${E(T("Más opciones"))}" title="${E(T("Más opciones"))}">${I("more")}</summary><div class="overflow-popover"><button type="button" class="overflow-item danger-text" data-action="${action}" data-id="${Number(id)}" ${extra}>${E(T(label))}</button></div></details>`;
+  }
+  function commentOverflow(c, postId) {
+    const items = [];
+    if (c.can_report) items.push(`<button type="button" class="overflow-item" data-action="report-comment" data-id="${Number(c.id)}" data-post="${Number(postId)}">${E(T("Reportar comentario"))}</button>`);
+    if (c.can_delete) items.push(`<button type="button" class="overflow-item danger-text" data-action="delete-comment" data-id="${Number(c.id)}" data-post="${Number(postId)}">${E(T("Eliminar comentario"))}</button>`);
+    if (!items.length) return "";
+    return `<details class="overflow-menu"><summary aria-label="${E(T("Más opciones"))}" title="${E(T("Más opciones"))}">${I("more")}</summary><div class="overflow-popover">${items.join("")}</div></details>`;
+  }
+  function commentsHTML(comments, postId) {
+    if (!comments.length) return `<p class="private-note">${E(T('Sé la primera persona en compartir una idea.'))}</p>`;
+    const byId = new Map(comments.map(c => [Number(c.id), c]));
+    const children = new Map();
+    for (const c of comments) {
+      const parent = Number(c.parent || 0);
+      if (!children.has(parent)) children.set(parent, []);
+      children.get(parent).push(c);
+    }
+    const seen = new Set();
+    const renderOne = (c, depth = 0) => {
+      if (seen.has(Number(c.id))) return '';
+      seen.add(Number(c.id));
+      const menu = commentOverflow(c, postId);
+      const canReply = c.status === 'publish';
+      const actions = `<div class="comment-actions">${btn(I('heart') + ` <span>${Number(c.likes || 0)}</span>`, 'comment-like', `data-id="${Number(c.id)}" data-post="${Number(postId)}" data-active="${!c.liked}" aria-pressed="${!!c.liked}" aria-label="${E(T(c.liked ? 'Quitar Me gusta' : 'Me gusta'))}"`, `ghost small comment-like ${c.liked ? 'active' : ''}`)}${canReply ? btn(I('reply') + ' ' + T('Responder'), 'comment-reply', `data-id="${Number(c.id)}" data-post="${Number(postId)}" data-author="${E(c.author)}"`, 'ghost small') : ''}${c.status === 'pending' ? status(c.status) : ''}</div>`;
+      const replies = (children.get(Number(c.id)) || []).map(child => renderOne(child, depth + 1)).join('');
+      return `<article class="comment ${depth ? 'comment-reply' : ''}" data-comment-id="${Number(c.id)}" style="--comment-depth:${Math.min(depth, 4)}"><div class="comment-head"><div><strong>${E(c.author)}</strong> <small class="muted">${date(c.date)}</small></div>${menu}</div><p>${E(c.body)}</p>${actions}<div class="comment-reply-slot"></div>${replies}</article>`;
+    };
+    let html = (children.get(0) || []).map(c => renderOne(c, 0)).join('');
+    for (const c of comments) if (!seen.has(Number(c.id))) html += renderOne(c, 0);
+    return html;
+  }
+  function openCommentReply(button) {
+    const comment = button.closest('.comment');
+    if (!comment) return;
+    document.querySelectorAll('.comment-reply-form').forEach(form => form.remove());
+    const slot = comment.querySelector(':scope > .comment-reply-slot');
+    if (!slot) return;
+    slot.innerHTML = `<form class="comment-reply-form" data-form="comment-reply" data-id="${Number(button.dataset.post)}" data-parent="${Number(button.dataset.id)}"><label>${E(T("Responder a"))} ${E(button.dataset.author || T('este comentario'))}</label><textarea name="body" required maxlength="5000" placeholder="${E(T("Escribe una respuesta…"))}"></textarea><div class="form-actions">${btn('Cancelar','comment-reply-cancel','','ghost small')}<button class="btn primary small">${E(T("Responder"))}</button></div></form>`;
+    slot.querySelector('textarea')?.focus();
   }
   async function item(id) {
     const p = await api("items/" + id);
@@ -540,32 +680,40 @@
     if (p.type === "event") {
       const d = await api("events/" + id);
       S.event = d;
-      extra = `<div class="card" style="background:var(--bg);margin:20px 0"><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span><span>${I("clock")} ${time(p.meta.start)} – ${time(p.meta.end)}</span><span>${I("pin")} ${E(p.meta.location || "Por confirmar")}</span></div><p class="private-note">${d.attending} inscritos${p.meta.capacity ? " · " + p.meta.capacity + " cupos" : " · Sin límite de cupos"} · ${status(d.registered)}</p>${p.meta.agenda ? `<p class="detail-body">${E(p.meta.agenda).replace(/\\n/g, "<br>")}</p>` : ""}<div class="form-actions">${d.registered === "accepted" ? btn("Cancelar inscripción", "register", `data-id="${id}" data-status="cancelled"`) : btn("Registrarme", "register", `data-id="${id}" data-status="accepted"`, "primary")}${d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : ""}<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">Añadir a Google Calendar ↗</a>${btn(I("download") + " ICS", "ics", `data-id="${id}"`, "small")}${S.boot.google_connected ? btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small") + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small") : ""}</div>${d.participants ? `<details><summary class="private-note">Participantes (moderación)</summary>${d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("")}</details>` : ""}</div>`;
+      const registrationActions = d.is_past
+        ? `<span class="tag">${E(T("Evento finalizado"))}</span>`
+        : `${d.registered === "accepted" ? btn("Cancelar inscripción", "register", `data-id="${id}" data-status="cancelled"`) : btn("Registrarme", "register", `data-id="${id}" data-status="accepted"`, "primary")}${d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : ""}`;
+      extra = `<div class="card" style="background:var(--bg);margin:20px 0"><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span><span>${I("clock")} ${time(p.meta.start)} – ${time(p.meta.end)}</span><span>${I("pin")} ${E(p.meta.location || T("Por confirmar"))}</span></div><p class="private-note">${d.attending} ${E(T("inscritos"))}${p.meta.capacity ? " · " + p.meta.capacity + " " + T("cupos") : " · " + T("Sin límite de cupos")}${d.is_past ? " · " + T("Finalizado") : " · " + status(d.registered)}</p>${p.meta.agenda ? `<p class="detail-body">${E(p.meta.agenda).replace(/\n/g, "<br>")}</p>` : ""}<div class="form-actions">${registrationActions}${!d.is_past && d.google_url ? `<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">${E(T("Añadir a Google Calendar ↗"))}</a>` : ""}${!d.is_past && S.boot.google_connected ? btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small") + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small") : ""}</div>${d.participants ? `<details><summary class="private-note">${E(T("Participantes (moderación)"))}</summary>${d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("")}</details>` : ""}</div>`;
     }
     const canEdit = ["gallery", "resource", "event"].includes(p.type) ? (S.boot.admin || S.boot.executive) : S.boot.moderator || p.author.id === S.boot.me.id;
-    const reviewedLabel = p.meta.reviewed ? "Revisado" : "Requiere revisión de fuentes, anonimización y derechos.";
+    const reviewedLabel = T(p.meta.reviewed ? "Revisado" : "Requiere revisión de fuentes, anonimización y derechos.");
     const clipQuery = p.meta.clip ? "?start=" + Number(p.meta.clip.start) + "&end=" + Number(p.meta.clip.end) : "";
-    const videoDuration = p.meta.duration_seconds ? E(UI.duration(p.meta.duration_seconds)) : "Duración por confirmar";
+    const videoDuration = p.meta.duration_seconds ? E(UI.duration(p.meta.duration_seconds)) : E(T("Duración por confirmar"));
+    const eventIsPast = p.type === "event" && !!S.event?.is_past;
     const followingLabel = p.following ? "Dejar de seguir" : "Seguir conversación";
-    const videoModeTag = p.meta.video_metadata_mode ? ("<span class=\"tag\">" + (E(p.meta.video_metadata_mode)) + "</span>") : "";
+    const videoModeTag = p.meta.video_metadata_mode ? `<span class="tag">${E(p.meta.video_metadata_mode)}</span>` : "";
+    const demoTag = p.meta.demo ? `<span class="demo-badge">${E(T("DATOS DEMO"))}</span>` : "";
+    const chatham = p.meta.chatham ? `<div class="alert chatham" style="margin-top:18px">${I("shield")} ${E(T("Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones."))}</div>` : "";
+    const generated = p.meta.generated ? `<div class="alert">${E(T("Contenido generado"))} · ${E(p.meta.ai_mode || p.meta.social_mode || "IA")} · ${E(reviewedLabel)}</div>` : "";
+    const video = p.meta.video_id ? `<div class="video-wrap"><iframe loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/${E(p.meta.video_id)}${clipQuery}" title="${E(p.title)}" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe></div><div class="video-metadata"><span>${videoDuration}</span>${videoModeTag}</div>` : "";
+    const deleteMedia = (p.media || []).filter(m => m.can_delete).map(m => btn(`${T("Eliminar archivo")}: ${E(m.name)}`, "delete-media", `data-id="${m.id}" data-post="${id}" data-name="${E(m.name)}"`, "ghost danger small")).join("");
+    const external = p.meta.url ? `<a class="btn" href="${E(safeURL(p.meta.url))}" target="_blank" rel="noopener noreferrer">${E(T("Abrir enlace ↗"))}</a>` : "";
+    const benefits = p.meta.benefits ? `<h3>${E(T("Beneficios"))}</h3><p class="detail-body">${E(p.meta.benefits)}</p>` : "";
+    const initiatives = p.meta.initiatives ? `<h3>${E(T("Iniciativas"))}</h3><p class="detail-body">${E(p.meta.initiatives)}</p>` : "";
+    const clip = p.meta.clip ? `<div class="alert">${E(T("Cápsula sugerida"))}: ${p.meta.clip.start}s – ${p.meta.clip.end}s · ${E(T("Referencia temporal al video de origen. No existe un archivo recortado."))}</div>` : "";
+    const infographic = p.meta.infographic ? btn(I("download") + " " + T("Descargar infografía"), "infographic", `data-id="${id}"`) : "";
+    const actions = `<div class="form-actions">${p.can_delete ? btn("Eliminar", "delete-content", `data-id="${id}"`, "danger") : ""}${canEdit ? btn(I("edit") + " Editar", "editor", `data-type="${p.type}" data-id="${id}"`) : ""}${S.boot.moderator && p.type === "event" && p.status === "publish" && !p.meta.micro && !eventIsPast ? btn("Invitar asociados", "event-invite", `data-id="${id}"`) : ""}${(S.boot.admin || S.boot.executive) && p.type === "resource" && p.meta.video_id ? btn("Actualizar datos de YouTube", "video-metadata", `data-id="${id}"`) : ""}${(S.boot.admin || S.boot.executive) && p.type === "resource" ? btn(I("spark") + " Generar resumen y nota", "generate", `data-id="${id}"`) : ""}${p.type !== "contact" && (["gallery", "resource", "event"].includes(p.type) ? (S.boot.admin || S.boot.executive) : S.boot.moderator) ? btn(I("shield") + " Moderar", "moderate", `data-id="${id}"`) : ""}${p.status === "publish" ? btn(I("heart") + " " + p.reactions, "like", `data-id="${id}" data-active="${!p.liked}"`) + (!eventIsPast ? btn(followingLabel, "follow", `data-id="${id}" data-active="${!p.following}"`) : "") + (Number(p.author.id) !== Number(S.boot.me.id) ? btn("Reportar", "report", `data-id="${id}"`, "ghost") : "") : ""}</div>`;
+    const commentsSection = p.status === "publish" ? `<section class="comments"><h3>${E(T("Conversación"))}</h3><div id="comments-list">${E(T("Cargando comentarios…"))}</div><form data-form="comment" data-id="${id}" style="margin-top:18px">${field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')}<button class="btn primary small">${E(T("Publicar comentario"))}</button></form></section>` : "";
 
     modal(
       p.title,
-      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${p.meta.demo ? '<span class="demo-badge">DATOS DEMO</span>' : ""}</div>${p.meta.chatham ? '<div class="alert chatham" style="margin-top:18px">' + I("shield") + " Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones.</div>" : ""}${p.meta.generated ? ("<div class=\"alert\">Contenido generado · " + (E(p.meta.ai_mode || p.meta.social_mode || "IA")) + " · " + (reviewedLabel) + "</div>") : ""}<p class="detail-body">${E(p.body)}</p>${p.meta.video_id ? ("<div class=\"video-wrap\"><iframe loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" src=\"https://www.youtube-nocookie.com/embed/" + (E(p.meta.video_id)) + "" + (clipQuery) + "\" title=\"" + (E(p.title)) + "\" allow=\"accelerometer; encrypted-media; picture-in-picture\" allowfullscreen></iframe></div>") : ""}${p.meta.video_id ? ("<div class=\"video-metadata\"><span>" + (videoDuration) + "</span>" + (videoModeTag) + "</div>") : ""}${extra}${UI.attachments(p)}${(p.media || []).filter(m => m.can_delete).map(m => btn("Eliminar archivo: " + E(m.name), "delete-media", `data-id="${m.id}" data-post="${id}" data-name="${E(m.name)}"`, "ghost danger small")).join("")}${UI.generated(p)}${UI.agenda(p)}${p.meta.demo_source_note ? ("<p class=\"alert\">" + (E(p.meta.demo_source_note)) + "</p>") : ""}${p.meta.url ? ("<a class=\"btn\" href=\"" + (E(safeURL(p.meta.url))) + "\" target=\"_blank\" rel=\"noopener noreferrer\">Abrir enlace ↗</a>") : ""}${p.meta.benefits ? ("<h3>Beneficios</h3><p class=\"detail-body\">" + (E(p.meta.benefits)) + "</p>") : ""}${p.meta.initiatives ? ("<h3>Iniciativas</h3><p class=\"detail-body\">" + (E(p.meta.initiatives)) + "</p>") : ""}${p.meta.clip ? ("<div class=\"alert\">Cápsula sugerida: " + (p.meta.clip.start) + "s – " + (p.meta.clip.end) + "s · Referencia temporal al video de origen. No existe un archivo recortado.</div>") : ""}${p.meta.infographic ? btn(I("download") + " Descargar infografía", "infographic", ("data-id=\"" + (id) + "\"")) : ""}${p.meta.copyright ? ("<p class=\"private-note\">" + (E(p.meta.copyright)) + "</p>") : ""}<div class="form-actions">${p.can_delete ? btn("Eliminar", "delete-content", `data-id="${id}"`, "danger") : ""}${canEdit ? btn(I("edit") + " Editar", "editor", ("data-type=\"" + (p.type) + "\" data-id=\"" + (id) + "\"")) : ""}${S.boot.moderator && p.type === "event" && p.status === "publish" && !p.meta.micro ? btn("Invitar asociados", "event-invite", ("data-id=\"" + (id) + "\"")) : ""}${(S.boot.admin || S.boot.executive) && p.type === "resource" && p.meta.video_id ? btn("Actualizar datos de YouTube", "video-metadata", ("data-id=\"" + (id) + "\"")) : ""}${(S.boot.admin || S.boot.executive) && p.type === "resource" ? btn(I("spark") + " Generar resumen y nota", "generate", ("data-id=\"" + (id) + "\"")) : ""}${p.type !== "contact" && (["gallery", "resource", "event"].includes(p.type) ? (S.boot.admin || S.boot.executive) : S.boot.moderator) ? btn(I("shield") + " Moderar", "moderate", ("data-id=\"" + (id) + "\"")) : ""}${p.status === "publish" ? ("" + (btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.liked) + "\""))) + "" + (btn(followingLabel, "follow", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.following) + "\""))) + "" + (btn("Reportar", "report", ("data-id=\"" + (id) + "\""), "ghost")) + "") : ""}</div>${p.status === "publish" ? ("<section class=\"comments\"><h3>Conversación</h3><div id=\"comments-list\">Cargando comentarios…</div><form data-form=\"comment\" data-id=\"" + (id) + "\" style=\"margin-top:18px\">" + (field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')) + "<button class=\"btn primary small\">Publicar comentario</button></form></section>") : ""}`,
+      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${demoTag}</div>${chatham}${generated}<p class="detail-body">${E(p.body)}</p>${video}${extra}${UI.attachments(p)}${deleteMedia}${UI.generated(p)}${UI.agenda(p)}${p.meta.demo_source_note ? `<p class="alert">${E(p.meta.demo_source_note)}</p>` : ""}${external}${benefits}${initiatives}${clip}${infographic}${p.meta.copyright ? `<p class="private-note">${E(p.meta.copyright)}</p>` : ""}${actions}${commentsSection}`,
       true,
     );
     if (p.status === "publish") {
       const comments = await api("items/" + id + "/comments");
       const target = document.getElementById("comments-list");
-      if (target)
-        target.innerHTML =
-          comments
-            .map(
-              (c) =>
-                `<article class="comment"><strong>${E(c.author)}</strong> <small class="muted">${date(c.date)}</small><p>${E(c.body)}</p>${c.status === "pending" ? status(c.status) : ""}${c.can_delete ? btn("Eliminar comentario", "delete-comment", `data-id="${c.id}" data-post="${id}"`, "ghost danger small") : ""}</article>`,
-            )
-            .join("") ||
-          '<p class="private-note">Sé la primera persona en compartir una idea.</p>';
+      if (target) target.innerHTML = commentsHTML(comments, id);
     }
   }
   async function editor(type, id = 0) {
@@ -648,9 +796,9 @@
     S.files = {page, q};
     modal(S.boot.admin ? "Archivos de la comunidad" : "Mis archivos", `<form data-form="file-search" class="filters"><input name="q" aria-label="Buscar archivos" placeholder="Buscar por nombre…" value="${E(q)}"><button class="btn">Buscar</button></form><p class="private-note">${list.total} archivos · La eliminación es permanente y retira sus referencias.</p><div class="file-library">${list.items.map(m => `<article class="file-row" data-file="${m.id}"><div>${I(m.mime.startsWith('image/') ? 'gallery' : 'book')}<strong>${E(m.name)}</strong><small>${E(m.author)} · ${Math.ceil(m.size / 1024)} KB · ${date(m.date)}</small></div><div class="form-actions"><a class="btn small" href="${E(m.url)}" target="_blank" rel="noopener">Abrir archivo</a>${btn("Eliminar archivo", "delete-media", `data-id="${m.id}" data-name="${E(m.name)}" data-library="true"`, "danger small")}</div></article>`).join("") || empty("No hay archivos")}</div><div class="pagination">${btn("Anterior", "files", `data-page="${page-1}" ${page<=1?'disabled':''}`)}<span>${page} / ${list.pages}</span>${btn("Siguiente", "files", `data-page="${page+1}" ${page>=list.pages?'disabled':''}`)}</div>`, true);
   }
-  function confirmDeletion(kind, id, {post = 0, title = "", library = false, forum = false} = {}) {
-    const description = kind === 'media' ? 'El archivo se eliminará permanentemente y se retirará de las publicaciones y de la foto de perfil que lo utilicen.' : kind === 'comment' ? 'El comentario dejará de mostrarse en la conversación.' : 'El contenido dejará de estar disponible en la comunidad.';
-    modal(T('Confirmar eliminación'), `<p class="detail-body">${E(title)}</p><p>${E(T(description))}</p>${forum?'<p>Los temas de este foro se conservarán en la lista general.</p>':''}<div class="form-actions">${btn('Cancelar','delete-cancel',`data-kind="${kind}" data-id="${id}" data-post="${post}" data-library="${library}"`)}${btn('Eliminar','delete-confirm',`data-kind="${kind}" data-id="${id}" data-post="${post}" data-library="${library}"`,'danger primary')}</div>`);
+  function confirmDeletion(kind, id, {post = 0, title = "", library = false, forum = false, conversation = 0} = {}) {
+    const description = kind === 'media' ? 'El archivo se eliminará permanentemente y se retirará de las publicaciones y de la foto de perfil que lo utilicen.' : kind === 'comment' ? 'El comentario dejará de mostrarse en la conversación.' : kind === 'message' ? 'El mensaje se eliminará de esta conversación para ambos participantes.' : 'El contenido dejará de estar disponible en la comunidad.';
+    modal(T('Confirmar eliminación'), `<p class="detail-body">${E(title)}</p><p>${E(T(description))}</p>${forum?'<p>Los temas de este foro se conservarán en la lista general.</p>':''}<div class="form-actions">${btn('Cancelar','delete-cancel',`data-kind="${kind}" data-id="${id}" data-post="${post}" data-library="${library}" data-conversation="${conversation}"`)}${btn('Eliminar','delete-confirm',`data-kind="${kind}" data-id="${id}" data-post="${post}" data-library="${library}" data-conversation="${conversation}"`,'danger primary')}</div>`);
   }
   async function inviteMembers(id, page = 1, query = "") {
     if (!S.invite || S.invite.id !== id) S.invite = { id, selected: new Set() };
@@ -682,7 +830,9 @@
     if (label) { label.textContent = text; label.classList.toggle("is-error", failed); }
   }
   function messageBubble(m) {
-    return `<div data-message-id="${Number(m.id)}" class="bubble ${Number(m.sender_id) === S.boot.me.id ? "me" : ""}">${E(m.body)}<small>${date(m.created_at, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small></div>`;
+    const mine = Number(m.sender_id) === Number(S.boot.me.id);
+    const menu = m.can_delete ? overflowDelete('delete-message', m.id, `data-conversation="${Number(m.conversation_id || S.conversation)}"`, 'Eliminar mensaje') : '';
+    return `<div data-message-id="${Number(m.id)}" class="bubble ${mine ? "me" : ""}"><div class="bubble-top"><span class="bubble-body">${E(m.body)}</span>${menu}</div><small>${date(m.created_at, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small></div>`;
   }
   function chatSidebar() {
     const aside = document.querySelector(".chat-sidebar");
@@ -799,12 +949,52 @@
       `<p class="alert">${E(r.mode)} · Puedes editarla antes de enviar. Aún no se ha enviado ningún mensaje.</p><form data-form="intro" data-id="${id}">${field("body", "Mensaje introductorio", r.text, "textarea", 'required maxlength="5000"')}<div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Enviar mensaje</button></div></form>`,
     );
   }
+  function assistantSources(r) {
+    const links = (r?.sources || []).map(source => `<a href="${E(safeURL(source.url))}">${I(source.kind === "event" ? "calendar" : "book")} ${E(source.title)}</a>`).join("");
+    return links ? `<div class="sources">${links}</div>` : "";
+  }
+  function assistantAnswerBody(r) {
+    return `<div class="assistant-message-meta"><span>${I("spark")} ASCLA</span><small>${E(r?.mode || S.boot.ai_mode)}</small></div><div class="assistant-message-copy">${E(r?.answer || T("No pude preparar una respuesta."))}</div>${assistantSources(r)}`;
+  }
+  function assistantUserBubble(question) {
+    return `<article class="assistant-message user"><div class="assistant-message-meta"><span>${E(T("Tú"))}</span></div><div class="assistant-message-copy">${E(question)}</div></article>`;
+  }
+  function assistantBotBubble(content = "", id = "") {
+    return `<article class="assistant-message assistant" ${id ? `id="${E(id)}"` : ""}>${content}</article>`;
+  }
+  function assistantLoadingBody(status = "pending") {
+    const label = status === "processing" ? T("Consultando la intranet…") : T("Preparando respuesta…");
+    return `<div class="assistant-message-meta"><span>${I("spark")} ASCLA</span></div><div class="assistant-thinking"><span></span><span></span><span></span><em>${E(label)}</em></div>`;
+  }
+  function assistantScroll() {
+    const area = document.getElementById("assistant-messages");
+    if (area) area.scrollTop = area.scrollHeight;
+  }
   async function assistant() {
-    content().innerHTML = `<section class="assistant-intro"><div class="assistant-mark">${I("spark")}</div><div class="eyebrow">ASISTENTE ASCLA</div><h1>El conocimiento de tu comunidad,<br>a una pregunta de distancia.</h1><p>Explora ideas y encuentra respuestas basadas en el Centro de Conocimiento, siempre con sus fuentes.</p><span class="demo-badge" style="display:inline-block;margin-top:15px">${E(S.boot.ai_mode)}</span></section><div class="ask-suggestions">${["¿Cómo puede la junta supervisar los riesgos de inteligencia artificial?", "¿Cuál es el rol de la secretaría corporativa?", "¿Cómo mejorar el seguimiento de acuerdos?", "¿Qué recursos tenemos sobre gobierno corporativo?"].map((q) => btn(E(q) + " " + I("arrow"), "ask-suggestion", ("data-question=\"" + (E(q)) + "\""))).join("")}</div><form class="card" data-form="ask" style="max-width:820px;margin:auto">${field("question", "Tu pregunta", "", "textarea", 'placeholder="¿Qué te gustaría conocer?" required maxlength="2000"')}<div class="form-actions"><button class="btn primary">${I("spark")} Consultar al asistente</button></div><p class="private-note">El asistente selecciona fragmentos sustentados en recursos publicados de ASCLA. Si no puede verificar una afirmación, se abstiene.</p></form>${btn(I("clock") + " Mis consultas anteriores", "answer-history", "", "ghost answer-history-button")}<div id="answers"></div>`;
+    const thread = assistantThread();
+    const rows = await api("assistant/thread?" + new URLSearchParams({ thread }));
+    const suggestions = [
+      "¿Hay alguna reunión o evento pronto?",
+      "¿Qué se publicó recientemente?",
+      "¿Qué recursos tenemos sobre gobierno corporativo?",
+      "¿A quién me recomiendas conocer?",
+    ];
+    content().innerHTML = `<section class="assistant-intro"><div class="assistant-mark">${I("spark")}</div><div class="eyebrow">${E(T("ASISTENTE ASCLA"))}</div><h1>${E(T("Pregunta a tu comunidad ASCLA"))}</h1><p>${E(T("Conversa con el asistente sobre eventos, publicaciones, recursos y conexiones. Primero consulta la información disponible en la propia intranet."))}</p><span class="demo-badge" style="display:inline-block;margin-top:15px">${E(S.boot.ai_mode)}</span></section><div class="ask-suggestions">${suggestions.map(q => btn(E(T(q)) + " " + I("arrow"), "ask-suggestion", `data-question="${E(T(q))}"`)).join("")}</div><section class="assistant-chat-shell"><header class="assistant-chat-head"><div><strong>${E(T("Conversación con ASCLA"))}</strong><span>${E(T("Los datos internos actuales tienen prioridad sobre el historial de la conversación."))}</span></div><div>${btn(I("plus") + " " + T("Nueva conversación"), "assistant-new", "", "ghost small")}${btn(I("clock") + " " + T("Historial"), "answer-history", "", "ghost small")}</div></header><div class="assistant-messages" id="assistant-messages" role="log" aria-live="polite"><article class="assistant-message assistant welcome"><div class="assistant-message-meta"><span>${I("spark")} ASCLA</span></div><div class="assistant-message-copy">${E(T("Hola. Puedo revisar lo que hay en ASCLA y ayudarte a encontrar eventos próximos, publicaciones recientes, recursos y conexiones recomendadas. ¿Qué quieres saber?"))}</div></article>${rows.map(j => {
+      const user = assistantUserBubble(j.question);
+      if (j.status === "completed" && j.result) return user + assistantBotBubble(assistantAnswerBody(j.result), `assistant-job-${j.id}`);
+      if (j.status === "error") return user + assistantBotBubble(`<div class="error">${E(T(j.error || "No se pudo completar la consulta."))} ${btn(T("Reintentar"), "retry-job", `data-id="${j.id}"`, "small")}</div>`, `assistant-job-${j.id}`);
+      return user + assistantBotBubble(assistantLoadingBody(j.status), `assistant-job-${j.id}`);
+    }).join("")}</div><form class="assistant-compose" data-form="ask"><textarea name="question" aria-label="${E(T("Tu pregunta"))}" placeholder="${E(T("Escribe una pregunta sobre ASCLA…"))}" required maxlength="2000" rows="2"></textarea><button class="btn primary" aria-label="${E(T("Enviar pregunta"))}">${I("arrow")} <span>${E(T("Enviar"))}</span></button></form><p class="private-note assistant-grounding-note">${E(T("El asistente prioriza la información que tu cuenta puede consultar en ASCLA. Si un dato no puede verificarse dentro de la intranet, te lo indicará."))}</p></section>`;
+    rows.filter(j => ["pending", "processing"].includes(j.status)).forEach(j => {
+      const target = document.getElementById(`assistant-job-${j.id}`);
+      if (target) watchJob(j.id, target, result => { target.innerHTML = assistantAnswerBody(result); assistantScroll(); });
+    });
+    assistantScroll();
   }
   async function watchJob(id, target, onDone) {
     let attempts = 0;
-    target.innerHTML =
+    const assistantMode = target.classList?.contains("assistant-message");
+    target.innerHTML = assistantMode ? assistantLoadingBody("pending") :
       '<div class="alert">Pendiente · Estamos preparando la respuesta…</div>';
     const poll = async () => {
       try {
@@ -818,10 +1008,10 @@
           target.innerHTML = `<div class="error">${E(j.error)} ${btn("Reintentar", "retry-job", 'data-id="' + id + '"', "small")}</div>`;
           return;
         }
-        target.innerHTML = `<div class="alert">${I("clock")} ${j.status === "processing" ? "Procesando" : "Pendiente"} · Trabajo #${id}</div>`;
+        target.innerHTML = assistantMode ? assistantLoadingBody(j.status) : `<div class="alert">${I("clock")} ${j.status === "processing" ? "Procesando" : "Pendiente"} · Trabajo #${id}</div>`;
         if (++attempts < 90) setTimeout(poll, 2500);
         else
-          target.innerHTML =
+          target.innerHTML = assistantMode ? `<div class="assistant-message-meta"><span>${I("spark")} ASCLA</span></div><div class="assistant-message-copy">${E(T("La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta."))}</div>` :
             '<div class="alert">El trabajo continúa en segundo plano. Recibirás una notificación cuando esté listo.</div>';
       } catch (e) {
         target.innerHTML = `<div class="error">${E(e.message)}</div>`;
@@ -861,7 +1051,7 @@
   function notificationCount(total) {
     const badge = document.querySelector(".notification-count"), bell = document.querySelector('[data-action="notifications"]');
     if (badge) { badge.hidden = !total; badge.textContent = total > 99 ? "99+" : total; }
-    bell?.setAttribute("aria-label", "Notificaciones" + (total ? `, ${total} sin leer` : ", estás al día"));
+    bell?.setAttribute("aria-label", T("Notificaciones") + (total ? `, ${total} ${T("sin leer")}` : `, ${T("estás al día")}`));
   }
   async function refreshNotifications() {
     try { notificationCount((await api("notifications/summary")).unread_total); } catch {}
@@ -870,34 +1060,40 @@
     const feed = await api("notifications/feed?" + new URLSearchParams({ filter: S.noticeFilter, page: S.noticePage }));
     S.noticePage = feed.page;
     notificationCount(feed.unread_total);
-    const html = window.ASCLANotifications({ E, I, btn }).panel(feed, S.noticeFilter);
+    const html = window.ASCLANotifications({ E, I, btn, T, locale: C.locale || "es-PE" }).panel(feed, S.noticeFilter);
     const existing = document.querySelector(".notification-modal .modal-content");
     if (existing) { existing.innerHTML = html; document.querySelector(`.activity-filters [data-filter="${S.noticeFilter}"]`)?.focus(); }
-    else { modal("Tus notificaciones", html); document.querySelector(".modal").classList.add("notification-modal"); S.focus = document.querySelector('[data-action="notifications"]'); }
+    else { modal(T("Tus notificaciones"), html); document.querySelector(".modal").classList.add("notification-modal"); S.focus = document.querySelector('[data-action="notifications"]'); }
   }
   function answerHTML(question, r) {
-    const links = (r.sources || []).map(source => `<a href="${E(safeURL(source.url))}">${I("book")} ${E(source.title)}</a>`).join("");
-    const sources = links ? '<div class="sources">' + links + '</div>' : '';
-    return `<small class="demo-badge">${E(r.mode)}</small><h3 style="margin:16px 0">${E(question)}</h3><p>${E(r.answer)}</p>${sources}`;
+    return assistantUserBubble(question) + assistantBotBubble(assistantAnswerBody(r));
   }
   function answerTarget() {
-    const target = document.createElement("div"); target.className = "card answer-card";
-    document.getElementById("answers").prepend(target); return target;
+    const area = document.getElementById("assistant-messages");
+    const target = document.createElement("article"); target.className = "assistant-message assistant";
+    (area || document.getElementById("answers") || content()).append(target); return target;
   }
   async function restoreAnswer(id) {
     const j = await api("jobs/" + id);
     if (j.kind !== "answer") { toast("Este aviso corresponde a una tarea de administración."); return; }
-    const target = answerTarget();
-    document.querySelector('[name="question"]').value = j.question || "";
-    if (j.status === "completed") target.innerHTML = answerHTML(j.question, j.result);
-    else await watchJob(id, target, result => { target.innerHTML = answerHTML(j.question, result); });
-    target.scrollIntoView({ block: "center" });
+    if (j.thread) {
+      assistantThread(false, j.thread);
+      await assistant();
+      const target = document.getElementById(`assistant-job-${j.id}`);
+      target?.scrollIntoView({ block: "center" });
+      return;
+    }
+    const area = document.getElementById("assistant-messages");
+    if (area) area.insertAdjacentHTML("beforeend", assistantUserBubble(j.question) + assistantBotBubble(j.status === "completed" ? assistantAnswerBody(j.result) : assistantLoadingBody(j.status), `assistant-job-${j.id}`));
+    const target = document.getElementById(`assistant-job-${j.id}`);
+    if (j.status !== "completed" && target) await watchJob(id, target, result => { target.innerHTML = assistantAnswerBody(result); });
+    target?.scrollIntoView({ block: "center" });
   }
   async function answerHistory() {
     const rows = await api("answers");
-    modal("Mis consultas anteriores", `<p class="private-note">Tus últimas 50 consultas, guardadas para volver a ellas cuando las necesites.</p>${rows.map(j => {
+    modal(T("Mis consultas anteriores"), `<p class="private-note">${E(T("Tus últimas 50 consultas, guardadas para volver a ellas cuando las necesites."))}</p>${rows.map(j => {
       const url = new URL(C.pages.asistente.url); url.searchParams.set("job", j.id);
-      const status = { completed: "Respuesta lista", pending: "Pendiente", processing: "Preparando respuesta", error: "Necesita atención" }[j.status];
+      const status = T({ completed: "Respuesta lista", pending: "Pendiente", processing: "Preparando respuesta", error: "Necesita atención" }[j.status] || j.status);
       return `<a class="answer-history-entry" href="${E(url.href)}"><span>${I("spark")}</span><span><strong>${E(j.question)}</strong><small>${E(status)} · ${date(j.created_at)}</small></span>${I("arrow")}</a>`;
     }).join("") || empty("Aún no tienes consultas", "Haz tu primera pregunta al asistente para empezar.")}`);
   }
@@ -922,12 +1118,12 @@
     const d = await api("admin"); S.admin=d;
     const tab=S.adminTab;
     const tabs=[["moderacion","Moderación","shield"],["solicitudes","Solicitudes","contact"],...(S.boot.admin?[["usuarios","Usuarios","users"],["archivos","Archivos","book"]]:[]),["trabajos","IA y trabajos","spark"],["microeventos","Microeventos","calendar"],["logs","Auditoría","clock"],...(S.boot.admin?[["configuracion","Configuración","settings"]]:[])];
-    content().innerHTML=`<div class="admin-workspace"><header class="admin-hero"><div><span class="eyebrow">GESTIÓN DE LA COMUNIDAD</span><h1>Administración ASCLA</h1><p>Personas, contenido y atención en un mismo lugar.</p></div><div>${link('intranet','Ver intranet '+I('arrow'),'ghost')}${btn(I('refresh')+' Actualizar','admin-refresh','','small')}</div></header><div class="admin-overview">${[[d.counts.members,'Miembros','users',S.boot.admin?'usuarios':'moderacion'],[d.pending.length,'Contenidos por revisar','shield','moderacion'],[d.jobs.filter(j=>['pending','processing'].includes(j.status)).length,'Trabajos activos','spark','trabajos'],[d.reports.length,'Reportes de la comunidad','bell','moderacion']].map(([n,label,icon,target])=>btn(`<span class="stat-icon">${I(icon)}</span><span><strong>${n}</strong><small>${label}</small></span>`,'admin-tab',`data-tab="${target}"`,'admin-stat')).join('')}</div><nav class="admin-tabs" aria-label="Secciones de administración">${tabs.map(([key,label,icon])=>btn(I(icon)+label,'admin-tab',`data-tab="${key}" aria-pressed="${tab===key}"`,'admin-tab'+(tab===key?' active':''))).join('')}</nav><section id="admin-panel" class="admin-panel"></section></div>`;
+    content().innerHTML=`<div class="admin-workspace"><header class="admin-hero"><div><span class="eyebrow">GESTIÓN DE LA COMUNIDAD</span><h1>Administración ASCLA</h1><p>Personas, contenido y atención en un mismo lugar.</p></div><div>${link('intranet','Ver intranet '+I('arrow'),'ghost')}${btn(themeIcons()+' Apariencia','theme-menu','','small')}${btn(I('refresh')+' Actualizar','admin-refresh','','small')}</div></header><div class="admin-overview">${[[d.counts.members,'Miembros','users',S.boot.admin?'usuarios':'moderacion'],[d.pending.length,'Contenidos por revisar','shield','moderacion'],[d.jobs.filter(j=>['pending','processing'].includes(j.status)).length,'Trabajos activos','spark','trabajos'],[d.reports.length,'Reportes de la comunidad','bell','moderacion']].map(([n,label,icon,target])=>btn(`<span class="stat-icon">${I(icon)}</span><span><strong>${n}</strong><small>${E(T(label))}</small></span>`,'admin-tab',`data-tab="${target}"`,'admin-stat')).join('')}</div><nav class="admin-tabs" aria-label="Secciones de administración">${tabs.map(([key,label,icon])=>btn(I(icon)+label,'admin-tab',`data-tab="${key}" aria-pressed="${tab===key}"`,'admin-tab'+(tab===key?' active':''))).join('')}</nav><section id="admin-panel" class="admin-panel"></section></div>`;
     const panel=document.getElementById('admin-panel');
     if(tab==='solicitudes') await adminContacts(panel);
     else if(tab==='usuarios' && S.boot.admin) await adminUsers(panel);
     else if(tab==='archivos' && S.boot.admin) panel.innerHTML='<h2>Archivos de la comunidad</h2><p>Consulta los archivos privados de la intranet y elimina los que corresponda.</p>'+btn('Administrar archivos','files','','primary');
-    else if(tab==='moderacion') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">CALIDAD Y CONVIVENCIA</span><h2>Revisión de contenido</h2><p>Los foros se publican directamente. Galería, Eventos y Conocimiento los gestiona el Ejecutivo o un administrador.</p></div></div><div class="card"><h3>Contenido pendiente y borradores</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>Contenido</th><th>Autor</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${d.pending.map(p=>`<tr><td><strong>${E(p.title)}</strong><br><small>${E(typeLabel[p.type])}${p.meta.generated?' · IA':''}${p.meta.chatham?' · Chatham House':''}</small></td><td>${E(p.author.name)}</td><td>${status(p.status)}</td><td>${btn('Revisar','item',`data-id="${p.id}"`,'small')}${!S.boot.admin&&!S.boot.executive&&['gallery','resource'].includes(p.type)?'<small>Publicación administrativa</small>':''}</td></tr>`).join('')||'<tr><td colspan="4">Todo al día. No hay contenido pendiente.</td></tr>'}</tbody></table></div></div><div class="admin-review-grid"><div class="card"><h3>Reportes de la comunidad</h3>${d.reports.map(r=>`<div class="admin-report"><span>Publicación #${r.target_id}</span>${btn('Revisar','item',`data-id="${r.target_id}"`,'small')}</div>`).join('')||'<p class="private-note">No hay reportes por revisar.</p>'}</div><div class="card"><h3>Comentarios pendientes</h3>${d.comments.map(c=>`<div class="comment"><strong>${E(c.author)}</strong><p>${E(c.body)}</p>${btn('Aprobar','comment-moderate',`data-id="${c.id}" data-decision="approve"`,'small')}${btn('Mantener oculto','comment-moderate',`data-id="${c.id}" data-decision="reject"`,'small')}${c.can_delete?btn('Eliminar comentario','delete-comment',`data-id="${c.id}"`,'danger small'):''}</div>`).join('')||'<p class="private-note">No hay comentarios pendientes.</p>'}</div></div>`;
+    else if(tab==='moderacion') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">CALIDAD Y CONVIVENCIA</span><h2>Revisión de contenido</h2><p>Los foros se publican directamente. Galería, Eventos y Conocimiento los gestiona el Ejecutivo o un administrador.</p></div></div><div class="card"><h3>Contenido pendiente y borradores</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>Contenido</th><th>Autor</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${d.pending.map(p=>`<tr><td><strong>${E(p.title)}</strong><br><small>${E(typeLabel[p.type])}${p.meta.generated?' · IA':''}${p.meta.chatham?' · Chatham House':''}</small></td><td>${E(p.author.name)}</td><td>${status(p.status)}</td><td>${btn('Revisar','item',`data-id="${p.id}"`,'small')}${!S.boot.admin&&!S.boot.executive&&['gallery','resource'].includes(p.type)?'<small>Publicación administrativa</small>':''}</td></tr>`).join('')||'<tr><td colspan="4">Todo al día. No hay contenido pendiente.</td></tr>'}</tbody></table></div></div><div class="admin-review-grid"><div class="card"><h3>Reportes de la comunidad</h3>${d.reports.map(r=>`<div class="admin-report"><div><strong>${E(r.title || `Publicación #${r.target_id}`)}</strong>${r.excerpt ? `<p>${E(r.excerpt)}</p>` : ''}<p class="private-note"><b>Motivo:</b> ${E(r.reason_label || 'Sin motivo registrado')}${r.detail ? `<br><b>Detalle:</b> ${E(r.detail)}` : ''}</p></div>${Number(r.target_id) ? btn('Revisar','item',`data-id="${r.target_id}"`,'small') : ''}</div>`).join('')||'<p class="private-note">No hay reportes por revisar.</p>'}</div><div class="card"><h3>Comentarios pendientes</h3>${d.comments.map(c=>`<div class="comment"><strong>${E(c.author)}</strong><p>${E(c.body)}</p>${btn('Aprobar','comment-moderate',`data-id="${c.id}" data-decision="approve"`,'small')}${btn('Mantener oculto','comment-moderate',`data-id="${c.id}" data-decision="reject"`,'small')}${c.can_delete?btn('Eliminar comentario','delete-comment',`data-id="${c.id}"`,'danger small'):''}</div>`).join('')||'<p class="private-note">No hay comentarios pendientes.</p>'}</div></div>`;
     else if(tab==='trabajos') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PROCESAMIENTO Y RESULTADOS</span><h2>IA y trabajos</h2><p>Consulta el avance, abre resultados y reintenta los trabajos con error.</p></div></div><div class="alert">Los derivados de IA quedan en borrador para revisión.</div><div class="admin-actions">${link('centro-conocimiento','Ver recursos','primary')}${btn('Curaduría social demo','social-job')}${S.boot.admin?btn('Conectar YouTube OAuth','google-connect','data-service="youtube"'):''}${btn('Actualizar estados','admin-refresh')}</div><div class="card table-wrap"><table class="data-table"><thead><tr><th>Trabajo</th><th>Estado</th><th>Detalle</th><th>Acción</th></tr></thead><tbody>${d.jobs.map(j=>`<tr><td><strong>#${j.id}</strong><br>${E(j.kind)}</td><td>${status(j.status)}</td><td>${E(j.error||date(j.created_at))}</td><td>${btn('Ver','job-detail',`data-id="${j.id}"`,'small')}${j.status==='error'?btn('Reintentar','retry-job',`data-id="${j.id}"`,'small'):''}</td></tr>`).join('')||'<tr><td colspan="4">No hay trabajos registrados.</td></tr>'}</tbody></table></div>`;
     else if(tab==='microeventos') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ENCUENTROS ENTRE ASOCIADOS</span><h2>Círculos de conversación</h2><p>Grupos de 4 a 6 personas, con intereses comunes y una agenda para conversar.</p></div></div><div class="card"><h3>Preparar los encuentros del mes</h3><p class="detail-body">Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.</p><div class="admin-actions">${S.boot.admin?btn(I('spark')+' Preparar propuesta del mes','micro-job','','primary'):''}${link('eventos','Ver encuentros','small')}</div><div id="micro-job-result"></div></div>`;
     else if(tab==='logs') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">TRAZABILIDAD</span><h2>Auditoría</h2><p>Últimas acciones registradas. No incluye contraseñas ni contenido de mensajes privados.</p></div></div><div class="card table-wrap"><table class="data-table"><thead><tr><th>Fecha UTC</th><th>Acción</th><th>Actor</th><th>Objeto</th><th>Detalle</th></tr></thead><tbody>${d.audit.map(a=>`<tr><td>${E(a.created_at)}</td><td>${E(a.action)}</td><td>#${a.actor_id}</td><td>${a.object_id||'—'}</td><td>${E(a.detail)}</td></tr>`).join('')||'<tr><td colspan="5">No hay acciones registradas.</td></tr>'}</tbody></table></div>`;
@@ -940,7 +1136,7 @@
   }
   async function settings(panel) {
     const s = await api("settings");
-    panel.innerHTML = `<form class="card" data-form="settings"><h2>Comunidad e integraciones</h2><div class="form-section">Participación y revisión</div>${check("demo", "Modo demo (datos e integraciones identificados)", s.demo)}${check("moderation_required", "Revisar publicaciones del Hub antes de publicarlas", s.moderation_required)}${check("moderate_comments", "Revisar comentarios del Hub y otras secciones (excepto Foros)", s.moderate_comments)}${check("chatham_default", "Aplicar Chatham House por defecto", s.chatham_default)}${check("micro_enabled", "Preparar microeventos mensualmente con WP-Cron", s.micro_enabled)}${check("micro_approval", "Exigir aprobación administrativa de microeventos", s.micro_approval)}<div class="form-section">Motor de afinidad</div><div class="form-grid">${Object.entries(
+    panel.innerHTML = `<form class="card" data-form="settings" data-guard-unsaved><h2>Comunidad e integraciones</h2><div class="form-section">Participación y revisión</div>${check("demo", "Modo demo (datos e integraciones identificados)", s.demo)}${check("moderation_required", "Revisar publicaciones del Hub antes de publicarlas", s.moderation_required)}${check("moderate_comments", "Revisar comentarios del Hub y otras secciones (excepto Foros)", s.moderate_comments)}${check("chatham_default", "Aplicar Chatham House por defecto", s.chatham_default)}${check("micro_enabled", "Preparar microeventos mensualmente con WP-Cron", s.micro_enabled)}${check("micro_approval", "Exigir aprobación administrativa de microeventos", s.micro_approval)}<div class="form-section">Motor de afinidad</div><div class="form-grid">${Object.entries(
       s.matching_weights,
     )
       .map(([k, v]) =>
@@ -954,7 +1150,7 @@
       )
       .join(
         "",
-      )}</div><div class="form-section">Inteligencia artificial</div><div class="form-grid">${select(
+      )}${field("matching_min_affinity", "Afinidad mínima para recomendar (%)", s.matching_min_affinity ?? 30, "number", 'min="0" max="100" step="1"')}</div><p class="private-note">${E(T("Solo aparecerán como personas recomendadas los perfiles que alcancen al menos este porcentaje de afinidad. Valor predeterminado: 30%."))}</p><div class="form-section">Inteligencia artificial</div><div class="form-grid">${select(
       "ai_mode",
       "Proveedor",
       [
@@ -971,6 +1167,7 @@
       ],
       s.youtube_mode,
     )}</div>${check("clear_ai_key", "Eliminar Gemini API Key guardada", false)}<p class="private-note">Usa un modelo Gemini disponible para tu cuenta. Guarda la configuración antes de probar. Las claves de OpenAI no son compatibles.</p>${btn("Probar conexión", "gemini-test", "", "small")}<p id="gemini-test-result" class="private-note" role="status" aria-live="polite"></p><div class="form-section">Google OAuth</div><div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert">URI de redirección: <code>${E(s.google_redirect)}</code></div><p class="private-note">Cada asociado conecta su calendario desde Perfil. YouTube se conecta desde IA y trabajos.</p><div class="form-section">Social Listening</div><div class="alert">LinkedIn y X: DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; no se realiza scraping ni se envían respuestas externas.</div>${mailSettings(s)}${field("copyright", "Propiedad intelectual", s.copyright)}<div class="form-actions"><button class="btn primary">Guardar configuración</button></div></form><form class="card section-gap" data-form="demo"><h2>Preparar datos de demostración</h2><p class="private-note">Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes.</p>${field("password", "Contraseña para nuevas cuentas demo", "", "password", 'required minlength="12" autocomplete="new-password"')}<button class="btn">Crear / completar demo</button></form>`;
+    registerUnsavedForm(panel.querySelector('[data-form="settings"]'));
   }
   function rules() {
     modal(
@@ -1061,17 +1258,36 @@
     if (q.get("notification")) { await api("notifications/" + Number(q.get("notification")) + "/read", {}); await refreshNotifications(); }
     if (S.page === "asistente" && q.get("job")) await restoreAnswer(Number(q.get("job")));
     if (S.page === "asistente" && q.get("history")) await answerHistory();
-    if (q.get("notice") === "unavailable") toast("El contenido de este aviso ya no está disponible. Puedes continuar en esta sección.");
+    if (q.get("notice") === "unavailable") toast(T("El contenido de este aviso ya no está disponible. Puedes continuar en esta sección."));
     if (q.get("item")) await item(Number(q.get("item")));
     if (q.get("member")) await member(Number(q.get("member")));
   }
   function enableNavigation() {
     if (C.page === 'admin') return;
     navigation = window.ASCLANavigation({root, pages: C.pages, prepare: prepareView,
+      beforeNavigate: () => confirmUnsavedExit(),
       load: async () => { const version = S.viewVersion; await render(); if (version === S.viewVersion) await routeDetails(); },
       error: error => { if (error.name !== 'AbortError') toast(error.message); }
     });
   }
+  // Keep contextual three-dot menus exclusive: opening one closes any other.
+  root.addEventListener("click", (event) => {
+    const summary = event.target.closest(".overflow-menu > summary");
+    if (summary) {
+      const current = summary.closest(".overflow-menu");
+      root.querySelectorAll(".overflow-menu[open]").forEach(menu => { if (menu !== current) menu.removeAttribute("open"); });
+      return;
+    }
+    if (!event.target.closest(".overflow-menu")) root.querySelectorAll(".overflow-menu[open]").forEach(menu => menu.removeAttribute("open"));
+  });
+
+  root.addEventListener("keydown", event => {
+    const input = event.target.closest?.('.assistant-compose textarea[name="question"]');
+    if (!input || event.key !== "Enter" || event.shiftKey || event.isComposing) return;
+    event.preventDefault();
+    input.form?.requestSubmit();
+  });
+
   root.addEventListener("click", async (event) => {
     const b = event.target.closest("[data-action]");
     if (!b) return;
@@ -1082,9 +1298,11 @@
     b.disabled = true;
     try {
       if (a === "close") closeModal();
+      else if (a === "theme-menu") themeDialog();
+      else if (a === "theme-set") { applyTheme(b.dataset.theme || "system", true); closeModal(); toast(T("Apariencia actualizada.")); }
       else if (a === "menu")
         document.querySelector(".ascla-sidebar").classList.toggle("open");
-      else if (a === "refresh") await render();
+      else if (a === "refresh") { if (confirmUnsavedExit()) await render(); }
       else if (a === "rules") rules();
       else if (a === "member") await member(id);
       else if (a === "item") await item(id);
@@ -1092,18 +1310,34 @@
       else if (a === "detach-media") b.closest('[data-media]').remove();
       else if (a === "delete-content") { const p = await api('items/' + id); confirmDeletion('content',id,{title:p.title,forum:p.type==='forum'}); }
       else if (a === "delete-comment") confirmDeletion('comment',id,{post:Number(b.dataset.post)||0});
+      else if (a === "delete-message") confirmDeletion('message',id,{conversation:Number(b.dataset.conversation)||S.conversation});
+      else if (a === "comment-reply") openCommentReply(b);
+      else if (a === "comment-reply-cancel") b.closest('.comment-reply-form')?.remove();
+      else if (a === "report-comment") reportDialog(id, "comment");
+      else if (a === "comment-like") {
+        const r = await api(`comments/${id}/reaction`, {active:b.dataset.active === 'true'});
+        b.dataset.active=String(!r.active); b.setAttribute('aria-pressed',String(!!r.active)); b.setAttribute('aria-label',T(r.active?'Quitar Me gusta':'Me gusta'));
+        b.classList.toggle('active',!!r.active); const count=b.querySelector('span'); if(count) count.textContent=String(r.likes);
+      }
       else if (a === "delete-media") confirmDeletion('media',id,{post:Number(b.dataset.post)||0,title:b.dataset.name,library:b.dataset.library==='true'});
       else if (a === "delete-cancel") {
-        if(b.dataset.library==='true') await files(S.files.page,S.files.q);
+        if(b.dataset.kind==='message') closeModal();
+        else if(b.dataset.library==='true') await files(S.files.page,S.files.q);
         else if(Number(b.dataset.post)) await item(Number(b.dataset.post));
         else if(b.dataset.kind==='content') await item(id);
         else closeModal();
       }
       else if (a === "delete-confirm") {
-        const kind=b.dataset.kind, post=Number(b.dataset.post), library=b.dataset.library==='true';
-        await api((kind==='content'?'items':kind==='comment'?'comments':'media')+'/'+id,{},'DELETE');
+        const kind=b.dataset.kind, post=Number(b.dataset.post), library=b.dataset.library==='true', conversation=Number(b.dataset.conversation)||0;
+        const endpoint=kind==='content'?'items/'+id:kind==='comment'?'comments/'+id:kind==='message'?`conversations/${conversation}/messages/${id}`:'media/'+id;
+        await api(endpoint,{},'DELETE');
         closeModal();toast(T('Eliminado correctamente.'));
-        if(library) await files(S.files.page,S.files.q);
+        if(kind==='message') {
+          document.querySelector(`[data-message-id="${id}"]`)?.remove();
+          S.chat?.ids?.delete(id);
+          if (chatAlive(S.chat)) await syncChat();
+        }
+        else if(library) await files(S.files.page,S.files.q);
         else if(post) await item(post);
         else { const url=new URL(location.href);url.searchParams.delete('item');history.replaceState(history.state,'',url);S.item=null;await render(); }
       }
@@ -1114,17 +1348,19 @@
       else if (a === "notifications-read-all") { await api("notifications/read-all", {}); await notifications(); }
       else if (a === "notification-open") { const destination = await api("notifications/" + id + "/open", {}); await navigateTo(destination.url); }
       else if (a === "answer-history") await answerHistory();
-      else if (["like", "follow", "report"].includes(a)) {
+      else if (a === "report") reportDialog(id, "content");
+      else if (["like", "follow"].includes(a)) {
         await api(`items/${id}/reaction`, {
           kind: a,
-          active: a === "report" || b.dataset.active === "true",
+          active: b.dataset.active === "true",
         });
-        toast(
-          a === "report" ? "Reporte enviado a moderación." : "Actualizado.",
-        );
+        toast("Actualizado.");
         if (S.item?.id === id && document.querySelector(".modal"))
           await item(id);
         else await render();
+      } else if (a === "password-reset-email") {
+        const result = await api("account/password-reset", {});
+        toast(result.message);
       } else if (a === "connect") {
         const state = await api("relations", { target: id, kind: "connect", active: true });
         updateConnectionState(id, state); await refreshConnectionsPanel();
@@ -1157,13 +1393,7 @@
         await api(`events/${id}/register`, { status: b.dataset.status });
         toast("Inscripción actualizada.");
         await item(id);
-      } else if (a === "ics")
-        download(
-          "ascla-evento-" + id + ".ics",
-          S.event.ics,
-          "text/calendar;charset=utf-8",
-        );
-      else if (a === "page") {
+      } else if (a === "page") {
         S.filter.page = b.dataset.page;
         await render();
       } else if (a.startsWith("filter-")) {
@@ -1190,8 +1420,12 @@
         await notifications();
         await refreshNotifications();
       } else if (a === "ask-suggestion") {
-        document.querySelector("[name=question]").value = b.dataset.question;
-        document.querySelector("[data-form=ask]").requestSubmit();
+        const input=document.querySelector('[data-form="ask"] [name="question"]');
+        if (input) { input.value = b.dataset.question; document.querySelector("[data-form=ask]").requestSubmit(); }
+      } else if (a === "assistant-new") {
+        assistantThread(true);
+        await assistant();
+        document.querySelector('[data-form="ask"] [name="question"]')?.focus();
       } else if (a === "gemini-test") {
         const target=document.getElementById('gemini-test-result'); target.textContent='Probando el modelo y la clave guardados…';
         try { const r=await api('ai/test',{}); target.textContent=r.message+' Modelo: '+r.model; target.className='alert success'; }
@@ -1206,9 +1440,12 @@
       } else if (a === "user-status") {
         await api('admin/member/'+id,{suspended:b.dataset.suspended==='true'}); closeModal();toast('Acceso actualizado.');await adminUsers(document.getElementById('admin-panel'));
       } else if (a === "admin-tab") {
+        if (!confirmUnsavedExit()) return;
         S.adminTab = b.dataset.tab;
         await admin();
-      } else if (a === "admin-refresh") await admin();
+      } else if (a === "admin-refresh") {
+        if (confirmUnsavedExit()) await admin();
+      }
       else if (a === "moderate") {
         const p = await api("items/" + id);
         modal(
@@ -1328,10 +1565,28 @@
           data[key] = form.elements[key].checked;
         delete data.photo;
         await api("profiles/me", data);
+        clearUnsavedGuard(form);
         S.boot = await api("bootstrap");
         const label = root.querySelector(".header-profile strong"); if (label) label.textContent = S.boot.me.name;
         toast("Perfil actualizado.");
         await profile();
+      } else if (action === "password-change") {
+        const result = await api("account/password", {
+          current_password: data.current_password,
+          new_password: data.new_password,
+          confirm_password: data.confirm_password,
+        });
+        form.reset();
+        toast(result.message + " Actualizando tu sesión…");
+        setTimeout(() => location.reload(), 900);
+      } else if (action === "report") {
+        const target = form.dataset.kind === "comment" ? `comments/${Number(form.dataset.id)}/report` : `items/${Number(form.dataset.id)}/report`;
+        const result = await api(target, {
+          reason: data.reason,
+          detail: data.detail || "",
+        });
+        closeModal();
+        toast(`${form.dataset.kind === "comment" ? "Comentario reportado" : "Reporte enviado"}: ${result.reason_label}.`);
       } else if (action === "editor") {
         const type = form.dataset.type,
           id = Number(form.dataset.id),
@@ -1396,6 +1651,13 @@
             : "Comentario publicado.",
         );
         await item(Number(form.dataset.id));
+      } else if (action === "comment-reply") {
+        const r = await api("items/" + form.dataset.id + "/comments", {
+          body: data.body,
+          parent: Number(form.dataset.parent),
+        });
+        toast(r.status === "pending" ? "Respuesta enviada a revisión." : "Respuesta publicada.");
+        await item(Number(form.dataset.id));
       } else if (action === "message") {
         const chat = S.chat;
         form.dataset.sending = 'true';
@@ -1412,9 +1674,17 @@
         closeModal();
         toast("Mensaje enviado.");
       } else if (action === "ask") {
-        const j = await api("ask", { question: data.question });
-        const target = answerTarget();
-        watchJob(j.id, target, (r) => { target.innerHTML = answerHTML(data.question, r); });
+        const question=String(data.question || "").trim();
+        const area=document.getElementById("assistant-messages");
+        if (!question || !area) return;
+        area.insertAdjacentHTML("beforeend", assistantUserBubble(question));
+        const target=document.createElement("article");target.className="assistant-message assistant";target.innerHTML=assistantLoadingBody();area.append(target);
+        form.reset();assistantScroll();
+        try {
+          const j = await api("ask", { question, thread: assistantThread() });
+          target.id=`assistant-job-${j.id}`;
+          watchJob(j.id, target, (r) => { target.innerHTML = assistantAnswerBody(r); assistantScroll(); });
+        } catch(error) { target.innerHTML=`<div class="error">${E(error.message)}</div>`; }
       } else if (action === "contact") {
         if (data.website_confirm) throw new Error("Solicitud no válida.");
         await api("content/contact", {
@@ -1447,6 +1717,7 @@
           "clear_smtp_password",
         ])
           data[k] = form.elements[k].checked;
+        data.matching_min_affinity = Number(data.matching_min_affinity);
         data.matching_weights = {};
         for (const k of [
           "interests",
@@ -1457,6 +1728,7 @@
         ])
           data.matching_weights[k] = Number(data["weight_" + k]);
         await api("settings", data);
+        clearUnsavedGuard(form);
         toast("Configuración guardada.");
         await admin();
       } else if (action === "demo") {
@@ -1471,9 +1743,11 @@
       if (submit) submit.disabled = false;
     }
   });
+  root.addEventListener("input", (event) => refreshUnsavedGuard(event.target));
   root.addEventListener("change", async (event) => {
     const input = event.target;
     updateProfilePreference(input);
+    refreshUnsavedGuard(input);
     if (!input.dataset.upload || !input.files?.length) return;
     try {
       const fd = new FormData();
@@ -1481,7 +1755,9 @@
       toast("Subiendo archivo privado…");
       const m = await api("media", fd);
       if (input.dataset.upload === "photo") {
-        document.querySelector("[name=photo_id]").value = m.id;
+        const photoId = document.querySelector("[name=photo_id]");
+        photoId.value = m.id;
+        refreshUnsavedGuard(photoId);
         document.getElementById("photo-status").textContent =
           "Fotografía cargada. Guarda el perfil para aplicar.";
       } else
@@ -1497,6 +1773,14 @@
     } finally {
       input.value = "";
     }
+  });
+  applyTheme(themeMode());
+  themeMedia?.addEventListener?.("change", () => { if (themeMode() === "system") applyTheme("system"); });
+  window.addEventListener("storage", (event) => { if (event.key === THEME_KEY) applyTheme(themeMode()); });
+  window.addEventListener("beforeunload", (event) => {
+    if (!hasUnsavedChanges()) return;
+    event.preventDefault();
+    event.returnValue = "";
   });
   document.addEventListener("keydown", (event) => {
     const dialog = document.querySelector(".modal");

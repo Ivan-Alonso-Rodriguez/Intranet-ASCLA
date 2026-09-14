@@ -32,11 +32,12 @@ final class Matching
     {
         $me=get_current_user_id(); $profile=Profiles::raw($me);
         if (empty($profile['networking'])) { return []; }
+        $minimum=max(0,min(100,(int)(Settings::get()['matching_min_affinity']??30)));
         $items=[];
         foreach (get_users(['capability'=>'ascla_access']) as $candidate) {
             $id=$candidate->ID;
             if ((int)$id===$me) { continue; }
-            try { $affinity=self::between($me,(int)$id,false); $items[]=array_merge(Profiles::visible((int)$id),['affinity'=>$affinity]); } catch (\ASCLA\Core\Rest\ApiException $e) { continue; }
+            try { $affinity=self::between($me,(int)$id,false); if ((int)$affinity['score'] < $minimum) { continue; } $items[]=array_merge(Profiles::visible((int)$id),['affinity'=>$affinity]); } catch (\ASCLA\Core\Rest\ApiException $e) { continue; }
         }
         usort($items,static fn($a,$b)=>($b['affinity']['score']<=>$a['affinity']['score'])?:($a['id']<=>$b['id']));
         return Connections::attach(array_slice($items,0,6));

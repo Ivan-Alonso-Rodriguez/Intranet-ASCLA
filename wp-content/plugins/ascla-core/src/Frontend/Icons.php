@@ -28,8 +28,12 @@ final class Icons
         'download'=>'M12 3v12m-5-5 5 5 5-5M5 17v4h14v-4',
         'play'=>'m8 5 12 7-12 7Z',
         'settings'=>'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2',
+        'sun'=>'M12 4V2M12 22v-2M4.93 4.93 3.51 3.51M20.49 20.49l-1.42-1.42M4 12H2M22 12h-2M4.93 19.07l-1.42 1.42M20.49 3.51l-1.42 1.42M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z',
+        'moon'=>'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z',
         'check'=>'m5 12 4 4L19 6',
         'edit'=>'m15 4 5 5M4 20l4-1L21 6l-4-4L4 15Z',
+        'more'=>'M5 12h.01M12 12h.01M19 12h.01',
+        'reply'=>'M9 17l-5-5 5-5M4 12h9a7 7 0 0 1 7 7',
     ];
     public static function html(string $name): string
     {

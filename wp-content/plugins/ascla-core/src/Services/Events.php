@@ -9,10 +9,10 @@ final class Events
     {
         $post=Content::get($id); Access::require($post->post_type==='ascla_event','Evento no encontrado.',404);
         $meta=(array)get_post_meta($id,'_ascla',true); $item=Content::serialize($post);
+        $end=strtotime((string)($meta['end']??'')); $item['is_past']=$end!==false && $end<=time();
         $item['registered']=Store::rows('registrations',self::REGISTRATION,[$id,get_current_user_id()],'LIMIT 1')[0]['status']??'none';
         $item['attending']=Store::count('registrations',"event_id=%d AND status='accepted'",[$id]);
-        $item['google_url']=Calendar::google($post->post_title,$meta,!empty($meta['chatham'])?'Sesión bajo la Regla de Chatham House.':$post->post_content);
-        $item['ics']=Calendar::ics($id,$post->post_title,$meta,'Evento privado ASCLA.',wp_parse_url(home_url(),PHP_URL_HOST));
+        $item['google_url']=$item['is_past']?'':Calendar::google($post->post_title,$meta,!empty($meta['chatham'])?'Sesión bajo la Regla de Chatham House.':$post->post_content);
         if (current_user_can('ascla_moderate')) {
             $item['participants']=array_map(static function ($r) { $u=get_userdata($r['user_id']); return ['id'=>(int)$r['user_id'],'name'=>$u?Profiles::publicName((int)$u->ID):'Miembro','status'=>$r['status']]; },Store::rows('registrations','event_id=%d',[$id]));
         }

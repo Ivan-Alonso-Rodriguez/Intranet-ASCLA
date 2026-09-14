@@ -66,6 +66,46 @@ final class IntegrationTest extends TestCase
 
     }
 
+    public function testParticipationDefaultsEnableNetworkingAndMicroevents(): void
+
+    {
+
+        $this->user(1);$profile=Profiles::raw($this->users[1]);self::assertTrue($profile['networking']);self::assertTrue($profile['microevents']);
+
+        Profiles::save(['networking'=>false,'microevents'=>false]);$profile=Profiles::raw($this->users[1]);self::assertFalse($profile['networking']);self::assertFalse($profile['microevents']);
+
+    }
+
+    public function testPastEventsCannotBeRegisteredOrFollowed(): void
+
+    {
+
+        $p=$this->make('event',['meta'=>['start'=>gmdate('c',time()-7200),'end'=>gmdate('c',time()-3600),'capacity'=>20,'modality'=>'Virtual']]);$this->user(1);
+
+        $detail=Events::detail($p['id']);self::assertTrue($detail['is_past']);self::assertSame('', $detail['google_url']);self::assertArrayNotHasKey('ics',$detail);
+
+        self::assertSame(400,$this->api('POST','/events/'.$p['id'].'/register',['status'=>'accepted'])->get_status());
+        self::assertSame(400,$this->api('POST','/events/'.$p['id'].'/google',['operation'=>'save'])->get_status());
+
+        self::assertSame(400,$this->api('POST','/items/'.$p['id'].'/reaction',['kind'=>'follow','active'=>true])->get_status());
+
+        self::assertSame(0,Store::count('registrations','event_id=%d AND user_id=%d',[$p['id'],$this->users[1]]));
+
+        self::assertSame(0,Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',[$this->users[1],$p['id'],'follow']));
+
+    }
+
+    public function testRecommendationsRespectMinimumAffinity(): void
+    {
+        $interests=Profiles::catalogs()['interest'];self::assertGreaterThanOrEqual(2,count($interests));$one=(int)$interests[0]['id'];$two=(int)$interests[1]['id'];
+        $this->user(1);Profiles::save(['networking'=>true,'directory'=>true,'interests'=>[$one],'areas'=>[],'industries'=>[],'goals'=>[],'languages'=>[]]);
+        $this->user(2);Profiles::save(['networking'=>true,'directory'=>true,'interests'=>[$one],'areas'=>[],'industries'=>[],'goals'=>[],'languages'=>[]]);
+        $this->user(1);Settings::save(['matching_weights'=>['interests'=>100,'areas'=>0,'industries'=>0,'goals'=>0,'languages'=>0],'matching_min_affinity'=>100]);
+        $recommended=Matching::recommendations();self::assertNotEmpty($recommended);self::assertSame(100,(int)$recommended[0]['affinity']['score']);
+        Profiles::save(['interests'=>[$two]],$this->users[2]);
+        self::assertSame([],Matching::recommendations());
+    }
+
     public function testInstallerIsIdempotentAndKeepsExistingPages(): void
 
     {
@@ -119,6 +159,24 @@ final class IntegrationTest extends TestCase
         Content::react($p['id'],'like',true);Content::react($p['id'],'like',true);Content::react($p['id'],'follow',true);Content::react($p['id'],'report',true);self::assertSame(1,Content::serialize(Content::get($p['id']))['reactions']);Content::react($p['id'],'like',false);self::assertSame(0,Content::serialize(Content::get($p['id']))['reactions']);
 
         $this->user(0);Settings::save(['moderate_comments'=>true]);$this->user(2);self::assertSame('pending',Content::comment($p['id'],'Revisión previa.')['status']);
+
+    }
+
+    public function testCommentReportsCannotTargetOwnComment(): void
+
+    {
+
+        $p=$this->make('hub');
+        $this->user(1);$own=Content::comment($p['id'],'Comentario propio para validar reporte.');
+        self::assertSame(400,$this->api('POST','/comments/'.$own['id'].'/report',['reason'=>'spam'])->get_status());
+        self::assertSame(0,Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',[$this->users[1],$own['id'],'comment_report']));
+
+        $this->user(2);$reported=$this->api('POST','/comments/'.$own['id'].'/report',['reason'=>'spam','detail'=>'Reporte de prueba.']);
+        self::assertSame(200,$reported->get_status());
+        self::assertSame(1,Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',[$this->users[2],$own['id'],'comment_report']));
+        $comments=Content::comments($p['id']);self::assertTrue($comments[0]['can_report']);
+
+        $this->user(1);$comments=Content::comments($p['id']);self::assertFalse($comments[0]['can_report']);
 
     }
 
@@ -180,6 +238,29 @@ final class IntegrationTest extends TestCase
 
     }
 
+    public function testAssistantKnowsUpcomingEventsFromTheIntranet(): void
+
+    {
+
+        $event=$this->make('event',['title'=>'Reunión próxima ASCLA','body'=>'Encuentro interno para conversar sobre gobierno corporativo.','meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>20,'modality'=>'Virtual','location'=>'Sala virtual']]);
+        $this->user(1);$answer=Knowledge::answer('¿Hay alguna reunión pronto?');
+        self::assertContains($event['id'],array_column($answer['sources'],'id'));
+        self::assertStringContainsString('Reunión próxima ASCLA',$answer['answer']);
+
+    }
+
+    public function testAssistantThreadsKeepConversationHistoryScopedToTheMember(): void
+
+    {
+
+        $this->user(1);$thread='chat_test_'.bin2hex(random_bytes(4));
+        $response=$this->api('POST','/ask',['question'=>'Hola','thread'=>$thread]);self::assertSame(200,$response->get_status());$job=$response->get_data();
+        for($attempt=0;$attempt<30&&Queue::get((int)$job['id'])['status']==='pending';$attempt++){Queue::run();}
+        $items=Queue::thread($thread);self::assertCount(1,$items);self::assertSame('Hola',$items[0]['question']);self::assertSame('completed',$items[0]['status']);
+        $this->user(2);self::assertSame([],Queue::thread($thread));
+
+    }
+
     public function testKnowledgeFindsOldSourcesBeyondTheFirst300Posts(): void
 
     {
@@ -221,6 +302,9 @@ final class IntegrationTest extends TestCase
         $r=Settings::save(['ai_key'=>'test-key-never-real','matching_weights'=>['interests'=>100,'areas'=>0,'industries'=>0,'goals'=>0,'languages'=>0]]);self::assertTrue($r['has_ai_key']);self::assertArrayNotHasKey('ai_key',$r);self::assertStringNotContainsString('test-key-never-real',wp_json_encode($r));Settings::save(['clear_ai_key'=>true]);self::assertFalse(Settings::status()['has_ai_key']);
 
         self::assertSame(400,$this->api('POST','/settings',['matching_weights'=>array_fill_keys(['interests','areas','industries','goals','languages'],0)])->get_status());
+        Settings::save(['matching_min_affinity'=>67]);self::assertSame(67,Settings::get()['matching_min_affinity']);
+        Settings::save(['matching_min_affinity'=>999]);self::assertSame(100,Settings::get()['matching_min_affinity']);
+        Settings::save(['matching_min_affinity'=>-10]);self::assertSame(0,Settings::get()['matching_min_affinity']);
 
     }
 

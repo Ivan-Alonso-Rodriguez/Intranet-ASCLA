@@ -5,7 +5,7 @@ final class Settings
 {
     public static function get(): array
     {
-        return array_merge(['mail_mode'=>'wordpress','smtp_host'=>'','smtp_port'=>587,'smtp_security'=>'tls','smtp_user'=>'','smtp_from'=>'','smtp_name'=>'ASCLA','demo'=>true,'moderation_required'=>true,'moderate_comments'=>false,'chatham_default'=>true,'micro_enabled'=>false,'micro_approval'=>true,'ai_mode'=>'mock','ai_model'=>'','matching_weights'=>MatchScore::WEIGHTS,'google_client_id'=>'','youtube_mode'=>'mock','social_mode'=>'mock','copyright'=>'© ASCLA – Asociación de Secretarios Corporativos de América Latina'],(array)get_option('ascla_settings',[]));
+        return array_merge(['mail_mode'=>'wordpress','smtp_host'=>'','smtp_port'=>587,'smtp_security'=>'tls','smtp_user'=>'','smtp_from'=>'','smtp_name'=>'ASCLA','demo'=>true,'moderation_required'=>true,'moderate_comments'=>false,'chatham_default'=>true,'micro_enabled'=>false,'micro_approval'=>true,'ai_mode'=>'mock','ai_model'=>'','matching_weights'=>MatchScore::WEIGHTS,'matching_min_affinity'=>30,'google_client_id'=>'','youtube_mode'=>'mock','social_mode'=>'mock','copyright'=>'© ASCLA – Asociación de Secretarios Corporativos de América Latina'],(array)get_option('ascla_settings',[]));
     }
     public static function save(array $input): array
     {
@@ -14,6 +14,7 @@ final class Settings
         foreach (['ai_mode','youtube_mode'] as $field) { if (isset($input[$field])) { Access::require(in_array($input[$field],['mock','real'],true),'Modo no válido.',400); $data[$field]=$input[$field]; } }
         foreach (['ai_model','google_client_id','copyright'] as $field) { if (isset($input[$field])) { $data[$field]=Access::text($input[$field],300); } }
         if (isset($input['ai_model']) && $data['ai_model']!=='') { $data['ai_model']=\ASCLA\Core\Integrations\RealAIProvider::model($data['ai_model']); }
+        if (isset($input['matching_min_affinity'])) { $data['matching_min_affinity']=max(0,min(100,(int)$input['matching_min_affinity'])); }
         if (isset($input['matching_weights'])) {
             $weights=[];
             foreach (MatchScore::WEIGHTS as $key=>$default) { $weights[$key]=max(0,min(100,(int)($input['matching_weights'][$key]??$default))); }

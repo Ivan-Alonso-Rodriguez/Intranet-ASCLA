@@ -77,6 +77,9 @@ final class Messaging
         $rows=Store::rows('messages',$where,$args,$after===null?'ORDER BY id DESC LIMIT 61':'ORDER BY id ASC LIMIT 61');
         $more=count($rows)>60; $rows=array_slice($rows,0,60);
         if ($after===null) { $rows=array_reverse($rows); }
+        $me=get_current_user_id();
+        foreach ($rows as &$message) { $message['can_delete']=(int)$message['sender_id']===$me; }
+        unset($message);
         $last=$rows?(int)end($rows)['id']:($after??0);
         if (!$before && $rows) {
             // Overlapping reads must never move the read cursor backwards.
@@ -97,6 +100,18 @@ final class Messaging
             Notifications::send($other,'message','Tienes un nuevo mensaje.',Catalog::url('mensajeria',['conversation'=>$id]),['type'=>'conversation','id'=>$id,'actor'=>$me]);
             return Store::one('messages',$mid);
         });
+    }
+    public static function removeMessage(int $conversationId,int $messageId): array
+    {
+        self::participant($conversationId);
+        $message=Store::one('messages',$messageId);
+        Access::require($message && (int)$message['conversation_id']===$conversationId,'Mensaje no encontrado.',404);
+        Access::require((int)$message['sender_id']===get_current_user_id(),'Solo puedes eliminar tus propios mensajes.',403);
+        Store::delete('messages',['id'=>$messageId,'conversation_id'=>$conversationId,'sender_id'=>get_current_user_id()]);
+        $last=Store::rows('messages','conversation_id=%d',[$conversationId],'ORDER BY id DESC LIMIT 1')[0]??null;
+        Store::update('conversations',['updated_at'=>$last?(string)$last['created_at']:current_time('mysql',true)],['id'=>$conversationId]);
+        Audit::record('message_deleted',$messageId,'conversation:'.$conversationId);
+        return ['id'=>$messageId,'deleted'=>true];
     }
     public static function relation(int $target,string $kind,bool $active): array
     {

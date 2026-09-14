@@ -15,6 +15,7 @@ bloc.txt
 .idea/
 .vscode/
 wp-content/uploads/
+wp-content/plugins/ascla-core.zip
 docs/reference/*.png
 docs/reference/*.pdf
 docs/reference/*.docx

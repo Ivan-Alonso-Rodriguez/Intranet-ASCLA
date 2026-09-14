@@ -1,4 +1,4 @@
-  function asclaInfographic(p) {
+  function asclaInfographic(p, T = (text) => text) {
     const ns = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(ns, "svg");
     const info = p.meta.infographic || {};
@@ -34,22 +34,22 @@
     add(
       "text",
       { x: 54, y: 40, fill: "#bcd5ef", "font-size": 14 },
-      "ASCLA · CENTRO DE CONOCIMIENTO",
+      T("ASCLA · CENTRO DE CONOCIMIENTO"),
     );
     add(
       "text",
       { x: 54, y: 80, fill: "white", "font-size": 25 },
-      String(info.title || "Claves de la sesión").slice(0, 45),
+      String(info.title || T("Claves de la sesión")).slice(0, 45),
     );
     section(
-      "Puntos clave",
+      T("Puntos clave"),
       (info.key_points || info.sections || []).filter(
         (x) => typeof x === "string",
       ),
     );
     if (["extractive-source-sentences-v1", "source-references-v2"].includes(p.meta.grounding?.policy)) {
       section(
-        "Estadísticas de la sesión",
+        T("Estadísticas de la sesión"),
         (info.statistics || []).filter((x) => typeof x === "string"),
       );
       const timeline = (info.timeline || []).filter(
@@ -57,7 +57,7 @@
       );
       if (timeline.length) {
         y += 15;
-        paragraph("Cronología de la fuente", 54, "#116da3", 21);
+        paragraph(T("Cronología de la fuente"), 54, "#116da3", 21);
         for (const item of timeline.slice(0, 8)) {
           add("circle", { cx: 60, cy: y - 6, r: 5, fill: "#116da3" });
           paragraph(`${item.date} · ${item.text}`, 82);
@@ -65,10 +65,10 @@
       }
     }
     if (p.meta.demo_source_note)
-      section("Datos ficticios de demostración", [p.meta.demo_source_note]);
+      section(T("Datos ficticios de demostración"), [p.meta.demo_source_note]);
     y += 18;
     paragraph(
-      `Fuente: Centro de Conocimiento ASCLA #${p.meta.source_id || p.id}`,
+      `${T("Fuente")}: ${T("Centro de Conocimiento ASCLA")} #${p.meta.source_id || p.id}`,
       54,
       "#526078",
       13,
@@ -88,9 +88,9 @@
     return new XMLSerializer().serializeToString(svg);
   }
 /* Content views share the app's escaping and controls. */
-window.ASCLAContent = function ({ escape: E, icon: I, config: C }) {
+window.ASCLAContent = function ({ escape: E, icon: I, config: C, T = (text) => text }) {
   const option = (name, label, values, selected = "") =>
-    `<label class="filter-control"><span>${E(label)}</span><select name="${E(name)}" aria-label="${E(label)}"><option value="">Todos</option>${values.map((t) => `<option value="${E(t.id)}" ${String(selected) === String(t.id) ? "selected" : ""}>${E(t.name)}</option>`).join("")}</select></label>`;
+    `<label class="filter-control"><span>${E(T(label))}</span><select name="${E(name)}" aria-label="${E(T(label))}"><option value="">${E(T("Todos"))}</option>${values.map((t) => `<option value="${E(t.id)}" ${String(selected) === String(t.id) ? "selected" : ""}>${E(t.name)}</option>`).join("")}</select></label>`;
   const termFilter = (name, label, terms, filter) =>
     option(name, label, terms || [], filter[name]);
   const duration = (seconds) => {
@@ -136,7 +136,7 @@ window.ASCLAContent = function ({ escape: E, icon: I, config: C }) {
           [{ id: 0, name: "Conversación general" }, ...forums],
           filter.parent,
         ) + controls;
-    return `<details class="advanced-filters" ${["category", "tag", "keyword", "author", "parent"].some((k) => filter[k] !== undefined && filter[k] !== "") ? "open" : ""}><summary>Más filtros</summary><div class="filter-grid">${controls}</div></details>`;
+    return `<details class="advanced-filters" ${["category", "tag", "keyword", "author", "parent"].some((k) => filter[k] !== undefined && filter[k] !== "") ? "open" : ""}><summary>${E(T("Más filtros"))}</summary><div class="filter-grid">${controls}</div></details>`;
   }
   const labels = {
     title: "Título",
@@ -160,17 +160,17 @@ window.ASCLAContent = function ({ escape: E, icon: I, config: C }) {
           m.youtube_url || "",
         )
       ) {
-        link = `<a class="btn small" href="${E(m.youtube_url)}" target="_blank" rel="noopener noreferrer">Abrir referencia en YouTube ↗</a>`;
+        link = `<a class="btn small" href="${E(m.youtube_url)}" target="_blank" rel="noopener noreferrer">${E(T("Abrir referencia en YouTube ↗"))}</a>`;
       }
-      return `<li><strong>Cápsula sugerida · ${timing}</strong><p>${E(m.description || m.title)}</p><small>${E(m.reason || m.selection)}</small><p>${link}</p></li>`;
+      return `<li><strong>${E(T("Cápsula sugerida"))} · ${timing}</strong><p>${E(m.description || m.title)}</p><small>${E(m.reason || m.selection)}</small><p>${link}</p></li>`;
     });
-    return `<ol>${items.join("")}</ol><p class="private-note">Referencias temporales al video de origen; no son archivos recortados.</p>`;
+    return `<ol>${items.join("")}</ol><p class="private-note">${E(T("Referencias temporales al video de origen; no son archivos recortados."))}</p>`;
   }
   function agenda(p) {
     const data = p.meta.agenda_ai;
     if (!data) return "";
     const mode = `<span class="tag">${E(data.mode || "DEMO MODE")}</span>`;
-    return `<section class="generated-results"><h3>Agenda de conversación ${mode}</h3><p>${E(data.objective)}</p><p><strong>Para comenzar:</strong> ${E(data.icebreaker)}</p><p><strong>Para cerrar:</strong> ${E(data.closing_question)}</p><p class="private-note">Propuesta de ${Number(data.duration_minutes)} minutos. Revisa la agenda y la fecha antes de aprobar.</p></section>`;
+    return `<section class="generated-results"><h3>${E(T("Agenda de conversación"))} ${mode}</h3><p>${E(data.objective)}</p><p><strong>${E(T("Para comenzar"))}:</strong> ${E(data.icebreaker)}</p><p><strong>${E(T("Para cerrar"))}:</strong> ${E(data.closing_question)}</p><p class="private-note">${E(T("Propuesta de"))} ${Number(data.duration_minutes)} ${E(T("minutos. Revisa la agenda y la fecha antes de aprobar."))}</p></section>`;
   }
   function value(data, depth = 0) {
     if (depth > 3 || data == null) return "";
@@ -204,15 +204,15 @@ window.ASCLAContent = function ({ escape: E, icon: I, config: C }) {
       .filter(([key]) => p.meta[key]?.length)
       .map(
         ([key, label]) =>
-          `<details class="generated-section"><summary>${label}</summary>${key === "moments" ? fragments(p.meta[key]) : value(p.meta[key])}</details>`,
+          `<details class="generated-section"><summary>${E(T(label))}</summary>${key === "moments" ? fragments(p.meta[key]) : value(p.meta[key])}</details>`,
       )
       .join("");
     if (p.meta.source_id) {
       const url = new URL(C.pages["centro-conocimiento"].url, location.href);
       url.searchParams.set("item", p.meta.source_id);
-      html += `<a class="btn small" href="${E(url.href)}">Consultar recurso de origen ${I("arrow")}</a>`;
+      html += `<a class="btn small" href="${E(url.href)}">${E(T("Consultar recurso de origen"))} ${I("arrow")}</a>`;
     }
-    return `<section class="generated-results"><h3>Resultados y fuentes</h3>${html}</section>`;
+    return `<section class="generated-results"><h3>${E(T("Resultados y fuentes"))}</h3>${html}</section>`;
   }
   return {
     option,
@@ -222,7 +222,7 @@ window.ASCLAContent = function ({ escape: E, icon: I, config: C }) {
     attachments,
     filters,
     generated,
-    infographic: asclaInfographic,
+    infographic: (p) => asclaInfographic(p, T),
     agenda,
   };
 };

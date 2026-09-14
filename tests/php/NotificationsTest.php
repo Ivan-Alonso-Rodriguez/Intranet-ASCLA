@@ -50,6 +50,29 @@ final class NotificationsTest extends TestCase
         self::assertSame($notice['url'],Notifications::open($notice['id'])['url']);
         self::assertNotNull(Store::one('notifications',$notice['id'])['read_at']);
     }
+    public function testOwnCommentDoesNotNotifyOwnPublication(): void
+    {
+        $id=wp_insert_post(['post_type'=>'ascla_hub','post_title'=>'Publicación propia','post_content'=>'Contenido propio','post_status'=>'publish','post_author'=>$this->users[0]]);
+        $this->posts[]=$id;
+        Content::comment($id,'Comentario de la misma persona autora.');
+        self::assertSame(0,Store::count('notifications','user_id=%d AND kind=%s',[$this->users[0],'comment']));
+    }
+
+    public function testCommentAndReplyNotificationsIdentifyTheAssociate(): void
+    {
+        $id=$this->post();
+        wp_set_current_user($this->users[0]);
+        $first=Content::comment($id,'Comentario de Elena para Diego.');
+        wp_set_current_user($this->users[1]);
+        $notice=Notifications::list()[0];
+        self::assertSame('Elena Prueba comentó en tu publicación',$notice['title']);
+
+        Content::comment($id,'Respuesta de Diego para Elena.',$first['id']);
+        wp_set_current_user($this->users[0]);
+        $reply=Notifications::list()[0];
+        self::assertSame('Diego Prueba respondió a tu comentario',$reply['title']);
+    }
+
     public function testUnavailableTargetAndChathamNeverExposeOldIdentities(): void
     {
         $id=$this->post(); update_post_meta($id,'_ascla',['chatham'=>true]);

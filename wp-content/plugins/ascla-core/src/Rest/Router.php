@@ -1,6 +1,6 @@
 <?php
 namespace ASCLA\Core\Rest;
-use ASCLA\Core\Services\{Access,Profiles,Matching,Messaging,Content,Events,Notifications,Settings,Media,Knowledge,Audit};
+use ASCLA\Core\Services\{Access,Profiles,Matching,Messaging,Content,Events,Notifications,Settings,Media,Knowledge,Audit,Account};
 use ASCLA\Core\Repositories\Store;
 use ASCLA\Core\Jobs\Queue;
 use ASCLA\Core\Integrations\GoogleOAuth;
@@ -26,6 +26,8 @@ final class Router
         self::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
         self::route('/profiles','GET',static fn($r)=>Profiles::directory($r->get_params()));
         self::route('/profiles/me','POST',static fn($r)=>Profiles::save($r->get_json_params()?:[]),'ascla_write');
+        self::route('/account/password','POST',static fn($r)=>Account::changePassword($r->get_json_params()?:[]),'ascla_write');
+        self::route('/account/password-reset','POST',static fn()=>Account::sendPasswordReset(),'ascla_write');
         self::route('/profiles/(?P<id>\d+)','GET',static fn($r)=>\ASCLA\Core\Services\Connections::profile((int)$r['id']));
         self::route('/matching','GET',static fn()=>Matching::recommendations());
         self::route('/matching/(?P<id>\d+)','GET',static fn($r)=>Matching::between(get_current_user_id(),(int)$r['id']));
@@ -40,13 +42,17 @@ final class Router
         self::route('/items/(?P<id>\d+)','DELETE',static fn($r)=>Content::remove((int)$r['id']),'ascla_write');
         self::route('/comments/(?P<id>\d+)','DELETE',static fn($r)=>Content::removeComment((int)$r['id']),'ascla_write');
         self::route('/items/(?P<id>\d+)/comments','GET',static fn($r)=>Content::comments((int)$r['id']));
-        self::route('/items/(?P<id>\d+)/comments','POST',static fn($r)=>Content::comment((int)$r['id'],(string)$r['body']),'ascla_write');
+        self::route('/items/(?P<id>\d+)/comments','POST',static fn($r)=>Content::comment((int)$r['id'],(string)$r['body'],(int)($r['parent']??0)),'ascla_write');
+        self::route('/comments/(?P<id>\d+)/reaction','POST',static fn($r)=>Content::reactComment((int)$r['id'],rest_sanitize_boolean($r['active'])),'ascla_write');
+        self::route('/comments/(?P<id>\d+)/report','POST',static fn($r)=>Content::reportComment((int)$r['id'],(string)$r['reason'],(string)($r['detail']??'')),'ascla_write');
         self::route('/items/(?P<id>\d+)/reaction','POST',static fn($r)=>Content::react((int)$r['id'],(string)$r['kind'],rest_sanitize_boolean($r['active'])),'ascla_write');
+        self::route('/items/(?P<id>\d+)/report','POST',static fn($r)=>Content::report((int)$r['id'],(string)$r['reason'],(string)($r['detail']??'')),'ascla_write');
         self::route('/items/(?P<id>\d+)/moderate','POST',static fn($r)=>Content::moderate((int)$r['id'],(string)$r['decision'],(string)$r['reason'],rest_sanitize_boolean($r['reviewed'])),'ascla_moderate');
         self::route('/conversations','GET',static fn($r)=>Messaging::conversations(Access::text($r['q']??'',120)));
         self::route('/conversations','POST',static fn($r)=>Messaging::start((int)$r['target']),'ascla_write');
         self::route('/conversations/(?P<id>\d+)/messages','GET',static fn($r)=>Messaging::messages((int)$r['id'],(int)$r['before'],$r->has_param('after')?(int)$r['after']:null));
         self::route('/conversations/(?P<id>\d+)/messages','POST',static fn($r)=>Messaging::send((int)$r['id'],(string)$r['body']),'ascla_write');
+        self::route('/conversations/(?P<id>\d+)/messages/(?P<message>\d+)','DELETE',static fn($r)=>Messaging::removeMessage((int)$r['id'],(int)$r['message']),'ascla_write');
         self::route('/events/(?P<id>\d+)','GET',static fn($r)=>Events::detail((int)$r['id']));
         self::route('/events/(?P<id>\d+)/invite','POST',static fn($r)=>Events::invite((int)$r['id'],(array)$r['users']),'ascla_moderate');
         self::route('/events/(?P<id>\d+)/register','POST',static fn($r)=>Events::register((int)$r['id'],(string)$r['status']),'ascla_write');
@@ -61,7 +67,8 @@ final class Router
         self::route('/media','GET',static fn($r)=>Media::listing($r->get_params()));
         self::route('/media/(?P<id>\d+)','DELETE',static fn($r)=>Media::remove((int)$r['id']),'ascla_write');
         self::route('/media','POST',static function($r) { $files=$r->get_file_params(); return Media::upload($files['file']??[]); },'ascla_write');
-        self::route('/ask','POST',static function($r) { Access::limit('ask',6,300); $question=trim(Access::text($r['question']??'',2000)); Access::require(mb_strlen($question)>=4,'Escriba una pregunta más específica.',400); return Queue::enqueue('answer',['question'=>$question]); });
+        self::route('/ask','POST',static function($r) { Access::limit('ask',12,300); $question=trim(Access::text($r['question']??'',2000)); Access::require(mb_strlen($question)>=2,'Escriba una pregunta.',400); $thread=Queue::threadKey((string)($r['thread']??'')); Access::require($thread!=='','Conversación no válida.',400); return Queue::enqueue('answer',['question'=>$question,'thread'=>$thread]); });
+        self::route('/assistant/thread','GET',static fn($r)=>Queue::thread((string)($r['thread']??'')));
         self::route('/jobs/(?P<id>\d+)','GET',static fn($r)=>Queue::get((int)$r['id']));
         self::route('/jobs/(?P<id>\d+)/retry','POST',static fn($r)=>Queue::retry((int)$r['id']));
         self::route('/jobs','POST',static function($r) {
@@ -98,6 +105,26 @@ final class Router
         $comments=[];
         foreach (get_comments(['status'=>'hold','number'=>100]) as $c) { $post=get_post($c->comment_post_ID); if ($post&&str_starts_with($post->post_type,'ascla_')) { $comments[]=['id'=>(int)$c->comment_ID,'body'=>$c->comment_content,'can_delete'=>current_user_can('ascla_manage')||(int)$c->user_id===get_current_user_id(),'author'=>$c->user_id?Profiles::publicName((int)$c->user_id):'Comunidad ASCLA']; } }
         $jobs=Store::rows('jobs'); foreach ($jobs as &$job) { unset($job['payload'],$job['result']); } unset($job);
-        return ['pending'=>$pending,'comments'=>$comments,'reports'=>Store::rows('relations',"kind='report'"),'jobs'=>$jobs,'audit'=>Store::rows('audit'),'counts'=>['members'=>count(get_users(['capability'=>'ascla_access','fields'=>'ID'])),'pending'=>count($pending)]];
+        $reports=Store::rows('relations',"kind='report'");
+        foreach ($reports as &$report) {
+            $post=get_post((int)$report['target_id']);
+            $report['title']=$post?get_the_title($post):'Contenido no disponible';
+            $report['reason_label']=Content::reportLabel((string)($report['reason']??''));
+            $report['report_type']='content';
+        }
+        unset($report);
+        foreach (Store::rows('relations',"kind='comment_report'") as $report) {
+            $comment=get_comment((int)$report['target_id']);
+            $post=$comment?get_post((int)$comment->comment_post_ID):null;
+            $author=$comment && (int)$comment->user_id>0?Profiles::publicName((int)$comment->user_id):'Comunidad ASCLA';
+            $report['comment_id']=$comment?(int)$comment->comment_ID:0;
+            $report['target_id']=$post?(int)$post->ID:0;
+            $report['title']=$post?'Comentario de '.$author.' en “'.get_the_title($post).'”':'Comentario no disponible';
+            $report['excerpt']=$comment?Access::excerpt((string)$comment->comment_content,180):'';
+            $report['reason_label']=Content::reportLabel((string)($report['reason']??''));
+            $report['report_type']='comment';
+            $reports[]=$report;
+        }
+        return ['pending'=>$pending,'comments'=>$comments,'reports'=>$reports,'jobs'=>$jobs,'audit'=>Store::rows('audit'),'counts'=>['members'=>count(get_users(['capability'=>'ascla_access','fields'=>'ID'])),'pending'=>count($pending)]];
     }
 }

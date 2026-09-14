@@ -18,6 +18,7 @@ final class Queue
         unset($row['payload']); $row['result']=json_decode($row['result']??'null',true);
         if ($row['kind']==='answer') {
             $row['question']=Access::text($payload['question']??'',2000);
+            $row['thread']=self::threadKey((string)($payload['thread']??'legacy'));
             if ($row['status']==='completed' && is_array($row['result'])) { $row['result']=Knowledge::storedAnswer($row['result']); }
         }
         return $row;
@@ -27,8 +28,41 @@ final class Queue
         $rows=Store::rows('jobs','user_id=%d AND kind=%s',[get_current_user_id(),'answer'],'ORDER BY id DESC LIMIT 50');
         return array_map(static function($row) {
             $payload=json_decode($row['payload'],true)?:[];
-            return ['id'=>(int)$row['id'],'question'=>Access::text($payload['question']??'Consulta al asistente',2000),'status'=>$row['status'],'created_at'=>$row['created_at']];
+            return ['id'=>(int)$row['id'],'question'=>Access::text($payload['question']??'Consulta al asistente',2000),'thread'=>self::threadKey((string)($payload['thread']??'legacy')),'status'=>$row['status'],'created_at'=>$row['created_at']];
         },$rows);
+    }
+    public static function thread(string $thread): array
+    {
+        $thread=self::threadKey($thread);Access::require($thread!=='','Conversación no válida.',400);
+        $rows=Store::rows('jobs','user_id=%d AND kind=%s',[get_current_user_id(),'answer'],'ORDER BY id DESC LIMIT 100');$items=[];
+        foreach($rows as $row){
+            $payload=json_decode($row['payload'],true)?:[];
+            if(self::threadKey((string)($payload['thread']??'legacy'))!==$thread)continue;
+            $result=json_decode($row['result']??'null',true);
+            if($row['status']==='completed'&&is_array($result))$result=Knowledge::storedAnswer($result);
+            $items[]=['id'=>(int)$row['id'],'question'=>Access::text($payload['question']??'',2000),'status'=>$row['status'],'error'=>$row['error']??'','result'=>$result,'created_at'=>$row['created_at']];
+            if(count($items)>=30)break;
+        }
+        return array_reverse($items);
+    }
+    private static function history(int $user,string $thread,int $beforeId): array
+    {
+        $thread=self::threadKey($thread);if($thread==='')return [];
+        $rows=Store::rows('jobs','user_id=%d AND kind=%s AND status=%s AND id<%d',[$user,'answer','completed',$beforeId],'ORDER BY id DESC LIMIT 40');$turns=[];
+        foreach($rows as $row){
+            $payload=json_decode($row['payload'],true)?:[];
+            if(self::threadKey((string)($payload['thread']??'legacy'))!==$thread)continue;
+            $result=json_decode($row['result']??'null',true);
+            if(!is_array($result)||trim((string)($result['answer']??''))==='')continue;
+            $turns[]=['question'=>Access::text($payload['question']??'',2000),'answer'=>Access::text($result['answer'],20000)];
+            if(count($turns)>=6)break;
+        }
+        return array_reverse($turns);
+    }
+    public static function threadKey(string $value): string
+    {
+        $value=preg_replace('/[^a-zA-Z0-9_-]/','',$value)??'';
+        return strlen($value)>=6&&strlen($value)<=80?$value:'';
     }
     public static function retry(int $id): array
     {
@@ -50,7 +84,7 @@ final class Queue
                 if ($row['kind']==='social') { Access::require(current_user_can('ascla_moderate'),'Permiso de moderación revocado.'); }
                 if (in_array($row['kind'],['multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Permiso de publicación revocado.'); }
                 $result=match($row['kind']) {
-                    'answer'=>Knowledge::answer($p['question']??''),
+                    'answer'=>Knowledge::answer($p['question']??'',self::history((int)$row['user_id'],(string)($p['thread']??'legacy'),(int)$row['id'])),
                     'multimedia'=>Knowledge::multimedia((int)($p['resource_id']??0)),
                     'microevents'=>MicroEvents::create(),
                     'social'=>self::social(),

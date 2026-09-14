@@ -6,7 +6,7 @@ final class Knowledge
 {
     private const IDENTITIES_SEPARATOR='/[\n,;]+/u';
     public static function provider(): AIProviderInterface { return Settings::get()['ai_mode']==='real'?new RealAIProvider():new MockAIProvider(); }
-    public static function answer(string $question): array
+    public static function answer(string $question,array $history=[]): array
     {
         $question=Access::text($question,2000);
         $tokens=\ASCLA\Core\Repositories\KnowledgeSearch::tokens($question);
@@ -24,28 +24,59 @@ final class Knowledge
             }
             $title=!empty($meta['chatham'])?Anonymizer::redact($post->post_title,$identities):$post->post_title;
             $score=\ASCLA\Core\Repositories\KnowledgeSearch::score($title,$body,$tokens);
-            if($score>0) $ranked[]=['id'=>$post->ID,'title'=>$title,'body'=>\ASCLA\Core\Repositories\KnowledgeSearch::excerpt($body,$tokens),'score'=>$score,'url'=>Content::serialize($post)['url']];
+            if($score>0) $ranked[]=['id'=>$post->ID,'title'=>$title,'body'=>\ASCLA\Core\Repositories\KnowledgeSearch::excerpt($body,$tokens),'score'=>$score,'url'=>Content::serialize($post)['url'],'kind'=>'resource'];
         }
-        usort($ranked,static fn($a,$b)=>($b['score']<=>$a['score'])?:($b['id']<=>$a['id'])); $sources=array_slice($ranked,0,6);
-        if (!$sources) { return ['answer'=>'No existe suficiente información en el Centro de Conocimiento para responder esta consulta.','sources'=>[],'mode'=>self::provider()->mode()]; }
+        usort($ranked,static fn($a,$b)=>($b['score']<=>$a['score'])?:($b['id']<=>$a['id']));
+
+        $history=array_values(array_slice(array_filter($history,static fn($turn)=>is_array($turn)&&trim((string)($turn['question']??''))!==''&&trim((string)($turn['answer']??''))!==''),-6));
+        $contextQuestion=$question;
+        if($history && self::followUp($question)){
+            $last=end($history);$contextQuestion.=' '.Access::text($last['question']??'',1000);
+        }
+        $context=AssistantContext::build($contextQuestion);
+        $sources=[];$seen=[];
+        // Live intranet context comes first for operational questions such as upcoming events.
+        foreach(array_merge($context['sources'],array_slice($ranked,0,6)) as $source){
+            $id=(int)($source['id']??0);if($id<=0||isset($seen[$id]))continue;
+            $seen[$id]=true;$sources[]=$source;if(count($sources)>=8)break;
+        }
+        $conversation=self::conversational($question);
+        if (!$sources && empty($context['answerable']) && !$conversation) {
+            return ['answer'=>'No existe suficiente información en ASCLA para responder esta consulta. Prueba con una pregunta sobre eventos, publicaciones o recursos de la comunidad.','sources'=>[],'mode'=>self::provider()->mode(),'grounding'=>['policy'=>Grounding::POLICY,'context_source_ids'=>[],'valid_references'=>0,'ignored_references'=>0,'live_context_used'=>false,'conversation_only'=>false]];
+        }
         $inputQuestion=$protected?EntityRedactor::redact($question,$allIdentities):$question;
-        $result=self::provider()->generate('answer',['question'=>$inputQuestion,'sources'=>$sources]);
+        if($protected){ $history=EntityRedactor::tree($history,$allIdentities); }
+        $result=self::provider()->generate('answer',['question'=>$inputQuestion,'sources'=>$sources,'live_context'=>$context['live'],'history'=>$history]);
         if($protected){ $result=EntityRedactor::tree($result,$allIdentities); }
         $verified=Grounding::answer($result,$sources);
-        if (!$verified['answer']) { return ['answer'=>'No existe suficiente información verificable para responder esta consulta. El proveedor no devolvió una respuesta utilizable.','sources'=>[],'mode'=>self::provider()->mode(),'grounding'=>$verified['grounding']]; }
+        $verified['grounding']['live_context_used']=!empty($context['answerable']);
+        $verified['grounding']['conversation_only']=$conversation&&!$sources&&!$context['answerable'];
+        $verified['grounding']['snapshot_at']=current_datetime()->format(DATE_ATOM);
+        if (!$verified['answer']) { return ['answer'=>'No pude preparar una respuesta verificable con la información disponible en ASCLA. Intenta reformular la pregunta.','sources'=>[],'mode'=>self::provider()->mode(),'grounding'=>$verified['grounding']]; }
         $answer=$protected?EntityRedactor::redact($verified['answer'],$allIdentities):$verified['answer'];
         if($protected){ Access::require(EntityRedactor::validateRedaction($answer,$allIdentities)['valid'],'La respuesta requiere revisión de anonimización.',502); }
-        return ['answer'=>Access::text($answer,20000),'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url']],$verified['sources']),'mode'=>self::provider()->mode(),'grounding'=>$verified['grounding']];
+        return ['answer'=>Access::text($answer,20000),'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url'],'kind'=>$source['kind']??'content'],$verified['sources']),'mode'=>self::provider()->mode(),'grounding'=>$verified['grounding']];
+    }
+
+    private static function conversational(string $question): bool
+    {
+        $plain=mb_strtolower(remove_accents(trim($question)));
+        return (bool)preg_match('/^(hola|hello|hi|buenas|buenos dias|buenas tardes|buenas noches|gracias|thanks)\b|\b(que puedes hacer|como me ayudas|ayuda|help|what can you do)\b/u',$plain);
+    }
+
+    private static function followUp(string $question): bool
+    {
+        $plain=mb_strtolower(remove_accents(trim($question)));
+        return mb_strlen($plain)<=120 && (bool)preg_match('/^(y|pero|entonces)\b|\b(cual|cuales|cuando|hora|donde|virtual|presencial|ese|esa|eso|este|esta|primero|primera|segundo|segunda|tambien|more|which|when|where|what time|that one|the first|the second)\b/u',$plain);
     }
 
     /** Revalidate saved answers against the currently readable, reviewed evidence. */
     public static function storedAnswer(array $result): array
     {
         $sources=[];$identities=[];$protected=false;
-        $originalIds=array_values(array_unique(array_map('intval',$result['grounding']['context_source_ids']??array_column($result['sources']??[],'id'))));
+        $originalIds=array_values(array_unique(array_filter(array_map('intval',$result['grounding']['context_source_ids']??array_column($result['sources']??[],'id')),static fn($id)=>$id>0)));
         foreach ($originalIds as $sourceId) {
-            $source=['id'=>$sourceId];
-            $post=get_post((int)($source['id']??0));
+            $post=get_post($sourceId);
             if (!$post || $post->post_status!=='publish' || !Content::canRead($post)) { continue; }
             $meta=(array)get_post_meta($post->ID,'_ascla',true);
             if (!empty($meta['generated']) && empty($meta['reviewed'])) { continue; }
@@ -57,12 +88,18 @@ final class Knowledge
             }
             $sources[]=['id'=>$post->ID,'body'=>$body,'title'=>$title,'url'=>Content::serialize($post)['url']];
         }
-        if(!$originalIds) return ['answer'=>'No existe suficiente información en el Centro de Conocimiento para responder esta consulta.','sources'=>[],'mode'=>$result['mode']??'Fuentes actualizadas'];
-        if(count($sources)!==count($originalIds)) return ['answer'=>'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar el Centro de Conocimiento.','sources'=>[],'mode'=>$result['mode']??'Fuentes actualizadas'];
+        if(!$originalIds){
+            if(!empty($result['grounding']['live_context_used'])||!empty($result['grounding']['conversation_only'])){
+                return ['answer'=>Access::text($result['answer']??'',20000),'sources'=>[],'mode'=>$result['mode']??'ASCLA','grounding'=>$result['grounding']??[]];
+            }
+            return ['answer'=>'No existe suficiente información en ASCLA para responder esta consulta.','sources'=>[],'mode'=>$result['mode']??'Fuentes actualizadas'];
+        }
+        if(count($sources)!==count($originalIds)) return ['answer'=>'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar al Asistente ASCLA.','sources'=>[],'mode'=>$result['mode']??'Fuentes actualizadas'];
         $candidate=['answer'=>$result['answer']??'','source_ids'=>array_column($result['sources']??[],'id')];
         if($protected){ $candidate=EntityRedactor::tree($candidate,$identities); }
         $verified=Grounding::answer($candidate,$sources);
-        $answer=$verified['answer']?:'No existe suficiente información verificable en las fuentes actuales. Puedes volver a consultar el Centro de Conocimiento.';
+        $answer=$verified['answer']?:'No existe suficiente información verificable en las fuentes actuales. Puedes volver a consultar al Asistente ASCLA.';
+        $verified['grounding']=array_merge($result['grounding']??[],$verified['grounding']);
         return ['answer'=>$answer,'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url']],$verified['sources']),'mode'=>$result['mode']??'Fuentes actualizadas','grounding'=>$verified['grounding']];
     }
 

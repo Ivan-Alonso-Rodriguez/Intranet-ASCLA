@@ -32,13 +32,9 @@ final class DomainTest extends TestCase
         foreach($first['groups'] as $g)foreach($g as $a)foreach($g as $b)if($a<$b)$history[$a.':'.$b]=10;
         self::assertNotSame($first['groups'],GroupPlanner::plan($p,$history)['groups']);
     }
-    public function testCalendarEscapesInjectionAndConvertsTimezone(): void
+    public function testGoogleCalendarLinkConvertsTimezone(): void
     {
-        $meta=['start'=>'2026-09-05T10:00:00-05:00','end'=>'2026-09-05T11:00:00-05:00','location'=>"Lima; Sala, 1\nEND:VEVENT"];
-        $ics=Calendar::ics(4,str_repeat('Gobernanza ',20),$meta,"Descripción; confidencial\nNueva línea",'example.invalid');
-        self::assertStringContainsString('DTSTART:20260905T150000Z',$ics);
-        self::assertStringContainsString('Lima\\; Sala\\, 1\\nEND:VEVENT',$ics);
-        foreach(explode("\r\n",$ics) as $line)self::assertLessThanOrEqual(75,strlen($line));
+        $meta=['start'=>'2026-09-05T10:00:00-05:00','end'=>'2026-09-05T11:00:00-05:00','location'=>'Lima'];
         self::assertStringContainsString('dates=20260905T150000Z%2F20260905T160000Z',Calendar::google('Consejo',$meta));
     }
     public function testChathamRedactsKnownIdentityAndAffiliation(): void

@@ -70,7 +70,7 @@ Los {metrics['code_smells']} avisos de mantenimiento siguen abiertos, incluidos 
 
 PHPUnit 11.5.56/PCOV 1.0.12: matching, grupos, autorización/IDOR, privacidad, bloqueo, cupos, moderación, medios, secretos, fuentes antiguas y abstención, Chatham House, cola e instalador. La regresión nueva cubre filtros combinados, listas JSON de etiquetas, autores/fuentes, más de una página de eventos, mes y zona horaria, invitaciones/avisos idempotentes, consentimiento, subtítulos densos, tiempos no sustentados, metadatos y continuación de cola.
 
-Playwright/Edge: doce secciones, perfil, Hub, foros, mensajería, calendario/ICS, uploads privados, generación/revisión, asistente, contacto y configuración. Aceptación específica: filtros nuevos, imágenes, logos, invitaciones, agenda y resultados estructurados. Acceso: escritorio y 320/390/768 px, error, destino permitido, logout, recuperación y renovación de sesión.
+Playwright/Edge: doce secciones, perfil, Hub, foros, mensajería, calendario, uploads privados, generación/revisión, asistente, contacto y configuración. Aceptación específica: filtros nuevos, imágenes, logos, invitaciones, agenda y resultados estructurados. Acceso: escritorio y 320/390/768 px, error, destino permitido, logout, recuperación y renovación de sesión.
 
 V8 se captura antes de navegar. Se incorpora evidencia del ZIP y de aceptación sólo si el código fuente coincide exactamente, incluido content-ui.js. Los proveedores HTTP se probaron con respuestas simuladas; no con cuentas reales.
 
