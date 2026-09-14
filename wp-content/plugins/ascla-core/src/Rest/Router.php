@@ -66,7 +66,7 @@ final class Router
         self::route('/notifications/(?P<id>\d+)/read','POST',static fn($r)=>Notifications::read((int)$r['id']));
         self::route('/media','GET',static fn($r)=>Media::listing($r->get_params()));
         self::route('/media/(?P<id>\d+)','DELETE',static fn($r)=>Media::remove((int)$r['id']),'ascla_write');
-        self::route('/media','POST',static function($r) { $files=$r->get_file_params(); return Media::upload($files['file']??[]); },'ascla_write');
+        self::route('/media','POST',static function($r) { $files=$r->get_file_params(); return Media::upload($files['file']??[],$r->get_params()); },'ascla_write');
         self::route('/ask','POST',static function($r) { Access::limit('ask',12,300); $question=trim(Access::text($r['question']??'',2000)); Access::require(mb_strlen($question)>=2,'Escriba una pregunta.',400); $thread=Queue::threadKey((string)($r['thread']??'')); Access::require($thread!=='','Conversación no válida.',400); return Queue::enqueue('answer',['question'=>$question,'thread'=>$thread]); });
         self::route('/assistant/thread','GET',static fn($r)=>Queue::thread((string)($r['thread']??'')));
         self::route('/jobs/(?P<id>\d+)','GET',static fn($r)=>Queue::get((int)$r['id']));
@@ -78,13 +78,18 @@ final class Router
             if (in_array($kind,['multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden gestionar recursos.',403); Content::get((int)$r['resource_id']); }
             Access::limit('admin_job',10,300); return Queue::enqueue($kind,['resource_id'=>(int)$r['resource_id']]);
         },'ascla_admin_area');
-        self::route('/ai/test','POST',static fn()=>\ASCLA\Core\Integrations\RealAIProvider::test(),'ascla_manage');
+        self::route('/ai/test','POST',static function(){
+            $provider=Settings::get()['ai_provider']??'mock';
+            Access::require($provider!=='mock','Selecciona Google Gemini u OpenAI antes de probar la conexión.',400);
+            return $provider==='openai'?\ASCLA\Core\Integrations\OpenAIProvider::test():\ASCLA\Core\Integrations\RealAIProvider::test();
+        },'ascla_manage');
         self::route('/admin/users','GET',static fn($r)=>\ASCLA\Core\Services\Administration::users($r->get_params()),'ascla_manage');
         self::route('/admin/contacts','GET',static fn($r)=>\ASCLA\Core\Services\Administration::contacts($r->get_params()),'ascla_moderate');
         self::route('/mail/test','POST',static fn()=>\ASCLA\Core\Integrations\Mailer::test(),'ascla_manage');
         self::route('/settings','GET',static fn()=>Settings::status(),'ascla_manage');
         self::route('/settings','POST',static fn($r)=>Settings::save($r->get_json_params()?:[]),'ascla_manage');
         self::route('/admin','GET',static fn()=>self::admin(),'ascla_admin_area');
+        self::route('/admin/reports/(?P<id>\d+)/review','POST',static fn($r)=>Content::reviewReport((int)$r['id']),'ascla_moderate');
         self::route('/admin/comments/(?P<id>\d+)','POST',static function($r) {
             $comment=get_comment((int)$r['id']); Access::require($comment && Content::get((int)$comment->comment_post_ID),'Comentario no válido.',404);
             $status=$r['decision']==='approve'?'approve':'hold'; wp_set_comment_status($comment->comment_ID,$status); Audit::record('comment_moderation',(int)$comment->comment_ID,$status); return ['ok'=>true];
@@ -125,6 +130,8 @@ final class Router
             $report['report_type']='comment';
             $reports[]=$report;
         }
+        foreach ($reports as &$report) { $report['reviewed']=!empty($report['reviewed_at']); $report['reviewed_by_name']=!empty($report['reviewed_by'])?Profiles::publicName((int)$report['reviewed_by']):''; } unset($report);
+        usort($reports,static fn($a,$b)=>(($a['reviewed']?1:0)<=>($b['reviewed']?1:0)) ?: strcmp((string)($b['created_at']??''),(string)($a['created_at']??'')));
         return ['pending'=>$pending,'comments'=>$comments,'reports'=>$reports,'jobs'=>$jobs,'audit'=>Store::rows('audit'),'counts'=>['members'=>count(get_users(['capability'=>'ascla_access','fields'=>'ID'])),'pending'=>count($pending)]];
     }
 }

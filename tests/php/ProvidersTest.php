@@ -1,20 +1,20 @@
 <?php
 use PHPUnit\Framework\TestCase;
-use ASCLA\Core\Integrations\{RealAIProvider,YouTubeVideoProvider,GoogleOAuth,Secrets};
+use ASCLA\Core\Integrations\{RealAIProvider,OpenAIProvider,YouTubeVideoProvider,GoogleOAuth,Secrets};
 use ASCLA\Core\Services\{Settings,Content};
 final class ProvidersTest extends TestCase
 {
     private int $user; private $http; private array $settings; private array $posts=[]; private array $savedSecrets=[];
     protected function setUp(): void
     {
-        $this->settings=Settings::get();foreach(['ai_key','google_client_secret'] as $key)$this->savedSecrets[$key]=Secrets::get($key);$this->user=wp_insert_user(['user_login'=>'test_provider_'.bin2hex(random_bytes(4)),'user_pass'=>wp_generate_password(30),'role'=>'administrator']);wp_set_current_user($this->user);
+        $this->settings=Settings::get();foreach(['ai_key','openai_key','google_client_secret'] as $key)$this->savedSecrets[$key]=Secrets::get($key);$this->user=wp_insert_user(['user_login'=>'test_provider_'.bin2hex(random_bytes(4)),'user_pass'=>wp_generate_password(30),'role'=>'administrator']);wp_set_current_user($this->user);
         Settings::save(['ai_mode'=>'real','ai_model'=>'gemini-test-model','ai_key'=>'fake-key-for-http-mock','google_client_id'=>'fake-client-id','google_client_secret'=>'fake-client-secret']);
     }
     protected function tearDown(): void
     {
         if($this->http)remove_filter('pre_http_request',$this->http,10);
         foreach($this->posts as $id)wp_delete_post($id,true);
-        foreach(['ai_key','google_client_secret','google_calendar_'.$this->user,'google_youtube_'.$this->user] as $key)Secrets::remove($key);
+        foreach(['ai_key','openai_key','google_client_secret','google_calendar_'.$this->user,'google_youtube_'.$this->user] as $key)Secrets::remove($key);
         foreach($this->savedSecrets as $key=>$value){if($value!=='')Secrets::set($key,$value);}
         wp_delete_user($this->user);update_option('ascla_settings',$this->settings,false);wp_set_current_user(0);
     }
@@ -35,6 +35,20 @@ final class ProvidersTest extends TestCase
             return self::response(['candidates'=>[['content'=>['parts'=>[['text'=>wp_json_encode(['answer'=>'Respuesta de prueba','source_ids'=>[22]])]]],'finishReason'=>'STOP']]]);
         });
         $r=(new RealAIProvider())->generate('answer',['sources'=>[['id'=>22]]]);self::assertSame('Google Gemini · API real',$r['mode']);self::assertSame([22],$r['source_ids']);
+    }
+    public function testOpenAITransportUsesResponsesEndpointBearerKeyAndConfiguredModel(): void
+    {
+        Settings::save(['ai_provider'=>'openai','openai_model'=>'gpt-5.6-luna','openai_key'=>'sk-test-openai-never-send']);
+        $this->mock(static function($args,$url){
+            self::assertSame('https://api.openai.com/v1/responses',$url);
+            self::assertSame('Bearer sk-test-openai-never-send',$args['headers']['Authorization']);
+            self::assertArrayNotHasKey('x-goog-api-key',$args['headers']);
+            $body=json_decode($args['body'],true);self::assertSame('gpt-5.6-luna',$body['model']);
+            self::assertStringNotContainsString('sk-test-openai-never-send',$args['body']);
+            self::assertSame('answer',json_decode($body['input'],true)['task']);
+            return self::response(['status'=>'completed','output'=>[['type'=>'message','content'=>[['type'=>'output_text','text'=>wp_json_encode(['answer'=>'Respuesta OpenAI','source_ids'=>[22]])]]]]]);
+        });
+        $r=(new OpenAIProvider())->generate('answer',['sources'=>[['id'=>22]]]);self::assertSame('OpenAI · API real',$r['mode']);self::assertSame([22],$r['source_ids']);
     }
     public function testRealAIPropagatesSafeQuotaError(): void
     {

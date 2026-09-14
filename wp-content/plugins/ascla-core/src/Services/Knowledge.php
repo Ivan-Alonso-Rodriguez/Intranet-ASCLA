@@ -1,11 +1,18 @@
 <?php
 namespace ASCLA\Core\Services;
-use ASCLA\Core\Integrations\{AIProviderInterface,MockAIProvider,RealAIProvider,MockVideoProvider,YouTubeVideoProvider};
+use ASCLA\Core\Integrations\{AIProviderInterface,MockAIProvider,RealAIProvider,OpenAIProvider,MockVideoProvider,YouTubeVideoProvider};
 use ASCLA\Core\Domain\{Anonymizer,EntityRedactor,Grounding};
 final class Knowledge
 {
     private const IDENTITIES_SEPARATOR='/[\n,;]+/u';
-    public static function provider(): AIProviderInterface { return Settings::get()['ai_mode']==='real'?new RealAIProvider():new MockAIProvider(); }
+    public static function provider(): AIProviderInterface
+    {
+        return match(Settings::get()['ai_provider']??'mock') {
+            'gemini'=>new RealAIProvider(),
+            'openai'=>new OpenAIProvider(),
+            default=>new MockAIProvider(),
+        };
+    }
     public static function answer(string $question,array $history=[]): array
     {
         $question=Access::text($question,2000);

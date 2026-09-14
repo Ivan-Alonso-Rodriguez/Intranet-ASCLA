@@ -8,9 +8,12 @@ final class NetworkingAI
     private const DEMO_MODE='DEMO MODE';
     public static function generate(string $task,array $context): array
     {
-        $settings=Settings::get();$fallback=$settings['ai_mode']==='real'&&(!Secrets::get('ai_key')||!$settings['ai_model']);
+        $settings=Settings::get();$selected=$settings['ai_provider']??'mock';
+        $configured=match($selected){'gemini'=>Secrets::get('ai_key')!==''&&!empty($settings['ai_model']),'openai'=>Secrets::get('openai_key')!==''&&!empty($settings['openai_model']),default=>true};
+        $fallback=$selected!=='mock'&&!$configured;
         $provider=$fallback?new MockAIProvider():Knowledge::provider();
-        $key='ascla_prose_'.hash('sha256',wp_json_encode([$task,$context,$provider->mode(),$settings['ai_model'],'v1']));
+        $model=$selected==='openai'?($settings['openai_model']??''):($settings['ai_model']??'');
+        $key='ascla_prose_'.hash('sha256',wp_json_encode([$task,$context,$provider->mode(),$model,'v3']));
         $cached=get_transient($key);if(is_array($cached)){ return $cached; }
         Access::limit('network-ai',20,300);
         try {$result=$provider->generate($task,$context);}

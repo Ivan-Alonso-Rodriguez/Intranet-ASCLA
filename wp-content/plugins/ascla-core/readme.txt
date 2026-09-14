@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.9.9
+Stable tag: 1.9.15
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,47 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.9.15 =
+* Administración > Configuración usa el modal propio de ASCLA al intentar salir con cambios pendientes, incluso al navegar mediante enlaces del panel de WordPress.
+* El directorio reorganiza las tarjetas de asociados en bloques proporcionales de información, afinidad/intereses y acciones.
+* Las acciones de conexión quedan alineadas y con alturas consistentes; la tarjeta propia ofrece Editar mi perfil.
+* No requiere migración de base de datos; se mantiene el esquema 7.
+
+= 1.9.14 =
+* ASCLA bloquea el auto-registro público de WordPress: las cuentas solo pueden ser creadas por la administración.
+* Retira Registro público de Configuración → Seguridad y elimina ese flujo de la integración Turnstile.
+* Turnstile permanece disponible para login, recuperación de contraseña y formularios públicos adaptativos.
+* No requiere migración de base de datos; se mantiene el esquema 7.
+
+= 1.9.13 =
+* Añade Cloudflare Turnstile opcional en modo Managed para login y recuperación de contraseña, además de una política adaptativa reutilizable para otros formularios públicos.
+* Login solicita Turnstile después de 3 fallos y aplica bloqueo temporal desde 5 fallos.
+* Recuperación de contraseña solicita Turnstile después de 2 solicitudes consecutivas.
+* Un navegador/IP verificado se considera confiable durante 24 horas para evitar desafíos repetitivos, salvo nuevos patrones de abuso.
+* Los intentos usan principalmente IP + usuario/correo y una señal IP secundaria para reducir bloqueos injustos en redes compartidas.
+* La validación del token se realiza del lado del servidor con Cloudflare Siteverify y la Secret Key se almacena cifrada.
+* Administración → Configuración → Seguridad permite activar Turnstile, guardar claves y elegir los formularios protegidos.
+* No requiere migración de base de datos; se mantiene el esquema 7.
+
+= 1.9.12 =
+* Filtro por usuario propietario en Administración > Archivos.
+* Mensajes sugeridos por IA redactados como el asociado remitente, sin voz de asistente.
+* Modal ASCLA para advertir cambios sin guardar durante la navegación interna.
+* Esquema de base de datos sin cambios (7).
+
+= 1.9.11 =
+* Perfil > Mis archivos muestra únicamente los archivos propios, incluso para administradores; la vista global queda en Administración > Archivos.
+* Añade OpenAI / ChatGPT como proveedor alternativo de IA junto a Gemini y DEMO, con modelo, clave y prueba de conexión independientes.
+* Permite marcar reportes como revisados, registra moderador y fecha, y prioriza los reportes pendientes en Moderación.
+* Añade esquema 7 para el estado de revisión de reportes.
+
+
+= 1.9.10 =
+* Mejora el espaciado de Inicio entre Conocimiento para tu día a día y Publicados recientemente.
+* Añade editor previo de imágenes con vista previa, movimiento, zoom y recorte por contexto antes de guardar.
+* Optimiza imágenes en el navegador, evita ampliar fuentes pequeñas y conserva una copia maestra no recortada y optimizada cuando se aplica recorte.
+* Añade esquema 6 para enlazar la versión visible de una imagen con su copia maestra privada y gestionarlas juntas.
 
 = 1.9.9 =
 * Convierte el Asistente ASCLA en una experiencia de chat con conversaciones separadas e historial por hilo.

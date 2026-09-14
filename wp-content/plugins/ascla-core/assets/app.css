@@ -488,6 +488,27 @@
   align-items: center;
   flex-direction: column;
   position: relative;
+  min-height: 398px;
+}
+.member-card-profile {
+  width: 100%;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  flex-direction: column;
+}
+.member-card-signal {
+  width: 100%;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.member-card-actions {
+  width: 100%;
+  margin-top: auto;
+  display: grid;
+  gap: 12px;
 }
 .member-card .avatar {
   margin: 2px 0 12px;
@@ -533,12 +554,35 @@
   height: 12px;
 }
 .member-card .btn {
-  margin-top: 17px;
   width: 100%;
   font-size: 11px;
-  min-height: 32px;
-  padding: 6px;
+  min-height: 36px;
+  padding: 7px 10px;
 }
+.member-card-actions > .btn { margin-top: 0; }
+.member-card .connection-controls {
+  margin-top: 0;
+  min-height: 86px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.member-card .connection-actions {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+  align-items: stretch;
+}
+.member-card .connection-actions .btn { margin-top: 0; }
+.member-card .connection-state { justify-self: center; }
+.member-card .connection-controls .private-note {
+  min-height: 30px;
+  margin: 8px 4px 0;
+  text-align: center;
+  line-height: 1.35;
+}
+.member-card .member-own-actions,
+.member-card .member-action-placeholder { min-height: 86px; }
 .tag-row {
   display: flex;
   gap: 6px;
@@ -555,6 +599,7 @@
 }
 .member-card .tag-row {
   justify-content: center;
+  margin: 12px 0 0;
 }
 .section-gap {
   margin-top: 27px;
@@ -1841,7 +1886,7 @@ output.view-loading{display:block}
 .chat-profile strong { overflow-wrap: anywhere; }
 .chat-profile small { display: block; font-size: 11px; color: var(--blue); margin-top: 3px; }
 .chat-profile:hover strong { text-decoration: underline; }
-@media (max-width: 760px) { .connection-row { flex-direction: column; align-items: stretch; gap: 12px; } .chat-title { gap: 10px; } }
+@media (max-width: 760px) { .connection-row { flex-direction: column; align-items: stretch; gap: 12px; } .chat-title { gap: 10px; } .member-card { min-height: 0; } .member-card .connection-controls, .member-card .member-own-actions, .member-card .member-action-placeholder { min-height: 0; } }
 
 /* Administration workspace: clear task states, user access and responsive controls. */
 #ascla-root .admin-workspace{max-width:1500px;margin:0 auto}
@@ -2431,3 +2476,214 @@ html[data-ascla-theme="dark"] #ascla-root .assistant-compose textarea { backgrou
   .assistant-compose { align-items: stretch; }
   .assistant-compose .btn span { display: none; }
 }
+
+/* v1.9.10 · Image editor and improved dashboard spacing */
+#ascla-root .recent-heading {
+  margin-top: 34px !important;
+  padding-top: 4px;
+}
+#ascla-root .ascla-image-editor-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100120;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(8, 28, 45, .72);
+  backdrop-filter: blur(5px);
+}
+#ascla-root .ascla-image-editor {
+  width: min(1050px, 100%);
+  max-height: min(900px, calc(100vh - 36px));
+  overflow: auto;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 28px 90px rgba(5, 27, 47, .28);
+}
+#ascla-root .ascla-image-editor-head,
+#ascla-root .ascla-image-editor-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+}
+#ascla-root .ascla-image-editor-head {
+  border-bottom: 1px solid var(--line);
+}
+#ascla-root .ascla-image-editor-head h2 {
+  margin: 0 0 4px !important;
+}
+#ascla-root .ascla-image-editor-head p,
+#ascla-root .image-editor-info p,
+#ascla-root .image-editor-info span {
+  color: var(--muted);
+  font-size: 12px;
+}
+#ascla-root .image-editor-close {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 28px;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+#ascla-root .image-editor-close:hover { background: var(--bg); color: var(--ink); }
+#ascla-root .ascla-image-editor-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 22px;
+  padding: 22px 24px;
+}
+#ascla-root .image-editor-workspace { min-width: 0; }
+#ascla-root .image-editor-stage {
+  position: relative;
+  width: 100%;
+  height: clamp(330px, 52vh, 540px);
+  overflow: hidden;
+  border-radius: 14px;
+  background-color: #0d1720;
+  background-image: linear-gradient(45deg,#182633 25%,transparent 25%),linear-gradient(-45deg,#182633 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#182633 75%),linear-gradient(-45deg,transparent 75%,#182633 75%);
+  background-size: 24px 24px;
+  background-position: 0 0,0 12px,12px -12px,-12px 0;
+  touch-action: none;
+  cursor: grab;
+  outline: none;
+}
+#ascla-root .image-editor-stage.is-dragging { cursor: grabbing; }
+#ascla-root .image-editor-stage.is-full { cursor: default; }
+#ascla-root .image-editor-stage > img {
+  position: absolute;
+  max-width: none;
+  user-select: none;
+  pointer-events: none;
+  will-change: left, top, width, height;
+}
+#ascla-root .image-editor-crop-frame {
+  position: absolute;
+  z-index: 2;
+  border: 2px solid #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 0 9999px rgba(3, 12, 20, .58), 0 0 0 1px rgba(0,0,0,.3);
+  pointer-events: none;
+}
+#ascla-root .image-editor-crop-frame::before,
+#ascla-root .image-editor-crop-frame::after,
+#ascla-root .image-editor-crop-frame > span::before,
+#ascla-root .image-editor-crop-frame > span::after {
+  content: "";
+  position: absolute;
+  background: rgba(255,255,255,.45);
+}
+#ascla-root .image-editor-crop-frame::before { left: 33.333%; top: 0; width: 1px; height: 100%; }
+#ascla-root .image-editor-crop-frame::after { left: 66.666%; top: 0; width: 1px; height: 100%; }
+#ascla-root .image-editor-crop-frame > span::before { top: 33.333%; left: 0; height: 1px; width: 100%; }
+#ascla-root .image-editor-crop-frame > span::after { top: 66.666%; left: 0; height: 1px; width: 100%; }
+#ascla-root .image-editor-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+#ascla-root .image-editor-zoom {
+  display: grid;
+  grid-template-columns: auto 34px minmax(130px, 1fr) 34px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+}
+#ascla-root .image-editor-zoom[hidden] { display: none; }
+#ascla-root .image-editor-zoom button {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+}
+#ascla-root .image-editor-zoom input { width: 100%; accent-color: var(--blue); }
+#ascla-root .image-editor-info {
+  align-self: start;
+  display: grid;
+  gap: 8px;
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--bg);
+  overflow-wrap: anywhere;
+}
+#ascla-root .image-editor-info strong { color: var(--ink); }
+#ascla-root .image-editor-ratio {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 650;
+}
+#ascla-root .ascla-image-editor-actions {
+  justify-content: flex-end;
+  border-top: 1px solid var(--line);
+}
+#ascla-root .image-editor-status {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 12px;
+}
+#ascla-root .attached-file.image-ready {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+#ascla-root .attached-file.image-ready img {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+}
+html[data-ascla-theme="dark"] #ascla-root .ascla-image-editor {
+  background: #17222d;
+  border-color: var(--line);
+  color: var(--ink);
+}
+html[data-ascla-theme="dark"] #ascla-root .image-editor-info,
+html[data-ascla-theme="dark"] #ascla-root .image-editor-zoom button {
+  background: #111b24;
+  border-color: #344756;
+  color: var(--ink);
+}
+html[data-ascla-theme="dark"] #ascla-root .image-editor-ratio { background: #16384c; color: #8cd5f5; }
+html[data-ascla-theme="dark"] #ascla-root .image-editor-close:hover { background: #1f303c; }
+@media (max-width: 760px) {
+  #ascla-root .ascla-image-editor-backdrop { padding: 10px; }
+  #ascla-root .ascla-image-editor { max-height: calc(100vh - 20px); border-radius: 15px; }
+  #ascla-root .ascla-image-editor-body { grid-template-columns: 1fr; padding: 14px; }
+  #ascla-root .ascla-image-editor-head,
+  #ascla-root .ascla-image-editor-actions { padding: 15px 14px; }
+  #ascla-root .image-editor-stage { height: min(56vh, 430px); }
+  #ascla-root .image-editor-info { grid-template-columns: 1fr 1fr; }
+  #ascla-root .image-editor-info p { grid-column: 1 / -1; }
+  #ascla-root .image-editor-zoom { grid-template-columns: 1fr 34px minmax(100px, 2fr) 34px; }
+}
+
+/* v1.9.11 moderation state */
+.admin-report.is-reviewed{opacity:.78}
+.admin-report-heading{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tag.success{border-color:color-mix(in srgb,var(--success,#238636) 55%,var(--line));background:color-mix(in srgb,var(--success,#238636) 14%,transparent)}
+
+/* v1.9.12 admin media filtering and unsaved-change dialog */
+.file-library-filters{align-items:end}.file-library-filters .field{margin:0;min-width:220px;flex:1}.file-library-filters .field label{display:block;margin-bottom:6px}.file-library-filters select,.file-library-filters input{width:100%}.modal .form-actions .danger.primary{font-weight:700}
+@media(max-width:720px){.file-library-filters{display:grid;grid-template-columns:1fr}.file-library-filters .field{min-width:0}}
+
+/* v1.9.14 · security configuration */
+.turnstile-protection-options{display:grid;gap:8px;margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.turnstile-protection-options>strong{font-size:13px;color:var(--ink)}
+html[data-ascla-theme="dark"] .turnstile-protection-options{background:#111b24;border-color:#344756}

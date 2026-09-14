@@ -274,10 +274,11 @@ final class Content
         $reason=trim(Access::text($reason,64));
         Access::require(isset(self::REPORT_REASONS[$reason]),'Selecciona un motivo de reporte válido.',400);
         $detail=trim(Access::text($detail,1000));
+        Access::require($reason!=='other' || $detail!=='','Describe brevemente el motivo del reporte cuando selecciones “Otro motivo”.',400);
         $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>'comment_report'];
         Store::lock('comment-report:'.implode(':',$where),static function () use($where,$reason,$detail,$comment) {
             $existing=Store::rows('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where),'LIMIT 1')[0]??null;
-            $data=['reason'=>$reason,'detail'=>$detail,'created_at'=>current_time('mysql',true)];
+            $data=['reason'=>$reason,'detail'=>$detail,'reviewed_at'=>null,'reviewed_by'=>0,'created_at'=>current_time('mysql',true)];
             if ($existing) Store::update('relations',$data,['id'=>(int)$existing['id']]);
             else Store::insert('relations',$where+$data);
             Audit::record('comment_reported',(int)$comment->comment_ID,self::reportLabel($reason));
@@ -310,15 +311,26 @@ final class Content
         $reason=trim(Access::text($reason,64));
         Access::require(isset(self::REPORT_REASONS[$reason]),'Selecciona un motivo de reporte válido.',400);
         $detail=trim(Access::text($detail,1000));
+        Access::require($reason!=='other' || $detail!=='','Describe brevemente el motivo del reporte cuando selecciones “Otro motivo”.',400);
         $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>'report'];
         Store::lock('report:'.implode(':',$where),static function () use($where,$reason,$detail,$post) {
             $existing=Store::rows('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where),'LIMIT 1')[0]??null;
-            $data=['reason'=>$reason,'detail'=>$detail,'created_at'=>current_time('mysql',true)];
+            $data=['reason'=>$reason,'detail'=>$detail,'reviewed_at'=>null,'reviewed_by'=>0,'created_at'=>current_time('mysql',true)];
             if ($existing) Store::update('relations',$data,['id'=>(int)$existing['id']]);
             else Store::insert('relations',$where+$data);
             Audit::record('content_reported',$post->ID,self::reportLabel($reason));
         });
         return ['reported'=>true,'reason'=>$reason,'reason_label'=>self::reportLabel($reason)];
+    }
+    public static function reviewReport(int $id): array
+    {
+        Access::require(current_user_can('ascla_moderate'),'No tienes permisos para revisar reportes.',403);
+        $report=Store::one('relations',$id);
+        Access::require($report && in_array((string)$report['kind'],['report','comment_report'],true),'Reporte no encontrado.',404);
+        $when=current_time('mysql',true);
+        Store::update('relations',['reviewed_at'=>$when,'reviewed_by'=>get_current_user_id()],['id'=>$id]);
+        Audit::record('report_reviewed',$id,(string)$report['kind']);
+        return ['id'=>$id,'reviewed'=>true,'reviewed_at'=>$when];
     }
     public static function moderate(int $id,string $decision,string $reason,bool $reviewed=false): array
     {

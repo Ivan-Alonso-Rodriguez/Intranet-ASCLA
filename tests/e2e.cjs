@@ -344,9 +344,6 @@ async function goto(page, route) {
       await a
         .locator(".modal [name=body]")
         .fill("E2E Imágenes ficticias para comprobar privacidad.");
-      const uploaded = a.waitForResponse(
-        (r) => r.url().endsWith("/media") && r.request().method() === "POST",
-      );
       await a
         .locator(".modal [data-upload=content]")
         .setInputFiles(
@@ -355,11 +352,18 @@ async function goto(page, route) {
             "wp-content/plugins/ascla-core/assets/ascla-logo.png",
           ),
         );
-      const media = await (await uploaded).json();
-      assert.ok(media.id);
-      mediaIds.push(media.id);
+      await a.locator('.ascla-image-editor [data-image-apply]').waitFor();
+      assert.equal(await a.locator('.ascla-image-editor [data-image-zoom="in"]').count(), 1);
+      await a.locator('.ascla-image-editor [data-image-apply]').click();
+      const attachment=a.locator('.modal #attachments [data-media]').last();
+      await attachment.waitFor();
+      const mediaId=Number(await attachment.getAttribute('data-media'));
+      const mediaUrl=await attachment.locator('img').getAttribute('src');
+      assert.ok(mediaId && mediaUrl);
+      mediaIds.push(mediaId);
       const guest = await browser.newContext();
-      const response = await guest.request.get(media.url);
+      const response = await guest.request.get(mediaUrl);
+      assert.notEqual(response.headers()["content-type"], "image/webp");
       assert.notEqual(response.headers()["content-type"], "image/png");
       await guest.close();
       const save = a.waitForResponse(
@@ -602,3 +606,6 @@ async function goto(page, route) {
   console.error(e);
   process.exit(1);
 });
+
+// v1.9.12 regression notes: admin media owner filter, suggested-message voice and custom unsaved modal
+// v1.9.15 regression notes: admin settings dirty navigation uses the ASCLA modal; directory cards keep proportional action zones.

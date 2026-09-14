@@ -71,7 +71,7 @@ final class Language
         });
         // Disable WordPress' native login selector: it may inject its own en_US option.
         add_filter('login_display_language_dropdown','__return_false');
-        foreach(['login_form','lostpassword_form','resetpass_form','register_form'] as $hook)add_action($hook,static function(){echo '<input type="hidden" name="_ascla_locale" value="'.esc_attr(self::requested()).'">';});
+        foreach(['login_form','lostpassword_form','resetpass_form'] as $hook)add_action($hook,static function(){echo '<input type="hidden" name="_ascla_locale" value="'.esc_attr(self::requested()).'">';});
         add_filter('language_attributes',static function($attributes){
             if(($GLOBALS['pagenow']??'')==='wp-login.php' || App::page())return preg_replace('/lang="[^"]*"/','lang="'.esc_attr(str_replace('_','-',self::current())).'"',$attributes);
             return $attributes;

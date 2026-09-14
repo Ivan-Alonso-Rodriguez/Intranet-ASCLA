@@ -9,6 +9,9 @@ final class Login
     public static function boot(): void
     {
         Language::boot();
+        // ASCLA is a closed community: accounts are provisioned only by administrators.
+        // This also neutralizes an accidental "Anyone can register" toggle in WordPress.
+        add_filter('pre_option_users_can_register', static fn() => 0);
         add_action('login_init', static function () { add_filter('gettext', [self::class, 'translate'], 10, 3); });
         add_action('login_head', [Theme::class, 'printScript'], 0);
         add_action('login_enqueue_scripts', static function () {
@@ -74,14 +77,14 @@ final class Login
             'login' => ['Te damos la bienvenida', 'Ingresa con tu cuenta para acceder a la comunidad.'],
             'lostpassword', 'retrievepassword' => ['Recupera tu acceso', 'Te ayudamos a volver a tu comunidad.'],
             'resetpass', 'rp' => ['Elige tu nueva contraseña', 'Protege tu cuenta con una contraseña única.'],
-            'register' => ['Únete a la comunidad', 'Completa los datos para solicitar tu cuenta.'],
+            'register' => ['Acceso exclusivo para asociados', 'Las cuentas ASCLA son creadas únicamente por la administración.'],
             default => ['Tu cuenta ASCLA', 'Gestiona tu acceso a la comunidad.'],
         };
         if(Language::english()) $copy=match($GLOBALS['action']??'login') {
             'login'=>['Welcome to ASCLA','Sign in to access your community.'],
             'lostpassword','retrievepassword'=>['Recover your access','Let us help you return to your community.'],
             'resetpass','rp'=>['Choose a new password','Protect your account with a unique password.'],
-            'register'=>['Join the community','Complete your account details.'],
+            'register'=>['Members-only access','ASCLA accounts are created only by the administration.'],
             default=>['Your ASCLA account','Manage access to your community.'],
         };
         return '<div class="ascla-login-intro"><p class="ascla-login-eyebrow">INTRANET ASCLA</p><h2>'

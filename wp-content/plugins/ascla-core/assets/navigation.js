@@ -22,7 +22,7 @@ window.ASCLANavigation = ({ root, pages, prepare, load, error, beforeNavigate })
   async function navigate(value, { pop = false, state = null } = {}) {
     const route = matches(value); if (!route) return false;
     const url = new URL(value, location.href);
-    if (beforeNavigate && !beforeNavigate({ url: url.href, pop })) {
+    if (beforeNavigate && !(await beforeNavigate({ url: url.href, pop }))) {
       if (pop && location.href !== activeUrl) {
         history.pushState({ ascla: true, scroll: scrollY }, '', activeUrl);
         const activeRoute = matches(activeUrl); if (activeRoute) activate(activeRoute);

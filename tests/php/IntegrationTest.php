@@ -114,8 +114,26 @@ final class IntegrationTest extends TestCase
 
         foreach($before as $slug=>$id)self::assertSame($slug,get_post_meta($id,'_ascla_page',true));
 
-        update_option('ascla_schema',0);Installer::activate(false);self::assertSame(4,(int)get_option('ascla_schema'));
+        update_option('ascla_schema',0);Installer::activate(false);self::assertSame(7,(int)get_option('ascla_schema'));
 
+    }
+
+    public function testAdminProfileMediaLibraryRemainsPersonalWhileAdminScopeCanSeeAll(): void
+    {
+        $adminFile=Store::insert('media',['user_id'=>$this->users[0],'post_id'=>0,'original_id'=>0,'name'=>'admin-file.pdf','mime'=>'application/pdf','bytes'=>'admin','created_at'=>current_time('mysql',true)]);
+        $memberFile=Store::insert('media',['user_id'=>$this->users[1],'post_id'=>0,'original_id'=>0,'name'=>'member-file.pdf','mime'=>'application/pdf','bytes'=>'member','created_at'=>current_time('mysql',true)]);
+        $this->user(0);$mine=Media::listing(['scope'=>'mine']);self::assertContains($adminFile,array_column($mine['items'],'id'));self::assertNotContains($memberFile,array_column($mine['items'],'id'));
+        $all=Media::listing(['scope'=>'all']);self::assertContains($adminFile,array_column($all['items'],'id'));self::assertContains($memberFile,array_column($all['items'],'id'));
+        $this->user(1);$forced=Media::listing(['scope'=>'all']);self::assertContains($memberFile,array_column($forced['items'],'id'));self::assertNotContains($adminFile,array_column($forced['items'],'id'));
+    }
+
+    public function testReportedContentCanBeMarkedReviewedAndNewReportReopensIt(): void
+    {
+        $p=$this->make('hub');$this->user(1);Content::report($p['id'],'spam','Reporte de prueba.');
+        $row=Store::rows('relations','user_id=%d AND target_id=%d AND kind=%s',[$this->users[1],$p['id'],'report'],'LIMIT 1')[0];self::assertEmpty($row['reviewed_at']);
+        $this->user(0);$reviewed=$this->api('POST','/admin/reports/'.(int)$row['id'].'/review');self::assertSame(200,$reviewed->get_status());
+        $row=Store::one('relations',(int)$row['id']);self::assertNotEmpty($row['reviewed_at']);self::assertSame($this->users[0],(int)$row['reviewed_by']);
+        $this->user(1);Content::report($p['id'],'spam','Información adicional nueva.');$row=Store::one('relations',(int)$row['id']);self::assertEmpty($row['reviewed_at']);self::assertSame(0,(int)$row['reviewed_by']);
     }
 
     public function testProfilePrivacyCannotBeBypassedBySearchOrMatching(): void
@@ -171,9 +189,13 @@ final class IntegrationTest extends TestCase
         self::assertSame(400,$this->api('POST','/comments/'.$own['id'].'/report',['reason'=>'spam'])->get_status());
         self::assertSame(0,Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',[$this->users[1],$own['id'],'comment_report']));
 
-        $this->user(2);$reported=$this->api('POST','/comments/'.$own['id'].'/report',['reason'=>'spam','detail'=>'Reporte de prueba.']);
+        $this->user(2);
+        self::assertSame(400,$this->api('POST','/comments/'.$own['id'].'/report',['reason'=>'other','detail'=>'   '])->get_status());
+        self::assertSame(0,Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',[$this->users[2],$own['id'],'comment_report']));
+        $reported=$this->api('POST','/comments/'.$own['id'].'/report',['reason'=>'other','detail'=>'Motivo específico de prueba.']);
         self::assertSame(200,$reported->get_status());
         self::assertSame(1,Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',[$this->users[2],$own['id'],'comment_report']));
+        self::assertSame(400,$this->api('POST','/items/'.$p['id'].'/report',['reason'=>'other','detail'=>''])->get_status());
         $comments=Content::comments($p['id']);self::assertTrue($comments[0]['can_report']);
 
         $this->user(1);$comments=Content::comments($p['id']);self::assertFalse($comments[0]['can_report']);

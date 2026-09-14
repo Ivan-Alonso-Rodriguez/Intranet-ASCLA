@@ -68,6 +68,24 @@ final class ContentLifecycleTest extends TestCase
         self::assertNull(Store::one('media',$id));self::assertSame([],get_post_meta($post['id'],'_ascla',true)['media_ids']);self::assertSame(0,get_user_meta($this->users[2],'_ascla_profile',true)['photo_id']);self::assertSame(404,$this->api('DELETE','media/'.$id)->get_status());
         wp_set_current_user($this->users[2]);$id=Store::insert('media',['user_id'=>$this->users[2],'post_id'=>0,'name'=>'owned.pdf','mime'=>'application/pdf','bytes'=>'test','created_at'=>current_time('mysql',true)]);$this->media[]=$id;self::assertSame(200,$this->api('DELETE','media/'.$id)->get_status());
     }
+    public function testCroppedImageKeepsHiddenMasterAndDeletesBothAsOneUnit():void
+    {
+        wp_set_current_user($this->users[2]);
+        $source=Store::insert('media',['user_id'=>$this->users[2],'post_id'=>0,'original_id'=>0,'name'=>'portrait-master.webp','mime'=>'image/webp','bytes'=>'master-fixture','created_at'=>current_time('mysql',true)]);
+        $visible=Store::insert('media',['user_id'=>$this->users[2],'post_id'=>0,'original_id'=>$source,'name'=>'portrait-recorte.webp','mime'=>'image/webp','bytes'=>'display-fixture','created_at'=>current_time('mysql',true)]);
+        $this->media[]=$source;$this->media[]=$visible;
+        $items=Media::listing(['q'=>'portrait'])['items'];
+        self::assertNotContains($source,array_column($items,'id'));
+        self::assertContains($visible,array_column($items,'id'));
+        $entry=current(array_filter($items,static fn($item)=>(int)$item['id']===$visible));
+        self::assertTrue($entry['has_master']);
+        self::assertSame(strlen('master-fixture')+strlen('display-fixture'),$entry['stored_size']);
+        self::assertSame(409,$this->api('DELETE','media/'.$source)->get_status());
+        self::assertSame(200,$this->api('DELETE','media/'.$visible)->get_status());
+        self::assertNull(Store::one('media',$visible));
+        self::assertNull(Store::one('media',$source));
+    }
+
     public function testOnlyAdminCreatesEventsAndNonDraftPublishesImmediately():void
     {
         $payload=['title'=>'Evento directo','body'=>'Descripción','meta'=>['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000)]];

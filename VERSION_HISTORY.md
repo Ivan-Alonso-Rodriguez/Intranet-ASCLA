@@ -2,9 +2,9 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.9.9`  
-> **Esquema de base de datos:** `5`  
-> Esta actualización del historial es únicamente documental y **no modifica la versión del plugin**.
+> **Versión actual:** `1.9.15`  
+> **Esquema de base de datos:** `7`  
+> La versión `1.9.15` mejora la protección de cambios sin guardar en Administración y armoniza visualmente las tarjetas del directorio.
 
 ## Resumen de versiones
 
@@ -30,11 +30,139 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.6 | Comentarios enriquecidos y menús contextuales | Completada |
 | 1.9.7 | Reportes de comentarios y notificaciones identificables | Completada |
 | 1.9.8 | Menús exclusivos y ampliación de traducciones ES/EN | Completada |
-| 1.9.9 | Asistente ASCLA conversacional con contexto vivo | **Actual** |
+| 1.9.9 | Asistente ASCLA conversacional con contexto vivo | Completada |
+| 1.9.10 | Edición, recorte y optimización de imágenes | Completada |
+| 1.9.11 | Permisos de archivos, OpenAI y seguimiento de reportes | Completada |
+| 1.9.12 | Filtro de archivos por usuario, mensajes sugeridos y guardia de cambios | Completada |
+| 1.9.13 | Cloudflare Turnstile adaptativo y protección de formularios públicos | Completada |
+| 1.9.14 | Acceso cerrado de asociados y ajuste de Turnstile | Completada |
+| 1.9.15 | Guardia de configuración y tarjetas proporcionales del directorio | **Actual** |
 
 ---
 
 # Serie 1.9.x — evolución funcional
+
+## 1.9.15 — Guardia de configuración y tarjetas proporcionales del directorio
+
+**Objetivo:** evitar pérdidas accidentales de configuración administrativa y dar una presentación visual consistente al directorio de asociados.
+
+### Cambios principales
+
+- Administración → Configuración conserva la detección real de cambios y utiliza el modal propio **Cambios sin guardar** al cambiar de pestaña administrativa, actualizar la vista o salir mediante enlaces del panel de WordPress.
+- Los enlaces que abandonan la pantalla administrativa con cambios pendientes se interceptan antes de navegar; F5/cierre de pestaña conserva el aviso nativo obligatorio del navegador.
+- Las tarjetas del directorio separan información personal, afinidad/intereses y acciones en zonas estables.
+- Los botones **Ver perfil**, conexión y mensajería mantienen ancho, altura y separación uniformes independientemente de la cantidad de intereses o del estado de conexión.
+- La tarjeta del usuario actual ofrece **Editar mi perfil** para evitar un bloque de acciones visualmente vacío.
+- En móvil se elimina la altura mínima rígida para mantener una disposición compacta y adaptable.
+- No requiere migración de base de datos: se mantiene el esquema `7`.
+
+**Resultado de la iteración:** la configuración administrativa queda protegida por la misma experiencia de guardado que Perfil y el directorio presenta una cuadrícula más equilibrada y fácil de recorrer.
+
+---
+
+## 1.9.14 — Acceso cerrado de asociados y ajuste de Turnstile
+
+**Objetivo:** reflejar en seguridad que ASCLA no admite auto-registro público y que todas las cuentas pertenecen a asociados provisionados por Administración.
+
+### Cambios principales
+
+- Se fuerza `users_can_register = false` desde `ascla-core`, de modo que una activación accidental de “Cualquiera puede registrarse” en WordPress no abra el alta pública.
+- Se elimina **Registro público** de Administración → Configuración → Seguridad.
+- Se retiran los hooks y validaciones Turnstile vinculados al formulario nativo de registro de WordPress.
+- Turnstile continúa disponible para login adaptativo, recuperación de contraseña y futuros formularios públicos autorizados por ASCLA.
+- La creación de cuentas sigue realizándose desde Administración / Usuarios, sin afectar roles, sesiones ni inscripciones a eventos.
+- Se mantiene el esquema de base de datos `7`.
+
+**Resultado de la iteración:** ASCLA mantiene un modelo de membresía cerrado y evita que una configuración accidental de WordPress habilite cuentas fuera del proceso administrativo.
+
+---
+
+## 1.9.13 — Cloudflare Turnstile adaptativo
+
+**Objetivo:** añadir protección anti-bot sin introducir CAPTCHA permanente ni alterar la autenticación nativa de WordPress.
+
+### Cambios principales
+
+- Se integra **Cloudflare Turnstile** como capa opcional de seguridad para formularios públicos.
+- Los usuarios autenticados nunca reciben un desafío Turnstile.
+- En inicio de sesión, Turnstile aparece después de **3 intentos fallidos**; al llegar a **5** se aplica además un bloqueo temporal de 10 minutos y se exige una nueva verificación al finalizar el bloqueo.
+- Los intentos de login se contabilizan principalmente con una clave derivada de **IP + usuario/correo**, acompañada de una señal IP secundaria de umbral más alto para detectar rotación de usuarios sin bloquear injustamente redes compartidas.
+- La **recuperación de contraseña** comienza a exigir Turnstile después de **2 solicitudes consecutivas**.
+- Un navegador/IP que supera correctamente Turnstile queda confiable durante **24 horas**, evitando que el desafío reaparezca continuamente.
+- Si vuelven a acumularse cinco fallos de credenciales, la confianza previa se revoca y se exige una nueva verificación después del bloqueo.
+- La validación del token se realiza obligatoriamente en PHP mediante `https://challenges.cloudflare.com/turnstile/v0/siteverify`; no se confía únicamente en JavaScript.
+- Los tokens se validan también por `action` y, en producción, por hostname.
+- Se añade una política reutilizable para futuros formularios públicos ASCLA: desafío únicamente ante señales sospechosas o demasiados envíos.
+- Administración → Configuración → **Seguridad** permite activar/desactivar Turnstile, guardar Site Key y Secret Key y seleccionar login, recuperación y formularios públicos.
+- La Secret Key se guarda mediante el almacén cifrado de ASCLA y nunca se devuelve al navegador.
+- La integración permanece desactivada por defecto para no romper instalaciones existentes que todavía no tengan claves de Cloudflare.
+- El widget debe crearse en Cloudflare con modo **Managed**.
+- No requiere migración de base de datos: se mantiene el esquema `7`.
+
+**Resultado de la iteración:** ASCLA incorpora una defensa anti-bot progresiva que se activa cuando aumenta el riesgo, conservando una experiencia limpia para usuarios legítimos.
+
+---
+
+## 1.9.12 — Filtro administrativo, mensajes sugeridos y cambios sin guardar
+
+- Administración → Archivos permite filtrar la biblioteca global por usuario propietario, además de buscar por nombre de archivo.
+- Perfil → Mis archivos continúa mostrando exclusivamente los archivos del usuario actual, incluso para administradores.
+- El generador de “Mensaje sugerido” redacta como el asociado remitente: no se presenta como ASCLA, IA, asistente o chatbot y no menciona análisis de perfiles ni porcentajes de afinidad.
+- Se invalidó la caché de sugerencias anterior para evitar reutilizar textos generados con el prompt previo.
+- La navegación interna con formularios modificados utiliza un modal propio de ASCLA con “Seguir editando” y “Descartar cambios”.
+- El aviso nativo del navegador se conserva sólo para cerrar/recargar la pestaña, una limitación impuesta por los navegadores modernos.
+- No requiere migración de base de datos: se mantiene el esquema 7.
+
+## 1.9.11 — Permisos de archivos, OpenAI y seguimiento de reportes
+
+**Objetivo:** separar el alcance de la biblioteca personal y administrativa, permitir elegir entre Gemini y OpenAI para el Asistente ASCLA y dar trazabilidad al cierre de reportes de moderación.
+
+### Cambios principales
+
+- **Perfil → Mis archivos** muestra siempre únicamente los archivos propiedad del usuario actual, incluso si ese usuario es administrador.
+- **Administración → Archivos** mantiene la vista global de archivos de la comunidad y continúa disponible solo para administradores.
+- Se añade **OpenAI / ChatGPT** como proveedor alternativo de IA, sin retirar Google Gemini ni el modo DEMO.
+- El administrador puede guardar de forma independiente el modelo y la API Key de Gemini y de OpenAI, seleccionar el proveedor activo y probar su conexión.
+- El proveedor OpenAI utiliza la **Responses API** y recibe el mismo contexto interno autorizado que ASCLA ya prepara para Gemini; no se amplían los permisos del asistente.
+- Los reportes de publicaciones y comentarios ahora pueden marcarse como **Revisados** desde Moderación.
+- El estado guarda fecha y moderador responsable; los reportes pendientes aparecen primero y el contador principal refleja los que todavía faltan revisar.
+- Si un usuario vuelve a reportar el mismo contenido, el reporte vuelve automáticamente a estado pendiente para que se evalúe la nueva información.
+- El esquema de base de datos avanza de `6` a `7` para registrar `reviewed_at` y `reviewed_by` en reportes.
+
+**Resultado de la iteración:** la biblioteca respeta mejor el contexto desde el que se abre, ASCLA deja de depender de un único proveedor de IA y Moderación puede distinguir claramente los reportes pendientes de los ya atendidos.
+
+---
+
+## 1.9.10 — Edición, recorte y optimización de imágenes
+
+**Objetivo:** mejorar la experiencia de carga de imágenes y reducir el espacio consumido sin perder un encuadre controlado ni una fuente no recortada.
+
+### Cambios principales
+
+- Se añadió una vista previa antes de subir imágenes en Perfil y editores de contenido.
+- El usuario puede **mover**, **hacer zoom**, **restablecer** y **recortar** la imagen antes de guardarla.
+- Se aplican proporciones recomendadas según el contexto:
+  - Perfil: `1:1`;
+  - Hub y Centro de Conocimiento: `16:9`;
+  - Galería: `4:3`;
+  - Aliados: `1:1`, con opción de conservar la imagen completa para evitar cortar logotipos.
+- En contextos donde conviene preservar la composición se ofrece **Usar imagen completa**.
+- Las imágenes se procesan en el navegador antes de enviarse:
+  - se limita la resolución máxima de la copia maestra;
+  - se evita ampliar artificialmente imágenes pequeñas;
+  - se usa WebP cuando el navegador puede generarlo y JPEG/PNG como alternativa;
+  - se ajusta la calidad de forma progresiva cuando el archivo resultante es demasiado grande.
+- Cuando se aplica un recorte, ASCLA conserva una **copia maestra privada, no recortada y optimizada** y una versión preparada para mostrarse.
+- La biblioteca oculta la copia maestra para que el usuario gestione la imagen como una sola unidad.
+- Al eliminar la versión visible, la copia maestra asociada también se elimina cuando deja de tener referencias.
+- Se añadió `original_id` a la tabla privada de medios para enlazar ambas versiones.
+- El esquema de base de datos avanza de `5` a `6`.
+- Se mejoró la separación visual entre **Conocimiento para tu día a día** y **Publicados recientemente** en Inicio.
+- La interfaz de edición es compatible con modo claro, modo oscuro y pantallas móviles.
+
+**Resultado de la iteración:** las imágenes dejan de subirse “a ciegas”; el asociado controla el encuadre antes de guardar y ASCLA reduce la resolución/peso del archivo de uso habitual mientras conserva una fuente no recortada para evitar pérdidas de composición.
+
+---
 
 ## 1.9.9 — Asistente ASCLA conversacional
 
@@ -377,10 +505,10 @@ Versión histórica recuperada del repositorio Git original.
 Durante la serie 1.9.x se adoptó un versionado incremental para reflejar cambios pequeños y verificables sin producir saltos innecesarios:
 
 ```text
-1.9.0 → 1.9.1 → 1.9.2 → ... → 1.9.9
+1.9.0 → 1.9.1 → 1.9.2 → ... → 1.9.15
 ```
 
-Las modificaciones exclusivamente documentales, como la ampliación de este archivo, **no generan por sí solas una nueva versión del plugin**. Por ello, después de actualizar este historial la versión actual continúa siendo **1.9.9**.
+Las modificaciones exclusivamente documentales, como la ampliación de este archivo, **no generan por sí solas una nueva versión del plugin**. La versión `1.9.15` se justifica por la protección ampliada de cambios pendientes en Administración y la reorganización visual del directorio; el esquema de datos permanece en 7.
 
 # Notas de trazabilidad
 
@@ -388,4 +516,4 @@ Las modificaciones exclusivamente documentales, como la ampliación de este arch
 - Cuando existe un snapshot verificable se conserva como referencia histórica.
 - No se crean tags ficticios para versiones cuyo código fuente original no esté disponible.
 - La carpeta `docs/` se mantiene fuera del repositorio público según la configuración actual de `.gitignore`.
-- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.9**.
+- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.15**.

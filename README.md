@@ -4,21 +4,21 @@ Plugin WordPress portable para una comunidad profesional privada. Incluye perfil
 
 Toda la funcionalidad propia está en `wp-content/plugins/ascla-core/`. Elementor es opcional. No se modifica WordPress Core ni se necesita un tema específico. El plugin conserva sus datos al desactivarse o desinstalarse.
 
-## Versión actual: 1.9.9 · esquema 5
+## Versión actual: 1.9.15 · esquema 7
 
-La versión 1.9.9 mantiene el esquema 5 y transforma el Asistente ASCLA en un chat por conversaciones. El asistente consulta primero contexto vivo y autorizado de la intranet —incluidos próximos eventos, publicaciones recientes, notificaciones y recomendaciones— y conserva el Centro de Conocimiento como evidencia consultable. El historial sólo mantiene el hilo: los datos internos actuales tienen prioridad. Se mantienen Chatham House, permisos por usuario, modo oscuro, traducciones y las correcciones funcionales de las versiones anteriores.
+La versión 1.9.15 mantiene el esquema 7 y mejora la experiencia de administración y del directorio. Administración → Configuración protege los cambios pendientes con el modal propio de ASCLA incluso al salir mediante enlaces del panel de WordPress, y las tarjetas del directorio usan una estructura proporcional con acciones alineadas. Se conserva el modelo cerrado de asociados y la protección adaptativa de Cloudflare Turnstile introducida en las versiones anteriores.
 
 Administración con solicitudes persistentes, historial, búsqueda de usuarios y suspensión/reactivación. Los foros se publican sin aprobación; Galería, Centro de Conocimiento y Eventos sólo permiten crear/editar/publicar a administradores. Los eventos ordinarios se publican directamente, salvo borrador explícito; los microeventos conservan revisión administrativa.
 
-El autor o un administrador puede eliminar contenido y comentarios. Al eliminar un foro sus temas pasan a la lista general; eliminar un archivo es permanente y retira sus referencias y foto de perfil. Biblioteca privada en Perfil → Administrar archivos y Administración → Archivos. La preferencia de idioma del login se guarda por cuenta y se conserva al recargar y navegar. El catálogo inglés cubre navegación, controles, Perfil, actividad/notificaciones y los flujos principales. Las publicaciones, documentos y otros contenidos creados por usuarios conservan su idioma original. Las publicaciones y documentos creados por usuarios conservan su idioma original. Las respuestas del Asistente ASCLA siguen el idioma de interfaz del asociado.
+El autor o un administrador puede eliminar contenido y comentarios. Al eliminar un foro sus temas pasan a la lista general; eliminar un archivo es permanente y retira sus referencias y foto de perfil. Perfil → Administrar mis archivos siempre se limita a los archivos propios; Administración → Archivos permite a administradores consultar la biblioteca global. Las imágenes de Perfil, Hub, Galería, Conocimiento y Aliados se pueden encuadrar antes de subir: Perfil usa 1:1, Hub/Conocimiento 16:9, Galería 4:3 y Aliados 1:1. El navegador genera una versión optimizada y, cuando existe recorte, una copia maestra no recortada y optimizada; ambas siguen siendo privadas y se eliminan juntas. La preferencia de idioma del login se guarda por cuenta y se conserva al recargar y navegar. El catálogo inglés cubre navegación, controles, Perfil, actividad/notificaciones y los flujos principales. Las publicaciones, documentos y otros contenidos creados por usuarios conservan su idioma original. Las respuestas del Asistente ASCLA siguen el idioma de interfaz del asociado.
 
-El proveedor real es **Google Gemini**, mediante REST oficial y cabecera `x-goog-api-key`. Modelo configurable, clave cifrada, eliminación explícita y botón Probar conexión. La búsqueda admite términos parciales significativos y fuentes relacionadas. El asistente combina esas fuentes con un contexto vivo y autorizado de la intranet para consultas operativas, por ejemplo próximos eventos o publicaciones recientes. Las respuestas admiten paráfrasis: se valida la pertenencia de las referencias, no la igualdad de frases. Para datos de ASCLA sin evidencia suficiente, el asistente lo indica en lugar de inventar. Chatham House y revisión editorial se mantienen.
+Los proveedores reales configurables son **Google Gemini** y **OpenAI**. Cada uno mantiene modelo y API Key independientes, con claves cifradas, eliminación explícita y botón Probar conexión. OpenAI usa la Responses API y Gemini conserva su integración REST actual. La búsqueda admite términos parciales significativos y fuentes relacionadas. El asistente combina esas fuentes con un contexto vivo y autorizado de la intranet para consultas operativas, por ejemplo próximos eventos o publicaciones recientes. Las respuestas admiten paráfrasis: se valida la pertenencia de las referencias, no la igualdad de frases. Para datos de ASCLA sin evidencia suficiente, el asistente lo indica en lugar de inventar. Chatham House y revisión editorial se mantienen.
 
 Las conexiones requieren aceptación antes de habilitar mensajes; el chat consulta novedades cada **2 segundos** con cursores, conservación de borradores y backoff tras errores. Recuperación de contraseña nativa y SMTP configurable; Mailpit recibe los correos únicamente en el desarrollo local. Sigue pendiente configurar un proveedor para entrega a bandejas externas.
 
 El historial técnico de las entregas se resume en `VERSION_HISTORY.md`. Las métricas históricas de Sonar, cobertura y rendimiento no acreditan automáticamente la versión actual.
 
-No se han desplegado estos cambios en el servidor remoto. Gemini, YouTube OAuth y Calendar OAuth requieren credenciales y pruebas con cuentas reales. LinkedIn/X reales siguen sin implementar.
+No se han desplegado estos cambios en el servidor remoto. Gemini, OpenAI, YouTube OAuth y Calendar OAuth requieren credenciales y pruebas con cuentas reales. LinkedIn/X reales siguen sin implementar.
 
 ## Historial: versión 1.2.0
 
@@ -49,7 +49,7 @@ Genera `dist/ascla-core.zip` y su SHA-256. El ZIP contiene una única carpeta `a
 
 En WordPress: **Plugins → Añadir plugin → Subir plugin → elegir ZIP → Instalar → Activar**. Se crean doce páginas faltantes, roles, permisos, taxonomías y tablas versionadas. El instalador no sobrescribe páginas ajenas ni duplica las páginas que ya creó.
 
-Accede a **ASCLA → Configuración** para elegir modos y políticas. Crea asociados en **Usuarios → Añadir nuevo**, con rol **Asociado ASCLA** o **Moderador ASCLA**. Los asociados trabajan desde el frontend; no necesitan `wp-admin` para sus actividades.
+Accede a **ASCLA → Configuración** para elegir modos y políticas. Crea asociados en **Usuarios → Añadir nuevo**, con rol **Asociado ASCLA** o **Moderador ASCLA**. ASCLA no permite auto-registro público; las cuentas se provisionan exclusivamente desde Administración. Los asociados trabajan desde el frontend; no necesitan `wp-admin` para sus actividades.
 
 ## Desarrollo local
 
@@ -68,6 +68,7 @@ También puedes crear la demo desde **ASCLA → Configuración → Preparar dato
 
 ## Integraciones
 
+- **Cloudflare Turnstile:** opcional y desactivado por defecto. Configura un widget de Cloudflare en modo **Managed**, guarda Site Key y Secret Key en **ASCLA → Configuración → Seguridad** y elige entre login, recuperación de contraseña y otros formularios públicos adaptativos. El Secret se cifra con el mismo almacén seguro de integraciones. La verificación real se realiza en PHP contra Siteverify; el JavaScript por sí solo nunca autoriza una acción.
 - **IA:** por defecto `DEMO MODE`, sin gasto. Para API real configura una Google Gemini API Key y un modelo habilitado en tu cuenta. El chat prioriza la información visible dentro de ASCLA y todo contenido multimedia generado queda en borrador para revisión. La arquitectura permite implementar otra `AIProviderInterface`.
 - **YouTube:** introduce una URL válida en el recurso. Los videos se embeben; no se descargan ni almacenan completos. Puedes suministrar transcripción autorizada o conectar OAuth con permisos sobre los subtítulos. Sin permisos, se informa el error; en modo mock se identifica explícitamente la transcripción ficticia.
 - **Google Calendar:** los eventos futuros pueden abrirse en Google Calendar sin credenciales o guardarse en un calendario conectado mediante OAuth. La descarga ICS fue retirada. Configura Client ID/Secret y URI de redirección para OAuth; cada asociado conecta su calendario desde Perfil. Guardar, actualizar y quitar un evento requiere pulsar la acción correspondiente.

@@ -45,7 +45,16 @@ final class Matching
     public static function intro(int $id): array
     {
         $me=get_current_user_id();$affinity=self::between($me,$id,false);
-        $result=NetworkingAI::generate('intro',NetworkingAI::context($me,$id,$affinity));
-        return ['text'=>Access::excerpt($result['text']??'',5000),'conversation_proposal'=>Access::excerpt($result['conversation_proposal']??'',2000),'mode'=>$result['mode'],'fallback'=>$result['fallback'],'sent'=>false];
+        $context=NetworkingAI::context($me,$id,$affinity);
+        $result=NetworkingAI::generate('intro',$context);
+        $text=trim(Access::excerpt($result['text']??'',5000));
+        // A suggested private message must sound like the member, never like the AI service itself.
+        if($text==='' || preg_match('/\b(?:soy|somos)\s+(?:(?:el|la|un|una)\s+)?(?:asistente|chatbot|ASCLA)\b|\b(?:como|en calidad de)\s+(?:asistente|chatbot)\b/iu',$text)){
+            $safe=(new \ASCLA\Core\Integrations\MockAIProvider())->generate('intro',$context);
+            $text=trim(Access::excerpt($safe['text']??'',5000));
+            $result['conversation_proposal']=$safe['conversation_proposal']??'';
+            $result['fallback']=true;
+        }
+        return ['text'=>$text,'conversation_proposal'=>Access::excerpt($result['conversation_proposal']??'',2000),'mode'=>$result['mode']??'IA','fallback'=>!empty($result['fallback']),'sent'=>false];
     }
 }

@@ -14,6 +14,8 @@ final class Installer
         self::migrateDiscovery();
         self::migrateNotificationContext();
         self::migrateReportReasons();
+        self::migrateMediaMasters();
+        self::migrateReportReviewState();
         self::pages();
         self::terms();
         if (!wp_next_scheduled('ascla_jobs')) { wp_schedule_event(time()+60, 'hourly', 'ascla_jobs'); }
@@ -81,6 +83,30 @@ final class Installer
         }
         update_option('ascla_schema',5,false);
     }
+    private static function migrateMediaMasters(): void
+    {
+        if ((int)get_option('ascla_schema',0)>=6) { return; }
+        global $wpdb; $table=$wpdb->prefix.'ascla_media';
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'original_id'))) {
+            $wpdb->query("ALTER TABLE $table ADD original_id bigint(20) unsigned NOT NULL DEFAULT 0, ADD KEY original_id (original_id)");
+        }
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'original_id'))) {
+            throw new MigrationException('No se pudo actualizar el almacenamiento de imágenes.');
+        }
+        update_option('ascla_schema',6,false);
+    }
+    private static function migrateReportReviewState(): void
+    {
+        if ((int)get_option('ascla_schema',0)>=7) { return; }
+        global $wpdb; $table=$wpdb->prefix.'ascla_relations';
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'reviewed_at'))) {
+            $wpdb->query("ALTER TABLE $table ADD reviewed_at datetime DEFAULT NULL, ADD reviewed_by bigint(20) unsigned NOT NULL DEFAULT 0");
+        }
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'reviewed_at')) || !$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'reviewed_by'))) {
+            throw new MigrationException('No se pudo actualizar el estado de revisión de reportes.');
+        }
+        update_option('ascla_schema',7,false);
+    }
     /**
      * Four ASCLA roles map directly onto the process diagram's swimlanes:
      *  - Asociado (ascla_member): base community access, no publishing/moderation power.
@@ -121,12 +147,12 @@ final class Installer
             'conversations'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\npair_key varchar(100) NOT NULL,\nupdated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nUNIQUE KEY pair_key (pair_key)",
             'participants'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nconversation_id bigint(20) unsigned NOT NULL,\nuser_id bigint(20) unsigned NOT NULL,\nlast_read bigint(20) unsigned NOT NULL DEFAULT 0,\nPRIMARY KEY  (id),\nUNIQUE KEY member (conversation_id,user_id),\nKEY user_id (user_id)",
             'messages'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nconversation_id bigint(20) unsigned NOT NULL,\nsender_id bigint(20) unsigned NOT NULL,\nbody text NOT NULL,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nKEY conversation_id (conversation_id,id)",
-            'relations'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nuser_id bigint(20) unsigned NOT NULL,\ntarget_id bigint(20) unsigned NOT NULL,\nkind varchar(24) NOT NULL,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nUNIQUE KEY relation (user_id,target_id,kind),\nKEY target_kind (target_id,kind)",
+            'relations'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nuser_id bigint(20) unsigned NOT NULL,\ntarget_id bigint(20) unsigned NOT NULL,\nkind varchar(24) NOT NULL,\nreason varchar(64) NOT NULL DEFAULT '',\ndetail text NULL,\nreviewed_at datetime DEFAULT NULL,\nreviewed_by bigint(20) unsigned NOT NULL DEFAULT 0,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nUNIQUE KEY relation (user_id,target_id,kind),\nKEY target_kind (target_id,kind)",
             'registrations'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nevent_id bigint(20) unsigned NOT NULL,\nuser_id bigint(20) unsigned NOT NULL,\nstatus varchar(24) NOT NULL,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nUNIQUE KEY registration (event_id,user_id),\nKEY event_status (event_id,status)",
             'notifications'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nuser_id bigint(20) unsigned NOT NULL,\nkind varchar(32) NOT NULL,\nlabel varchar(255) NOT NULL,\nurl text NOT NULL,\nread_at datetime DEFAULT NULL,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nKEY user_unread (user_id,read_at,id)",
             'audit'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nactor_id bigint(20) unsigned NOT NULL,\naction varchar(64) NOT NULL,\nobject_id bigint(20) unsigned NOT NULL DEFAULT 0,\ndetail varchar(255) NOT NULL DEFAULT '',\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nKEY action_date (action,created_at)",
             'jobs'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nkind varchar(32) NOT NULL,\nuser_id bigint(20) unsigned NOT NULL,\npayload longtext NOT NULL,\nstatus varchar(24) NOT NULL,\nattempts int(11) NOT NULL DEFAULT 0,\nresult longtext DEFAULT NULL,\nerror varchar(255) DEFAULT NULL,\nlocked_at datetime DEFAULT NULL,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nKEY queue (status,id),\nKEY owner (user_id,id)",
-            'media'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nuser_id bigint(20) unsigned NOT NULL,\npost_id bigint(20) unsigned NOT NULL DEFAULT 0,\nname varchar(255) NOT NULL,\nmime varchar(80) NOT NULL,\nbytes longblob NOT NULL,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nKEY owner (user_id),\nKEY post_id (post_id)",
+            'media'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nuser_id bigint(20) unsigned NOT NULL,\npost_id bigint(20) unsigned NOT NULL DEFAULT 0,\noriginal_id bigint(20) unsigned NOT NULL DEFAULT 0,\nname varchar(255) NOT NULL,\nmime varchar(80) NOT NULL,\nbytes longblob NOT NULL,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nKEY owner (user_id),\nKEY post_id (post_id),\nKEY original_id (original_id)",
         ];
         foreach ($tables as $name=>$schema) {
             dbDelta("CREATE TABLE {$p}{$name} (\n{$schema}\n) ENGINE=InnoDB {$collate};");
