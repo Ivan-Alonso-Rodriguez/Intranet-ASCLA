@@ -43,7 +43,7 @@ final class Grounding
     public static function multimedia(array $result,string $source): array
     {
         foreach(['summary','technical_note','suggested_hub'] as $field) $result[$field]=is_string($result[$field]??null)?$result[$field]:'';
-        foreach(['frameworks','norms','conclusions','concepts','tags'] as $field) $result[$field]=self::strings((array)($result[$field]??[]));
+        foreach(['frameworks','norms','conclusions','concepts','tags','topics'] as $field) $result[$field]=self::strings((array)($result[$field]??[]));
         $info=is_array($result['infographic']??null)?$result['infographic']:[];
         $result['infographic']=['title'=>is_string($info['title']??null)?$info['title']:'Claves de la sesión'];
         foreach(['key_points','sections','statistics'] as $field) $result['infographic'][$field]=self::strings((array)($info[$field]??[]));

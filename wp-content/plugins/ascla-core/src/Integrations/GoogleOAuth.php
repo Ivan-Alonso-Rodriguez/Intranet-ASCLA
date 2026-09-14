@@ -7,7 +7,7 @@ final class GoogleOAuth
     public static function connect(string $service): array
     {
         Access::require(in_array($service,['calendar','youtube'],true),'Servicio inválido.',400);
-        if ($service==='youtube') { Access::require(current_user_can('ascla_moderate')); }
+        if ($service==='youtube') { Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden conectar YouTube.',403); }
         $settings=Settings::get(); Access::require($settings['google_client_id']!==''&&Secrets::get('google_client_secret')!=='','Integración Google Calendar / YouTube no configurada.',400);
         $state=bin2hex(random_bytes(32)); set_transient('ascla_oauth_'.hash('sha256',$state),['user'=>get_current_user_id(),'service'=>$service,'session'=>hash('sha256',wp_get_session_token())],600);
         return ['url'=>'https://accounts.google.com/o/oauth2/v2/auth?'.http_build_query(['client_id'=>$settings['google_client_id'],'redirect_uri'=>admin_url('admin-post.php?action=ascla_google_callback'),'response_type'=>'code','scope'=>$service==='youtube'?'https://www.googleapis.com/auth/youtube.force-ssl':'https://www.googleapis.com/auth/calendar.events','access_type'=>'offline','prompt'=>'consent','state'=>$state], '', '&', PHP_QUERY_RFC3986)];

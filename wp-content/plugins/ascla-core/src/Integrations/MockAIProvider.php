@@ -68,6 +68,16 @@ final class MockAIProvider implements AIProviderInterface
         $statistics=array_values(array_filter($sentences,static fn($sentence)=>preg_match('/\d+(?:[.,]\d+)?\s*(?:%|por ciento)/u',$sentence)));
         $timeline=[];foreach($sentences as $sentence){if(preg_match('/\b(?:19|20)\d{2}\b/u',$sentence,$year)){ $timeline[]=['date'=>$year[0],'text'=>$sentence]; }}
         // Extract named frameworks/norms and numerical claims only when mentioned.
-        return ['summary'=>$summary,'technical_note'=>"Ideas recogidas en la transcripción:\n\n".implode("\n\n",$points),'frameworks'=>$frameworks,'conclusions'=>$points,'norms'=>array_values(array_unique($norms[0])),'concepts'=>$points,'tags'=>$tags,'suggested_hub'=>$summary,'infographic'=>['title'=>'Claves de la sesión','sections'=>$points,'statistics'=>$statistics,'timeline'=>$timeline,'key_points'=>$points,'source'=>$context['source_id']??0],'moments'=>\ASCLA\Core\Domain\Transcript::moments($text),'excerpts'=>\ASCLA\Core\Domain\Transcript::moments($text),'mode'=>$this->mode()];
+        $duration=max(0,(int)($context['duration_seconds']??0));
+        $moments=$duration>0?\ASCLA\Core\Domain\Transcript::moments($text,[],$duration):[];
+        $topics=[];
+        $topicText=mb_strtolower(remove_accents($text));
+        if (preg_match('/riesgo/',$topicText)) $topics[]='Gestión de riesgos';
+        if (preg_match('/gobierno corporativo|gobernanza corporativa/',$topicText)) $topics[]='Gobierno corporativo';
+        if (preg_match('/inteligencia artificial|\bia\b/',$topicText)) $topics[]='Inteligencia artificial';
+        if (preg_match('/junta directiva|directorio|consejo de administracion/',$topicText)) $topics[]='Juntas directivas';
+        if (preg_match('/sostenibilidad|sustentabilidad|\besg\b|\basg\b/',$topicText)) $topics[]='Sostenibilidad';
+        if (preg_match('/transformacion digital|digitalizacion|innovacion digital/',$topicText)) $topics[]='Transformación digital';
+        return ['summary'=>$summary,'technical_note'=>"Ideas principales del video:\n\n".implode("\n\n",$points),'frameworks'=>$frameworks,'conclusions'=>$points,'norms'=>array_values(array_unique($norms[0])),'concepts'=>$points,'tags'=>$tags,'topics'=>array_values(array_unique($topics)),'suggested_hub'=>$summary,'infographic'=>['title'=>'Claves de la sesión','sections'=>$points,'statistics'=>$statistics,'timeline'=>$timeline,'key_points'=>$points,'source'=>$context['source_id']??0],'moments'=>$moments,'excerpts'=>$moments,'mode'=>$this->mode()];
     }
 }

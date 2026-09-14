@@ -150,6 +150,85 @@
     new URLSearchParams(query).forEach((value, key) => url.searchParams.set(key, value));
     return url.href;
   }
+  let youtubeIframeApiPromise = null;
+  function youtubeIframeApi() {
+    if (window.YT?.Player) return Promise.resolve(window.YT);
+    if (youtubeIframeApiPromise) return youtubeIframeApiPromise;
+    youtubeIframeApiPromise = new Promise((resolve, reject) => {
+      const previous = window.onYouTubeIframeAPIReady;
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        try { if (typeof previous === "function") previous(); } catch {}
+        window.YT?.Player ? resolve(window.YT) : reject(new Error(T("No se pudo cargar el reproductor de YouTube.")));
+      };
+      window.onYouTubeIframeAPIReady = finish;
+      if (!document.querySelector('script[data-ascla-youtube-api]')) {
+        const script = document.createElement("script");
+        script.src = "https://www.youtube.com/iframe_api";
+        script.async = true;
+        script.dataset.asclaYoutubeApi = "1";
+        script.onerror = () => reject(new Error(T("No se pudo cargar el reproductor de YouTube.")));
+        document.head.appendChild(script);
+      }
+      setTimeout(() => {
+        if (!settled && window.YT?.Player) finish();
+        else if (!settled) reject(new Error(T("YouTube tardó demasiado en responder.")));
+      }, 12000);
+    });
+    return youtubeIframeApiPromise;
+  }
+  async function detectYouTubeDuration(videoId) {
+    if (!/^[A-Za-z0-9_-]{11}$/.test(String(videoId || ""))) throw new Error(T("Video de YouTube no válido."));
+    const YT = await youtubeIframeApi();
+    return new Promise((resolve, reject) => {
+      const host = document.createElement("div");
+      host.style.cssText = "position:fixed;left:-9999px;top:-9999px;width:2px;height:2px;overflow:hidden;opacity:0;pointer-events:none";
+      document.body.appendChild(host);
+      let player = null, timer = null, checks = 0, finished = false;
+      const cleanup = () => {
+        if (timer) clearInterval(timer);
+        try { player?.destroy?.(); } catch {}
+        host.remove();
+      };
+      const done = (fn, value) => {
+        if (finished) return;
+        finished = true;
+        cleanup();
+        fn(value);
+      };
+      const poll = () => {
+        let duration = 0;
+        try { duration = Math.round(Number(player?.getDuration?.() || 0)); } catch {}
+        if (duration > 0 && duration <= 604800) return done(resolve, duration);
+        if (++checks >= 24) done(reject, new Error(T("YouTube no entregó la duración al reproductor.")));
+      };
+      try {
+        player = new YT.Player(host, {
+          width: "2", height: "2", videoId,
+          playerVars: { controls: 0, playsinline: 1, rel: 0, origin: location.origin },
+          events: {
+            onReady: event => {
+              try { event.target.mute(); event.target.cueVideoById(videoId); } catch {}
+              timer = setInterval(poll, 350);
+              poll();
+            },
+            onError: () => done(reject, new Error(T("YouTube no pudo abrir este video para leer su duración."))),
+          },
+        });
+      } catch (error) { done(reject, error); }
+    });
+  }
+  async function ensureYouTubeDuration(id, force = false) {
+    const item = await api("items/" + Number(id));
+    const videoId = item?.meta?.video_id || "";
+    if (!videoId) return null;
+    if (!force && Number(item?.meta?.duration_seconds || 0) > 0) return Number(item.meta.duration_seconds);
+    const seconds = await detectYouTubeDuration(videoId);
+    const saved = await api("items/" + Number(id) + "/video-duration", { duration_seconds: seconds });
+    return Number(saved.duration_seconds || seconds);
+  }
   async function api(path, body, method) {
     const version = S.viewVersion;
     const options = {
@@ -645,9 +724,10 @@
   }
   function resourceCard(p, i = 0) {
     const cover = p.meta.thumbnail_url
-      ? `<a href="${E(p.url)}" class="resource-video-cover"><img class="resource-thumbnail" src="${E(p.meta.thumbnail_url)}" alt="${E(T("Miniatura de"))} ${E(p.title)}" loading="lazy"><span>${I("play")} ${E(UI.duration(p.meta.duration_seconds))}</span></a>`
+      ? `<a href="${E(p.url)}" class="resource-video-cover"><img class="resource-thumbnail" src="${E(p.meta.thumbnail_url)}" alt="${E(T("Miniatura de"))} ${E(p.title)}" loading="lazy"><span>${I("play")} ${p.meta.duration_seconds ? E(UI.duration(p.meta.duration_seconds)) : E(T("Duración por confirmar"))}</span></a>`
       : `<a href="${E(p.url)}" class="resource-cover v${i % 3}"><div class="cover-label">${E(T("ASCLA · CONOCIMIENTO"))}</div><strong>${E(p.title.split(":")[0])}</strong><span class="cover-icon">${I(p.meta.resource_type === "Video" ? "play" : "book")}</span></a>`;
-    return `<article class="card resource-card">${cover}<div class="resource-content"><span class="tag" style="align-self:flex-start;margin-bottom:10px">${E(T(p.meta.resource_type || "Artículo"))}</span><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E((p.meta.summary || p.body).slice(0, 115))}${p.body.length > 115 ? "…" : ""}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Explorar " + I("arrow"), "item", `data-id="${p.id}"`, "ghost")}</div></div></article>`;
+    const editorialState = p.status !== "publish" ? status(p.status) : "";
+    return `<article class="card resource-card">${cover}<div class="resource-content"><div class="resource-card-badges"><span class="tag">${E(T(p.meta.resource_type || "Artículo"))}</span>${editorialState}</div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E((p.meta.summary || p.body).slice(0, 115))}${(p.meta.summary || p.body).length > 115 ? "…" : ""}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Explorar " + I("arrow"), "item", `data-id="${p.id}"`, "ghost")}</div></div></article>`;
   }
   function eventMini(p) {
     const d = new Date(p.meta.start);
@@ -981,22 +1061,26 @@
     const eventIsPast = p.type === "event" && !!S.event?.is_past;
     const followingLabel = p.following ? "Dejar de seguir" : "Seguir conversación";
     const videoModeTag = p.meta.video_metadata_mode ? `<span class="tag">${E(p.meta.video_metadata_mode)}</span>` : "";
+    const transcriptWarning = (S.boot.admin || S.boot.executive) && p.type === "resource" && p.meta.video_id && p.meta.transcript_status === "unavailable"
+      ? `<div class="error" style="margin-top:16px">${E(T("No se pudo obtener una transcripción verificable para este video. ASCLA no generará resumen, nota ni temas hasta que agregues una transcripción autorizada o YouTube pueda entregar subtítulos accesibles."))}</div>`
+      : "";
     const demoTag = p.meta.demo ? `<span class="demo-badge">${E(T("DATOS DEMO"))}</span>` : "";
     const chatham = p.meta.chatham ? `<div class="alert chatham" style="margin-top:18px">${I("shield")} ${E(T("Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones."))}</div>` : "";
-    const generated = p.meta.generated ? `<div class="alert">${E(T("Contenido generado"))} · ${E(p.meta.ai_mode || p.meta.social_mode || "IA")} · ${E(reviewedLabel)}</div>` : "";
+    const generated = (p.meta.generated || p.meta.ai_enriched || p.meta.generated_sections)
+      ? `<div class="alert">${E(T(p.meta.ai_enriched ? "Publicación enriquecida con IA" : "Contenido generado"))} · ${E(p.meta.ai_mode || p.meta.social_mode || "IA")}${p.meta.ai_enriched ? "" : " · " + E(reviewedLabel)}</div>`
+      : "";
     const video = p.meta.video_id ? `<div class="video-wrap"><iframe loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/${E(p.meta.video_id)}${clipQuery}" title="${E(p.title)}" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe></div><div class="video-metadata"><span>${videoDuration}</span>${videoModeTag}</div>` : "";
     const deleteMedia = (p.media || []).filter(m => m.can_delete).map(m => btn(`${T("Eliminar archivo")}: ${E(m.name)}`, "delete-media", `data-id="${m.id}" data-post="${id}" data-name="${E(m.name)}"`, "ghost danger small")).join("");
     const external = p.meta.url ? `<a class="btn" href="${E(safeURL(p.meta.url))}" target="_blank" rel="noopener noreferrer">${E(T("Abrir enlace ↗"))}</a>` : "";
     const benefits = p.meta.benefits ? `<h3>${E(T("Beneficios"))}</h3><p class="detail-body">${E(p.meta.benefits)}</p>` : "";
     const initiatives = p.meta.initiatives ? `<h3>${E(T("Iniciativas"))}</h3><p class="detail-body">${E(p.meta.initiatives)}</p>` : "";
     const clip = p.meta.clip ? `<div class="alert">${E(T("Cápsula sugerida"))}: ${p.meta.clip.start}s – ${p.meta.clip.end}s · ${E(T("Referencia temporal al video de origen. No existe un archivo recortado."))}</div>` : "";
-    const infographic = p.meta.infographic ? btn(I("download") + " " + T("Descargar infografía"), "infographic", `data-id="${id}"`) : "";
     const actions = `<div class="form-actions">${p.can_delete ? btn("Eliminar", "delete-content", `data-id="${id}"`, "danger") : ""}${canEdit ? btn(I("edit") + " Editar", "editor", `data-type="${p.type}" data-id="${id}"`) : ""}${S.boot.moderator && p.type === "event" && p.status === "publish" && !p.meta.micro && !eventIsPast ? btn("Invitar asociados", "event-invite", `data-id="${id}"`) : ""}${(S.boot.admin || S.boot.executive) && p.type === "resource" && p.meta.video_id ? btn("Actualizar datos de YouTube", "video-metadata", `data-id="${id}"`) : ""}${(S.boot.admin || S.boot.executive) && p.type === "resource" ? btn(I("spark") + " Generar resumen y nota", "generate", `data-id="${id}"`) : ""}${p.type !== "contact" && (["gallery", "resource", "event"].includes(p.type) ? (S.boot.admin || S.boot.executive) : S.boot.moderator) ? btn(I("shield") + " Moderar", "moderate", `data-id="${id}"`) : ""}${p.status === "publish" ? btn(I("heart") + " " + p.reactions, "like", `data-id="${id}" data-active="${!p.liked}"`) + (!eventIsPast ? btn(followingLabel, "follow", `data-id="${id}" data-active="${!p.following}"`) : "") + (Number(p.author.id) !== Number(S.boot.me.id) ? btn("Reportar", "report", `data-id="${id}"`, "ghost") : "") : ""}</div>`;
     const commentsSection = p.status === "publish" ? `<section class="comments"><h3>${E(T("Conversación"))}</h3><div id="comments-list">${E(T("Cargando comentarios…"))}</div><form data-form="comment" data-id="${id}" style="margin-top:18px">${field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')}<button class="btn primary small">${E(T("Publicar comentario"))}</button></form></section>` : "";
 
     modal(
       p.title,
-      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${demoTag}</div>${chatham}${generated}<p class="detail-body">${E(p.body)}</p>${video}${extra}${UI.attachments(p)}${deleteMedia}${UI.generated(p)}${UI.agenda(p)}${p.meta.demo_source_note ? `<p class="alert">${E(p.meta.demo_source_note)}</p>` : ""}${external}${benefits}${initiatives}${clip}${infographic}${p.meta.copyright ? `<p class="private-note">${E(p.meta.copyright)}</p>` : ""}${actions}${commentsSection}`,
+      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${demoTag}</div>${chatham}${generated}<p class="detail-body">${E(p.body)}</p>${video}${transcriptWarning}${extra}${UI.attachments(p)}${deleteMedia}${UI.generated(p)}${UI.agenda(p)}${p.meta.demo_source_note ? `<p class="alert">${E(p.meta.demo_source_note)}</p>` : ""}${external}${benefits}${initiatives}${clip}${p.meta.copyright ? `<p class="private-note">${E(p.meta.copyright)}</p>` : ""}${actions}${commentsSection}`,
       true,
     );
     if (p.status === "publish") {
@@ -1022,7 +1106,7 @@
     if (type === "event")
       extra = `<div class="form-grid">${field("start", "Inicio (tu zona horaria)", localDate(m.start), "datetime-local", "required")}${field("end", "Fin (tu zona horaria)", localDate(m.end), "datetime-local", "required")}${field("capacity", "Cupos (0 = ilimitado)", m.capacity || 0, "number", 'min="0" max="100000"')}${select("modality", "Modalidad", ["Virtual", "Presencial", "Híbrido"], m.modality || "Virtual")}${field("location", "Ubicación", m.location || "")}${field("url", "Enlace del encuentro", m.url || "", "url")}</div>${field("agenda", "Agenda", m.agenda || "", "textarea")}`;
     if (type === "resource")
-      extra = `<div class="form-grid">${select("resource_type", "Tipo de recurso", ["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"], m.resource_type || "Artículo")}${field("source", "Fuente / autoría", m.source || "")}${field("youtube_url", "URL de YouTube", m.youtube_url || "", "url")}${field("url", "URL del recurso externo", m.url || "", "url")}${field("duration_seconds", "Duración en segundos (0 = por confirmar)", m.duration_seconds || 0, "number", 'min="0" max="604800"')}</div>${field("copyright", "Propiedad intelectual", m.copyright || "© ASCLA – Asociación de Secretarios Corporativos de América Latina")}${field("summary", "Resumen", m.summary || "", "textarea")}${(S.boot.moderator || S.boot.executive) ? `${field("transcript", "Transcripción autorizada (opcional)", m.transcript || "", "textarea", 'maxlength="100000"')}${field("identities", "Identidades y afiliaciones que deben anonimizarse (una por línea)", m.identities || "", "textarea")}` : ""}<p class="private-note">Las conferencias completas permanecen en YouTube. La IA genera borradores revisables.</p>`;
+      extra = `<div class="form-grid">${select("resource_type", "Tipo de recurso", ["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"], m.resource_type || "Artículo")}${field("source", "Fuente / autoría", m.source || "")}${field("youtube_url", "URL de YouTube", m.youtube_url || "", "url")}${field("url", "URL del recurso externo", m.url || "", "url")}</div>${m.video_id ? `<p class="private-note">${E(T("Duración detectada automáticamente"))}${m.duration_seconds ? `: ${E(UI.duration(m.duration_seconds))}` : `. ${E(T("Si YouTube no la expone públicamente, conecta YouTube OAuth y vuelve a intentar."))}`}</p>` : ""}${field("copyright", "Propiedad intelectual", m.copyright || "© ASCLA – Asociación de Secretarios Corporativos de América Latina")}${field("summary", "Resumen", m.summary || "", "textarea")}${(S.boot.moderator || S.boot.executive || S.boot.admin) ? `${field("transcript", "Transcripción autorizada (opcional)", m.transcript || "", "textarea", 'maxlength="100000"')}${m.video_id && !m.transcript ? `<div class="alert">${E(T("No hay una transcripción guardada. ASCLA intentará obtener una transcripción autorizada de YouTube al generar el resumen. Si no puede obtenerla, la generación se detendrá para evitar inventar información."))}</div>` : ""}${field("identities", "Identidades y afiliaciones que deben anonimizarse (una por línea)", m.identities || "", "textarea")}` : ""}<p class="private-note">Las conferencias completas permanecen en YouTube. La duración se consulta directamente desde los metadatos del video y nunca se estima a partir de la transcripción.</p>`;
     if (type === "ally")
       extra =
         select(
@@ -1060,23 +1144,21 @@
         m.event_id || 0,
       );
     }
+    const directResourcePublisher = type === "resource" && (S.boot.admin || S.boot.executive);
+    const directContentPublisher = (["gallery", "resource"].includes(type) ? (S.boot.admin || S.boot.executive) : S.boot.moderator);
+    const statusOptions = (["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated))
+      ? [["draft", "Borrador"], ["publish", "Publicar ahora"]]
+      : directContentPublisher && (!m.generated || directResourcePublisher)
+        ? [["draft", "Borrador"], ["pending", "Pendiente de revisión"], ["publish", m.generated ? "Publicar ahora (revisado)" : "Publicado"]]
+        : [["draft", "Borrador"], ["pending", "Enviar a revisión"]];
+    const statusValue = (["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated))
+      ? (id && p.status === "draft" ? "draft" : "publish")
+      : (!id && type === "resource" && directResourcePublisher
+          ? "publish"
+          : (p.status === "publish" && directContentPublisher ? "publish" : p.status));
     modal(
       (id ? "Editar " : "Crear ") + typeLabel[type],
-      `<form data-form="editor" data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${extra}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => `<label class="chip-check"><input type="checkbox" name="interest" value="${t.id}" ${p.tags.some((x) => x.id === t.id) ? "checked" : ""}>${E(t.name)}</label>`).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? `<label class="btn small">${I("plus")} ${E(T("Adjuntar imagen o PDF"))}<input type="file" data-upload="content" accept="image/jpeg,image/png,image/webp,application/pdf" hidden></label><div id="attachments">${(m.media_ids || []).map((mid) => `<span class="attached-file" data-media="${mid}">Archivo #${mid}${btn("Quitar", "detach-media", `data-id="${mid}"`, "ghost small")}</span>`).join("")}</div><p class="private-note">${E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))}</p>` : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${select(
-        "status",
-        "Guardar como",
-        (["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated)) ? [["draft", "Borrador"], ["publish", "Publicar ahora"]] : (["gallery", "resource"].includes(type) ? (S.boot.admin || S.boot.executive) : S.boot.moderator) && !m.generated
-          ? [
-              ["draft", "Borrador"],
-              ["pending", "Pendiente de revisión"],
-              ["publish", "Publicado"],
-            ]
-          : [
-              ["draft", "Borrador"],
-              ["pending", "Enviar a revisión"],
-            ],
-        (["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated)) ? (id && p.status === "draft" ? "draft" : "publish") : p.status === "publish" ? "pending" : p.status,
-      )}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar ${typeLabel[type]}</button></div></form>`,
+      `<form data-form="editor" data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${extra}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => `<label class="chip-check"><input type="checkbox" name="interest" value="${t.id}" ${p.tags.some((x) => x.id === t.id) ? "checked" : ""}>${E(t.name)}</label>`).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? `<label class="btn small">${I("plus")} ${E(T("Adjuntar imagen o PDF"))}<input type="file" data-upload="content" accept="image/jpeg,image/png,image/webp,application/pdf" hidden></label><div id="attachments">${(m.media_ids || []).map((mid) => `<span class="attached-file" data-media="${mid}">Archivo #${mid}${btn("Quitar", "detach-media", `data-id="${mid}"`, "ghost small")}</span>`).join("")}</div><p class="private-note">${E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))}</p>` : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${select("status", "Guardar como", statusOptions, statusValue)}${m.generated && directResourcePublisher ? `<p class="private-note">${E(T("Si eliges Publicar ahora, confirmas que revisaste fuentes, anonimización y derechos antes de publicar."))}</p>` : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar ${typeLabel[type]}</button></div></form>`,
       true,
     );
   }
@@ -1289,7 +1371,7 @@
     });
     assistantScroll();
   }
-  async function watchJob(id, target, onDone) {
+  async function watchJob(id, target, onDone, onError = null) {
     let attempts = 0;
     const assistantMode = target.classList?.contains("assistant-message");
     target.innerHTML = assistantMode ? assistantLoadingBody("pending") :
@@ -1303,6 +1385,15 @@
           return;
         }
         if (j.status === "error") {
+          if (onError) {
+            try {
+              const handled = await onError(j.error);
+              if (handled) return;
+            } catch (fallbackError) {
+              target.innerHTML = `<div class="error">${E(j.error)}<br>${E(fallbackError.message || "")}</div>`;
+              return;
+            }
+          }
           target.innerHTML = `<div class="error">${E(j.error)} ${btn("Reintentar", "retry-job", 'data-id="' + id + '"', "small")}</div>`;
           return;
         }
@@ -1422,7 +1513,7 @@
     else if(tab==='usuarios' && S.boot.admin) await adminUsers(panel);
     else if(tab==='archivos' && S.boot.admin) panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T('BIBLIOTECA PRIVADA'))}</span><h2>${E(T('Archivos de la comunidad'))}</h2><p>${E(T('Consulta los archivos privados de todos los asociados y elimina los que corresponda.'))}</p></div></div><div class="card admin-feature-card"><div class="admin-feature-icon">${I('book')}</div><div><h3>${E(T('Biblioteca administrativa'))}</h3><p class="detail-body">${E(T('Busca por archivo o propietario y revisa el material privado almacenado en ASCLA.'))}</p></div>${btn('Administrar archivos','files','data-scope="all"','primary')}</div>`;
     else if(tab==='moderacion') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">CALIDAD Y CONVIVENCIA</span><h2>Revisión de contenido</h2><p>Los foros se publican directamente. Galería, Eventos y Conocimiento los gestiona el Ejecutivo o un administrador.</p></div></div><div class="card"><h3>Contenido pendiente y borradores</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>Contenido</th><th>Autor</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${d.pending.map(p=>`<tr><td><strong>${E(p.title)}</strong><br><small>${E(typeLabel[p.type])}${p.meta.generated?' · IA':''}${p.meta.chatham?' · Chatham House':''}</small></td><td>${E(p.author.name)}</td><td>${status(p.status)}</td><td>${btn('Revisar','item',`data-id="${p.id}"`,'small')}${!S.boot.admin&&!S.boot.executive&&['gallery','resource'].includes(p.type)?'<small>Publicación administrativa</small>':''}</td></tr>`).join('')||'<tr><td colspan="4">Todo al día. No hay contenido pendiente.</td></tr>'}</tbody></table></div></div><div class="admin-review-grid"><div class="card"><h3>Reportes de la comunidad</h3>${d.reports.map(r=>`<div class="admin-report ${r.reviewed?'is-reviewed':''}"><div><div class="admin-report-heading"><strong>${E(r.title || `Publicación #${r.target_id}`)}</strong><span class="tag ${r.reviewed?'success':''}">${E(T(r.reviewed?'Revisado':'Pendiente'))}</span></div>${r.excerpt ? `<p>${E(r.excerpt)}</p>` : ''}<p class="private-note"><b>Motivo:</b> ${E(r.reason_label || 'Sin motivo registrado')}${r.detail ? `<br><b>Detalle:</b> ${E(r.detail)}` : ''}${r.reviewed && r.reviewed_by_name ? `<br><b>${E(T('Revisado por:'))}</b> ${E(r.reviewed_by_name)}` : ''}</p></div><div class="form-actions">${Number(r.target_id) ? btn('Abrir contenido','item',`data-id="${r.target_id}"`,'small') : ''}${!r.reviewed && S.boot.moderator ? btn('Marcar como revisado','report-reviewed',`data-id="${r.id}"`,'primary small') : ''}</div></div>`).join('')||'<p class="private-note">'+E(T('No hay reportes registrados.'))+'</p>'}</div><div class="card"><h3>Comentarios pendientes</h3>${d.comments.map(c=>`<div class="comment"><strong>${E(c.author)}</strong><p>${E(c.body)}</p>${btn('Aprobar','comment-moderate',`data-id="${c.id}" data-decision="approve"`,'small')}${btn('Mantener oculto','comment-moderate',`data-id="${c.id}" data-decision="reject"`,'small')}${c.can_delete?btn('Eliminar comentario','delete-comment',`data-id="${c.id}"`,'danger small'):''}</div>`).join('')||'<p class="private-note">No hay comentarios pendientes.</p>'}</div></div>`;
-    else if(tab==='trabajos') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PROCESAMIENTO Y RESULTADOS</span><h2>IA y trabajos</h2><p>Consulta el avance, abre resultados y reintenta los trabajos con error.</p></div></div><div class="alert">Los derivados de IA quedan en borrador para revisión.</div><div class="admin-actions">${link('centro-conocimiento','Ver recursos','primary')}${btn('Curaduría social demo','social-job')}${S.boot.admin?btn('Conectar YouTube OAuth','google-connect','data-service="youtube"'):''}${btn('Actualizar estados','admin-refresh')}</div><div class="card table-wrap"><table class="data-table"><thead><tr><th>Trabajo</th><th>Estado</th><th>Detalle</th><th>Acción</th></tr></thead><tbody>${d.jobs.map(j=>`<tr><td><strong>#${j.id}</strong><br>${E(j.kind)}</td><td>${status(j.status)}</td><td>${E(j.error||date(j.created_at))}</td><td>${btn('Ver','job-detail',`data-id="${j.id}"`,'small')}${j.status==='error'?btn('Reintentar','retry-job',`data-id="${j.id}"`,'small'):''}</td></tr>`).join('')||'<tr><td colspan="4">No hay trabajos registrados.</td></tr>'}</tbody></table></div>`;
+    else if(tab==='trabajos') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PROCESAMIENTO Y RESULTADOS</span><h2>IA y trabajos</h2><p>Consulta el avance, abre resultados y reintenta los trabajos con error.</p></div></div><div class="alert">Los derivados de IA quedan en borrador para revisión.</div><div class="admin-actions">${link('centro-conocimiento','Ver recursos','primary')}${btn('Curaduría social demo','social-job')}${(S.boot.admin||S.boot.executive)?btn('Conectar YouTube OAuth','google-connect','data-service="youtube"'):''}${btn('Actualizar estados','admin-refresh')}</div><div class="card table-wrap"><table class="data-table"><thead><tr><th>Trabajo</th><th>Estado</th><th>Detalle</th><th>Acción</th></tr></thead><tbody>${d.jobs.map(j=>`<tr><td><strong>#${j.id}</strong><br>${E(j.kind)}</td><td>${status(j.status)}</td><td>${E(j.error||date(j.created_at))}</td><td>${btn('Ver','job-detail',`data-id="${j.id}"`,'small')}${j.status==='error'?btn('Reintentar','retry-job',`data-id="${j.id}"`,'small'):''}</td></tr>`).join('')||'<tr><td colspan="4">No hay trabajos registrados.</td></tr>'}</tbody></table></div>`;
     else if(tab==='microeventos') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ENCUENTROS ENTRE ASOCIADOS</span><h2>Círculos de conversación</h2><p>Grupos de 4 a 6 personas, con intereses comunes y una agenda para conversar.</p></div></div><div class="card"><h3>Preparar los encuentros del mes</h3><p class="detail-body">Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.</p><div class="admin-actions">${S.boot.admin?btn(I('spark')+' Preparar propuesta del mes','micro-job','','primary'):''}${link('eventos','Ver encuentros','small')}</div><div id="micro-job-result"></div></div>`;
     else if(tab==='logs') {
       const auditRows=d.audit||[];
@@ -1459,7 +1550,7 @@
     const participation=settingsSection('users','Participación y revisión','Define cómo se publica, modera y organiza la participación dentro de la comunidad.',`${check("demo", "Modo demo (datos e integraciones identificados)", s.demo)}${check("moderation_required", "Revisar publicaciones del Hub antes de publicarlas", s.moderation_required)}${check("moderate_comments", "Revisar comentarios del Hub y otras secciones (excepto Foros)", s.moderate_comments)}${check("chatham_default", "Aplicar Chatham House por defecto", s.chatham_default)}${check("micro_enabled", "Preparar microeventos mensualmente con WP-Cron", s.micro_enabled)}${check("micro_approval", "Exigir aprobación administrativa de microeventos", s.micro_approval)}`,true);
     const security=settingsSection('shield','Seguridad','Protección adaptativa del acceso y formularios públicos sin interrumpir a usuarios legítimos.',`${check("turnstile_enabled", "Activar Cloudflare Turnstile", s.turnstile_enabled)}<p class="private-note">El widget debe crearse en Cloudflare con modo <strong>Managed</strong>. ASCLA valida cada token en el servidor y recuerda durante 24 horas los navegadores/IP que ya superaron una verificación.</p><div class="form-grid">${field("turnstile_site_key", "Turnstile Site Key", s.turnstile_site_key || "", "text", 'autocomplete="off" placeholder="0x4AAAA..."')}${field("turnstile_secret", s.has_turnstile_secret ? "Turnstile Secret Key (guardada; vacío para conservar)" : "Turnstile Secret Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_turnstile_secret", "Eliminar Turnstile Secret Key guardada", false)}<div class="turnstile-protection-options"><strong>Formularios protegidos</strong>${check("turnstile_login", "Inicio de sesión · mostrar después de 3 fallos; bloqueo temporal desde 5", s.turnstile_login)}${check("turnstile_recovery", "Recuperación de contraseña · exigir después de 2 solicitudes seguidas", s.turnstile_recovery)}${check("turnstile_public", "Otros formularios públicos ASCLA · activar solo ante señales sospechosas o demasiados envíos", s.turnstile_public)}</div><p class="private-note">Los intentos se contabilizan principalmente por IP + usuario/correo para reducir bloqueos injustos en redes compartidas. Los usuarios autenticados nunca ven Turnstile.</p>`,true);
     const matching=settingsSection('spark','Motor de afinidad','Define el umbral mínimo que debe alcanzar una coincidencia antes de mostrarse como recomendación.',`<div class="matching-threshold-setting">${field("matching_min_affinity", "Afinidad mínima para recomendar (%)", s.matching_min_affinity ?? 30, "number", 'min="0" max="100" step="1"')}</div><p class="private-note">${E(T("Solo aparecerán como personas recomendadas los perfiles que alcancen al menos este porcentaje de afinidad. Valor predeterminado: 30%."))}</p>`);
-    const ai=settingsSection('spark','Inteligencia artificial','Elige un único proveedor activo. ASCLA utilizará solo ese proveedor para redactar respuestas y sugerencias.',`<div class="ai-provider-config">${select("ai_provider","Proveedor activo",[["mock","DEMO MODE · sin API"],["gemini","Google Gemini · API real"],["openai","OpenAI / ChatGPT · API real"]],s.ai_provider)}<div class="ai-provider-panel" data-ai-provider-panel="mock"><div class="alert">Modo de demostración: ASCLA usa respuestas simuladas y no envía información a un proveedor externo.</div></div><div class="ai-provider-panel" data-ai-provider-panel="gemini"><div class="form-grid">${field("ai_model", "ID del modelo Gemini", s.ai_model, "text", 'placeholder="gemini-2.5-flash" autocomplete="off"')}${field("ai_key", s.has_ai_key ? "Gemini API Key (guardada; vacío para conservar)" : "Gemini API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_ai_key", "Eliminar Gemini API Key guardada", false)}</div><div class="ai-provider-panel" data-ai-provider-panel="openai"><div class="form-grid">${field("openai_model", "ID del modelo OpenAI", s.openai_model || "gpt-5.6-luna", "text", 'placeholder="gpt-5.6-luna" autocomplete="off"')}${field("openai_key", s.has_openai_key ? "OpenAI API Key (guardada; vacío para conservar)" : "OpenAI API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_openai_key", "Eliminar OpenAI API Key guardada", false)}</div><div class="ai-secondary-setting">${select("youtube_mode","Transcripciones YouTube",[["mock","DEMO MODE / transcripción manual"],["real","YouTube OAuth real"]],s.youtube_mode)}</div><p class="private-note">Las claves permanecen protegidas en el servidor. Guarda la configuración antes de probar la conexión. Los datos internos autorizados de ASCLA se preparan antes de consultar al proveedor activo.</p><div class="settings-actions-row" data-ai-test-actions>${btn("Probar conexión", "ai-test", "", "small")}<p id="ai-test-result" class="private-note" role="status" aria-live="polite"></p></div></div>`,true);
+    const ai=settingsSection('spark','Inteligencia artificial','Elige un único proveedor activo. ASCLA utilizará solo ese proveedor para redactar respuestas y sugerencias.',`<div class="ai-provider-config">${select("ai_provider","Proveedor activo",[["mock","DEMO MODE · sin API"],["gemini","Google Gemini · API real"],["openai","OpenAI / ChatGPT · API real"]],s.ai_provider)}<div class="ai-provider-panel" data-ai-provider-panel="mock"><div class="alert">Modo de demostración: ASCLA usa respuestas simuladas y no envía información a un proveedor externo.</div></div><div class="ai-provider-panel" data-ai-provider-panel="gemini"><div class="form-grid">${field("ai_model", "ID del modelo Gemini", s.ai_model, "text", 'placeholder="gemini-2.5-flash" autocomplete="off"')}${field("ai_key", s.has_ai_key ? "Gemini API Key (guardada; vacío para conservar)" : "Gemini API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_ai_key", "Eliminar Gemini API Key guardada", false)}</div><div class="ai-provider-panel" data-ai-provider-panel="openai"><div class="form-grid">${field("openai_model", "ID del modelo OpenAI", s.openai_model || "gpt-5.6-luna", "text", 'placeholder="gpt-5.6-luna" autocomplete="off"')}${field("openai_key", s.has_openai_key ? "OpenAI API Key (guardada; vacío para conservar)" : "OpenAI API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_openai_key", "Eliminar OpenAI API Key guardada", false)}</div><div class="ai-secondary-setting">${select("youtube_mode","Transcripciones YouTube",[["mock","Transcripción manual"],["real","YouTube OAuth real · subtítulos autorizados"]],s.youtube_mode)}<p class="private-note">YouTube permite descargar subtítulos por API solo cuando la cuenta conectada tiene permisos suficientes sobre el video. Para otros videos, pega una transcripción autorizada manualmente.</p></div><p class="private-note">Las claves permanecen protegidas en el servidor. Guarda la configuración antes de probar la conexión. Los datos internos autorizados de ASCLA se preparan antes de consultar al proveedor activo.</p><div class="settings-actions-row" data-ai-test-actions>${btn("Probar conexión", "ai-test", "", "small")}<p id="ai-test-result" class="private-note" role="status" aria-live="polite"></p></div></div>`,true);
     const google=settingsSection('calendar','Google OAuth','Credenciales para que cada asociado conecte servicios autorizados de Google desde su cuenta.',`<div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert settings-code-alert"><span>URI de redirección</span><code>${E(s.google_redirect)}</code></div><p class="private-note">Cada asociado conecta su calendario desde Perfil. YouTube se conecta desde IA y trabajos.</p>`);
     const social=settingsSection('contact','Social Listening','Estado de conectores sociales y restricciones de integración externa.',`<div class="alert">LinkedIn y X permanecen en DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; ASCLA no realiza scraping ni envía respuestas externas.</div>`);
     const legal=settingsSection('book','Identidad y propiedad intelectual','Texto institucional mostrado en las áreas correspondientes de la intranet.',`${field("copyright", "Propiedad intelectual", s.copyright)}`);
@@ -1507,17 +1598,6 @@
         )
         .join("")}`,
     );
-  }
-  function download(name, body, mime) {
-    const url = URL.createObjectURL(new Blob([body], { type: mime }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-  function infographic() {
-    download("ascla-infografia-" + S.item.id + ".svg", UI.infographic(S.item), "image/svg+xml");
   }
   async function render() {
     const version = S.viewVersion;
@@ -1804,11 +1884,12 @@
         toast("Solicitud #"+id+": "+requestLabels[b.dataset.status]+".");
         await adminContacts(document.getElementById('admin-panel'));
       } else if (a === "generate") {
+        try { await ensureYouTubeDuration(id); } catch { /* Server-side metadata remains the primary path. */ }
         const j = await api("jobs", { kind: "multimedia", resource_id: id });
         modal("Procesar conferencia", '<div id="job-result"></div>');
         watchJob(j.id, document.getElementById("job-result"), (r) => {
           document.getElementById("job-result").innerHTML =
-            `<div class="alert">${E(r.message)} · ${E(r.mode)}</div>${btn("Abrir nota técnica", "item", `data-id="${r.resource_id}"`, "primary")}`;
+            `<div class="alert">${E(r.message)} · ${E(r.mode)}</div>${btn("Abrir publicación actualizada", "item", `data-id="${r.resource_id}"`, "primary")}`;
         });
       } else if (a === "event-invite") {
         S.invite = null;
@@ -1818,7 +1899,19 @@
       } else if (a === "video-metadata") {
         const j = await api("jobs", { kind: "video_metadata", resource_id: id });
         modal("Datos del video", '<div id="video-job-result" role="status">Consultando metadatos…</div>');
-        watchJob(j.id, document.getElementById("video-job-result"), () => item(id));
+        const target = document.getElementById("video-job-result");
+        watchJob(j.id, target, () => item(id), async serverError => {
+          target.innerHTML = `<div class="alert">${E(T("YouTube no expuso la duración al servidor. Intentando leerla directamente desde el reproductor…"))}</div>`;
+          try {
+            const seconds = await ensureYouTubeDuration(id, true);
+            target.innerHTML = `<div class="alert">${E(T("Duración verificada directamente desde el video"))}: ${E(UI.duration(seconds))}</div>`;
+            setTimeout(() => item(id), 700);
+            return true;
+          } catch (error) {
+            target.innerHTML = `<div class="error">${E(serverError)}<br>${E(T("Tampoco fue posible verificar la duración desde el reproductor."))}</div>`;
+            return true;
+          }
+        });
       } else if (a === "micro-job") {
         const j = await api("jobs", { kind: "microevents" });
         watchJob(j.id, document.getElementById("micro-job-result"), (r) => {

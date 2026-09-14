@@ -12,13 +12,23 @@ final class ContentMeta
 
         $old=$id?(array)get_post_meta($id,'_ascla',true):[];
 
-        $data=$old; $mod=current_user_can('ascla_moderate');
+        $data=$old; $mod=current_user_can('ascla_moderate'); $editorial=$mod||($type==='resource'&&Access::canPublish());
 
         $texts=['source','copyright','description','agenda','location','modality','resource_type','alliance_type','benefits','initiatives','summary'];
 
-        if ($mod) { $texts=array_merge($texts,['transcript','identities']); }
+        if ($editorial) { $texts=array_merge($texts,['transcript','identities']); }
 
         foreach ($texts as $key) { if (isset($input[$key])) { $data[$key]=Access::text($input[$key],$key==='transcript'?100000:10000); } }
+        if ($editorial && array_key_exists('transcript',$input)) {
+            if (trim((string)($data['transcript']??''))!=='') {
+                $data['transcript_status']='manual';
+                $data['transcript_mode']='Transcripción manual autorizada';
+                $data['transcript_checked_at']=current_datetime()->format(DATE_ATOM);
+                unset($data['transcript_error']);
+            } else {
+                unset($data['transcript_status'],$data['transcript_mode'],$data['transcript_checked_at'],$data['transcript_error']);
+            }
+        }
 
         foreach (['url','youtube_url'] as $key) {
 
@@ -40,9 +50,11 @@ final class ContentMeta
 
             Access::require($data['video_id']!=='','URL de YouTube no válida.',400);
 
+        } elseif (array_key_exists('youtube_url',$input)) {
+            unset($data['video_id'],$data['thumbnail_url'],$data['duration_seconds'],$data['video_metadata_mode'],$data['video_source_title']);
         }
 
-        if ($mod && isset($input['chatham'])) { $data['chatham']=rest_sanitize_boolean($input['chatham']); }
+        if ($editorial && isset($input['chatham'])) { $data['chatham']=rest_sanitize_boolean($input['chatham']); }
 
         elseif (!isset($data['chatham'])) { $data['chatham']=Settings::get()['chatham_default']; }
 

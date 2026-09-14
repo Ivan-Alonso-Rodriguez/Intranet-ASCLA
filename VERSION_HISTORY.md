@@ -2,9 +2,9 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.9.24`  
+> **Versión actual:** `1.9.29`  
 > **Esquema de base de datos:** `7`  
-> La versión `1.9.24` repara referencias huérfanas de microeventos eliminados, permite regenerar propuestas mensuales y mejora la ubicación visual del estado de conexión en el Directorio, manteniendo el esquema de datos 7.
+> La versión `1.9.29` incorpora clasificación automática de Temas para videos, mejora la detección de duración directamente desde YouTube y bloquea la generación de IA cuando no existe una transcripción verificable. Mantiene el esquema de datos 7.
 
 ## Resumen de versiones
 
@@ -45,12 +45,71 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.21 | Pulido del hero, Auditoría y Configuración administrativa | |
 | 1.9.22 | Proveedor IA exclusivo, configuración simplificada y auditoría explicativa | Completada |
 | 1.9.23 | Gestión de notificaciones y ciclo completo de conexiones | Completada |
-| 1.9.24 | Reparación de microeventos y estado visual de conexiones | **Actual** |
+| 1.9.24 | Reparación de microeventos y estado visual de conexiones | Completada |
+| 1.9.25 | Publicación editorial directa, notas integradas y cápsulas coherentes | Completada |
+| 1.9.26 | Nota técnica en recurso original, duración automática y publicación por defecto | Completada |
+| 1.9.27 | Resumen editorial, duración verificada y estados visibles | Completada |
+| 1.9.28 | Recomendaciones de conocimiento reforzadas por palabras clave | Completada |
+| 1.9.29 | Temas automáticos, duración YouTube y transcripción segura | **Actual** |
 
 ---
 
 # Serie 1.9.x — evolución funcional
 
+
+## 1.9.29 — Temas automáticos, duración YouTube y transcripción segura
+
+- Al generar resumen y nota, ASCLA puede activar automáticamente los seis **Temas** del Centro de Conocimiento cuando estén respaldados por el video: Gestión de riesgos, Gobierno corporativo, Inteligencia artificial, Juntas directivas, Sostenibilidad y Transformación digital.
+- Los temas automáticos se guardan por separado (`ai_topic_ids`) para que un reprocesamiento pueda reemplazarlos sin borrar los temas elegidos manualmente por el editor.
+- Gemini y OpenAI reciben una lista cerrada de Temas permitidos y solo deben devolver los que estén claramente sustentados por el contenido; ASCLA añade además una clasificación determinística basada en el texto verificable.
+- La duración del video se desacopla del modo de transcripción: ASCLA intenta siempre consultar `contentDetails.duration` desde YouTube OAuth cuando la cuenta está conectada y usa metadatos públicos del propio video únicamente como fallback.
+- El fallback público prueba la página del video y superficies de embed; si el servidor sigue sin obtener duración, la interfaz puede leerla directamente del YouTube IFrame Player API y guardarla como metadato verificado por el reproductor. Nunca usa timestamps de la transcripción para calcular la duración.
+- Ejecutivos y Administradores pueden conectar YouTube OAuth para procesar recursos que gestionan.
+- Si el recurso no tiene transcripción manual, ASCLA solo genera contenido cuando puede obtener subtítulos autorizados desde YouTube. Si no puede, detiene el trabajo con un mensaje explícito y **no llama a la IA para inventar información**.
+- El editor advierte cuando no hay una transcripción guardada y explica que la generación se detendrá si YouTube tampoco puede proporcionar una.
+- Esquema de base de datos: **7** (sin migración).
+
+## 1.9.28 — Recomendaciones de conocimiento reforzadas por palabras clave
+
+- Los temas/intereses asignados al recurso siguen siendo la señal de recomendación más fuerte y nunca son desplazados por etiquetas generadas por IA.
+- Las palabras clave del Centro de Conocimiento ahora aportan una señal secundaria cuando coinciden con intereses, áreas de conocimiento, industrias u objetivos registrados en el perfil del asociado.
+- El comparador normaliza mayúsculas, acentos y puntuación, reconoce acrónimos de varias palabras y admite coincidencias parciales suficientemente claras sin usar una sola palabra genérica como criterio dominante.
+- La recencia aporta únicamente un pequeño bono después de comprobar relevancia temática; un recurso reciente sin coincidencias no aparece como recomendado.
+- El orden de **Conocimiento para tu día a día** se calcula por puntuación de relevancia y luego por fecha, de modo que una coincidencia explícita de interés queda por encima de una coincidencia basada solo en palabras clave.
+- Los avisos de nuevos recursos utilizan la misma señal de relevancia, haciendo consistente el descubrimiento entre Inicio y Notificaciones.
+- Se añade una prueba de regresión que comprueba que un recurso relacionado solo por palabra clave puede recomendarse, que un recurso sin relación no entra por ser reciente y que las coincidencias explícitas conservan prioridad.
+- Esquema de base de datos: **7** (sin migración).
+
+## 1.9.27 — Resumen editorial, duración verificada y estados visibles
+
+- Los resúmenes y notas generados se redactan como contenido editorial del video y evitan expresiones como `La transcripción aborda...`; los prompts de Gemini/OpenAI también prohíben mencionar transcripción, subtítulos o el proceso de extracción.
+- Las publicaciones enriquecidas ya no añaden una sección **Fuente** con el mismo video ni muestran **Descargar infografía**.
+- La duración deja de inferirse desde timestamps de la transcripción. ASCLA intenta primero la API real de YouTube cuando está conectada y, como respaldo, consulta metadatos públicos del propio video; si no puede verificarse, la duración queda **por confirmar**.
+- Cuando la duración no está verificada, ASCLA no genera cápsulas temporales para evitar referencias que excedan o contradigan el video real.
+- Las tarjetas de Centro de Conocimiento muestran **Borrador** o **Pendiente de revisión** cuando corresponde, igual que otros módulos editoriales.
+- Esquema de base de datos: **7** (sin migración).
+
+## 1.9.26 — Nota técnica en la publicación original y duración automática
+
+- **Generar resumen y nota** actualiza el mismo recurso desde el que se ejecutó la acción; ya no crea una Nota técnica separada, un borrador del Hub ni recursos independientes para cápsulas.
+- Resumen, Nota técnica, marcos, conclusiones, normativas, conceptos, palabras clave y cápsulas se renderizan como secciones internas de la publicación original.
+- Las cápsulas permanecen como referencias temporales al mismo video y nunca generan un nuevo post.
+- La duración se refresca automáticamente al guardar/procesar un recurso: con YouTube OAuth real se usan metadatos de YouTube; si no están disponibles, se infiere de timestamps válidos de la transcripción y se conserva el dato existente como último respaldo.
+- Los campos estructurados eliminan valores genéricos sin significado como `participante`, `una persona`, `dato reservado` o `identidad reservada` cuando constituyen por sí solos un marco, concepto, normativa, conclusión o palabra clave.
+- Los prompts de Gemini/OpenAI instruyen explícitamente a omitir esos placeholders en listas estructuradas.
+- Para Administradores y Ejecutivos, un nuevo recurso del Centro de Conocimiento abre **Guardar como: Publicado** por defecto.
+- Esquema de base de datos: **7** (sin migración).
+
+## 1.9.25 — Publicación editorial directa, notas integradas y cápsulas coherentes
+
+- Administradores y Ejecutivos ASCLA pueden publicar directamente recursos del **Centro de Conocimiento**, incluidos borradores generados por IA cuando eligen explícitamente **Publicar ahora (revisado)**.
+- La publicación directa de un recurso generado registra `reviewed=true`, de modo que la protección editorial sigue siendo explícita y el contenido puede indexar sus etiquetas revisadas.
+- Las notas técnicas dejan de presentar un bloque separado **Resultados y fuentes**: Resumen, marcos, conclusiones, normativas, conceptos, palabras clave, cápsulas y la fuente de origen se renderizan como secciones de la misma publicación.
+- La anonimización Chatham House evita mostrar el marcador artificial `[identidad reservada]`; la salida usa formulaciones neutrales como `participante` o `dato reservado`.
+- La generación de cápsulas deja de dividir el video mecánicamente. Se toma la duración real conocida —o la duración inferida de la transcripción cuando no existe metadata— y se aplica esta política: hasta 3 min, ninguna cápsula; 3–10 min, máximo 1; 10–30 min, máximo 2; más de 30 min, máximo 3.
+- Los timestamps propuestos por IA se descartan si exceden la duración real y cada cápsula válida conserva una duración de 60 a 180 segundos con tiempos verificados en la transcripción.
+- Se agregan pruebas para publicación directa de conocimiento generado, redacción sin `[identidad reservada]` y límites de cápsulas por duración.
+- Esquema de base de datos: **7** (sin migración).
 
 ## 1.9.24 — Reparación de microeventos y estado visual de conexiones
 
@@ -650,10 +709,10 @@ Versión histórica recuperada del repositorio Git original.
 Durante la serie 1.9.x se adoptó un versionado incremental para reflejar cambios pequeños y verificables sin producir saltos innecesarios:
 
 ```text
-1.9.0 → 1.9.1 → 1.9.2 → ... → 1.9.24
+1.9.0 → 1.9.1 → 1.9.2 → ... → 1.9.27
 ```
 
-Las modificaciones exclusivamente documentales, como la ampliación de este archivo, **no generan por sí solas una nueva versión del plugin**. La versión `1.9.24` se justifica por la reparación del ciclo de microeventos eliminados y el ajuste visual de conexiones; el esquema de datos permanece en 7.
+Las modificaciones exclusivamente documentales, como la ampliación de este archivo, **no generan por sí solas una nueva versión del plugin**. La versión `1.9.27` se justifica por depurar la presentación editorial del conocimiento, verificar la duración directamente contra YouTube y visibilizar los estados editoriales; el esquema de datos permanece en 7.
 
 # Notas de trazabilidad
 
@@ -661,4 +720,4 @@ Las modificaciones exclusivamente documentales, como la ampliación de este arch
 - Cuando existe un snapshot verificable se conserva como referencia histórica.
 - No se crean tags ficticios para versiones cuyo código fuente original no esté disponible.
 - La carpeta `docs/` se mantiene fuera del repositorio público según la configuración actual de `.gitignore`.
-- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.24**.
+- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.27**.

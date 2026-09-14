@@ -15,8 +15,8 @@ final class CompletionTest extends TestCase
             self::assertIsInt($id); $this->users[]=$id;
         }
         wp_set_current_user($this->users[0]); Settings::save(['ai_mode'=>'mock','youtube_mode'=>'mock']);
-        foreach (['interest','category'] as $tax) { $term=wp_insert_term('Cierre '.bin2hex(random_bytes(4)),'ascla_'.$tax); $this->terms[$tax]=(int)$term['term_id']; }
-        foreach (array_slice($this->users,1) as $id) { wp_set_current_user($id); Profiles::save(['networking'=>true,'interests'=>[$this->terms['interest']]]); }
+        foreach (['interest','category','area'] as $tax) { $term=wp_insert_term('Cierre '.bin2hex(random_bytes(4)),'ascla_'.$tax); $this->terms[$tax]=(int)$term['term_id']; }
+        foreach (array_slice($this->users,1) as $id) { wp_set_current_user($id); Profiles::save(['networking'=>true,'interests'=>[$this->terms['interest']],'areas'=>[$this->terms['area']]]); }
         wp_set_current_user($this->users[0]);
     }
     protected function tearDown(): void
@@ -97,6 +97,23 @@ final class CompletionTest extends TestCase
         Events::register($p['id'],'accepted');
         $this->expectException(ASCLA\Core\Rest\ApiException::class); Events::invite($p['id'],[$this->users[2]]);
     }
+    public function testKnowledgeRecommendationsUseKeywordsAsSecondarySignal(): void
+    {
+        $areaName=get_term($this->terms['area'],'ascla_area')->name;
+        $direct=$this->create('resource',['title'=>'QZ Interés directo','interest'=>[$this->terms['interest']]]);
+        $keyword=$this->create('resource',['title'=>'QZ Coincidencia por palabra clave','tag_names'=>[$areaName]]);
+        $unrelated=$this->create('resource',['title'=>'QZ Sin relación','tag_names'=>['Tema completamente ajeno']]);
+        wp_set_current_user($this->users[1]);
+        $recommended=Content::listing('resource',['recommended'=>1,'per_page'=>100]);
+        $ids=array_column($recommended['items'],'id');
+        self::assertContains($direct['id'],$ids);
+        self::assertContains($keyword['id'],$ids,'A keyword matching a profile knowledge area should reinforce recommendations.');
+        self::assertNotContains($unrelated['id'],$ids,'Recency alone must not recommend unrelated content.');
+        self::assertLessThan(array_search($keyword['id'],$ids,true),array_search($direct['id'],$ids,true),'Explicit interests must rank above keyword-only matches.');
+        wp_set_current_user($this->users[0]);
+        self::assertGreaterThanOrEqual(2,Discovery::resource($keyword['id'])['sent'],'Keyword relevance should also participate in resource discovery notifications.');
+    }
+
     public function testRelevantResourcesAndNetworkingNotifyOnceAndRespectOptOut(): void
     {
         $p=$this->create('resource',['interest'=>[$this->terms['interest']]]);
@@ -126,18 +143,49 @@ final class CompletionTest extends TestCase
         self::assertSame([],Transcript::moments("[00:00] Texto sin intervalo suficiente\n[00:20] Final"));
         self::assertSame([],Transcript::segments("[00:99] Invalido\n[01:30] Final"));
     }
-    public function testVideoMetadataAndGeneratedTagsRemainReviewable(): void
+    public function testVideoTopicsAreActivatedAndGeneratedNoteStaysInOriginalResource(): void
     {
-        $p=$this->create('resource',['interest'=>[$this->terms['interest']],'meta'=>['youtube_url'=>'https://youtu.be/abcdefghijk','resource_type'=>'Video','chatham'=>false]]);
-        $data=Knowledge::videoMetadata($p['id']); self::assertSame('DEMO MODE',$data['mode']); self::assertSame(210,$data['duration_seconds']);
-        $result=Knowledge::multimedia($p['id']); $this->posts=array_merge($this->posts,[$result['resource_id'],$result['hub_id']],$result['capsule_ids']);
-        self::assertGreaterThan(0,strtotime(Content::serialize(get_post($result['resource_id']))['date']));
-        $draft=get_post_meta($result['resource_id'],'_ascla',true); self::assertNotEmpty($draft['moments']); self::assertNotEmpty($draft['tags']);
-        self::assertSame([],wp_get_object_terms($result['resource_id'],'ascla_tag'));
-        $name='Etiqueta revisada '.bin2hex(random_bytes(3));
-        Content::save('resource',['title'=>'Nota revisada','body'=>'Contenido revisado','status'=>'pending','meta'=>$draft,'tag_names'=>[$name],'interest'=>[$this->terms['interest']]],$result['resource_id']);
-        Content::moderate($result['resource_id'],'approve','Fuentes, palabras clave y anonimización revisadas.',true);
-        $terms=wp_get_object_terms($result['resource_id'],'ascla_tag'); self::assertSame($name,$terms[0]->name); $this->terms['tag']=$terms[0]->term_id;
-        self::assertSame([$this->terms['interest']],wp_get_object_terms($result['resource_id'],'ascla_interest',['fields'=>'ids']));
+        $p=$this->create('resource',['interest'=>[$this->terms['interest']],'meta'=>['youtube_url'=>'https://youtu.be/abcdefghijk','resource_type'=>'Video','chatham'=>false,'duration_seconds'=>210,'transcript'=>"[00:00] La inteligencia artificial requiere gestión de riesgos y supervisión del directorio.
+[01:10] La transformación digital exige responsabilidades claras.
+[03:30] Cierre del contenido."]]);
+        $result=Knowledge::multimedia($p['id']);self::assertSame($p['id'],$result['resource_id']);self::assertSame(0,$result['hub_id']);self::assertSame([],$result['capsule_ids']);
+        self::assertGreaterThan(0,strtotime(Content::serialize(get_post($p['id']))['date']));
+        $meta=get_post_meta($p['id'],'_ascla',true); self::assertSame(210,(int)$meta['duration_seconds']);self::assertNotEmpty($meta['technical_note']);self::assertTrue((bool)$meta['ai_enriched']);
+        self::assertLessThanOrEqual(1,count($meta['moments']));
+        self::assertNotEmpty(wp_get_object_terms($p['id'],'ascla_tag'));
+        $topicNames=wp_get_object_terms($p['id'],'ascla_interest',['fields'=>'names']);
+        self::assertContains(get_term($this->terms['interest'])->name,$topicNames,'Los temas seleccionados manualmente deben conservarse.');
+        self::assertContains('Gestión de riesgos',$topicNames);
+        self::assertContains('Inteligencia artificial',$topicNames);
+        self::assertContains('Juntas directivas',$topicNames);
+        self::assertContains('Transformación digital',$topicNames);
+    }
+    public function testAIDoesNotGenerateWithoutVerifiedTranscript(): void
+    {
+        $p=$this->create('resource',['meta'=>['resource_type'=>'Video','chatham'=>false]]);
+        $meta=(array)get_post_meta($p['id'],'_ascla',true);$meta['video_id']='abcdefghijk';update_post_meta($p['id'],'_ascla',$meta);
+        try {
+            Knowledge::multimedia($p['id']);
+            self::fail('La generación debe detenerse si no existe una transcripción verificable.');
+        } catch (ASCLA\Core\Rest\ApiException $e) {
+            self::assertSame(409,$e->get_status());
+            self::assertStringContainsString('transcripción verificable',$e->getMessage());
+        }
+        $saved=(array)get_post_meta($p['id'],'_ascla',true);
+        self::assertEmpty($saved['ai_enriched']??false);
+        self::assertSame('unavailable',$saved['transcript_status']??'');
+    }
+    public function testBrowserPlayerDurationCanBePersistedWithoutTranscriptInference(): void
+    {
+        $p=$this->create('resource',['meta'=>['resource_type'=>'Video','chatham'=>false]]);
+        $meta=(array)get_post_meta($p['id'],'_ascla',true);
+        $meta['video_id']='abcdefghijk';
+        unset($meta['duration_seconds']);
+        update_post_meta($p['id'],'_ascla',$meta);
+        $result=Knowledge::browserVideoDuration($p['id'],367);
+        self::assertSame(367,$result['duration_seconds']);
+        $saved=(array)get_post_meta($p['id'],'_ascla',true);
+        self::assertSame(367,(int)$saved['duration_seconds']);
+        self::assertSame('YouTube Player API (navegador)',$saved['video_metadata_mode']);
     }
 }

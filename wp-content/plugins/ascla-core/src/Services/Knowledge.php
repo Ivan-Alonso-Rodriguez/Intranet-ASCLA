@@ -5,6 +5,14 @@ use ASCLA\Core\Domain\{Anonymizer,EntityRedactor,Grounding};
 final class Knowledge
 {
     private const IDENTITIES_SEPARATOR='/[\n,;]+/u';
+    private const VIDEO_TOPICS=[
+        'Gestión de riesgos'=>['/\bgesti[oó]n de riesgos?\b/iu','/\briesgos?\b/iu','/\brisk management\b/iu'],
+        'Gobierno corporativo'=>['/\bgobierno corporativo\b/iu','/\bgobernanza corporativa\b/iu','/\bcorporate governance\b/iu'],
+        'Inteligencia artificial'=>['/\binteligencia artificial\b/iu','/(?<![\p{L}\p{N}])IA(?![\p{L}\p{N}])/iu','/\bartificial intelligence\b/iu','/\bmachine learning\b/iu'],
+        'Juntas directivas'=>['/\bjuntas? directivas?\b/iu','/\bdirectorio\b/iu','/\bconsejo de administraci[oó]n\b/iu','/\bboard of directors\b/iu'],
+        'Sostenibilidad'=>['/\bsostenibilidad\b/iu','/\bsustentabilidad\b/iu','/(?<![\p{L}\p{N}])ESG(?![\p{L}\p{N}])/iu','/(?<![\p{L}\p{N}])ASG(?![\p{L}\p{N}])/iu'],
+        'Transformación digital'=>['/\btransformaci[oó]n digital\b/iu','/\bdigitalizaci[oó]n\b/iu','/\binnovaci[oó]n digital\b/iu','/\btecnolog[ií]a digital\b/iu'],
+    ];
     public static function provider(): AIProviderInterface
     {
         return match(Settings::get()['ai_provider']??'mock') {
@@ -113,15 +121,65 @@ final class Knowledge
     public static function videoMetadata(int $id): array
     {
         Access::require(Access::canPublish());
+        return self::syncVideoMetadata($id,true);
+    }
+    /** Refresh video duration/thumbnail without making content saves depend on an external API. */
+    public static function autoVideoMetadata(int $id): void
+    {
+        if (!Access::canPublish()) { return; }
+        try { self::syncVideoMetadata($id,false); } catch (\Throwable $e) { /* best effort */ }
+    }
+    /** Store a duration obtained from YouTube's official IFrame Player API in the authenticated browser. */
+    public static function browserVideoDuration(int $id,int $seconds): array
+    {
+        Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden actualizar datos del video.',403);
+        Access::require($seconds>0 && $seconds<=604800,'Duración de video no válida.',400);
         $post=Content::get($id); $meta=(array)get_post_meta($id,'_ascla',true);
         Access::require($post->post_type==='ascla_resource' && !empty($meta['video_id']),'Seleccione un recurso con video de YouTube.',400);
-        $provider=Settings::get()['youtube_mode']==='real'?new YouTubeVideoProvider():new MockVideoProvider();
-        $data=$provider->metadata($meta['video_id']);
-        $meta['duration_seconds']=max(0,min(604800,(int)$data['duration_seconds']));
+        $meta['duration_seconds']=$seconds;
+        $meta['video_metadata_mode']='YouTube Player API (navegador)';
+        $meta['video_metadata_checked_at']=current_datetime()->format(DATE_ATOM);
+        $meta['thumbnail_url']=YouTubeVideoProvider::thumbnail((string)$meta['video_id']);
+        update_post_meta($id,'_ascla',$meta);
+        Audit::record('video_metadata_updated',$id,'YouTube Player API (navegador)');
+        return ['resource_id'=>$id,'mode'=>$meta['video_metadata_mode'],'duration_seconds'=>$seconds,'message'=>'Duración verificada directamente con el reproductor de YouTube.'];
+    }
+    private static function syncVideoMetadata(int $id,bool $strict): array
+    {
+        $post=Content::get($id); $meta=(array)get_post_meta($id,'_ascla',true);
+        Access::require($post->post_type==='ascla_resource' && !empty($meta['video_id']),'Seleccione un recurso con video de YouTube.',400);
+        $duration=0; $mode=''; $title='';
+        $previousMode=(string)($meta['video_metadata_mode']??'');
+        $previousDuration=str_contains($previousMode,'transcripci')?0:max(0,min(604800,(int)($meta['duration_seconds']??0)));
+        $apiError=null;
+        // Metadata is independent from transcript mode: if this account has YouTube OAuth,
+        // always prefer the official videos.list contentDetails.duration value.
+        try {
+            $data=(new YouTubeVideoProvider())->metadata($meta['video_id']);
+            $duration=max(0,min(604800,(int)($data['duration_seconds']??0)));
+            $mode=(string)($data['mode']??'API REAL YouTube');
+            $title=sanitize_text_field($data['source_title']??'');
+        } catch (\Throwable $e) { $apiError=$e; }
+        if ($duration<=0) {
+            try {
+                $data=YouTubeVideoProvider::publicMetadata($meta['video_id']);
+                $duration=max(0,min(604800,(int)($data['duration_seconds']??0)));
+                $mode=(string)($data['mode']??'Metadatos públicos de YouTube');
+            } catch (\Throwable $e) {
+                if ($strict && $previousDuration<=0) {
+                    throw new \RuntimeException('No se pudo verificar la duración directamente desde YouTube. Conecta YouTube OAuth y vuelve a intentar; ASCLA no estimará la duración usando la transcripción.');
+                }
+            }
+        }
+        if ($duration<=0) { $duration=$previousDuration; }
+        if ($duration>0) { $meta['duration_seconds']=$duration; }
+        else { unset($meta['duration_seconds']); if (str_contains($previousMode,'transcripci')) { unset($meta['video_metadata_mode']); } }
         $meta['thumbnail_url']=YouTubeVideoProvider::thumbnail($meta['video_id']);
-        $meta['video_metadata_mode']=$data['mode'];
-        update_post_meta($id,'_ascla',$meta); Audit::record('video_metadata_updated',$id,$data['mode']);
-        return ['resource_id'=>$id,'mode'=>$data['mode'],'duration_seconds'=>$meta['duration_seconds'],'message'=>'Duración y miniatura actualizadas.'];
+        if ($mode!=='') { $meta['video_metadata_mode']=$mode; }
+        if ($title!=='') { $meta['video_source_title']=$title; }
+        update_post_meta($id,'_ascla',$meta);
+        if ($mode!=='') { Audit::record('video_metadata_updated',$id,$mode); }
+        return ['resource_id'=>$id,'mode'=>$mode?:($meta['video_metadata_mode']??'Datos conservados'),'duration_seconds'=>$duration,'message'=>$duration>0?'Duración y miniatura actualizadas automáticamente.':'No fue posible detectar la duración; se conservaron los datos disponibles.'];
     }
     public static function multimedia(int $id,?AIProviderInterface $ai=null): array
     {
@@ -129,54 +187,142 @@ final class Knowledge
         $ai=$ai??self::provider();
         $post=Content::get($id); Access::require($post->post_type==='ascla_resource','Seleccione un recurso.',400);
         $meta=(array)get_post_meta($id,'_ascla',true);
-        [$transcript,$videoMode,$identities]=self::editorialContext($meta);
-        $result=$ai->generate('multimedia',['source_id'=>$id,'transcript'=>$transcript,'chatham'=>!empty($meta['chatham'])]);
+        [$transcript,$videoMode,$identities]=self::editorialContext($id,$meta);
+
+        // Before generating excerpts, refresh the real YouTube duration whenever OAuth/API is available.
+        self::autoVideoMetadata($id);
+        $meta=(array)get_post_meta($id,'_ascla',true);
+        $durationSeconds=(int)($meta['duration_seconds']??0);
+        // Never infer the video length from captions. If YouTube cannot verify it, keep it unknown and do not create timed capsules.
+        if ($durationSeconds<=0) { $durationSeconds=0; }
+
+        $result=$ai->generate('multimedia',['source_id'=>$id,'transcript'=>$transcript,'chatham'=>!empty($meta['chatham']),'duration_seconds'=>$durationSeconds]);
         if (!empty($meta['chatham'])) { $result=EntityRedactor::tree($result,$identities); }
         $result=Grounding::multimedia($result,$transcript);
-        $summary=Access::text($result['summary']??'',15000); $note=Access::text($result['technical_note']??'',30000);
+        $summary=self::naturalizeVideoLanguage(Access::text($result['summary']??'',15000));
+        $note=self::naturalizeVideoLanguage(Access::text($result['technical_note']??'',30000));
         Access::require($summary!==''&&$note!=='','La IA no devolvió resumen y nota técnica válidos.',502);
         if (!empty($meta['chatham'])) { $summary=Anonymizer::redact($summary,$identities); $note=Anonymizer::redact($note,$identities); }
-        $derived=['resource_type'=>'Nota técnica','generated'=>true,'reviewed'=>false,'chatham'=>!empty($meta['chatham']),'source_id'=>$id,'summary'=>$summary,'copyright'=>Settings::get()['copyright'],'ai_mode'=>$ai->mode(),'video_mode'=>$videoMode,'infographic'=>$result['infographic']??[],'moments'=>$result['moments']??[],'excerpts'=>$result['excerpts']??[],'frameworks'=>$result['frameworks']??[],'norms'=>$result['norms']??[],'conclusions'=>$result['conclusions']??[],'concepts'=>$result['concepts']??[],'tags'=>$result['tags']??[],'demo_source_note'=>$meta['demo_source_note']??'','grounding'=>$result['grounding'],'redaction'=>['policy'=>'pre-and-post-entities-v1','review_required'=>true]];
-        $derived=self::cleanGenerated($derived,!empty($meta['chatham']),$identities);
-        // Copyright and provenance are controlled metadata, not model-generated prose.
-        $derived['copyright']='© ASCLA – Asociación de Secretarios Corporativos de América Latina';
-        $derived['ai_mode']=$ai->mode();
-        if (!empty($meta['chatham'])) {
-            $summary=EntityRedactor::redact($summary,$identities);$note=EntityRedactor::redact($note,$identities);
-            Access::require(EntityRedactor::validateRedaction($summary.' '.$note.' '.wp_json_encode($result,JSON_UNESCAPED_UNICODE),$identities)['valid'],'El borrador requiere revisión adicional de identidades.',502);
+
+        $structured=[];
+        foreach (['frameworks','norms','conclusions','concepts','tags'] as $field) {
+            $structured[$field]=self::cleanStructuredList((array)($result[$field]??[]));
         }
-        // Keep only timed excerpts grounded in timestamps actually present in the source.
-        $grounded=\ASCLA\Core\Domain\Transcript::moments($transcript,array_merge((array)($result['moments']??[]),(array)($result['excerpts']??[])));
+        $info=is_array($result['infographic']??null)?$result['infographic']:[];
+        foreach (['sections','key_points'] as $field) {
+            if (isset($info[$field])) { $info[$field]=self::cleanStructuredList((array)$info[$field]); }
+        }
+
+        // Keep only timed excerpts grounded in timestamps actually present in the source and inside the detected duration.
+        $grounded=$durationSeconds>0
+            ? \ASCLA\Core\Domain\Transcript::moments($transcript,array_merge((array)($result['moments']??[]),(array)($result['excerpts']??[])),$durationSeconds)
+            : [];
         $grounded=array_map(static function($clip) use($id,$meta) {
             $clip['duration']=$clip['end']-$clip['start'];$clip['source_id']=$id;
             $clip['description']=$clip['title'];$clip['reason']=$clip['selection'];
             $clip['youtube_url']=empty($meta['video_id'])?'':'https://www.youtube.com/watch?v='.$meta['video_id'].'&t='.$clip['start'].'s';
             return $clip;
         },$grounded);
-        $derived['moments']=$grounded; $derived['excerpts']=$grounded;
-        $derived['video_id']=$meta['video_id']??'';
-        $derived['thumbnail_url']=YouTubeVideoProvider::thumbnail($derived['video_id']);
-        $derived['duration_seconds']=(int)($meta['duration_seconds']??0);
-        $new=wp_insert_post(wp_slash(['post_type'=>'ascla_resource','post_title'=>'Nota técnica · '.(!empty($meta['chatham'])?'Sesión ASCLA':$post->post_title),'post_content'=>$note,'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
-        if (is_wp_error($new)) { throw new \RuntimeException('No fue posible guardar el borrador.'); }
-        update_post_meta($new,'_ascla',$derived);
-        $topics=wp_get_object_terms($id,'ascla_interest',['fields'=>'ids']);
-        if (!is_wp_error($topics)) { wp_set_object_terms($new,array_map('intval',$topics),'ascla_interest'); }
-        $suggested=Access::text($result['suggested_hub']??$summary,10000);
-        if (!empty($meta['chatham'])) { $suggested=Anonymizer::redact($suggested,$identities); }
-        $hub=wp_insert_post(wp_slash(['post_type'=>'ascla_hub','post_title'=>'Ideas para conversar · Sesión ASCLA','post_content'=>$suggested,'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
-        if (!is_wp_error($hub)) { update_post_meta($hub,'_ascla',['generated'=>true,'reviewed'=>false,'chatham'=>$derived['chatham'],'source_id'=>$new,'ai_mode'=>$ai->mode()]); }
-        $capsules=self::capsules($grounded,$id,$meta,$derived,$summary,$topics,$ai);
-        Audit::record('ai_generated',$new); return ['resource_id'=>$new,'capsule_ids'=>$capsules,'hub_id'=>is_wp_error($hub)?0:$hub,'mode'=>$ai->mode(),'video_mode'=>$videoMode,'message'=>'Borradores creados. Revise fuentes, anonimización y derechos antes de publicar.'];
-    }
-    private static function editorialContext(array $meta): array
-    {
-        $transcript=$meta['transcript']??''; $videoMode='Transcripción manual';
-        if (!$transcript) {
-            $provider=Settings::get()['youtube_mode']==='real'?new YouTubeVideoProvider():new MockVideoProvider();
-            $video=$provider->transcript($meta['video_id']??''); $transcript=$video['text']; $videoMode=$video['mode'];
+
+        // Classify only against the six official ASCLA knowledge topics.
+        // Existing manual topics are preserved; only topics previously added by AI are replaced on reprocessing.
+        $autoTopics=self::inferVideoTopics($result,$transcript,$summary,$note);
+        $topicIds=self::topicIds($autoTopics);
+
+        // Enrich the original publication. Do not create a second technical-note resource, Hub draft or capsule posts.
+        $generatedFields=[
+            'ai_enriched'=>true,
+            'generated_sections'=>true,
+            'ai_reviewed'=>true,
+            'summary'=>$summary,
+            'technical_note'=>$note,
+            'ai_mode'=>$ai->mode(),
+            'video_mode'=>$videoMode,
+            'infographic'=>$info,
+            'moments'=>$grounded,
+            'excerpts'=>$grounded,
+            'frameworks'=>$structured['frameworks'],
+            'norms'=>$structured['norms'],
+            'conclusions'=>$structured['conclusions'],
+            'concepts'=>$structured['concepts'],
+            'tags'=>$structured['tags'],
+            'ai_topics'=>$autoTopics,
+            'ai_topic_ids'=>$topicIds,
+            'grounding'=>$result['grounding'],
+            'redaction'=>['policy'=>'pre-and-post-entities-v1','review_required'=>false],
+            'duration_seconds'=>$durationSeconds,
+            'capsule_policy'=>['duration_seconds'=>$durationSeconds,'max_capsules'=>\ASCLA\Core\Domain\Transcript::capsuleLimit($durationSeconds)],
+            'generated_at'=>current_datetime()->format(DATE_ATOM),
+        ];
+        // Sanitize only generated material. Original source URLs, video IDs and editorial metadata must remain untouched.
+        $generatedFields=self::cleanGenerated($generatedFields,!empty($meta['chatham']),$identities);
+        $updated=array_merge($meta,$generatedFields);
+        $updated['copyright']='© ASCLA – Asociación de Secretarios Corporativos de América Latina';
+        $updated['ai_mode']=$ai->mode();
+        $updated['resource_type']=$meta['resource_type']??'Video';
+        $updated['video_id']=$meta['video_id']??'';
+        $updated['youtube_url']=$meta['youtube_url']??'';
+        $updated['thumbnail_url']=YouTubeVideoProvider::thumbnail($updated['video_id']);
+        if (!empty($meta['chatham'])) {
+            $summary=EntityRedactor::redact($summary,$identities);$note=EntityRedactor::redact($note,$identities);
+            Access::require(EntityRedactor::validateRedaction($summary.' '.$note.' '.wp_json_encode($result,JSON_UNESCAPED_UNICODE),$identities)['valid'],'El borrador requiere revisión adicional de identidades.',502);
         }
-        Access::require(mb_strlen($transcript)>=30,'La transcripción es insuficiente.',400);
+        update_post_meta($id,'_ascla',$updated);
+        if ($structured['tags']) { Content::tags($id,$structured['tags']); }
+        self::applyVideoTopics($id,$topicIds,(array)($meta['ai_topic_ids']??[]));
+        Audit::record('ai_enriched',$id,$ai->mode());
+        return ['resource_id'=>$id,'capsule_ids'=>[],'hub_id'=>0,'mode'=>$ai->mode(),'video_mode'=>$videoMode,'duration_seconds'=>$durationSeconds,'topics'=>$autoTopics,'message'=>'Resumen y nota técnica integrados en la publicación original.'.($autoTopics?' Temas activados: '.implode(', ',$autoTopics).'.':'')];
+    }
+    private static function naturalizeVideoLanguage(string $text): string
+    {
+        if ($text==='') { return ''; }
+        $text=preg_replace('/(^|[.!?]\s+)La transcripci[oó]n\b/u','$1El video',$text)??$text;
+        $text=preg_replace('/\b(?:la|esta) transcripci[oó]n\b/iu','el video',$text)??$text;
+        $text=preg_replace('/\btranscripci[oó]n\b/iu','contenido del video',$text)??$text;
+        return trim($text);
+    }
+    private static function cleanStructuredList(array $values): array
+    {
+        $clean=[];
+        foreach (array_slice($values,0,40) as $value) {
+            if (!is_string($value)) { continue; }
+            $value=trim(preg_replace('/\s+/u',' ',sanitize_text_field($value)));
+            if ($value==='') { continue; }
+            $plain=mb_strtolower(remove_accents(trim($value," \t\n\r\0\x0B.,;:–—-")));
+            if (in_array($plain,['participante','participantes','una persona','persona','dato reservado','informacion reservada','identidad reservada','organizacion reservada'],true)) { continue; }
+            $clean[]=$value;
+        }
+        return array_values(array_unique($clean));
+    }
+    private static function editorialContext(int $id,array $meta): array
+    {
+        $transcript=trim((string)($meta['transcript']??'')); $videoMode='Transcripción manual autorizada';
+        if ($transcript==='') {
+            if (empty($meta['video_id'])) {
+                self::rememberTranscriptFailure($id,$meta,'El recurso no tiene video de YouTube ni transcripción autorizada.');
+                Access::require(false,'No hay una transcripción disponible para analizar este recurso. Añade una transcripción autorizada antes de generar el resumen.',400);
+            }
+            if ((Settings::get()['youtube_mode']??'mock')!=='real') {
+                self::rememberTranscriptFailure($id,$meta,'La obtención real de subtítulos de YouTube no está habilitada.');
+                Access::require(false,'No se pudo obtener una transcripción verificable. Conecta YouTube OAuth o pega una transcripción autorizada. ASCLA no generará información sin una transcripción válida.',409);
+            }
+            try {
+                $video=(new YouTubeVideoProvider())->transcript((string)$meta['video_id']);
+                $transcript=trim((string)($video['text']??'')); $videoMode=(string)($video['mode']??'API REAL YouTube');
+            } catch (\Throwable $e) {
+                self::rememberTranscriptFailure($id,$meta,$e->getMessage());
+                throw new \RuntimeException('No se pudo obtener una transcripción autorizada desde YouTube. Puede que el video no tenga subtítulos accesibles para esta cuenta. Pega una transcripción manual antes de generar el resumen; ASCLA no inventará contenido.');
+            }
+        }
+        if (mb_strlen($transcript)<30) {
+            self::rememberTranscriptFailure($id,$meta,'La transcripción disponible es demasiado corta para verificar el contenido.');
+            Access::require(false,'La transcripción disponible es insuficiente para generar contenido confiable. ASCLA no generará información sin evidencia suficiente.',400);
+        }
+        $meta['transcript_status']=($meta['transcript']??'')!==''?'manual':'youtube';
+        $meta['transcript_mode']=$videoMode;
+        $meta['transcript_checked_at']=current_datetime()->format(DATE_ATOM);
+        unset($meta['transcript_error']);
+        update_post_meta($id,'_ascla',$meta);
         $identities=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];
         if (!empty($meta['chatham'])) {
             foreach (get_users(['capability'=>'ascla_access']) as $user) {
@@ -187,6 +333,14 @@ final class Knowledge
         }
         return [$transcript,$videoMode,$identities];
     }
+    private static function rememberTranscriptFailure(int $id,array $meta,string $reason): void
+    {
+        $meta['transcript_status']='unavailable';
+        $meta['transcript_checked_at']=current_datetime()->format(DATE_ATOM);
+        $meta['transcript_error']=mb_substr(sanitize_text_field($reason),0,500);
+        update_post_meta($id,'_ascla',$meta);
+        Audit::record('video_transcript_unavailable',$id,$meta['transcript_error']);
+    }
     private static function cleanGenerated(mixed $value,bool $chatham,array $identities): mixed
     {
         if (is_array($value)) { return array_map(static fn($item)=>self::cleanGenerated($item,$chatham,$identities),array_slice($value,0,80)); }
@@ -196,13 +350,51 @@ final class Knowledge
         }
         return is_scalar($value)?$value:null;
     }
+    private static function inferVideoTopics(array $result,string $transcript,string $summary,string $note): array
+    {
+        $topics=[];
+        $approved=array_keys(self::VIDEO_TOPICS);
+        foreach ((array)($result['topics']??[]) as $candidate) {
+            if (!is_string($candidate)) { continue; }
+            foreach ($approved as $name) {
+                if (strcasecmp(remove_accents(trim($candidate)),remove_accents($name))===0) { $topics[]=$name; break; }
+            }
+        }
+        $haystack=$transcript."\n".$summary."\n".$note."\n".implode("\n",array_merge((array)($result['tags']??[]),(array)($result['concepts']??[]),(array)($result['frameworks']??[]),(array)($result['conclusions']??[])));
+        foreach (self::VIDEO_TOPICS as $name=>$patterns) {
+            foreach ($patterns as $pattern) {
+                if (preg_match($pattern,$haystack)) { $topics[]=$name; break; }
+            }
+        }
+        return array_values(array_unique($topics));
+    }
+    private static function topicIds(array $topics): array
+    {
+        $ids=[];
+        foreach ($topics as $name) {
+            $term=term_exists($name,'ascla_interest');
+            if (is_array($term)) { $term=$term['term_id']??0; }
+            if (is_int($term) || ctype_digit((string)$term)) { $ids[]=(int)$term; }
+        }
+        return array_values(array_unique(array_filter($ids)));
+    }
+    private static function applyVideoTopics(int $id,array $newIds,array $previousAiIds): void
+    {
+        $current=wp_get_object_terms($id,'ascla_interest',['fields'=>'ids']);
+        if (is_wp_error($current)) { $current=[]; }
+        $manual=array_values(array_diff(array_map('intval',$current),array_map('intval',$previousAiIds)));
+        $final=array_values(array_unique(array_merge($manual,array_map('intval',$newIds))));
+        wp_set_object_terms($id,$final,'ascla_interest');
+    }
+
     private static function capsules(array $grounded,int $id,array $meta,array $derived,string $summary,array|\WP_Error $topics,AIProviderInterface $ai): array
     {
         $capsules=[];
         foreach (array_slice($grounded,0,3) as $index=>$clip) {
-            $capsule=wp_insert_post(wp_slash(['post_type'=>'ascla_resource','post_title'=>'Cápsula '.($index+1).' · Sesión ASCLA','post_content'=>$summary,'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
+            $clipBody=Access::text((string)($clip['description']??$clip['title']??$summary),10000);
+            $capsule=wp_insert_post(wp_slash(['post_type'=>'ascla_resource','post_title'=>'Cápsula sugerida '.($index+1).' · Sesión ASCLA','post_content'=>$clipBody,'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
             if (!is_wp_error($capsule)) {
-                update_post_meta($capsule,'_ascla',['resource_type'=>'Podcast','generated'=>true,'reviewed'=>false,'chatham'=>$derived['chatham'],'source_id'=>$id,'video_id'=>$meta['video_id']??'','clip'=>$clip,'demo_source_note'=>$meta['demo_source_note']??'','duration_seconds'=>$clip['end']-$clip['start'],'thumbnail_url'=>YouTubeVideoProvider::thumbnail($meta['video_id']??''),'copyright'=>Settings::get()['copyright'],'ai_mode'=>$ai->mode()]);
+                update_post_meta($capsule,'_ascla',['resource_type'=>'Video','generated'=>true,'reviewed'=>false,'chatham'=>$derived['chatham'],'source_id'=>$id,'video_id'=>$meta['video_id']??'','clip'=>$clip,'demo_source_note'=>$meta['demo_source_note']??'','duration_seconds'=>$clip['end']-$clip['start'],'thumbnail_url'=>YouTubeVideoProvider::thumbnail($meta['video_id']??''),'copyright'=>Settings::get()['copyright'],'ai_mode'=>$ai->mode()]);
                 if (!is_wp_error($topics)) { wp_set_object_terms($capsule,array_map('intval',$topics),'ascla_interest'); }
                 $capsules[]=$capsule;
             }

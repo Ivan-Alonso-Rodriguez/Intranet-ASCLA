@@ -1,0 +1,69 @@
+<?php
+namespace ASCLA\Core;
+
+final class Plugin
+{
+    public static function boot(): void
+    {
+        add_action('init', [Domain\Catalog::class, 'register']);
+        add_action('init', [Database\Installer::class, 'upgrade'], 20);
+        add_filter('posts_search',[Repositories\ContentQuery::class,'search'],10,2);
+        Frontend\App::boot();
+        Services\Turnstile::boot();
+        Admin\Panel::boot();
+        Rest\Router::boot();
+        Jobs\Queue::boot();
+        Services\Media::boot();
+        add_action('added_post_meta',[Services\Content::class,'indexMeta'],10,4);
+        add_action('updated_post_meta',[Services\Content::class,'indexMeta'],10,4);
+        Integrations\GoogleOAuth::boot();
+        Integrations\Mailer::boot();
+        add_action('transition_comment_status',[Services\Content::class,'commentTransition'],10,3);
+        add_action('transition_post_status', [Services\Content::class, 'published'], 10, 3);
+        add_filter('wp_insert_post_data', [Services\Content::class, 'guardPublication'], 10, 2);
+        add_filter('preprocess_comment', static function ($comment) {
+            if (str_starts_with((string)get_post_type((int)($comment['comment_post_ID']??0)),'ascla_')) {
+                wp_die('Utilice el formulario de comentarios de la comunidad ASCLA.','ASCLA',['response'=>403]);
+            }
+            return $comment;
+        });
+        add_filter('comment_feed_where',[Repositories\Store::class,'privateCommentFeedFilter']);
+        add_filter('widget_comments_args', static function ($args) {
+            $types=(array)($args['post_type']??get_post_types());
+            $args['post_type']=array_values(array_filter($types,static fn($type)=>!str_starts_with($type,'ascla_')))?:['__ascla_no_public_comments__'];
+            return $args;
+        });
+        add_filter('wp_sitemaps_post_types', static function ($types) {
+            foreach (Domain\Catalog::TYPES as $key => $label) { unset($types['ascla_' . $key]); }
+            return $types;
+        });
+        add_filter('rest_post_dispatch', static function ($response, $server, $request) {
+            if (str_starts_with($request->get_route(), '/ascla/v1/')) {
+                $response->header('Cache-Control', 'private, no-store, max-age=0');
+                $response->header('Vary', 'Cookie');
+            }
+            return $response;
+        }, 10, 3);
+        if (defined('WP_CLI') && WP_CLI) { self::cli(); }
+    }
+    private static function cli(): void
+    {
+            \WP_CLI::add_command('ascla seed', static function () {
+                $password = getenv('ASCLA_DEMO_PASSWORD');
+                if (!$password || strlen($password) < 12) { \WP_CLI::error('Configure ASCLA_DEMO_PASSWORD (12 caracteres mínimo).'); }
+                $previous=get_current_user_id();
+                if(!$previous){$admins=get_users(['capability'=>'ascla_manage','number'=>1,'fields'=>'ID']);if(!$admins)\WP_CLI::error('No hay administrador ASCLA disponible.');wp_set_current_user((int)$admins[0]);}
+                try{Services\Demo::seed($password);}
+                catch(\Throwable $error){\WP_CLI::error($error instanceof Rest\ApiException?$error->getMessage():'No se pudo crear la demo. Revise permisos y datos existentes.');}
+                finally{wp_set_current_user($previous);}
+                \WP_CLI::success('Demo preparada: demo.asociado e ivan.alonso2602. Contraseñas existentes conservadas.');
+            });
+            \WP_CLI::add_command('ascla demo-user',static function($args,$options){
+                if(($args[0]??'')!=='ivan'){\WP_CLI::error('Uso: wp ascla demo-user ivan [--reset-password]');}
+                $result=Services\DemoUser::ivan(getenv('ASCLA_DEMO_PASSWORD')?:'',isset($options['reset-password']));
+                \WP_CLI::success('Usuario '.Services\DemoUser::EMAIL.' preparado. '.($result['password_reset']?'Contraseña actualizada desde ASCLA_IVAN_DEMO_PASSWORD.':'El seed conserva la contraseña existente.'));
+            });
+            \WP_CLI::add_command('ascla migrate', static function () { Database\Installer::activate(false); \WP_CLI::success('Migraciones aplicadas.'); });
+            \WP_CLI::add_command('ascla jobs', [Jobs\Queue::class, 'run']);
+    }
+}

@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.9.24
+Stable tag: 1.9.29
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,41 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.9.29 =
+* El análisis de videos activa automáticamente los Temas ASCLA que estén claramente respaldados por el contenido, preservando los temas elegidos manualmente.
+* La duración se consulta primero desde YouTube Data API mediante OAuth; como respaldo se prueban metadatos públicos y el YouTube IFrame Player API del navegador. Nunca se usa la transcripción para estimar tiempo.
+* Si no existe una transcripción manual y YouTube no puede entregar subtítulos autorizados, ASCLA detiene la generación y muestra un aviso explícito en vez de producir resúmenes, notas o cápsulas sin evidencia.
+* Ejecutivos y Administradores pueden conectar YouTube OAuth para metadatos/transcripciones del Centro de Conocimiento.
+* No requiere migración de base de datos; se mantiene el esquema 7.
+
+= 1.9.28 =
+* Las palabras clave del Centro de Conocimiento participan como señal secundaria de recomendación al coincidir con intereses, áreas, industrias u objetivos del perfil.
+* Los intereses explícitos del asociado conservan el mayor peso; una coincidencia directa se ordena por encima de una recomendación basada solo en palabras clave.
+* La recencia únicamente desempata recursos ya relevantes y no recomienda contenido sin relación temática.
+* Los avisos de nuevos recursos reutilizan la misma lógica de relevancia para mantener consistencia entre Inicio y Notificaciones.
+* No requiere migración de base de datos; se mantiene el esquema 7.
+
+= 1.9.27 =
+* Los resúmenes generados describen directamente el video y dejan de presentar el contenido como "la transcripción".
+* La publicación enriquecida ya no muestra una sección Fuente redundante ni el botón Descargar infografía.
+* La duración se obtiene únicamente desde metadatos verificables del video de YouTube (API OAuth o metadatos públicos); nunca se infiere desde la transcripción. Si no puede verificarse, queda por confirmar y no se generan cápsulas temporales.
+* Las tarjetas del Centro de Conocimiento muestran Borrador o Pendiente de revisión cuando el recurso aún no está publicado.
+* No requiere migración de base de datos; se mantiene el esquema 7.
+
+= 1.9.26 =
+* Generar resumen y nota enriquece la publicación original y deja de crear recursos separados, borradores del Hub o posts independientes para cápsulas.
+* La duración del video se actualiza automáticamente con metadatos de YouTube cuando están disponibles o, como respaldo, con timestamps válidos de la transcripción.
+* Los marcos, conceptos, normativas, conclusiones y palabras clave omiten placeholders de anonimización sin significado como participante o dato reservado.
+* Los nuevos recursos creados por Administradores/Ejecutivos usan Publicado como estado predeterminado.
+* No requiere migración de base de datos; se mantiene el esquema 7.
+
+= 1.9.25 =
+* Administradores y Ejecutivos pueden publicar directamente recursos del Centro de Conocimiento, incluidos borradores generados por IA cuando se guardan explícitamente como revisados/publicados.
+* Las notas técnicas integran Resumen, marcos, conclusiones, conceptos, palabras clave, cápsulas y fuente de origen dentro de la misma publicación, eliminando el bloque separado Resultados y fuentes.
+* La anonimización usa redacción natural como participante o dato reservado y elimina el marcador visible [identidad reservada].
+* Las cápsulas sugeridas respetan la duración real: videos de hasta 3 minutos no generan cápsulas; 3–10 min máximo 1; 10–30 min máximo 2; más de 30 min máximo 3. Ningún tiempo puede exceder la duración real del video.
+* No requiere migración de base de datos; se mantiene el esquema 7.
 
 = 1.9.24 =
 * Repara Microeventos: elimina referencias mensuales a propuestas borradas y permite volver a generar encuentros cuando las propuestas anteriores ya no existen.

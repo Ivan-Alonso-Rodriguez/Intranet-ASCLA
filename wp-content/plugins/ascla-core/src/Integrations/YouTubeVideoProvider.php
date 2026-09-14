@@ -31,6 +31,33 @@ final class YouTubeVideoProvider implements VideoProviderInterface
         } catch (\Exception $e) { throw new \RuntimeException('YouTube devolvió una duración no válida.'); }
         return ['mode'=>'API REAL YouTube','duration_seconds'=>$duration,'thumbnail_url'=>self::thumbnail($videoId),'source_title'=>sanitize_text_field($item['snippet']['title']??'')];
     }
+    /** Best-effort public metadata fallback. It reads YouTube's own player metadata and never infers duration from captions. */
+    public static function publicMetadata(string $videoId): array
+    {
+        if (!self::thumbnail($videoId)) { throw new \RuntimeException('ID de video no válido.'); }
+        $key='ascla_yt_public_'.hash('sha256',$videoId);
+        $cached=get_transient($key);
+        if (is_array($cached) && (int)($cached['duration_seconds']??0)>0) { return $cached; }
+        $duration=0;
+        $urls=[
+            'https://www.youtube.com/watch?v='.rawurlencode($videoId).'&hl=es&bpctr=9999999999&has_verified=1',
+            'https://www.youtube.com/embed/'.rawurlencode($videoId).'?hl=es',
+            'https://www.youtube-nocookie.com/embed/'.rawurlencode($videoId).'?hl=es',
+        ];
+        foreach ($urls as $url) {
+            $response=wp_safe_remote_get($url,['timeout'=>7,'redirection'=>2,'limit_response_size'=>4194304,'headers'=>['User-Agent'=>'Mozilla/5.0 (compatible; ASCLA/'.(defined('ASCLA_VERSION')?ASCLA_VERSION:'1').')','Accept-Language'=>'es,en;q=0.8']]);
+            if (is_wp_error($response) || wp_remote_retrieve_response_code($response)!==200) { continue; }
+            $body=wp_remote_retrieve_body($response);
+            if (preg_match('/"lengthSeconds"\s*:\s*"?(\d{1,7})"?/',$body,$m)) { $duration=(int)$m[1]; }
+            elseif (preg_match('/"approxDurationMs"\s*:\s*"?(\d{1,12})"?/',$body,$m)) { $duration=(int)round(((int)$m[1])/1000); }
+            if ($duration>0 && $duration<=604800) { break; }
+            $duration=0;
+        }
+        if ($duration<=0 || $duration>604800) { throw new \RuntimeException('YouTube no expuso una duración verificable para este video.'); }
+        $data=['mode'=>'Metadatos públicos de YouTube','duration_seconds'=>$duration,'thumbnail_url'=>self::thumbnail($videoId),'source_title'=>''];
+        set_transient($key,$data,DAY_IN_SECONDS);
+        return $data;
+    }
     public function transcript(string $videoId): array
     {
         $token=GoogleOAuth::accessToken(get_current_user_id());
