@@ -2,9 +2,9 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.9.23`  
+> **Versión actual:** `1.9.24`  
 > **Esquema de base de datos:** `7`  
-> La versión `1.9.23` añade control personal sobre notificaciones y relaciones: las notificaciones pueden eliminarse, las solicitudes enviadas pueden cancelarse y las conexiones confirmadas pueden eliminarse sin borrar el historial, manteniendo el esquema de datos 7.
+> La versión `1.9.24` repara referencias huérfanas de microeventos eliminados, permite regenerar propuestas mensuales y mejora la ubicación visual del estado de conexión en el Directorio, manteniendo el esquema de datos 7.
 
 ## Resumen de versiones
 
@@ -44,12 +44,23 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.20 | Renovación visual de Administración, idioma y branding | Completada |
 | 1.9.21 | Pulido del hero, Auditoría y Configuración administrativa | |
 | 1.9.22 | Proveedor IA exclusivo, configuración simplificada y auditoría explicativa | Completada |
-| 1.9.23 | Gestión de notificaciones y ciclo completo de conexiones | **Actual** |
+| 1.9.23 | Gestión de notificaciones y ciclo completo de conexiones | Completada |
+| 1.9.24 | Reparación de microeventos y estado visual de conexiones | **Actual** |
 
 ---
 
 # Serie 1.9.x — evolución funcional
 
+
+## 1.9.24 — Reparación de microeventos y estado visual de conexiones
+
+- Microeventos valida la caché mensual antes de reutilizarla y descarta IDs de eventos eliminados o enviados a la papelera.
+- Si todas las propuestas del mes fueron eliminadas, **Preparar propuesta del mes** vuelve a generar encuentros válidos en lugar de devolver referencias antiguas.
+- Al eliminar un microevento se actualiza inmediatamente la caché mensual y se retiran sus inscripciones asociadas.
+- Los trabajos históricos de microeventos filtran IDs que ya no existen, evitando botones **Revisar #ID** que terminaban en “Contenido no encontrado”.
+- En el Directorio, el indicador **Conectados** pasa a mostrarse junto al porcentaje de afinidad; la zona inferior queda reservada para acciones como Ver perfil, Enviar mensaje y Eliminar conexión.
+- Se añade una prueba de regresión para comprobar que propuestas eliminadas pueden regenerarse sin reutilizar IDs obsoletos.
+- Esquema de base de datos: **7** (sin migración).
 
 ## 1.9.23 — Gestión de notificaciones y ciclo completo de conexiones
 
@@ -639,10 +650,10 @@ Versión histórica recuperada del repositorio Git original.
 Durante la serie 1.9.x se adoptó un versionado incremental para reflejar cambios pequeños y verificables sin producir saltos innecesarios:
 
 ```text
-1.9.0 → 1.9.1 → 1.9.2 → ... → 1.9.23
+1.9.0 → 1.9.1 → 1.9.2 → ... → 1.9.24
 ```
 
-Las modificaciones exclusivamente documentales, como la ampliación de este archivo, **no generan por sí solas una nueva versión del plugin**. La versión `1.9.23` se justifica por la gestión completa del ciclo de conexiones y el control personal de notificaciones; el esquema de datos permanece en 7.
+Las modificaciones exclusivamente documentales, como la ampliación de este archivo, **no generan por sí solas una nueva versión del plugin**. La versión `1.9.24` se justifica por la reparación del ciclo de microeventos eliminados y el ajuste visual de conexiones; el esquema de datos permanece en 7.
 
 # Notas de trazabilidad
 
@@ -650,4 +661,4 @@ Las modificaciones exclusivamente documentales, como la ampliación de este arch
 - Cuando existe un snapshot verificable se conserva como referencia histórica.
 - No se crean tags ficticios para versiones cuyo código fuente original no esté disponible.
 - La carpeta `docs/` se mantiene fuera del repositorio público según la configuración actual de `.gitignore`.
-- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.23**.
+- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.24**.

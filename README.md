@@ -4,9 +4,9 @@ Plugin WordPress portable para una comunidad profesional privada. Incluye perfil
 
 Toda la funcionalidad propia está en `wp-content/plugins/ascla-core/`. Elementor es opcional. No se modifica WordPress Core ni se necesita un tema específico. El plugin conserva sus datos al desactivarse o desinstalarse.
 
-## Versión actual: 1.9.23 · esquema 7
+## Versión actual: 1.9.24 · esquema 7
 
-La versión 1.9.23 mantiene el esquema 7 y completa la gestión personal de actividad y networking: permite eliminar notificaciones, cancelar solicitudes de conexión enviadas retirando su aviso asociado y eliminar conexiones confirmadas sin borrar el historial de mensajes.
+La versión 1.9.24 mantiene el esquema 7 y corrige el ciclo de microeventos eliminados para que no queden referencias huérfanas ni botones hacia encuentros inexistentes. También integra el estado Conectados junto a la afinidad en las tarjetas del Directorio para mejorar su jerarquía visual.
 
 Administración con solicitudes persistentes, historial, búsqueda de usuarios y suspensión/reactivación. Los foros se publican sin aprobación; Galería, Centro de Conocimiento y Eventos sólo permiten crear/editar/publicar a administradores. Los eventos ordinarios se publican directamente, salvo borrador explícito; los microeventos conservan revisión administrativa.
 

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: ASCLA Core
  * Description: Intranet profesional ASCLA: comunidad, conocimiento y networking.
- * Version: 1.9.23
+ * Version: 1.9.24
  * Requires at least: 6.6
  * Requires PHP: 8.2
  * Author: ASCLA
@@ -10,7 +10,7 @@
  * Text Domain: ascla-core
  */
 defined('ABSPATH') || exit;
-define('ASCLA_VERSION', '1.9.23');
+define('ASCLA_VERSION', '1.9.24');
 define('ASCLA_PATH', plugin_dir_path(__FILE__));
 define('ASCLA_URL', plugin_dir_url(__FILE__));
 spl_autoload_register(static function (string $class): void {

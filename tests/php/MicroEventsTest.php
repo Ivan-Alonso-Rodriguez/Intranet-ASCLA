@@ -18,4 +18,20 @@ final class MicroEventsTest extends TestCase
             if($saved)update_option('ascla_micro_'.$month,$saved,false);else delete_option('ascla_micro_'.$month);update_option('ascla_group_history',$history,false);update_option('ascla_settings',$settings,false);wp_set_current_user(0);
         }
     }
+
+    public function testDeletedMonthlyProposalsDoNotLeaveStaleReviewLinks(): void
+    {
+        $month=wp_date('Y-m');$saved=get_option('ascla_micro_'.$month);$history=get_option('ascla_group_history',[]);$settings=Settings::get();$admin=get_users(['role'=>'administrator','number'=>1])[0];wp_set_current_user($admin->ID);delete_option('ascla_micro_'.$month);Settings::save(['micro_approval'=>true]);
+        $created=[];$regenerated=[];
+        try {
+            $first=MicroEvents::create();$created=$first['events'];self::assertNotEmpty($created);
+            foreach($created as $id){Content::remove($id);self::assertSame('trash',get_post_status($id));}
+            self::assertFalse(get_option('ascla_micro_'.$month));
+            $second=MicroEvents::create();$regenerated=$second['events'];self::assertNotEmpty($regenerated);
+            foreach($regenerated as $id){self::assertNotContains($id,$created);self::assertNotSame('trash',get_post_status($id));}
+        } finally {
+            foreach(array_merge($created,$regenerated) as $id){Store::delete('registrations',['event_id'=>$id]);wp_delete_post($id,true);}
+            if($saved)update_option('ascla_micro_'.$month,$saved,false);else delete_option('ascla_micro_'.$month);update_option('ascla_group_history',$history,false);update_option('ascla_settings',$settings,false);wp_set_current_user(0);
+        }
+    }
 }

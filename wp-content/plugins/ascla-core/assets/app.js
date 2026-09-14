@@ -571,7 +571,7 @@
     return `<div class="page-heading"><div><h1>${E(T(title))}</h1><p>${E(T(subtitle))}</p></div>${action}</div>`;
   }
   const content = () => document.getElementById("page-content");
-  function connectionActions(p, suggested = false) {
+  function connectionActions(p, suggested = false, compactConnected = false) {
     if (Number(p.id) === S.boot.me.id || !p.connection) return '';
     const c = p.connection, id = Number(p.id);
     let actions = '';
@@ -580,16 +580,25 @@
     } else if (c.state === 'outgoing_pending') {
       actions = `<span class="connection-state pending">${E(T('Solicitud enviada · Pendiente'))}</span>` + btn(T('Cancelar solicitud'), 'connection-remove-request', `data-id="${id}" data-mode="cancel"`, 'ghost danger small');
     } else if (c.state === 'connected') {
-      actions = '<span class="connection-state connected">' + I('check') + ' ' + E(T('Conectados')) + '</span>';
+      actions = compactConnected ? '' : '<span class="connection-state connected">' + I('check') + ' ' + E(T('Conectados')) + '</span>';
       if (c.can_message) actions += btn(I('mail') + ' ' + T('Enviar mensaje'), 'message-start', `data-id="${id}"`, 'primary small') + (suggested ? btn(T('Mensaje sugerido'), 'intro', `data-id="${id}"`, 'small') : '');
       actions += btn(T('Eliminar conexión'), 'connection-remove-request', `data-id="${id}" data-mode="disconnect"`, 'ghost danger small');
     } else actions = btn('Enviar solicitud de conexión', 'connect', `data-id="${id}" ${c.can_request ? '' : 'disabled'}`, 'small');
     const note = c.blocked ? T('La mensajería está bloqueada entre estas cuentas.') : c.state !== 'connected' ? (c.state === 'none' && !c.can_request ? T('Ambos asociados deben tener activado networking para conectar.') : T('La mensajería se habilita al aceptar la conexión.')) : '';
     if (c.blocked_by_me) actions += btn('Desbloquear', 'block', `data-id="${id}" data-active="false"`, 'small');
-    return `<div class="connection-controls" data-member-connection="${id}" data-suggested="${suggested}" data-state="${E(c.state)}"><div class="connection-actions">${actions}</div>${note ? '<p class="private-note">' + E(note) + '</p>' : ''}</div>`;
+    return `<div class="connection-controls" data-member-connection="${id}" data-suggested="${suggested}" data-compact-connected="${compactConnected}" data-state="${E(c.state)}"><div class="connection-actions">${actions}</div>${note ? '<p class="private-note">' + E(note) + '</p>' : ''}</div>`;
+  }
+  function memberRelationshipState(connection) {
+    return connection?.state === 'connected' ? `<span class="connection-state connected compact">${I('check')} ${E(T('Conectados'))}</span>` : '';
   }
   function updateConnectionState(id, state) {
-    for (const element of root.querySelectorAll(`[data-member-connection="${Number(id)}"]`)) element.outerHTML = connectionActions({id, connection: state}, element.dataset.suggested === 'true');
+    for (const element of [...root.querySelectorAll(`[data-member-connection="${Number(id)}"]`)]) {
+      const card = element.closest('.member-card');
+      const suggested = element.dataset.suggested === 'true';
+      const compactConnected = element.dataset.compactConnected === 'true';
+      element.outerHTML = connectionActions({id, connection: state}, suggested, compactConnected);
+      if (card) { const holder=card.querySelector('.member-card-relationship-state'); if (holder) holder.innerHTML=memberRelationshipState(state); }
+    }
   }
   function connectionRow(p) {
     return `<article class="connection-row"><div class="connection-person">${avatar(p)}<div><strong>${E(p.name)}</strong>${p.profile_url ? `<a href="${E(p.profile_url)}">${E(T('Ver perfil'))}</a>` : `<small>${E(T('Perfil no disponible'))}</small>`}</div></div>${connectionActions(p)}</article>`;
@@ -630,8 +639,9 @@
           .join("")}</div>`;
     const relationship = isMe
       ? `<div class="connection-controls member-own-actions"><div class="connection-actions">${link("perfil", "Editar mi perfil", "small")}</div></div>`
-      : connectionActions(p);
-    return `<article class="card member-card"><div class="member-card-profile">${avatar(p, "lg")}<h3>${E(p.name)}</h3><div class="role">${E(p.position || T("Miembro ASCLA"))}</div><div class="company">${E(p.company || T("Comunidad profesional"))}</div><span class="country">${I("pin")}${E(p.country || T("América Latina"))}</span><div class="member-card-signal">${signal}</div></div><div class="member-card-actions">${btn("Ver perfil " + I("arrow"), "member", `data-id="${p.id}"`, "small")}${relationship || '<div class="connection-controls member-action-placeholder" aria-hidden="true"></div>'}</div></article>`;
+      : connectionActions(p, false, true);
+    const relationshipState = isMe ? '' : memberRelationshipState(p.connection);
+    return `<article class="card member-card"><div class="member-card-profile">${avatar(p, "lg")}<h3>${E(p.name)}</h3><div class="role">${E(p.position || T("Miembro ASCLA"))}</div><div class="company">${E(p.company || T("Comunidad profesional"))}</div><span class="country">${I("pin")}${E(p.country || T("América Latina"))}</span><div class="member-card-signal">${signal}<span class="member-card-relationship-state">${relationshipState}</span></div></div><div class="member-card-actions">${btn("Ver perfil " + I("arrow"), "member", `data-id="${p.id}"`, "small")}${relationship || '<div class="connection-controls member-action-placeholder" aria-hidden="true"></div>'}</div></article>`;
   }
   function resourceCard(p, i = 0) {
     const cover = p.meta.thumbnail_url

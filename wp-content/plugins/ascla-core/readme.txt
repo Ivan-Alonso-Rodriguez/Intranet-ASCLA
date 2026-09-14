@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.9.23
+Stable tag: 1.9.24
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,13 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.9.24 =
+* Repara Microeventos: elimina referencias mensuales a propuestas borradas y permite volver a generar encuentros cuando las propuestas anteriores ya no existen.
+* Los resultados históricos de trabajos de microeventos dejan de mostrar enlaces Revisar hacia eventos eliminados.
+* Al eliminar un microevento se limpia su caché mensual y sus inscripciones asociadas.
+* En las tarjetas del Directorio, el estado Conectados se muestra junto a la afinidad y deja libre la zona de acciones para Ver perfil, mensajería y gestión de la conexión.
+* No requiere migración de base de datos; se mantiene el esquema 7.
 
 = 1.9.23 =
 * Permite eliminar notificaciones individuales desde la bandeja de actividad.

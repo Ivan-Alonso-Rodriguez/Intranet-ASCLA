@@ -152,7 +152,12 @@ final class Content
     {
         $post=self::get($id); Access::require(self::canDelete($post),'Solo el autor o un administrador puede eliminar este contenido.',403);
         return Store::lock('content:'.$id,static function()use($id,$post){
+            $meta=(array)get_post_meta($id,'_ascla',true);
             Access::require((bool)wp_trash_post($id),'No se pudo eliminar el contenido.',500);
+            if($post->post_type==='ascla_event' && !empty($meta['micro'])) {
+                MicroEvents::forget($id);
+                Store::delete('registrations',['event_id'=>$id]);
+            }
             if($post->post_type==='ascla_forum') {
                 foreach(get_posts(['post_type'=>'ascla_topic','post_parent'=>$id,'post_status'=>['publish','pending','draft','ascla_hidden','ascla_rejected'],'numberposts'=>-1]) as $child) wp_update_post(['ID'=>$child->ID,'post_parent'=>0]);
             }

@@ -11,7 +11,15 @@ final class MicroEvents
         $month=($onlyIds?'demo-'.substr(hash('sha256',wp_json_encode($onlyIds)),0,12).'-':'').wp_date('Y-m');
         return Store::lock('micro:'.$month,static function () use($month,$onlyIds) {
             $existing=get_option('ascla_micro_'.$month);
-            if ($existing) { return $existing; }
+            if (is_array($existing)) {
+                $current=self::sanitizeResult($existing);
+                if (!empty($current['events'])) {
+                    if ($current!==$existing) { update_option('ascla_micro_'.$month,$current,false); }
+                    return $current;
+                }
+                // A deleted proposal must not keep the month locked to stale post IDs.
+                delete_option('ascla_micro_'.$month);
+            }
             $profiles=self::eligible($onlyIds);
             $history=get_option('ascla_group_history',[]);
             $blocked=self::blockedPairs($profiles);
@@ -25,6 +33,41 @@ final class MicroEvents
             if ($ids) { update_option('ascla_micro_'.$month,$result,false); update_option('ascla_group_history',$history,false); }
             Audit::record('microevents_created',0,'groups_'.count($ids)); return $result;
         });
+    }
+
+    /** Remove deleted/trashed microevents from a stored or queued result. */
+    public static function sanitizeResult(array $result): array
+    {
+        $events=[];
+        foreach ((array)($result['events']??[]) as $id) {
+            $id=absint($id);
+            if ($id>0 && self::isLiveProposal($id)) { $events[]=$id; }
+        }
+        $result['events']=array_values(array_unique($events));
+        $result['waiting']=array_values(array_unique(array_filter(array_map('absint',(array)($result['waiting']??[])))));
+        return $result;
+    }
+    private static function isLiveProposal(int $id): bool
+    {
+        $post=get_post($id);
+        if (!$post || $post->post_type!=='ascla_event' || in_array($post->post_status,['trash','auto-draft'],true)) { return false; }
+        $meta=(array)get_post_meta($id,'_ascla',true);
+        return !empty($meta['micro']);
+    }
+    /** Keep monthly proposal caches aligned when an administrator removes a microevent. */
+    public static function forget(int $id): void
+    {
+        global $wpdb;
+        $like=$wpdb->esc_like('ascla_micro_').'%';
+        $rows=$wpdb->get_results($wpdb->prepare("SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s",$like),ARRAY_A)?:[];
+        foreach ($rows as $row) {
+            $result=maybe_unserialize($row['option_value']??null);
+            if (!is_array($result) || empty($result['events']) || !in_array($id,array_map('absint',(array)$result['events']),true)) { continue; }
+            $result['events']=array_values(array_filter(array_map('absint',(array)$result['events']),static fn($eventId)=>$eventId!==$id));
+            $result=self::sanitizeResult($result);
+            if ($result['events']) { update_option($row['option_name'],$result,false); }
+            else { delete_option($row['option_name']); }
+        }
     }
     private static function eligible(array $onlyIds): array
     {
