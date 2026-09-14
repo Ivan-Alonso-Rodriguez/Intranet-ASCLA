@@ -156,6 +156,15 @@ final class IntegrationTest extends TestCase
 
     }
 
+    public function testProfileCompletionAndCountryNormalization(): void
+    {
+        $this->user(1);$before=Profiles::completion($this->users[1]);self::assertLessThan(40,$before['percent']);
+        Profiles::save(['first_name'=>'Ana','last_name'=>'Asociada','position'=>'Secretaria corporativa','company'=>'Empresa Demo','country'=>'Peru','city'=>'Lima']);
+        $profile=Profiles::raw($this->users[1]);self::assertSame('Perú',$profile['country']);self::assertGreaterThanOrEqual(40,Profiles::completion($this->users[1])['percent']);
+        self::assertSame(400,$this->api('POST','/profiles/me',['country'=>'Pais Inventado QXYZ'])->get_status());
+    }
+
+
     public function testMemberCannotPublishOrModerateOrReadOthersDrafts(): void
 
     {

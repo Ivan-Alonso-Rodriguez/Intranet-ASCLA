@@ -79,6 +79,25 @@ final class Profiles
         }
         return $labels;
     }
+    public static function completion(int $id): array
+    {
+        $data=self::raw($id);
+        $checks=[
+            'name'=>trim((string)($data['first_name']??''))!=='' && trim((string)($data['last_name']??''))!=='',
+            'position'=>trim((string)($data['position']??''))!=='',
+            'company'=>trim((string)($data['company']??''))!=='',
+            'location'=>trim((string)($data['country']??''))!=='' && trim((string)($data['city']??''))!=='',
+            'bio'=>trim((string)($data['bio']??''))!=='',
+            'experience'=>trim((string)($data['experience']??''))!=='',
+            'photo'=>!empty($data['photo_id']),
+            'interests'=>!empty($data['interests']),
+            'areas'=>!empty($data['areas']),
+            'industries'=>!empty($data['industries']),
+        ];
+        $completed=count(array_filter($checks));
+        return ['percent'=>$completed*10,'completed'=>$completed,'total'=>10,'minimum'=>40,'checks'=>$checks];
+    }
+
     public static function save(array $input,int $id=0): array
     {
         $id=$id?:get_current_user_id(); $old=self::raw($id); $data=$old;
@@ -88,6 +107,11 @@ final class Profiles
             if (in_array($field,['linkedin','twitter','website'],true) && $value!=='') {
                 Access::require((bool)filter_var($value,FILTER_VALIDATE_URL) && in_array(wp_parse_url($value,PHP_URL_SCHEME),['https','http'],true),'URL no válida.',400);
                 $value=esc_url_raw($value);
+            }
+            if ($field==='country' && $value!=='' && $value!==(string)($old['country']??'')) {
+                $country=Locations::resolveCountry($value);
+                Access::require((bool)$country,'Seleccione un país de la lista.',400);
+                $value=$country['es'];
             }
             $data[$field]=$value;
         }

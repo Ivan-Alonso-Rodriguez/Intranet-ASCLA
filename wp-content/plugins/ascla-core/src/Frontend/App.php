@@ -51,6 +51,8 @@ final class App
         wp_enqueue_script('ascla-navigation',ASCLA_URL.'assets/navigation.js',[],ASCLA_VERSION,true);
         wp_enqueue_script('ascla-app',ASCLA_URL.'assets/app.js',['ascla-image-editor','ascla-content','ascla-notifications','ascla-navigation'],ASCLA_VERSION,true);
         $pages=[]; foreach (Catalog::PAGES as $slug=>$label) { $pages[$slug]=['label'=>Language::label($label),'url'=>Catalog::url($slug)]; }
-        wp_localize_script('ascla-app','ASCLA',['locale'=>str_replace('_','-',Language::current()),'language'=>Language::english()?'en':'es','translations'=>Language::english()?Language::labels():[],'api'=>esc_url_raw(rest_url('ascla/v1/')),'nonce'=>wp_create_nonce('wp_rest'),'page'=>$page,'pages'=>$pages,'icons'=>Icons::PATHS,'logo'=>ASCLA_URL.'assets/ascla-logo.png','logout'=>wp_logout_url(wp_login_url()),'adminUrl'=>admin_url('admin.php?page=ascla'),'mediaUrl'=>admin_url('admin-post.php?action=ascla_media&id=')]);
+        $logo=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo.png');
+        $logoWhite=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo-white.png');
+        wp_localize_script('ascla-app','ASCLA',['locale'=>str_replace('_','-',Language::current()),'userLocale'=>Language::current(),'language'=>Language::english()?'en':'es','translations'=>Language::english()?Language::labels():[],'languageOptions'=>Language::SUPPORTED,'languageNonce'=>wp_create_nonce('ascla_change_language'),'api'=>esc_url_raw(rest_url('ascla/v1/')),'nonce'=>wp_create_nonce('wp_rest'),'page'=>$page,'pages'=>$pages,'icons'=>Icons::PATHS,'logo'=>$logo,'logoWhite'=>$logoWhite,'logout'=>wp_logout_url(wp_login_url()),'adminUrl'=>admin_url('admin.php?page=ascla'),'mediaUrl'=>admin_url('admin-post.php?action=ascla_media&id=')]);
     }
 }

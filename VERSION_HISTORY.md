@@ -2,9 +2,9 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.9.15`  
+> **Versión actual:** `1.9.23`  
 > **Esquema de base de datos:** `7`  
-> La versión `1.9.15` mejora la protección de cambios sin guardar en Administración y armoniza visualmente las tarjetas del directorio.
+> La versión `1.9.23` añade control personal sobre notificaciones y relaciones: las notificaciones pueden eliminarse, las solicitudes enviadas pueden cancelarse y las conexiones confirmadas pueden eliminarse sin borrar el historial, manteniendo el esquema de datos 7.
 
 ## Resumen de versiones
 
@@ -36,11 +36,145 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.12 | Filtro de archivos por usuario, mensajes sugeridos y guardia de cambios | Completada |
 | 1.9.13 | Cloudflare Turnstile adaptativo y protección de formularios públicos | Completada |
 | 1.9.14 | Acceso cerrado de asociados y ajuste de Turnstile | Completada |
-| 1.9.15 | Guardia de configuración y tarjetas proporcionales del directorio | **Actual** |
+| 1.9.15 | Guardia de configuración y tarjetas proporcionales del directorio | Completada |
+| 1.9.16 | Pulido visual de login, Inicio y filtros | Completada |
+| 1.9.17 | Foros simplificados, completitud de perfil y ubicaciones normalizadas | Completada |
+| 1.9.18 | Autocompletado profesional de ubicación y nueva identidad visual | Completada |
+| 1.9.19 | Corrección de autofill y logos transparentes | Completada |
+| 1.9.20 | Renovación visual de Administración, idioma y branding | Completada |
+| 1.9.21 | Pulido del hero, Auditoría y Configuración administrativa | |
+| 1.9.22 | Proveedor IA exclusivo, configuración simplificada y auditoría explicativa | Completada |
+| 1.9.23 | Gestión de notificaciones y ciclo completo de conexiones | **Actual** |
 
 ---
 
 # Serie 1.9.x — evolución funcional
+
+
+## 1.9.23 — Gestión de notificaciones y ciclo completo de conexiones
+
+- Las notificaciones individuales pueden eliminarse desde la bandeja de actividad mediante una confirmación propia de ASCLA.
+- Las solicitudes de conexión enviadas incorporan **Cancelar solicitud**. Al cancelarlas, se elimina la relación pendiente y también la notificación de solicitud que recibió el destinatario.
+- Las conexiones confirmadas incorporan **Eliminar conexión** con confirmación explícita. La mensajería deja de estar disponible entre ambos perfiles, pero el historial no se borra y puede recuperarse si vuelven a conectar.
+- Auditoría registra cancelaciones de solicitudes y eliminación de conexiones con etiquetas comprensibles.
+- La interfaz y las nuevas acciones tienen traducción Español/English y estilos para modo claro/oscuro.
+- Esquema de base de datos: **7** (sin migración).
+
+## 1.9.22 — Proveedor IA exclusivo, configuración simplificada y auditoría explicativa
+
+- Inteligencia artificial muestra únicamente la configuración del proveedor activo: DEMO MODE, Google Gemini u OpenAI / ChatGPT.
+- Cambiar el proveedor oculta y deshabilita los campos del proveedor inactivo; ASCLA consulta solo al proveedor seleccionado.
+- Configuración se reorganiza en bloques más coherentes y el Motor de afinidad deja visible únicamente `Afinidad mínima para recomendar (%)`.
+- Auditoría explica qué registra, para qué sirve y qué información no almacena; además muestra el nombre del actor cuando está disponible y etiquetas de acción más legibles.
+- El estado `Inscrito` recibe estilos específicos para modo oscuro.
+- Mensajería mantiene la actualización automática en segundo plano, pero deja de mostrar el texto “Actualización automática activada · cada 2 segundos”.
+- Esquema de base de datos: **7** (sin migración).
+
+## 1.9.21 — Pulido del hero, Auditoría y Configuración administrativa
+
+**Objetivo:** corregir el problema visual del logo sobredimensionado y convertir Auditoría y Configuración en secciones más claras y profesionales sin alterar permisos ni lógica de negocio.
+
+### Cambios principales
+
+- El hero de Administración limita explícitamente el logo a una marca compacta y equilibrada, evitando que el recurso gráfico ocupe el área principal.
+- Se corrige el bloque CSS administrativo de 1.9.20 que contenía saltos de línea escapados literalmente, asegurando que los estilos del rediseño sean interpretados por el navegador.
+- Auditoría incorpora tarjetas de resumen, recuento de actores, última actividad, indicador de registro protegido y una tabla con acciones/objetos visualmente diferenciados.
+- Configuración se reorganiza en tarjetas temáticas para Participación, Seguridad, Afinidad, IA, Google OAuth, Social Listening, Correo y Propiedad intelectual.
+- Se añade una barra de guardado persistente y responsive para que la acción principal permanezca clara en formularios extensos.
+- El modo oscuro recibe estilos específicos para las nuevas tarjetas, resúmenes y estados.
+- No requiere migración de base de datos: se mantiene el esquema `7`.
+
+**Resultado de la iteración:** el panel administrativo conserva la renovación de 1.9.20, pero con un hero proporcionado y dos de sus secciones más técnicas mucho más legibles y consistentes.
+
+---
+
+## 1.9.20 — Renovación visual de Administración, idioma y branding
+
+**Objetivo:** hacer que el panel administrativo se perciba como una extensión cuidada de la intranet y no como una colección de controles aislados, manteniendo los permisos y flujos existentes.
+
+### Cambios principales
+
+- Administración estrena una cabecera con identidad ASCLA actual, mejor jerarquía visual y acceso directo a la intranet.
+- Las métricas superiores, pestañas, filtros, tablas, usuarios, solicitudes y tarjetas de configuración reciben un tratamiento visual consistente, con mejores espacios, bordes, estados y lectura en claro/oscuro.
+- La barra superior de Administración incorpora selector **Español / English** y control de apariencia, alineados con la experiencia de la intranet.
+- El cambio de idioma se guarda por usuario también desde `wp-admin`, sin modificar el idioma global de WordPress para los demás asociados.
+- Los logos principales se sirven con versión en la URL para evitar que el navegador siga mostrando una imagen antigua después de actualizar el plugin.
+- La biblioteca administrativa recibe una presentación propia y más clara sin cambiar su alcance de permisos.
+- No requiere migración de base de datos: se mantiene el esquema `7`.
+
+**Resultado de la iteración:** Administración tiene una identidad visual más uniforme, controles superiores coherentes con el frontend y branding actualizado de forma fiable.
+
+---
+
+## 1.9.19 — Corrección de autofill y logos transparentes
+
+**Objetivo:** eliminar interferencias del autocompletado de direcciones del navegador y pulir el uso de los nuevos recursos de marca sin introducir fondos artificiales.
+
+### Cambios principales
+
+- País/región y Ciudad mantienen el autocompletado propio de ASCLA, pero el campo visible ya no se expone como un campo de dirección al navegador; los valores validados se sincronizan a campos internos antes de guardar.
+- Se añaden señales para gestores de autofill y contraseñas, reduciendo la aparición de menús externos sobre el selector de ASCLA.
+- Login e Inicio eliminan rectángulos blancos alrededor del logo. En superficies claras se usa el logo principal y en superficies oscuras se utiliza la variante inversa para conservar contraste sin añadir una placa.
+- La barra lateral mantiene la variante blanca oficial y añade una separación mayor antes del texto **COMUNIDAD DE ASOCIADOS**.
+- No requiere migración de base de datos: se mantiene el esquema `7`.
+
+**Resultado de la iteración:** los selectores geográficos quedan visualmente bajo control de ASCLA y la marca se integra de forma más limpia con los fondos claros y oscuros.
+
+---
+
+## 1.9.18 — Autocompletado profesional de ubicación y nueva identidad visual
+
+**Objetivo:** hacer que la captura de País/región y Ciudad se sienta integrada a la intranet, evitando el aspecto del `datalist` nativo, y aplicar de forma consistente los nuevos recursos oficiales de marca.
+
+### Cambios principales
+
+- Perfil reemplaza el selector nativo del navegador por un autocompletado propio: las sugerencias aparecen debajo del campo, se filtran al escribir y pueden recorrerse con teclado.
+- País/región sigue validándose contra el catálogo normalizado; Ciudad continúa consultándose por el país seleccionado, por lo que no se pierde la calidad de datos incorporada en 1.9.17.
+- La ciudad se mantiene deshabilitada hasta seleccionar un país válido, reduciendo combinaciones inconsistentes.
+- Se incorpora el nuevo logo horizontal oficial de ASCLA como recurso principal para el inicio de sesión y la cabecera de la intranet.
+- La barra lateral oscura utiliza una variante blanca independiente (`ascla-logo-white.png`) en lugar de recolorear artificialmente el logo principal con máscaras CSS.
+- El login presenta el logo principal sobre una superficie clara para conservar legibilidad también cuando el usuario utiliza modo oscuro.
+- No requiere migración de base de datos: se mantiene el esquema `7`.
+
+**Resultado de la iteración:** la selección de ubicación se percibe como un componente propio de ASCLA y la identidad visual mantiene contraste correcto en superficies claras y oscuras.
+
+---
+
+## 1.9.17 — Foros simplificados, completitud de perfil y ubicaciones normalizadas
+
+**Objetivo:** reducir duplicidades de interfaz y mejorar la calidad de la información básica de los perfiles sin convertir el onboarding en un bloqueo.
+
+### Cambios principales
+
+- Foros elimina el botón duplicado de la franja inferior y conserva una sola acción azul superior, ahora denominada **Crear foro**.
+- Inicio calcula una completitud de perfil basada en 10 elementos: nombre completo, cargo, empresa, ubicación, biografía, experiencia, fotografía, intereses, áreas de conocimiento e industrias.
+- Cuando el perfil está por debajo del **40%**, ASCLA muestra una recomendación al entrar en Inicio con el porcentaje actual y acceso directo a **Completar mi perfil**; la navegación sigue disponible y el aviso aparece una sola vez por sesión del navegador.
+- Perfil sustituye la entrada totalmente libre de País/región por sugerencias basadas en un catálogo ISO 3166 normalizado y valida los cambios de país contra dicho catálogo.
+- Ciudad ofrece sugerencias dependientes del país. ASCLA consulta CountriesNow desde PHP, cachea cada país durante 7 días y devuelve solo coincidencias relevantes al navegador.
+- Si el proveedor de ciudades está temporalmente indisponible, ASCLA conserva la posibilidad de guardar un perfil existente en lugar de convertir la integración externa en un punto único de fallo.
+- No requiere migración de base de datos: se mantiene el esquema `7`.
+
+**Resultado de la iteración:** la creación de conversaciones queda más clara, los perfiles incompletos reciben una guía útil y la ubicación profesional queda más consistente para búsquedas y networking.
+
+---
+
+## 1.9.16 — Pulido visual de login, Inicio y filtros
+
+**Objetivo:** corregir detalles de presentación detectados en el uso real sin modificar permisos, datos ni flujos funcionales.
+
+### Cambios principales
+
+- El logo del inicio de sesión se muestra con un encuadre más proporcionado tanto en la tarjeta de acceso como en el panel de bienvenida.
+- La verificación adaptativa de **Cloudflare Turnstile** usa una tarjeta visual más clara, con jerarquía de título, proveedor y explicación breve, manteniendo la aparición únicamente cuando corresponde.
+- El hero de Inicio (`Hola …, sigamos conectando ideas.`) adopta una paleta azul clara en modo claro; el modo oscuro conserva su tratamiento oscuro.
+- Se elimina el botón general **Actualizar** de la cabecera de Administración para reducir ruido visual; las acciones específicas de actualización de cada módulo se conservan.
+- En Administración → Solicitudes, el selector **Estado** queda alineado con el campo de búsqueda y el botón Buscar.
+- En el Directorio, los filtros **Interés** y **Área de conocimiento** quedan alineados con país, industria y búsqueda.
+- No requiere migración de base de datos: se mantiene el esquema `7`.
+
+**Resultado de la iteración:** las pantallas principales presentan una composición más consistente y equilibrada sin alterar el comportamiento funcional de ASCLA.
+
+---
 
 ## 1.9.15 — Guardia de configuración y tarjetas proporcionales del directorio
 
@@ -505,10 +639,10 @@ Versión histórica recuperada del repositorio Git original.
 Durante la serie 1.9.x se adoptó un versionado incremental para reflejar cambios pequeños y verificables sin producir saltos innecesarios:
 
 ```text
-1.9.0 → 1.9.1 → 1.9.2 → ... → 1.9.15
+1.9.0 → 1.9.1 → 1.9.2 → ... → 1.9.23
 ```
 
-Las modificaciones exclusivamente documentales, como la ampliación de este archivo, **no generan por sí solas una nueva versión del plugin**. La versión `1.9.15` se justifica por la protección ampliada de cambios pendientes en Administración y la reorganización visual del directorio; el esquema de datos permanece en 7.
+Las modificaciones exclusivamente documentales, como la ampliación de este archivo, **no generan por sí solas una nueva versión del plugin**. La versión `1.9.23` se justifica por la gestión completa del ciclo de conexiones y el control personal de notificaciones; el esquema de datos permanece en 7.
 
 # Notas de trazabilidad
 
@@ -516,4 +650,4 @@ Las modificaciones exclusivamente documentales, como la ampliación de este arch
 - Cuando existe un snapshot verificable se conserva como referencia histórica.
 - No se crean tags ficticios para versiones cuyo código fuente original no esté disponible.
 - La carpeta `docs/` se mantiene fuera del repositorio público según la configuración actual de `.gitignore`.
-- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.15**.
+- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.23**.

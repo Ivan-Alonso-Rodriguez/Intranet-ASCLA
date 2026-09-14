@@ -4,9 +4,9 @@ Plugin WordPress portable para una comunidad profesional privada. Incluye perfil
 
 Toda la funcionalidad propia está en `wp-content/plugins/ascla-core/`. Elementor es opcional. No se modifica WordPress Core ni se necesita un tema específico. El plugin conserva sus datos al desactivarse o desinstalarse.
 
-## Versión actual: 1.9.15 · esquema 7
+## Versión actual: 1.9.23 · esquema 7
 
-La versión 1.9.15 mantiene el esquema 7 y mejora la experiencia de administración y del directorio. Administración → Configuración protege los cambios pendientes con el modal propio de ASCLA incluso al salir mediante enlaces del panel de WordPress, y las tarjetas del directorio usan una estructura proporcional con acciones alineadas. Se conserva el modelo cerrado de asociados y la protección adaptativa de Cloudflare Turnstile introducida en las versiones anteriores.
+La versión 1.9.23 mantiene el esquema 7 y completa la gestión personal de actividad y networking: permite eliminar notificaciones, cancelar solicitudes de conexión enviadas retirando su aviso asociado y eliminar conexiones confirmadas sin borrar el historial de mensajes.
 
 Administración con solicitudes persistentes, historial, búsqueda de usuarios y suspensión/reactivación. Los foros se publican sin aprobación; Galería, Centro de Conocimiento y Eventos sólo permiten crear/editar/publicar a administradores. Los eventos ordinarios se publican directamente, salvo borrador explícito; los microeventos conservan revisión administrativa.
 
@@ -68,6 +68,7 @@ También puedes crear la demo desde **ASCLA → Configuración → Preparar dato
 
 ## Integraciones
 
+- **Ubicaciones de perfil:** País/región usa un catálogo ISO normalizado y Ciudad ofrece sugerencias dependientes del país mediante CountriesNow. ASCLA consulta el servicio desde el servidor, cachea la respuesta durante 7 días y no bloquea un perfil existente si el proveedor geográfico está temporalmente indisponible.
 - **Cloudflare Turnstile:** opcional y desactivado por defecto. Configura un widget de Cloudflare en modo **Managed**, guarda Site Key y Secret Key en **ASCLA → Configuración → Seguridad** y elige entre login, recuperación de contraseña y otros formularios públicos adaptativos. El Secret se cifra con el mismo almacén seguro de integraciones. La verificación real se realiza en PHP contra Siteverify; el JavaScript por sí solo nunca autoriza una acción.
 - **IA:** por defecto `DEMO MODE`, sin gasto. Para API real configura una Google Gemini API Key y un modelo habilitado en tu cuenta. El chat prioriza la información visible dentro de ASCLA y todo contenido multimedia generado queda en borrador para revisión. La arquitectura permite implementar otra `AIProviderInterface`.
 - **YouTube:** introduce una URL válida en el recurso. Los videos se embeben; no se descargan ni almacenan completos. Puedes suministrar transcripción autorizada o conectar OAuth con permisos sobre los subtítulos. Sin permisos, se informa el error; en modo mock se identifica explícitamente la transcripción ficticia.

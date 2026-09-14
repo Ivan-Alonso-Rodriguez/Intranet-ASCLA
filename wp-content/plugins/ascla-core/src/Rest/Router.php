@@ -1,6 +1,6 @@
 <?php
 namespace ASCLA\Core\Rest;
-use ASCLA\Core\Services\{Access,Profiles,Matching,Messaging,Content,Events,Notifications,Settings,Media,Knowledge,Audit,Account};
+use ASCLA\Core\Services\{Access,Profiles,Matching,Messaging,Content,Events,Notifications,Settings,Media,Knowledge,Audit,Account,Locations};
 use ASCLA\Core\Repositories\Store;
 use ASCLA\Core\Jobs\Queue;
 use ASCLA\Core\Integrations\GoogleOAuth;
@@ -22,9 +22,11 @@ final class Router
     }
     public static function routes(): void
     {
-        self::route('/bootstrap','GET',static fn()=>['me'=>Profiles::visible(get_current_user_id()),'catalogs'=>Profiles::catalogs(),'moderator'=>current_user_can('ascla_moderate'),'executive'=>current_user_can('ascla_publish'),'admin'=>current_user_can('ascla_manage'),'demo'=>Settings::get()['demo'],'ai_mode'=>Knowledge::provider()->mode(),'google_connected'=>\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='']);
+        self::route('/bootstrap','GET',static fn()=>['me'=>Profiles::visible(get_current_user_id()),'profile_completion'=>Profiles::completion(get_current_user_id()),'catalogs'=>Profiles::catalogs(),'moderator'=>current_user_can('ascla_moderate'),'executive'=>current_user_can('ascla_publish'),'admin'=>current_user_can('ascla_manage'),'demo'=>Settings::get()['demo'],'ai_mode'=>Knowledge::provider()->mode(),'google_connected'=>\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='']);
         self::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
         self::route('/profiles','GET',static fn($r)=>Profiles::directory($r->get_params()));
+        self::route('/locations/countries','GET',static fn()=>Locations::countries());
+        self::route('/locations/cities','GET',static fn($r)=>Locations::cities((string)$r['country'],(string)($r['q']??''),rest_sanitize_boolean($r['exact']??false)));
         self::route('/profiles/me','POST',static fn($r)=>Profiles::save($r->get_json_params()?:[]),'ascla_write');
         self::route('/account/password','POST',static fn($r)=>Account::changePassword($r->get_json_params()?:[]),'ascla_write');
         self::route('/account/password-reset','POST',static fn()=>Account::sendPasswordReset(),'ascla_write');
@@ -64,6 +66,7 @@ final class Router
         self::route('/answers','GET',static fn()=>Queue::answers());
         self::route('/conversations/(?P<id>\d+)','GET',static fn($r)=>Messaging::conversation((int)$r['id']));
         self::route('/notifications/(?P<id>\d+)/read','POST',static fn($r)=>Notifications::read((int)$r['id']));
+        self::route('/notifications/(?P<id>\d+)','DELETE',static fn($r)=>Notifications::delete((int)$r['id']));
         self::route('/media','GET',static fn($r)=>Media::listing($r->get_params()));
         self::route('/media/(?P<id>\d+)','DELETE',static fn($r)=>Media::remove((int)$r['id']),'ascla_write');
         self::route('/media','POST',static function($r) { $files=$r->get_file_params(); return Media::upload($files['file']??[],$r->get_params()); },'ascla_write');
@@ -132,6 +135,20 @@ final class Router
         }
         foreach ($reports as &$report) { $report['reviewed']=!empty($report['reviewed_at']); $report['reviewed_by_name']=!empty($report['reviewed_by'])?Profiles::publicName((int)$report['reviewed_by']):''; } unset($report);
         usort($reports,static fn($a,$b)=>(($a['reviewed']?1:0)<=>($b['reviewed']?1:0)) ?: strcmp((string)($b['created_at']??''),(string)($a['created_at']??'')));
-        return ['pending'=>$pending,'comments'=>$comments,'reports'=>$reports,'jobs'=>$jobs,'audit'=>Store::rows('audit'),'counts'=>['members'=>count(get_users(['capability'=>'ascla_access','fields'=>'ID'])),'pending'=>count($pending)]];
+        $audit=Store::rows('audit');
+        $actorNames=[];
+        foreach ($audit as $row) {
+            $actorId=(int)($row['actor_id']??0);
+            if ($actorId>0 && !array_key_exists($actorId,$actorNames)) {
+                $user=get_userdata($actorId);
+                $actorNames[$actorId]=$user?Profiles::publicName($actorId):'Usuario eliminado';
+            }
+        }
+        foreach ($audit as &$row) {
+            $actorId=(int)($row['actor_id']??0);
+            $row['actor_name']=$actorId>0?($actorNames[$actorId]??'Usuario'):'Sistema';
+        }
+        unset($row);
+        return ['pending'=>$pending,'comments'=>$comments,'reports'=>$reports,'jobs'=>$jobs,'audit'=>$audit,'counts'=>['members'=>count(get_users(['capability'=>'ascla_access','fields'=>'ID'])),'pending'=>count($pending)]];
     }
 }

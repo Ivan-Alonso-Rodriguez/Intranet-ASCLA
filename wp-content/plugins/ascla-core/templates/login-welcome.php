@@ -1,6 +1,6 @@
 <?php use ASCLA\Core\Frontend\Language; defined('ABSPATH') || exit; ?>
 <aside class="ascla-welcome" aria-label="Comunidad ASCLA">
-    <div class="ascla-welcome-brand"><img src="<?php echo esc_url(ASCLA_URL.'assets/ascla-logo.png'); ?>" alt="ASCLA" class="ascla-official-logo"></div>
+    <div class="ascla-welcome-brand"><img src="<?php echo esc_url(add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo.png')); ?>" alt="ASCLA" class="ascla-official-logo ascla-logo-normal"><img src="<?php echo esc_url(add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo-white.png')); ?>" alt="" aria-hidden="true" class="ascla-official-logo ascla-logo-inverse"></div>
     <div class="ascla-welcome-copy">
         <p class="ascla-welcome-eyebrow"><?php echo esc_html(Language::text('CONECTA · COMPARTE · CRECE','CONNECT · SHARE · GROW')); ?></p>
         <h2><?php echo wp_kses_post(Language::text('El conocimiento<br>nos conecta.','Knowledge<br>connects us.')); ?></h2>

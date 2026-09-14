@@ -53,6 +53,31 @@ final class Notifications
         $wpdb->query($wpdb->prepare("UPDATE $table SET read_at=%s WHERE user_id=%d AND read_at IS NULL",current_time('mysql',true),get_current_user_id()));
         return ['ok'=>true]+self::summary();
     }
+    public static function delete(int $id): array
+    {
+        $row=Store::one('notifications',$id);
+        Access::require($row && (int)$row['user_id']===get_current_user_id(),'Notificación no encontrada.',404);
+        Store::delete('notifications',['id'=>$id,'user_id'=>get_current_user_id()]);
+        return ['ok'=>true,'deleted'=>$id]+self::summary();
+    }
+    public static function removeProfileNotices(int $user,array $kinds,int $profileId): int
+    {
+        $user=absint($user); $profileId=absint($profileId);
+        $kinds=array_values(array_filter(array_map('sanitize_key',$kinds)));
+        if (!$user || !$profileId || !$kinds) return 0;
+        $removed=0;
+        $placeholders=implode(',',array_fill(0,count($kinds),'%s'));
+        foreach (Store::rows('notifications',"user_id=%d AND kind IN ($placeholders)",array_merge([$user],$kinds),'') as $row) {
+            $context=json_decode($row['context']??'null',true);
+            $matches=is_array($context) && ($context['type']??'')==='profile' && absint($context['id']??0)===$profileId;
+            if (!$matches) {
+                parse_str((string)wp_parse_url($row['url']??'',PHP_URL_QUERY),$query);
+                $matches=absint($query['member']??0)===$profileId;
+            }
+            if ($matches) { Store::delete('notifications',['id'=>(int)$row['id'],'user_id'=>$user]); $removed++; }
+        }
+        return $removed;
+    }
     public static function open(int $id): array
     {
         $row=Store::one('notifications',$id);

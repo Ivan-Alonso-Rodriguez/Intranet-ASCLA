@@ -110,12 +110,26 @@ final class Connections
             if ((int)($context['id']??$query['member']??0)===$sender) Notifications::read((int)$row['id']);
         }
     }
-    public static function cancel(int $target): array
+    public static function remove(int $target): array
     {
-        $me=self::writer(); return self::lockPair($me,$target,static function () use($me,$target) {
-            $state=self::between($me,$target); Access::require(in_array($state['state'],['none','outgoing_pending'],true),'Solo puedes cancelar tu propia solicitud pendiente.',409);
-            if ($state['request_id']) Store::delete('relations',['id'=>$state['request_id'],'user_id'=>$me,'kind'=>'connect']);
+        $me=self::writer(); Access::require($target>0 && $target!==$me && Access::member($target),'Asociado no válido.',400);
+        return self::lockPair($me,$target,static function () use($me,$target) {
+            $state=self::between($me,$target);
+            Access::require(in_array($state['state'],['outgoing_pending','connected'],true),'No hay una solicitud enviada ni una conexión que puedas eliminar.',409);
+            if ($state['state']==='outgoing_pending') {
+                $requestId=(int)$state['request_id'];
+                if ($requestId) Store::delete('relations',['id'=>$requestId,'user_id'=>$me,'target_id'=>$target,'kind'=>'connect']);
+                Notifications::removeProfileNotices($target,['connection'],$me);
+                Audit::record('connection_cancelled',$requestId,'profile-'.$target);
+            } else {
+                $connectionId=(int)$state['connection_id'];
+                foreach (self::rows($me,[$target]) as $row) {
+                    if ($row['kind']==='connected') Store::delete('relations',['id'=>(int)$row['id']]);
+                }
+                Audit::record('connection_removed',$connectionId,'profile-'.$target);
+            }
             return self::between($me,$target);
         });
     }
+    public static function cancel(int $target): array { return self::remove($target); }
 }

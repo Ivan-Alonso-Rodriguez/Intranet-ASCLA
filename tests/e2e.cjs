@@ -609,3 +609,11 @@ async function goto(page, route) {
 
 // v1.9.12 regression notes: admin media owner filter, suggested-message voice and custom unsaved modal
 // v1.9.15 regression notes: admin settings dirty navigation uses the ASCLA modal; directory cards keep proportional action zones.
+
+// v1.9.16 regression notes: refined login/Turnstile presentation, lighter light-mode home hero, no global admin refresh button, and aligned request/directory filters.
+
+// v1.9.17 regression notes: single Create forum action, profile-completion nudge below 40%, and country/city suggestions with server-side country validation.
+
+// v1.9.18 regression notes: custom profile location combobox (no native datalist) and separate normal/white ASCLA logo assets.
+
+// v1.9.19 regression notes: location lookup inputs are isolated from browser address autofill; normal/inverse logos render without white plates.

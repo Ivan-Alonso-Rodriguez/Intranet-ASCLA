@@ -57,6 +57,33 @@ final class ConnectionsTest extends TestCase
         self::assertFalse(Connections::areConnected($a,$b)); self::assertCount(0,Connections::listing()['incoming']);
         wp_set_current_user($a); self::assertGreaterThan($id,Connections::request($b)['request_id']);
     }
+    public function testSenderCanCancelPendingRequestAndRecipientNotificationDisappears(): void
+    {
+        [$a,$b]=$this->users;
+        $state=Connections::request($b); self::assertSame('outgoing_pending',$state['state']);
+        wp_set_current_user($b);
+        self::assertSame(1,Store::count('notifications','user_id=%d AND kind=%s',[$b,'connection']));
+        wp_set_current_user($a);
+        $after=Connections::remove($b);
+        self::assertSame('none',$after['state']);
+        self::assertSame(0,Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',[$a,$b,'connect']));
+        self::assertSame(0,Store::count('notifications','user_id=%d AND kind=%s',[$b,'connection']));
+        self::assertTrue($after['can_request']);
+    }
+
+    public function testConnectedMemberCanRemoveConnectionWithoutDeletingMessageHistory(): void
+    {
+        [$a,$b]=$this->users; $this->accept();
+        $conversation=Messaging::start($b); $id=(int)$conversation['id']; $this->conversations[]=$id;
+        Messaging::send($id,'Mensaje que debe conservarse');
+        self::assertTrue(Connections::areConnected($a,$b));
+        $after=Connections::remove($b);
+        self::assertSame('none',$after['state']); self::assertFalse($after['can_message']);
+        self::assertSame(1,Store::count('messages','conversation_id=%d',[$id]));
+        self::assertSame(403,$this->api('GET','conversations/'.$id)->get_status());
+        self::assertSame([],Messaging::conversations());
+    }
+
     public function testRN010ProtectsLegacyConversationsBeforeAcceptanceAndAllowsBothSendersAfterwards(): void
     {
         [$a,$b,$c]=$this->users;

@@ -116,7 +116,7 @@ final class Messaging
     public static function relation(int $target,string $kind,bool $active): array
     {
         Access::require(in_array($kind,['block','connect'],true)&&$target>0&&$target!==get_current_user_id()&&Access::member($target),'Acción no válida.',400);
-        if ($kind==='connect') return $active?Connections::request($target):Connections::cancel($target);
+        if ($kind==='connect') return $active?Connections::request($target):Connections::remove($target);
         $me=get_current_user_id();
         return Connections::lockPair($me,$target,static function () use($me,$target,$active) {
             $where=['user_id'=>$me,'target_id'=>$target,'kind'=>'block'];

@@ -188,9 +188,13 @@ final class Turnstile
                 )) . '</p>';
             }
         }
-        echo '<div class="ascla-turnstile-wrap">' . $notice
+        echo '<div class="ascla-turnstile-wrap">'
+            . '<div class="ascla-turnstile-head"><span class="ascla-turnstile-badge" aria-hidden="true">✓</span><span><strong>'
+            . esc_html(Language::text('Verificación de seguridad', 'Security check'))
+            . '</strong><small>' . esc_html(Language::text('Protegido por Cloudflare Turnstile', 'Protected by Cloudflare Turnstile')) . '</small></span></div>'
+            . $notice
             . '<div class="cf-turnstile" data-sitekey="' . esc_attr($siteKey) . '" data-theme="auto" data-size="flexible" data-appearance="interaction-only" data-retry="auto" data-refresh-expired="auto" data-action="' . esc_attr($action) . '"></div>'
-            . '<p class="ascla-turnstile-note">' . esc_html(Language::text('Verificación de seguridad · Cloudflare Turnstile', 'Security check · Cloudflare Turnstile')) . '</p></div>';
+            . '<p class="ascla-turnstile-note">' . esc_html(Language::text('Esta comprobación aparece solo cuando es necesaria para proteger tu acceso.', 'This check appears only when needed to protect your access.')) . '</p></div>';
     }
 
     public static function shouldRender(string $flow): bool

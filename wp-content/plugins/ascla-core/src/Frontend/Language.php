@@ -55,10 +55,22 @@ final class Language
         wp_safe_redirect($redirect?:home_url('/'));
         exit;
     }
+    public static function changeAdmin(): void
+    {
+        if(!is_admin() || !is_user_logged_in() || ($_SERVER['REQUEST_METHOD']??'GET')!=='POST' || !isset($_POST['_ascla_change_language']))return;
+        if(!current_user_can('ascla_admin_area'))return;
+        check_admin_referer('ascla_change_language','_ascla_language_nonce');
+        $locale=self::valid($_POST['_ascla_locale']??'');
+        if($locale!=='')update_user_meta(get_current_user_id(),'locale',$locale);
+        $redirect=wp_get_referer()?:admin_url('admin.php?page=ascla');
+        wp_safe_redirect($redirect);
+        exit;
+    }
     public static function boot(): void
     {
         add_action('wp_login',[self::class,'remember'],10,2);
         add_action('template_redirect',[self::class,'change'],1);
+        add_action('admin_init',[self::class,'changeAdmin'],1);
         add_action('login_footer',[self::class,'selector']);
         add_filter('determine_locale',static function($locale){
             if(($GLOBALS['pagenow']??'')==='wp-login.php')return self::requested()?:'es_ES';

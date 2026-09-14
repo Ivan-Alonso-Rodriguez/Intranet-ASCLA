@@ -56,6 +56,8 @@
     noticeFilter: "all",
     noticePage: 1,
     assistantThread: "",
+    locations: null,
+    locationTimer: null,
   };
   const ASSISTANT_THREAD_PREFIX = "ascla-assistant-thread-";
   function assistantThread(reset = false, forced = "") {
@@ -74,6 +76,11 @@
   const I = (name) =>
     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${icons[name] || icons.hub}"/></svg>`;
   const themeIcons = () => `<span class="theme-icon theme-icon-light">${I("sun")}</span><span class="theme-icon theme-icon-dark">${I("moon")}</span>`;
+  function adminLanguageControl() {
+    const options = Object.entries(C.languageOptions || { es_ES: "Español", en_US: "English" });
+    const selected = C.userLocale || (String(C.language).startsWith("en") ? "en_US" : "es_ES");
+    return `<form class="header-language admin-language-control" method="post" action="" data-native aria-label="${E(T("Cambiar idioma"))}"><span class="admin-language-icon">${I("globe")}</span><label class="screen-reader-text" for="ascla-admin-language">${E(T("Idioma"))}</label><select id="ascla-admin-language" name="_ascla_locale" data-admin-language-select aria-label="${E(T("Idioma"))}">${options.map(([value,label]) => `<option value="${E(value)}" ${value===selected?"selected":""}>${E(label)}</option>`).join("")}</select><input type="hidden" name="_ascla_change_language" value="1"><input type="hidden" name="_ascla_language_nonce" value="${E(C.languageNonce || "")}"></form>`;
+  }
   const E = (v) =>
     String(v ?? "").replace(
       /[&<>"']/g,
@@ -206,6 +213,237 @@
   function formData(form) {
     return Object.fromEntries(new FormData(form));
   }
+  const locationNormalize = value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  function profileLocationFields(p) {
+    const countryPlaceholder = E(T("Busca un país o región"));
+    const cityPlaceholder = E(T("Busca una ciudad"));
+    return `<div class="field location-combobox" data-location-box="country"><label for="f-country">${E(T("País/región"))}</label><input type="hidden" name="country" value="${E(p.country || "")}" data-location-country-value><div class="location-input-wrap"><input id="f-country" type="text" value="${E(p.country || "")}" maxlength="120" autocomplete="new-password" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ascla-country-options" placeholder="${countryPlaceholder}" data-location-country>${I("chevron")}</div><div id="ascla-country-options" class="location-suggestions" role="listbox" hidden></div></div><div class="field location-combobox" data-location-box="city"><label for="f-city">${E(T("Ciudad"))}</label><input type="hidden" name="city" value="${E(p.city || "")}" data-location-city-value><div class="location-input-wrap"><input id="f-city" type="text" value="${E(p.city || "")}" maxlength="120" autocomplete="new-password" data-lpignore="true" data-1p-ignore="true" data-form-type="other" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ascla-city-options" placeholder="${cityPlaceholder}" data-location-city>${I("chevron")}</div><div id="ascla-city-options" class="location-suggestions" role="listbox" hidden></div></div><p class="private-note full location-helper">${E(T("Escribe para ver sugerencias y selecciona una opción de la lista."))}</p>`;
+  }
+  function locationCountryMatch(value) {
+    const needle = locationNormalize(value);
+    return S.locations?.countries?.find(country => [country.code, country.es, country.en].some(name => locationNormalize(name) === needle)) || null;
+  }
+  function locationCloseMenus(except = null) {
+    document.querySelectorAll('.location-combobox').forEach(box => {
+      if (box === except) return;
+      const menu = box.querySelector('.location-suggestions');
+      const input = box.querySelector('[role="combobox"]');
+      if (menu) menu.hidden = true;
+      if (input) { input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); }
+      box.classList.remove('is-open');
+    });
+  }
+  function locationSetActive(box, index) {
+    const input = box?.querySelector('[role="combobox"]');
+    const options = [...(box?.querySelectorAll('.location-option') || [])];
+    if (!input || !options.length) return;
+    const bounded = Math.max(0, Math.min(options.length - 1, index));
+    options.forEach((option, i) => option.classList.toggle('is-active', i === bounded));
+    options[bounded].scrollIntoView({block:'nearest'});
+    input.dataset.locationIndex = String(bounded);
+    input.setAttribute('aria-activedescendant', options[bounded].id);
+  }
+  function locationRender(box, items, renderer, emptyText = "") {
+    const input = box?.querySelector('[role="combobox"]');
+    const menu = box?.querySelector('.location-suggestions');
+    if (!box || !input || !menu) return;
+    input.dataset.locationIndex = '-1';
+    if (!items.length) {
+      menu.innerHTML = emptyText ? `<div class="location-empty">${E(T(emptyText))}</div>` : '';
+      menu.hidden = !emptyText;
+      input.setAttribute('aria-expanded', emptyText ? 'true' : 'false');
+      box.classList.toggle('is-open', !!emptyText);
+      return;
+    }
+    menu.innerHTML = items.map((item, i) => renderer(item, i)).join('');
+    menu.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    box.classList.add('is-open');
+  }
+  function countrySuggestions(value = "") {
+    const items = S.locations?.countries || [];
+    const needle = locationNormalize(value);
+    if (!needle) return items.slice(0, 10);
+    const begins = [], contains = [];
+    for (const country of items) {
+      const names = [country.es, country.en, country.code].map(locationNormalize);
+      if (names.some(name => name.startsWith(needle))) begins.push(country);
+      else if (names.some(name => name.includes(needle))) contains.push(country);
+    }
+    return [...begins, ...contains].slice(0, 10);
+  }
+  function renderCountrySuggestions(form) {
+    const input = form?.querySelector('[data-location-country]');
+    const box = input?.closest('.location-combobox');
+    if (!input || !box) return;
+    const items = countrySuggestions(input.value);
+    locationRender(box, items, (country, i) => {
+      const primary = C.language === 'en' ? country.en : country.es;
+      const secondary = C.language === 'en' ? country.es : country.en;
+      return `<button type="button" class="location-option" role="option" id="ascla-country-option-${i}" data-country-code="${E(country.code)}" data-country-value="${E(primary)}"><span>${E(primary)}</span>${secondary && secondary !== primary ? `<small>${E(secondary)}</small>` : ''}</button>`;
+    }, "No encontramos países con ese nombre.");
+  }
+  async function loadCitySuggestions(form, exact = false) {
+    const countryInput = form?.querySelector('[data-location-country]');
+    const cityInput = form?.querySelector('[data-location-city]');
+    const box = cityInput?.closest('.location-combobox');
+    if (!countryInput || !cityInput || !box) return null;
+    const country = locationCountryMatch(countryInput.value);
+    const query = cityInput.value.trim();
+    if (!country || (!exact && query.length < 2) || (exact && !query)) {
+      if (!exact) locationRender(box, [], () => '', query && !country ? "Selecciona primero un país." : "");
+      return null;
+    }
+    if (!exact) {
+      locationRender(box, [], () => '', "Cargando ciudades…");
+      box.classList.add('is-loading');
+    }
+    try {
+      const result = await api(`locations/cities?country=${encodeURIComponent(country.code)}&q=${encodeURIComponent(query)}${exact ? "&exact=1" : ""}`);
+      if (!exact) {
+        box.classList.remove('is-loading');
+        const items = result.items || [];
+        locationRender(box, items, (city, i) => `<button type="button" class="location-option" role="option" id="ascla-city-option-${i}" data-city-value="${E(city)}"><span>${E(city)}</span><small>${E(C.language === 'en' ? country.en : country.es)}</small></button>`, result.available ? "No encontramos ciudades con ese nombre." : "No se pudieron cargar las ciudades en este momento.");
+      }
+      return result;
+    } catch (error) {
+      box.classList.remove('is-loading');
+      if (error.name === "AbortError") throw error;
+      if (!exact) locationRender(box, [], () => '', "No se pudieron cargar las ciudades en este momento.");
+      return {available:false, items:[]};
+    }
+  }
+  function locationKeyboard(input, event) {
+    const box = input.closest('.location-combobox');
+    const options = [...box.querySelectorAll('.location-option')];
+    if (event.key === 'Escape') { locationCloseMenus(); return true; }
+    if (!options.length || !['ArrowDown','ArrowUp','Enter'].includes(event.key)) return false;
+    const current = Number(input.dataset.locationIndex || -1);
+    if (event.key === 'ArrowDown') { event.preventDefault(); locationSetActive(box, current < options.length - 1 ? current + 1 : 0); return true; }
+    if (event.key === 'ArrowUp') { event.preventDefault(); locationSetActive(box, current > 0 ? current - 1 : options.length - 1); return true; }
+    if (event.key === 'Enter' && current >= 0) { event.preventDefault(); options[current].click(); return true; }
+    return false;
+  }
+  async function setupProfileLocations(form) {
+    if (!form) return;
+    const countryInput = form.querySelector('[data-location-country]');
+    const cityInput = form.querySelector('[data-location-city]');
+    const countryValue = form.querySelector('[data-location-country-value]');
+    const cityValue = form.querySelector('[data-location-city-value]');
+    const countryBox = countryInput?.closest('.location-combobox');
+    const cityBox = cityInput?.closest('.location-combobox');
+    if (!countryInput || !cityInput || !countryValue || !cityValue || !countryBox || !cityBox) return;
+    countryInput.dataset.initial = countryInput.value;
+    cityInput.dataset.initial = cityInput.value;
+    try {
+      const countries = await api("locations/countries");
+      S.locations = {countries};
+    } catch (error) {
+      if (error.name !== "AbortError") toast(T("No se pudieron cargar las sugerencias geográficas. Puedes conservar tu ubicación actual."));
+      return;
+    }
+    const syncCountryState = (clearCity = false) => {
+      const country = locationCountryMatch(countryInput.value);
+      const previous = countryInput.dataset.selectedCode || '';
+      const next = country?.code || '';
+      if (clearCity && previous && previous !== next) {
+        cityInput.value = '';
+        cityValue.value = '';
+        cityInput.dataset.selectedCity = '';
+        refreshUnsavedGuard(cityInput);
+      }
+      countryInput.dataset.selectedCode = next;
+      countryValue.value = country ? country.es : '';
+      if (!next) cityValue.value = '';
+      cityInput.disabled = !next;
+      cityInput.placeholder = next ? T("Busca una ciudad") : T("Selecciona primero un país");
+      if (!next) locationCloseMenus();
+      return country;
+    };
+    const initialCountry = locationCountryMatch(countryInput.value);
+    countryInput.dataset.selectedCode = initialCountry?.code || '';
+    cityInput.disabled = !initialCountry;
+    cityInput.placeholder = initialCountry ? T("Busca una ciudad") : T("Selecciona primero un país");
+
+    countryInput.addEventListener('focus', () => { locationCloseMenus(countryBox); renderCountrySuggestions(form); });
+    countryInput.addEventListener('input', () => { syncCountryState(true); locationCloseMenus(countryBox); renderCountrySuggestions(form); });
+    countryInput.addEventListener('keydown', event => locationKeyboard(countryInput, event));
+    countryBox.querySelector('.location-suggestions')?.addEventListener('mousedown', event => event.preventDefault());
+    countryBox.addEventListener('click', event => {
+      const option = event.target.closest('[data-country-value]');
+      if (!option) return;
+      const previous = countryInput.dataset.selectedCode || '';
+      countryInput.value = option.dataset.countryValue || '';
+      countryInput.dataset.selectedCode = option.dataset.countryCode || '';
+      const selectedCountry = locationCountryMatch(countryInput.value);
+      countryValue.value = selectedCountry?.es || countryInput.value;
+      if (previous && previous !== countryInput.dataset.selectedCode) { cityInput.value = ''; cityValue.value = ''; }
+      cityInput.disabled = false;
+      cityInput.placeholder = T("Busca una ciudad");
+      refreshUnsavedGuard(countryInput); refreshUnsavedGuard(cityInput);
+      locationCloseMenus();
+    });
+
+    cityInput.addEventListener('focus', () => {
+      locationCloseMenus(cityBox);
+      if (cityInput.value.trim().length >= 2) loadCitySuggestions(form).catch(() => {});
+    });
+    cityInput.addEventListener('input', () => {
+      cityInput.dataset.selectedCity = '';
+      cityValue.value = '';
+      clearTimeout(S.locationTimer);
+      S.locationTimer = setTimeout(() => loadCitySuggestions(form).catch(() => {}), 220);
+    });
+    cityInput.addEventListener('keydown', event => locationKeyboard(cityInput, event));
+    cityBox.querySelector('.location-suggestions')?.addEventListener('mousedown', event => event.preventDefault());
+    cityBox.addEventListener('click', event => {
+      const option = event.target.closest('[data-city-value]');
+      if (!option) return;
+      cityInput.value = option.dataset.cityValue || '';
+      cityValue.value = cityInput.value;
+      cityInput.dataset.selectedCity = cityInput.value;
+      refreshUnsavedGuard(cityInput);
+      locationCloseMenus();
+    });
+    if (!S.locationOutsideBound) {
+      document.addEventListener('mousedown', event => { if (!event.target.closest('.location-combobox')) locationCloseMenus(); });
+      S.locationOutsideBound = true;
+    }
+  }
+  async function validateProfileLocations(form) {
+    if (!S.locations?.countries?.length) return;
+    const countryInput = form.querySelector('[data-location-country]');
+    const cityInput = form.querySelector('[data-location-city]');
+    const countryValue = form.querySelector('[data-location-country-value]');
+    const cityValue = form.querySelector('[data-location-city-value]');
+    if (!countryInput || !cityInput || !countryValue || !cityValue) return;
+    const countryChanged = countryInput.value.trim() !== String(countryInput.dataset.initial || "").trim();
+    const cityChanged = cityInput.value.trim() !== String(cityInput.dataset.initial || "").trim();
+    const country = locationCountryMatch(countryInput.value);
+    if (countryInput.value.trim() && !country && countryChanged) {
+      countryInput.focus();
+      throw new Error(T("Selecciona un país de la lista de sugerencias."));
+    }
+    countryValue.value = country ? country.es : '';
+    if (!countryInput.value.trim()) cityValue.value = '';
+    if (cityInput.value.trim() && country && (cityChanged || countryChanged)) {
+      const result = await loadCitySuggestions(form, true);
+      if (result?.available && !result.exact) {
+        cityInput.focus();
+        throw new Error(T("Selecciona una ciudad real de las sugerencias para el país elegido."));
+      }
+      cityValue.value = result?.available === false ? cityInput.value.trim() : (result?.exact ? cityInput.value.trim() : '');
+    } else if (!cityInput.value.trim()) {
+      cityValue.value = '';
+    }
+  }
+  function maybeProfileCompletionNudge() {
+    const completion = S.boot?.profile_completion;
+    if (!completion || Number(completion.percent) >= Number(completion.minimum || 40) || S.page !== "intranet") return;
+    const key = `ascla-profile-completion-${S.boot.me.id}`;
+    try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch {}
+    modal(T("Completa tu perfil"), `<div class="profile-completion-nudge"><div class="completion-ring" style="--completion:${Math.max(0, Math.min(100, Number(completion.percent) || 0))}"><strong>${Number(completion.percent) || 0}%</strong></div><div><h3>${E(T("Tu perfil todavía tiene información pendiente"))}</h3><p>${E(T("Completar al menos el 40% ayuda a ASCLA a ofrecerte mejores recomendaciones, conexiones y experiencias dentro de la comunidad."))}</p></div></div><div class="form-actions">${btn(T("Ahora no"), "profile-nudge-later")}${btn(T("Completar mi perfil"), "profile-nudge-go", "", "primary")}</div>`);
+  }
   const unsavedGuard = { form: null, baseline: "", dirty: false };
   function formSnapshot(form) {
     if (!form) return "";
@@ -326,7 +564,7 @@
     const p = S.boot.me;
     const links = navOrder.map((k) => `<a class="nav-link ${S.page === k ? "active" : ""}" href="${E(C.pages[k].url)}">${I(pageIcon[k])}<span>${E(C.pages[k].label)}</span></a>`).join("");
     const adminLink = (S.boot.moderator || S.boot.executive) ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}${E(T("Administración"))}</a>` : "";
-    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logo)}" alt="ASCLA"></a><div class="brand-sub">${E(T("COMUNIDAD DE ASOCIADOS"))}</div><nav aria-label="${E(T("Navegación principal"))}">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}${E(T("Cerrar sesión"))}</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logo)}" alt="ASCLA"></a>${btn(I("menu"), "menu", `aria-label="${E(T("Abrir navegación"))}"`, "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="${E(T("Buscar en ASCLA"))}" placeholder="${E(T("Buscar en tu comunidad…"))}" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", `aria-label="${E(T("Notificaciones"))}"`, "icon-button")}<a class="header-profile" aria-label="${E(T("Mi perfil"))}" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || T("Comunidad ASCLA"))}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || T("Administración"))}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · ${E(T("Conectamos conocimiento, fortalecemos la gobernanza."))}${S.boot.demo ? " · " + E(T("Datos ficticios de demostración.")) : ""}</div></main></div>`;
+    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></a><div class="brand-sub">${E(T("COMUNIDAD DE ASOCIADOS"))}</div><nav aria-label="${E(T("Navegación principal"))}">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}${E(T("Cerrar sesión"))}</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img class="brand-logo-normal" src="${E(C.logo)}" alt="ASCLA"><img class="brand-logo-inverse" src="${E(C.logoWhite || C.logo)}" alt="" aria-hidden="true"></a>${btn(I("menu"), "menu", `aria-label="${E(T("Abrir navegación"))}"`, "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="${E(T("Buscar en ASCLA"))}" placeholder="${E(T("Buscar en tu comunidad…"))}" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${C.page === "admin" ? adminLanguageControl() + btn(themeIcons(), "theme-menu", `aria-label="${E(T("Apariencia"))}"`, "icon-button theme-button") : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", `aria-label="${E(T("Notificaciones"))}"`, "icon-button")}<a class="header-profile" aria-label="${E(T("Mi perfil"))}" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || T("Comunidad ASCLA"))}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || T("Administración"))}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · ${E(T("Conectamos conocimiento, fortalecemos la gobernanza."))}${S.boot.demo ? " · " + E(T("Datos ficticios de demostración.")) : ""}</div></main></div>`;
     refreshNotifications();
   }
   function heading(title, subtitle, action = "") {
@@ -339,10 +577,12 @@
     let actions = '';
     if (c.state === 'incoming_pending') {
       actions = btn('Aceptar conexión', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="accept" ${c.blocked ? 'disabled' : ''}`, 'primary small') + btn('Rechazar solicitud', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="reject"`, 'small');
-    } else if (c.state === 'outgoing_pending') actions = `<span class="connection-state pending">${E(T('Solicitud enviada · Pendiente'))}</span>`;
-    else if (c.state === 'connected') {
+    } else if (c.state === 'outgoing_pending') {
+      actions = `<span class="connection-state pending">${E(T('Solicitud enviada · Pendiente'))}</span>` + btn(T('Cancelar solicitud'), 'connection-remove-request', `data-id="${id}" data-mode="cancel"`, 'ghost danger small');
+    } else if (c.state === 'connected') {
       actions = '<span class="connection-state connected">' + I('check') + ' ' + E(T('Conectados')) + '</span>';
-      if (c.can_message) actions += btn(I('mail') + ' Enviar mensaje', 'message-start', `data-id="${id}"`, 'primary small') + (suggested ? btn('Mensaje sugerido', 'intro', `data-id="${id}"`, 'small') : '');
+      if (c.can_message) actions += btn(I('mail') + ' ' + T('Enviar mensaje'), 'message-start', `data-id="${id}"`, 'primary small') + (suggested ? btn(T('Mensaje sugerido'), 'intro', `data-id="${id}"`, 'small') : '');
+      actions += btn(T('Eliminar conexión'), 'connection-remove-request', `data-id="${id}" data-mode="disconnect"`, 'ghost danger small');
     } else actions = btn('Enviar solicitud de conexión', 'connect', `data-id="${id}" ${c.can_request ? '' : 'disabled'}`, 'small');
     const note = c.blocked ? T('La mensajería está bloqueada entre estas cuentas.') : c.state !== 'connected' ? (c.state === 'none' && !c.can_request ? T('Ambos asociados deben tener activado networking para conectar.') : T('La mensajería se habilita al aceptar la conexión.')) : '';
     if (c.blocked_by_me) actions += btn('Desbloquear', 'block', `data-id="${id}" data-active="false"`, 'small');
@@ -369,6 +609,16 @@
       if (element.isConnected) updateConnectionState(p.id, p.connection);
     } catch { /* The action endpoints still validate the latest state and permissions. */ }
     finally { relationshipRefreshing = false; }
+  }
+  function confirmConnectionRemoval(id, mode) {
+    const cancelling = mode === 'cancel';
+    const title = cancelling ? T('Cancelar solicitud de conexión') : T('Eliminar conexión');
+    const description = cancelling
+      ? T('La solicitud se cancelará y la otra persona dejará de ver la notificación asociada.')
+      : T('Dejarán de aparecer como conectados y la mensajería quedará deshabilitada. El historial de mensajes no se elimina.');
+    const keep = cancelling ? T('Mantener solicitud') : T('Mantener conexión');
+    const remove = cancelling ? T('Cancelar solicitud') : T('Eliminar conexión');
+    modal(title, `<p class="detail-body">${E(description)}</p><div class="form-actions">${btn(keep,'close')}${btn(remove,'connection-remove-confirm',`data-id="${Number(id)}" data-mode="${E(mode)}"`,'danger primary')}</div>`);
   }
   function memberCard(p) {
     const isMe = Number(p.id) === Number(S.boot.me.id);
@@ -452,7 +702,7 @@
         "Tu red profesional",
         "Conecta con quienes comparten tus retos, intereses y conocimientos.",
       ) +
-      `<section class="card connections-panel" id="connections-panel" aria-label="${E(T("Mis conexiones"))}"></section><form class="filters" data-form="filters"><input aria-label="${E(T("Buscar perfiles"))}" name="q" placeholder="${E(T("Nombre, cargo, empresa o experiencia…"))}" value="${E(S.filter.q || "")}"><input aria-label="${E(T("País"))}" name="country" placeholder="${E(T("País"))}" value="${E(S.filter.country || "")}" style="max-width:180px;min-width:120px"><select name="industries" aria-label="${E(T("Industria"))}" style="max-width:200px"><option value="">${E(T("Todas las industrias"))}</option>${S.boot.catalogs.industry.map((t) => `<option value="${t.id}" ${String(S.filter.industries) === String(t.id) ? "selected" : ""}>${E(t.name)}</option>`).join("")}</select>${UI.termFilter("interests", "Interés", S.boot.catalogs.interest, S.filter)}${UI.termFilter("areas", "Área de conocimiento", S.boot.catalogs.area, S.filter)}<button class="btn primary">${I("search")} ${E(T("Buscar"))}</button></form><div class="section-top"><span class="muted" style="font-size:12px">${list.total} ${E(T("perfiles en la comunidad"))}</span>${link("perfil", "Editar mis intereses", "ghost")}</div><div class="cards directory">${list.items.map(memberCard).join("")}</div>${!list.items.length ? empty("No encontramos perfiles", "Prueba con otro nombre, país o interés.") : ""}${pager(list)}`;
+      `<section class="card connections-panel" id="connections-panel" aria-label="${E(T("Mis conexiones"))}"></section><form class="filters directory-filters" data-form="filters"><input aria-label="${E(T("Buscar perfiles"))}" name="q" placeholder="${E(T("Nombre, cargo, empresa o experiencia…"))}" value="${E(S.filter.q || "")}"><input aria-label="${E(T("País"))}" name="country" placeholder="${E(T("País"))}" value="${E(S.filter.country || "")}" style="max-width:180px;min-width:120px"><select name="industries" aria-label="${E(T("Industria"))}" style="max-width:200px"><option value="">${E(T("Todas las industrias"))}</option>${S.boot.catalogs.industry.map((t) => `<option value="${t.id}" ${String(S.filter.industries) === String(t.id) ? "selected" : ""}>${E(t.name)}</option>`).join("")}</select>${UI.termFilter("interests", "Interés", S.boot.catalogs.interest, S.filter)}${UI.termFilter("areas", "Área de conocimiento", S.boot.catalogs.area, S.filter)}<button class="btn primary">${I("search")} ${E(T("Buscar"))}</button></form><div class="section-top"><span class="muted" style="font-size:12px">${list.total} ${E(T("perfiles en la comunidad"))}</span>${link("perfil", "Editar mis intereses", "ghost")}</div><div class="cards directory">${list.items.map(memberCard).join("")}</div>${!list.items.length ? empty("No encontramos perfiles", "Prueba con otro nombre, país o interés.") : ""}${pager(list)}`;
     await refreshConnectionsPanel();
   }
   async function member(id) {
@@ -560,8 +810,10 @@
         "Mi perfil",
         "Tu experiencia es el punto de partida de nuevas conexiones.",
       ) +
-      `<form class="card" data-form="profile" data-guard-unsaved><div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small" style="margin-top:10px">${I("edit")} ${E(T("Cambiar fotografía"))}<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">${E(T("JPG, PNG o WebP. Podrás mover, ampliar y recortar antes de guardar; ASCLA optimiza la imagen automáticamente."))}</div></div></div><div class="form-section">${E(T("Información profesional"))}</div><div class="form-grid">${["first_name", "last_name", "position", "company", "country", "city", "member_type", "linkedin", "twitter", "website"].map((k) => field(k, profileLabels[k], p[k] || "", k === "linkedin" || k === "twitter" || k === "website" ? "url" : "text", 'maxlength="200"')).join("")}<div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>${profileKnowledge(p)}${profilePrivacy(p)}<div class="form-actions"><button class="btn primary">${I("check")} ${E(T("Guardar perfil"))}</button></div></form><div class="card section-gap account-security"><div class="form-section">${E(T("Seguridad de la cuenta"))}</div><h3>${E(T("Cambiar contraseña"))}</h3><p class="private-note">${E(T("Para cambiarla desde la intranet, confirma primero tu contraseña actual."))}</p><form data-form="password-change"><div class="password-current">${field("current_password", "Contraseña actual", "", "password", 'required autocomplete="current-password"')}</div><div class="form-grid password-new-grid">${field("new_password", "Nueva contraseña", "", "password", 'required minlength="12" autocomplete="new-password"')}${field("confirm_password", "Confirmar nueva contraseña", "", "password", 'required minlength="12" autocomplete="new-password"')}</div><div class="form-actions"><button class="btn primary">${E(T("Cambiar contraseña"))}</button></div></form><div class="password-recovery"><h3>${E(T("¿No recuerdas tu contraseña actual?"))}</h3><p class="private-note">${E(T("Puedes recibir un enlace seguro de recuperación en"))} <strong>${E(p.email || S.boot.me.email || T("tu correo registrado"))}</strong>.</p>${btn(I("mail") + " Enviar enlace de recuperación", "password-reset-email", "", "small")}</div></div><div class="card section-gap"><h3>${E(T("Mis archivos"))}</h3><p class="private-note">${E(T("Consulta tus archivos y elimina los que ya no necesitas. Los archivos eliminados también se retiran de las publicaciones y de tu fotografía de perfil."))}</p>${btn("Administrar mis archivos", "files", 'data-scope="mine"', "small")}<h3 class="section-gap">${E(T("Mi calendario"))}</h3><p class="private-note">${E(T(S.boot.google_connected ? "Tu calendario Google está conectado." : "Integración Google Calendar no configurada para tu cuenta. Puedes conectarlo para guardar próximos eventos."))}</p><div class="admin-actions">${btn("Conectar Google Calendar", "google-connect", 'data-service="calendar"')}${S.boot.google_connected ? btn("Desconectar", "google-disconnect", 'data-service="calendar"') : ""}</div></div>`;
-    registerUnsavedForm(content().querySelector('[data-form="profile"]'));
+      `<form class="card" data-form="profile" data-guard-unsaved><div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small" style="margin-top:10px">${I("edit")} ${E(T("Cambiar fotografía"))}<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">${E(T("JPG, PNG o WebP. Podrás mover, ampliar y recortar antes de guardar; ASCLA optimiza la imagen automáticamente."))}</div></div></div><div class="form-section">${E(T("Información profesional"))}</div><div class="form-grid">${["first_name", "last_name", "position", "company"].map((k) => field(k, profileLabels[k], p[k] || "", "text", 'maxlength="200"')).join("")}${profileLocationFields(p)}${["member_type", "linkedin", "twitter", "website"].map((k) => field(k, profileLabels[k], p[k] || "", k === "linkedin" || k === "twitter" || k === "website" ? "url" : "text", 'maxlength="200"')).join("")}<div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>${profileKnowledge(p)}${profilePrivacy(p)}<div class="form-actions"><button class="btn primary">${I("check")} ${E(T("Guardar perfil"))}</button></div></form><div class="card section-gap account-security"><div class="form-section">${E(T("Seguridad de la cuenta"))}</div><h3>${E(T("Cambiar contraseña"))}</h3><p class="private-note">${E(T("Para cambiarla desde la intranet, confirma primero tu contraseña actual."))}</p><form data-form="password-change"><div class="password-current">${field("current_password", "Contraseña actual", "", "password", 'required autocomplete="current-password"')}</div><div class="form-grid password-new-grid">${field("new_password", "Nueva contraseña", "", "password", 'required minlength="12" autocomplete="new-password"')}${field("confirm_password", "Confirmar nueva contraseña", "", "password", 'required minlength="12" autocomplete="new-password"')}</div><div class="form-actions"><button class="btn primary">${E(T("Cambiar contraseña"))}</button></div></form><div class="password-recovery"><h3>${E(T("¿No recuerdas tu contraseña actual?"))}</h3><p class="private-note">${E(T("Puedes recibir un enlace seguro de recuperación en"))} <strong>${E(p.email || S.boot.me.email || T("tu correo registrado"))}</strong>.</p>${btn(I("mail") + " Enviar enlace de recuperación", "password-reset-email", "", "small")}</div></div><div class="card section-gap"><h3>${E(T("Mis archivos"))}</h3><p class="private-note">${E(T("Consulta tus archivos y elimina los que ya no necesitas. Los archivos eliminados también se retiran de las publicaciones y de tu fotografía de perfil."))}</p>${btn("Administrar mis archivos", "files", 'data-scope="mine"', "small")}<h3 class="section-gap">${E(T("Mi calendario"))}</h3><p class="private-note">${E(T(S.boot.google_connected ? "Tu calendario Google está conectado." : "Integración Google Calendar no configurada para tu cuenta. Puedes conectarlo para guardar próximos eventos."))}</p><div class="admin-actions">${btn("Conectar Google Calendar", "google-connect", 'data-service="calendar"')}${S.boot.google_connected ? btn("Desconectar", "google-disconnect", 'data-service="calendar"') : ""}</div></div>`;
+    const profileForm = content().querySelector('[data-form="profile"]');
+    registerUnsavedForm(profileForm);
+    await setupProfileLocations(profileForm);
   }
   const typeByPage = {
     hub: "hub",
@@ -640,17 +892,14 @@
         ...labels[type],
         canWrite
           ? btn(
-              I("plus") +
-                " Nuev" +
-                (type === "hub" || type === "gallery" ? "a " : "o ") +
-                typeLabel[type],
+              I("plus") + " " + (type === "topic" ? T("Crear foro") : "Nuev" + (type === "hub" || type === "gallery" ? "a " : "o ") + typeLabel[type]),
               "editor",
               `data-type="${type}"`,
               "primary",
             )
           : "",
       ) +
-      `<form class="filters" data-form="filters"><input name="q" aria-label="${E(T("Buscar contenido"))}" value="${E(S.filter.q || "")}" placeholder="${E(T(type === "resource" ? "Buscar por tema, autor o contenido…" : "Buscar en esta sección…"))}">${type === "resource" ? `<select name="resource_type" aria-label="${E(T("Tipo de recurso"))}" style="max-width:180px"><option value="">${E(T("Todos los tipos"))}</option>${["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"].map((t) => `<option value="${E(t)}" ${S.filter.resource_type === t ? "selected" : ""}>${E(T(t))}</option>`).join("")}</select><input type="date" name="after" value="${E(S.filter.after || "")}" aria-label="${E(T("Desde fecha"))}" style="max-width:160px;min-width:100px">` : ""}${UI.filters(type, S.filter, S.boot.catalogs, authors, forums)}<button class="btn">${I("search")} ${E(T("Buscar"))}</button></form><div class="tabs">${btn(type === "event" ? "Próximos eventos" : "Comunidad", "filter-all", "", "tab " + (!S.filter.mine && !S.filter.past ? "active" : ""))}${type === "event" ? btn("Eventos anteriores", "filter-past", "", "tab " + (S.filter.past ? "active" : "")) : ""}${canWrite ? btn("Mis publicaciones", "filter-mine", "", "tab " + (S.filter.mine ? "active" : "")) : ""}${type === "topic" && S.boot.moderator ? btn(I("plus") + " Crear foro", "editor", 'data-type="forum"', "tab") : ""}</div>${type === "topic" && forums.length ? `<details class="card forum-directory"><summary>${E(T("Explorar foros"))} (${forums.length})</summary><div class="form-actions">${forums.map(f => btn(E(f.name), "item", `data-id="${f.id}"`, "small")).join("")}</div></details>` : ""}${type === "resource" ? `<div class="cards">${items.map(resourceCard).join("")}</div>` : type === "event" ? `<div class="cards two">${items.map(eventCard).join("")}</div>` : type === "gallery" ? `<div class="cards">${items.map(galleryCard).join("")}</div>` : type === "ally" ? `<div class="cards">${items.map(allyCard).join("")}</div>` : items.map(feedCard).join("")}${!items.length ? empty("Aún no hay contenido aquí", S.filter.q ? "Prueba una búsqueda diferente." : "Comparte un aporte o vuelve pronto para ver novedades.") : ""}${pager(list)}`;
+      `<form class="filters" data-form="filters"><input name="q" aria-label="${E(T("Buscar contenido"))}" value="${E(S.filter.q || "")}" placeholder="${E(T(type === "resource" ? "Buscar por tema, autor o contenido…" : "Buscar en esta sección…"))}">${type === "resource" ? `<select name="resource_type" aria-label="${E(T("Tipo de recurso"))}" style="max-width:180px"><option value="">${E(T("Todos los tipos"))}</option>${["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"].map((t) => `<option value="${E(t)}" ${S.filter.resource_type === t ? "selected" : ""}>${E(T(t))}</option>`).join("")}</select><input type="date" name="after" value="${E(S.filter.after || "")}" aria-label="${E(T("Desde fecha"))}" style="max-width:160px;min-width:100px">` : ""}${UI.filters(type, S.filter, S.boot.catalogs, authors, forums)}<button class="btn">${I("search")} ${E(T("Buscar"))}</button></form><div class="tabs">${btn(type === "event" ? "Próximos eventos" : "Comunidad", "filter-all", "", "tab " + (!S.filter.mine && !S.filter.past ? "active" : ""))}${type === "event" ? btn("Eventos anteriores", "filter-past", "", "tab " + (S.filter.past ? "active" : "")) : ""}${canWrite ? btn("Mis publicaciones", "filter-mine", "", "tab " + (S.filter.mine ? "active" : "")) : ""}</div>${type === "topic" && forums.length ? `<details class="card forum-directory"><summary>${E(T("Explorar foros"))} (${forums.length})</summary><div class="form-actions">${forums.map(f => btn(E(f.name), "item", `data-id="${f.id}"`, "small")).join("")}</div></details>` : ""}${type === "resource" ? `<div class="cards">${items.map(resourceCard).join("")}</div>` : type === "event" ? `<div class="cards two">${items.map(eventCard).join("")}</div>` : type === "gallery" ? `<div class="cards">${items.map(galleryCard).join("")}</div>` : type === "ally" ? `<div class="cards">${items.map(allyCard).join("")}</div>` : items.map(feedCard).join("")}${!items.length ? empty("Aún no hay contenido aquí", S.filter.q ? "Prueba una búsqueda diferente." : "Comparte un aporte o vuelve pronto para ver novedades.") : ""}${pager(list)}`;
   }
   function eventCard(p) {
     return `<article class="card"><div class="section-top"><span class="tag">${I("calendar")} ${E(T(p.meta.modality || "Virtual"))}</span>${p.status !== "publish" ? status(p.status) : ""}</div><h3>${E(p.title)}</h3><p class="detail-body" style="font-size:12px">${E(p.body.slice(0, 160))}</p><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start)}</span><span>${I("clock")} ${time(p.meta.start)}</span></div><div class="form-actions" style="justify-content:space-between">${p.meta.chatham ? '<span class="tag">Chatham House</span>' : "<span></span>"}${btn("Ver encuentro " + I("arrow"), "item", `data-id="${p.id}"`, "small primary")}</div></article>`;
@@ -862,7 +1111,11 @@
   function chatAlive(chat) { return chat?.active && S.chat === chat && S.page === "mensajeria"; }
   function chatStatus(text, failed = false) {
     const label = document.getElementById("chat-sync");
-    if (label) { label.textContent = text; label.classList.toggle("is-error", failed); }
+    if (label) {
+      label.textContent = text || "";
+      label.hidden = !text;
+      label.classList.toggle("is-error", failed);
+    }
   }
   function messageBubble(m) {
     const mine = Number(m.sender_id) === Number(S.boot.me.id);
@@ -905,7 +1158,7 @@
     let current = conversations.find(c => Number(c.id) === selected);
     if (selected && !current) current = await api('conversations/' + selected);
     if (!chatAlive(chat)) return;
-    content().innerHTML = heading('Mensajería', 'Una conversación puede ser el inicio de una gran colaboración.', link('directorio', I('plus') + ' Nueva conversación', 'primary')) + `<div class="chat-sync" id="chat-sync" role="status">Actualizando mensajes…</div><form class="filters" data-form="filters"><input name="q" aria-label="Buscar conversaciones" placeholder="Buscar conversaciones…" value="${E(S.filter.q || '')}"><button class="btn">Buscar</button></form><div class="chat-layout"><aside class="chat-sidebar" aria-label="Conversaciones"></aside><section class="chat-conversation">${empty('Inicia una conversación', 'Podrás conversar aquí con tus conexiones confirmadas.')}</section></div>`;
+    content().innerHTML = heading('Mensajería', 'Una conversación puede ser el inicio de una gran colaboración.', link('directorio', I('plus') + ' Nueva conversación', 'primary')) + `<div class="chat-sync" id="chat-sync" role="status" hidden></div><form class="filters" data-form="filters"><input name="q" aria-label="Buscar conversaciones" placeholder="Buscar conversaciones…" value="${E(S.filter.q || '')}"><button class="btn">Buscar</button></form><div class="chat-layout"><aside class="chat-sidebar" aria-label="Conversaciones"></aside><section class="chat-conversation">${empty('Inicia una conversación', 'Podrás conversar aquí con tus conexiones confirmadas.')}</section></div>`;
     chatSidebar();
     if (current) openChat(chat, current);
     await syncChat();
@@ -960,7 +1213,7 @@
       await loadMessages(chat);
       if (!chatAlive(chat)) return;
       if (current && !chat.more) current.unread = 0;
-      chatSidebar(); chatStatus('Actualización automática activada · cada 2 segundos');
+      chatSidebar(); chatStatus('');
       if (chat.more) delay = 100;
     } catch (error) {
       if (!chatAlive(chat) || error.name === 'AbortError') return;
@@ -1153,57 +1406,57 @@
     const d = await api("admin"); S.admin=d;
     const tab=S.adminTab;
     const tabs=[["moderacion","Moderación","shield"],["solicitudes","Solicitudes","contact"],...(S.boot.admin?[["usuarios","Usuarios","users"],["archivos","Archivos","book"]]:[]),["trabajos","IA y trabajos","spark"],["microeventos","Microeventos","calendar"],["logs","Auditoría","clock"],...(S.boot.admin?[["configuracion","Configuración","settings"]]:[])];
-    content().innerHTML=`<div class="admin-workspace"><header class="admin-hero"><div><span class="eyebrow">GESTIÓN DE LA COMUNIDAD</span><h1>Administración ASCLA</h1><p>Personas, contenido y atención en un mismo lugar.</p></div><div>${link('intranet','Ver intranet '+I('arrow'),'ghost')}${btn(themeIcons()+' Apariencia','theme-menu','','small')}${btn(I('refresh')+' Actualizar','admin-refresh','','small')}</div></header><div class="admin-overview">${[[d.counts.members,'Miembros','users',S.boot.admin?'usuarios':'moderacion'],[d.pending.length,'Contenidos por revisar','shield','moderacion'],[d.jobs.filter(j=>['pending','processing'].includes(j.status)).length,'Trabajos activos','spark','trabajos'],[d.reports.filter(r=>!r.reviewed).length,'Reportes por revisar','bell','moderacion']].map(([n,label,icon,target])=>btn(`<span class="stat-icon">${I(icon)}</span><span><strong>${n}</strong><small>${E(T(label))}</small></span>`,'admin-tab',`data-tab="${target}"`,'admin-stat')).join('')}</div><nav class="admin-tabs" aria-label="Secciones de administración">${tabs.map(([key,label,icon])=>btn(I(icon)+label,'admin-tab',`data-tab="${key}" aria-pressed="${tab===key}"`,'admin-tab'+(tab===key?' active':''))).join('')}</nav><section id="admin-panel" class="admin-panel"></section></div>`;
+    content().innerHTML=`<div class="admin-workspace"><header class="admin-hero"><div class="admin-hero-main"><div class="admin-hero-logo"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></div><div class="admin-hero-copy"><span class="eyebrow">${E(T("GESTIÓN DE LA COMUNIDAD"))}</span><h1>${E(T("Administración ASCLA"))}</h1><p>${E(T("Personas, contenido y atención en un mismo lugar."))}</p></div></div><div class="admin-hero-actions">${link('intranet',E(T('Ver intranet'))+' '+I('arrow'),'ghost')}</div></header><div class="admin-overview">${[[d.counts.members,'Miembros','users',S.boot.admin?'usuarios':'moderacion'],[d.pending.length,'Contenidos por revisar','shield','moderacion'],[d.jobs.filter(j=>['pending','processing'].includes(j.status)).length,'Trabajos activos','spark','trabajos'],[d.reports.filter(r=>!r.reviewed).length,'Reportes por revisar','bell','moderacion']].map(([n,label,icon,target])=>btn(`<span class="stat-icon">${I(icon)}</span><span class="admin-stat-copy"><strong>${n}</strong><small>${E(T(label))}</small></span><span class="admin-stat-arrow">${I('chevron')}</span>`,'admin-tab',`data-tab="${target}" aria-label="${E(T(label))}"`,'admin-stat')).join('')}</div><nav class="admin-tabs" aria-label="${E(T("Secciones de administración"))}">${tabs.map(([key,label,icon])=>btn(I(icon)+E(T(label)),'admin-tab',`data-tab="${key}" aria-pressed="${tab===key}"`,'admin-tab'+(tab===key?' active':''))).join('')}</nav><section id="admin-panel" class="admin-panel"></section></div>`;
     const panel=document.getElementById('admin-panel');
     if(tab==='solicitudes') await adminContacts(panel);
     else if(tab==='usuarios' && S.boot.admin) await adminUsers(panel);
-    else if(tab==='archivos' && S.boot.admin) panel.innerHTML='<h2>Archivos de la comunidad</h2><p>Consulta los archivos privados de todos los asociados y elimina los que corresponda.</p>'+btn('Administrar archivos','files','data-scope="all"','primary');
+    else if(tab==='archivos' && S.boot.admin) panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T('BIBLIOTECA PRIVADA'))}</span><h2>${E(T('Archivos de la comunidad'))}</h2><p>${E(T('Consulta los archivos privados de todos los asociados y elimina los que corresponda.'))}</p></div></div><div class="card admin-feature-card"><div class="admin-feature-icon">${I('book')}</div><div><h3>${E(T('Biblioteca administrativa'))}</h3><p class="detail-body">${E(T('Busca por archivo o propietario y revisa el material privado almacenado en ASCLA.'))}</p></div>${btn('Administrar archivos','files','data-scope="all"','primary')}</div>`;
     else if(tab==='moderacion') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">CALIDAD Y CONVIVENCIA</span><h2>Revisión de contenido</h2><p>Los foros se publican directamente. Galería, Eventos y Conocimiento los gestiona el Ejecutivo o un administrador.</p></div></div><div class="card"><h3>Contenido pendiente y borradores</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>Contenido</th><th>Autor</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${d.pending.map(p=>`<tr><td><strong>${E(p.title)}</strong><br><small>${E(typeLabel[p.type])}${p.meta.generated?' · IA':''}${p.meta.chatham?' · Chatham House':''}</small></td><td>${E(p.author.name)}</td><td>${status(p.status)}</td><td>${btn('Revisar','item',`data-id="${p.id}"`,'small')}${!S.boot.admin&&!S.boot.executive&&['gallery','resource'].includes(p.type)?'<small>Publicación administrativa</small>':''}</td></tr>`).join('')||'<tr><td colspan="4">Todo al día. No hay contenido pendiente.</td></tr>'}</tbody></table></div></div><div class="admin-review-grid"><div class="card"><h3>Reportes de la comunidad</h3>${d.reports.map(r=>`<div class="admin-report ${r.reviewed?'is-reviewed':''}"><div><div class="admin-report-heading"><strong>${E(r.title || `Publicación #${r.target_id}`)}</strong><span class="tag ${r.reviewed?'success':''}">${E(T(r.reviewed?'Revisado':'Pendiente'))}</span></div>${r.excerpt ? `<p>${E(r.excerpt)}</p>` : ''}<p class="private-note"><b>Motivo:</b> ${E(r.reason_label || 'Sin motivo registrado')}${r.detail ? `<br><b>Detalle:</b> ${E(r.detail)}` : ''}${r.reviewed && r.reviewed_by_name ? `<br><b>${E(T('Revisado por:'))}</b> ${E(r.reviewed_by_name)}` : ''}</p></div><div class="form-actions">${Number(r.target_id) ? btn('Abrir contenido','item',`data-id="${r.target_id}"`,'small') : ''}${!r.reviewed && S.boot.moderator ? btn('Marcar como revisado','report-reviewed',`data-id="${r.id}"`,'primary small') : ''}</div></div>`).join('')||'<p class="private-note">'+E(T('No hay reportes registrados.'))+'</p>'}</div><div class="card"><h3>Comentarios pendientes</h3>${d.comments.map(c=>`<div class="comment"><strong>${E(c.author)}</strong><p>${E(c.body)}</p>${btn('Aprobar','comment-moderate',`data-id="${c.id}" data-decision="approve"`,'small')}${btn('Mantener oculto','comment-moderate',`data-id="${c.id}" data-decision="reject"`,'small')}${c.can_delete?btn('Eliminar comentario','delete-comment',`data-id="${c.id}"`,'danger small'):''}</div>`).join('')||'<p class="private-note">No hay comentarios pendientes.</p>'}</div></div>`;
     else if(tab==='trabajos') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PROCESAMIENTO Y RESULTADOS</span><h2>IA y trabajos</h2><p>Consulta el avance, abre resultados y reintenta los trabajos con error.</p></div></div><div class="alert">Los derivados de IA quedan en borrador para revisión.</div><div class="admin-actions">${link('centro-conocimiento','Ver recursos','primary')}${btn('Curaduría social demo','social-job')}${S.boot.admin?btn('Conectar YouTube OAuth','google-connect','data-service="youtube"'):''}${btn('Actualizar estados','admin-refresh')}</div><div class="card table-wrap"><table class="data-table"><thead><tr><th>Trabajo</th><th>Estado</th><th>Detalle</th><th>Acción</th></tr></thead><tbody>${d.jobs.map(j=>`<tr><td><strong>#${j.id}</strong><br>${E(j.kind)}</td><td>${status(j.status)}</td><td>${E(j.error||date(j.created_at))}</td><td>${btn('Ver','job-detail',`data-id="${j.id}"`,'small')}${j.status==='error'?btn('Reintentar','retry-job',`data-id="${j.id}"`,'small'):''}</td></tr>`).join('')||'<tr><td colspan="4">No hay trabajos registrados.</td></tr>'}</tbody></table></div>`;
     else if(tab==='microeventos') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ENCUENTROS ENTRE ASOCIADOS</span><h2>Círculos de conversación</h2><p>Grupos de 4 a 6 personas, con intereses comunes y una agenda para conversar.</p></div></div><div class="card"><h3>Preparar los encuentros del mes</h3><p class="detail-body">Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.</p><div class="admin-actions">${S.boot.admin?btn(I('spark')+' Preparar propuesta del mes','micro-job','','primary'):''}${link('eventos','Ver encuentros','small')}</div><div id="micro-job-result"></div></div>`;
-    else if(tab==='logs') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">TRAZABILIDAD</span><h2>Auditoría</h2><p>Últimas acciones registradas. No incluye contraseñas ni contenido de mensajes privados.</p></div></div><div class="card table-wrap"><table class="data-table"><thead><tr><th>Fecha UTC</th><th>Acción</th><th>Actor</th><th>Objeto</th><th>Detalle</th></tr></thead><tbody>${d.audit.map(a=>`<tr><td>${E(a.created_at)}</td><td>${E(a.action)}</td><td>#${a.actor_id}</td><td>${a.object_id||'—'}</td><td>${E(a.detail)}</td></tr>`).join('')||'<tr><td colspan="5">No hay acciones registradas.</td></tr>'}</tbody></table></div>`;
+    else if(tab==='logs') {
+      const auditRows=d.audit||[];
+      const auditActors=new Set(auditRows.map(a=>Number(a.actor_id)).filter(Boolean)).size;
+      const latest=auditRows[0]?.created_at||'';
+      const auditLabels={settings_updated:'Configuración actualizada',content_saved:'Contenido guardado',content_trashed:'Contenido eliminado',comment_trashed:'Comentario eliminado',content_reported:'Contenido reportado',comment_reported:'Comentario reportado',report_reviewed:'Reporte revisado',moderation:'Decisión de moderación',comment_moderation:'Comentario moderado',member_suspended:'Acceso suspendido',member_reactivated:'Acceso reactivado',contact_status:'Solicitud actualizada',event_registration:'Inscripción a evento',event_invited:'Invitaciones a evento',connection_requested:'Solicitud de conexión',connection_accepted:'Conexión aceptada',connection_rejected:'Conexión rechazada',connection_cancelled:'Solicitud de conexión cancelada',connection_removed:'Conexión eliminada',message_deleted:'Mensaje eliminado',password_changed:'Contraseña cambiada',password_reset_requested:'Recuperación solicitada',media_deleted:'Archivo eliminado',oauth_connected:'Servicio Google conectado',oauth_disconnected:'Servicio Google desconectado',calendar_create:'Evento añadido a Google Calendar',calendar_delete:'Evento retirado de Google Calendar',turnstile_passed:'Verificación de seguridad superada',turnstile_failed:'Verificación de seguridad fallida',turnstile_error:'Error de verificación de seguridad',request_failed:'Solicitud con error',job_completed:'Trabajo en segundo plano completado',job_failed:'Trabajo en segundo plano con error',ai_generated:'Contenido asistido por IA creado'};
+      const actionName=a=>auditLabels[a]||String(a||'Actividad del sistema').replaceAll('_',' ');
+      panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">TRAZABILIDAD Y CONTROL</span><h2>Auditoría</h2><p>Este registro ayuda a entender qué cambios importantes ocurrieron en ASCLA, quién los realizó y sobre qué elemento actuaron.</p></div><span class="admin-total">${auditRows.length} registros</span></div><div class="audit-guide"><article>${I('clock')}<div><strong>¿Qué registra?</strong><p>Acciones relevantes como cambios de configuración, moderación, accesos, reportes, archivos e integraciones.</p></div></article><article>${I('users')}<div><strong>¿Para qué sirve?</strong><p>Permite revisar el historial cuando necesitas saber quién hizo un cambio o investigar un problema.</p></div></article><article>${I('shield')}<div><strong>¿Qué no guarda?</strong><p>No almacena contraseñas ni el contenido de mensajes privados. Solo registra metadatos de la acción.</p></div></article></div><div class="audit-summary"><article class="audit-summary-card"><span class="audit-summary-icon">${I('clock')}</span><div><small>Acciones registradas</small><strong>${auditRows.length}</strong></div></article><article class="audit-summary-card"><span class="audit-summary-icon">${I('users')}</span><div><small>Personas identificadas</small><strong>${auditActors}</strong></div></article><article class="audit-summary-card wide"><span class="audit-summary-icon">${I('shield')}</span><div><small>Última actividad</small><strong>${latest?E(date(latest,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'Sin actividad'}</strong></div></article></div><div class="card audit-card"><div class="audit-card-head"><div><h3>Historial de actividad</h3><p class="private-note">Los eventos más recientes aparecen primero. “Elemento” identifica el registro afectado cuando corresponde.</p></div><span class="audit-privacy">${I('shield')} Registro protegido</span></div><div class="table-wrap"><table class="data-table audit-table"><thead><tr><th>Cuándo</th><th>Qué ocurrió</th><th>Quién</th><th>Elemento</th><th>Detalle técnico</th></tr></thead><tbody>${auditRows.map(a=>`<tr><td><time class="audit-time" datetime="${E(a.created_at)}" title="${E(a.created_at)}">${E(date(a.created_at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))}</time></td><td><span class="audit-action">${E(actionName(a.action))}</span></td><td><span class="audit-actor">${E(a.actor_name||'Sistema')}</span></td><td><span class="audit-object">${a.object_id?'#'+Number(a.object_id):'—'}</span></td><td class="audit-detail">${E(a.detail||'—')}</td></tr>`).join('')||'<tr><td colspan="5"><div class="audit-empty">No hay acciones registradas todavía.</div></td></tr>'}</tbody></table></div></div>`;
+    }
     else if(tab==='configuracion' && S.boot.admin) await settings(panel);
+  }
+  function settingsSection(icon, title, description, body, wide = false) {
+    return `<section class="settings-group${wide?' wide':''}"><header class="settings-group-head"><span class="settings-group-icon">${I(icon)}</span><div><h3>${E(title)}</h3><p>${E(description)}</p></div></header><div class="settings-group-body">${body}</div></section>`;
+  }
+  function syncAIProvider(form) {
+    if (!form) return;
+    const provider=form.elements.ai_provider?.value||'mock';
+    form.querySelectorAll('[data-ai-provider-panel]').forEach(panel=>{
+      const active=panel.dataset.aiProviderPanel===provider;
+      panel.hidden=!active;
+      panel.querySelectorAll('input,select,textarea').forEach(control=>{ control.disabled=!active; });
+    });
+    const test=form.querySelector('[data-ai-test-actions]');
+    if (test) test.hidden=provider==='mock';
   }
   function mailSettings(s) {
     const local = s.mail_local ? '<div class="alert">Buzón local activo: los correos se consultan en <a href="http://localhost:8025/" target="_blank" rel="noopener">Abrir buzón de pruebas</a>. No llegan a una bandeja externa.</div>' : '';
     const last = s.mail_last_result;
-    return `<div class="form-section">Correo y recuperación de contraseña</div>${local}<p class="private-note">Usa el servicio de correo de tu hosting o un proveedor SMTP. Si otro plugin ya gestiona los envíos, conserva “Transporte de WordPress”. Guarda los cambios antes de enviar una prueba a tu correo de administrador.</p><div class="form-grid">${select('mail_mode', 'Envío de correos', [['wordpress', 'Transporte de WordPress / otro plugin'], ['smtp', 'Servidor SMTP']], s.mail_mode)}${field('smtp_host', 'Servidor SMTP', s.smtp_host, 'text', 'placeholder="smtp.tuproveedor.com" autocomplete="off"')}${select('smtp_port', 'Puerto', [[587,'587'],[465,'465'],[2525,'2525']], s.smtp_port)}${select('smtp_security', 'Cifrado', [['tls', 'STARTTLS (587 / 2525)'],['ssl', 'SSL/TLS (465)']], s.smtp_security)}${field('smtp_user','Usuario SMTP',s.smtp_user,'text','autocomplete="off"')}${field('smtp_password', s.has_smtp_password ? 'Contraseña SMTP (guardada; vacío para conservar)' : 'Contraseña SMTP', '', 'password', 'autocomplete="new-password"')}${field('smtp_from','Correo remitente autorizado',s.smtp_from,'email')}${field('smtp_name','Nombre del remitente',s.smtp_name)}</div>${check('clear_smtp_password','Eliminar contraseña SMTP guardada',false)}<p class="private-note">La contraseña se guarda cifrada. Para eliminarla, cambia primero al transporte de WordPress. ${last ? 'Último intento: ' + E(last.status === 'accepted' ? 'aceptado por el transporte' : 'falló el envío') + ' · ' + E(date(last.at, {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})) : 'Aún no hay intentos registrados.'}</p>${btn('Enviar correo de prueba a mi cuenta','mail-test','','small')}`;
+    const body=`${local}<p class="private-note">Usa el servicio de correo de tu hosting o un proveedor SMTP. Si otro plugin ya gestiona los envíos, conserva “Transporte de WordPress”. Guarda los cambios antes de enviar una prueba a tu correo de administrador.</p><div class="form-grid">${select('mail_mode', 'Envío de correos', [['wordpress', 'Transporte de WordPress / otro plugin'], ['smtp', 'Servidor SMTP']], s.mail_mode)}${field('smtp_host', 'Servidor SMTP', s.smtp_host, 'text', 'placeholder="smtp.tuproveedor.com" autocomplete="off"')}${select('smtp_port', 'Puerto', [[587,'587'],[465,'465'],[2525,'2525']], s.smtp_port)}${select('smtp_security', 'Cifrado', [['tls', 'STARTTLS (587 / 2525)'],['ssl', 'SSL/TLS (465)']], s.smtp_security)}${field('smtp_user','Usuario SMTP',s.smtp_user,'text','autocomplete="off"')}${field('smtp_password', s.has_smtp_password ? 'Contraseña SMTP (guardada; vacío para conservar)' : 'Contraseña SMTP', '', 'password', 'autocomplete="new-password"')}${field('smtp_from','Correo remitente autorizado',s.smtp_from,'email')}${field('smtp_name','Nombre del remitente',s.smtp_name)}</div>${check('clear_smtp_password','Eliminar contraseña SMTP guardada',false)}<p class="private-note">La contraseña se guarda cifrada. Para eliminarla, cambia primero al transporte de WordPress. ${last ? 'Último intento: ' + E(last.status === 'accepted' ? 'aceptado por el transporte' : 'falló el envío') + ' · ' + E(date(last.at, {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})) : 'Aún no hay intentos registrados.'}</p>${btn('Enviar correo de prueba a mi cuenta','mail-test','','small')}`;
+    return settingsSection('contact','Correo y recuperación','Configura la salida de correos, recuperación de contraseña y pruebas de entrega.',body,true);
   }
   async function settings(panel) {
     const s = await api("settings");
-    panel.innerHTML = `<form class="card" data-form="settings" data-guard-unsaved><h2>Comunidad e integraciones</h2><div class="form-section">Participación y revisión</div>${check("demo", "Modo demo (datos e integraciones identificados)", s.demo)}${check("moderation_required", "Revisar publicaciones del Hub antes de publicarlas", s.moderation_required)}${check("moderate_comments", "Revisar comentarios del Hub y otras secciones (excepto Foros)", s.moderate_comments)}${check("chatham_default", "Aplicar Chatham House por defecto", s.chatham_default)}${check("micro_enabled", "Preparar microeventos mensualmente con WP-Cron", s.micro_enabled)}${check("micro_approval", "Exigir aprobación administrativa de microeventos", s.micro_approval)}<div class="form-section">Seguridad</div>${check("turnstile_enabled", "Activar Cloudflare Turnstile", s.turnstile_enabled)}<p class="private-note">Protección adaptativa y no invasiva. El widget debe crearse en Cloudflare con modo <strong>Managed</strong>. ASCLA valida cada token en el servidor antes de aceptar el formulario y recuerda durante 24 horas los navegadores/IP que ya superaron una verificación.</p><div class="form-grid">${field("turnstile_site_key", "Turnstile Site Key", s.turnstile_site_key || "", "text", 'autocomplete="off" placeholder="0x4AAAA..."')}${field("turnstile_secret", s.has_turnstile_secret ? "Turnstile Secret Key (guardada; vacío para conservar)" : "Turnstile Secret Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_turnstile_secret", "Eliminar Turnstile Secret Key guardada", false)}<div class="turnstile-protection-options"><strong>Formularios protegidos</strong>${check("turnstile_login", "Inicio de sesión · mostrar después de 3 fallos; bloqueo temporal desde 5", s.turnstile_login)}${check("turnstile_recovery", "Recuperación de contraseña · exigir después de 2 solicitudes seguidas", s.turnstile_recovery)}${check("turnstile_public", "Otros formularios públicos ASCLA · activar solo ante señales sospechosas o demasiados envíos", s.turnstile_public)}</div><p class="private-note">Los intentos se contabilizan principalmente por IP + usuario/correo para reducir bloqueos injustos en redes compartidas. Los usuarios autenticados nunca ven Turnstile.</p><div class="form-section">Motor de afinidad</div><div class="form-grid">${Object.entries(
-      s.matching_weights,
-    )
-      .map(([k, v]) =>
-        field(
-          "weight_" + k,
-          profileLabels[k],
-          v,
-          "number",
-          'min="0" max="100"',
-        ),
-      )
-      .join(
-        "",
-      )}${field("matching_min_affinity", "Afinidad mínima para recomendar (%)", s.matching_min_affinity ?? 30, "number", 'min="0" max="100" step="1"')}</div><p class="private-note">${E(T("Solo aparecerán como personas recomendadas los perfiles que alcancen al menos este porcentaje de afinidad. Valor predeterminado: 30%."))}</p><div class="form-section">Inteligencia artificial</div><div class="form-grid">${select(
-      "ai_provider",
-      "Proveedor",
-      [
-        ["mock", "DEMO MODE · sin API"],
-        ["gemini", "Google Gemini · API real"],
-        ["openai", "OpenAI / ChatGPT · API real"],
-      ],
-      s.ai_provider,
-    )}${field("ai_model", "ID del modelo Gemini", s.ai_model, "text", 'placeholder="gemini-2.5-flash" autocomplete="off"')}${field("ai_key", s.has_ai_key ? "Gemini API Key (guardada; vacío para conservar)" : "Gemini API Key", "", "password", 'autocomplete="new-password"')}${field("openai_model", "ID del modelo OpenAI", s.openai_model || "gpt-5.6-luna", "text", 'placeholder="gpt-5.6-luna" autocomplete="off"')}${field("openai_key", s.has_openai_key ? "OpenAI API Key (guardada; vacío para conservar)" : "OpenAI API Key", "", "password", 'autocomplete="new-password"')}${select(
-      "youtube_mode",
-      "Transcripciones YouTube",
-      [
-        ["mock", "DEMO MODE / transcripción manual"],
-        ["real", "YouTube OAuth real"],
-      ],
-      s.youtube_mode,
-    )}</div>${check("clear_ai_key", "Eliminar Gemini API Key guardada", false)}${check("clear_openai_key", "Eliminar OpenAI API Key guardada", false)}<p class="private-note">Selecciona el proveedor, guarda su modelo y su clave, y luego prueba la conexión. ASCLA envía al proveedor únicamente el contexto interno autorizado que prepara el asistente.</p>${btn("Probar conexión", "ai-test", "", "small")}<p id="ai-test-result" class="private-note" role="status" aria-live="polite"></p><div class="form-section">Google OAuth</div><div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert">URI de redirección: <code>${E(s.google_redirect)}</code></div><p class="private-note">Cada asociado conecta su calendario desde Perfil. YouTube se conecta desde IA y trabajos.</p><div class="form-section">Social Listening</div><div class="alert">LinkedIn y X: DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; no se realiza scraping ni se envían respuestas externas.</div>${mailSettings(s)}${field("copyright", "Propiedad intelectual", s.copyright)}<div class="form-actions"><button class="btn primary">Guardar configuración</button></div></form><form class="card section-gap" data-form="demo"><h2>Preparar datos de demostración</h2><p class="private-note">Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes.</p>${field("password", "Contraseña para nuevas cuentas demo", "", "password", 'required minlength="12" autocomplete="new-password"')}<button class="btn">Crear / completar demo</button></form>`;
-    registerUnsavedForm(panel.querySelector('[data-form="settings"]'));
+    const participation=settingsSection('users','Participación y revisión','Define cómo se publica, modera y organiza la participación dentro de la comunidad.',`${check("demo", "Modo demo (datos e integraciones identificados)", s.demo)}${check("moderation_required", "Revisar publicaciones del Hub antes de publicarlas", s.moderation_required)}${check("moderate_comments", "Revisar comentarios del Hub y otras secciones (excepto Foros)", s.moderate_comments)}${check("chatham_default", "Aplicar Chatham House por defecto", s.chatham_default)}${check("micro_enabled", "Preparar microeventos mensualmente con WP-Cron", s.micro_enabled)}${check("micro_approval", "Exigir aprobación administrativa de microeventos", s.micro_approval)}`,true);
+    const security=settingsSection('shield','Seguridad','Protección adaptativa del acceso y formularios públicos sin interrumpir a usuarios legítimos.',`${check("turnstile_enabled", "Activar Cloudflare Turnstile", s.turnstile_enabled)}<p class="private-note">El widget debe crearse en Cloudflare con modo <strong>Managed</strong>. ASCLA valida cada token en el servidor y recuerda durante 24 horas los navegadores/IP que ya superaron una verificación.</p><div class="form-grid">${field("turnstile_site_key", "Turnstile Site Key", s.turnstile_site_key || "", "text", 'autocomplete="off" placeholder="0x4AAAA..."')}${field("turnstile_secret", s.has_turnstile_secret ? "Turnstile Secret Key (guardada; vacío para conservar)" : "Turnstile Secret Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_turnstile_secret", "Eliminar Turnstile Secret Key guardada", false)}<div class="turnstile-protection-options"><strong>Formularios protegidos</strong>${check("turnstile_login", "Inicio de sesión · mostrar después de 3 fallos; bloqueo temporal desde 5", s.turnstile_login)}${check("turnstile_recovery", "Recuperación de contraseña · exigir después de 2 solicitudes seguidas", s.turnstile_recovery)}${check("turnstile_public", "Otros formularios públicos ASCLA · activar solo ante señales sospechosas o demasiados envíos", s.turnstile_public)}</div><p class="private-note">Los intentos se contabilizan principalmente por IP + usuario/correo para reducir bloqueos injustos en redes compartidas. Los usuarios autenticados nunca ven Turnstile.</p>`,true);
+    const matching=settingsSection('spark','Motor de afinidad','Define el umbral mínimo que debe alcanzar una coincidencia antes de mostrarse como recomendación.',`<div class="matching-threshold-setting">${field("matching_min_affinity", "Afinidad mínima para recomendar (%)", s.matching_min_affinity ?? 30, "number", 'min="0" max="100" step="1"')}</div><p class="private-note">${E(T("Solo aparecerán como personas recomendadas los perfiles que alcancen al menos este porcentaje de afinidad. Valor predeterminado: 30%."))}</p>`);
+    const ai=settingsSection('spark','Inteligencia artificial','Elige un único proveedor activo. ASCLA utilizará solo ese proveedor para redactar respuestas y sugerencias.',`<div class="ai-provider-config">${select("ai_provider","Proveedor activo",[["mock","DEMO MODE · sin API"],["gemini","Google Gemini · API real"],["openai","OpenAI / ChatGPT · API real"]],s.ai_provider)}<div class="ai-provider-panel" data-ai-provider-panel="mock"><div class="alert">Modo de demostración: ASCLA usa respuestas simuladas y no envía información a un proveedor externo.</div></div><div class="ai-provider-panel" data-ai-provider-panel="gemini"><div class="form-grid">${field("ai_model", "ID del modelo Gemini", s.ai_model, "text", 'placeholder="gemini-2.5-flash" autocomplete="off"')}${field("ai_key", s.has_ai_key ? "Gemini API Key (guardada; vacío para conservar)" : "Gemini API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_ai_key", "Eliminar Gemini API Key guardada", false)}</div><div class="ai-provider-panel" data-ai-provider-panel="openai"><div class="form-grid">${field("openai_model", "ID del modelo OpenAI", s.openai_model || "gpt-5.6-luna", "text", 'placeholder="gpt-5.6-luna" autocomplete="off"')}${field("openai_key", s.has_openai_key ? "OpenAI API Key (guardada; vacío para conservar)" : "OpenAI API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_openai_key", "Eliminar OpenAI API Key guardada", false)}</div><div class="ai-secondary-setting">${select("youtube_mode","Transcripciones YouTube",[["mock","DEMO MODE / transcripción manual"],["real","YouTube OAuth real"]],s.youtube_mode)}</div><p class="private-note">Las claves permanecen protegidas en el servidor. Guarda la configuración antes de probar la conexión. Los datos internos autorizados de ASCLA se preparan antes de consultar al proveedor activo.</p><div class="settings-actions-row" data-ai-test-actions>${btn("Probar conexión", "ai-test", "", "small")}<p id="ai-test-result" class="private-note" role="status" aria-live="polite"></p></div></div>`,true);
+    const google=settingsSection('calendar','Google OAuth','Credenciales para que cada asociado conecte servicios autorizados de Google desde su cuenta.',`<div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert settings-code-alert"><span>URI de redirección</span><code>${E(s.google_redirect)}</code></div><p class="private-note">Cada asociado conecta su calendario desde Perfil. YouTube se conecta desde IA y trabajos.</p>`);
+    const social=settingsSection('contact','Social Listening','Estado de conectores sociales y restricciones de integración externa.',`<div class="alert">LinkedIn y X permanecen en DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; ASCLA no realiza scraping ni envía respuestas externas.</div>`);
+    const legal=settingsSection('book','Identidad y propiedad intelectual','Texto institucional mostrado en las áreas correspondientes de la intranet.',`${field("copyright", "Propiedad intelectual", s.copyright)}`);
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PREFERENCIAS Y SERVICIOS</span><h2>Configuración</h2><p>Gestiona las reglas de comunidad, recomendaciones, seguridad e integraciones. Cada bloque agrupa opciones relacionadas para evitar configuraciones ambiguas.</p></div><span class="admin-config-status">${I('shield')} Cambios protegidos</span></div><form class="admin-settings" data-form="settings" data-guard-unsaved><div class="settings-grid">${participation}${matching}${social}${security}${ai}${google}${legal}${mailSettings(s)}</div><div class="settings-savebar"><div><strong>Configuración de ASCLA</strong><span>Los cambios se aplican al guardar.</span></div><button class="btn primary">Guardar configuración</button></div></form><form class="card section-gap demo-settings-card" data-form="demo"><div class="admin-feature-icon">${I('spark')}</div><div><h2>Preparar datos de demostración</h2><p class="private-note">Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes.</p>${field("password", "Contraseña para nuevas cuentas demo", "", "password", 'required minlength="12" autocomplete="new-password"')}</div><button class="btn">Crear / completar demo</button></form>`;
+    const settingsForm=panel.querySelector('[data-form="settings"]');
+    syncAIProvider(settingsForm);
+    registerUnsavedForm(settingsForm);
   }
   function rules() {
     modal(
@@ -1349,6 +1602,8 @@
     b.disabled = true;
     try {
       if (a === "close") closeModal();
+      else if (a === "profile-nudge-later") closeModal();
+      else if (a === "profile-nudge-go") { closeModal(); await navigateTo(C.pages.perfil.url); }
       else if (a === "unsaved-stay") resolveUnsavedExit(false);
       else if (a === "unsaved-discard") resolveUnsavedExit(true);
       else if (a === "theme-menu") themeDialog();
@@ -1422,6 +1677,13 @@
         const state = await api(`connections/${Number(b.dataset.request)}/respond`, {decision: b.dataset.decision});
         updateConnectionState(id, state); await refreshConnectionsPanel(); await refreshNotifications();
         toast(b.dataset.decision === 'accept' ? 'Conexión confirmada. Ya pueden enviarse mensajes.' : 'Solicitud rechazada.');
+      } else if (a === "connection-remove-request") {
+        confirmConnectionRemoval(id, b.dataset.mode);
+      } else if (a === "connection-remove-confirm") {
+        const mode = b.dataset.mode;
+        const state = await api("relations", {target:id, kind:"connect", active:false});
+        closeModal(); updateConnectionState(id, state); await refreshConnectionsPanel(); await refreshNotifications();
+        toast(mode === 'cancel' ? 'Solicitud de conexión cancelada.' : 'Conexión eliminada.');
       } else if (a === "connections-refresh") {
         await refreshConnectionsPanel(); await refreshOpenConnection();
       } else if (a === "intro") await intro(id);
@@ -1472,6 +1734,11 @@
         await api("notifications/" + id + "/read", {});
         await notifications();
         await refreshNotifications();
+      } else if (a === "notification-delete-request") {
+        modal(T('Eliminar notificación'), `<p class="detail-body">${E(T('Esta notificación se eliminará de tu bandeja de actividad.'))}</p><div class="form-actions">${btn(T('Cancelar'),'close')}${btn(T('Eliminar'),'notification-delete-confirm',`data-id="${id}"`,'danger primary')}</div>`);
+      } else if (a === "notification-delete-confirm") {
+        await api("notifications/" + id, null, "DELETE");
+        closeModal(); await notifications(); await refreshNotifications(); toast('Notificación eliminada.');
       } else if (a === "ask-suggestion") {
         const input=document.querySelector('[data-form="ask"] [name="question"]');
         if (input) { input.value = b.dataset.question; document.querySelector("[data-form=ask]").requestSubmit(); }
@@ -1582,7 +1849,7 @@
       } else if (a === "mail-test") { const result = await api("mail/test", {}); toast(result.message); }
       else if (a === "infographic") infographic();
     } catch (e) {
-      if (['connect','connection-respond'].includes(a) && [404,409].includes(e.status)) { await refreshOpenConnection(); await refreshConnectionsPanel(); }
+      if (['connect','connection-respond','connection-remove-confirm'].includes(a) && [404,409].includes(e.status)) { await refreshOpenConnection(); await refreshConnectionsPanel(); }
       if (e.name !== "AbortError") toast(e.message);
     } finally {
       b.disabled = false;
@@ -1615,6 +1882,7 @@
         toast(`${r.sent} invitaciones enviadas; ${r.skipped} asociados ya tenían una inscripción o invitación.`);
         await item(Number(form.dataset.id));
       } else if (action === "profile") {
+        await validateProfileLocations(form);
         for (const key of Object.keys(profileTax))
           data[key] = new FormData(form).getAll(key).map(Number);
         data.hidden = new FormData(form).getAll("hidden");
@@ -1770,8 +2038,6 @@
           "chatham_default",
           "micro_enabled",
           "micro_approval",
-          "clear_ai_key",
-          "clear_openai_key",
           "clear_smtp_password",
           "turnstile_enabled",
           "turnstile_login",
@@ -1780,16 +2046,9 @@
           "clear_turnstile_secret",
         ])
           data[k] = form.elements[k].checked;
+        data.clear_ai_key = data.ai_provider === "gemini" && !!form.elements.clear_ai_key?.checked;
+        data.clear_openai_key = data.ai_provider === "openai" && !!form.elements.clear_openai_key?.checked;
         data.matching_min_affinity = Number(data.matching_min_affinity);
-        data.matching_weights = {};
-        for (const k of [
-          "interests",
-          "areas",
-          "industries",
-          "goals",
-          "languages",
-        ])
-          data.matching_weights[k] = Number(data["weight_" + k]);
         await api("settings", data);
         clearUnsavedGuard(form);
         toast("Configuración guardada.");
@@ -1858,6 +2117,8 @@
   }
   root.addEventListener("change", async (event) => {
     const input = event.target;
+    if (input.matches?.("[data-admin-language-select]")) { input.form?.requestSubmit(); return; }
+    if (input.matches?.('form[data-form="settings"] [name="ai_provider"]')) syncAIProvider(input.form);
     const reportForm = input.closest?.('form[data-form="report"]');
     if (reportForm && input.name === "reason") updateReportDetailRequirement(reportForm);
     updateProfilePreference(input);
@@ -1977,6 +2238,7 @@
       window.addEventListener('focus', () => { syncChat(); refreshOpenConnection(); });
       window.addEventListener('online', () => { syncChat(); });
       await routeDetails();
+      maybeProfileCompletionNudge();
     } catch (e) {
       (content() || root).innerHTML = `<div class="error">${E(e.message)} <a data-native href="${E(location.href)}">Recarga la página para renovar tu sesión.</a></div>`;
     }

@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.9.15
+Stable tag: 1.9.23
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,61 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.9.23 =
+* Permite eliminar notificaciones individuales desde la bandeja de actividad.
+* Permite cancelar solicitudes de conexión enviadas; al cancelarlas se elimina también la notificación de solicitud del destinatario.
+* Permite eliminar una conexión confirmada mediante una confirmación explícita; la mensajería queda deshabilitada sin borrar el historial.
+* Añade etiquetas ES/EN y auditoría para cancelaciones y eliminación de conexiones.
+* No requiere migración de base de datos; se mantiene el esquema 7.
+
+= 1.9.22 =
+* Configura un único proveedor de IA a la vez: Gemini, OpenAI/ChatGPT o modo demo, mostrando solo los campos del proveedor activo.
+* Reorganiza Configuración para agrupar opciones relacionadas y simplifica el Motor de afinidad al porcentaje mínimo de recomendación.
+* Mejora Auditoría con explicaciones de propósito, nombres de actor y acciones legibles.
+* Corrige el estado Inscrito en modo oscuro y elimina el mensaje visual de actualización automática de Mensajería.
+
+= 1.9.21 =
+* Corrige el hero de Administración: el logo vuelve a una escala compacta y deja de dominar la pantalla.
+* Rediseña Auditoría con resumen de actividad, registro protegido, mejor jerarquía de columnas y estilos claro/oscuro.
+* Reorganiza Configuración en tarjetas temáticas para participación, seguridad, afinidad, IA, Google, correo y propiedad intelectual.
+* Añade una barra de guardado visible y responsive en Configuración sin cambiar los campos ni permisos existentes.
+* Corrige los saltos de línea escapados del bloque CSS administrativo de 1.9.20 para asegurar que sus estilos se apliquen correctamente.
+* No requiere migración de base de datos; se mantiene el esquema 7.
+
+= 1.9.20 =
+* Renueva el panel de Administración con cabecera, métricas, pestañas, filtros, tablas y formularios visualmente consistentes.
+* Añade selector Español/English y Apariencia en la barra superior administrativa, guardando el idioma por usuario.
+* Actualiza la presentación de la biblioteca administrativa y mejora el comportamiento responsive del panel.
+* Versiona las URLs de los logos oficiales para evitar que el navegador conserve recursos de marca antiguos en caché.
+* No requiere migración de base de datos; se mantiene el esquema 7.
+
+= 1.9.19 =
+* País/región y Ciudad separan el campo visible del valor enviado para evitar que Chrome superponga su autocompletado de direcciones sobre las sugerencias de ASCLA.
+* Login e Inicio eliminan las placas blancas alrededor del logotipo; el recurso normal se usa en superficies claras y la variante inversa en superficies oscuras.
+* La barra lateral conserva el logo blanco y aumenta el espacio antes de COMUNIDAD DE ASOCIADOS.
+* No requiere migración de base de datos; se mantiene el esquema 7.
+
+= 1.9.18 =
+* Perfil reemplaza los datalist nativos de País/región y Ciudad por un autocompletado propio, compacto y navegable con teclado, inspirado en patrones de directorios profesionales como LinkedIn.
+* Ciudad permanece vinculada al país seleccionado y conserva la validación real del catálogo geográfico introducida en 1.9.17.
+* Actualiza el logo horizontal oficial de ASCLA para login y cabecera de Inicio.
+* La barra lateral usa un recurso de logo blanco independiente para mejorar legibilidad sobre el fondo oscuro.
+* No requiere migración de base de datos; se mantiene el esquema 7.
+
+= 1.9.17 =
+* Simplifica Foros: elimina la acción duplicada inferior y conserva el botón azul superior con la etiqueta Crear foro.
+* Añade una recomendación no invasiva al iniciar en Inicio cuando el perfil está por debajo del 40% de completitud.
+* Perfil ofrece sugerencias normalizadas de país y ciudad; las ciudades se consultan según el país elegido y se cachean en WordPress.
+* El país se valida contra ISO 3166 y la ciudad se valida contra el catálogo remoto cuando está disponible, sin bloquear el guardado si el servicio geográfico está temporalmente caído.
+* No requiere migración de base de datos; se mantiene el esquema 7.
+
+= 1.9.16 =
+* Refina el login: logo ASCLA mejor proporcionado y presentación más limpia de Cloudflare Turnstile.
+* Aclara visualmente el hero de Inicio en modo claro sin alterar el modo oscuro.
+* Retira el botón general Actualizar de la cabecera de Administración.
+* Alinea los filtros de Estado en Solicitudes y de Interés/Área de conocimiento en el Directorio.
+
 
 = 1.9.15 =
 * Administración > Configuración usa el modal propio de ASCLA al intentar salir con cambios pendientes, incluso al navegar mediante enlaces del panel de WordPress.

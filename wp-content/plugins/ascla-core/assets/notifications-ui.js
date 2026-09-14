@@ -26,7 +26,10 @@ window.ASCLANotifications = ({ E, I, btn, T = (text) => text, locale = "es-PE" }
         <strong>${E(n.title)}</strong><span class="activity-description">${E(n.description)}</span>
         <span class="activity-destination">${E(n.action_label)} ${I('arrow')}</span></span>
       </a>
-      ${n.read_at ? '' : btn(I('check'), 'notification-read', `data-id="${n.id}" aria-label="${E(T('Marcar como leída'))}: ${E(n.title)}" title="${E(T('Marcar como leída'))}"`, 'activity-read ghost')}
+      <div class="activity-card-actions">
+        ${n.read_at ? '' : btn(I('check'), 'notification-read', `data-id="${n.id}" aria-label="${E(T('Marcar como leída'))}: ${E(n.title)}" title="${E(T('Marcar como leída'))}"`, 'activity-read ghost')}
+        ${btn(I('trash'), 'notification-delete-request', `data-id="${n.id}" aria-label="${E(T('Eliminar notificación'))}: ${E(n.title)}" title="${E(T('Eliminar notificación'))}"`, 'activity-delete ghost')}
+      </div>
     </article>`;
   }
   function panel(feed, filter) {

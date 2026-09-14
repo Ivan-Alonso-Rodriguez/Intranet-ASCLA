@@ -100,6 +100,24 @@ final class NotificationsTest extends TestCase
         self::assertSame(105,Notifications::feed([])['total']);
         wp_set_current_user($this->users[1]); self::assertSame(1,Notifications::summary()['unread_total']);
     }
+    public function testUserCanDeleteOnlyOwnNotifications(): void
+    {
+        Notifications::send($this->users[0],'welcome','Aviso eliminable');
+        Notifications::send($this->users[1],'welcome','Aviso ajeno');
+        $mine=Notifications::feed([])['items'][0];
+        self::assertSame(1,Notifications::summary()['unread_total']);
+        self::assertTrue(Notifications::delete((int)$mine['id'])['ok']);
+        self::assertNull(Store::one('notifications',(int)$mine['id']));
+        self::assertSame(0,Notifications::summary()['unread_total']);
+        wp_set_current_user($this->users[1]);
+        Notifications::send($this->users[0],'welcome','Otro aviso de Elena');
+        wp_set_current_user($this->users[0]);
+        $other=Store::rows('notifications','user_id=%d',[$this->users[1]],'ORDER BY id DESC LIMIT 1')[0];
+        try { Notifications::delete((int)$other['id']); self::fail('Expected ownership check.'); }
+        catch (\ASCLA\Core\Rest\ApiException $e) { self::assertSame(404,$e->getCode()); }
+        self::assertNotNull(Store::one('notifications',(int)$other['id']));
+    }
+
     public function testLegacyLinksRebuildOnCurrentSiteAndUnknownLinksHaveFallback(): void
     {
         $id=$this->post();
