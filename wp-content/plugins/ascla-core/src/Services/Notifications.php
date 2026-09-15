@@ -4,6 +4,8 @@ use ASCLA\Core\Repositories\Store;
 final class Notifications
 {
     private const EMAIL_META='_ascla_email_notifications';
+    private const MESSAGE_EMAIL_META='_ascla_message_email_last_sent';
+    private const MESSAGE_EMAIL_WINDOW=900;
     private const EMAIL_DEFAULTS=['connections'=>true,'messages'=>true,'events'=>true];
     private const EMAIL_KINDS=[
         'connection'=>'connections',
@@ -14,6 +16,7 @@ final class Notifications
         'message'=>'messages',
         'event'=>'events',
         'event_waitlist_available'=>'events',
+        'event_cancelled'=>'events',
         'microevent'=>'events',
     ];
 
@@ -56,18 +59,44 @@ final class Notifications
             'conversation_request'=>$name.' te envió una solicitud de conversación en ASCLA.',
             'conversation_accepted'=>$name.' aceptó tu solicitud de conversación en ASCLA.',
             'conversation_group'=>$name.' te añadió a una conversación grupal en ASCLA.',
-            'message'=>'Tienes un nuevo mensaje en ASCLA.',
+            'message'=>'Tienes mensajes nuevos en ASCLA.',
             'event'=>'Tienes una nueva invitación a un evento de ASCLA.',
             'event_waitlist_available'=>'Se liberó un cupo para ti en un evento de ASCLA. Entra para confirmar tu asistencia.',
+            'event_cancelled'=>'Un evento en el que participabas o estabas en espera fue cancelado. Revisa los detalles en ASCLA.',
             'microevent'=>'Tienes una nueva invitación a un círculo ASCLA.',
             default=>Access::excerpt($fallback,255),
         };
+    }
+
+    /** RN-011: message emails are complementary and rate-limited per conversation. */
+    private static function messageEmailAllowed(int $user,array $context): bool
+    {
+        $conversation=(($context['type']??'')==='conversation')?absint($context['id']??0):0;
+        $key=(string)$conversation;
+        return (bool)Store::lock('message-email:'.$user.':'.$key,static function () use($user,$key) {
+            $now=time();
+            $history=get_user_meta($user,self::MESSAGE_EMAIL_META,true);
+            $history=is_array($history)?$history:[];
+            foreach ($history as $conversation=>$sentAt) {
+                if ((int)$sentAt < $now-DAY_IN_SECONDS) unset($history[$conversation]);
+            }
+            $last=(int)($history[$key]??0);
+            if ($last>0 && ($now-$last)<self::MESSAGE_EMAIL_WINDOW) {
+                if (count($history)>50) { arsort($history); $history=array_slice($history,0,50,true); update_user_meta($user,self::MESSAGE_EMAIL_META,$history); }
+                return false;
+            }
+            $history[$key]=$now;
+            if (count($history)>50) { arsort($history); $history=array_slice($history,0,50,true); }
+            update_user_meta($user,self::MESSAGE_EMAIL_META,$history);
+            return true;
+        });
     }
 
     private static function email(int $user,string $kind,string $label,string $url,array $context): void
     {
         $category=self::emailCategory($kind);
         if ($category==='' || empty(self::emailPreferences($user)[$category])) return;
+        if (sanitize_key($kind)==='message' && !self::messageEmailAllowed($user,$context)) return;
         try {
             \ASCLA\Core\Integrations\Mailer::notification($user,$category,self::emailCopy($kind,$label,$context),$url);
         } catch (\Throwable $error) {

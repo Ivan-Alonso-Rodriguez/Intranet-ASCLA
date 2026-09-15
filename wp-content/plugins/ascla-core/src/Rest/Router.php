@@ -63,6 +63,7 @@ final class Router
         self::route('/conversations/(?P<id>\d+)/messages/(?P<message>\d+)','DELETE',static fn($r)=>Messaging::removeMessage((int)$r['id'],(int)$r['message']),'ascla_write');
         self::route('/events/(?P<id>\d+)','GET',static fn($r)=>Events::detail((int)$r['id']));
         self::route('/events/(?P<id>\d+)/invite','POST',static fn($r)=>Events::invite((int)$r['id'],(array)$r['users']),'ascla_moderate');
+        self::route('/events/(?P<id>\d+)/cancel','POST',static fn($r)=>Events::cancel((int)$r['id']),'ascla_publish');
         self::route('/events/(?P<id>\d+)/register','POST',static fn($r)=>Events::register((int)$r['id'],(string)$r['status']),'ascla_write');
         self::route('/notifications','GET',static fn()=>Notifications::list());
         self::route('/notifications/feed','GET',static fn($r)=>Notifications::feed($r->get_params()));

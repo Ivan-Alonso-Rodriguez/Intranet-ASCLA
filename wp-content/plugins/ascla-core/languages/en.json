@@ -678,5 +678,13 @@
   "personas en espera": "people waiting",
   "aforo completo": "full capacity",
   "disponibles": "available",
-  "Participantes y lista de espera (moderación)": "Participants and waitlist (moderation)"
+  "Participantes y lista de espera (moderación)": "Participants and waitlist (moderation)",
+  "Portada del evento": "Event cover",
+  "Imagen del evento": "Event image",
+  "Elegir imagen": "Choose image",
+  "Cambiar portada": "Change cover",
+  "Quitar portada": "Remove cover",
+  "Aún no has seleccionado una portada.": "You have not selected a cover yet.",
+  "JPG, PNG o WebP. Proporción recomendada 16:9. La imagen se recorta y optimiza antes de guardarse.": "JPG, PNG or WebP. Recommended ratio 16:9. The image is cropped and optimized before saving.",
+  "Ajustar portada del evento": "Adjust event cover"
 }

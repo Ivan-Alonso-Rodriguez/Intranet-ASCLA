@@ -620,6 +620,97 @@
   display: flex;
   flex-direction: column;
 }
+.event-card {
+  overflow: hidden;
+}
+.event-card-cover {
+  display: block;
+  width: calc(100% + 44px);
+  height: 190px;
+  margin: -22px -22px 18px;
+  padding: 0;
+  border: 0;
+  background: var(--bg);
+  cursor: pointer;
+}
+.event-card-cover img,
+.event-detail-cover img,
+.event-cover-ready img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.event-card-cover:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: -3px;
+}
+.event-detail-cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 18px 0 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+.event-cover-editor {
+  margin: 18px 0;
+}
+.event-cover-editor > label:first-child {
+  display: block;
+  font-weight: 650;
+  margin-bottom: 8px;
+}
+.event-cover-preview {
+  width: min(100%, 620px);
+  aspect-ratio: 16 / 9;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.event-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  color: var(--muted);
+  text-align: center;
+}
+.event-cover-placeholder svg {
+  width: 30px;
+  height: 30px;
+}
+.event-cover-ready {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.event-cover-actions {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  background: var(--bg);
+}
+.event-cover-actions strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+}
 .resource-cover {
   height: 130px;
   position: relative;

@@ -375,6 +375,7 @@ final class Content
         $post=self::get($id); Access::require($post->post_status==='publish','Contenido no publicado.',400);
         if ($kind==='follow' && $active && $post->post_type==='ascla_event') {
             $meta=(array)get_post_meta($id,'_ascla',true); $end=strtotime((string)($meta['end']??''));
+            Access::require(empty($meta['cancelled']),'No puedes seguir un evento cancelado.',409);
             Access::require($end===false || $end>time(),'No puedes seguir un evento que ya finalizó.',400);
         }
         $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>$kind];

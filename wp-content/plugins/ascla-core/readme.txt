@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.9.38
+Stable tag: 1.9.40
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,17 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.9.40 =
+* RF-025: los eventos admiten una portada privada JPG, PNG o WebP desde el editor de creación y edición.
+* La imagen del evento se recorta/optimiza con proporción recomendada 16:9, se muestra en las tarjetas y en el detalle, y puede reemplazarse o quitarse al editar.
+* El backend limita la portada del evento a una sola imagen y rechaza PDFs u otros tipos de archivo para este campo. Mantiene esquema 10; no requiere migración de base de datos.
+
+= 1.9.39 =
+* RF-024: los Administradores y Ejecutivos pueden cancelar un evento publicado sin eliminar su historial; el evento queda visible como Cancelado y bloquea nuevas inscripciones, invitaciones, seguimiento y altas en Google Calendar.
+* Al cancelar, ASCLA notifica una sola vez a asociados inscritos, invitados, con cupo ofrecido o en lista de espera. Las notificaciones internas se conservan aunque falle el correo.
+* RN-011: los avisos internos de cada mensaje siguen siendo inmediatos, pero el correo de Mensajería se limita a un máximo de un aviso por conversación cada 15 minutos para evitar un email por cada interacción menor.
+* Los correos de Mensajería no incluyen el contenido privado. Mantiene esquema 10; no requiere migración de base de datos.
 
 = 1.9.38 =
 * RF-029: cuando el aforo está completo, el asociado puede incorporarse explícitamente a una lista de espera y consultar su posición.

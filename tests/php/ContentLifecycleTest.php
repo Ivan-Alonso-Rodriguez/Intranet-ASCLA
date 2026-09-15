@@ -94,6 +94,27 @@ final class ContentLifecycleTest extends TestCase
         foreach(array_slice($this->users,1) as $id){wp_set_current_user($id);self::assertSame(403,$this->api('POST','content/event',$payload)->get_status());self::assertSame(403,$this->api('POST','content/event/'.$p['id'],$payload)->get_status());self::assertSame(403,$this->api('POST','items/'.$draft['id'].'/moderate',['decision'=>'approve','reason'=>'Publicar'])->get_status());}
         wp_set_current_user($this->users[2]);Content::comment($p['id'],'Participaré');self::assertSame('publish',get_post_status($p['id']));
     }
+    public function testEventCoverAcceptsOneImageAndRejectsMultipleFilesOrPdf():void
+    {
+        wp_set_current_user($this->users[0]);
+        $makeMedia=function(string $name,string $mime):int {
+            $id=Store::insert('media',['user_id'=>$this->users[0],'post_id'=>0,'name'=>$name,'mime'=>$mime,'bytes'=>'fixture','created_at'=>current_time('mysql',true)]);
+            $this->media[]=$id;
+            return $id;
+        };
+        $imageA=$makeMedia('event-cover-a.webp','image/webp');
+        $imageB=$makeMedia('event-cover-b.png','image/png');
+        $pdf=$makeMedia('event-cover.pdf','application/pdf');
+        $dates=['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000),'capacity'=>20,'modality'=>'Virtual'];
+        $event=$this->post('event',['meta'=>$dates+['media_ids'=>[$imageA]]]);
+        self::assertSame([$imageA],get_post_meta($event['id'],'_ascla',true)['media_ids']);
+        self::assertSame($event['id'],(int)Store::one('media',$imageA)['post_id']);
+        self::assertSame($imageA,(int)$event['media'][0]['id']);
+        $payload=['title'=>'Evento portada inválida','body'=>'Descripción','status'=>'publish'];
+        self::assertSame(400,$this->api('POST','content/event',$payload+['meta'=>$dates+['media_ids'=>[$imageA,$imageB]]])->get_status());
+        self::assertSame(400,$this->api('POST','content/event',$payload+['meta'=>$dates+['media_ids'=>[$pdf]]])->get_status());
+    }
+
     public function testLoginLocalePersistsPerUserRejectsMalformedInputAndDoesNotChangeSite():void
     {
         $site=get_option('WPLANG');$user=get_userdata($this->users[2]);$_POST['_ascla_locale']='en_US';Language::remember($user->user_login,$user);

@@ -235,6 +235,22 @@ final class IntegrationTest extends TestCase
 
     }
 
+    public function testEventCanBeCancelledWithoutDeletingHistoryAndBlocksFurtherRsvp(): void
+    {
+        $p=$this->make('event',['meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>2,'modality'=>'Virtual']]);
+        $this->user(1); Events::register($p['id'],'accepted');
+        $this->user(2); Events::register($p['id'],'accepted');
+        $this->user(0); $cancelled=Events::cancel($p['id']);
+        self::assertTrue($cancelled['cancelled']);
+        self::assertSame('publish',get_post_status($p['id']));
+        self::assertSame('',Events::detail($p['id'])['google_url']);
+        $this->user(1);
+        self::assertSame(409,$this->api('POST','/events/'.$p['id'].'/register',['status'=>'cancelled'])->get_status());
+        self::assertSame(1,Store::count('notifications','user_id=%d AND kind=%s',[$this->users[1],'event_cancelled']));
+        $this->user(2);
+        self::assertSame(1,Store::count('notifications','user_id=%d AND kind=%s',[$this->users[2],'event_cancelled']));
+    }
+
     public function testContactRequestsStayPrivateAndHaveStatuses(): void
 
     {

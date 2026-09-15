@@ -58,7 +58,7 @@ final class GoogleOAuth
         Access::require(in_array($operation,['save','cancel'],true),'Operación inválida.',400);
         $post=Content::get($id); Access::require($post->post_type==='ascla_event'&&$post->post_status==='publish','Evento no disponible.',400);
         $meta=(array)get_post_meta($id,'_ascla',true);
-        if ($operation==='save') { Access::require(strtotime((string)($meta['end']??''))>time(),'El evento ya finalizó.',400); }
+        if ($operation==='save') { Access::require(empty($meta['cancelled']),'El evento fue cancelado.',409); Access::require(strtotime((string)($meta['end']??''))>time(),'El evento ya finalizó.',400); }
         $token=self::accessToken(get_current_user_id(),'calendar');
         $key='_ascla_google_event_'.$id; $remote=get_user_meta(get_current_user_id(),$key,true);
         if ($operation==='cancel'&&!$remote) { return ['ok'=>true]; }

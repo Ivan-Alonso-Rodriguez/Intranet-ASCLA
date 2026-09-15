@@ -76,6 +76,14 @@ final class ContentMeta
 
         if ($type==='event') {
 
+            $eventMedia=array_values(array_filter(array_map('absint',(array)($data['media_ids']??[]))));
+            Access::require(count($eventMedia)<=1,'El evento admite una sola imagen de portada.',400);
+            foreach ($eventMedia as $mediaId) {
+                $file=\ASCLA\Core\Repositories\Store::one('media',$mediaId);
+                Access::require($file && in_array((string)$file['mime'],['image/jpeg','image/png','image/webp'],true),'La portada del evento debe ser una imagen JPG, PNG o WebP.',400);
+            }
+            $data['media_ids']=$eventMedia;
+
             foreach (['start','end'] as $key) {
 
                 $value=$input[$key]??$data[$key]??'';

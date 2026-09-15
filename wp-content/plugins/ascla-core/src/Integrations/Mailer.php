@@ -99,7 +99,7 @@ final class Mailer
         if (!$account || !is_email($account->user_email)) return false;
         $subjects=[
             'connections'=>'ASCLA · Novedad en tus conexiones',
-            'messages'=>'ASCLA · Nuevo mensaje',
+            'messages'=>'ASCLA · Novedad en mensajería',
             'events'=>'ASCLA · Novedad de eventos',
         ];
         if (!isset($subjects[$category])) return false;

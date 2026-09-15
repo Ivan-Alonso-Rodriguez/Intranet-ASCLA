@@ -222,6 +222,23 @@ final class NotificationsTest extends TestCase
         self::assertSame(['connections'=>false,'messages'=>false,'events'=>false],$saved);
     }
 
+    public function testMessageEmailIsThrottledPerConversationButInternalNoticesAreNot(): void
+    {
+        $user=$this->users[0];
+        $context=['type'=>'conversation','id'=>701,'actor'=>$this->users[1]];
+        Notifications::send($user,'message','Primer mensaje','',$context);
+        $first=get_user_meta($user,'_ascla_message_email_last_sent',true);
+        self::assertArrayHasKey('701',$first);
+        Notifications::send($user,'message','Segundo mensaje','',$context);
+        $second=get_user_meta($user,'_ascla_message_email_last_sent',true);
+        self::assertSame($first['701'],$second['701']);
+        self::assertSame(2,Store::count('notifications','user_id=%d AND kind=%s',[$user,'message']));
+        Notifications::send($user,'message','Otro chat','',['type'=>'conversation','id'=>702,'actor'=>$this->users[2]]);
+        $third=get_user_meta($user,'_ascla_message_email_last_sent',true);
+        self::assertArrayHasKey('702',$third);
+        self::assertSame(3,Store::count('notifications','user_id=%d AND kind=%s',[$user,'message']));
+    }
+
     public function testNotificationEndpointsRequireAuthentication(): void
     {
         wp_set_current_user(0);

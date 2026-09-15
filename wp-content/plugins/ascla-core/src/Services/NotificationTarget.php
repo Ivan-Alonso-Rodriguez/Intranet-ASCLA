@@ -21,6 +21,7 @@ final class NotificationTarget
         'moderation'=>['Publicaciones','shield','hub','Ver mis publicaciones'],
         'event'=>['Eventos','calendar','eventos','Ver eventos'],
         'event_waitlist_available'=>['Eventos','calendar','eventos','Confirmar cupo'],
+        'event_cancelled'=>['Eventos','calendar','eventos','Ver evento cancelado'],
         'microevent'=>['Eventos','calendar','eventos','Ver eventos'],
         'resource'=>['Conocimiento','book','centro-conocimiento','Explorar recursos'],
         'networking'=>['Tu red','users','directorio','Explorar directorio'],
@@ -103,13 +104,14 @@ final class NotificationTarget
             'resource'=>self::tr('Un nuevo recurso para tus intereses','A new resource for your interests'),
             'event'=>self::tr('Tienes una invitación a un evento','You have an event invitation'),
             'event_waitlist_available'=>self::tr('Se liberó un cupo para ti','A spot is available for you'),
+            'event_cancelled'=>self::tr('Un evento fue cancelado','An event was cancelled'),
             'microevent'=>self::tr('Tu círculo ASCLA te espera','Your ASCLA circle is waiting'),
             default=>$view['title'],
         };
         $view['description']=Access::excerpt($post->post_title,180);
         $view['url']=Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$post->ID]);
         $view['action_label']=match($post->post_type) {
-            'ascla_event'=>$view['kind']==='event_waitlist_available'?self::tr('Confirmar cupo','Confirm spot'):self::tr('Ver encuentro e invitación','View event and invitation'),
+            'ascla_event'=>match($view['kind']) { 'event_waitlist_available'=>self::tr('Confirmar cupo','Confirm spot'), 'event_cancelled'=>self::tr('Ver evento cancelado','View cancelled event'), default=>self::tr('Ver encuentro e invitación','View event and invitation') },
             'ascla_resource'=>self::tr('Abrir recurso','Open resource'),
             default=>self::tr('Ver publicación','View post'),
         };

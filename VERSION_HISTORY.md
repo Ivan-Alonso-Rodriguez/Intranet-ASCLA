@@ -2,9 +2,9 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.9.38`  
+> **Versión actual:** `1.9.40`  
 > **Esquema de base de datos:** `10`  
-> La versión `1.9.38` completa RF-029 y RF-030 con lista de espera, reserva ordenada del cupo liberado y confirmación explícita antes del RSVP.
+> La versión `1.9.40` completa RF-025 incorporando portada de evento editable, privada y optimizada en proporción recomendada 16:9.
 
 ## Resumen de versiones
 
@@ -59,11 +59,30 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.35 | Cierre por fondo y perfiles desde comentarios | Completada |
 | 1.9.36 | Guardado protegido y notificaciones opcionales por correo | Completada |
 | 1.9.37 | RF-033 y RF-038: notificaciones del ciclo de soporte | Completada |
-| 1.9.38 | RF-029 y RF-030: lista de espera y liberación de cupo | **Actual** |
+| 1.9.38 | RF-029 y RF-030: lista de espera y liberación de cupo | Completada |
+| 1.9.39 | RF-024 y RN-011: cancelación de eventos y correo controlado | Completada |
+| 1.9.40 | RF-025: imagen de portada del evento | **Actual** |
 
 ---
 
 # Serie 1.9.x — evolución funcional
+
+## 1.9.40 — RF-025: imagen de portada del evento
+
+- **RF-025:** el formulario de creación y edición de eventos permite seleccionar una portada JPG, PNG o WebP.
+- La imagen utiliza el editor privado existente, con recorte/optimización y proporción recomendada **16:9** antes de guardarse.
+- Al editar un evento, la portada actual se previsualiza y puede **reemplazarse o quitarse** sin modificar el resto de la información.
+- La portada se muestra en las tarjetas de Eventos y en el detalle del encuentro; si no existe imagen, el evento mantiene su presentación textual normal.
+- El backend limita cada evento a **una sola imagen** y rechaza PDF u otros tipos de archivo como portada, aunque el sistema general de medios continúe admitiéndolos en los módulos correspondientes.
+- Mantiene el **esquema 10** y no requiere migración de base de datos.
+
+## 1.9.39 — RF-024 y RN-011: cancelación de eventos y correo controlado
+
+- **RF-024:** un Administrador o Ejecutivo ASCLA puede cancelar un evento futuro publicado sin eliminarlo. El evento se conserva visible con estado funcional **Cancelado** y mantiene sus datos, participantes y trazabilidad.
+- La cancelación bloquea nuevas inscripciones, lista de espera, invitaciones, seguimiento y nuevas altas en Google Calendar; los calendarios ya guardados pueden retirarse manualmente.
+- Las personas inscritas, invitadas, con cupo ofrecido o en lista de espera reciben una notificación interna única de cancelación; si tienen activado correo de Eventos, el aviso puede complementarse por email.
+- **RN-011:** cada mensaje continúa generando su notificación interna inmediata, pero los correos de la categoría Mensajes se limitan a un máximo de **un aviso por conversación cada 15 minutos**. El contenido privado del mensaje no se copia al email.
+- Mantiene el **esquema 10** y no requiere migración de base de datos.
 
 ## 1.9.38 — RF-029 y RF-030: Lista de espera y liberación de cupo
 
@@ -812,4 +831,4 @@ Las modificaciones exclusivamente documentales, como la ampliación de este arch
 - Cuando existe un snapshot verificable se conserva como referencia histórica.
 - No se crean tags ficticios para versiones cuyo código fuente original no esté disponible.
 - La carpeta `docs/` se mantiene fuera del repositorio público según la configuración actual de `.gitignore`.
-- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.38**.
+- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.40**.
