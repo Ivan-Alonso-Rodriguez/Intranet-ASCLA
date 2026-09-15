@@ -1,6 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
-use ASCLA\Core\Services\{Connections,Messaging,Profiles,Notifications};
+use ASCLA\Core\Services\{Connections,Messaging,ConversationRequests,Profiles,Notifications};
 use ASCLA\Core\Repositories\Store;
 use ASCLA\Core\Rest\ApiException;
 
@@ -154,4 +154,65 @@ final class ConnectionsTest extends TestCase
         wp_set_current_user($b);Profiles::save(['hidden'=>[]]);Store::delete('media',['id'=>$photo]);wp_set_current_user($a);
         self::assertSame('',Messaging::conversation($id)['other']['photo_url']);
     }
+    public function testConversationRequestAllowsMessagingWithoutCreatingProfessionalConnection(): void
+    {
+        [$a,$b]=$this->users;
+        self::assertFalse(Connections::areConnected($a,$b));
+        self::assertSame(403,$this->api('POST','conversations',['target'=>$b])->get_status());
+        $state=ConversationRequests::request($b,'Hola, quisiera conversar contigo.');
+        self::assertSame('outgoing_pending',$state['state']);
+        self::assertGreaterThan(0,(int)$state['conversation_id']);
+        $id=(int)$state['conversation_id']; $this->conversations[]=$id;
+        self::assertCount(1,Messaging::messages($id)['items']);
+        self::assertSame(403,$this->api('POST','conversations',['target'=>$b])->get_status());
+        wp_set_current_user($b);
+        $accepted=ConversationRequests::respond((int)$state['request_id'],'accept');
+        self::assertSame('allowed',$accepted['state']);
+        self::assertFalse(Connections::areConnected($a,$b));
+        wp_set_current_user($a);
+        $conversation=Messaging::start($b); self::assertSame($id,(int)$conversation['id']);
+        self::assertSame($a,(int)Messaging::send($id,'Hola sin conexión profesional')['sender_id']);
+        wp_set_current_user($b);
+        self::assertSame('allowed',ConversationRequests::between($b,$a)['state']);
+        self::assertCount(2,Messaging::messages($id)['items']);
+    }
+
+    public function testConversationRequestCanBeRejectedAndDoesNotEnableChat(): void
+    {
+        [$a,$b]=$this->users;
+        $state=ConversationRequests::request($b,'Mensaje que puede ser rechazado.');
+        $id=(int)$state['conversation_id']; $this->conversations[]=$id;
+        wp_set_current_user($b);
+        self::assertSame('none',ConversationRequests::respond((int)$state['request_id'],'reject')['state']);
+        wp_set_current_user($a);
+        self::assertSame(403,$this->api('POST','conversations',['target'=>$b])->get_status());
+        self::assertSame('none',ConversationRequests::between($a,$b)['state']);
+        self::assertSame(0,Store::count('messages','conversation_id=%d',[$id]));
+    }
+
+    public function testGroupChatSupportsMultipleParticipantsAndReadReceipts(): void
+    {
+        [$a,$b,$c]=$this->users;
+        wp_set_current_user($a); $ab=Connections::request($b);
+        wp_set_current_user($b); Connections::respond((int)$ab['request_id'],'accept');
+        wp_set_current_user($a); $ac=Connections::request($c);
+        wp_set_current_user($c); Connections::respond((int)$ac['request_id'],'accept');
+        wp_set_current_user($a);
+        $photo=Store::insert('media',['user_id'=>$a,'post_id'=>0,'name'=>'group.png','mime'=>'image/png','bytes'=>'synthetic-group-image','created_at'=>current_time('mysql',true)]);
+        $group=Messaging::createGroup('Comité de prueba',[$b,$c],$photo); $id=(int)$group['id']; $this->conversations[]=$id;
+        self::assertSame('group',$group['kind']); self::assertSame(3,(int)$group['member_count']); self::assertNotEmpty($group['photo_url']); self::assertTrue($group['can_delete_group']);
+        $message=Messaging::send($id,'Mensaje grupal'); $mid=(int)$message['id'];
+        $mine=Messaging::messages($id); self::assertSame(0,(int)$mine['items'][0]['read_count']); self::assertSame(2,(int)$mine['items'][0]['read_total']);
+        wp_set_current_user($b); self::assertCount(1,Messaging::messages($id)['items']);
+        self::assertFalse(Connections::areConnected($b,$c));
+        self::assertSame($b,(int)Messaging::send($id,'Respuesta grupal')['sender_id']);
+        wp_set_current_user($a); $poll=Messaging::messages($id,0,$mid);
+        $state=array_column($poll['read_state'],'last_read','user_id');
+        self::assertGreaterThanOrEqual($mid,(int)$state[$b]); self::assertSame(0,(int)$state[$c]);
+        wp_set_current_user($b); self::assertSame(403,$this->api('DELETE','conversations/'.$id)->get_status());
+        wp_set_current_user($a); self::assertTrue(Messaging::removeGroup($id)['deleted']);
+        self::assertNull(Store::one('conversations',$id));
+        $this->conversations=array_values(array_diff($this->conversations,[$id]));
+    }
+
 }

@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.9.29
+Stable tag: 1.9.38
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,59 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.9.38 =
+* RF-029: cuando el aforo está completo, el asociado puede incorporarse explícitamente a una lista de espera y consultar su posición.
+* RF-030: al liberarse un cupo, se reserva para la primera persona en espera y se le notifica para que confirme o rechace antes de registrar el RSVP.
+* Mientras un cupo está ofrecido, queda reservado para evitar que otro registro salte la cola; si se rechaza, pasa automáticamente al siguiente asociado.
+* La vista del evento muestra aforo, cupos disponibles y cantidad de personas en espera. Mantiene esquema 10; no requiere migración de base de datos.
+
+= 1.9.37 =
+* RF-033: las solicitudes de soporte generan notificaciones internas de recepción para el asociado y de nueva solicitud para el equipo de moderación.
+* RF-038: cuando Moderación cambia el estado de una solicitud, el asociado recibe una notificación interna con el nuevo estado (Recibida, En atención o Resuelta).
+* Repetir el mismo estado no duplica avisos. Las notificaciones enlazan a Mis solicitudes para el asociado y a ASCLA > Solicitudes para Moderación.
+* Mantiene esquema 10; no requiere migración de base de datos.
+
+= 1.9.36 =
+* Editar grupo protege cambios sin guardar: al intentar cerrar desde el fondo, la X o Escape se ofrece seguir editando, descartar o guardar.
+* RF-035: conexiones, mensajes y eventos pueden complementar sus avisos internos mediante correo electrónico.
+* Perfil incorpora preferencias de correo para Conexiones, Mensajes y Eventos; las tres están activadas por defecto y cada asociado puede desactivarlas independientemente.
+* Los correos de mensajería no incluyen el contenido privado del mensaje. Mantiene esquema 10; las preferencias se guardan como metadatos de usuario.
+
+= 1.9.35 =
+* Las ventanas emergentes se cierran al hacer clic en el fondo exterior, además de conservar la X y la tecla Escape.
+* Los nombres de autores en conversaciones/comentarios son interactivos y abren el perfil del asociado dentro de la misma página.
+* Mantiene esquema 10; no requiere migración de base de datos.
+
+= 1.9.34 =
+* El creador del grupo puede editar nombre, fotografía y una descripción breve desde Información del grupo.
+* Añade esquema 10 para guardar la descripción de los grupos y mantiene la edición protegida en backend para el creador.
+* Todos los controles “Ver perfil” de la intranet abren el perfil del asociado dentro de un modal en la página actual, en lugar de navegar a la página de perfil propio.
+* El encabezado de los chats privados también abre el perfil del otro asociado dentro de la mensajería.
+
+= 1.9.33 =
+* Simplifica las acciones de perfiles: cuando una conversación ya está autorizada, deja de mostrar la etiqueta redundante “Conversación autorizada” y conserva únicamente la acción para enviar mensaje.
+* Mejora el menú Información del grupo con una lista de integrantes más clara, acceso al perfil y acción Mensaje privado para cada integrante distinto del usuario actual.
+* Mensaje privado reutiliza el flujo existente: abre el chat si ya está autorizado, abre la solicitud pendiente si existe o permite enviar el primer mensaje como solicitud de conversación.
+* Elimina el botón Cerrar inferior del menú del grupo y conserva únicamente la X superior. La eliminación del grupo permanece dentro del menú y solo para el creador. No requiere migración; se mantiene el esquema 9.
+
+= 1.9.32 =
+* Separa las solicitudes de conversación en una bandeja propia dentro de Mensajería, manteniendo el primer mensaje, vista previa y contador de pendientes/no leídos.
+* Las solicitudes recibidas dejan de mezclarse con los chats normales; al aceptarlas pasan automáticamente a la bandeja de Chats.
+* Añade un menú de información para grupos con fotografía, nombre, lista de integrantes e identificación del creador.
+* El botón Eliminar grupo se mueve al menú de información y sigue disponible únicamente para quien creó el grupo. No requiere migración; se mantiene el esquema 9.
+
+= 1.9.31 =
+* Las solicitudes de conversación ahora funcionan como solicitudes de mensajes: el remitente escribe el primer mensaje y el destinatario puede leerlo antes de aceptar o rechazar.
+* Los chats grupales admiten una foto cuadrada visible para todos los participantes del grupo.
+* El creador del grupo puede eliminarlo; la eliminación retira la conversación y sus mensajes para todos los participantes.
+* Añade esquema 9 para almacenar la fotografía del grupo y conserva los recibos Enviado/Leído de la versión anterior.
+
+= 1.9.30 =
+* Añade solicitudes de conversación independientes de las conexiones: enviar, aceptar, rechazar y cancelar; al aceptar se habilita el chat directo sin crear una conexión profesional.
+* Añade chats grupales de hasta 50 participantes, creados a partir de conexiones confirmadas, con nombre de grupo y notificaciones internas.
+* Añade confirmación de lectura en mensajería: Enviado/Leído en chat directo y Leído por N de M en grupos, reutilizando el cursor last_read existente.
+* Añade esquema 8 para distinguir conversaciones directas y grupales y guardar título y creador del grupo.
 
 = 1.9.29 =
 * El análisis de videos activa automáticamente los Temas ASCLA que estén claramente respaldados por el contenido, preservando los temas elegidos manualmente.

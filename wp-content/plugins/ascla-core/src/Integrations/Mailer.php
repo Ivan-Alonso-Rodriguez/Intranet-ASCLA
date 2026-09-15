@@ -93,6 +93,32 @@ final class Mailer
         Access::require($ok,'No se pudo enviar. Revise los datos SMTP, el remitente autorizado y la conexión del servidor.',502);
         return ['message'=>self::local()?'Correo recibido por el buzón local de pruebas.':'El servidor aceptó el correo. Revise su bandeja de entrada y spam.'];
     }
+    public static function notification(int $user,string $category,string $message,string $url=''): bool
+    {
+        $account=get_userdata($user);
+        if (!$account || !is_email($account->user_email)) return false;
+        $subjects=[
+            'connections'=>'ASCLA · Novedad en tus conexiones',
+            'messages'=>'ASCLA · Nuevo mensaje',
+            'events'=>'ASCLA · Novedad de eventos',
+        ];
+        if (!isset($subjects[$category])) return false;
+        $name=trim((string)$account->display_name) ?: 'asociado';
+        $message=trim(wp_strip_all_tags($message));
+        $safeUrl=$url!==''?esc_url_raw($url):'';
+        $profileUrl=\ASCLA\Core\Domain\Catalog::url('perfil');
+        $body="Hola {$name},\n\n{$message}";
+        if ($safeUrl!=='') $body.="\n\nVer en ASCLA: {$safeUrl}";
+        $body.="\n\nPuedes activar o desactivar este tipo de correo desde Mi perfil > Notificaciones por correo: {$profileUrl}";
+        $body.="\n\n— ASCLA";
+        try {
+            return (bool)wp_mail($account->user_email,$subjects[$category],$body);
+        } catch (\Throwable $error) {
+            self::record('failed');
+            return false;
+        }
+    }
+
     public static function localNotice(string $message): string
     {
         if (self::local() && (($_REQUEST['action']??'')==='lostpassword' || isset($_GET['checkemail']))) {

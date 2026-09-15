@@ -1,6 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
-use ASCLA\Core\Services\{Notifications,Content,Profiles,Messaging};
+use ASCLA\Core\Services\{Notifications,Content,Profiles,Messaging,Administration};
 use ASCLA\Core\Repositories\Store;
 use ASCLA\Core\Jobs\Queue;
 use ASCLA\Core\Domain\Catalog;
@@ -149,6 +149,55 @@ final class NotificationsTest extends TestCase
         wp_set_current_user($this->users[0]); Profiles::save(['directory'=>false]);
         wp_set_current_user($this->users[2]); self::assertFalse(Notifications::list()[0]['available']);
     }
+
+    public function testSupportRequestsNotifyModerationAndStatusChangesNotifyRequester(): void
+    {
+        $moderator=wp_insert_user([
+            'user_login'=>'notice_mod_'.bin2hex(random_bytes(6)),
+            'user_pass'=>wp_generate_password(30),
+            'display_name'=>'Moderador Prueba',
+            'role'=>'ascla_moderator',
+        ]);
+        self::assertIsInt($moderator); $this->users[]=$moderator;
+
+        wp_set_current_user($this->users[0]);
+        $support=Content::save('contact',[
+            'title'=>'No puedo abrir mi perfil',
+            'body'=>'Necesito ayuda con una incidencia de prueba.',
+            'meta'=>['description'=>'Soporte técnico'],
+        ]);
+        $this->posts[]=(int)$support['id'];
+
+        $mine=Notifications::feed([])['items'][0];
+        self::assertSame('support_received',$mine['kind']);
+        self::assertSame('Recibimos tu solicitud de soporte',$mine['title']);
+        self::assertStringContainsString('contacto', $mine['url']);
+
+        wp_set_current_user($moderator);
+        $staff=Notifications::feed([])['items'][0];
+        self::assertSame('support_request',$staff['kind']);
+        self::assertStringContainsString('nueva solicitud de soporte',$staff['title']);
+        self::assertStringContainsString('page=ascla-solicitudes',$staff['url']);
+
+        Administration::contactStatus((int)$support['id'],'progress');
+        wp_set_current_user($this->users[0]);
+        $updated=Notifications::feed([])['items'][0];
+        self::assertSame('support_update',$updated['kind']);
+        self::assertStringContainsString('En atención',$updated['title']);
+        $before=Store::count('notifications','user_id=%d AND kind=%s',[$this->users[0],'support_update']);
+
+        wp_set_current_user($moderator);
+        Administration::contactStatus((int)$support['id'],'progress');
+        wp_set_current_user($this->users[0]);
+        self::assertSame($before,Store::count('notifications','user_id=%d AND kind=%s',[$this->users[0],'support_update']));
+
+        wp_set_current_user($moderator);
+        Administration::contactStatus((int)$support['id'],'closed');
+        wp_set_current_user($this->users[0]);
+        $resolved=Notifications::feed([])['items'][0];
+        self::assertSame('support_update',$resolved['kind']);
+        self::assertStringContainsString('Resuelta',$resolved['title']);
+    }
     public function testSavedAnswersHistoryOwnershipAndRevokedSources(): void
     {
         $source=$this->post('resource');
@@ -160,6 +209,19 @@ final class NotificationsTest extends TestCase
         wp_set_current_user($this->users[0]); wp_update_post(['ID'=>$source,'post_status'=>'draft']);
         $result=Queue::get($id)['result']; self::assertSame([],$result['sources']); self::assertStringNotContainsString('Texto privado',wp_json_encode($result));
     }
+    public function testEmailPreferencesDefaultActiveAndCanBeChangedPerCategory(): void
+    {
+        $defaults=Notifications::emailPreferences($this->users[0]);
+        self::assertSame(['connections'=>true,'messages'=>true,'events'=>true],$defaults);
+        $saved=Notifications::saveEmailPreferences($this->users[0],['messages'=>false]);
+        self::assertTrue($saved['connections']);
+        self::assertFalse($saved['messages']);
+        self::assertTrue($saved['events']);
+        self::assertSame($saved,Profiles::visible($this->users[0])['email_notifications']);
+        $saved=Notifications::saveEmailPreferences($this->users[0],['connections'=>false,'events'=>false]);
+        self::assertSame(['connections'=>false,'messages'=>false,'events'=>false],$saved);
+    }
+
     public function testNotificationEndpointsRequireAuthentication(): void
     {
         wp_set_current_user(0);

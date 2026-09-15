@@ -1,6 +1,6 @@
 <?php
 namespace ASCLA\Core\Rest;
-use ASCLA\Core\Services\{Access,Profiles,Matching,Messaging,Content,Events,Notifications,Settings,Media,Knowledge,Audit,Account,Locations};
+use ASCLA\Core\Services\{Access,Profiles,Matching,Messaging,ConversationRequests,Content,Events,Notifications,Settings,Media,Knowledge,Audit,Account,Locations};
 use ASCLA\Core\Repositories\Store;
 use ASCLA\Core\Jobs\Queue;
 use ASCLA\Core\Integrations\GoogleOAuth;
@@ -36,6 +36,10 @@ final class Router
         self::route('/matching/(?P<id>\d+)/intro','GET',static fn($r)=>Matching::intro((int)$r['id']));
         self::route('/connections','GET',static fn()=>\ASCLA\Core\Services\Connections::listing());
         self::route('/connections/(?P<id>\d+)/respond','POST',static fn($r)=>\ASCLA\Core\Services\Connections::respond((int)$r['id'],(string)$r['decision']),'ascla_write');
+        self::route('/conversation-requests','GET',static fn()=>ConversationRequests::listing());
+        self::route('/conversation-requests','POST',static fn($r)=>ConversationRequests::request((int)$r['target'],(string)$r['body']),'ascla_write');
+        self::route('/conversation-requests/(?P<id>\d+)/respond','POST',static fn($r)=>ConversationRequests::respond((int)$r['id'],(string)$r['decision']),'ascla_write');
+        self::route('/conversation-requests/(?P<target>\d+)/cancel','POST',static fn($r)=>ConversationRequests::cancel((int)$r['target']),'ascla_write');
         self::route('/relations','POST',static fn($r)=>Messaging::relation((int)$r['target'],(string)$r['kind'],rest_sanitize_boolean($r['active'])),'ascla_write');
         self::route('/content/(?P<type>[a-z]+)','GET',static fn($r)=>Content::listing($r['type'],$r->get_params()));
         self::route('/content/(?P<type>[a-z]+)','POST',static fn($r)=>Content::save($r['type'],$r->get_json_params()?:[]),'ascla_write');
@@ -53,6 +57,7 @@ final class Router
         self::route('/items/(?P<id>\d+)/moderate','POST',static fn($r)=>Content::moderate((int)$r['id'],(string)$r['decision'],(string)$r['reason'],rest_sanitize_boolean($r['reviewed'])),'ascla_moderate');
         self::route('/conversations','GET',static fn($r)=>Messaging::conversations(Access::text($r['q']??'',120)));
         self::route('/conversations','POST',static fn($r)=>Messaging::start((int)$r['target']),'ascla_write');
+        self::route('/conversations/group','POST',static fn($r)=>Messaging::createGroup((string)$r['title'],(array)($r['users']??[]),(int)($r['photo_id']??0),(string)($r['description']??'')),'ascla_write');
         self::route('/conversations/(?P<id>\d+)/messages','GET',static fn($r)=>Messaging::messages((int)$r['id'],(int)$r['before'],$r->has_param('after')?(int)$r['after']:null));
         self::route('/conversations/(?P<id>\d+)/messages','POST',static fn($r)=>Messaging::send((int)$r['id'],(string)$r['body']),'ascla_write');
         self::route('/conversations/(?P<id>\d+)/messages/(?P<message>\d+)','DELETE',static fn($r)=>Messaging::removeMessage((int)$r['id'],(int)$r['message']),'ascla_write');
@@ -66,6 +71,8 @@ final class Router
         self::route('/notifications/(?P<id>\d+)/open','POST',static fn($r)=>Notifications::open((int)$r['id']));
         self::route('/answers','GET',static fn()=>Queue::answers());
         self::route('/conversations/(?P<id>\d+)','GET',static fn($r)=>Messaging::conversation((int)$r['id']));
+        self::route('/conversations/(?P<id>\d+)/group','POST',static fn($r)=>Messaging::updateGroup((int)$r['id'],(string)$r['title'],(string)($r['description']??''),(int)($r['photo_id']??0)),'ascla_write');
+        self::route('/conversations/(?P<id>\d+)','DELETE',static fn($r)=>Messaging::removeGroup((int)$r['id']),'ascla_write');
         self::route('/notifications/(?P<id>\d+)/read','POST',static fn($r)=>Notifications::read((int)$r['id']));
         self::route('/notifications/(?P<id>\d+)','DELETE',static fn($r)=>Notifications::delete((int)$r['id']));
         self::route('/media','GET',static fn($r)=>Media::listing($r->get_params()));

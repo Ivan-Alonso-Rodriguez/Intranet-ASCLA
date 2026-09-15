@@ -2,9 +2,9 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.9.29`  
-> **Esquema de base de datos:** `7`  
-> La versión `1.9.29` incorpora clasificación automática de Temas para videos, mejora la detección de duración directamente desde YouTube y bloquea la generación de IA cuando no existe una transcripción verificable. Mantiene el esquema de datos 7.
+> **Versión actual:** `1.9.38`  
+> **Esquema de base de datos:** `10`  
+> La versión `1.9.38` completa RF-029 y RF-030 con lista de espera, reserva ordenada del cupo liberado y confirmación explícita antes del RSVP.
 
 ## Resumen de versiones
 
@@ -50,12 +50,104 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.26 | Nota técnica en recurso original, duración automática y publicación por defecto | Completada |
 | 1.9.27 | Resumen editorial, duración verificada y estados visibles | Completada |
 | 1.9.28 | Recomendaciones de conocimiento reforzadas por palabras clave | Completada |
-| 1.9.29 | Temas automáticos, duración YouTube y transcripción segura | **Actual** |
+| 1.9.29 | Temas automáticos, duración YouTube y transcripción segura | Completada |
+| 1.9.30 | Solicitudes de conversación, grupos y lectura | Completada |
+| 1.9.31 | Solicitudes con mensaje, foto y eliminación de grupos | Completada |
+| 1.9.32 | Bandeja de solicitudes y menú de información de grupos | Completada |
+| 1.9.33 | Pulido de perfiles y acciones de integrantes del grupo | Completada |
+| 1.9.34 | Edición de identidad del grupo y perfiles en modal | Completada |
+| 1.9.35 | Cierre por fondo y perfiles desde comentarios | Completada |
+| 1.9.36 | Guardado protegido y notificaciones opcionales por correo | Completada |
+| 1.9.37 | RF-033 y RF-038: notificaciones del ciclo de soporte | Completada |
+| 1.9.38 | RF-029 y RF-030: lista de espera y liberación de cupo | **Actual** |
 
 ---
 
 # Serie 1.9.x — evolución funcional
 
+## 1.9.38 — RF-029 y RF-030: Lista de espera y liberación de cupo
+
+- **RF-029:** si un evento con capacidad limitada alcanza el aforo, la interfaz ofrece **Unirme a la lista de espera** en lugar de intentar una inscripción imposible.
+- La cola es **FIFO**: se conserva el orden de ingreso y el asociado puede ver su posición mientras permanezca en espera.
+- **RF-030:** cuando una inscripción confirmada se cancela o una persona rechaza un cupo previamente ofrecido, el sistema toma al primer asociado en espera, cambia su estado a **Cupo disponible** y le envía una notificación.
+- El cupo liberado queda **reservado temporalmente** para ese asociado hasta que confirme o rechace; no se registra el RSVP automáticamente.
+- Si confirma, el estado pasa a **Inscrito**. Si rechaza, el cupo se ofrece automáticamente a la siguiente persona de la lista.
+- La vista del evento muestra inscritos, aforo, cupos disponibles y cantidad de personas en espera; Moderación puede revisar también los estados `waitlisted` y `offered`.
+- Los avisos de cupo disponible pueden complementarse por correo si el asociado mantiene activada la categoría **Eventos**.
+- No requiere migración de tablas; se mantiene el esquema **10**.
+
+## 1.9.37 — RF-033 y RF-038: Soporte notificado
+
+- **RF-033:** al registrar una solicitud de soporte, el asociado recibe confirmación dentro del centro de notificaciones y el equipo con capacidad de Moderación recibe un aviso de nueva solicitud.
+- **RF-038:** cuando Moderación cambia el estado de una solicitud, su autor recibe una notificación interna con el nuevo estado: **Recibida**, **En atención** o **Resuelta**.
+- Volver a seleccionar el mismo estado no crea notificaciones duplicadas.
+- Los avisos del asociado abren **Contacto → Mis solicitudes** y los avisos del equipo abren **ASCLA → Solicitudes**.
+- Los avisos de soporte son internos; no dependen de las preferencias opcionales de correo de Conexiones, Mensajes y Eventos.
+- No requiere migración de tablas; se mantiene el esquema **10**.
+
+## 1.9.36 — Guardado protegido y RF-035 por correo
+
+- **Editar grupo** detecta modificaciones en nombre, descripción o fotografía. Si el usuario intenta cerrar con el fondo, la X o Escape, aparece una confirmación con **Seguir editando**, **Descartar cambios** y **Guardar cambios**.
+- RF-035 queda cubierto para las categorías opcionales **Conexiones**, **Mensajes** y **Eventos**, utilizando el transporte de correo configurado en WordPress/SMTP.
+- En **Mi perfil → Notificaciones por correo** cada asociado puede activar o desactivar esas tres categorías de forma independiente. Para cuentas existentes y nuevas, las tres opciones están activadas por defecto hasta que el usuario cambie su preferencia.
+- Las notificaciones internas permanecen siempre disponibles aunque se desactive el correo.
+- Los correos de mensajería avisan de la existencia del mensaje o solicitud, pero no copian el texto privado del mensaje al correo.
+- No requiere migración de tablas; se mantiene el esquema **10** y las preferencias se almacenan en metadatos de usuario.
+
+## 1.9.35 — Navegación contextual en conversaciones y modales
+
+- Las ventanas emergentes ahora se cierran al hacer clic directamente sobre el fondo oscuro exterior; los clics dentro del contenido no las cierran.
+- Se mantienen los cierres mediante la X superior y la tecla Escape.
+- En conversaciones/comentarios, el nombre de un autor asociado a una cuenta se puede pulsar para abrir su perfil dentro de un modal en la misma página.
+- Los comentarios sin usuario asociado continúan mostrándose como texto no interactivo.
+- No requiere migración y mantiene el esquema 10.
+
+## 1.9.34 — Edición de grupos y perfiles en contexto
+
+- El creador de un chat grupal puede editar el **nombre**, la **fotografía** y una **descripción breve** desde el menú Información del grupo.
+- La edición del grupo se valida también en backend: únicamente `created_by` puede guardar esos cambios.
+- La creación de grupos permite registrar opcionalmente la descripción desde el inicio.
+- Todos los controles **Ver perfil** del frontend abren el perfil del asociado dentro de un modal sobre la página actual; ya no dependen del enlace genérico que podía llevar al perfil propio.
+- El encabezado de una conversación privada usa el mismo visor de perfil en modal.
+- Esquema de base de datos: **10**, añadiendo `description` a las conversaciones grupales.
+
+
+## 1.9.33 — Pulido de mensajería y menú de grupos
+
+- Cuando una conversación privada ya está autorizada, el perfil deja de mostrar la etiqueta redundante **Conversación autorizada** y mantiene únicamente el botón **Enviar mensaje**.
+- El menú **Información del grupo** conserva solo la X superior para cerrar; se elimina el botón Cerrar inferior.
+- Cada integrante del grupo muestra acciones para **Ver perfil** y, salvo el propio usuario, **Mensaje privado**.
+- **Mensaje privado** abre el chat existente cuando ya está autorizado; si hay una solicitud pendiente abre esa conversación, y si aún no existe autorización permite enviar el primer mensaje como solicitud.
+- El botón **Eliminar grupo** continúa dentro de la información del grupo y solo está disponible para su creador.
+- No requiere migración adicional; se mantiene el esquema de base de datos **9**.
+
+
+## 1.9.32 — Bandeja de solicitudes y menú de grupos
+
+- Las solicitudes de conversación recibidas se muestran en un apartado **Solicitudes** separado de los chats normales, con vista previa del primer mensaje y contador visible.
+- Al aceptar una solicitud, la conversación pasa a **Chats**; al rechazarla deja de mostrarse como solicitud.
+- Los grupos incluyen un menú de información accesible desde el encabezado, con foto, nombre, integrantes e identificación del creador.
+- El botón **Eliminar grupo** se encuentra dentro de ese menú y solo se muestra al creador.
+- No requiere migración adicional; se mantiene el esquema de base de datos **9**.
+
+
+
+## 1.9.31 — Solicitudes con mensaje, foto y eliminación de grupos
+
+- El primer mensaje puede enviarse aunque aún no exista conexión profesional; al destinatario le aparece como solicitud de conversación y puede leerlo antes de aceptar o rechazar.
+- Mientras la solicitud está pendiente, el remitente no puede enviar mensajes adicionales; al aceptarse se habilita el chat normal sin crear una conexión profesional.
+- Los chats grupales admiten fotografía cuadrada privada, accesible únicamente para sus participantes.
+- Solo el creador del grupo puede eliminarlo; al hacerlo se eliminan conversación, participantes, mensajes y notificaciones asociadas.
+- Se conserva la confirmación de lectura `Enviado` / `Leído` y `Leído por N de M`.
+- Esquema de base de datos: **9**, añadiendo `photo_id` a las conversaciones.
+
+
+## 1.9.30 — Solicitudes de conversación, grupos y lectura
+
+- Incorpora RF-016, RF-017 y RF-018 con solicitudes de conversación independientes de la conexión profesional.
+- Permite crear chats grupales con conexiones confirmadas y hasta 50 participantes.
+- Muestra confirmación de lectura en mensajes directos y conteo de lectura en grupos.
+- Añade esquema 8 para conversaciones directas/grupales, título y creador.
 
 ## 1.9.29 — Temas automáticos, duración YouTube y transcripción segura
 
@@ -720,4 +812,4 @@ Las modificaciones exclusivamente documentales, como la ampliación de este arch
 - Cuando existe un snapshot verificable se conserva como referencia histórica.
 - No se crean tags ficticios para versiones cuyo código fuente original no esté disponible.
 - La carpeta `docs/` se mantiene fuera del repositorio público según la configuración actual de `.gitignore`.
-- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.27**.
+- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.38**.

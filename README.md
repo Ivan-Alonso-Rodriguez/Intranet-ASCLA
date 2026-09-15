@@ -4,9 +4,9 @@ Plugin WordPress portable para una comunidad profesional privada. Incluye perfil
 
 Toda la funcionalidad propia está en `wp-content/plugins/ascla-core/`. Elementor es opcional. No se modifica WordPress Core ni se necesita un tema específico. El plugin conserva sus datos al desactivarse o desinstalarse.
 
-## Versión actual: 1.9.29 · esquema 7
+## Versión actual: 1.9.38 · esquema 10
 
-La versión 1.9.29 mantiene el esquema 7 y refuerza el procesamiento de videos del Centro de Conocimiento: activa automáticamente los Temas ASCLA respaldados por el contenido, consulta la duración directamente desde YouTube y bloquea la generación asistida cuando no existe una transcripción verificable, evitando resúmenes o cápsulas sin evidencia.
+La versión 1.9.38 completa RF-029 y RF-030 en Eventos: incorpora lista de espera cuando el aforo está completo y, al liberarse un cupo, lo reserva para la primera persona en cola y la notifica para confirmar antes de registrar el RSVP. No introduce cambios de base de datos y mantiene el esquema 10.
 
 Administración con solicitudes persistentes, historial, búsqueda de usuarios y suspensión/reactivación. Los foros se publican sin aprobación; Galería, Centro de Conocimiento y Eventos sólo permiten crear/editar/publicar a Administradores y Ejecutivos ASCLA. Los eventos ordinarios se publican directamente, salvo borrador explícito; los microeventos conservan revisión administrativa.
 
@@ -14,7 +14,7 @@ El autor o un administrador puede eliminar contenido y comentarios. Al eliminar 
 
 Los proveedores reales configurables son **Google Gemini** y **OpenAI**. Cada uno mantiene modelo y API Key independientes, con claves cifradas, eliminación explícita y botón Probar conexión. OpenAI usa la Responses API y Gemini conserva su integración REST actual. La búsqueda admite términos parciales significativos y fuentes relacionadas. El asistente combina esas fuentes con un contexto vivo y autorizado de la intranet para consultas operativas, por ejemplo próximos eventos o publicaciones recientes. Las respuestas admiten paráfrasis: se valida la pertenencia de las referencias, no la igualdad de frases. Para datos de ASCLA sin evidencia suficiente, el asistente lo indica en lugar de inventar. Chatham House y revisión editorial se mantienen.
 
-Las conexiones requieren aceptación antes de habilitar mensajes; el chat consulta novedades cada **2 segundos** con cursores, conservación de borradores y backoff tras errores. Recuperación de contraseña nativa y SMTP configurable; Mailpit recibe los correos únicamente en el desarrollo local. Sigue pendiente configurar un proveedor para entrega a bandejas externas.
+Las conexiones confirmadas pueden conversar directamente. Entre asociados no conectados, el primer mensaje llega como **solicitud de conversación**: el destinatario puede leerlo y aceptar o rechazar; solo después de aceptar se habilitan mensajes adicionales. El chat consulta novedades cada **2 segundos** con cursores, conservación de borradores y backoff tras errores. Recuperación de contraseña nativa y SMTP configurable. Las notificaciones internas de conexiones, mensajes y eventos pueden complementarse por correo según las preferencias del asociado; los correos de mensajería no incluyen el texto privado del mensaje. Mailpit recibe los correos únicamente en el desarrollo local. En producción se requiere un transporte de correo operativo.
 
 El historial técnico de las entregas se resume en `VERSION_HISTORY.md`. Las métricas históricas de Sonar, cobertura y rendimiento no acreditan automáticamente la versión actual.
 

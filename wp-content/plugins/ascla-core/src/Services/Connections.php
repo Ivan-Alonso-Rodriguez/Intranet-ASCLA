@@ -47,21 +47,27 @@ final class Connections
     public static function between(int $a,int $b): array { return self::statesFor($a,[$b])[$b]; }
     public static function areConnected(int $a,int $b): bool { return self::between($a,$b)['can_read_messages']; }
     public static function requireConnected(int $a,int $b): void { Access::require(self::areConnected($a,$b),self::REQUIRED,403); }
-    public static function profile(int $id): array { return Profiles::visible($id)+['connection'=>self::between(get_current_user_id(),$id)]; }
+    public static function profile(int $id): array
+    {
+        $me=get_current_user_id();
+        return Profiles::visible($id)+['connection'=>self::between($me,$id),'conversation'=>ConversationRequests::between($me,$id)];
+    }
     public static function attach(array $profiles): array
     {
-        $states=self::statesFor(get_current_user_id(),array_column($profiles,'id'));
-        return array_map(static fn($p)=>$p+['connection'=>$states[$p['id']]],$profiles);
+        $me=get_current_user_id(); $ids=array_column($profiles,'id');
+        $states=self::statesFor($me,$ids); $conversations=ConversationRequests::statesFor($me,$ids);
+        return array_map(static fn($p)=>$p+['connection'=>$states[$p['id']],'conversation'=>$conversations[$p['id']]],$profiles);
     }
     public static function listing(): array
     {
         $me=get_current_user_id(); $rows=self::rows($me); $ids=[];
         foreach($rows as $row) $ids[]=(int)((int)$row['user_id']===$me?$row['target_id']:$row['user_id']);
         $out=['incoming'=>[],'outgoing'=>[],'connected'=>[]];
+        $conversationStates=ConversationRequests::statesFor($me,$ids);
         foreach(self::statesFor($me,$ids,$rows) as $id=>$state) {
             if (!Access::member($id) || $state['state']==='none') continue;
             $key=['incoming_pending'=>'incoming','outgoing_pending'=>'outgoing','connected'=>'connected'][$state['state']];
-            $out[$key][]=Profiles::card($id)+['connection'=>$state];
+            $out[$key][]=Profiles::card($id)+['connection'=>$state,'conversation'=>$conversationStates[$id]??ConversationRequests::between($me,$id)];
         }
         return $out;
     }

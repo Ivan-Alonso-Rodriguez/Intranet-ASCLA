@@ -179,12 +179,47 @@ final class Content
         if ($tagNames) { self::tags($saved,$tagNames); }
         foreach ($meta['media_ids']??[] as $media) { Media::attach($media,$saved); }
         wp_update_post(['ID'=>$saved,'post_status'=>$status]);
+        if ($type==='contact' && !$id) {
+            self::notifySupportCreated((int)$saved);
+        }
         if ($type==='resource' && !empty($meta['video_id'])) {
             // Best-effort automatic duration/thumbnail refresh. Saving must still succeed if YouTube is unavailable.
             Knowledge::autoVideoMetadata((int)$saved);
         }
         Audit::record('content_saved',$saved,$status);
         return self::serialize(get_post($saved));
+    }
+
+    /**
+     * RF-033: a new support request is relevant activity for both the requester
+     * and the moderation team. Email is intentionally not forced here; support
+     * notices remain available in-app even when optional email categories are off.
+     */
+    private static function notifySupportCreated(int $postId): void
+    {
+        $post=get_post($postId);
+        if (!$post || $post->post_type!=='ascla_contact') { return; }
+        $author=(int)$post->post_author;
+        if ($author>0 && Access::member($author)) {
+            Notifications::send(
+                $author,
+                'support_received',
+                'Recibimos tu solicitud #'.$postId.'.',
+                Catalog::url('contacto'),
+                ['type'=>'post','id'=>$postId]
+            );
+        }
+        $moderators=get_users(['capability'=>'ascla_moderate','fields'=>'ids']);
+        foreach (array_unique(array_map('absint',$moderators)) as $moderator) {
+            if (!$moderator || $moderator===$author || !Access::member($moderator)) { continue; }
+            Notifications::send(
+                $moderator,
+                'support_request',
+                Profiles::publicName($author).' envió una nueva solicitud de soporte.',
+                admin_url('admin.php?page=ascla-solicitudes'),
+                ['type'=>'post','id'=>$postId,'actor'=>$author]
+            );
+        }
     }
     public static function canDelete(\WP_Post $post): bool
     {

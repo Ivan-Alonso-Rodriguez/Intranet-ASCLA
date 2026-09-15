@@ -5,6 +5,7 @@
   const MB = 1024 * 1024;
   const contexts = {
     profile: { aspect: 1, width: 800, height: 800, label: '1:1', allowFull: false },
+    group: { aspect: 1, width: 800, height: 800, label: '1:1', allowFull: false },
     hub: { aspect: 16 / 9, width: 1600, height: 900, label: '16:9', allowFull: true },
     resource: { aspect: 16 / 9, width: 1600, height: 900, label: '16:9', allowFull: true },
     gallery: { aspect: 4 / 3, width: 1600, height: 1200, label: '4:3', allowFull: true },

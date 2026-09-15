@@ -48,10 +48,14 @@
     list: null,
     conversation: 0,
     conversations: [],
+    messageTab: "chats",
+    groupChat: null,
+    groupEdit: null,
     calendar: new Date(),
     adminTab: "moderacion",
     adminFilters: {users: {}, contacts: {}},
     pendingUnsavedResolver: null,
+    modalUnsavedForm: null,
     poll: null,
     noticeFilter: "all",
     noticePage: 1,
@@ -117,7 +121,7 @@
         })
       : "";
   const status = (value) =>
-    `<span class="status ${E(value)}">${E(T({ publish: "Publicado", draft: "Borrador", pending: "Pendiente de revisión", private: "Solicitud privada", ascla_rejected: "Rechazado", ascla_hidden: "Oculto", completed: "Completado", processing: "Procesando", error: "Error", accepted: "Inscrito", invited: "Invitado", cancelled: "Cancelado", declined: "Rechazado" }[value] || value))}</span>`;
+    `<span class="status ${E(value)}">${E(T({ publish: "Publicado", draft: "Borrador", pending: "Pendiente de revisión", private: "Solicitud privada", ascla_rejected: "Rechazado", ascla_hidden: "Oculto", completed: "Completado", processing: "Procesando", error: "Error", accepted: "Inscrito", invited: "Invitado", waitlisted: "En lista de espera", offered: "Cupo disponible", cancelled: "Cancelado", declined: "Rechazado" }[value] || value))}</span>`;
   const initials = (name) =>
     String(name || "AS")
       .split(" ")
@@ -261,19 +265,50 @@
     root.append(t);
     setTimeout(() => t.remove(), 5500);
   }
+  const modalUnsavedBaselines = new WeakMap();
+  function modalDecision(title, body) {
+    document.querySelector(".modal-decision-backdrop")?.remove();
+    const div = document.createElement("div");
+    div.className = "modal-backdrop modal-decision-backdrop";
+    div.innerHTML = `<section role="alertdialog" aria-modal="true" aria-label="${E(title)}" class="modal modal-decision"><div class="modal-top"><h2>${E(title)}</h2>${btn(I("close"), "modal-unsaved-stay", `aria-label="${E(T("Seguir editando"))}"`, "ghost")}</div><div class="modal-content">${body}</div></section>`;
+    root.append(div);
+    div.addEventListener("click", event => { if (event.target === div) closeModalDecision(); });
+    div.querySelector("button")?.focus();
+  }
+  function closeModalDecision() {
+    document.querySelector(".modal-decision-backdrop")?.remove();
+    S.modalUnsavedForm?.querySelector("button,input,textarea,select")?.focus();
+  }
+  function modalHasUnsavedChanges(form) {
+    if (!form?.isConnected || !modalUnsavedBaselines.has(form)) return false;
+    return modalUnsavedBaselines.get(form) !== formSnapshot(form);
+  }
+  function requestModalClose() {
+    const backdrop = [...document.querySelectorAll(".modal-backdrop")].find(node => !node.classList.contains("modal-decision-backdrop"));
+    const form = backdrop?.querySelector("form[data-guard-modal-unsaved]");
+    if (!modalHasUnsavedChanges(form)) { closeModal(); return; }
+    S.modalUnsavedForm = form;
+    modalDecision(T("Cambios sin guardar"), `<p class="detail-body">${E(T("Has realizado cambios que todavía no se han guardado."))}</p><p class="private-note">${E(T("¿Quieres guardar los cambios antes de cerrar esta ventana?"))}</p><div class="form-actions">${btn(T("Seguir editando"), "modal-unsaved-stay")}${btn(T("Descartar cambios"), "modal-unsaved-discard", "", "danger")}${btn(I("check")+" "+T("Guardar cambios"), "modal-unsaved-save", "", "primary")}</div>`);
+  }
   function modal(title, body, wide = false) {
     closeModal();
     const div = document.createElement("div");
     div.className = "modal-backdrop";
     div.innerHTML = `<section role="dialog" aria-modal="true" aria-label="${E(title)}" class="modal ${wide ? "wide" : ""}"><div class="modal-top"><h2>${E(title)}</h2>${btn(I("close"), "close", `aria-label="${E(T("Cerrar"))}"`, "ghost")}</div><div class="modal-content">${body}</div></section>`;
     root.append(div);
+    const guarded = div.querySelector("form[data-guard-modal-unsaved]");
+    if (guarded) modalUnsavedBaselines.set(guarded, formSnapshot(guarded));
+    div.addEventListener("click", (event) => {
+      if (event.target === div) requestModalClose();
+    });
     S.focus = document.activeElement;
     div.querySelector("button,input")?.focus();
   }
   function closeModal() {
     const pending = S.pendingUnsavedResolver;
     S.pendingUnsavedResolver = null;
-    document.querySelector(".modal-backdrop")?.remove();
+    S.modalUnsavedForm = null;
+    document.querySelectorAll(".modal-backdrop").forEach(node => node.remove());
     S.focus?.focus();
     if (pending) pending(false);
   }
@@ -650,6 +685,20 @@
     return `<div class="page-heading"><div><h1>${E(T(title))}</h1><p>${E(T(subtitle))}</p></div>${action}</div>`;
   }
   const content = () => document.getElementById("page-content");
+  function conversationRequestActions(p) {
+    const c = p.connection || {}, r = p.conversation || {}, id = Number(p.id);
+    if (c.state === 'connected') return '';
+    if (r.state === 'incoming_pending') {
+      return `<div class="conversation-request-actions"><span class="connection-state pending">${E(T('Solicitud de conversación recibida'))}</span>${r.conversation_id ? btn('Ver mensaje','conversation-open',`data-conversation="${Number(r.conversation_id)}"`,'small') : ''}${btn('Aceptar conversación','conversation-request-respond',`data-id="${id}" data-request="${Number(r.request_id)}" data-decision="accept" ${r.blocked ? 'disabled' : ''}`,'primary small')}${btn('Rechazar','conversation-request-respond',`data-id="${id}" data-request="${Number(r.request_id)}" data-decision="reject"`,'small')}</div>`;
+    }
+    if (r.state === 'outgoing_pending') {
+      return `<div class="conversation-request-actions"><span class="connection-state pending">${E(T('Mensaje enviado · Esperando aceptación'))}</span>${r.conversation_id ? btn('Ver mensaje','conversation-open',`data-conversation="${Number(r.conversation_id)}"`,'small') : ''}${btn(T('Cancelar solicitud'),'conversation-request-cancel',`data-id="${id}"`,'ghost danger small')}</div>`;
+    }
+    if (r.state === 'allowed') {
+      return r.can_message ? `<div class="conversation-request-actions conversation-request-actions-authorized">${btn(I('mail')+' '+T('Enviar mensaje'),'message-start',`data-id="${id}"`,'primary small')}</div>` : '';
+    }
+    return `<div class="conversation-request-actions">${btn(I('mail')+' '+T('Enviar mensaje'),'conversation-request',`data-id="${id}" ${r.can_request ? '' : 'disabled'}`,'small')}</div>`;
+  }
   function connectionActions(p, suggested = false, compactConnected = false) {
     if (Number(p.id) === S.boot.me.id || !p.connection) return '';
     const c = p.connection, id = Number(p.id);
@@ -663,29 +712,37 @@
       if (c.can_message) actions += btn(I('mail') + ' ' + T('Enviar mensaje'), 'message-start', `data-id="${id}"`, 'primary small') + (suggested ? btn(T('Mensaje sugerido'), 'intro', `data-id="${id}"`, 'small') : '');
       actions += btn(T('Eliminar conexión'), 'connection-remove-request', `data-id="${id}" data-mode="disconnect"`, 'ghost danger small');
     } else actions = btn('Enviar solicitud de conexión', 'connect', `data-id="${id}" ${c.can_request ? '' : 'disabled'}`, 'small');
-    const note = c.blocked ? T('La mensajería está bloqueada entre estas cuentas.') : c.state !== 'connected' ? (c.state === 'none' && !c.can_request ? T('Ambos asociados deben tener activado networking para conectar.') : T('La mensajería se habilita al aceptar la conexión.')) : '';
+    const conversationActions = conversationRequestActions(p);
+    const note = c.blocked ? T('La mensajería está bloqueada entre estas cuentas.') : c.state !== 'connected' ? (c.state === 'none' && !c.can_request ? T('Ambos asociados deben tener activado networking para conectar.') : '') : '';
     if (c.blocked_by_me) actions += btn('Desbloquear', 'block', `data-id="${id}" data-active="false"`, 'small');
-    return `<div class="connection-controls" data-member-connection="${id}" data-suggested="${suggested}" data-compact-connected="${compactConnected}" data-state="${E(c.state)}"><div class="connection-actions">${actions}</div>${note ? '<p class="private-note">' + E(note) + '</p>' : ''}</div>`;
+    return `<div class="connection-controls" data-member-connection="${id}" data-suggested="${suggested}" data-compact-connected="${compactConnected}" data-state="${E(c.state)}"><div class="connection-actions">${actions}</div>${conversationActions}${note ? '<p class="private-note">' + E(note) + '</p>' : ''}</div>`;
   }
   function memberRelationshipState(connection) {
     return connection?.state === 'connected' ? `<span class="connection-state connected compact">${I('check')} ${E(T('Conectados'))}</span>` : '';
   }
-  function updateConnectionState(id, state) {
-    for (const element of [...root.querySelectorAll(`[data-member-connection="${Number(id)}"]`)]) {
+  function updateRelationshipState(p) {
+    const id = Number(p.id);
+    for (const element of [...root.querySelectorAll(`[data-member-connection="${id}"]`)]) {
       const card = element.closest('.member-card');
       const suggested = element.dataset.suggested === 'true';
       const compactConnected = element.dataset.compactConnected === 'true';
-      element.outerHTML = connectionActions({id, connection: state}, suggested, compactConnected);
-      if (card) { const holder=card.querySelector('.member-card-relationship-state'); if (holder) holder.innerHTML=memberRelationshipState(state); }
+      element.outerHTML = connectionActions(p, suggested, compactConnected);
+      if (card) { const holder=card.querySelector('.member-card-relationship-state'); if (holder) holder.innerHTML=memberRelationshipState(p.connection); }
     }
   }
+  async function refreshRelationshipState(id) {
+    const p = await api('profiles/' + Number(id));
+    updateRelationshipState(p);
+    return p;
+  }
   function connectionRow(p) {
-    return `<article class="connection-row"><div class="connection-person">${avatar(p)}<div><strong>${E(p.name)}</strong>${p.profile_url ? `<a href="${E(p.profile_url)}">${E(T('Ver perfil'))}</a>` : `<small>${E(T('Perfil no disponible'))}</small>`}</div></div>${connectionActions(p)}</article>`;
+    const preview = p.conversation?.initial_message ? `<div class="conversation-request-preview"><span>${E(T('Mensaje'))}</span><p>${E(p.conversation.initial_message)}</p></div>` : '';
+    return `<article class="connection-row"><div class="connection-person">${avatar(p)}<div><strong>${E(p.name)}</strong>${p.profile_url ? `<button type="button" class="profile-inline-link" data-action="member" data-id="${Number(p.id)}">${E(T('Ver perfil'))}</button>` : `<small>${E(T('Perfil no disponible'))}</small>`}${preview}</div></div>${connectionActions(p)}</article>`;
   }
   async function refreshConnectionsPanel() {
     const panel = document.getElementById('connections-panel'); if (!panel) return;
-    const data = await api('connections'); if (!panel.isConnected) return;
-    panel.innerHTML = `<div class="section-top"><h2>${E(T('Mis conexiones'))}</h2>${btn('Actualizar conexiones','connections-refresh','','ghost small')}</div><h3>${E(T('Solicitudes recibidas'))} (${data.incoming.length})</h3>${data.incoming.map(connectionRow).join('') || `<p class="private-note">${E(T('No tienes solicitudes pendientes.'))}</p>`}<details><summary>${E(T('Solicitudes enviadas'))} (${data.outgoing.length})</summary>${data.outgoing.map(connectionRow).join('') || `<p class="private-note">${E(T('No hay solicitudes enviadas pendientes.'))}</p>`}</details><details><summary>${E(T('Conexiones confirmadas'))} (${data.connected.length})</summary>${data.connected.map(connectionRow).join('') || `<p class="private-note">${E(T('Tus conexiones aparecerán aquí cuando acepten la solicitud.'))}</p>`}</details>`;
+    const [data, requests] = await Promise.all([api('connections'), api('conversation-requests')]); if (!panel.isConnected) return;
+    panel.innerHTML = `<div class="section-top"><h2>${E(T('Mis conexiones'))}</h2>${btn('Actualizar conexiones','connections-refresh','','ghost small')}</div><h3>${E(T('Solicitudes recibidas'))} (${data.incoming.length})</h3>${data.incoming.map(connectionRow).join('') || `<p class="private-note">${E(T('No tienes solicitudes pendientes.'))}</p>`}<details><summary>${E(T('Solicitudes enviadas'))} (${data.outgoing.length})</summary>${data.outgoing.map(connectionRow).join('') || `<p class="private-note">${E(T('No hay solicitudes enviadas pendientes.'))}</p>`}</details><details><summary>${E(T('Conexiones confirmadas'))} (${data.connected.length})</summary>${data.connected.map(connectionRow).join('') || `<p class="private-note">${E(T('Tus conexiones aparecerán aquí cuando acepten la solicitud.'))}</p>`}</details><div class="conversation-request-panel"><h3>${E(T('Solicitudes de conversación'))} (${requests.incoming.length})</h3>${requests.incoming.map(connectionRow).join('') || `<p class="private-note">${E(T('No tienes solicitudes de conversación pendientes.'))}</p>`}<details><summary>${E(T('Conversaciones solicitadas'))} (${requests.outgoing.length})</summary>${requests.outgoing.map(connectionRow).join('') || `<p class="private-note">${E(T('No hay solicitudes de conversación enviadas.'))}</p>`}</details></div>`;
   }
   let relationshipRefreshing = false;
   async function refreshOpenConnection() {
@@ -694,7 +751,7 @@
     relationshipRefreshing = true;
     try {
       const p = await api('profiles/' + element.dataset.memberConnection);
-      if (element.isConnected) updateConnectionState(p.id, p.connection);
+      if (element.isConnected) updateRelationshipState(p);
     } catch { /* The action endpoints still validate the latest state and permissions. */ }
     finally { relationshipRefreshing = false; }
   }
@@ -884,6 +941,17 @@
     const preserved = (p.hidden || []).filter(key => !fields.includes(key)).map(key => `<input type="hidden" name="hidden" value="${E(key)}">`).join("");
     return `<section class="profile-preferences" aria-labelledby="profile-privacy-title"><div class="preference-heading"><span class="preference-emblem privacy-emblem">${I("shield")}</span><div><h2 id="profile-privacy-title">${E(T("Privacidad y participación"))}</h2><p>${E(T("Tú eliges cómo participar y qué información compartir con la comunidad."))}</p></div></div><div class="profile-privacy-layout"><div class="participation-panel"><h3>${E(T("Tu lugar en la comunidad"))}</h3>${profileParticipation(p)}<div class="profile-privacy-note">${I("shield")}<p>${E(T("Tus objetivos y preferencias de aprendizaje se utilizan internamente para ayudarte a conectar."))}</p></div></div><div class="visibility-panel"><h3>${E(T("Qué ven otros asociados"))}</h3><p>${E(T("Pulsa un dato para cambiar entre visible y oculto. La moderación puede consultarlo."))}</p><div class="visibility-options">${controls}</div>${preserved}<span class="profile-save-hint">${E(T("Los cambios se aplican al guardar tu perfil."))}</span></div></div></section>`;
   }
+  function profileEmailNotifications(p) {
+    const prefs = { connections: true, messages: true, events: true, ...(p.email_notifications || {}) };
+    const rows = [
+      ["connections", "users", "Conexiones", "Solicitudes de conexión y avisos cuando una conexión sea aceptada."],
+      ["messages", "mail", "Mensajes", "Mensajes privados, solicitudes de conversación e invitaciones a grupos."],
+      ["events", "calendar", "Eventos", "Invitaciones a eventos y círculos de conversación."],
+    ];
+    const options = rows.map(([key, icon, title, description]) => `<label class="participation-option"><span class="participation-icon">${I(icon)}</span><span class="participation-copy"><strong>${E(T(title))}</strong><span>${E(T(description))}</span></span><span class="preference-switch"><input type="checkbox" role="switch" name="email_${key}" aria-label="${E(T(title))}" ${prefs[key] !== false ? "checked" : ""}><span class="switch-track" aria-hidden="true"></span></span></label>`).join("");
+    return `<section class="profile-preferences email-notification-preferences" aria-labelledby="profile-email-title"><div class="preference-heading"><span class="preference-emblem">${I("mail")}</span><div><h2 id="profile-email-title">${E(T("Notificaciones por correo"))}</h2><p>${E(T("Elige qué avisos opcionales quieres recibir también en tu correo. Por defecto están activados."))}</p></div></div><div class="email-notification-panel">${options}<p class="profile-save-hint">${E(T("Las notificaciones internas de ASCLA seguirán disponibles aunque desactives estos correos."))}</p></div></section>`;
+  }
+
   function updateProfilePreference(input) {
     const topic = input.closest(".profile-topic");
     if (!topic) return;
@@ -900,7 +968,7 @@
         "Mi perfil",
         "Tu experiencia es el punto de partida de nuevas conexiones.",
       ) +
-      `<form class="card" data-form="profile" data-guard-unsaved><div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small" style="margin-top:10px">${I("edit")} ${E(T("Cambiar fotografía"))}<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">${E(T("JPG, PNG o WebP. Podrás mover, ampliar y recortar antes de guardar; ASCLA optimiza la imagen automáticamente."))}</div></div></div><div class="form-section">${E(T("Información profesional"))}</div><div class="form-grid">${["first_name", "last_name", "position", "company"].map((k) => field(k, profileLabels[k], p[k] || "", "text", 'maxlength="200"')).join("")}${profileLocationFields(p)}${["member_type", "linkedin", "twitter", "website"].map((k) => field(k, profileLabels[k], p[k] || "", k === "linkedin" || k === "twitter" || k === "website" ? "url" : "text", 'maxlength="200"')).join("")}<div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>${profileKnowledge(p)}${profilePrivacy(p)}<div class="form-actions"><button class="btn primary">${I("check")} ${E(T("Guardar perfil"))}</button></div></form><div class="card section-gap account-security"><div class="form-section">${E(T("Seguridad de la cuenta"))}</div><h3>${E(T("Cambiar contraseña"))}</h3><p class="private-note">${E(T("Para cambiarla desde la intranet, confirma primero tu contraseña actual."))}</p><form data-form="password-change"><div class="password-current">${field("current_password", "Contraseña actual", "", "password", 'required autocomplete="current-password"')}</div><div class="form-grid password-new-grid">${field("new_password", "Nueva contraseña", "", "password", 'required minlength="12" autocomplete="new-password"')}${field("confirm_password", "Confirmar nueva contraseña", "", "password", 'required minlength="12" autocomplete="new-password"')}</div><div class="form-actions"><button class="btn primary">${E(T("Cambiar contraseña"))}</button></div></form><div class="password-recovery"><h3>${E(T("¿No recuerdas tu contraseña actual?"))}</h3><p class="private-note">${E(T("Puedes recibir un enlace seguro de recuperación en"))} <strong>${E(p.email || S.boot.me.email || T("tu correo registrado"))}</strong>.</p>${btn(I("mail") + " Enviar enlace de recuperación", "password-reset-email", "", "small")}</div></div><div class="card section-gap"><h3>${E(T("Mis archivos"))}</h3><p class="private-note">${E(T("Consulta tus archivos y elimina los que ya no necesitas. Los archivos eliminados también se retiran de las publicaciones y de tu fotografía de perfil."))}</p>${btn("Administrar mis archivos", "files", 'data-scope="mine"', "small")}<h3 class="section-gap">${E(T("Mi calendario"))}</h3><p class="private-note">${E(T(S.boot.google_connected ? "Tu calendario Google está conectado." : "Integración Google Calendar no configurada para tu cuenta. Puedes conectarlo para guardar próximos eventos."))}</p><div class="admin-actions">${btn("Conectar Google Calendar", "google-connect", 'data-service="calendar"')}${S.boot.google_connected ? btn("Desconectar", "google-disconnect", 'data-service="calendar"') : ""}</div></div>`;
+      `<form class="card" data-form="profile" data-guard-unsaved><div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small" style="margin-top:10px">${I("edit")} ${E(T("Cambiar fotografía"))}<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">${E(T("JPG, PNG o WebP. Podrás mover, ampliar y recortar antes de guardar; ASCLA optimiza la imagen automáticamente."))}</div></div></div><div class="form-section">${E(T("Información profesional"))}</div><div class="form-grid">${["first_name", "last_name", "position", "company"].map((k) => field(k, profileLabels[k], p[k] || "", "text", 'maxlength="200"')).join("")}${profileLocationFields(p)}${["member_type", "linkedin", "twitter", "website"].map((k) => field(k, profileLabels[k], p[k] || "", k === "linkedin" || k === "twitter" || k === "website" ? "url" : "text", 'maxlength="200"')).join("")}<div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>${profileKnowledge(p)}${profilePrivacy(p)}${profileEmailNotifications(p)}<div class="form-actions"><button class="btn primary">${I("check")} ${E(T("Guardar perfil"))}</button></div></form><div class="card section-gap account-security"><div class="form-section">${E(T("Seguridad de la cuenta"))}</div><h3>${E(T("Cambiar contraseña"))}</h3><p class="private-note">${E(T("Para cambiarla desde la intranet, confirma primero tu contraseña actual."))}</p><form data-form="password-change"><div class="password-current">${field("current_password", "Contraseña actual", "", "password", 'required autocomplete="current-password"')}</div><div class="form-grid password-new-grid">${field("new_password", "Nueva contraseña", "", "password", 'required minlength="12" autocomplete="new-password"')}${field("confirm_password", "Confirmar nueva contraseña", "", "password", 'required minlength="12" autocomplete="new-password"')}</div><div class="form-actions"><button class="btn primary">${E(T("Cambiar contraseña"))}</button></div></form><div class="password-recovery"><h3>${E(T("¿No recuerdas tu contraseña actual?"))}</h3><p class="private-note">${E(T("Puedes recibir un enlace seguro de recuperación en"))} <strong>${E(p.email || S.boot.me.email || T("tu correo registrado"))}</strong>.</p>${btn(I("mail") + " Enviar enlace de recuperación", "password-reset-email", "", "small")}</div></div><div class="card section-gap"><h3>${E(T("Mis archivos"))}</h3><p class="private-note">${E(T("Consulta tus archivos y elimina los que ya no necesitas. Los archivos eliminados también se retiran de las publicaciones y de tu fotografía de perfil."))}</p>${btn("Administrar mis archivos", "files", 'data-scope="mine"', "small")}<h3 class="section-gap">${E(T("Mi calendario"))}</h3><p class="private-note">${E(T(S.boot.google_connected ? "Tu calendario Google está conectado." : "Integración Google Calendar no configurada para tu cuenta. Puedes conectarlo para guardar próximos eventos."))}</p><div class="admin-actions">${btn("Conectar Google Calendar", "google-connect", 'data-service="calendar"')}${S.boot.google_connected ? btn("Desconectar", "google-disconnect", 'data-service="calendar"') : ""}</div></div>`;
     const profileForm = content().querySelector('[data-form="profile"]');
     registerUnsavedForm(profileForm);
     await setupProfileLocations(profileForm);
@@ -1027,7 +1095,10 @@
       const canReply = c.status === 'publish';
       const actions = `<div class="comment-actions">${btn(I('heart') + ` <span>${Number(c.likes || 0)}</span>`, 'comment-like', `data-id="${Number(c.id)}" data-post="${Number(postId)}" data-active="${!c.liked}" aria-pressed="${!!c.liked}" aria-label="${E(T(c.liked ? 'Quitar Me gusta' : 'Me gusta'))}"`, `ghost small comment-like ${c.liked ? 'active' : ''}`)}${canReply ? btn(I('reply') + ' ' + T('Responder'), 'comment-reply', `data-id="${Number(c.id)}" data-post="${Number(postId)}" data-author="${E(c.author)}"`, 'ghost small') : ''}${c.status === 'pending' ? status(c.status) : ''}</div>`;
       const replies = (children.get(Number(c.id)) || []).map(child => renderOne(child, depth + 1)).join('');
-      return `<article class="comment ${depth ? 'comment-reply' : ''}" data-comment-id="${Number(c.id)}" style="--comment-depth:${Math.min(depth, 4)}"><div class="comment-head"><div><strong>${E(c.author)}</strong> <small class="muted">${date(c.date)}</small></div>${menu}</div><p>${E(c.body)}</p>${actions}<div class="comment-reply-slot"></div>${replies}</article>`;
+      const authorName = Number(c.author_id) > 0
+        ? `<button type="button" class="comment-author" data-action="member" data-id="${Number(c.author_id)}" aria-label="${E(T('Ver perfil de'))} ${E(c.author)}">${E(c.author)}</button>`
+        : `<strong>${E(c.author)}</strong>`;
+      return `<article class="comment ${depth ? 'comment-reply' : ''}" data-comment-id="${Number(c.id)}" style="--comment-depth:${Math.min(depth, 4)}"><div class="comment-head"><div>${authorName} <small class="muted">${date(c.date)}</small></div>${menu}</div><p>${E(c.body)}</p>${actions}<div class="comment-reply-slot"></div>${replies}</article>`;
     };
     let html = (children.get(0) || []).map(c => renderOne(c, 0)).join('');
     for (const c of comments) if (!seen.has(Number(c.id))) html += renderOne(c, 0);
@@ -1049,10 +1120,27 @@
     if (p.type === "event") {
       const d = await api("events/" + id);
       S.event = d;
-      const registrationActions = d.is_past
-        ? `<span class="tag">${E(T("Evento finalizado"))}</span>`
-        : `${d.registered === "accepted" ? btn("Cancelar inscripción", "register", `data-id="${id}" data-status="cancelled"`) : btn("Registrarme", "register", `data-id="${id}" data-status="accepted"`, "primary")}${d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : ""}`;
-      extra = `<div class="card" style="background:var(--bg);margin:20px 0"><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span><span>${I("clock")} ${time(p.meta.start)} – ${time(p.meta.end)}</span><span>${I("pin")} ${E(p.meta.location || T("Por confirmar"))}</span></div><p class="private-note">${d.attending} ${E(T("inscritos"))}${p.meta.capacity ? " · " + p.meta.capacity + " " + T("cupos") : " · " + T("Sin límite de cupos")}${d.is_past ? " · " + T("Finalizado") : " · " + status(d.registered)}</p>${p.meta.agenda ? `<p class="detail-body">${E(p.meta.agenda).replace(/\n/g, "<br>")}</p>` : ""}<div class="form-actions">${registrationActions}${!d.is_past && d.google_url ? `<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">${E(T("Añadir a Google Calendar ↗"))}</a>` : ""}${!d.is_past && S.boot.google_connected ? btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small") + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small") : ""}</div>${d.participants ? `<details><summary class="private-note">${E(T("Participantes (moderación)"))}</summary>${d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("")}</details>` : ""}</div>`;
+      let registrationActions = "";
+      let waitlistNotice = "";
+      if (d.is_past) {
+        registrationActions = `<span class="tag">${E(T("Evento finalizado"))}</span>`;
+      } else if (d.registered === "accepted") {
+        registrationActions = btn("Cancelar inscripción", "register", `data-id="${id}" data-status="cancelled"`);
+      } else if (d.registered === "waitlisted") {
+        const position = Number(d.waitlist_position || 0);
+        waitlistNotice = `<div class="alert" style="margin-top:16px">${I("clock")} <strong>${E(T("Estás en la lista de espera"))}</strong>${position ? ` · ${E(T("posición"))} ${position}` : ""}. ${E(T("Te avisaremos cuando se libere un cupo."))}</div>`;
+        registrationActions = btn("Salir de la lista de espera", "register", `data-id="${id}" data-status="cancelled"`, "ghost");
+      } else if (d.registered === "offered") {
+        waitlistNotice = `<div class="alert success" style="margin-top:16px">${I("check")} <strong>${E(T("Se liberó un cupo para ti"))}</strong>. ${E(T("Confirma tu asistencia para ocuparlo."))}</div>`;
+        registrationActions = btn("Confirmar asistencia", "register", `data-id="${id}" data-status="accepted"`, "primary") + btn("Rechazar cupo", "register", `data-id="${id}" data-status="declined"`, "ghost");
+      } else if (d.full) {
+        registrationActions = btn("Unirme a la lista de espera", "register", `data-id="${id}" data-status="waitlisted"`, "primary") + (d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : "");
+      } else {
+        registrationActions = btn(d.registered === "invited" ? "Aceptar invitación" : "Registrarme", "register", `data-id="${id}" data-status="accepted"`, "primary") + (d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : "");
+      }
+      const waitlistSummary = Number(d.waitlist_count || 0) ? ` · ${Number(d.waitlist_count)} ${E(T(Number(d.waitlist_count) === 1 ? "persona en espera" : "personas en espera"))}` : "";
+      const capacitySummary = p.meta.capacity ? ` · ${p.meta.capacity} ${E(T("cupos"))}${Number(d.remaining) === 0 ? ` · ${E(T("aforo completo"))}` : ` · ${Number(d.remaining)} ${E(T("disponibles"))}`}` : ` · ${E(T("Sin límite de cupos"))}`;
+      extra = `<div class="card" style="background:var(--bg);margin:20px 0"><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span><span>${I("clock")} ${time(p.meta.start)} – ${time(p.meta.end)}</span><span>${I("pin")} ${E(p.meta.location || T("Por confirmar"))}</span></div><p class="private-note">${d.attending} ${E(T("inscritos"))}${capacitySummary}${waitlistSummary}${d.is_past ? " · " + T("Finalizado") : " · " + status(d.registered)}</p>${waitlistNotice}${p.meta.agenda ? `<p class="detail-body">${E(p.meta.agenda).replace(/\n/g, "<br>")}</p>` : ""}<div class="form-actions">${registrationActions}${!d.is_past && d.google_url ? `<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">${E(T("Añadir a Google Calendar ↗"))}</a>` : ""}${!d.is_past && S.boot.google_connected ? btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small") + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small") : ""}</div>${d.participants ? `<details><summary class="private-note">${E(T("Participantes y lista de espera (moderación)"))}</summary>${d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("")}</details>` : ""}</div>`;
     }
     const canEdit = ["gallery", "resource", "event"].includes(p.type) ? (S.boot.admin || S.boot.executive) : S.boot.moderator || p.author.id === S.boot.me.id;
     const reviewedLabel = T(p.meta.reviewed ? "Revisado" : "Requiere revisión de fuentes, anonimización y derechos.");
@@ -1195,6 +1283,56 @@
     const form = event.target.closest('.chat-compose');
     if (form) chatDrafts.set(Number(form.dataset.id), form.elements.body.value);
   });
+  root.addEventListener('change', event => {
+    const input = event.target.closest('[data-group-member]');
+    if (!input || !S.groupChat) return;
+    const id = Number(input.dataset.groupMember);
+    if (input.checked && S.groupChat.selected.size >= 49) { input.checked = false; toast('Un grupo puede tener como máximo 50 participantes.'); return; }
+    if (input.checked) S.groupChat.selected.add(id); else S.groupChat.selected.delete(id);
+    const count = document.getElementById('group-selected'); if (count) count.textContent = S.groupChat.selected.size;
+  });
+  async function conversationRequestDialog(id) {
+    const p = await api('profiles/' + Number(id));
+    modal('Enviar solicitud de conversación', `<form data-form="conversation-request-message" data-id="${Number(id)}"><div class="request-message-recipient">${avatar(p)}<div><strong>${E(p.name)}</strong><small>${E(T('Este primer mensaje llegará como una solicitud. Podrá leerlo y decidir si acepta la conversación.'))}</small></div></div>${field('body','Mensaje','','textarea','required maxlength="5000" placeholder="Escribe tu mensaje…"')}<div class="form-actions">${btn('Cancelar','close')}<button class="btn primary">${I('mail')} Enviar solicitud</button></div></form>`);
+  }
+  async function groupChatDialog() {
+    const data = await api('connections');
+    S.groupChat = {selected:new Set(), members:data.connected || [], photo:null};
+    const options = S.groupChat.members.map(p => `<label class="check group-member-option"><input type="checkbox" name="users" value="${Number(p.id)}" data-group-member="${Number(p.id)}"><span>${avatar(p)}<span><strong>${E(p.name)}</strong><small>${E(p.company || T('Conexión ASCLA'))}</small></span></span></label>`).join('');
+    const photo = `<div class="group-photo-field"><div id="group-photo-preview" class="group-photo-preview"><span class="group-photo-placeholder">${I('users')}</span></div><div><label class="btn small">${I('plus')} Elegir foto<input type="file" accept="image/jpeg,image/png,image/webp" data-upload="group-photo" hidden></label><input type="hidden" name="photo_id" value="0"><p class="private-note">JPG, PNG o WebP. Se ajustará en formato cuadrado.</p></div></div>`;
+    modal('Crear chat grupal', `<form data-form="group-chat">${photo}${field('title','Nombre del grupo','','text','required maxlength="120" placeholder="Ej. Comité de Innovación"')}${field('description','Descripción breve','','textarea','maxlength="240" placeholder="Ej. Coordinación del comité y próximos acuerdos"')}<p class="private-note">Selecciona al menos dos conexiones confirmadas. El grupo admite hasta 50 participantes contando tu cuenta.</p><div class="group-member-list">${options || empty('Necesitas al menos dos conexiones confirmadas','Conecta con otros asociados antes de crear un grupo.')}</div><p class="private-note"><strong id="group-selected">0</strong> seleccionados</p><div class="form-actions">${btn('Cancelar','close')}<button class="btn primary" ${S.groupChat.members.length < 2 ? 'disabled' : ''}>${I('plus')} Crear grupo</button></div></form>`);
+  }
+  async function groupEditDialog(id) {
+    const current = await api('conversations/' + Number(id));
+    if (current.kind !== 'group' || !current.can_delete_group) return;
+    S.groupEdit = {id:Number(current.id), photo_id:Number(current.photo_id || 0), photo_url:current.photo_url || ''};
+    const preview = current.photo_url
+      ? `<img src="${E(current.photo_url)}" alt="${E(T('Foto del grupo'))}">${btn('Quitar foto','group-edit-photo-clear','','ghost small')}`
+      : `<span class="group-photo-placeholder">${I('users')}</span>`;
+    const photo = `<div class="group-photo-field"><div id="group-edit-photo-preview" class="group-photo-preview">${preview}</div><div><label class="btn small">${I('plus')} Cambiar foto<input type="file" accept="image/jpeg,image/png,image/webp" data-upload="group-photo-edit" hidden></label><input type="hidden" name="photo_id" value="${Number(current.photo_id || 0)}"><p class="private-note">JPG, PNG o WebP. La nueva foto reemplazará a la actual al guardar.</p></div></div>`;
+    modal(T('Editar grupo'), `<form data-form="group-edit" data-guard-modal-unsaved data-id="${Number(current.id)}">${photo}${field('title','Nombre del grupo',current.title || '','text','required maxlength="120"')}${field('description','Descripción breve',current.description || '','textarea','maxlength="240" placeholder="Añade una breve descripción del propósito del grupo"')}<div class="form-actions">${btn('Cancelar','group-menu',`data-id="${Number(current.id)}"`)}<button class="btn primary">${I('check')} Guardar cambios</button></div></form>`);
+  }
+  async function groupInfoDialog(id) {
+    const current = await api('conversations/' + Number(id));
+    if (current.kind !== 'group') return;
+    const identity = chatIdentity(current);
+    const me = Number(S.boot.me.id);
+    const members = (current.members || []).map(member => {
+      const memberId = Number(member.id);
+      const creator = memberId === Number(current.created_by);
+      const isMe = memberId === me;
+      const profileAction = btn(T('Ver perfil')+' '+I('arrow'),'member',`data-id="${memberId}"`,'ghost small group-member-action');
+      const messageAction = !isMe ? btn(I('mail')+' '+T('Mensaje privado'),'group-member-message',`data-id="${memberId}"`,'small group-member-action') : '';
+      const ownerBadge = creator ? '<span class="group-owner-badge">' + E(T('Creador')) + '</span>' : '';
+      const meBadge = isMe ? '<span class="group-me-badge">' + E(T('Tú')) + '</span>' : '';
+      return `<div class="group-info-member"><div class="group-info-member-main">${avatar(member)}<div class="group-info-member-copy"><div class="group-info-member-name"><strong>${E(member.name || T('Asociado ASCLA'))}</strong>${ownerBadge}${meBadge}</div><small>${E(member.company || member.role_label || T('Integrante'))}</small></div></div><div class="group-info-member-actions">${profileAction}${messageAction}</div></div>`;
+    }).join('');
+    const editAction = current.can_delete_group ? btn(I('edit')+' '+T('Editar grupo'),'group-edit-open',`data-id="${Number(current.id)}"`,'ghost small') : '';
+    const description = current.description ? `<p class="group-info-description">${E(current.description)}</p>` : `<p class="group-info-description muted">${E(T('Sin descripción del grupo.'))}</p>`;
+    const danger = current.can_delete_group ? `<div class="group-info-danger"><div><strong>${E(T('Eliminar grupo'))}</strong><p class="private-note">${E(T('Elimina esta conversación y sus mensajes para todos los integrantes. Esta acción no se puede deshacer.'))}</p></div>${btn('Eliminar grupo','group-delete-request',`data-id="${Number(current.id)}" data-name="${E(identity.name)}"`,'danger')}</div>` : '';
+    modal(T('Información del grupo'), `<div class="group-info-head">${avatar(identity)}<div class="group-info-head-copy"><h3>${E(identity.name)}</h3><p>${Number(current.member_count || current.members?.length || 0)} ${E(T('integrantes'))}</p>${description}</div>${editAction ? `<div class="group-info-head-action">${editAction}</div>` : ''}</div><div class="group-info-section"><div class="group-info-section-title"><h4>${E(T('Integrantes'))}</h4><span>${Number(current.member_count || current.members?.length || 0)}</span></div><div class="group-info-members">${members}</div></div>${danger}`);
+  }
+
   function stopChat() {
     clearTimeout(S.poll);
     if (S.chat) S.chat.active = false;
@@ -1209,15 +1347,54 @@
       label.classList.toggle("is-error", failed);
     }
   }
+  function receiptText(read, total) {
+    read = Number(read || 0); total = Number(total || 0);
+    if (total <= 1) return read >= 1 ? T('Leído') : T('Enviado');
+    return `${T('Leído por')} ${Math.min(read,total)} ${T('de')} ${total}`;
+  }
   function messageBubble(m) {
     const mine = Number(m.sender_id) === Number(S.boot.me.id);
+    const group = S.chat?.current?.kind === 'group';
     const menu = m.can_delete ? overflowDelete('delete-message', m.id, `data-conversation="${Number(m.conversation_id || S.conversation)}"`, 'Eliminar mensaje') : '';
-    return `<div data-message-id="${Number(m.id)}" class="bubble ${mine ? "me" : ""}"><div class="bubble-top"><span class="bubble-body">${E(m.body)}</span>${menu}</div><small>${date(m.created_at, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</small></div>`;
+    const sender = group && !mine ? `<strong class="bubble-sender">${E(m.sender?.name || T('Asociado ASCLA'))}</strong>` : '';
+    const receipt = mine ? `<span class="message-receipt" data-receipt-for="${Number(m.id)}">${E(receiptText(m.read_count,m.read_total))}</span>` : '';
+    return `<div data-message-id="${Number(m.id)}" data-sender-id="${Number(m.sender_id)}" class="bubble ${mine ? "me" : ""}">${sender}<div class="bubble-top"><span class="bubble-body">${E(m.body)}</span>${menu}</div><small>${date(m.created_at, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}${receipt ? ' · ' + receipt : ''}</small></div>`;
+  }
+  function applyReadState(readState = []) {
+    const states = Array.isArray(readState) ? readState : [];
+    document.querySelectorAll('.bubble.me[data-message-id]').forEach(bubble => {
+      const id = Number(bubble.dataset.messageId);
+      const count = states.filter(state => Number(state.last_read) >= id).length;
+      const holder = bubble.querySelector('[data-receipt-for]');
+      if (holder) holder.textContent = receiptText(count, states.length);
+    });
+  }
+  function chatIdentity(c) {
+    if (c?.kind === 'group') return {name:c.title || T('Grupo ASCLA'), photo_url:c.photo_url || '', profile_url:''};
+    return c?.other || {name:T('Conversación'),photo_url:'',profile_url:''};
+  }
+  function isIncomingRequest(c) {
+    return c?.kind !== 'group' && c?.conversation_request?.state === 'incoming_pending';
+  }
+  function conversationBucket(tab = S.messageTab, rows = S.conversations) {
+    return (rows || []).filter(c => tab === 'requests' ? isIncomingRequest(c) : !isIncomingRequest(c));
   }
   function chatSidebar() {
     const aside = document.querySelector(".chat-sidebar");
     if (!aside) return;
-    const markup = S.conversations.map(c => `<button class="chat-person ${Number(c.id) === S.conversation ? "active" : ""}" data-action="conversation" data-id="${Number(c.id)}">${avatar(c.other)}<span><strong>${E(c.other.name)} ${c.unread ? '<span class="tag" aria-label="' + Number(c.unread) + ' sin leer">' + Number(c.unread) + '</span>' : ''}</strong><small>${E(c.preview.slice(0, 42))}</small></span></button>`).join("") || '<p class="private-note">No hay conversaciones para mostrar. Puedes iniciar una desde el directorio.</p>';
+    const requests = conversationBucket('requests');
+    const rows = conversationBucket(S.messageTab);
+    const requestUnread = requests.reduce((sum,c)=>sum + Number(c.unread || 0),0);
+    const tabs = `<div class="chat-sidebar-tabs"><button type="button" class="chat-sidebar-tab ${S.messageTab==='chats'?'active':''}" data-action="chat-tab" data-tab="chats">${E(T('Chats'))}</button><button type="button" class="chat-sidebar-tab ${S.messageTab==='requests'?'active':''}" data-action="chat-tab" data-tab="requests">${E(T('Solicitudes'))}<span class="chat-request-count ${requestUnread?'unread':''}">${requests.length}</span></button></div>`;
+    const heading = S.messageTab === 'requests' ? `<div class="chat-sidebar-section"><strong>${E(T('Solicitudes de conversación'))}</strong><small>${E(T('Los mensajes de personas aún no autorizadas aparecen aquí.'))}</small></div>` : '';
+    const list = rows.map(c => {
+      const person=chatIdentity(c);
+      const requestMark = isIncomingRequest(c) ? `<span class="request-pill">${E(T('Solicitud'))}</span>` : '';
+      return `<button class="chat-person ${Number(c.id) === S.conversation ? "active" : ""} ${c.unread ? 'has-unread' : ''}" data-action="conversation" data-id="${Number(c.id)}">${avatar(person)}<span><strong>${E(person.name)} ${c.kind==='group'?'<span class="group-badge">Grupo</span>':''} ${requestMark} ${c.unread ? '<span class="tag" aria-label="' + Number(c.unread) + ' sin leer">' + Number(c.unread) + '</span>' : ''}</strong><small>${E((c.preview || '').slice(0, 42))}</small></span></button>`;
+    }).join("") || (S.messageTab === 'requests'
+      ? `<p class="private-note chat-sidebar-empty">${E(T('No tienes solicitudes de conversación pendientes.'))}</p>`
+      : `<p class="private-note chat-sidebar-empty">${E(T('No hay conversaciones para mostrar. Puedes iniciar una desde el directorio o crear un grupo.'))}</p>`);
+    const markup = tabs + heading + `<div class="chat-sidebar-list">${list}</div>`;
     if (aside.innerHTML !== markup) {
       const focused = aside.contains(document.activeElement) ? document.activeElement.dataset.id : null;
       aside.innerHTML = markup;
@@ -1227,14 +1404,36 @@
   function chatControls(current) {
     const form = document.querySelector('.chat-compose');
     if (!form) return;
-    form.querySelectorAll('textarea, button').forEach(el => { el.disabled = !!current.blocked || (el.tagName === 'BUTTON' && form.dataset.sending === 'true'); });
-    const block = document.querySelector('.chat-title [data-action="block"]');
-    if (block) { block.textContent = current.blocked_by_me ? 'Desbloquear' : 'Bloquear'; block.dataset.active = String(!current.blocked_by_me); }
+    const disabled = current.can_message === false || !!current.blocked;
+    form.querySelectorAll('textarea, button').forEach(el => { el.disabled = disabled || (el.tagName === 'BUTTON' && form.dataset.sending === 'true'); });
+    if (current.kind !== 'group') {
+      const block = document.querySelector('.chat-title [data-action="block"]');
+      if (block) { block.textContent = current.blocked_by_me ? 'Desbloquear' : 'Bloquear'; block.dataset.active = String(!current.blocked_by_me); }
+    }
   }
   function openChat(chat, current) {
-    S.conversation = Number(current.id); chat.id = S.conversation;
+    S.conversation = Number(current.id); chat.id = S.conversation; chat.current = current;
     chat.last = 0; chat.loaded = false; chat.ids = new Set();
-    document.querySelector('.chat-conversation').innerHTML = `<div class="chat-title">${current.other.profile_url ? `<a class="chat-profile" href="${E(current.other.profile_url)}" aria-label="Ver perfil de ${E(current.other.name)}">${avatar(current.other)}<span><strong>${E(current.other.name)}</strong><small>Ver perfil</small></span></a>` : `<span class="chat-profile">${avatar(current.other)}<strong>${E(current.other.name)}</strong></span>`}${btn(current.blocked_by_me ? "Desbloquear" : "Bloquear", "block", `data-id="${Number(current.other.id)}" data-active="${!current.blocked_by_me}"`, "ghost small")}</div><div class="chat-messages" id="chat-messages" role="log" aria-label="Mensajes de la conversación" aria-live="polite" aria-relevant="additions"></div><form class="chat-compose" data-form="message" data-id="${chat.id}"><textarea name="body" aria-label="Escribir mensaje" placeholder="Escribe un mensaje…" required maxlength="5000"></textarea><button class="btn primary">${I("contact")} Enviar</button></form>`;
+    const group = current.kind === 'group';
+    const identity = chatIdentity(current);
+    const title = group
+      ? `<button type="button" class="chat-profile group-chat-profile group-info-trigger" data-action="group-menu" data-id="${Number(current.id)}" aria-label="${E(T('Abrir información del grupo'))}">${avatar(identity)}<span><strong>${E(identity.name)}</strong><small>${Number(current.member_count || current.members?.length || 0)} participantes · ${E(T('Ver integrantes'))}</small></span></button>`
+      : (current.other.profile_url ? `<button type="button" class="chat-profile chat-profile-button" data-action="member" data-id="${Number(current.other.id)}" aria-label="Ver perfil de ${E(current.other.name)}">${avatar(current.other)}<span><strong>${E(current.other.name)}</strong><small>Ver perfil</small></span></button>` : `<span class="chat-profile">${avatar(current.other)}<strong>${E(current.other.name)}</strong></span>`);
+    const request = current.conversation_request || {};
+    let action = '';
+    let requestBanner = '';
+    if (group) {
+      action = btn(I('more') + ' ' + T('Grupo'),'group-menu',`data-id="${Number(current.id)}"`,'ghost small');
+    } else if (request.state === 'incoming_pending') {
+      action = `${btn('Aceptar','conversation-request-respond',`data-id="${Number(current.other.id)}" data-request="${Number(request.request_id)}" data-decision="accept"`,'primary small')}${btn('Rechazar','conversation-request-respond',`data-id="${Number(current.other.id)}" data-request="${Number(request.request_id)}" data-decision="reject"`,'small')}`;
+      requestBanner = `<div class="chat-request-banner"><strong>${E(T('Solicitud de conversación'))}</strong><span>${E(T('Puedes leer este mensaje antes de decidir. Acepta para poder responder.'))}</span></div>`;
+    } else if (request.state === 'outgoing_pending') {
+      action = btn('Cancelar solicitud','conversation-request-cancel',`data-id="${Number(current.other.id)}"`,'ghost danger small');
+      requestBanner = `<div class="chat-request-banner outgoing"><strong>${E(T('Solicitud enviada'))}</strong><span>${E(T('La otra persona ya recibió tu mensaje. Podrás seguir escribiendo cuando acepte.'))}</span></div>`;
+    } else {
+      action = btn(current.blocked_by_me ? "Desbloquear" : "Bloquear", "block", `data-id="${Number(current.other.id)}" data-active="${!current.blocked_by_me}"`, "ghost small");
+    }
+    document.querySelector('.chat-conversation').innerHTML = `<div class="chat-title">${title}<div class="chat-title-actions">${action}</div></div>${requestBanner}<div class="chat-messages" id="chat-messages" role="log" aria-label="Mensajes de la conversación" aria-live="polite" aria-relevant="additions"></div><form class="chat-compose" data-form="message" data-id="${chat.id}"><textarea name="body" aria-label="Escribir mensaje" placeholder="${request.state && request.state !== 'allowed' ? E(T('Acepta la solicitud para continuar la conversación')) : E(T('Escribe un mensaje…'))}" required maxlength="5000"></textarea><button class="btn primary">${I("contact")} Enviar</button></form>`;
     document.querySelector('.chat-compose textarea').value = chatDrafts.get(chat.id) || '';
     chatControls(current); chatSidebar();
   }
@@ -1242,15 +1441,24 @@
     const previous = document.querySelector('.chat-compose');
     if (previous) chatDrafts.set(Number(previous.dataset.id), previous.elements.body.value);
     stopChat();
-    const chat = S.chat = { active: true, id: 0, pending: null, syncing: false, halted: false };
+    const chat = S.chat = { active: true, id: 0, current:null, pending: null, syncing: false, halted: false };
     const conversations = await api('conversations?' + new URLSearchParams({q: S.filter.q || ''}));
     if (!chatAlive(chat)) return;
     S.conversations = conversations;
-    const selected = S.conversation || Number(new URLSearchParams(location.search).get('conversation')) || Number(conversations[0]?.id) || 0;
-    let current = conversations.find(c => Number(c.id) === selected);
+    const urlSelected = Number(new URLSearchParams(location.search).get('conversation')) || 0;
+    let selected = S.conversation || urlSelected || 0;
+    let current = selected ? conversations.find(c => Number(c.id) === selected) : null;
     if (selected && !current) current = await api('conversations/' + selected);
+    if (current && isIncomingRequest(current)) S.messageTab = 'requests';
+    else if (current && urlSelected) S.messageTab = 'chats';
+    if (!current) {
+      const first = conversationBucket(S.messageTab, conversations)[0];
+      selected = Number(first?.id) || 0;
+      current = first || null;
+    }
     if (!chatAlive(chat)) return;
-    content().innerHTML = heading('Mensajería', 'Una conversación puede ser el inicio de una gran colaboración.', link('directorio', I('plus') + ' Nueva conversación', 'primary')) + `<div class="chat-sync" id="chat-sync" role="status" hidden></div><form class="filters" data-form="filters"><input name="q" aria-label="Buscar conversaciones" placeholder="Buscar conversaciones…" value="${E(S.filter.q || '')}"><button class="btn">Buscar</button></form><div class="chat-layout"><aside class="chat-sidebar" aria-label="Conversaciones"></aside><section class="chat-conversation">${empty('Inicia una conversación', 'Podrás conversar aquí con tus conexiones confirmadas.')}</section></div>`;
+    const headingActions = `<div class="chat-heading-actions">${link('directorio', I('plus') + ' Nueva conversación', 'primary')}${btn(I('users') + ' Crear grupo','group-chat-open','','small')}</div>`;
+    content().innerHTML = heading('Mensajería', 'Conversaciones directas y grupales para colaborar dentro de ASCLA.', headingActions) + `<div class="chat-sync" id="chat-sync" role="status" hidden></div><form class="filters" data-form="filters"><input name="q" aria-label="Buscar conversaciones" placeholder="Buscar conversaciones o grupos…" value="${E(S.filter.q || '')}"><button class="btn">Buscar</button></form><div class="chat-layout"><aside class="chat-sidebar" aria-label="Conversaciones"></aside><section class="chat-conversation">${empty('Inicia una conversación', 'Puedes conversar con una conexión, aceptar una solicitud de conversación o crear un grupo.')}</section></div>`;
     chatSidebar();
     if (current) openChat(chat, current);
     await syncChat();
@@ -1270,6 +1478,7 @@
         if (chat.ids.has(Number(m.id))) continue;
         chat.ids.add(Number(m.id)); area.insertAdjacentHTML('beforeend', messageBubble(m));
       }
+      applyReadState(data.read_state);
       chat.last = Math.max(chat.last, Number(data.after)); chat.loaded = true;
       chat.more = !initial && data.has_more;
       if (initial || bottom) area.scrollTop = area.scrollHeight;
@@ -1284,6 +1493,7 @@
     const items = data.items.filter(m => !chat.ids.has(Number(m.id)));
     items.forEach(m => chat.ids.add(Number(m.id)));
     button.outerHTML = (data.has_more ? btn('Cargar anteriores', 'older-messages', `data-before="${data.before}"`, 'small') : '') + items.map(messageBubble).join('');
+    applyReadState(data.read_state);
     area.scrollTop = top + area.scrollHeight - height;
   }
   async function syncChat() {
@@ -1301,7 +1511,7 @@
       let current = conversations.find(c => Number(c.id) === chat.id);
       if (chat.id && !current) current = await api('conversations/' + chat.id);
       if (!chatAlive(chat)) return;
-      if (current) chatControls(current);
+      if (current) { chat.current=current; chatControls(current); }
       await loadMessages(chat);
       if (!chatAlive(chat)) return;
       if (current && !chat.more) current.unread = 0;
@@ -1314,7 +1524,7 @@
         const form = document.querySelector('.chat-compose');
         if (form) chatDrafts.set(Number(form.dataset.id), form.elements.body.value);
         const pane = document.querySelector('.chat-conversation');
-        if (pane) pane.innerHTML = empty('Conversación no disponible', error.message) + link('directorio', 'Revisar mis conexiones', 'small');
+        if (pane) pane.innerHTML = empty('Conversación no disponible', error.message) + link('directorio', 'Revisar mis conversaciones', 'small');
         chatStatus(error.message || 'No se puede acceder a los mensajes. Recarga la página para revisar tu sesión.', true);
       } else { chatStatus('Sin conexión con el servidor. Reintentando…', true); delay = 8000; }
     } finally {
@@ -1493,7 +1703,7 @@
   }
   async function adminContacts(panel) {
     const f=S.adminFilters.contacts, list=await api('admin/contacts?'+new URLSearchParams(f));
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ATENCIÓN A LA COMUNIDAD</span><h2>Solicitudes</h2><p>Revisa cada caso y registra su avance. El asociado verá el estado actualizado.</p></div><span class="admin-total">${list.total} resultados</span></div><div class="request-stats">${Object.entries(requestLabels).map(([k,label])=>btn(`<strong>${list.counts[k]}</strong><span>${label}</span>`, 'request-filter', `data-state="${k}" aria-pressed="${f.state===k}"`, 'request-stat '+k+(f.state===k?' selected':''))).join('')}</div><form class="filters admin-filters" data-form="admin-filter" data-area="contacts"><input name="q" aria-label="Buscar solicitudes" placeholder="Buscar por asunto o contenido…" value="${E(f.q||'')}">${select('state','Estado',[['','Todos los estados'],...Object.entries(requestLabels)],f.state||'')}<button class="btn primary">${I('search')} Buscar</button></form><div class="request-list">${list.items.map(p=>{
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ATENCIÓN A LA COMUNIDAD</span><h2>Solicitudes</h2><p>Revisa cada caso y registra su avance. Cuando cambies el estado, el asociado recibirá una notificación.</p></div><span class="admin-total">${list.total} resultados</span></div><div class="request-stats">${Object.entries(requestLabels).map(([k,label])=>btn(`<strong>${list.counts[k]}</strong><span>${label}</span>`, 'request-filter', `data-state="${k}" aria-pressed="${f.state===k}"`, 'request-stat '+k+(f.state===k?' selected':''))).join('')}</div><form class="filters admin-filters" data-form="admin-filter" data-area="contacts"><input name="q" aria-label="Buscar solicitudes" placeholder="Buscar por asunto o contenido…" value="${E(f.q||'')}">${select('state','Estado',[['','Todos los estados'],...Object.entries(requestLabels)],f.state||'')}<button class="btn primary">${I('search')} Buscar</button></form><div class="request-list">${list.items.map(p=>{
       const state=p.meta.request_status||'open';
       return `<article class="request-card ${E(state)}" data-contact="${p.id}" data-state="${E(state)}"><div class="request-card-top"><span class="request-number">SOLICITUD #${p.id}</span><span class="request-status ${E(state)}">${E(requestLabels[state])}</span></div><h3>${E(p.title)}</h3><div class="request-author">${I('users')}<strong>${E(p.author.name)}</strong><span>· ${date(p.date)}</span>${p.meta.description?`<span class="tag">${E(p.meta.description)}</span>`:''}</div><p class="request-body">${E(p.body)}</p><div class="request-footer"><div><small>Cambiar estado</small><div class="request-actions">${Object.entries(requestLabels).map(([key,label])=>btn((state===key?'✓ ':'')+label,'contact-status',`data-id="${p.id}" data-status="${key}" ${state===key?'disabled aria-pressed="true"':'aria-pressed="false"'}`,'small '+(state===key?'selected':''))).join('')}</div></div>${p.meta.request_updated_at?`<small>Actualizada ${date(p.meta.request_updated_at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</small>`:''}</div>${p.meta.request_history?.length?`<details class="request-history"><summary>Historial de atención</summary><ol>${p.meta.request_history.slice().reverse().map(h=>`<li><strong>${E(requestLabels[h.to])}</strong><span>${E(h.actor)} · ${date(h.at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span></li>`).join('')}</ol></details>`:''}</article>`;
     }).join('')||empty('No hay solicitudes en esta vista','Prueba otro estado o modifica la búsqueda.')}</div>${adminPager(list,'contacts')}`;
@@ -1501,7 +1711,7 @@
   async function adminUsers(panel) {
     const f=S.adminFilters.users,list=await api('admin/users?'+new URLSearchParams(f));
     const roles=Object.fromEntries(list.roles.map(r=>[r.id,r.name]));
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PERSONAS Y ACCESOS</span><h2>Usuarios de la comunidad</h2><p>Encuentra cuentas, consulta sus roles y administra su acceso.</p></div>${list.create_url?`<a class="btn primary" data-native href="${E(list.create_url)}">${I('plus')} Añadir usuario</a>`:''}</div><form class="filters admin-filters" data-form="admin-filter" data-area="users"><input name="q" aria-label="Buscar usuarios" placeholder="Nombre, usuario o correo…" value="${E(f.q||'')}">${select('role','Rol',[['','Todos los roles'],...list.roles.map(r=>[r.id,r.name])],f.role||'')}${select('state','Acceso',[['','Todos'],['active','Activo'],['suspended','Suspendido']],f.state||'')}<button class="btn primary">${I('search')} Buscar</button></form><p class="private-note">${list.total} usuarios encontrados</p><div class="admin-users">${list.items.map(u=>`<article class="admin-user" data-admin-user="${u.id}"><div class="admin-user-person">${avatar(u)}<div><h3>${E(u.name)}</h3><span>@${E(u.login)}</span><a href="mailto:${E(u.email)}">${E(u.email)}</a></div></div><div class="admin-user-access">${u.roles.map(r=>`<span class="tag">${E(roles[r]||r)}</span>`).join('')}<span class="request-status ${u.suspended?'closed':'open'}">${u.suspended?'Acceso suspendido':'Acceso activo'}</span><small>Registro: ${date(u.registered)}</small></div><div class="admin-user-actions">${u.profile_url?`<a class="btn small" href="${E(u.profile_url)}">Ver perfil</a>`:''}${u.edit_url?`<a class="btn small" data-native href="${E(u.edit_url)}">Editar cuenta</a>`:''}${u.can_suspend?btn(u.suspended?'Reactivar acceso':'Suspender acceso','user-access',`data-id="${u.id}" data-suspended="${!u.suspended}" data-name="${E(u.name)}"`,'ghost small'):''}</div></article>`).join('')||empty('No encontramos usuarios','Prueba otro nombre o cambia los filtros.')}</div>${adminPager(list,'users')}`;
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PERSONAS Y ACCESOS</span><h2>Usuarios de la comunidad</h2><p>Encuentra cuentas, consulta sus roles y administra su acceso.</p></div>${list.create_url?`<a class="btn primary" data-native href="${E(list.create_url)}">${I('plus')} Añadir usuario</a>`:''}</div><form class="filters admin-filters" data-form="admin-filter" data-area="users"><input name="q" aria-label="Buscar usuarios" placeholder="Nombre, usuario o correo…" value="${E(f.q||'')}">${select('role','Rol',[['','Todos los roles'],...list.roles.map(r=>[r.id,r.name])],f.role||'')}${select('state','Acceso',[['','Todos'],['active','Activo'],['suspended','Suspendido']],f.state||'')}<button class="btn primary">${I('search')} Buscar</button></form><p class="private-note">${list.total} usuarios encontrados</p><div class="admin-users">${list.items.map(u=>`<article class="admin-user" data-admin-user="${u.id}"><div class="admin-user-person">${avatar(u)}<div><h3>${E(u.name)}</h3><span>@${E(u.login)}</span><a href="mailto:${E(u.email)}">${E(u.email)}</a></div></div><div class="admin-user-access">${u.roles.map(r=>`<span class="tag">${E(roles[r]||r)}</span>`).join('')}<span class="request-status ${u.suspended?'closed':'open'}">${u.suspended?'Acceso suspendido':'Acceso activo'}</span><small>Registro: ${date(u.registered)}</small></div><div class="admin-user-actions">${u.profile_url?btn('Ver perfil','member',`data-id="${Number(u.id)}"`,'small'):''}${u.edit_url?`<a class="btn small" data-native href="${E(u.edit_url)}">Editar cuenta</a>`:''}${u.can_suspend?btn(u.suspended?'Reactivar acceso':'Suspender acceso','user-access',`data-id="${u.id}" data-suspended="${!u.suspended}" data-name="${E(u.name)}"`,'ghost small'):''}</div></article>`).join('')||empty('No encontramos usuarios','Prueba otro nombre o cambia los filtros.')}</div>${adminPager(list,'users')}`;
   }
   async function admin() {
     const d = await api("admin"); S.admin=d;
@@ -1519,7 +1729,7 @@
       const auditRows=d.audit||[];
       const auditActors=new Set(auditRows.map(a=>Number(a.actor_id)).filter(Boolean)).size;
       const latest=auditRows[0]?.created_at||'';
-      const auditLabels={settings_updated:'Configuración actualizada',content_saved:'Contenido guardado',content_trashed:'Contenido eliminado',comment_trashed:'Comentario eliminado',content_reported:'Contenido reportado',comment_reported:'Comentario reportado',report_reviewed:'Reporte revisado',moderation:'Decisión de moderación',comment_moderation:'Comentario moderado',member_suspended:'Acceso suspendido',member_reactivated:'Acceso reactivado',contact_status:'Solicitud actualizada',event_registration:'Inscripción a evento',event_invited:'Invitaciones a evento',connection_requested:'Solicitud de conexión',connection_accepted:'Conexión aceptada',connection_rejected:'Conexión rechazada',connection_cancelled:'Solicitud de conexión cancelada',connection_removed:'Conexión eliminada',message_deleted:'Mensaje eliminado',password_changed:'Contraseña cambiada',password_reset_requested:'Recuperación solicitada',media_deleted:'Archivo eliminado',oauth_connected:'Servicio Google conectado',oauth_disconnected:'Servicio Google desconectado',calendar_create:'Evento añadido a Google Calendar',calendar_delete:'Evento retirado de Google Calendar',turnstile_passed:'Verificación de seguridad superada',turnstile_failed:'Verificación de seguridad fallida',turnstile_error:'Error de verificación de seguridad',request_failed:'Solicitud con error',job_completed:'Trabajo en segundo plano completado',job_failed:'Trabajo en segundo plano con error',ai_generated:'Contenido asistido por IA creado'};
+      const auditLabels={settings_updated:'Configuración actualizada',content_saved:'Contenido guardado',content_trashed:'Contenido eliminado',comment_trashed:'Comentario eliminado',content_reported:'Contenido reportado',comment_reported:'Comentario reportado',report_reviewed:'Reporte revisado',moderation:'Decisión de moderación',comment_moderation:'Comentario moderado',member_suspended:'Acceso suspendido',member_reactivated:'Acceso reactivado',contact_status:'Solicitud actualizada',event_registration:'Inscripción a evento',event_invited:'Invitaciones a evento',connection_requested:'Solicitud de conexión',connection_accepted:'Conexión aceptada',connection_rejected:'Conexión rechazada',connection_cancelled:'Solicitud de conexión cancelada',connection_removed:'Conexión eliminada',conversation_requested:'Solicitud de conversación',conversation_request_accepted:'Conversación autorizada',conversation_request_rejected:'Solicitud de conversación rechazada',conversation_request_cancelled:'Solicitud de conversación cancelada',conversation_started:'Conversación iniciada',group_conversation_created:'Grupo de mensajería creado',group_conversation_updated:'Grupo de mensajería actualizado',group_conversation_deleted:'Grupo de mensajería eliminado',message_deleted:'Mensaje eliminado',password_changed:'Contraseña cambiada',password_reset_requested:'Recuperación solicitada',media_deleted:'Archivo eliminado',oauth_connected:'Servicio Google conectado',oauth_disconnected:'Servicio Google desconectado',calendar_create:'Evento añadido a Google Calendar',calendar_delete:'Evento retirado de Google Calendar',turnstile_passed:'Verificación de seguridad superada',turnstile_failed:'Verificación de seguridad fallida',turnstile_error:'Error de verificación de seguridad',request_failed:'Solicitud con error',job_completed:'Trabajo en segundo plano completado',job_failed:'Trabajo en segundo plano con error',ai_generated:'Contenido asistido por IA creado'};
       const actionName=a=>auditLabels[a]||String(a||'Actividad del sistema').replaceAll('_',' ');
       panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">TRAZABILIDAD Y CONTROL</span><h2>Auditoría</h2><p>Este registro ayuda a entender qué cambios importantes ocurrieron en ASCLA, quién los realizó y sobre qué elemento actuaron.</p></div><span class="admin-total">${auditRows.length} registros</span></div><div class="audit-guide"><article>${I('clock')}<div><strong>¿Qué registra?</strong><p>Acciones relevantes como cambios de configuración, moderación, accesos, reportes, archivos e integraciones.</p></div></article><article>${I('users')}<div><strong>¿Para qué sirve?</strong><p>Permite revisar el historial cuando necesitas saber quién hizo un cambio o investigar un problema.</p></div></article><article>${I('shield')}<div><strong>¿Qué no guarda?</strong><p>No almacena contraseñas ni el contenido de mensajes privados. Solo registra metadatos de la acción.</p></div></article></div><div class="audit-summary"><article class="audit-summary-card"><span class="audit-summary-icon">${I('clock')}</span><div><small>Acciones registradas</small><strong>${auditRows.length}</strong></div></article><article class="audit-summary-card"><span class="audit-summary-icon">${I('users')}</span><div><small>Personas identificadas</small><strong>${auditActors}</strong></div></article><article class="audit-summary-card wide"><span class="audit-summary-icon">${I('shield')}</span><div><small>Última actividad</small><strong>${latest?E(date(latest,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'Sin actividad'}</strong></div></article></div><div class="card audit-card"><div class="audit-card-head"><div><h3>Historial de actividad</h3><p class="private-note">Los eventos más recientes aparecen primero. “Elemento” identifica el registro afectado cuando corresponde.</p></div><span class="audit-privacy">${I('shield')} Registro protegido</span></div><div class="table-wrap"><table class="data-table audit-table"><thead><tr><th>Cuándo</th><th>Qué ocurrió</th><th>Quién</th><th>Elemento</th><th>Detalle técnico</th></tr></thead><tbody>${auditRows.map(a=>`<tr><td><time class="audit-time" datetime="${E(a.created_at)}" title="${E(a.created_at)}">${E(date(a.created_at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))}</time></td><td><span class="audit-action">${E(actionName(a.action))}</span></td><td><span class="audit-actor">${E(a.actor_name||'Sistema')}</span></td><td><span class="audit-object">${a.object_id?'#'+Number(a.object_id):'—'}</span></td><td class="audit-detail">${E(a.detail||'—')}</td></tr>`).join('')||'<tr><td colspan="5"><div class="audit-empty">No hay acciones registradas todavía.</div></td></tr>'}</tbody></table></div></div>`;
     }
@@ -1691,7 +1901,14 @@
       id = Number(b.dataset.id || 0);
     b.disabled = true;
     try {
-      if (a === "close") closeModal();
+      if (a === "close") requestModalClose();
+      else if (a === "modal-unsaved-stay") { closeModalDecision(); }
+      else if (a === "modal-unsaved-discard") { closeModalDecision(); S.modalUnsavedForm = null; closeModal(); }
+      else if (a === "modal-unsaved-save") {
+        const guarded = S.modalUnsavedForm;
+        closeModalDecision();
+        if (guarded?.isConnected) guarded.requestSubmit();
+      }
       else if (a === "profile-nudge-later") closeModal();
       else if (a === "profile-nudge-go") { closeModal(); await navigateTo(C.pages.perfil.url); }
       else if (a === "unsaved-stay") resolveUnsavedExit(false);
@@ -1760,24 +1977,89 @@
         const result = await api("account/password-reset", {});
         toast(result.message);
       } else if (a === "connect") {
-        const state = await api("relations", { target: id, kind: "connect", active: true });
-        updateConnectionState(id, state); await refreshConnectionsPanel();
+        await api("relations", { target: id, kind: "connect", active: true });
+        await refreshRelationshipState(id); await refreshConnectionsPanel();
         toast("Solicitud de conexión enviada.");
       } else if (a === "connection-respond") {
-        const state = await api(`connections/${Number(b.dataset.request)}/respond`, {decision: b.dataset.decision});
-        updateConnectionState(id, state); await refreshConnectionsPanel(); await refreshNotifications();
+        await api(`connections/${Number(b.dataset.request)}/respond`, {decision: b.dataset.decision});
+        await refreshRelationshipState(id); await refreshConnectionsPanel(); await refreshNotifications();
         toast(b.dataset.decision === 'accept' ? 'Conexión confirmada. Ya pueden enviarse mensajes.' : 'Solicitud rechazada.');
+      } else if (a === "conversation-request") {
+        await conversationRequestDialog(id);
+      } else if (a === "conversation-request-respond") {
+        await api(`conversation-requests/${Number(b.dataset.request)}/respond`, {decision:b.dataset.decision});
+        if (S.page === 'mensajeria') {
+          if (b.dataset.decision === 'accept') S.messageTab = 'chats';
+          if (b.dataset.decision === 'reject') {
+            S.conversation = 0;
+            const url=new URL(location.href); url.searchParams.delete('conversation'); history.replaceState(history.state,'',url);
+          }
+          await messages();
+        }
+        else { await refreshRelationshipState(id); await refreshConnectionsPanel(); }
+        await refreshNotifications();
+        toast(b.dataset.decision === 'accept' ? 'Solicitud aceptada. Ya pueden conversar.' : 'Solicitud de conversación rechazada.');
+      } else if (a === "conversation-request-cancel") {
+        await api(`conversation-requests/${id}/cancel`, {});
+        if (S.page === 'mensajeria') {
+          S.conversation = 0;
+          const url=new URL(location.href); url.searchParams.delete('conversation'); history.replaceState(history.state,'',url);
+          await messages();
+        }
+        else { await refreshRelationshipState(id); await refreshConnectionsPanel(); }
+        await refreshNotifications();
+        toast('Solicitud de conversación cancelada.');
       } else if (a === "connection-remove-request") {
         confirmConnectionRemoval(id, b.dataset.mode);
       } else if (a === "connection-remove-confirm") {
         const mode = b.dataset.mode;
-        const state = await api("relations", {target:id, kind:"connect", active:false});
-        closeModal(); updateConnectionState(id, state); await refreshConnectionsPanel(); await refreshNotifications();
+        await api("relations", {target:id, kind:"connect", active:false});
+        closeModal(); await refreshRelationshipState(id); await refreshConnectionsPanel(); await refreshNotifications();
         toast(mode === 'cancel' ? 'Solicitud de conexión cancelada.' : 'Conexión eliminada.');
       } else if (a === "connections-refresh") {
         await refreshConnectionsPanel(); await refreshOpenConnection();
       } else if (a === "intro") await intro(id);
-      else if (a === "message-start") {
+      else if (a === "group-chat-open") {
+        await groupChatDialog();
+      } else if (a === "group-photo-clear") {
+        if (S.groupChat) S.groupChat.photo = null;
+        const hidden=document.querySelector('[data-form="group-chat"] [name="photo_id"]'); if (hidden) hidden.value='0';
+        const preview=document.getElementById('group-photo-preview'); if (preview) preview.innerHTML=`<span class="group-photo-placeholder">${I('users')}</span>`;
+      } else if (a === "group-edit-open") {
+        await groupEditDialog(id);
+      } else if (a === "group-edit-photo-clear") {
+        if (S.groupEdit) { S.groupEdit.photo_id = 0; S.groupEdit.photo_url = ''; }
+        const hidden=document.querySelector('[data-form="group-edit"] [name="photo_id"]'); if (hidden) hidden.value='0';
+        const preview=document.getElementById('group-edit-photo-preview'); if (preview) preview.innerHTML=`<span class="group-photo-placeholder">${I('users')}</span>`;
+      } else if (a === "conversation-open") {
+        const destination=new URL(C.pages.mensajeria.url); destination.searchParams.set('conversation',Number(b.dataset.conversation)); await navigateTo(destination.href);
+      } else if (a === "chat-tab") {
+        S.messageTab = b.dataset.tab === 'requests' ? 'requests' : 'chats';
+        S.conversation = 0;
+        const url=new URL(location.href); url.searchParams.delete('conversation'); history.replaceState(history.state,'',url);
+        await messages();
+      } else if (a === "group-menu") {
+        await groupInfoDialog(id);
+      } else if (a === "group-delete-request") {
+        modal('Eliminar grupo', `<p>${E(T('¿Seguro que deseas eliminar este grupo? Se eliminarán sus mensajes para todos los participantes.'))}</p><div class="form-actions">${btn('Cancelar','close')}${btn('Eliminar grupo','group-delete-confirm',`data-id="${id}"`,'danger')}</div>`);
+      } else if (a === "group-delete-confirm") {
+        await api(`conversations/${id}`, null, 'DELETE');
+        closeModal(); S.conversation=0; await messages(); toast('Grupo eliminado.');
+      } else if (a === "group-member-message") {
+        const profile = await api('profiles/' + id);
+        const request = profile.conversation || {};
+        closeModal();
+        if (request.can_message) {
+          const c = await api('conversations', {target:id});
+          const destination = new URL(C.pages.mensajeria.url); destination.searchParams.set('conversation', c.id); await navigateTo(destination.href);
+        } else if (request.conversation_id && ['incoming_pending','outgoing_pending'].includes(request.state)) {
+          const destination = new URL(C.pages.mensajeria.url); destination.searchParams.set('conversation', Number(request.conversation_id)); await navigateTo(destination.href);
+        } else if (request.can_request) {
+          await conversationRequestDialog(id);
+        } else {
+          toast(request.blocked ? 'No puedes iniciar una conversación privada con este integrante.' : 'La conversación privada no está disponible para este integrante.');
+        }
+      } else if (a === "message-start") {
         const c = await api("conversations", { target: id });
         const destination = new URL(C.pages.mensajeria.url); destination.searchParams.set("conversation", c.id); await navigateTo(destination.href);
       } else if (a === "conversation") {
@@ -1791,12 +2073,20 @@
           active: b.dataset.active === "true",
         });
         if (S.page === 'mensajeria') await messages();
-        else { const p = await api('profiles/' + id); updateConnectionState(id, p.connection); await refreshConnectionsPanel(); }
+        else { const p = await api('profiles/' + id); updateRelationshipState(p); await refreshConnectionsPanel(); }
       } else if (a === "older-messages") {
         await olderMessages(b);
       } else if (a === "register") {
-        await api(`events/${id}/register`, { status: b.dataset.status });
-        toast("Inscripción actualizada.");
+        const requested = b.dataset.status;
+        const updated = await api(`events/${id}/register`, { status: requested });
+        const messages = {
+          accepted: "Asistencia confirmada.",
+          waitlisted: "Te añadimos a la lista de espera.",
+          declined: "Actualizado. Si había un cupo reservado para ti, se ofreció al siguiente asociado.",
+          cancelled: "Inscripción actualizada.",
+        };
+        toast(messages[requested] || "Inscripción actualizada.");
+        S.event = updated;
         await item(id);
       } else if (a === "page") {
         S.filter.page = b.dataset.page;
@@ -1881,7 +2171,7 @@
         await admin();
       } else if (a === "contact-status") {
         await api("admin/contact/" + id, { status: b.dataset.status });
-        toast("Solicitud #"+id+": "+requestLabels[b.dataset.status]+".");
+        toast("Solicitud #"+id+": "+requestLabels[b.dataset.status]+". Asociado notificado.");
         await adminContacts(document.getElementById('admin-panel'));
       } else if (a === "generate") {
         try { await ensureYouTubeDuration(id); } catch { /* Server-side metadata remains the primary path. */ }
@@ -1952,7 +2242,7 @@
       } else if (a === "mail-test") { const result = await api("mail/test", {}); toast(result.message); }
       else if (a === "infographic") infographic();
     } catch (e) {
-      if (['connect','connection-respond','connection-remove-confirm'].includes(a) && [404,409].includes(e.status)) { await refreshOpenConnection(); await refreshConnectionsPanel(); }
+      if (['connect','connection-respond','connection-remove-confirm','conversation-request-respond','conversation-request-cancel'].includes(a) && [404,409].includes(e.status)) { await refreshOpenConnection(); await refreshConnectionsPanel(); }
       if (e.name !== "AbortError") toast(e.message);
     } finally {
       b.disabled = false;
@@ -1991,6 +2281,11 @@
         data.hidden = new FormData(form).getAll("hidden");
         for (const key of ["directory", "networking", "microevents"])
           data[key] = form.elements[key].checked;
+        data.email_notifications = {};
+        for (const key of ["connections", "messages", "events"]) {
+          data.email_notifications[key] = !!form.elements[`email_${key}`]?.checked;
+          delete data[`email_${key}`];
+        }
         delete data.photo;
         await api("profiles/me", data);
         clearUnsavedGuard(form);
@@ -2094,6 +2389,27 @@
           if (form.elements.body.value === data.body) { form.reset(); chatDrafts.delete(Number(form.dataset.id)); }
           if (chatAlive(chat)) { await loadMessages(chat); await syncChat(); }
         } finally { delete form.dataset.sending; }
+      } else if (action === "conversation-request-message") {
+        const target=Number(form.dataset.id);
+        const result=await api('conversation-requests',{target,body:data.body});
+        closeModal(); await refreshNotifications();
+        const destination=new URL(C.pages.mensajeria.url); if (result.conversation_id) destination.searchParams.set('conversation',result.conversation_id); await navigateTo(destination.href);
+        toast('Mensaje enviado como solicitud de conversación.');
+      } else if (action === "group-chat") {
+        const users=[...form.querySelectorAll('[data-group-member]:checked')].map(input=>Number(input.value));
+        if (users.length < 2) { toast('Selecciona al menos dos asociados para crear un grupo.'); return; }
+        const conversation=await api('conversations/group',{title:data.title,description:data.description || '',users,photo_id:Number(data.photo_id || 0)});
+        S.groupChat=null; closeModal();
+        const destination=new URL(C.pages.mensajeria.url); destination.searchParams.set('conversation',conversation.id); await navigateTo(destination.href);
+        toast('Grupo creado.');
+      } else if (action === "group-edit") {
+        const groupId=Number(form.dataset.id);
+        await api(`conversations/${groupId}/group`,{title:data.title,description:data.description || '',photo_id:Number(data.photo_id || 0)});
+        S.groupEdit=null;
+        closeModal();
+        if (S.page === 'mensajeria') await messages();
+        await groupInfoDialog(groupId);
+        toast('Información del grupo actualizada.');
       } else if (action === "intro") {
         const c = await api("conversations", {
           target: Number(form.dataset.id),
@@ -2181,6 +2497,7 @@
   }
   function imageUploadContext(input) {
     if (input.dataset.upload === "photo") return "profile";
+    if (input.dataset.upload === "group-photo" || input.dataset.upload === "group-photo-edit") return "group";
     const type = input.closest('form[data-form="editor"]')?.dataset.type || "hub";
     return ["hub", "gallery", "resource", "ally"].includes(type) ? type : "hub";
   }
@@ -2189,7 +2506,7 @@
     const context = imageUploadContext(input);
     return window.ASCLAImageEditor.edit(file, {
       context,
-      title: T(context === "profile" ? "Ajustar fotografía" : "Ajustar imagen"),
+      title: T(context === "profile" ? "Ajustar fotografía" : context === "group" ? "Ajustar foto del grupo" : "Ajustar imagen"),
       hint: T("Arrastra la imagen para moverla y usa el zoom para elegir el encuadre antes de guardarla."),
       ratioLabel: T("Proporción recomendada"),
       fullLabel: T("Usar imagen completa"),
@@ -2259,6 +2576,19 @@
         if (statusBox) statusBox.textContent = prepared
           ? `${T("Fotografía preparada")}: ${humanFileSize(prepared.inputBytes)} → ${humanFileSize(prepared.storedBytes)}. ${T("Guarda el perfil para aplicar.")}`
           : T("Fotografía cargada. Guarda el perfil para aplicar.");
+      } else if (input.dataset.upload === "group-photo") {
+        if (!S.groupChat) return;
+        S.groupChat.photo = m;
+        const hidden = document.querySelector('[data-form="group-chat"] [name="photo_id"]'); if (hidden) hidden.value = String(m.id);
+        const preview = document.getElementById('group-photo-preview');
+        if (preview) preview.innerHTML = `<img src="${E(m.url)}" alt="${E(T('Foto del grupo'))}">${btn('Quitar','group-photo-clear','','ghost small')}`;
+      } else if (input.dataset.upload === "group-photo-edit") {
+        if (!S.groupEdit) return;
+        S.groupEdit.photo_id = Number(m.id);
+        S.groupEdit.photo_url = m.url || '';
+        const hidden = document.querySelector('[data-form="group-edit"] [name="photo_id"]'); if (hidden) hidden.value = String(m.id);
+        const preview = document.getElementById('group-edit-photo-preview');
+        if (preview) preview.innerHTML = `<img src="${E(m.url)}" alt="${E(T('Foto del grupo'))}">${btn('Quitar foto','group-edit-photo-clear','','ghost small')}`;
       } else {
         const attachments = document.getElementById("attachments");
         attachments?.insertAdjacentHTML("beforeend", m.mime?.startsWith("image/") ? preparedImageMarkup(m) : `<span class="attached-file" data-media="${m.id}">${E(m.name)}${btn("Quitar", "detach-media", `data-id="${m.id}"`, "ghost small")}</span>`);
@@ -2284,7 +2614,8 @@
   document.addEventListener("keydown", (event) => {
     const dialog = document.querySelector(".modal");
     if (event.key === "Escape") {
-      closeModal();
+      if (document.querySelector(".modal-decision-backdrop")) closeModalDecision();
+      else if (document.querySelector(".modal-backdrop")) requestModalClose();
       document.querySelector(".ascla-sidebar")?.classList.remove("open");
     }
     if (event.key === "Tab" && dialog) {

@@ -108,6 +108,8 @@ final class Media
             }
             $profile=(array)get_user_meta($file['user_id'],'_ascla_profile',true);
             if((int)($profile['photo_id']??0)===$id){$profile['photo_id']=0;$profile['revision']=(int)($profile['revision']??0)+1;update_user_meta($file['user_id'],'_ascla_profile',$profile);}
+            $conversations=Store::table('conversations');
+            $wpdb->query($wpdb->prepare("UPDATE $conversations SET photo_id=0 WHERE photo_id=%d",$id));
             $originalId=(int)($file['original_id']??0);
             Store::delete('media',['id'=>$id]);
             $deletedSource=false;
@@ -177,6 +179,14 @@ final class Media
             }
             if (!$allowed && str_starts_with($row['mime'],'image/')) {
                 try { $profile=Profiles::visible((int)$row['user_id']); $allowed=(int)($profile['photo_id']??0)===$id; } catch (\Throwable $e) { $allowed=false; }
+            }
+            if (!$allowed && str_starts_with($row['mime'],'image/')) {
+                global $wpdb;
+                $c=Store::table('conversations'); $p=Store::table('participants');
+                $allowed=(bool)$wpdb->get_var($wpdb->prepare(
+                    "SELECT c.id FROM $c c INNER JOIN $p p ON p.conversation_id=c.id WHERE c.kind='group' AND c.photo_id=%d AND p.user_id=%d LIMIT 1",
+                    $id,get_current_user_id()
+                ));
             }
             Access::require($allowed,'Archivo no encontrado.',404);
             nocache_headers();

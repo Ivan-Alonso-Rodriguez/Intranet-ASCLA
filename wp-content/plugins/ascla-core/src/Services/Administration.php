@@ -6,6 +6,10 @@ use ASCLA\Core\Repositories\Store;
 final class Administration
 {
     private const REQUEST_STATES=['open','progress','closed'];
+    private static function requestStateLabel(string $state): string
+    {
+        return ['open'=>'Recibida','progress'=>'En atención','closed'=>'Resuelta'][$state]??$state;
+    }
     private static function contactArgs(string $state,string $q): array
     {
         $args=['post_type'=>'ascla_contact','post_status'=>'private','s'=>$q,'orderby'=>['date'=>'DESC','ID'=>'DESC'],'posts_per_page'=>20];
@@ -39,6 +43,16 @@ final class Administration
                 $history=(array)($meta['request_history']??[]);$history[]=['from'=>$previous,'to'=>$status,'at'=>$meta['request_updated_at'],'actor'=>Profiles::publicName(get_current_user_id())];
                 $meta['request_history']=array_slice($history,-20);update_post_meta($id,'_ascla',$meta);
                 Audit::record('contact_status',$id,$status);
+                $author=(int)$post->post_author;
+                if($author>0 && Access::member($author)) {
+                    Notifications::send(
+                        $author,
+                        'support_update',
+                        'Tu solicitud #'.$id.' ahora está '.self::requestStateLabel($status).'.',
+                        \ASCLA\Core\Domain\Catalog::url('contacto'),
+                        ['type'=>'post','id'=>$id,'actor'=>get_current_user_id()]
+                    );
+                }
             }
             update_post_meta($id,'_ascla_request_status',$status);
             return Content::serialize($post);

@@ -16,6 +16,9 @@ final class Installer
         self::migrateReportReasons();
         self::migrateMediaMasters();
         self::migrateReportReviewState();
+        self::migrateConversationGroups();
+        self::migrateConversationPhotos();
+        self::migrateConversationDescriptions();
         self::pages();
         self::terms();
         if (!wp_next_scheduled('ascla_jobs')) { wp_schedule_event(time()+60, 'hourly', 'ascla_jobs'); }
@@ -107,6 +110,55 @@ final class Installer
         }
         update_option('ascla_schema',7,false);
     }
+
+    private static function migrateConversationGroups(): void
+    {
+        if ((int)get_option('ascla_schema',0)>=8) { return; }
+        global $wpdb; $table=$wpdb->prefix.'ascla_conversations';
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'kind'))) {
+            $wpdb->query("ALTER TABLE $table ADD kind varchar(16) NOT NULL DEFAULT 'direct' AFTER pair_key");
+        }
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'title'))) {
+            $wpdb->query("ALTER TABLE $table ADD title varchar(160) NOT NULL DEFAULT '' AFTER kind");
+        }
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'created_by'))) {
+            $wpdb->query("ALTER TABLE $table ADD created_by bigint(20) unsigned NOT NULL DEFAULT 0 AFTER title");
+        }
+        foreach (['kind','title','created_by'] as $column) {
+            if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",$column))) {
+                throw new MigrationException('No se pudo actualizar el esquema de conversaciones.');
+            }
+        }
+        $wpdb->query("UPDATE $table SET kind='direct' WHERE kind='' OR kind IS NULL");
+        update_option('ascla_schema',8,false);
+    }
+
+    private static function migrateConversationPhotos(): void
+    {
+        if ((int)get_option('ascla_schema',0)>=9) { return; }
+        global $wpdb; $table=$wpdb->prefix.'ascla_conversations';
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'photo_id'))) {
+            $wpdb->query("ALTER TABLE $table ADD photo_id bigint(20) unsigned NOT NULL DEFAULT 0 AFTER created_by, ADD KEY photo_id (photo_id)");
+        }
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'photo_id'))) {
+            throw new MigrationException('No se pudo añadir la fotografía de los grupos.');
+        }
+        update_option('ascla_schema',9,false);
+    }
+
+    private static function migrateConversationDescriptions(): void
+    {
+        if ((int)get_option('ascla_schema',0)>=10) { return; }
+        global $wpdb; $table=$wpdb->prefix.'ascla_conversations';
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'description'))) {
+            $wpdb->query("ALTER TABLE $table ADD description varchar(240) NOT NULL DEFAULT '' AFTER title");
+        }
+        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'description'))) {
+            throw new MigrationException('No se pudo añadir la descripción de los grupos.');
+        }
+        update_option('ascla_schema',10,false);
+    }
+
     /**
      * Four ASCLA roles map directly onto the process diagram's swimlanes:
      *  - Asociado (ascla_member): base community access, no publishing/moderation power.
@@ -144,7 +196,7 @@ final class Installer
         require_once ABSPATH.'wp-admin/includes/upgrade.php';
         $p=$wpdb->prefix.'ascla_'; $collate=$wpdb->get_charset_collate();
         $tables=[
-            'conversations'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\npair_key varchar(100) NOT NULL,\nupdated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nUNIQUE KEY pair_key (pair_key)",
+            'conversations'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\npair_key varchar(100) NOT NULL,\nkind varchar(16) NOT NULL DEFAULT 'direct',\ntitle varchar(160) NOT NULL DEFAULT '',\ndescription varchar(240) NOT NULL DEFAULT '',\ncreated_by bigint(20) unsigned NOT NULL DEFAULT 0,\nphoto_id bigint(20) unsigned NOT NULL DEFAULT 0,\nupdated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nUNIQUE KEY pair_key (pair_key),\nKEY photo_id (photo_id)",
             'participants'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nconversation_id bigint(20) unsigned NOT NULL,\nuser_id bigint(20) unsigned NOT NULL,\nlast_read bigint(20) unsigned NOT NULL DEFAULT 0,\nPRIMARY KEY  (id),\nUNIQUE KEY member (conversation_id,user_id),\nKEY user_id (user_id)",
             'messages'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nconversation_id bigint(20) unsigned NOT NULL,\nsender_id bigint(20) unsigned NOT NULL,\nbody text NOT NULL,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nKEY conversation_id (conversation_id,id)",
             'relations'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nuser_id bigint(20) unsigned NOT NULL,\ntarget_id bigint(20) unsigned NOT NULL,\nkind varchar(24) NOT NULL,\nreason varchar(64) NOT NULL DEFAULT '',\ndetail text NULL,\nreviewed_at datetime DEFAULT NULL,\nreviewed_by bigint(20) unsigned NOT NULL DEFAULT 0,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nUNIQUE KEY relation (user_id,target_id,kind),\nKEY target_kind (target_id,kind)",

@@ -59,7 +59,10 @@ final class Profiles
         }
         unset($data['revision']);
         $data['photo_url']=!empty($data['photo_id'])?Media::profilePhotoUrl((int)$data['photo_id'],$id):'';
-        if ($own) { $data['email']=wp_get_current_user()->user_email; }
+        if ($own) {
+            $data['email']=wp_get_current_user()->user_email;
+            $data['email_notifications']=Notifications::emailPreferences($id);
+        }
         $data['terms']=self::labels($data);
         return $data;
     }
@@ -128,6 +131,10 @@ final class Profiles
             $photo=absint($input['photo_id']);
             if ($photo) { Media::requireOwned($photo,$id,true); }
             $data['photo_id']=$photo;
+        }
+        if (isset($input['email_notifications'])) {
+            Access::require(is_array($input['email_notifications']),'Preferencias de correo no válidas.',400);
+            Notifications::saveEmailPreferences($id,$input['email_notifications']);
         }
         $data['revision']=(int)($old['revision']??0)+1;
         unset($data['email'],$data['terms'],$data['photo_url']);
