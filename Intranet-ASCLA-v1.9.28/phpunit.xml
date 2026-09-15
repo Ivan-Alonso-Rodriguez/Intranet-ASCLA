@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<phpunit bootstrap="tests/bootstrap.php" colors="true" cacheDirectory="tmp/phpunit" failOnWarning="true">
-  <testsuites><testsuite name="ASCLA Core"><directory>tests/php</directory></testsuite></testsuites>
-  <source><include><directory suffix=".php">wp-content/plugins/ascla-core/src</directory></include></source>
-  <coverage><report><clover outputFile="coverage/clover.xml"/><text outputFile="coverage/summary.txt"/></report></coverage>
-</phpunit>

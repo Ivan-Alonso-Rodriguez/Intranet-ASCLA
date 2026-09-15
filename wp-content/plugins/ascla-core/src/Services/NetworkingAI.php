@@ -26,7 +26,7 @@ final class NetworkingAI
     }
     public static function context(int $a,int $b,array $affinity): array
     {
-        return ['score'=>$affinity['score'],'shared'=>$affinity['shared'],'left'=>Profiles::networkingContext($a),'right'=>Profiles::networkingContext($b)];
+        return ['score'=>$affinity['score'],'shared'=>$affinity['shared'],'signals'=>$affinity['signals']??[],'left'=>Profiles::networkingContext($a),'right'=>Profiles::networkingContext($b)];
     }
     public static function agenda(array $group,bool $demo=false): array
     {

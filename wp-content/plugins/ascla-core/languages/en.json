@@ -686,5 +686,20 @@
   "Quitar portada": "Remove cover",
   "Aún no has seleccionado una portada.": "You have not selected a cover yet.",
   "JPG, PNG o WebP. Proporción recomendada 16:9. La imagen se recorta y optimiza antes de guardarse.": "JPG, PNG or WebP. Recommended ratio 16:9. The image is cropped and optimized before saving.",
-  "Ajustar portada del evento": "Adjust event cover"
+  "Ajustar portada del evento": "Adjust event cover",
+  "Participantes confirmados": "Confirmed attendees",
+  "Personas que asistirán": "People attending",
+  "participante no se muestra por sus preferencias de privacidad.": "attendee is hidden due to their privacy preferences.",
+  "participantes no se muestran por sus preferencias de privacidad.": "attendees are hidden due to their privacy preferences.",
+  "Solo se muestra la información que cada asociado permite compartir con la comunidad.": "Only information each member allows to be shared with the community is shown.",
+  "Disponible porque confirmaste tu asistencia. Conoce a otros participantes antes del encuentro.": "Available because you confirmed your attendance. Meet other attendees before the event.",
+  "confirmados": "confirmed",
+  "Comparten": "They share",
+  "Experiencia relacionada": "Related experience",
+  "Actividad en temas similares": "Activity in similar topics",
+  "Coincide con tus intereses": "Matches your interests",
+  "Relacionado con tu perfil profesional": "Related to your professional profile",
+  "Relacionado con tu actividad reciente": "Related to your recent activity",
+  "Seleccionado para ti": "Selected for you",
+  "Por qué te lo recomendamos": "Why we recommend this"
 }

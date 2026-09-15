@@ -15,6 +15,21 @@ final class DomainTest extends TestCase
         self::assertSame(80,MatchScore::calculate($a,$b)['score']);
         self::assertSame(MatchScore::calculate($a,$b),MatchScore::calculate($b,$a));
         $a['interests']=[1,1,2]; self::assertSame(80,MatchScore::calculate($a,$b)['score']);
+
+        $base=MatchScore::calculate(['interests'=>[1]],['interests'=>[1]])['score'];
+        $withExperience=MatchScore::calculate(
+            ['interests'=>[1],'position'=>'Secretario corporativo','experience'=>'Gobierno corporativo, cumplimiento y gestión de riesgos'],
+            ['interests'=>[1],'position'=>'Asesor de gobierno corporativo','experience'=>'Cumplimiento, gobierno corporativo y gestión de riesgos empresariales']
+        );
+        self::assertGreaterThan($base,$withExperience['score'],'Related professional experience must improve RF-040 affinity.');
+        self::assertGreaterThan(0,$withExperience['factors']['experience']['ratio']);
+
+        $withParticipation=MatchScore::calculate(
+            ['interests'=>[1],'participation'=>['ascla_tag:10','ascla_interest:20']],
+            ['interests'=>[1],'participation'=>['ascla_tag:10','ascla_interest:30']]
+        );
+        self::assertGreaterThan($base,$withParticipation['score'],'Similar public community participation should be a bounded secondary signal.');
+        self::assertGreaterThan(0,$withParticipation['factors']['participation']['ratio']);
     }
     public function testGroupPlannerNeverDuplicatesOrCreatesInvalidGroups(): void
     {

@@ -110,6 +110,22 @@ final class CompletionTest extends TestCase
         self::assertContains($keyword['id'],$ids,'A keyword matching a profile knowledge area should reinforce recommendations.');
         self::assertNotContains($unrelated['id'],$ids,'Recency alone must not recommend unrelated content.');
         self::assertLessThan(array_search($keyword['id'],$ids,true),array_search($direct['id'],$ids,true),'Explicit interests must rank above keyword-only matches.');
+        self::assertArrayHasKey('recommendation',$recommended['items'][0],'Recommended resources should explain their safe ranking signals to the UI.');
+
+        // RF-041: recent positive activity should help discover related content
+        // even when the activity topic is not part of the explicit profile.
+        $activityTag='Actividad '.bin2hex(random_bytes(4));
+        wp_set_current_user($this->users[0]);
+        $activitySource=$this->create('resource',['title'=>'QZ Fuente de actividad','tag_names'=>[$activityTag]]);
+        $activityTarget=$this->create('resource',['title'=>'QZ Recomendación por actividad','tag_names'=>[$activityTag]]);
+        wp_set_current_user($this->users[1]);
+        Content::react($activitySource['id'],'like',true);
+        $activityRecommendations=Content::listing('resource',['recommended'=>1,'per_page'=>100]);
+        $activityIds=array_column($activityRecommendations['items'],'id');
+        self::assertContains($activityTarget['id'],$activityIds,'Relevant recent activity should participate in RF-041 content recommendations.');
+        $activityItem=$activityRecommendations['items'][array_search($activityTarget['id'],$activityIds,true)];
+        self::assertContains('activity_match',$activityItem['recommendation']['reasons']);
+
         wp_set_current_user($this->users[0]);
         self::assertGreaterThanOrEqual(2,Discovery::resource($keyword['id'])['sent'],'Keyword relevance should also participate in resource discovery notifications.');
     }

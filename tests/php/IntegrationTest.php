@@ -235,6 +235,32 @@ final class IntegrationTest extends TestCase
 
     }
 
+    public function testConfirmedAttendeesCanSeeOnlyPrivacySafeParticipantProfiles(): void
+    {
+        $p=$this->make('event',['meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>3,'modality'=>'Presencial']]);
+        $this->user(1); Profiles::save(['directory'=>true]); Events::register($p['id'],'accepted');
+        $this->user(2); Profiles::save(['directory'=>true,'position'=>'Cargo reservado','company'=>'Empresa visible','hidden'=>['position']]); Events::register($p['id'],'accepted');
+        $this->user(3); Profiles::save(['directory'=>false,'company'=>'Empresa privada']); Events::register($p['id'],'accepted');
+
+        $this->user(1); $detail=Events::detail($p['id']);
+        self::assertSame('accepted',$detail['registered']);
+        self::assertArrayHasKey('attendees',$detail);
+        self::assertCount(2,$detail['attendees']);
+        self::assertSame(1,$detail['attendees_hidden']);
+        self::assertArrayNotHasKey('participants',$detail);
+        $visible=array_column($detail['attendees'],null,'id');
+        self::assertArrayHasKey($this->users[1],$visible);
+        self::assertArrayHasKey($this->users[2],$visible);
+        self::assertSame('', $visible[$this->users[2]]['position']);
+        self::assertSame('Empresa visible',$visible[$this->users[2]]['company']);
+        self::assertTrue($visible[$this->users[1]]['is_me']);
+
+        $this->user(3); Events::register($p['id'],'cancelled');
+        $after=Events::detail($p['id']);
+        self::assertSame('cancelled',$after['registered']);
+        self::assertArrayNotHasKey('attendees',$after);
+    }
+
     public function testEventCanBeCancelledWithoutDeletingHistoryAndBlocksFurtherRsvp(): void
     {
         $p=$this->make('event',['meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>2,'modality'=>'Virtual']]);

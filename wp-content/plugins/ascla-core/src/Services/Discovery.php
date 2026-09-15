@@ -16,7 +16,7 @@ final class Discovery
             $rank=KnowledgeRecommendations::score($post,(int)$user->ID);
             // Explicit interests are strongest; keywords can also qualify when they have a meaningful profile match.
             if (($rank['relevance']??0)>=8) {
-                $sent += Notifications::once($user->ID, 'resource:' . $post->ID, 'resource', 'Hay un nuevo recurso relacionado con tus intereses y conocimientos.', Catalog::url('centro-conocimiento', ['item' => $post->ID]),['type'=>'post','id'=>$post->ID]) ? 1 : 0;
+                $sent += Notifications::once($user->ID, 'resource:' . $post->ID, 'resource', 'Hay un nuevo recurso relacionado con tus intereses, perfil profesional o actividad reciente.', Catalog::url('centro-conocimiento', ['item' => $post->ID]),['type'=>'post','id'=>$post->ID]) ? 1 : 0;
             }
         });
         return ['sent' => $sent];

@@ -4,9 +4,9 @@ Plugin WordPress portable para una comunidad profesional privada. Incluye perfil
 
 Toda la funcionalidad propia está en `wp-content/plugins/ascla-core/`. Elementor es opcional. No se modifica WordPress Core ni se necesita un tema específico. El plugin conserva sus datos al desactivarse o desinstalarse.
 
-## Versión actual: 1.9.40 · esquema 10
+## Versión actual: 1.9.42 · esquema 10
 
-La versión 1.9.40 completa RF-025 incorporando una portada de evento editable: Administradores y Ejecutivos pueden cargar, recortar, optimizar, reemplazar o quitar una imagen JPG, PNG o WebP desde el mismo formulario del evento. La portada se muestra en el listado y en el detalle. No introduce cambios de base de datos y mantiene el esquema 10.
+La versión 1.9.42 mejora RF-040 y RF-041. La recomendación de asociados incorpora la experiencia profesional relacionada y una señal pequeña de participación pública en temas comunes, sin usar chats privados, soporte ni asistencia a eventos. Las recomendaciones de conocimiento combinan intereses explícitos, información profesional y actividad reciente sobre contenido público, y ahora explican visualmente por qué aparece cada sugerencia. No introduce cambios de base de datos y mantiene el esquema 10.
 
 Administración con solicitudes persistentes, historial, búsqueda de usuarios y suspensión/reactivación. Los foros se publican sin aprobación; Galería, Centro de Conocimiento y Eventos sólo permiten crear/editar/publicar a Administradores y Ejecutivos ASCLA. Los eventos ordinarios se publican directamente, salvo borrador explícito; los microeventos conservan revisión administrativa.
 
@@ -25,6 +25,14 @@ No se han desplegado estos cambios en el servidor remoto. Gemini, OpenAI, YouTub
 - **Temas automáticos:** el análisis puede activar Gestión de riesgos, Gobierno corporativo, Inteligencia artificial, Juntas directivas, Sostenibilidad y Transformación digital cuando el contenido los respalda. Los temas elegidos manualmente se conservan.
 - **Duración real:** ASCLA prioriza `videos.list` / `contentDetails.duration` mediante YouTube OAuth; si el servidor no puede verificarla, prueba metadatos públicos del video y, desde la interfaz autenticada, el YouTube IFrame Player API como último respaldo. Nunca calcula la duración usando timestamps de una transcripción.
 - **Transcripción obligatoria para IA:** una transcripción manual válida o subtítulos autorizados obtenidos desde YouTube son requisito para generar resumen, nota técnica y cápsulas. Si no se obtienen, el trabajo termina con un mensaje de revisión y no llama al proveedor de IA con contenido ficticio.
+
+### Recomendaciones de personas y conocimiento en 1.9.42
+
+- **RF-040 — asociados:** los intereses, áreas de conocimiento, industrias, objetivos e idiomas siguen siendo la base determinística. La experiencia profesional relacionada puede reforzar la afinidad y la actividad pública en temas similares aporta un ajuste pequeño. Los campos ocultos no se utilizan como señal de experiencia y no se inspeccionan chats privados, soporte ni asistencia a eventos.
+- El cálculo de participación se reserva para una lista corta de candidatos cercanos al umbral, evitando que la mejora convierta el directorio en una consulta costosa cuando crezca la comunidad.
+- **RF-041 — contenidos:** un recurso puede recomendarse por intereses explícitos, coincidencias con áreas/industrias/objetivos, información profesional o actividad reciente en contenido público que el asociado haya seguido, reaccionado, comentado o publicado.
+- La **recencia no crea relevancia por sí sola**; únicamente ordena contenido que ya tiene una relación temática con el asociado.
+- La interfaz muestra una explicación breve y segura: por ejemplo, “Coincide con tus intereses”, “Relacionado con tu perfil profesional” o “Relacionado con tu actividad reciente”.
 
 ### Recomendaciones de conocimiento en 1.9.28
 

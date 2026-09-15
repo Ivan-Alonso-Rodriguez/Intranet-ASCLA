@@ -765,10 +765,18 @@
     const remove = cancelling ? T('Cancelar solicitud') : T('Eliminar conexión');
     modal(title, `<p class="detail-body">${E(description)}</p><div class="form-actions">${btn(keep,'close')}${btn(remove,'connection-remove-confirm',`data-id="${Number(id)}" data-mode="${E(mode)}"`,'danger primary')}</div>`);
   }
+  function affinityContext(affinity) {
+    if (!affinity) return "";
+    const details = [];
+    if ((affinity.shared || []).length) details.push(`${E(T("Comparten"))} ${affinity.shared.slice(0, 2).map(E).join(" · ")}`);
+    if ((affinity.signals || []).includes("experience")) details.push(E(T("Experiencia relacionada")));
+    if ((affinity.signals || []).includes("participation")) details.push(E(T("Actividad en temas similares")));
+    return details.length ? `<small class="match-context">${details.slice(0, 2).join(" · ")}</small>` : "";
+  }
   function memberCard(p) {
     const isMe = Number(p.id) === Number(S.boot.me.id);
     const signal = p.affinity
-      ? `<div class="match-pill">${I("spark")}${p.affinity.score}% ${E(T("de afinidad"))}</div>`
+      ? `<div class="match-pill">${I("spark")}${p.affinity.score}% ${E(T("de afinidad"))}</div>${affinityContext(p.affinity)}`
       : `<div class="tag-row">${(p.terms?.interests || [])
           .slice(0, 2)
           .map((t) => `<span class="tag">${E(t)}</span>`)
@@ -779,12 +787,22 @@
     const relationshipState = isMe ? '' : memberRelationshipState(p.connection);
     return `<article class="card member-card"><div class="member-card-profile">${avatar(p, "lg")}<h3>${E(p.name)}</h3><div class="role">${E(p.position || T("Miembro ASCLA"))}</div><div class="company">${E(p.company || T("Comunidad profesional"))}</div><span class="country">${I("pin")}${E(p.country || T("América Latina"))}</span><div class="member-card-signal">${signal}<span class="member-card-relationship-state">${relationshipState}</span></div></div><div class="member-card-actions">${btn("Ver perfil " + I("arrow"), "member", `data-id="${p.id}"`, "small")}${relationship || '<div class="connection-controls member-action-placeholder" aria-hidden="true"></div>'}</div></article>`;
   }
+  function resourceRecommendation(recommendation) {
+    if (!recommendation) return "";
+    const reasons = recommendation.reasons || [];
+    const labels = [];
+    if (reasons.some((reason) => ["interest_match", "keyword_interest"].includes(reason))) labels.push(T("Coincide con tus intereses"));
+    if (reasons.some((reason) => ["keyword_area", "keyword_industry", "keyword_goal", "professional_match"].includes(reason))) labels.push(T("Relacionado con tu perfil profesional"));
+    if (reasons.includes("activity_match")) labels.push(T("Relacionado con tu actividad reciente"));
+    if (!labels.length) labels.push(T("Seleccionado para ti"));
+    return `<div class="recommendation-context" title="${E(T("Por qué te lo recomendamos"))}">${I("spark")}<span>${E(labels.slice(0, 2).join(" · "))}</span></div>`;
+  }
   function resourceCard(p, i = 0) {
     const cover = p.meta.thumbnail_url
       ? `<a href="${E(p.url)}" class="resource-video-cover"><img class="resource-thumbnail" src="${E(p.meta.thumbnail_url)}" alt="${E(T("Miniatura de"))} ${E(p.title)}" loading="lazy"><span>${I("play")} ${p.meta.duration_seconds ? E(UI.duration(p.meta.duration_seconds)) : E(T("Duración por confirmar"))}</span></a>`
       : `<a href="${E(p.url)}" class="resource-cover v${i % 3}"><div class="cover-label">${E(T("ASCLA · CONOCIMIENTO"))}</div><strong>${E(p.title.split(":")[0])}</strong><span class="cover-icon">${I(p.meta.resource_type === "Video" ? "play" : "book")}</span></a>`;
     const editorialState = p.status !== "publish" ? status(p.status) : "";
-    return `<article class="card resource-card">${cover}<div class="resource-content"><div class="resource-card-badges"><span class="tag">${E(T(p.meta.resource_type || "Artículo"))}</span>${editorialState}</div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E((p.meta.summary || p.body).slice(0, 115))}${(p.meta.summary || p.body).length > 115 ? "…" : ""}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Explorar " + I("arrow"), "item", `data-id="${p.id}"`, "ghost")}</div></div></article>`;
+    return `<article class="card resource-card">${cover}<div class="resource-content"><div class="resource-card-badges"><span class="tag">${E(T(p.meta.resource_type || "Artículo"))}</span>${editorialState}</div>${resourceRecommendation(p.recommendation)}<h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E((p.meta.summary || p.body).slice(0, 115))}${(p.meta.summary || p.body).length > 115 ? "…" : ""}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Explorar " + I("arrow"), "item", `data-id="${p.id}"`, "ghost")}</div></div></article>`;
   }
   function eventMini(p) {
     const d = new Date(p.meta.start);
@@ -1116,6 +1134,21 @@
     slot.innerHTML = `<form class="comment-reply-form" data-form="comment-reply" data-id="${Number(button.dataset.post)}" data-parent="${Number(button.dataset.id)}"><label>${E(T("Responder a"))} ${E(button.dataset.author || T('este comentario'))}</label><textarea name="body" required maxlength="5000" placeholder="${E(T("Escribe una respuesta…"))}"></textarea><div class="form-actions">${btn('Cancelar','comment-reply-cancel','','ghost small')}<button class="btn primary small">${E(T("Responder"))}</button></div></form>`;
     slot.querySelector('textarea')?.focus();
   }
+  function eventAttendees(d) {
+    if (!Array.isArray(d.attendees)) return '';
+    const people = d.attendees;
+    const title = d.is_past ? T('Participantes confirmados') : T('Personas que asistirán');
+    const hidden = Number(d.attendees_hidden || 0);
+    const cards = people.map(person => {
+      const role = [person.position, person.company].filter(Boolean).join(' · ');
+      const mine = person.is_me ? `<span class="event-attendee-you">${E(T('Tú'))}</span>` : '';
+      return `<article class="event-attendee-card${person.is_me ? ' is-me' : ''}"><button type="button" class="event-attendee-profile" data-action="member" data-id="${Number(person.id)}" aria-label="${E(T('Ver perfil de'))} ${E(person.name)}">${avatar(person)}<span class="event-attendee-copy"><span class="event-attendee-name">${E(person.name)}${mine}</span><small>${E(role || T('Miembro ASCLA'))}</small></span><span class="event-attendee-arrow" aria-hidden="true">${I('arrow')}</span></button></article>`;
+    }).join('');
+    const privacy = hidden > 0
+      ? `<p class="event-attendee-privacy">${I('shield')} ${hidden} ${E(T(hidden === 1 ? 'participante no se muestra por sus preferencias de privacidad.' : 'participantes no se muestran por sus preferencias de privacidad.'))}</p>`
+      : `<p class="event-attendee-privacy">${I('shield')} ${E(T('Solo se muestra la información que cada asociado permite compartir con la comunidad.'))}</p>`;
+    return `<section class="event-attendees" aria-labelledby="event-attendees-title"><div class="event-attendees-head"><div class="event-attendees-heading"><span class="event-attendees-icon">${I('users')}</span><div><h3 id="event-attendees-title">${E(title)}</h3><p>${E(T('Disponible porque confirmaste tu asistencia. Conoce a otros participantes antes del encuentro.'))}</p></div></div><span class="event-attendees-count"><strong>${Number(d.attending || people.length)}</strong><small>${E(T('confirmados'))}</small></span></div><div class="event-attendee-grid">${cards}</div>${privacy}</section>`;
+  }
   async function item(id) {
     const p = await api("items/" + id);
     S.item = p;
@@ -1147,7 +1180,8 @@
       const waitlistSummary = Number(d.waitlist_count || 0) ? ` · ${Number(d.waitlist_count)} ${E(T(Number(d.waitlist_count) === 1 ? "persona en espera" : "personas en espera"))}` : "";
       const capacitySummary = p.meta.capacity ? ` · ${p.meta.capacity} ${E(T("cupos"))}${Number(d.remaining) === 0 ? ` · ${E(T("aforo completo"))}` : ` · ${Number(d.remaining)} ${E(T("disponibles"))}`}` : ` · ${E(T("Sin límite de cupos"))}`;
       const eventState = d.cancelled ? ` · ${E(T("Cancelado"))}` : (d.is_past ? ` · ${E(T("Finalizado"))}` : ` · ${status(d.registered)}`);
-      extra = `<div class="card" style="background:var(--bg);margin:20px 0"><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span><span>${I("clock")} ${time(p.meta.start)} – ${time(p.meta.end)}</span><span>${I("pin")} ${E(p.meta.location || T("Por confirmar"))}</span></div><p class="private-note">${d.attending} ${E(T("inscritos"))}${capacitySummary}${waitlistSummary}${eventState}</p>${waitlistNotice}${p.meta.agenda ? `<p class="detail-body">${E(p.meta.agenda).replace(/\n/g, "<br>")}</p>` : ""}<div class="form-actions">${registrationActions}${!d.is_past && !d.cancelled && d.google_url ? `<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">${E(T("Añadir a Google Calendar ↗"))}</a>` : ""}${!d.is_past && !d.cancelled && S.boot.google_connected ? btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small") + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small") : ""}</div>${d.participants ? `<details><summary class="private-note">${E(T("Participantes y lista de espera (moderación)"))}</summary>${d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("")}</details>` : ""}</div>`;
+      const attendeeSection = eventAttendees(d);
+      extra = `<div class="card" style="background:var(--bg);margin:20px 0"><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span><span>${I("clock")} ${time(p.meta.start)} – ${time(p.meta.end)}</span><span>${I("pin")} ${E(p.meta.location || T("Por confirmar"))}</span></div><p class="private-note">${d.attending} ${E(T("inscritos"))}${capacitySummary}${waitlistSummary}${eventState}</p>${waitlistNotice}${p.meta.agenda ? `<p class="detail-body">${E(p.meta.agenda).replace(/\n/g, "<br>")}</p>` : ""}<div class="form-actions">${registrationActions}${!d.is_past && !d.cancelled && d.google_url ? `<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">${E(T("Añadir a Google Calendar ↗"))}</a>` : ""}${!d.is_past && !d.cancelled && S.boot.google_connected ? btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small") + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small") : ""}</div>${attendeeSection}${d.participants ? `<details class="event-moderation-participants"><summary class="private-note">${E(T("Participantes y lista de espera (moderación)"))}</summary>${d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("")}</details>` : ""}</div>`;
     }
     const canEdit = ["gallery", "resource", "event"].includes(p.type) ? (S.boot.admin || S.boot.executive) : S.boot.moderator || p.author.id === S.boot.me.id;
     const reviewedLabel = T(p.meta.reviewed ? "Revisado" : "Requiere revisión de fuentes, anonimización y derechos.");

@@ -2,9 +2,9 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.9.40`  
+> **Versión actual:** `1.9.42`  
 > **Esquema de base de datos:** `10`  
-> La versión `1.9.40` completa RF-025 incorporando portada de evento editable, privada y optimizada en proporción recomendada 16:9.
+> La versión `1.9.42` mejora RF-040 y RF-041 incorporando experiencia profesional y actividad pública como señales secundarias de recomendación, con explicaciones visuales y sin exponer información privada.
 
 ## Resumen de versiones
 
@@ -61,11 +61,35 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.37 | RF-033 y RF-038: notificaciones del ciclo de soporte | Completada |
 | 1.9.38 | RF-029 y RF-030: lista de espera y liberación de cupo | Completada |
 | 1.9.39 | RF-024 y RN-011: cancelación de eventos y correo controlado | Completada |
-| 1.9.40 | RF-025: imagen de portada del evento | **Actual** |
+| 1.9.40 | RF-025: imagen de portada del evento | Completada |
+| 1.9.41 | RF-031: participantes visibles después del RSVP | Completada |
+| 1.9.42 | RF-040 y RF-041: recomendaciones enriquecidas y explicables | **Actual** |
 
 ---
 
 # Serie 1.9.x — evolución funcional
+
+## 1.9.42 — RF-040 y RF-041: recomendaciones enriquecidas y explicables
+
+- **RF-040 — Recomendación de asociados:** mantiene como señales principales intereses, áreas de conocimiento, industrias, objetivos de networking e idiomas.
+- La **experiencia profesional relacionada** añade un refuerzo determinístico acotado al puntaje; si experiencia o cargo están ocultos para el proceso de matching, no se utilizan.
+- La actividad pública puede aportar un refuerzo pequeño cuando ambos asociados interactúan con temas similares en publicaciones accesibles. Se excluyen deliberadamente mensajes privados, solicitudes de soporte y registros de asistencia a eventos para evitar inferencias sensibles.
+- El cálculo de actividad se ejecuta solo para una lista corta de candidatos cercanos al umbral, preservando el rendimiento del directorio a medida que crece la comunidad.
+- Las tarjetas recomendadas muestran contexto breve de la afinidad, como temas compartidos, experiencia relacionada o actividad temática similar.
+- **RF-041 — Recomendación de contenidos:** los recursos se ordenan combinando intereses explícitos, áreas/industrias/objetivos, cargo/experiencia profesional y actividad reciente en contenido público que el asociado haya seguido, reaccionado, comentado o publicado.
+- La actividad es una señal secundaria y acotada; la **recencia nunca recomienda contenido ajeno por sí sola**.
+- Las tarjetas de conocimiento recomendadas indican por qué aparecen sin revelar datos del perfil: intereses, perfil profesional o actividad reciente.
+- Mantiene el **esquema 10** y no requiere migración de base de datos.
+
+## 1.9.41 — RF-031: participantes visibles después del RSVP
+
+- **RF-031:** la lista social de participantes se entrega únicamente cuando el asociado tiene un RSVP con estado **Inscrito/accepted**.
+- Antes del RSVP, en lista de espera, con cupo ofrecido o después de cancelar la inscripción, el backend no expone la sección de asistentes al asociado.
+- La vista del evento presenta una cuadrícula con fotografía o iniciales, nombre y cargo/empresa únicamente cuando esos datos pueden mostrarse de acuerdo con la configuración de privacidad.
+- Los perfiles que han desactivado su participación en el directorio no se identifican en esta vista; solo se indica de forma agregada que existen participantes no visibles por privacidad.
+- Cada tarjeta visible abre el perfil del asociado dentro de la misma página, reutilizando el visor modal existente.
+- Moderación conserva su listado completo de inscritos, invitados, lista de espera y cupos ofrecidos para tareas administrativas.
+- Mantiene el **esquema 10** y no requiere migración de base de datos.
 
 ## 1.9.40 — RF-025: imagen de portada del evento
 
@@ -831,4 +855,4 @@ Las modificaciones exclusivamente documentales, como la ampliación de este arch
 - Cuando existe un snapshot verificable se conserva como referencia histórica.
 - No se crean tags ficticios para versiones cuyo código fuente original no esté disponible.
 - La carpeta `docs/` se mantiene fuera del repositorio público según la configuración actual de `.gitignore`.
-- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.40**.
+- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.42**.

@@ -39,9 +39,15 @@ final class MockAIProvider implements AIProviderInterface
             return ['answer'=>implode("\n\n",$quotes),'source_ids'=>array_column($sources,'id'),'mode'=>$this->mode()];
         }
         if(in_array($task,['matching','intro'],true)){
-            $shared=implode(' y ',array_slice($context['shared']??[],0,3));$topic=$shared?:'sus objetivos de networking';
+            $shared=implode(' y ',array_slice($context['shared']??[],0,3));$signals=(array)($context['signals']??[]);
+            $topic=$shared?:((in_array('experience',$signals,true))?'experiencia profesional relacionada':'sus objetivos de networking');
             $proposal='¿Qué experiencia les gustaría compartir sobre '.$topic.'?';
-            return ['explanation'=>$shared?'Comparten interés en '.$shared.'. Estos factores provienen de los campos públicos de sus perfiles.':'Completen sus intereses para descubrir afinidades.','text'=>'Hola '.($context['right']['name']??'asociado').', vi que podemos conversar sobre '.$topic.'. '.$proposal,'conversation_proposal'=>$proposal,'mode'=>$this->mode()];
+            $details=[];
+            if($shared)$details[]='Comparten interés en '.$shared.'.';
+            if(in_array('experience',$signals,true))$details[]='También tienen experiencia profesional relacionada.';
+            if(in_array('participation',$signals,true))$details[]='Su actividad pública en la comunidad muestra temas en común.';
+            if(!$details)$details[]='Completen sus intereses y experiencia para descubrir afinidades.';
+            return ['explanation'=>implode(' ',$details),'text'=>'Hola '.($context['right']['name']??'asociado').', vi que podemos conversar sobre '.$topic.'. '.$proposal,'conversation_proposal'=>$proposal,'mode'=>$this->mode()];
         }
         if($task==='microagenda'){
             $theme=implode(' y ',array_slice($context['interests']??[],0,2))?:'gobierno corporativo';

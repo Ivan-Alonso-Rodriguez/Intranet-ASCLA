@@ -115,6 +115,12 @@ final class Content
                 if (($rank['relevance']??0)<=0) { continue; }
                 $item=self::serialize($post);
                 if (!empty($filter['resource_type']) && ($item['meta']['resource_type']??'')!==$filter['resource_type']) { continue; }
+                // RF-041: expose only safe recommendation metadata so the UI can
+                // explain why a resource appears without leaking profile values.
+                $item['recommendation']=[
+                    'score'=>(int)($rank['score']??0),
+                    'reasons'=>array_values((array)($rank['reasons']??[])),
+                ];
                 $ranked[]=['item'=>$item,'score'=>(int)$rank['score'],'timestamp'=>strtotime($post->post_date_gmt.' UTC')?:0];
             }
             usort($ranked,static fn($a,$b)=>$b['score']<=>$a['score'] ?: $b['timestamp']<=>$a['timestamp'] ?: $b['item']['id']<=>$a['item']['id']);
@@ -187,6 +193,10 @@ final class Content
             Knowledge::autoVideoMetadata((int)$saved);
         }
         Audit::record('content_saved',$saved,$status);
+        if ($status==='publish' && in_array($type,['hub','topic','resource','gallery'],true)) {
+            $savedPost=get_post($saved);
+            if ($savedPost) { KnowledgeRecommendations::invalidateActivity((int)$savedPost->post_author); }
+        }
         return self::serialize(get_post($saved));
     }
 
@@ -301,6 +311,7 @@ final class Content
         $user=wp_get_current_user();
         $cid=wp_insert_comment(wp_slash(['comment_post_ID'=>$id,'comment_parent'=>$parent,'user_id'=>$user->ID,'comment_author'=>$user->display_name,'comment_content'=>$body,'comment_approved'=>$approved?1:0,'comment_type'=>'comment']));
         Access::require((int)$cid>0,'No se pudo guardar el comentario.',500);
+        KnowledgeRecommendations::invalidateActivity(get_current_user_id());
         if ($approved) { self::notifyComment((int)$cid); }
         wp_update_post(['ID'=>$id,'post_modified'=>current_time('mysql')]);
         return ['id'=>(int)$cid,'status'=>$approved?'publish':'pending'];
@@ -385,6 +396,7 @@ final class Content
                 if ($kind==='like') { Notifications::send((int)$post->post_author,'reaction','Tu publicación recibió una reacción.',Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID]),['type'=>'post','id'=>$post->ID,'actor'=>get_current_user_id()]); }
             } elseif (!$active) { Store::delete('relations',$where); }
         });
+        KnowledgeRecommendations::invalidateActivity(get_current_user_id());
         return ['active'=>$active];
     }
     public static function report(int $id,string $reason,string $detail=''): array

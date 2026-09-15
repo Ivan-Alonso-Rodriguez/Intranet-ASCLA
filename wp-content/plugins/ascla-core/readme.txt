@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.9.40
+Stable tag: 1.9.42
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,18 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.9.42 =
+* RF-040: la afinidad entre asociados conserva intereses, áreas, industrias, objetivos e idiomas como señales principales y añade experiencia profesional relacionada como señal secundaria, respetando campos ocultos.
+* RF-040: la actividad pública en temas de la comunidad puede aportar un refuerzo pequeño a la afinidad; chats privados, soporte y asistencia a eventos no se usan para esta señal.
+* RF-041: las recomendaciones del Centro de Conocimiento combinan intereses explícitos, información profesional y actividad reciente en contenido público; la recencia solo desempata recursos ya relevantes.
+* Las tarjetas recomendadas explican de forma breve por qué aparecen (intereses, perfil profesional o actividad reciente), sin exponer datos privados. Mantiene esquema 10; no requiere migración.
+
+= 1.9.41 =
+* RF-031: un asociado con RSVP confirmado puede consultar a las personas inscritas visibles según las preferencias de privacidad de cada perfil.
+* La sección de participantes se presenta como una cuadrícula visual con fotografía/iniciales, nombre, cargo/empresa cuando sean públicos y acceso al perfil dentro de la misma página.
+* Los asociados que no participan en el directorio o cuyos datos estén ocultos no exponen información privada; se informa únicamente que existen participantes no visibles. Antes del RSVP la sección no se entrega ni se muestra.
+* Moderación conserva su listado administrativo completo. Mantiene esquema 10; no requiere migración de base de datos.
 
 = 1.9.40 =
 * RF-025: los eventos admiten una portada privada JPG, PNG o WebP desde el editor de creación y edición.

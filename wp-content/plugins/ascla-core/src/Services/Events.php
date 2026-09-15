@@ -41,6 +41,36 @@ final class Events
         );
     }
 
+    /** RF-031: expose only attendee information that the confirmed viewer is allowed to see. */
+    private static function visibleAttendees(int $id,int $viewer): array
+    {
+        $items=[]; $hidden=0;
+        foreach (Store::rows('registrations',"event_id=%d AND status='accepted'",[$id],'ORDER BY id ASC') as $row) {
+            $uid=absint($row['user_id']??0);
+            if ($uid<=0 || !Access::member($uid)) { continue; }
+            $profile=Profiles::raw($uid);
+            $own=$uid===$viewer;
+            // Leaving the directory is also a request not to be exposed in attendee discovery views.
+            if (!$own && empty($profile['directory'])) { $hidden++; continue; }
+            $hiddenFields=(array)($profile['hidden']??[]);
+            foreach ($hiddenFields as $field) { unset($profile[$field]); }
+            $name=$own?(string)($profile['name']??Profiles::publicName($uid)):Profiles::publicName($uid);
+            $photo='';
+            if (($own || !in_array('photo_id',$hiddenFields,true)) && !empty($profile['photo_id'])) {
+                $photo=Media::profilePhotoUrl((int)$profile['photo_id'],$uid);
+            }
+            $items[]=[
+                'id'=>$uid,
+                'name'=>$name,
+                'photo_url'=>$photo,
+                'position'=>(string)($profile['position']??''),
+                'company'=>(string)($profile['company']??''),
+                'is_me'=>$own,
+            ];
+        }
+        return ['items'=>$items,'hidden'=>$hidden];
+    }
+
     /** Reserve every currently free seat for the oldest people waiting. */
     private static function fillAvailableSlots(int $id,array $meta): int
     {
@@ -73,6 +103,11 @@ final class Events
         $item['waitlist_count']=self::countStatus($id,'waitlisted');
         $item['waitlist_position']=$item['registered']==='waitlisted'?self::waitlistPosition($id,get_current_user_id()):0;
         $item['google_url']=($item['is_past']||$item['cancelled'])?'':Calendar::google($post->post_title,$meta,!empty($meta['chatham'])?'Sesión bajo la Regla de Chatham House.':$post->post_content);
+        if ($item['registered']==='accepted') {
+            $attendees=self::visibleAttendees($id,get_current_user_id());
+            $item['attendees']=$attendees['items'];
+            $item['attendees_hidden']=$attendees['hidden'];
+        }
         if (current_user_can('ascla_moderate')) {
             $item['participants']=array_map(static function ($r) { $u=get_userdata($r['user_id']); return ['id'=>(int)$r['user_id'],'name'=>$u?Profiles::publicName((int)$u->ID):'Miembro','status'=>$r['status']]; },Store::rows('registrations','event_id=%d',[$id],'ORDER BY id ASC'));
         }
