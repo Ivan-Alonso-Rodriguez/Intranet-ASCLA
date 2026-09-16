@@ -126,6 +126,7 @@ final class Messaging
                 'pair_key'=>$key,'kind'=>'group','title'=>$title,'description'=>$description,'created_by'=>$me,'photo_id'=>$photoId,'updated_at'=>current_time('mysql',true),
             ]);
             foreach (array_merge([$me],$ids) as $uid) Store::insert('participants',['conversation_id'=>$id,'user_id'=>$uid,'last_read'=>0]);
+            if ($photoId>0) { Media::commit($photoId,$me); }
             foreach ($ids as $uid) {
                 Notifications::send(
                     $uid,
@@ -345,6 +346,7 @@ final class Messaging
                 'photo_id'=>$photoId,
                 'updated_at'=>current_time('mysql',true),
             ],['id'=>$conversationId]);
+            if ($photoId>0) { Media::commit($photoId,$me); }
             Audit::record('group_conversation_updated',$conversationId,'creator:'.$me);
             return self::conversation($conversationId);
         });

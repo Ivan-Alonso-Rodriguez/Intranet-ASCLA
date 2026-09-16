@@ -145,8 +145,10 @@ final class Content
         $publisher=Access::canPublish();
         Access::require(!in_array($type,['gallery','resource','event'],true)||$publisher,'Solo un Ejecutivo o un administrador pueden crear o editar eventos, Galería y Centro de Conocimiento.',403);
         Access::require($editor||in_array($type,['hub','topic','gallery','contact'],true),'Se requiere moderación.',403);
+        $oldMeta=[]; $oldTitle='';
         if ($id) {
             $post=self::get($id); Access::require($post->post_type==='ascla_'.$type && ($editor||(int)$post->post_author===get_current_user_id()),'No puede editar este contenido.');
+            if ($type==='event') { $oldMeta=(array)get_post_meta($id,'_ascla',true); $oldTitle=(string)$post->post_title; }
         }
         $title=trim(Access::text($input['title']??'',200)); $body=trim(Access::text($input['body']??'',30000));
         Access::require($title!=='' && $body!=='','Complete título y contenido.',400);
@@ -186,6 +188,9 @@ final class Content
         if ($tagNames) { self::tags($saved,$tagNames); }
         foreach ($meta['media_ids']??[] as $media) { Media::attach($media,$saved); }
         wp_update_post(['ID'=>$saved,'post_status'=>$status]);
+        if ($type==='event' && $id && $status==='publish') {
+            Events::notifyImportantChanges((int)$saved,$oldMeta+['__title'=>$oldTitle],$meta+['__title'=>$title]);
+        }
         if ($type==='contact' && !$id) {
             self::notifySupportCreated((int)$saved);
         }

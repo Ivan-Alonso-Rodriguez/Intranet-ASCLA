@@ -22,7 +22,7 @@ final class Router
     }
     public static function routes(): void
     {
-        self::route('/bootstrap','GET',static fn()=>['me'=>Profiles::visible(get_current_user_id()),'profile_completion'=>Profiles::completion(get_current_user_id()),'birthday'=>\ASCLA\Core\Services\Birthdays::info(get_current_user_id()),'catalogs'=>Profiles::catalogs(),'moderator'=>current_user_can('ascla_moderate'),'executive'=>current_user_can('ascla_publish'),'admin'=>current_user_can('ascla_manage'),'demo'=>Settings::get()['demo'],'ai_mode'=>Knowledge::provider()->mode(),'google_connected'=>\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='']);
+        self::route('/bootstrap','GET',static fn()=>['me'=>Profiles::visible(get_current_user_id()),'profile_completion'=>Profiles::completion(get_current_user_id()),'birthday'=>\ASCLA\Core\Services\Birthdays::info(get_current_user_id()),'catalogs'=>Profiles::catalogs(),'moderator'=>current_user_can('ascla_moderate'),'executive'=>current_user_can('ascla_publish'),'admin'=>current_user_can('ascla_manage'),'demo'=>Settings::get()['demo'],'ai_mode'=>Knowledge::provider()->mode(),'google_connected'=>\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='','notification_cursor'=>Notifications::latestId()]);
         self::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
         self::route('/profiles','GET',static fn($r)=>Profiles::directory($r->get_params()));
         self::route('/locations/countries','GET',static fn()=>Locations::countries());
@@ -67,6 +67,7 @@ final class Router
         self::route('/events/(?P<id>\d+)/register','POST',static fn($r)=>Events::register((int)$r['id'],(string)$r['status']),'ascla_write');
         self::route('/notifications','GET',static fn()=>Notifications::list());
         self::route('/notifications/feed','GET',static fn($r)=>Notifications::feed($r->get_params()));
+        self::route('/notifications/toasts','GET',static fn($r)=>Notifications::toastFeed((int)($r['after']??0)));
         self::route('/notifications/summary','GET',static fn()=>Notifications::summary());
         self::route('/notifications/read-all','POST',static fn()=>Notifications::readAll());
         self::route('/notifications/(?P<id>\d+)/open','POST',static fn($r)=>Notifications::open((int)$r['id']));
@@ -77,6 +78,7 @@ final class Router
         self::route('/notifications/(?P<id>\d+)/read','POST',static fn($r)=>Notifications::read((int)$r['id']));
         self::route('/notifications/(?P<id>\d+)','DELETE',static fn($r)=>Notifications::delete((int)$r['id']));
         self::route('/media','GET',static fn($r)=>Media::listing($r->get_params()));
+        self::route('/media/(?P<id>\d+)/discard','POST',static fn($r)=>Media::discard((int)$r['id']),'ascla_write');
         self::route('/media/(?P<id>\d+)','DELETE',static fn($r)=>Media::remove((int)$r['id']),'ascla_write');
         self::route('/media','POST',static function($r) { $files=$r->get_file_params(); return Media::upload($files['file']??[],$r->get_params()); },'ascla_write');
         self::route('/ask','POST',static function($r) { Access::limit('ask',12,300); $question=trim(Access::text($r['question']??'',2000)); Access::require(mb_strlen($question)>=2,'Escriba una pregunta.',400); $thread=Queue::threadKey((string)($r['thread']??'')); Access::require($thread!=='','Conversación no válida.',400); return Queue::enqueue('answer',['question'=>$question,'thread'=>$thread]); });

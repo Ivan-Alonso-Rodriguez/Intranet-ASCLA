@@ -62,7 +62,11 @@
     assistantThread: "",
     locations: null,
     locationTimer: null,
+    liveToastCursor: 0,
+    liveToastTimer: null,
+    liveToastPolling: false,
   };
+  let liveToasts = null;
   const ASSISTANT_THREAD_PREFIX = "ascla-assistant-thread-";
   function assistantThread(reset = false, forced = "") {
     const key = ASSISTANT_THREAD_PREFIX + String(S.boot?.me?.id || "member");
@@ -259,11 +263,39 @@
   function toast(message) {
     document.querySelector(".toast")?.remove();
     const t = document.createElement("div");
-    t.className = "toast";
+    t.className = "toast feedback-toast";
     t.role = "status";
     t.textContent = T(message);
     root.append(t);
     setTimeout(() => t.remove(), 5500);
+  }
+  async function discardTemporaryMedia(id, keepalive = false) {
+    id = Number(id) || 0;
+    if (!id) return false;
+    try {
+      const response = await fetch(apiURL(`media/${id}/discard`), {
+        method: "POST", credentials: "same-origin", keepalive,
+        headers: { "X-WP-Nonce": C.nonce },
+      });
+      return response.ok;
+    } catch { return false; }
+  }
+  function pendingMediaIds(scope = root) {
+    if (!scope?.querySelectorAll) return [];
+    return [...new Set([...scope.querySelectorAll("[data-pending-media]")].map(node => Number(node.dataset.pendingMedia || 0)).filter(Boolean))];
+  }
+  function discardPendingWithin(scope, keepalive = false) {
+    const ids = pendingMediaIds(scope);
+    scope?.querySelectorAll?.("[data-pending-media]").forEach(node => node.removeAttribute("data-pending-media"));
+    ids.forEach(id => { void discardTemporaryMedia(id, keepalive); });
+    return ids.length;
+  }
+  function replacePendingMedia(node, id) {
+    if (!node) return;
+    const previous = Number(node.dataset.pendingMedia || 0);
+    if (previous && previous !== Number(id)) void discardTemporaryMedia(previous);
+    if (id) node.dataset.pendingMedia = String(Number(id));
+    else node.removeAttribute("data-pending-media");
   }
   const modalUnsavedBaselines = new WeakMap();
   function modalDecision(title, body) {
@@ -308,7 +340,7 @@
     const pending = S.pendingUnsavedResolver;
     S.pendingUnsavedResolver = null;
     S.modalUnsavedForm = null;
-    document.querySelectorAll(".modal-backdrop").forEach(node => node.remove());
+    document.querySelectorAll(".modal-backdrop").forEach(node => { discardPendingWithin(node); node.remove(); });
     S.focus?.focus();
     if (pending) pending(false);
   }
@@ -613,7 +645,7 @@
     S.pendingUnsavedResolver = null;
     document.querySelector(".modal-backdrop")?.remove();
     S.focus?.focus();
-    if (leave) clearUnsavedGuard(null);
+    if (leave) { discardPendingWithin(content()); clearUnsavedGuard(null); }
     if (resolve) resolve(!!leave);
   }
   const reportReasons = [
@@ -1718,6 +1750,49 @@
   async function refreshNotifications() {
     try { notificationCount((await api("notifications/summary")).unread_total); } catch {}
   }
+  function notificationPageKey(url) {
+    try {
+      const target = new URL(url, location.href);
+      return Object.entries(C.pages || {}).find(([, page]) => {
+        try { return new URL(page.url, location.href).pathname.replace(/\/+$/, '') === target.pathname.replace(/\/+$/, ''); } catch { return false; }
+      })?.[0] || '';
+    } catch { return ''; }
+  }
+  function liveToastRedundant(notice) {
+    if (document.querySelector('.notification-modal')) return true;
+    let target;
+    try { target = new URL(notice.url, location.href); } catch { return false; }
+    const targetPage = notificationPageKey(target.href);
+    const conversation = Number(target.searchParams.get('conversation') || 0);
+    if (conversation && S.page === 'mensajeria' && Number(S.conversation) === conversation) return true;
+    const item = Number(target.searchParams.get('item') || 0);
+    if (item && targetPage === S.page && Number(S.item?.id || new URLSearchParams(location.search).get('item') || 0) === item) return true;
+    const member = Number(target.searchParams.get('member') || 0);
+    if (member && targetPage === S.page && Number(new URLSearchParams(location.search).get('member') || 0) === member) return true;
+    if (targetPage && targetPage === S.page && !conversation && !item && !member) return true;
+    return false;
+  }
+  async function openLiveNotification(notice) {
+    try {
+      const destination = await api(`notifications/${Number(notice.id)}/open`, {});
+      await refreshNotifications();
+      await navigateTo(destination.url);
+    } catch (error) { if (error.name !== 'AbortError') toast(error.message); }
+  }
+  async function pollLiveNotifications() {
+    if (document.hidden || !liveToasts || S.liveToastPolling) return;
+    S.liveToastPolling = true;
+    try {
+      const feed = await api(`notifications/toasts?after=${Math.max(0, Number(S.liveToastCursor) || 0)}`);
+      S.liveToastCursor = Math.max(Number(S.liveToastCursor) || 0, Number(feed.cursor) || 0);
+      notificationCount(Number(feed.unread_total) || 0);
+      liveToasts.showMany(feed.items || []);
+    } catch (error) {
+      if (error.name !== 'AbortError' && error.status === 401) location.assign(location.href);
+    } finally {
+      S.liveToastPolling = false;
+    }
+  }
   async function notifications() {
     const feed = await api("notifications/feed?" + new URLSearchParams({ filter: S.noticeFilter, page: S.noticePage }));
     S.noticePage = feed.page;
@@ -1916,8 +1991,9 @@
     else location.assign(safeURL(url));
   }
   function prepareView(page) {
+    discardPendingWithin(content());
     S.controller.abort(); S.controller = new AbortController(); S.viewVersion++;
-    stopChat(); closeModal(); document.querySelector('.toast')?.remove();
+    stopChat(); closeModal(); document.querySelector('.feedback-toast')?.remove();
     S.page = page; S.filter = {}; S.item = null; S.conversation = 0; S.messagesLoaded = false;
     const q = new URLSearchParams(location.search); if (q.has('q')) S.filter.q = q.get('q');
     root.querySelector('.ascla-sidebar')?.classList.remove('open');
@@ -2002,10 +2078,10 @@
       else if (a === "member") await member(id);
       else if (a === "item") await item(id);
       else if (a === "files") await files(Number(b.dataset.page) || 1, S.files?.q || "", b.dataset.scope || S.files?.scope || "mine", S.files?.owner || 0);
-      else if (a === "detach-media") b.closest('[data-media]').remove();
+      else if (a === "detach-media") { const row=b.closest('[data-media]'); if (row) { discardPendingWithin(row); row.remove(); } }
       else if (a === "event-cover-clear") {
         const preview = document.getElementById('event-cover-preview');
-        if (preview) preview.innerHTML = `<span class="event-cover-placeholder">${I('gallery')}<small>${E(T('Aún no has seleccionado una portada.'))}</small></span>`;
+        if (preview) { discardPendingWithin(preview); preview.innerHTML = `<span class="event-cover-placeholder">${I('gallery')}<small>${E(T('Aún no has seleccionado una portada.'))}</small></span>`; }
       }
       else if (a === "delete-content") { const p = await api('items/' + id); confirmDeletion('content',id,{title:p.title,forum:p.type==='forum'}); }
       else if (a === "delete-comment") confirmDeletion('comment',id,{post:Number(b.dataset.post)||0});
@@ -2107,13 +2183,13 @@
         await groupChatDialog();
       } else if (a === "group-photo-clear") {
         if (S.groupChat) S.groupChat.photo = null;
-        const hidden=document.querySelector('[data-form="group-chat"] [name="photo_id"]'); if (hidden) hidden.value='0';
+        const hidden=document.querySelector('[data-form="group-chat"] [name="photo_id"]'); if (hidden) { const old=Number(hidden.dataset.pendingMedia||0); if(old) void discardTemporaryMedia(old); hidden.value='0'; hidden.removeAttribute('data-pending-media'); }
         const preview=document.getElementById('group-photo-preview'); if (preview) preview.innerHTML=`<span class="group-photo-placeholder">${I('users')}</span>`;
       } else if (a === "group-edit-open") {
         await groupEditDialog(id);
       } else if (a === "group-edit-photo-clear") {
         if (S.groupEdit) { S.groupEdit.photo_id = 0; S.groupEdit.photo_url = ''; }
-        const hidden=document.querySelector('[data-form="group-edit"] [name="photo_id"]'); if (hidden) hidden.value='0';
+        const hidden=document.querySelector('[data-form="group-edit"] [name="photo_id"]'); if (hidden) { const old=Number(hidden.dataset.pendingMedia||0); if(old) void discardTemporaryMedia(old); hidden.value='0'; hidden.removeAttribute('data-pending-media'); }
         const preview=document.getElementById('group-edit-photo-preview'); if (preview) preview.innerHTML=`<span class="group-photo-placeholder">${I('users')}</span>`;
       } else if (a === "conversation-open") {
         const destination=new URL(C.pages.mensajeria.url); destination.searchParams.set('conversation',Number(b.dataset.conversation)); await navigateTo(destination.href);
@@ -2389,6 +2465,7 @@
         }
         delete data.photo;
         await api("profiles/me", data);
+        form.querySelector('[name="photo_id"]')?.removeAttribute('data-pending-media');
         clearUnsavedGuard(form);
         S.boot = await api("bootstrap");
         const label = root.querySelector(".header-profile strong"); if (label) label.textContent = S.boot.me.name;
@@ -2661,7 +2738,7 @@
     });
   }
   function preparedImageMarkup(media) {
-    return `<span class="attached-file image-ready" data-media="${media.id}"><img src="${E(media.url)}" alt=""><span>${E(media.name)}</span>${btn("Quitar", "detach-media", `data-id="${media.id}"`, "ghost small")}</span>`;
+    return `<span class="attached-file image-ready" data-media="${media.id}" data-pending-media="${media.id}"><img src="${E(media.url)}" alt=""><span>${E(media.name)}</span>${btn("Quitar", "detach-media", `data-id="${media.id}"`, "ghost small")}</span>`;
   }
   function humanFileSize(bytes) {
     const value = Number(bytes) || 0;
@@ -2697,8 +2774,12 @@
         toast(T("Subiendo archivo privado…"));
         m = await uploadPrivateMedia(file);
       }
+      // If the form disappeared while the request was in flight, discard the
+      // temporary upload immediately instead of waiting for scheduled cleanup.
+      if (!input.isConnected) { await discardTemporaryMedia(m.id); return; }
       if (input.dataset.upload === "photo") {
         const photoId = document.querySelector("[name=photo_id]");
+        replacePendingMedia(photoId,m.id);
         photoId.value = m.id;
         refreshUnsavedGuard(photoId);
         const avatarBox = document.querySelector('[data-form="profile"] .profile-summary .avatar');
@@ -2712,28 +2793,31 @@
           : T("Fotografía cargada. Guarda el perfil para aplicar.");
       } else if (input.dataset.upload === "event-cover") {
         const preview = document.getElementById('event-cover-preview');
-        if (preview) preview.innerHTML = `<span class="event-cover-ready" data-media="${Number(m.id)}"><img src="${E(m.url)}" alt="${E(T('Portada del evento'))}"><span class="event-cover-actions"><strong>${E(m.name || T('Imagen del evento'))}</strong>${btn('Quitar portada','event-cover-clear','','ghost small')}</span></span>`;
+        if (!preview) { await discardTemporaryMedia(m.id); return; }
+        discardPendingWithin(preview);
+        preview.innerHTML = `<span class="event-cover-ready" data-media="${Number(m.id)}" data-pending-media="${Number(m.id)}"><img src="${E(m.url)}" alt="${E(T('Portada del evento'))}"><span class="event-cover-actions"><strong>${E(m.name || T('Imagen del evento'))}</strong>${btn('Quitar portada','event-cover-clear','','ghost small')}</span></span>`;
       } else if (input.dataset.upload === "group-photo") {
-        if (!S.groupChat) return;
+        if (!S.groupChat) { await discardTemporaryMedia(m.id); return; }
         S.groupChat.photo = m;
-        const hidden = document.querySelector('[data-form="group-chat"] [name="photo_id"]'); if (hidden) hidden.value = String(m.id);
+        const hidden = document.querySelector('[data-form="group-chat"] [name="photo_id"]'); if (hidden) { replacePendingMedia(hidden,m.id); hidden.value = String(m.id); }
         const preview = document.getElementById('group-photo-preview');
         if (preview) preview.innerHTML = `<img src="${E(m.url)}" alt="${E(T('Foto del grupo'))}">${btn('Quitar','group-photo-clear','','ghost small')}`;
       } else if (input.dataset.upload === "group-photo-edit") {
-        if (!S.groupEdit) return;
+        if (!S.groupEdit) { await discardTemporaryMedia(m.id); return; }
         S.groupEdit.photo_id = Number(m.id);
         S.groupEdit.photo_url = m.url || '';
-        const hidden = document.querySelector('[data-form="group-edit"] [name="photo_id"]'); if (hidden) hidden.value = String(m.id);
+        const hidden = document.querySelector('[data-form="group-edit"] [name="photo_id"]'); if (hidden) { replacePendingMedia(hidden,m.id); hidden.value = String(m.id); }
         const preview = document.getElementById('group-edit-photo-preview');
         if (preview) preview.innerHTML = `<img src="${E(m.url)}" alt="${E(T('Foto del grupo'))}">${btn('Quitar foto','group-edit-photo-clear','','ghost small')}`;
       } else {
         const attachments = document.getElementById("attachments");
-        attachments?.insertAdjacentHTML("beforeend", m.mime?.startsWith("image/") ? preparedImageMarkup(m) : `<span class="attached-file" data-media="${m.id}">${E(m.name)}${btn("Quitar", "detach-media", `data-id="${m.id}"`, "ghost small")}</span>`);
+        if (!attachments) { await discardTemporaryMedia(m.id); return; }
+        attachments.insertAdjacentHTML("beforeend", m.mime?.startsWith("image/") ? preparedImageMarkup(m) : `<span class="attached-file" data-media="${m.id}" data-pending-media="${m.id}">${E(m.name)}${btn("Quitar", "detach-media", `data-id="${m.id}"`, "ghost small")}</span>`);
       }
       toast(prepared ? T("Imagen preparada y cargada.") : T("Archivo cargado."));
     } catch (e) {
       if (sourceId) {
-        try { await api("media/" + sourceId, null, "DELETE"); } catch {}
+        await discardTemporaryMedia(sourceId);
       }
       if (e.name !== "AbortError") toast(e.message);
     } finally {
@@ -2747,6 +2831,9 @@
     if (!hasUnsavedChanges()) return;
     event.preventDefault();
     event.returnValue = "";
+  });
+  window.addEventListener("pagehide", (event) => {
+    if (!event.persisted) discardPendingWithin(root, true);
   });
   document.addEventListener("keydown", (event) => {
     const dialog = document.querySelector(".modal");
@@ -2798,12 +2885,19 @@
           }[menu] || "moderacion";
       }
       shell();
+      S.liveToastCursor = Number(S.boot.notification_cursor || 0);
+      liveToasts = window.ASCLALiveToasts?.({
+        root, E, I, T, timeout: 7000, max: 3,
+        shouldSuppress: liveToastRedundant,
+        onOpen: openLiveNotification,
+      }) || null;
       await render();
       enableNavigation();
-      setInterval(() => { if (!document.hidden) refreshNotifications(); }, 30000);
+      await pollLiveNotifications();
+      S.liveToastTimer = setInterval(pollLiveNotifications, 7000);
       document.addEventListener("visibilitychange", () => {
         if (document.hidden) clearTimeout(S.poll);
-        else { refreshNotifications(); syncChat(); }
+        else { refreshNotifications(); pollLiveNotifications(); syncChat(); }
       });
       setInterval(refreshOpenConnection, 8000);
       window.addEventListener('focus', () => { syncChat(); refreshOpenConnection(); });

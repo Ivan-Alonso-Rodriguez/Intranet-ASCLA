@@ -23,6 +23,7 @@ final class NotificationTarget
         'event'=>['Eventos','calendar','eventos','Ver eventos'],
         'event_waitlist_available'=>['Eventos','calendar','eventos','Confirmar cupo'],
         'event_cancelled'=>['Eventos','calendar','eventos','Ver evento cancelado'],
+        'event_updated'=>['Eventos','calendar','eventos','Ver cambios del evento'],
         'microevent'=>['Eventos','calendar','eventos','Ver eventos'],
         'resource'=>['Conocimiento','book','centro-conocimiento','Explorar recursos'],
         'networking'=>['Tu red','users','directorio','Explorar directorio'],
@@ -107,13 +108,30 @@ final class NotificationTarget
             'event'=>self::tr('Tienes una invitación a un evento','You have an event invitation'),
             'event_waitlist_available'=>self::tr('Se liberó un cupo para ti','A spot is available for you'),
             'event_cancelled'=>self::tr('Un evento fue cancelado','An event was cancelled'),
+            'event_updated'=>self::tr('Un evento cambió información importante','An event has important updates'),
             'microevent'=>self::tr('Tu círculo ASCLA te espera','Your ASCLA circle is waiting'),
             default=>$view['title'],
         };
         $view['description']=Access::excerpt($post->post_title,180);
+        if ($view['kind']==='event_updated') {
+            $changes=is_array($context['changes']??null)?$context['changes']:[];
+            if ($changes) {
+                $labelsEs=['title'=>'nombre','start'=>'inicio','end'=>'finalización','modality'=>'modalidad','location'=>'ubicación','url'=>'enlace','capacity'=>'aforo'];
+                $labelsEn=['title'=>'name','start'=>'start time','end'=>'end time','modality'=>'format','location'=>'location','url'=>'meeting link','capacity'=>'capacity'];
+                $labels=Language::english()?$labelsEn:$labelsEs;
+                $visible=array_values(array_filter(array_map(static fn($key)=>$labels[$key]??'',array_slice($changes,0,4))));
+                if ($visible) {
+                    $prefix=Language::english()?'Updated: ':'Cambios: ';
+                    $view['description']=Access::excerpt($post->post_title.' · '.$prefix.implode(', ',$visible).(count($changes)>4?'…':''),180);
+                }
+            } elseif (!empty($context['note'])) {
+                // Compatibility with notices created by a previous plugin version.
+                $view['description']=Access::excerpt($post->post_title.' · '.$context['note'],180);
+            }
+        }
         $view['url']=Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$post->ID]);
         $view['action_label']=match($post->post_type) {
-            'ascla_event'=>match($view['kind']) { 'event_waitlist_available'=>self::tr('Confirmar cupo','Confirm spot'), 'event_cancelled'=>self::tr('Ver evento cancelado','View cancelled event'), default=>self::tr('Ver encuentro e invitación','View event and invitation') },
+            'ascla_event'=>match($view['kind']) { 'event_waitlist_available'=>self::tr('Confirmar cupo','Confirm spot'), 'event_cancelled'=>self::tr('Ver evento cancelado','View cancelled event'), 'event_updated'=>self::tr('Revisar cambios','Review updates'), default=>self::tr('Ver encuentro e invitación','View event and invitation') },
             'ascla_resource'=>self::tr('Abrir recurso','Open resource'),
             default=>self::tr('Ver publicación','View post'),
         };

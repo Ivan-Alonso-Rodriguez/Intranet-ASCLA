@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.9.49
+Stable tag: 1.9.50
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,11 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.9.50 =
+* Las imágenes y archivos recién subidos permanecen temporales hasta que el formulario se guarda; si el usuario cancela, cierra o reemplaza la selección, ASCLA los descarta y no aparecen en Mis archivos. Los temporales abandonados se limpian automáticamente.
+* Añade toasts de actividad en la esquina inferior derecha para mensajes, conexiones, solicitudes de conversación, eventos y cupos, usando REST + polling cada 7 segundos, sin WebSockets ni sonido.
+* Los toasts duran 7 segundos, admiten cerrar/abrir, se apilan hasta 3, respetan permisos y privacidad, evitan avisos redundantes cuando ya se está viendo el destino y no eliminan la notificación persistente de la campana. Mantiene esquema 10.
 
 = 1.9.49 =
 * Reordena la fecha de nacimiento dentro del perfil: queda junto al tipo de asociado, con una nota privada compacta, y la página personal aprovecha todo el ancho.

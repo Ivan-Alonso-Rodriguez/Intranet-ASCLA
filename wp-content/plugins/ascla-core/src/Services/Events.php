@@ -137,6 +137,44 @@ final class Events
         return ['sent'=>$sent,'skipped'=>count($users)-$sent,'message'=>'Invitaciones internas enviadas. Los cupos se confirman al aceptar.'];
     }
 
+    /** Notify registered/invited associates only when operational event data changed materially. */
+    public static function notifyImportantChanges(int $id,array $before,array $after): int
+    {
+        $fields=[
+            '__title'=>'title',
+            'start'=>'start',
+            'end'=>'end',
+            'modality'=>'modality',
+            'location'=>'location',
+            'url'=>'url',
+            'capacity'=>'capacity',
+        ];
+        $changed=[];
+        foreach ($fields as $key=>$contextKey) {
+            $left=is_scalar($before[$key]??null)?trim((string)$before[$key]):'';
+            $right=is_scalar($after[$key]??null)?trim((string)$after[$key]):'';
+            if ($left!==$right) $changed[]=$contextKey;
+        }
+        if (!$changed) return 0;
+        $post=get_post($id);
+        if (!$post || $post->post_type!=='ascla_event' || $post->post_status!=='publish' || !empty($after['cancelled'])) return 0;
+        $users=[];
+        foreach (Store::rows('registrations',"event_id=%d AND status IN ('accepted','offered','waitlisted','invited')",[$id],'ORDER BY id ASC') as $row) {
+            $uid=absint($row['user_id']??0);
+            if ($uid>0 && $uid!==get_current_user_id() && Access::member($uid)) $users[$uid]=true;
+        }
+        foreach (array_keys($users) as $uid) {
+            Notifications::send(
+                $uid,
+                'event_updated',
+                'Se actualizaron datos importantes del evento “'.$post->post_title.'”.',
+                \ASCLA\Core\Domain\Catalog::url('eventos',['item'=>$id]),
+                ['type'=>'post','id'=>$id,'actor'=>get_current_user_id(),'changes'=>$changed]
+            );
+        }
+        return count($users);
+    }
+
     /** RF-024: cancel an event without deleting its history, and notify affected associates. */
     public static function cancel(int $id): array
     {

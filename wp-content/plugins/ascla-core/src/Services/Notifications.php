@@ -17,7 +17,19 @@ final class Notifications
         'event'=>'events',
         'event_waitlist_available'=>'events',
         'event_cancelled'=>'events',
+        'event_updated'=>'events',
         'microevent'=>'events',
+    ];
+    private const TOAST_KINDS=[
+        'message',
+        'connection',
+        'connection_accepted',
+        'conversation_request',
+        'conversation_accepted',
+        'event',
+        'event_updated',
+        'event_cancelled',
+        'event_waitlist_available',
     ];
 
     public static function emailPreferences(int $user=0): array
@@ -63,6 +75,7 @@ final class Notifications
             'event'=>'Tienes una nueva invitación a un evento de ASCLA.',
             'event_waitlist_available'=>'Se liberó un cupo para ti en un evento de ASCLA. Entra para confirmar tu asistencia.',
             'event_cancelled'=>'Un evento en el que participabas o estabas en espera fue cancelado. Revisa los detalles en ASCLA.',
+            'event_updated'=>'Un evento relacionado contigo cambió información importante. Revisa los detalles actualizados en ASCLA.',
             'microevent'=>'Tienes una nueva invitación a un círculo ASCLA.',
             default=>Access::excerpt($fallback,255),
         };
@@ -109,6 +122,11 @@ final class Notifications
         $safe=[];
         if (in_array($context['type']??'', ['post','profile','conversation','job'],true)) {
             $safe=['type'=>$context['type'],'id'=>absint($context['id']??0),'actor'=>absint($context['actor']??0)];
+            if (!empty($context['note'])) { $safe['note']=Access::excerpt((string)$context['note'],160); }
+            if (!empty($context['changes']) && is_array($context['changes'])) {
+                $allowed=['title','start','end','modality','location','url','capacity'];
+                $safe['changes']=array_values(array_unique(array_intersect($allowed,array_map('sanitize_key',$context['changes']))));
+            }
         }
         return ['user_id'=>$user,'kind'=>sanitize_key($kind),'label'=>Access::excerpt($label,255),'url'=>esc_url_raw($url),'context'=>wp_json_encode($safe),'created_at'=>current_time('mysql',true)];
     }
@@ -130,6 +148,28 @@ final class Notifications
             return true;
         });
     }
+    public static function latestId(): int
+    {
+        global $wpdb;
+        $table=Store::table('notifications');
+        return (int)$wpdb->get_var($wpdb->prepare("SELECT COALESCE(MAX(id),0) FROM $table WHERE user_id=%d",get_current_user_id()));
+    }
+
+    /** Lightweight near-real-time feed. Reading a toast never removes it from the notification center. */
+    public static function toastFeed(int $after): array
+    {
+        $after=max(0,$after);
+        $rows=Store::rows('notifications','user_id=%d AND id>%d',[get_current_user_id(),$after],'ORDER BY id ASC LIMIT 100');
+        $cursor=$after; $items=[];
+        foreach ($rows as $row) {
+            $cursor=max($cursor,(int)$row['id']);
+            if (!empty($row['read_at']) || !in_array((string)$row['kind'],self::TOAST_KINDS,true)) continue;
+            $items[]=NotificationTarget::view($row);
+            if (count($items)>=12) break;
+        }
+        return ['cursor'=>$cursor,'items'=>$items]+self::summary();
+    }
+
     public static function list(): array
     {
         return array_map([NotificationTarget::class,'view'],Store::rows('notifications','user_id=%d',[get_current_user_id()]));

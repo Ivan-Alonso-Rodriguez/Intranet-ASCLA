@@ -100,6 +100,35 @@ final class NotificationsTest extends TestCase
         self::assertSame(105,Notifications::feed([])['total']);
         wp_set_current_user($this->users[1]); self::assertSame(1,Notifications::summary()['unread_total']);
     }
+    public function testToastFeedShowsOnlyEligibleUnreadAndKeepsNotificationInCenter(): void
+    {
+        $event=$this->post('event');
+        update_post_meta($event,'_ascla',[
+            'start'=>gmdate('c',time()+DAY_IN_SECONDS),
+            'end'=>gmdate('c',time()+DAY_IN_SECONDS+HOUR_IN_SECONDS),
+            'modality'=>'Virtual',
+            'capacity'=>30,
+        ]);
+        $cursor=Notifications::latestId();
+        Notifications::send($this->users[0],'event_updated','Evento actualizado','',[
+            'type'=>'post','id'=>$event,'actor'=>$this->users[1],'changes'=>['start','location'],
+        ]);
+        Notifications::send($this->users[0],'welcome','Aviso general');
+
+        $toast=Notifications::toastFeed($cursor);
+        self::assertCount(1,$toast['items']);
+        self::assertSame('event_updated',$toast['items'][0]['kind']);
+        self::assertStringContainsString('Cambios:', $toast['items'][0]['description']);
+        self::assertSame(2,$toast['unread_total']);
+        self::assertSame(2,Notifications::feed([])['total']);
+        self::assertNull(Store::one('notifications',(int)$toast['items'][0]['id'])['read_at']);
+
+        Notifications::read((int)$toast['items'][0]['id']);
+        $again=Notifications::toastFeed($cursor);
+        self::assertCount(0,$again['items']);
+        self::assertSame(1,$again['unread_total']);
+    }
+
     public function testUserCanDeleteOnlyOwnNotifications(): void
     {
         Notifications::send($this->users[0],'welcome','Aviso eliminable');

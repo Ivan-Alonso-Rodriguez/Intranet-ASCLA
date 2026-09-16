@@ -81,8 +81,9 @@ final class App
         wp_enqueue_script('ascla-image-editor',ASCLA_URL.'assets/image-editor.js',[],ASCLA_VERSION,true);
         wp_enqueue_script('ascla-content',ASCLA_URL.'assets/content-ui.js',[],ASCLA_VERSION,true);
         wp_enqueue_script('ascla-notifications',ASCLA_URL.'assets/notifications-ui.js',[],ASCLA_VERSION,true);
+        wp_enqueue_script('ascla-live-toasts',ASCLA_URL.'assets/live-toasts.js',[],ASCLA_VERSION,true);
         wp_enqueue_script('ascla-navigation',ASCLA_URL.'assets/navigation.js',[],ASCLA_VERSION,true);
-        wp_enqueue_script('ascla-app',ASCLA_URL.'assets/app.js',['ascla-image-editor','ascla-content','ascla-notifications','ascla-navigation'],ASCLA_VERSION,true);
+        wp_enqueue_script('ascla-app',ASCLA_URL.'assets/app.js',['ascla-image-editor','ascla-content','ascla-notifications','ascla-live-toasts','ascla-navigation'],ASCLA_VERSION,true);
         $pages=[]; foreach (Catalog::PAGES as $slug=>$label) { $pages[$slug]=['label'=>Language::label($label),'url'=>Catalog::url($slug)]; }
         $logo=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo.png');
         $logoWhite=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo-white.png');

@@ -142,6 +142,7 @@ final class Profiles
         $data['revision']=(int)($old['revision']??0)+1;
         unset($data['email'],$data['terms'],$data['photo_url']);
         update_user_meta($id,'_ascla_profile',$data);
+        if (!empty($data['photo_id'])) { Media::commit((int)$data['photo_id'],$id); }
         wp_update_user(['ID'=>$id,'first_name'=>$data['first_name'],'last_name'=>$data['last_name'],'display_name'=>trim($data['first_name'].' '.$data['last_name'])?:$data['name']]);
         update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
         Birthdays::celebrate($id);

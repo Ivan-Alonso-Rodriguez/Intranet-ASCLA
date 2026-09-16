@@ -2,9 +2,9 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.9.49`  
+> **Versión actual:** `1.9.50`  
 > **Esquema de base de datos:** `10`  
-> La versión `1.9.49` reubica la fecha de nacimiento para integrarla mejor al perfil y restaura Cloudflare Turnstile adaptativo: desafío después de tres fallos, bloqueo por cuenta al quinto y protección temporal ante ráfagas por IP.
+> La versión `1.9.50` evita conservar archivos de cargas canceladas y añade notificaciones tipo toast mediante REST + polling cada 7 segundos, reutilizando el centro de notificaciones sin afectar el sitio público.
 
 ## Resumen de versiones
 
@@ -64,7 +64,8 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.40 | RF-025: imagen de portada del evento | Completada |
 | 1.9.41 | RF-031: participantes visibles después del RSVP | Completada |
 | 1.9.42 | RF-040 y RF-041: recomendaciones enriquecidas y explicables | Completada |
-| 1.9.49 | Perfil de cumpleaños refinado y Turnstile adaptativo | **Actual** |
+| 1.9.50 | Cargas temporales cancelables y notificaciones toast | **Actual** |
+| 1.9.49 | Perfil de cumpleaños refinado y Turnstile adaptativo | Completada |
 | 1.9.48 | Cumpleaños privados y Turnstile oficial visible | Anterior |
 | 1.9.47 | Creación de usuarios dentro de Administración ASCLA | Completada |
 | 1.9.46 | Edición y eliminación de usuarios dentro de Administración ASCLA | Completada |
@@ -75,6 +76,20 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 ---
 
 # Serie 1.9.x — evolución funcional
+
+## 1.9.50 — cargas temporales y notificaciones toast
+
+- Las imágenes y documentos recién cargados quedan marcados como **temporales** hasta que el formulario que los utiliza se guarda correctamente.
+- Si el usuario cancela el formulario, cierra el modal, descarta cambios, quita la imagen o la reemplaza, la carga temporal se descarta mediante una ruta REST propia y deja de ocupar la biblioteca de archivos.
+- Los temporales no aparecen en **Mis archivos** ni en el filtro global de propietarios. Un cierre inesperado del navegador no los vuelve visibles: los registros abandonados se limpian automáticamente después de 12 horas.
+- Guardar Perfil, identidad de un grupo o contenido promueve/adjunta los archivos utilizados para que permanezcan normalmente en ASCLA.
+- Se incorpora un módulo frontend independiente `live-toasts.js` que reutiliza el modelo actual de notificaciones y consulta novedades por REST cada **7 segundos**; no utiliza WebSockets.
+- Los toasts cubren **nuevo mensaje, solicitud de conexión, conexión aceptada, solicitud/aceptación de conversación, invitaciones y cambios importantes de eventos, cancelaciones y cupos disponibles**.
+- Se muestran abajo a la derecha con icono, categoría, título, descripción, acción y cierre `×`; desaparecen automáticamente en aproximadamente 7 segundos, se apilan como máximo tres y no reproducen sonido.
+- Si el asociado ya está viendo la conversación, perfil, evento o sección de destino, el toast redundante no se muestra. La notificación continúa en la campana hasta que el usuario la lea o la elimine desde el centro de notificaciones.
+- Las URLs y descripciones de toast se resuelven con el mismo `NotificationTarget`, por lo que conservan permisos, privacidad, bloqueos y disponibilidad del contenido. Los assets se cargan únicamente en páginas ASCLA, sin afectar el sitio público de WordPress.
+- Los cambios significativos de un evento (nombre, horario, modalidad, ubicación, enlace o aforo) generan un aviso específico para asociados relacionados con el evento.
+- No cambia el esquema de base de datos: continúa en **10**.
 
 ## 1.9.49 — perfil de cumpleaños refinado y Turnstile adaptativo
 
@@ -928,4 +943,4 @@ Las modificaciones exclusivamente documentales, como la ampliación de este arch
 - Cuando existe un snapshot verificable se conserva como referencia histórica.
 - No se crean tags ficticios para versiones cuyo código fuente original no esté disponible.
 - La carpeta `docs/` se mantiene fuera del repositorio público según la configuración actual de `.gitignore`.
-- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.49**.
+- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.50**.

@@ -3853,3 +3853,32 @@ html[data-ascla-theme="dark"] #ascla-root .admin-user-invite-box p{color:#9fb3be
 #ascla-root .profile-website-field>.field{margin-bottom:17px}
 html[data-ascla-theme="dark"] #ascla-root .birthday-inline-note{background:#111d26;border-color:#304451;color:#9fb2bd}
 @media(max-width:640px){#ascla-root .birthday-profile-field{margin-bottom:17px}}
+
+/* ASCLA 1.9.50 · notificaciones tipo toast en tiempo casi real */
+#ascla-root .feedback-toast{left:50%;right:auto;transform:translateX(-50%);max-width:min(560px,calc(100vw - 32px));text-align:center}
+#ascla-root .live-toast-stack{position:fixed;right:24px;bottom:24px;z-index:100050;width:min(390px,calc(100vw - 32px));display:flex;flex-direction:column;gap:10px;pointer-events:none}
+#ascla-root .live-toast{position:relative;display:grid;grid-template-columns:42px minmax(0,1fr) 30px;gap:12px;align-items:start;padding:15px 13px 14px 15px;border:1px solid #d9e4eb;border-radius:15px;background:#fff;color:#1e3b50;box-shadow:0 14px 38px #153c5829;pointer-events:auto;opacity:0;transform:translateY(10px) scale(.985);transition:opacity .16s ease,transform .16s ease,border-color .16s ease;overflow:hidden}
+#ascla-root .live-toast:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#287ca5}
+#ascla-root .live-toast.is-visible{opacity:1;transform:translateY(0) scale(1)}
+#ascla-root .live-toast.is-leaving{opacity:0;transform:translateY(8px) scale(.985)}
+#ascla-root .live-toast-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#e9f3f8;color:#176b92}
+#ascla-root .live-toast-icon svg{width:21px;height:21px}
+#ascla-root .live-toast-copy{min-width:0}
+#ascla-root .live-toast-category{display:block;margin-bottom:3px;color:#718493;font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+#ascla-root .live-toast-copy strong{display:block;color:#183c55;font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+#ascla-root .live-toast-copy p{margin:5px 0 9px;color:#667d8d;font-size:11px;line-height:1.45;overflow-wrap:anywhere}
+#ascla-root .live-toast-open{display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;padding:0;color:#176f99;font:inherit;font-size:11px;font-weight:750;cursor:pointer}
+#ascla-root .live-toast-open svg{width:13px;height:13px}
+#ascla-root .live-toast-open:hover,#ascla-root .live-toast-open:focus-visible{text-decoration:underline;text-underline-offset:2px}
+#ascla-root .live-toast-close{width:30px;height:30px;border:0;border-radius:9px;background:transparent;color:#738694;display:grid;place-items:center;cursor:pointer}
+#ascla-root .live-toast-close:hover,#ascla-root .live-toast-close:focus-visible{background:#eef4f7;color:#294f66}
+#ascla-root .live-toast-close svg{width:17px;height:17px}
+#ascla-root .live-toast-mail:before{background:#2e8583}#ascla-root .live-toast-mail .live-toast-icon{background:#e2f2f0;color:#26716f}
+#ascla-root .live-toast-users:before{background:#467bb5}#ascla-root .live-toast-users .live-toast-icon{background:#e7eef9;color:#396d9f}
+#ascla-root .live-toast-calendar:before{background:#c58a35}#ascla-root .live-toast-calendar .live-toast-icon{background:#fff1dc;color:#9b6921}
+html[data-ascla-theme="dark"] #ascla-root .live-toast{background:#17242e;border-color:#314655;color:#e6eef3;box-shadow:0 18px 42px #02090d66}
+html[data-ascla-theme="dark"] #ascla-root .live-toast-copy strong{color:#edf6fa}
+html[data-ascla-theme="dark"] #ascla-root .live-toast-copy p,html[data-ascla-theme="dark"] #ascla-root .live-toast-category{color:#9fb3bf}
+html[data-ascla-theme="dark"] #ascla-root .live-toast-close{color:#9fb0ba}
+html[data-ascla-theme="dark"] #ascla-root .live-toast-close:hover,html[data-ascla-theme="dark"] #ascla-root .live-toast-close:focus-visible{background:#223541;color:#d9e8ef}
+@media(max-width:640px){#ascla-root .live-toast-stack{right:12px;bottom:12px;width:calc(100vw - 24px)}#ascla-root .live-toast{grid-template-columns:38px minmax(0,1fr) 28px;padding:13px 11px 12px 13px;gap:10px;border-radius:13px}#ascla-root .live-toast-icon{width:38px;height:38px}.toast.feedback-toast{bottom:14px}}
