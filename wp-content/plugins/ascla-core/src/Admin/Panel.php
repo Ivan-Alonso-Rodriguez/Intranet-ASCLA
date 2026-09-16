@@ -5,7 +5,7 @@ final class Panel
     public static function boot(): void
     {
         add_action('admin_menu',static function () {
-            // ascla_admin_area is shared by Ejecutivo, Moderador and Administrator (see Installer::roles).
+            // Legacy/native wp-admin entry for technical Administrators. Ejecutivo and Moderador use /administracion/.
             add_menu_page('ASCLA','ASCLA','ascla_admin_area','ascla',[self::class,'render'],'dashicons-groups',3);
             // Eventos, Conocimiento y Galería son responsabilidad del Ejecutivo (ascla_publish);
             // Miembros, Integraciones y Configuración quedan reservados al Administrador (ascla_manage).

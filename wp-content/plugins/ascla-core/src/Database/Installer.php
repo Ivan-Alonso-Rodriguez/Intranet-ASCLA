@@ -19,7 +19,9 @@ final class Installer
         self::migrateConversationGroups();
         self::migrateConversationPhotos();
         self::migrateConversationDescriptions();
+        self::loginPage();
         self::pages();
+        self::adminPage();
         self::terms();
         if (!wp_next_scheduled('ascla_jobs')) { wp_schedule_event(time()+60, 'hourly', 'ascla_jobs'); }
         if (!wp_next_scheduled('ascla_monthly')) { wp_schedule_event(time()+120, 'daily', 'ascla_monthly'); }
@@ -169,8 +171,9 @@ final class Installer
      *  - Administrator: retains every capability (system administration, plugin/source management,
      *    deployment) plus the Ejecutivo and Moderador capabilities, so nothing that worked before
      *    for site admins stops working.
-     * ascla_admin_area is a shared "may enter the wp-admin ASCLA panel" flag for the three staff
-     * roles (Ejecutivo, Moderador, Administrator); plain Asociados never see it.
+     * ascla_admin_area is the shared capability for the ASCLA administration workspace.
+     * Ejecutivo and Moderador use `/administracion/`; WordPress `/wp-admin/` stays reserved for
+     * technical Administrators with `manage_options`. Plain Asociados never receive this capability.
      */
     private static function roles(): void
     {
@@ -214,6 +217,43 @@ final class Installer
         }
         update_option('ascla_schema',1,false);
     }
+    private static function loginPage(): void
+    {
+        $id=(int)get_option('ascla_login_page',0);
+        if($id>0 && get_post_status($id) && get_post_status($id)!=='trash'){ return; }
+
+        $owned=get_posts([
+            'post_type'=>'page',
+            'post_status'=>['publish','draft','private'],
+            'meta_key'=>'_ascla_login_page',
+            'meta_value'=>'1',
+            'numberposts'=>1,
+        ]);
+        if($owned){ update_option('ascla_login_page',(int)$owned[0]->ID,false); return; }
+
+        $existing=get_page_by_path('login',OBJECT,'page');
+        if($existing && get_post_status($existing->ID)!=='trash'){
+            // Never overwrite an unrelated page. Reuse it only if it is empty and clearly safe to claim.
+            $content=trim((string)$existing->post_content);
+            if($content==='' && !get_post_meta($existing->ID,'_ascla_page',true)){
+                update_post_meta($existing->ID,'_ascla_login_page','1');
+                update_option('ascla_login_page',(int)$existing->ID,false);
+                return;
+            }
+        }
+
+        $id=wp_insert_post([
+            'post_type'=>'page',
+            'post_title'=>'Acceso ASCLA',
+            'post_name'=>'login',
+            'post_status'=>'publish',
+            'post_content'=>'',
+        ],true);
+        if(is_wp_error($id)){ throw new \RuntimeException('No se pudo crear la página de acceso ASCLA.'); }
+        update_post_meta($id,'_ascla_login_page','1');
+        update_option('ascla_login_page',(int)$id,false);
+    }
+
     private static function pages(): void
     {
         $ids=get_option('ascla_pages',[]);
@@ -227,6 +267,43 @@ final class Installer
         }
         update_option('ascla_pages',$ids,false);
     }
+    private static function adminPage(): void
+    {
+        $id=(int)get_option('ascla_admin_front_page',0);
+        if($id>0 && get_post_status($id) && get_post_status($id)!=='trash'){ return; }
+
+        $owned=get_posts([
+            'post_type'=>'page',
+            'post_status'=>['publish','draft','private'],
+            'meta_key'=>'_ascla_page',
+            'meta_value'=>'admin',
+            'numberposts'=>1,
+        ]);
+        if($owned){ update_option('ascla_admin_front_page',(int)$owned[0]->ID,false); return; }
+
+        $existing=get_page_by_path('administracion',OBJECT,'page');
+        if($existing && get_post_status($existing->ID)!=='trash'){
+            $current=(string)get_post_meta($existing->ID,'_ascla_page',true);
+            if($current==='' && trim((string)$existing->post_content)===''){
+                wp_update_post(['ID'=>$existing->ID,'post_content'=>'[ascla_app page="admin"]']);
+                update_post_meta($existing->ID,'_ascla_page','admin');
+                update_option('ascla_admin_front_page',(int)$existing->ID,false);
+                return;
+            }
+        }
+
+        $id=wp_insert_post([
+            'post_type'=>'page',
+            'post_title'=>'Administración ASCLA',
+            'post_name'=>'administracion',
+            'post_status'=>'publish',
+            'post_content'=>'[ascla_app page="admin"]',
+        ],true);
+        if(is_wp_error($id)){ throw new \RuntimeException('No se pudo crear la página de administración ASCLA.'); }
+        update_post_meta($id,'_ascla_page','admin');
+        update_option('ascla_admin_front_page',(int)$id,false);
+    }
+
     private static function terms(): void
     {
         $terms=['interest'=>['Gobierno corporativo','Inteligencia artificial','Juntas directivas','Sostenibilidad','Transformación digital','Gestión de riesgos'], 'area'=>['Secretaría corporativa','Cumplimiento','Estrategia','Gobierno de IA'], 'industry'=>['Servicios financieros','Energía','Tecnología','Industria','Consultoría'], 'goal'=>['Compartir experiencia','Aprender','Colaborar'], 'language'=>['Español','Inglés','Portugués'], 'category'=>['Gobernanza','Capacitación','Comunidad','Normativa']];

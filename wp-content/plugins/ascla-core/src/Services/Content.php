@@ -1,6 +1,7 @@
 <?php
 namespace ASCLA\Core\Services;
 use ASCLA\Core\Domain\Catalog;
+use ASCLA\Core\Frontend\App;
 use ASCLA\Core\Repositories\Store;
 
 final class Content
@@ -226,7 +227,7 @@ final class Content
                 $moderator,
                 'support_request',
                 Profiles::publicName($author).' envió una nueva solicitud de soporte.',
-                admin_url('admin.php?page=ascla-solicitudes'),
+                App::adminUrl(['page'=>'ascla-solicitudes']),
                 ['type'=>'post','id'=>$postId,'actor'=>$author]
             );
         }

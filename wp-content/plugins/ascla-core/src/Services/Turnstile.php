@@ -19,6 +19,8 @@ final class Turnstile
     private const RECOVERY_CHALLENGE_AFTER = 2;
     private const PUBLIC_CHALLENGE_AFTER = 3;
     private const IP_CHALLENGE_AFTER = 12;
+    private const IP_LOCK_AFTER = 20;
+    private const IP_LOCK_TTL = 15 * MINUTE_IN_SECONDS;
 
     public static function boot(): void
     {
@@ -50,28 +52,32 @@ final class Turnstile
 
     public static function authenticate($user, string $username, string $password)
     {
-        if ($user instanceof \WP_User || is_wp_error($user) || !self::protects('login') || !self::isWpLoginRequest()) { return $user; }
+        if ($user instanceof \WP_User || is_wp_error($user) || !self::protects('login') || !self::isLoginRequest()) { return $user; }
         if ($username === '' || $password === '') { return $user; }
         $state = self::state('login', $username);
-        if ((int)($state['lock_until'] ?? 0) > time()) {
-            $minutes = max(1, (int)ceil(((int)$state['lock_until'] - time()) / 60));
+        $lockUntil = max((int)($state['lock_until'] ?? 0), self::ipLockUntil('login'));
+        if ($lockUntil > time()) {
+            $minutes = max(1, (int)ceil(($lockUntil - time()) / 60));
             return new \WP_Error('ascla_login_locked', sprintf(
                 Language::text('Demasiados intentos fallidos. Inténtalo nuevamente en %d minuto(s).', 'Too many failed attempts. Try again in %d minute(s).'),
                 $minutes
             ));
         }
         if (!self::loginChallengeRequired($username)) { return $user; }
-        $result = self::verifyRequest('login', 'ascla_login');
+        $result = self::verifyRequest('login', 'ascla_login', false);
         return $result === true ? $user : $result;
     }
 
     public static function loginFailed(string $username, \WP_Error $error): void
     {
-        if (!self::protects('login') || !self::isWpLoginRequest()) { return; }
+        if (!self::protects('login') || !self::isLoginRequest()) { return; }
         $ignore = ['empty_username', 'empty_password', 'ascla_turnstile_required', 'ascla_turnstile_failed', 'ascla_login_locked'];
         if (in_array((string)$error->get_error_code(), $ignore, true)) { return; }
         $state = self::increment('login', $username);
         self::incrementIp('login');
+        if (self::ipCount('login') >= self::IP_LOCK_AFTER) {
+            self::lockIp('login', self::IP_LOCK_TTL);
+        }
         if ((int)$state['count'] >= self::LOGIN_LOCK_AFTER) {
             $state['lock_until'] = time() + self::LOCK_TTL;
             self::saveState('login', self::stateKey('login', $username), $state);
@@ -117,8 +123,9 @@ final class Turnstile
         if (!self::protects('login')) { return false; }
         if (self::trusted()) { return false; }
         $state = self::state('login', $identifier);
-        if ((int)($state['lock_until'] ?? 0) > time()) { return true; }
-        return (int)($state['count'] ?? 0) >= self::LOGIN_CHALLENGE_AFTER || self::ipCount('login') >= self::IP_CHALLENGE_AFTER;
+        if ((int)($state['lock_until'] ?? 0) > time() || self::ipLockUntil('login') > time()) { return true; }
+        return (int)($state['count'] ?? 0) >= self::LOGIN_CHALLENGE_AFTER
+            || self::ipCount('login') >= self::IP_CHALLENGE_AFTER;
     }
 
     public static function recoveryChallengeRequired(string $identifier = ''): bool
@@ -168,7 +175,7 @@ final class Turnstile
         if ($siteKey === '') { return; }
         self::enqueueScript(true);
         $action = substr('ascla_public_' . sanitize_key($form), 0, 32);
-        echo '<div class="ascla-turnstile-wrap"><div class="cf-turnstile" data-sitekey="' . esc_attr($siteKey) . '" data-theme="auto" data-size="flexible" data-appearance="interaction-only" data-retry="auto" data-refresh-expired="auto" data-action="' . esc_attr($action) . '"></div></div>';
+        echo '<div class="ascla-turnstile-wrap"><div class="cf-turnstile" data-sitekey="' . esc_attr($siteKey) . '" data-theme="auto" data-size="normal" data-appearance="always" data-retry="auto" data-refresh-expired="auto" data-action="' . esc_attr($action) . '"></div></div>';
     }
 
     public static function render(string $flow): void
@@ -180,21 +187,20 @@ final class Turnstile
         $notice = '';
         if ($flow === 'login') {
             $state = self::state('login', self::requestIdentifier('login'));
-            if ((int)($state['lock_until'] ?? 0) > time()) {
-                $minutes = max(1, (int)ceil(((int)$state['lock_until'] - time()) / 60));
+            $lockUntil = max((int)($state['lock_until'] ?? 0), self::ipLockUntil('login'));
+            if ($lockUntil > time()) {
+                $minutes = max(1, (int)ceil(($lockUntil - time()) / 60));
                 $notice = '<p class="ascla-turnstile-lock">' . esc_html(sprintf(
                     Language::text('Acceso temporalmente pausado por demasiados intentos. Prueba de nuevo en %d minuto(s).', 'Access is temporarily paused after too many attempts. Try again in %d minute(s).'),
                     $minutes
                 )) . '</p>';
             }
         }
-        echo '<div class="ascla-turnstile-wrap">'
-            . '<div class="ascla-turnstile-head"><span class="ascla-turnstile-badge" aria-hidden="true">✓</span><span><strong>'
-            . esc_html(Language::text('Verificación de seguridad', 'Security check'))
-            . '</strong><small>' . esc_html(Language::text('Protegido por Cloudflare Turnstile', 'Protected by Cloudflare Turnstile')) . '</small></span></div>'
+        $language=Language::english()?'en':'es';
+        echo '<div class="ascla-turnstile-native">'
             . $notice
-            . '<div class="cf-turnstile" data-sitekey="' . esc_attr($siteKey) . '" data-theme="auto" data-size="flexible" data-appearance="interaction-only" data-retry="auto" data-refresh-expired="auto" data-action="' . esc_attr($action) . '"></div>'
-            . '<p class="ascla-turnstile-note">' . esc_html(Language::text('Esta comprobación aparece solo cuando es necesaria para proteger tu acceso.', 'This check appears only when needed to protect your access.')) . '</p></div>';
+            . '<div class="cf-turnstile" data-sitekey="' . esc_attr($siteKey) . '" data-theme="auto" data-language="' . esc_attr($language) . '" data-size="normal" data-appearance="always" data-retry="auto" data-refresh-expired="auto" data-action="' . esc_attr($action) . '"></div>'
+            . '</div>';
     }
 
     public static function shouldRender(string $flow): bool
@@ -298,8 +304,9 @@ final class Turnstile
         wp_script_add_data('ascla-turnstile', 'strategy', 'defer');
     }
 
-    private static function isWpLoginRequest(): bool
+    private static function isLoginRequest(): bool
     {
+        if (!empty($_REQUEST['ascla_frontend_login'])) { return true; }
         if (($GLOBALS['pagenow'] ?? '') === 'wp-login.php') { return true; }
         $script = basename((string)($_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? ''));
         return $script === 'wp-login.php';
@@ -375,6 +382,17 @@ final class Turnstile
         return (int)get_transient(self::ipTransientName($flow));
     }
 
+    private static function ipLockUntil(string $flow): int
+    {
+        return (int)get_transient(self::ipLockTransientName($flow));
+    }
+
+    private static function lockIp(string $flow, int $ttl): void
+    {
+        $until = time() + max(60, $ttl);
+        set_transient(self::ipLockTransientName($flow), $until, max(60, $ttl));
+    }
+
     private static function stateKey(string $flow, string $identifier): string
     {
         $identifier = strtolower(trim($identifier));
@@ -389,6 +407,11 @@ final class Turnstile
     private static function ipTransientName(string $flow): string
     {
         return 'ascla_ts_ip_' . substr(sanitize_key($flow), 0, 24) . '_' . self::shortHash(self::clientIp());
+    }
+
+    private static function ipLockTransientName(string $flow): string
+    {
+        return 'ascla_ts_ip_lock_' . substr(sanitize_key($flow), 0, 20) . '_' . self::shortHash(self::clientIp());
     }
 
     private static function rememberHint(string $flow, string $key): void

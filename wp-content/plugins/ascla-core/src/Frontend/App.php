@@ -15,10 +15,23 @@ final class App
         });
         add_filter('show_admin_bar',static fn($show)=>self::page()?false:$show);
         add_action('admin_init',static function () {
-            if (Access::member()&&!current_user_can('ascla_admin_area')&&!wp_doing_ajax()&&basename($_SERVER['PHP_SELF']??'')!=='admin-post.php') { wp_safe_redirect(Catalog::url('intranet')); exit; }
+            if (!is_user_logged_in() || current_user_can('manage_options') || wp_doing_ajax() || basename($_SERVER['PHP_SELF']??'')==='admin-post.php') { return; }
+            if (Access::member()) {
+                wp_safe_redirect(current_user_can('ascla_admin_area') ? self::adminUrl() : Catalog::url('intranet'));
+            } else {
+                wp_safe_redirect(Login::url());
+            }
+            exit;
         });
         Login::boot();
         add_filter('wp_robots',static function ($robots) { if (self::page()) { $robots['noindex']=true; $robots['nofollow']=true; } return $robots; });
+        add_filter('wp_sitemaps_posts_query_args',static function(array $args,string $postType): array {
+            if($postType!=='page'){return $args;}
+            $private=array_map('intval',array_values((array)get_option('ascla_pages',[])));
+            $admin=(int)get_option('ascla_admin_front_page',0); if($admin>0){$private[]=$admin;}
+            $args['post__not_in']=array_values(array_unique(array_merge((array)($args['post__not_in']??[]),$private)));
+            return $args;
+        },10,2);
     }
     public static function page(): string
     {
@@ -28,8 +41,19 @@ final class App
     public static function protect(): void
     {
         if (!self::page()) { return; }
-        if (!is_user_logged_in()) { auth_redirect(); }
+        if (!is_user_logged_in()) {
+            $target=get_permalink(get_queried_object_id())?:Catalog::url(self::page());
+            $query=[];
+            foreach((array)$_GET as $key=>$value){
+                if(is_scalar($value)){$query[sanitize_key((string)$key)]=sanitize_text_field(wp_unslash((string)$value));}
+            }
+            if($query){$target=add_query_arg($query,$target);}
+            Login::rememberTarget($target);
+            wp_safe_redirect(Login::url());
+            exit;
+        }
         if (!Access::member()) { wp_die('Esta cuenta no tiene acceso a la comunidad ASCLA. Contacte al administrador.','ASCLA',['response'=>403]); }
+        if (self::page()==='admin' && !current_user_can('ascla_admin_area')) { wp_die('Esta cuenta no tiene permisos de administración ASCLA.','ASCLA',['response'=>403]); }
         if (!defined('DONOTCACHEPAGE')) { define('DONOTCACHEPAGE',true); }
         nocache_headers(); header('X-Robots-Tag: noindex, nofollow'); header('X-Content-Type-Options: nosniff'); header('Referrer-Policy: same-origin');
     }
@@ -40,6 +64,15 @@ final class App
             'profile'=>\ASCLA\Core\Services\Profiles::visible(get_current_user_id()),
             'settings'=>\ASCLA\Core\Services\Settings::get()
         ]);
+    }
+
+    public static function adminUrl(array $args=[]): string
+    {
+        $id=(int)get_option('ascla_admin_front_page',0);
+        $base=$id>0 && get_post_status($id) && get_post_status($id)!=='trash'
+            ? (get_permalink($id)?:home_url('/administracion/'))
+            : home_url('/administracion/');
+        return add_query_arg($args,$base);
     }
 
     public static function assets(string $page): void
@@ -53,6 +86,6 @@ final class App
         $pages=[]; foreach (Catalog::PAGES as $slug=>$label) { $pages[$slug]=['label'=>Language::label($label),'url'=>Catalog::url($slug)]; }
         $logo=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo.png');
         $logoWhite=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo-white.png');
-        wp_localize_script('ascla-app','ASCLA',['locale'=>str_replace('_','-',Language::current()),'userLocale'=>Language::current(),'language'=>Language::english()?'en':'es','translations'=>Language::english()?Language::labels():[],'languageOptions'=>Language::SUPPORTED,'languageNonce'=>wp_create_nonce('ascla_change_language'),'api'=>esc_url_raw(rest_url('ascla/v1/')),'nonce'=>wp_create_nonce('wp_rest'),'page'=>$page,'pages'=>$pages,'icons'=>Icons::PATHS,'logo'=>$logo,'logoWhite'=>$logoWhite,'logout'=>wp_logout_url(wp_login_url()),'adminUrl'=>admin_url('admin.php?page=ascla'),'mediaUrl'=>admin_url('admin-post.php?action=ascla_media&id=')]);
+        wp_localize_script('ascla-app','ASCLA',['locale'=>str_replace('_','-',Language::current()),'userLocale'=>Language::current(),'language'=>Language::english()?'en':'es','translations'=>Language::english()?Language::labels():[],'languageOptions'=>Language::SUPPORTED,'languageNonce'=>wp_create_nonce('ascla_change_language'),'api'=>esc_url_raw(rest_url('ascla/v1/')),'nonce'=>wp_create_nonce('wp_rest'),'page'=>$page,'pages'=>$pages,'icons'=>Icons::PATHS,'logo'=>$logo,'logoWhite'=>$logoWhite,'logout'=>wp_logout_url(Login::url()),'adminUrl'=>self::adminUrl(),'mediaUrl'=>admin_url('admin-post.php?action=ascla_media&id=')]);
     }
 }

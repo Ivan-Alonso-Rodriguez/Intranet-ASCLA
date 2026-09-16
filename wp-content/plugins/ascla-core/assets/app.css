@@ -3806,3 +3806,50 @@ form[data-form="group-edit"] textarea[name="description"] { min-height: 86px; re
 .email-notification-panel .participation-option:last-of-type{border-bottom:0}
 .email-notification-panel .profile-save-hint{margin:14px 0 16px}
 @media(max-width:600px){.email-notification-panel{padding:0 14px}.modal-decision{width:100%}}
+
+/* ASCLA 1.9.46 · administración de usuarios dentro de la intranet */
+#ascla-root .admin-user-editor{display:grid;gap:18px}
+#ascla-root .admin-user-editor-head{display:flex;align-items:center;gap:16px;padding:16px 18px;border:1px solid #dbe7ee;border-radius:14px;background:linear-gradient(135deg,#f7fbfd,#fff)}
+#ascla-root .admin-user-editor-head h3{margin:2px 0 4px;font-size:20px}
+#ascla-root .admin-user-editor-head p{margin:0 0 8px;color:#6f828f;font-size:12px;overflow-wrap:anywhere}
+#ascla-root .admin-user-edit-note{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;background:#f2f7fa;border:1px solid #dbe7ee;color:#385266}
+#ascla-root .admin-user-edit-note>svg{width:20px;height:20px;flex:0 0 auto;margin-top:1px}
+#ascla-root .admin-user-edit-note strong{display:block;margin-bottom:2px}
+#ascla-root .admin-user-edit-note p{margin:0;font-size:12px;line-height:1.5}
+#ascla-root .admin-delete-warning{display:flex;gap:12px;align-items:flex-start;padding:16px;border:1px solid #edc5cb;border-radius:12px;background:#fff5f6;color:#8d2e3a;margin-bottom:14px}
+#ascla-root .admin-delete-warning>svg{width:22px;height:22px;flex:0 0 auto;margin-top:1px}
+#ascla-root .admin-delete-warning strong{display:block;margin-bottom:3px}
+#ascla-root .admin-delete-warning p{margin:0;line-height:1.5}
+#ascla-root .admin-technical-tag{background:#f1f4f6;border-color:#dce3e8;color:#61717c}
+html[data-ascla-theme="dark"] #ascla-root .admin-user-editor-head{background:linear-gradient(135deg,#172a36,#14232d);border-color:#2e4654}
+html[data-ascla-theme="dark"] #ascla-root .admin-user-edit-note{background:#172832;border-color:#2d4552;color:#c7d9e2}
+html[data-ascla-theme="dark"] #ascla-root .admin-delete-warning{background:#321f24;border-color:#64343b;color:#f0a9b0}
+html[data-ascla-theme="dark"] #ascla-root .admin-technical-tag{background:#202b32;border-color:#3a4850;color:#b9c5cb}
+@media(max-width:640px){#ascla-root .admin-user-editor-head{align-items:flex-start}#ascla-root .admin-user-editor-head .avatar{flex:0 0 auto}}
+
+/* ASCLA 1.9.47 · alta de usuarios dentro de Administración ASCLA */
+#ascla-root .admin-user-create-head{background:linear-gradient(135deg,#f4fafc,#fff)}
+#ascla-root .admin-user-create-icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;flex:0 0 auto;background:#eaf4f8;color:#1f607f;border:1px solid #d2e5ee}
+#ascla-root .admin-user-create-icon svg{width:24px;height:24px}
+#ascla-root .admin-user-invite-box{padding:15px 16px;border:1px solid #dbe7ee;border-radius:12px;background:#fbfdfe}
+#ascla-root .admin-user-invite-box .check{margin:0;font-weight:700;color:#28475a}
+#ascla-root .admin-user-invite-box p{margin:8px 0 0 28px;color:#6f828f;font-size:12px;line-height:1.55}
+html[data-ascla-theme="dark"] #ascla-root .admin-user-create-head{background:linear-gradient(135deg,#172a36,#14232d)}
+html[data-ascla-theme="dark"] #ascla-root .admin-user-create-icon{background:#1d3441;border-color:#31505f;color:#b9deef}
+html[data-ascla-theme="dark"] #ascla-root .admin-user-invite-box{background:#14252f;border-color:#2d4552}
+html[data-ascla-theme="dark"] #ascla-root .admin-user-invite-box .check{color:#d8e6ed}
+html[data-ascla-theme="dark"] #ascla-root .admin-user-invite-box p{color:#9fb3be}
+@media(max-width:640px){#ascla-root .admin-user-create-head{align-items:flex-start}}
+
+
+/* ASCLA 1.9.48 · cumpleaños privado y celebración en la comunidad */
+.birthday-privacy-note{display:flex;align-items:flex-start;gap:8px;margin-top:-2px}.birthday-privacy-note svg{width:16px;height:16px;flex:0 0 auto;margin-top:2px;color:#3483ad}.hero.hero-birthday{position:relative;overflow:hidden;background:linear-gradient(132deg,#173f67 0%,#176a91 58%,#2584a2 100%)}.hero.hero-birthday:before,.hero.hero-birthday:after{content:"";position:absolute;border-radius:50%;background:#ffffff12;pointer-events:none}.hero.hero-birthday:before{width:190px;height:190px;right:4%;top:-72px}.hero.hero-birthday:after{width:120px;height:120px;right:26%;bottom:-62px}.birthday-celebration{position:relative;overflow:hidden;text-align:center;padding:26px 24px 22px;border:1px solid #dceaf3;border-radius:18px;background:linear-gradient(155deg,#f8fcff 0%,#eef8fc 58%,#fffaf0 100%)}.birthday-celebration .birthday-emblem{width:72px;height:72px;margin:0 auto 13px;display:grid;place-items:center;border-radius:22px;background:#fff;box-shadow:0 10px 28px #1a628523;font-size:36px}.birthday-celebration h3{margin:0 0 8px;color:#193f60;font-size:22px}.birthday-celebration p{max-width:520px;margin:0 auto;color:#587084;line-height:1.65}.birthday-signature{margin-top:15px;color:#1d6f96;font-weight:700}.birthday-confetti span{position:absolute;width:8px;height:18px;border-radius:4px;background:#2c8bb3;transform:rotate(18deg)}.birthday-confetti span:nth-child(1){left:8%;top:16%;background:#e5a93f;transform:rotate(-28deg)}.birthday-confetti span:nth-child(2){left:20%;top:7%;background:#5aa678;transform:rotate(38deg)}.birthday-confetti span:nth-child(3){right:15%;top:10%;background:#cf6d80;transform:rotate(22deg)}.birthday-confetti span:nth-child(4){right:6%;top:28%;background:#6e7fc0;transform:rotate(-38deg)}.birthday-confetti span:nth-child(5){left:10%;bottom:13%;background:#8d74b9;transform:rotate(54deg)}html[data-ascla-theme="dark"] .birthday-celebration{border-color:#314757;background:linear-gradient(155deg,#172631,#13222c 58%,#28251d 100%)}html[data-ascla-theme="dark"] .birthday-celebration h3{color:#e6f4fb}html[data-ascla-theme="dark"] .birthday-celebration p{color:#a9bdca}@media(max-width:640px){.birthday-celebration{padding:22px 16px 18px}.birthday-celebration h3{font-size:19px}}
+
+/* ASCLA 1.9.49 · fecha de nacimiento integrada en la cuadrícula del perfil */
+#ascla-root .birthday-profile-field{min-width:0;margin-bottom:17px}
+#ascla-root .birthday-profile-field>.field{margin-bottom:7px}
+#ascla-root .birthday-inline-note{display:flex;align-items:flex-start;gap:7px;padding:8px 10px;border:1px solid #dbe8ef;border-radius:9px;background:#f8fbfd;color:#6b7f8c;font-size:10.5px;line-height:1.45}
+#ascla-root .birthday-inline-note svg{width:15px;height:15px;flex:0 0 auto;margin-top:1px;color:#3483ad}
+#ascla-root .profile-website-field>.field{margin-bottom:17px}
+html[data-ascla-theme="dark"] #ascla-root .birthday-inline-note{background:#111d26;border-color:#304451;color:#9fb2bd}
+@media(max-width:640px){#ascla-root .birthday-profile-field{margin-bottom:17px}}

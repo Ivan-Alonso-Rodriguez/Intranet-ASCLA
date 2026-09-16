@@ -2,6 +2,8 @@
 use ASCLA\Core\Domain\Catalog;
 use ASCLA\Core\Frontend\Icons;
 use ASCLA\Core\Frontend\Language;
+use ASCLA\Core\Frontend\Login;
+use ASCLA\Core\Frontend\App;
 defined('ABSPATH') || exit;
 $page=$args['page'];$profile=$args['profile'];$settings=$args['settings'];
 $icons=['intranet'=>'home','perfil'=>'users','eventos'=>'calendar','hub'=>'hub','galeria'=>'gallery','foros'=>'hub','directorio'=>'users','centro-conocimiento'=>'book','asistente'=>'spark','aliados'=>'ally','mensajeria'=>'mail','contacto'=>'contact'];
@@ -13,7 +15,7 @@ $initials=implode('',array_map(static fn($word)=>mb_substr($word,0,1),array_slic
 <a class="brand" href="<?php echo esc_url(Catalog::url('intranet')); ?>" aria-label="ASCLA inicio"><img src="<?php echo esc_url($logoWhite); ?>" alt="ASCLA" width="1608" height="472"></a>
 <div class="brand-sub"><?php echo esc_html(Language::label('COMUNIDAD DE ASOCIADOS')); ?></div><nav aria-label="<?php echo esc_attr(Language::label('Navegación principal')); ?>">
 <?php foreach(Catalog::PAGES as $key=>$label): ?><a class="nav-link <?php echo $page===$key?'active':''; ?>" href="<?php echo esc_url(Catalog::url($key)); ?>" <?php if($page===$key){echo 'aria-current="page"';} ?>><?php echo Icons::html($icons[$key]); ?><span><?php echo esc_html(Language::label($label)); ?></span></a><?php endforeach; ?>
-</nav><div class="nav-bottom"><?php if(current_user_can('ascla_moderate')): ?><a class="nav-link" href="<?php echo esc_url(admin_url('admin.php?page=ascla')); ?>"><?php echo Icons::html('settings'); ?><?php echo esc_html(Language::label('Administración')); ?></a><?php endif; ?><a class="nav-link" href="<?php echo esc_url(wp_logout_url(wp_login_url())); ?>"><?php echo Icons::html('logout'); ?><?php echo esc_html(Language::label('Cerrar sesión')); ?></a></div></aside>
+</nav><div class="nav-bottom"><?php if(current_user_can('ascla_admin_area')): ?><a class="nav-link" href="<?php echo esc_url(App::adminUrl()); ?>"><?php echo Icons::html('settings'); ?><?php echo esc_html(Language::label('Administración')); ?></a><?php endif; ?><a class="nav-link" href="<?php echo esc_url(wp_logout_url(Login::url())); ?>"><?php echo Icons::html('logout'); ?><?php echo esc_html(Language::label('Cerrar sesión')); ?></a></div></aside>
 <div class="ascla-main"><header class="ascla-header">
 <a class="header-brand" href="<?php echo esc_url(Catalog::url('intranet')); ?>" aria-label="ASCLA inicio"><img class="brand-logo-normal" src="<?php echo esc_url($logo); ?>" alt="ASCLA" width="1343" height="382"><img class="brand-logo-inverse" src="<?php echo esc_url($logoWhite); ?>" alt="" aria-hidden="true" width="1608" height="472"></a>
 <button type="button" class="btn icon-button mobile-menu" data-action="menu" aria-label="<?php echo esc_attr(Language::label('Abrir navegación')); ?>"><?php echo Icons::html('menu'); ?></button>

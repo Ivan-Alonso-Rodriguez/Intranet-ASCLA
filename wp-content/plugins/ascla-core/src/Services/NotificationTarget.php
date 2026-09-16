@@ -3,6 +3,7 @@ namespace ASCLA\Core\Services;
 
 use ASCLA\Core\Domain\Catalog;
 use ASCLA\Core\Frontend\Language;
+use ASCLA\Core\Frontend\App;
 use ASCLA\Core\Repositories\Store;
 
 /** Resolve notification destinations against the recipient's current permissions. */
@@ -33,6 +34,7 @@ final class NotificationTarget
         'job'=>['Asistente y contenidos','spark','asistente','Ver mis consultas'],
         'job_error'=>['Asistente y contenidos','spark','asistente','Revisar consulta'],
         'welcome'=>['Comunidad','users','intranet','Explorar la comunidad'],
+        'birthday'=>['Comunidad','users','directorio','Ver perfil'],
     ];
 
     private static function tr(string $es,string $en): string { return Language::text($es,$en); }
@@ -130,7 +132,7 @@ final class NotificationTarget
             $actor=self::actor($context);
             $view['title']=Language::english()?$actor.' sent a new support request':$actor.' envió una nueva solicitud de soporte';
             $view['description']=$number.' · '.Access::excerpt($post->post_title,160);
-            $view['url']=current_user_can('ascla_moderate')?admin_url('admin.php?page=ascla-solicitudes'):Catalog::url('contacto');
+            $view['url']=current_user_can('ascla_moderate')?App::adminUrl(['page'=>'ascla-solicitudes']):Catalog::url('contacto');
             $view['action_label']=self::tr('Revisar solicitud','Review request');
             return $view;
         }
@@ -192,6 +194,13 @@ final class NotificationTarget
             if ($blocked || $optedOut) { return self::unavailable($view); }
         } catch (\ASCLA\Core\Rest\ApiException $e) { return self::unavailable($view); }
         $name=Access::excerpt($profile['name'],80);
+        if ($view['kind']==='birthday') {
+            $view['title']=Language::english()?'🎉 Today is '.$name.'’s birthday':'🎉 Hoy cumple años '.$name;
+            $view['description']=self::tr('Puedes abrir su perfil y enviarle un saludo desde ASCLA.','Open their profile and send a birthday greeting from ASCLA.');
+            $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
+            $view['action_label']=self::tr('Ver perfil','View profile');
+            return $view;
+        }
         if (in_array($view['kind'],['conversation_request','conversation_accepted'],true)) {
             $state=ConversationRequests::between(get_current_user_id(),(int)$profile['id']);
             $view['title']=match($state['state']) {
@@ -245,7 +254,7 @@ final class NotificationTarget
 
     private static function activityUrl(): string
     {
-        return current_user_can('ascla_moderate')?admin_url('admin.php?page=ascla-ia'):Catalog::url('asistente',['history'=>1]);
+        return current_user_can('ascla_moderate')?App::adminUrl(['page'=>'ascla-ia']):Catalog::url('asistente',['history'=>1]);
     }
 
     private static function legacy(array $view): array

@@ -1,10 +1,19 @@
 <?php
 use PHPUnit\Framework\TestCase;
 use ASCLA\Core\Frontend\Login;
+use ASCLA\Core\Frontend\App;
 use ASCLA\Core\Domain\Catalog;
 
 final class LoginTest extends TestCase
 {
+
+    public function testDedicatedLoginPageIsSeparateFromIntranet(): void
+    {
+        self::assertStringContainsString('/login', Login::url());
+        self::assertNotSame(Catalog::url('intranet'), Login::url());
+        self::assertStringContainsString('/administracion', App::adminUrl());
+    }
+
     public function testMemberReturnsOnlyToAnAsclaPage(): void
     {
         $member = get_user_by('login', 'demo.asociado');

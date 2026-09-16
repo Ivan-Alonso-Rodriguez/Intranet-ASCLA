@@ -16,7 +16,7 @@ final class Language
     }
     public static function current(): string
     {
-        if(($GLOBALS['pagenow']??'')==='wp-login.php')return self::requested()?:'es_ES';
+        if(($GLOBALS['pagenow']??'')==='wp-login.php' || Login::isFrontendRequest())return self::requested()?:'es_ES';
         return self::valid(get_user_meta(get_current_user_id(),'locale',true))?:'es_ES';
     }
     public static function english(): bool {return str_starts_with(self::current(),'en_');}
@@ -30,6 +30,17 @@ final class Language
     {
         $locale=self::requested();
         if($locale!=='')update_user_meta($user->ID,'locale',$locale);
+    }
+    public static function rememberLoginChoice(string $value): void
+    {
+        $locale=self::valid($value);
+        if($locale==='')return;
+        if(!headers_sent()){
+            $options=['expires'=>time()+YEAR_IN_SECONDS,'path'=>'/','secure'=>is_ssl(),'httponly'=>true,'samesite'=>'Lax'];
+            if(defined('COOKIE_DOMAIN') && is_string(COOKIE_DOMAIN) && COOKIE_DOMAIN!=='')$options['domain']=COOKIE_DOMAIN;
+            setcookie('wp_lang',$locale,$options);
+        }
+        $_COOKIE['wp_lang']=$locale;
     }
     public static function selector(): void
     {
@@ -62,7 +73,7 @@ final class Language
         check_admin_referer('ascla_change_language','_ascla_language_nonce');
         $locale=self::valid($_POST['_ascla_locale']??'');
         if($locale!=='')update_user_meta(get_current_user_id(),'locale',$locale);
-        $redirect=wp_get_referer()?:admin_url('admin.php?page=ascla');
+        $redirect=wp_get_referer()?:(current_user_can('manage_options')?admin_url('admin.php?page=ascla'):App::adminUrl());
         wp_safe_redirect($redirect);
         exit;
     }
@@ -73,7 +84,7 @@ final class Language
         add_action('admin_init',[self::class,'changeAdmin'],1);
         add_action('login_footer',[self::class,'selector']);
         add_filter('determine_locale',static function($locale){
-            if(($GLOBALS['pagenow']??'')==='wp-login.php')return self::requested()?:'es_ES';
+            if(($GLOBALS['pagenow']??'')==='wp-login.php' || Login::isFrontendRequest())return self::requested()?:'es_ES';
             if(did_action('set_current_user'))return self::valid(get_user_meta(get_current_user_id(),'locale',true))?:$locale;
             return $locale;
         });
@@ -85,7 +96,7 @@ final class Language
         add_filter('login_display_language_dropdown','__return_false');
         foreach(['login_form','lostpassword_form','resetpass_form'] as $hook)add_action($hook,static function(){echo '<input type="hidden" name="_ascla_locale" value="'.esc_attr(self::requested()).'">';});
         add_filter('language_attributes',static function($attributes){
-            if(($GLOBALS['pagenow']??'')==='wp-login.php' || App::page())return preg_replace('/lang="[^"]*"/','lang="'.esc_attr(str_replace('_','-',self::current())).'"',$attributes);
+            if(($GLOBALS['pagenow']??'')==='wp-login.php' || Login::isFrontendPage() || App::page())return preg_replace('/lang="[^"]*"/','lang="'.esc_attr(str_replace('_','-',self::current())).'"',$attributes);
             return $attributes;
         });
     }

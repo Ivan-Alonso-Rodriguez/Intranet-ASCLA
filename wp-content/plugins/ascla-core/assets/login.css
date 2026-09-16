@@ -142,120 +142,25 @@ html[data-ascla-theme="dark"] .ascla-login #login h1 a::after {
   clip-path: polygon(27% 0, 100% 0, 100% 100%, 0 100%, 0 66%, 27% 66%);
 }
 
-/* v1.9.13 · adaptive Cloudflare Turnstile */
-.ascla-login .ascla-turnstile-wrap {
-  margin: 4px 0 20px;
-  padding: 12px;
-  border: 1px solid #d8e3ed;
-  border-radius: 10px;
-  background: #f8fbfd;
-}
-.ascla-login .ascla-turnstile-wrap .cf-turnstile { width: 100%; }
-.ascla-login .ascla-turnstile-note,
-.ascla-login .ascla-turnstile-lock {
-  margin: 8px 0 0;
-  color: var(--ascla-muted);
-  font-size: 11px;
-  line-height: 1.55;
-}
-.ascla-login .ascla-turnstile-lock { color: #9b4a28; font-weight: 600; }
-html[data-ascla-theme="dark"] .ascla-login .ascla-turnstile-wrap {
-  border-color: #344756;
-  background: #111b24;
-}
-html[data-ascla-theme="dark"] .ascla-login .ascla-turnstile-lock { color: #f0b18f; }
-
-/* v1.9.16 · refined login branding and adaptive security presentation */
-.ascla-login #login h1 a {
-  height: 108px;
-  margin-bottom: 14px;
-  background-size: auto 215px;
-  background-position: center center;
-}
-.ascla-welcome-brand {
-  width: min(360px, 100%);
-  height: 112px;
-  aspect-ratio: auto;
-  overflow: hidden;
-}
-.ascla-welcome-brand .ascla-official-logo {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: auto;
-  max-width: none;
-  height: 215px;
-  transform: translate(-50%, -50%);
-}
-.ascla-welcome-brand::after {
-  mask-size: auto 215px;
-}
-html[data-ascla-theme="dark"] .ascla-login #login h1 a::after {
-  mask-size: auto 215px;
-}
-.ascla-login .ascla-turnstile-wrap {
-  margin: 4px 0 20px;
-  padding: 14px 15px;
-  border: 1px solid #d5e2ec;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #f8fbfd, #f1f7fb);
-  box-shadow: inset 0 1px 0 #fff;
-}
-.ascla-login .ascla-turnstile-head {
+/* ASCLA 1.9.49 · Cloudflare Turnstile oficial con activación adaptativa */
+.ascla-login .ascla-turnstile-native {
+  margin: 6px 0 18px;
+  min-height: 65px;
   display: flex;
-  align-items: center;
-  gap: 11px;
-  min-width: 0;
-}
-.ascla-login .ascla-turnstile-head > span:last-child {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-.ascla-login .ascla-turnstile-head strong {
-  color: #274760;
-  font-size: 12px;
-  line-height: 1.35;
-  font-weight: 650;
-}
-.ascla-login .ascla-turnstile-head small {
-  color: #718597;
-  font-size: 10px;
-  line-height: 1.4;
-}
-.ascla-login .ascla-turnstile-badge {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex: 0 0 30px;
-  color: #fff;
-  background: linear-gradient(145deg, #1684bb, #116a9d);
-  box-shadow: 0 4px 10px #116da326;
-  font-size: 15px;
-  font-weight: 800;
 }
-.ascla-login .ascla-turnstile-wrap .cf-turnstile {
+.ascla-login .ascla-turnstile-native .cf-turnstile {
   width: 100%;
-  margin-top: 12px;
+  min-height: 65px;
+  display: flex;
+  justify-content: center;
 }
-.ascla-login .ascla-turnstile-wrap .cf-turnstile:empty {
-  height: 0;
-  margin-top: 0;
-  overflow: hidden;
-}
-.ascla-login .ascla-turnstile-note {
-  margin: 10px 0 0;
-  padding-top: 9px;
-  border-top: 1px solid #e1eaf1;
-  color: #718597;
-  font-size: 10px;
-  line-height: 1.5;
-}
-.ascla-login .ascla-turnstile-lock {
-  margin: 10px 0 0;
+.ascla-login .ascla-turnstile-native .ascla-turnstile-lock {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 10px;
   padding: 9px 10px;
   border-radius: 8px;
   background: #fff4ec;
@@ -264,22 +169,7 @@ html[data-ascla-theme="dark"] .ascla-login #login h1 a::after {
   line-height: 1.5;
   font-weight: 650;
 }
-html[data-ascla-theme="dark"] .ascla-login .ascla-turnstile-wrap {
-  border-color: #344756;
-  background: linear-gradient(135deg, #111b24, #14212b);
-  box-shadow: inset 0 1px 0 #ffffff08;
-}
-html[data-ascla-theme="dark"] .ascla-login .ascla-turnstile-head strong { color: #dce7ef; }
-html[data-ascla-theme="dark"] .ascla-login .ascla-turnstile-head small,
-html[data-ascla-theme="dark"] .ascla-login .ascla-turnstile-note { color: #92a6b7; }
-html[data-ascla-theme="dark"] .ascla-login .ascla-turnstile-note { border-top-color: #2d3f4e; }
-html[data-ascla-theme="dark"] .ascla-login .ascla-turnstile-lock { background: #2d211d; color: #f0b18f; }
-@media (max-width: 480px) {
-  .ascla-login #login h1 a { height: 96px; background-size: auto 188px; }
-  html[data-ascla-theme="dark"] .ascla-login #login h1 a::after { mask-size: auto 188px; }
-  .ascla-login .ascla-turnstile-wrap { padding: 12px 13px; }
-}
-
+html[data-ascla-theme="dark"] .ascla-login .ascla-turnstile-native .ascla-turnstile-lock { background: #2d211d; color: #f0b18f; }
 
 /* v1.9.18 · official horizontal ASCLA logo */
 .ascla-login #login h1 a {
@@ -336,3 +226,36 @@ html[data-ascla-theme="dark"] .ascla-login #login h1 a {
 /* The welcome panel is a dark blue surface, so the white asset keeps the mark legible without a plate. */
 .ascla-welcome .ascla-welcome-brand .ascla-logo-normal { display:none; }
 .ascla-welcome .ascla-welcome-brand .ascla-logo-inverse { display:block; }
+
+/* v1.9.44 · /login/ keeps the same visual language as the original branded WordPress login. */
+.ascla-frontend-login #login form .password-input { padding-right: 45px; }
+.ascla-frontend-login #login .wp-pwd .wp-hide-pw {
+  width: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-decoration: none;
+}
+.ascla-frontend-login #login .message.success {
+  background: #edf8f2;
+  border-left: 4px solid #2f8a5e;
+  color: #245d43;
+}
+html[data-ascla-theme="dark"] .ascla-frontend-login #login .message.success {
+  background: #152920;
+  border-left-color: #55b985;
+  color: #b9e6ce;
+}
+
+/* Native wp-login.php is the technical administration entrance. The layout stays
+   identical to the community login, but the copy makes the boundary explicit. */
+.ascla-admin-login .ascla-login-eyebrow { letter-spacing: 1.7px; }
+.ascla-admin-login .ascla-login-intro h2 { color: #173f61; }
+.ascla-admin-login .ascla-welcome-topics span { border-color: #77a0ba; }
+.ascla-admin-login .ascla-admin-login-help { font-weight: 600; }
+html[data-ascla-theme="dark"] .ascla-admin-login .ascla-login-intro h2 { color: #e7f1f8; }
+.ascla-frontend-login #login .ascla-login-help { margin-top: 20px; }
+@media (max-width: 480px) {
+  .ascla-frontend-login #login form .password-input { padding-right: 72px; }
+  .ascla-frontend-login #login .wp-pwd .wp-hide-pw { width: 66px; padding: 0 6px; font-size: 10px; }
+}

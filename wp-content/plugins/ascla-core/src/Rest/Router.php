@@ -22,7 +22,7 @@ final class Router
     }
     public static function routes(): void
     {
-        self::route('/bootstrap','GET',static fn()=>['me'=>Profiles::visible(get_current_user_id()),'profile_completion'=>Profiles::completion(get_current_user_id()),'catalogs'=>Profiles::catalogs(),'moderator'=>current_user_can('ascla_moderate'),'executive'=>current_user_can('ascla_publish'),'admin'=>current_user_can('ascla_manage'),'demo'=>Settings::get()['demo'],'ai_mode'=>Knowledge::provider()->mode(),'google_connected'=>\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='']);
+        self::route('/bootstrap','GET',static fn()=>['me'=>Profiles::visible(get_current_user_id()),'profile_completion'=>Profiles::completion(get_current_user_id()),'birthday'=>\ASCLA\Core\Services\Birthdays::info(get_current_user_id()),'catalogs'=>Profiles::catalogs(),'moderator'=>current_user_can('ascla_moderate'),'executive'=>current_user_can('ascla_publish'),'admin'=>current_user_can('ascla_manage'),'demo'=>Settings::get()['demo'],'ai_mode'=>Knowledge::provider()->mode(),'google_connected'=>\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='']);
         self::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
         self::route('/profiles','GET',static fn($r)=>Profiles::directory($r->get_params()));
         self::route('/locations/countries','GET',static fn()=>Locations::countries());
@@ -96,6 +96,10 @@ final class Router
             return $provider==='openai'?\ASCLA\Core\Integrations\OpenAIProvider::test():\ASCLA\Core\Integrations\RealAIProvider::test();
         },'ascla_manage');
         self::route('/admin/users','GET',static fn($r)=>\ASCLA\Core\Services\Administration::users($r->get_params()),'ascla_manage');
+        self::route('/admin/users','POST',static fn($r)=>\ASCLA\Core\Services\Administration::createUser($r->get_json_params()?:[]),'ascla_manage');
+        self::route('/admin/users/(?P<id>\d+)','GET',static fn($r)=>\ASCLA\Core\Services\Administration::user((int)$r['id']),'ascla_manage');
+        self::route('/admin/users/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Administration::updateUser((int)$r['id'],$r->get_json_params()?:[]),'ascla_manage');
+        self::route('/admin/users/(?P<id>\d+)','DELETE',static fn($r)=>\ASCLA\Core\Services\Administration::deleteUser((int)$r['id']),'ascla_manage');
         self::route('/admin/contacts','GET',static fn($r)=>\ASCLA\Core\Services\Administration::contacts($r->get_params()),'ascla_moderate');
         self::route('/mail/test','POST',static fn()=>\ASCLA\Core\Integrations\Mailer::test(),'ascla_manage');
         self::route('/settings','GET',static fn()=>Settings::status(),'ascla_manage');

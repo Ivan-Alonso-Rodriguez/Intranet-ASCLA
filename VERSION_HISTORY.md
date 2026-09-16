@@ -2,9 +2,9 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.9.42`  
+> **Versión actual:** `1.9.49`  
 > **Esquema de base de datos:** `10`  
-> La versión `1.9.42` mejora RF-040 y RF-041 incorporando experiencia profesional y actividad pública como señales secundarias de recomendación, con explicaciones visuales y sin exponer información privada.
+> La versión `1.9.49` reubica la fecha de nacimiento para integrarla mejor al perfil y restaura Cloudflare Turnstile adaptativo: desafío después de tres fallos, bloqueo por cuenta al quinto y protección temporal ante ráfagas por IP.
 
 ## Resumen de versiones
 
@@ -63,11 +63,84 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.39 | RF-024 y RN-011: cancelación de eventos y correo controlado | Completada |
 | 1.9.40 | RF-025: imagen de portada del evento | Completada |
 | 1.9.41 | RF-031: participantes visibles después del RSVP | Completada |
-| 1.9.42 | RF-040 y RF-041: recomendaciones enriquecidas y explicables | **Actual** |
+| 1.9.42 | RF-040 y RF-041: recomendaciones enriquecidas y explicables | Completada |
+| 1.9.49 | Perfil de cumpleaños refinado y Turnstile adaptativo | **Actual** |
+| 1.9.48 | Cumpleaños privados y Turnstile oficial visible | Anterior |
+| 1.9.47 | Creación de usuarios dentro de Administración ASCLA | Completada |
+| 1.9.46 | Edición y eliminación de usuarios dentro de Administración ASCLA | Completada |
+| 1.9.45 | `/login/` limpio con retorno interno seguro sin `redirect_to` visible | Completada |
+| 1.9.44 | Login de comunidad con diseño anterior + acceso nativo identificado como Administración ASCLA | Completada |
+| 1.9.43 | Acceso ASCLA separado en `/login/` y protección de `/intranet/` | Anterior |
 
 ---
 
 # Serie 1.9.x — evolución funcional
+
+## 1.9.49 — perfil de cumpleaños refinado y Turnstile adaptativo
+
+- **Fecha de nacimiento** se integra en la cuadrícula del perfil junto al tipo de asociado y muestra una nota privada compacta debajo del campo, evitando el espacio vacío que generaba la versión anterior.
+- País y ciudad conservan su fila conjunta; LinkedIn y X/Twitter permanecen emparejados y Página personal utiliza todo el ancho disponible.
+- El cumpleaños continúa siendo privado y conserva el saludo dentro de ASCLA, correo anual y aviso único a administradores.
+- El login vuelve a la política adaptativa: primer, segundo y tercer intento procesan credenciales sin Turnstile; después del **tercer fallo** el siguiente acceso muestra el widget oficial de Cloudflare.
+- Tras el **quinto fallo** para el mismo usuario/correo se aplica una espera temporal de 10 minutos. Una ráfaga de **20 fallos** desde la misma IP dentro de la ventana de control activa un bloqueo temporal adicional de 15 minutos.
+- El widget, cuando corresponde, sigue siendo el oficial de Cloudflare; “Success” confirma la comprobación anti-bot y no sustituye la validación de credenciales.
+- No cambia el esquema de base de datos: continúa en **10**.
+
+## 1.9.48 — cumpleaños privados y Turnstile oficial visible
+
+- El perfil incorpora **Fecha de nacimiento** como dato privado. No se muestra en el directorio ni en perfiles ajenos y no participa en recomendaciones o afinidad.
+- En el día del cumpleaños se muestra un saludo especial en Inicio y una bienvenida visual la primera vez que el asociado entra a ASCLA durante ese día.
+- ASCLA intenta enviar una felicitación por correo **una sola vez al año** mediante el transporte configurado, sin incluir edad ni exponer la fecha de nacimiento.
+- Los Administradores ASCLA reciben una notificación interna única indicando qué asociado cumple años, con acceso a su perfil para poder saludarlo.
+- Crear y editar usuarios desde `/administracion/` también permite registrar la fecha de nacimiento.
+- Turnstile se normalizó al widget oficial visible de Cloudflare en cada acceso protegido.
+- No cambia el esquema de base de datos: continúa en **10**.
+
+## 1.9.47 — alta de usuarios dentro de Administración ASCLA
+
+- **Añadir usuario** deja de abrir `wp-admin/user-new.php`: el Administrador crea la cuenta desde un modal propio de `/administracion/`.
+- El formulario solicita nombre de usuario, correo, rol ASCLA, nombres, apellidos, cargo, empresa y tipo de asociado. Los roles disponibles se limitan a **Asociado, Ejecutivo y Moderador ASCLA**; la creación de administradores técnicos continúa exclusivamente en WordPress.
+- La contraseña inicial se genera con `wp_generate_password()` y **no se muestra ni se almacena en texto plano**. Por defecto, WordPress envía al correo registrado el flujo para que el usuario establezca su propia contraseña; si se desactiva el envío o el correo no llega, el nuevo usuario puede utilizar “¿Olvidaste tu contraseña?” desde `/login/`.
+- Se validan nombres de usuario y correos duplicados tanto antes de crear como dentro del bloqueo de concurrencia. La creación tiene límite de frecuencia administrativo y queda registrada como `member_created` en **Auditoría**.
+- El perfil inicial activa Directorio, Networking y Microeventos y guarda los datos profesionales básicos sin crear un esquema paralelo de autenticación. Continúa usando `wp_users`, roles y contraseñas nativas de WordPress.
+- No cambia el esquema de base de datos: continúa en **10**.
+
+## 1.9.46 — gestión de usuarios dentro de Administración ASCLA
+
+- **Editar usuario** ya no abre `wp-admin/user-edit.php`: Administrador trabaja en un modal propio dentro de `/administracion/`, con correo, rol ASCLA, nombres, cargo, empresa y tipo de asociado.
+- La edición utiliza permisos reales de WordPress y limita los roles seleccionables a **Asociado, Ejecutivo y Moderador ASCLA**. Los administradores técnicos permanecen fuera de este flujo y se gestionan únicamente desde WordPress.
+- Se añade **Eliminar usuario** con una ventana de confirmación diferenciada y una advertencia de que la operación es permanente. La propia cuenta y otros administradores técnicos no pueden eliminarse desde ASCLA.
+- Al eliminar un asociado, WordPress conserva y reasigna sus publicaciones al administrador que ejecuta la acción. ASCLA limpia relaciones, inscripciones, notificaciones, trabajos y conexión de Google Calendar; los archivos se reasignan para no romper contenido existente.
+- La actualización y eliminación quedan registradas en **Auditoría**. No cambia el esquema de base de datos: continúa en **10**.
+
+## 1.9.45 — URL canónica limpia para el acceso de asociados
+
+- Las páginas privadas ya no redirigen a `/login/?redirect_to=...`; guardan el destino interno solicitado en una **cookie HttpOnly firmada**, de corta duración, y redirigen únicamente a **`/login/`**.
+- Tras autenticarse correctamente, el destino se valida con las mismas reglas de seguridad existentes, se consume una sola vez y se elimina. URLs externas o manipuladas no se aceptan.
+- Los enlaces heredados con `redirect_to` se absorben por compatibilidad y se canonicalizan inmediatamente a `/login/`, por lo que el parámetro deja de permanecer visible en el navegador.
+- El cierre de sesión conserva el mensaje de confirmación mediante un aviso temporal y termina en `/login/` limpio, sin `?logged_out=1`.
+- El selector ES/EN del login usa POST/Redirect/GET y guarda la elección en cookie, evitando `?wp_lang=...` en la URL del acceso de asociados.
+- El flujo nativo de `wp-login.php` no cambia para recuperación/restablecimiento de contraseña y acceso técnico de WordPress. Mantiene el **esquema 10**.
+
+## 1.9.44 — diseño de login restaurado y administración diferenciada
+
+- `/login/` conserva la separación funcional de 1.9.43, pero vuelve a utilizar la misma composición visual del login ASCLA anterior: panel institucional lateral, tarjeta de acceso, logo, espaciado, recuperación y selector de idioma fuera de la tarjeta.
+- El acceso nativo `wp-login.php`, utilizado por `/wp-admin/`, se identifica como **ADMINISTRACIÓN ASCLA** y muestra textos específicos de acceso administrativo sin alterar el mecanismo de autenticación de WordPress.
+- Recuperación y restablecimiento de contraseña mantienen el lenguaje general de cuenta ASCLA; no se etiquetan como administración.
+- No cambia roles, contraseñas ni esquema de datos; se mantiene el **esquema 10**.
+
+## 1.9.43 — acceso ASCLA separado de la Intranet y wp-admin
+
+- Se crea una página pública dedicada **`/login/`** para el acceso de asociados, reutilizando la identidad visual del login existente.
+- Las páginas privadas de ASCLA, incluida **`/intranet/`**, ya no invocan directamente `auth_redirect()`; redirigen a `/login/?redirect_to=...` y conservan únicamente destinos internos autorizados.
+- Se crea **`/administracion/`** como workspace funcional de Ejecutivo, Moderador y Administrador, reutilizando la misma interfaz de gestión ASCLA sin exponerles el escritorio general de WordPress.
+- Ejecutivo y Moderador que intentan abrir **`/wp-admin/`** son redirigidos a `/administracion/`; los Asociados vuelven a `/intranet/`. El backoffice nativo queda reservado a usuarios con `manage_options`.
+- El formulario nuevo continúa autenticando con **`wp_signon()` y WordPress**, por lo que no duplica cuentas, contraseñas, cookies ni permisos.
+- La protección adaptativa de **Cloudflare Turnstile** y el conteo de intentos fallidos se reutilizan también en el nuevo formulario.
+- **`wp-login.php` no se elimina**: permanece disponible para recuperación/restablecimiento de contraseña, diálogos de sesión y autenticación técnica.
+- El cierre de sesión de la Intranet vuelve a `/login/?logged_out=1` y muestra una confirmación clara.
+- La página `/login/` conserva idioma ES/EN, modo claro/oscuro, diseño responsive y redirección segura a la sección ASCLA solicitada.
+- No requiere migración de tablas; mantiene el **esquema 10**.
 
 ## 1.9.42 — RF-040 y RF-041: recomendaciones enriquecidas y explicables
 
@@ -855,4 +928,4 @@ Las modificaciones exclusivamente documentales, como la ampliación de este arch
 - Cuando existe un snapshot verificable se conserva como referencia histórica.
 - No se crean tags ficticios para versiones cuyo código fuente original no esté disponible.
 - La carpeta `docs/` se mantiene fuera del repositorio público según la configuración actual de `.gitignore`.
-- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.42**.
+- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.49**.

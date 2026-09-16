@@ -21,7 +21,7 @@ final class Profiles
     {
         $data=self::raw($id);
         foreach((array)$data['hidden'] as $field){ unset($data[$field]); }
-        unset($data['first_name'],$data['last_name'],$data['bio'],$data['experience'],$data['company'],$data['linkedin'],$data['twitter'],$data['website']);
+        unset($data['first_name'],$data['last_name'],$data['birth_date'],$data['bio'],$data['experience'],$data['company'],$data['linkedin'],$data['twitter'],$data['website']);
         $data['name']=self::publicName($id);
         return $data;
     }
@@ -43,7 +43,7 @@ final class Profiles
     {
         $user=get_userdata($id); Access::require($user && Access::member($id),'Perfil no encontrado.',404);
         $data=(array)get_user_meta($id,'_ascla_profile',true);
-        return array_merge(['id'=>$id,'name'=>$user->display_name,'first_name'=>$user->first_name,'last_name'=>$user->last_name,'directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[],'revision'=>0],$data,['id'=>$id,'name'=>$user->display_name]);
+        return array_merge(['id'=>$id,'name'=>$user->display_name,'first_name'=>$user->first_name,'last_name'=>$user->last_name,'birth_date'=>'','directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[],'revision'=>0],$data,['id'=>$id,'name'=>$user->display_name]);
     }
     public static function visible(int $id): array
     {
@@ -57,6 +57,8 @@ final class Profiles
             unset($data['first_name'],$data['last_name'],$data['display_name']);
             $data['name']=self::publicName($id);
         }
+        // Birth date is always private. Only the profile owner and ASCLA administrators may retrieve it.
+        if (!$own && !current_user_can('ascla_manage')) { unset($data['birth_date']); }
         unset($data['revision']);
         $data['photo_url']=!empty($data['photo_id'])?Media::profilePhotoUrl((int)$data['photo_id'],$id):'';
         if ($own) {
@@ -118,6 +120,7 @@ final class Profiles
             }
             $data[$field]=$value;
         }
+        if (array_key_exists('birth_date',$input)) { $data['birth_date']=Birthdays::normalize($input['birth_date']); }
         foreach (self::TERMS as $field=>$tax) {
             if (!array_key_exists($field,$input)) { continue; }
             Access::require(is_array($input[$field]) && count($input[$field])<=20,'Selección no válida.',400);
@@ -141,6 +144,7 @@ final class Profiles
         update_user_meta($id,'_ascla_profile',$data);
         wp_update_user(['ID'=>$id,'first_name'=>$data['first_name'],'last_name'=>$data['last_name'],'display_name'=>trim($data['first_name'].' '.$data['last_name'])?:$data['name']]);
         update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+        Birthdays::celebrate($id);
         return self::visible($id);
     }
     public static function directory(array $filter=[]): array

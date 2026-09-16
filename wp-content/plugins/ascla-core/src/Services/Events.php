@@ -172,6 +172,29 @@ final class Events
         return self::detail($id);
     }
 
+    /** Remove a deleted member from event participation and release any reserved seat fairly. */
+    public static function removeMemberRegistrations(int $user): void
+    {
+        if($user<=0) return;
+        $rows=Store::rows('registrations','user_id=%d',[$user],'ORDER BY id ASC');
+        $events=[];
+        foreach($rows as $row) {
+            $eventId=(int)$row['event_id'];
+            $events[$eventId]=($events[$eventId]??false)||in_array((string)$row['status'],['accepted','offered'],true);
+        }
+        foreach($events as $eventId=>$releasedSeat) {
+            Store::lock('event:'.$eventId,static function()use($eventId,$user,$releasedSeat){
+                Store::delete('registrations',['event_id'=>$eventId,'user_id'=>$user]);
+                if(!$releasedSeat) return;
+                $post=get_post($eventId);
+                $meta=(array)get_post_meta($eventId,'_ascla',true);
+                if($post && $post->post_type==='ascla_event' && $post->post_status==='publish' && empty($meta['cancelled']) && strtotime((string)($meta['end']??''))>time()) {
+                    self::fillAvailableSlots($eventId,$meta);
+                }
+            });
+        }
+    }
+
     public static function register(int $id,string $status): array
     {
         Access::require(in_array($status,['accepted','declined','cancelled','waitlisted'],true),'Estado no válido.',400);

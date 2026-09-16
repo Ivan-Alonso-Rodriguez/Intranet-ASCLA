@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.9.42
+Stable tag: 1.9.49
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,43 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.9.49 =
+* Reordena la fecha de nacimiento dentro del perfil: queda junto al tipo de asociado, con una nota privada compacta, y la página personal aprovecha todo el ancho.
+* Restaura Cloudflare Turnstile adaptativo: los primeros intentos no muestran desafío, el widget oficial aparece tras 3 credenciales fallidas y el 5.º fallo activa una espera temporal.
+* Añade bloqueo temporal adicional ante ráfagas de intentos fallidos desde una misma IP. Mantiene esquema 10.
+
+= 1.9.48 =
+* Añade fecha de nacimiento privada en Perfil y Administración ASCLA; no se muestra a otros asociados ni se utiliza para matching.
+* En el cumpleaños, ASCLA muestra un saludo especial dentro de la intranet, intenta enviar un correo anual y avisa una sola vez a los administradores ASCLA con enlace al perfil.
+* El login protegido muestra el widget oficial visible de Cloudflare Turnstile en cada acceso; la indicación “Success” corresponde a la comprobación anti-bot y el backend sigue validando usuario y contraseña. Mantiene esquema 10.
+
+= 1.9.47 =
+* Añade creación de usuarios directamente desde `/administracion/`, sin abrir `wp-admin`: nombre de usuario, correo, rol ASCLA, nombres y datos profesionales básicos.
+* La contraseña inicial se genera de forma segura y no se expone al administrador. Por defecto se solicita a WordPress enviar al nuevo usuario un enlace para configurar su propia contraseña; si el correo no llega, puede usar la recuperación desde `/login/`.
+* La creación valida usuario/correo duplicados, limita los roles a Asociado, Ejecutivo y Moderador ASCLA, activa las preferencias base del perfil y registra la operación en Auditoría. Mantiene esquema 10.
+
+= 1.9.46 =
+* La gestión de usuarios deja de abrir WordPress para editar cuentas: Administrador puede modificar correo, rol ASCLA, nombres, cargo, empresa y tipo de asociado desde `/administracion/`.
+* Añade eliminación de usuarios con una segunda ventana de confirmación y advertencia permanente. No permite eliminar la cuenta propia ni administradores técnicos de WordPress.
+* Al eliminar un asociado, sus publicaciones y archivos necesarios se conservan bajo administración de ASCLA; se limpian relaciones, inscripciones, notificaciones y trabajos vinculados a la cuenta. Las acciones quedan registradas en Auditoría. Mantiene esquema 10.
+
+= 1.9.45 =
+* El acceso de asociados se canonicaliza a `/login/` sin `redirect_to`, `logged_out` ni parámetros de idioma visibles en la barra de direcciones.
+* El destino interno solicitado antes de autenticarse se conserva durante 15 minutos en una cookie HttpOnly firmada y se consume después del login; destinos externos siguen rechazándose.
+* El cierre de sesión y el cambio de idioma mantienen `/login/` limpio mediante avisos/cookies temporales y POST/Redirect/GET. `wp-login.php` conserva su flujo nativo para administración y recuperación. Mantiene esquema 10.
+
+= 1.9.44 =
+* `/login/` recupera el mismo diseño visual del login ASCLA anterior: panel institucional, tarjeta, espaciado, control de contraseña y elementos auxiliares conservan la estructura del flujo nativo personalizado.
+* El acceso técnico por `wp-login.php` conserva el mismo estilo, pero se identifica claramente como **Administración ASCLA** y usa textos orientados a administradores.
+* `/wp-admin/` continúa separado de la Intranet: asociados usan `/login/` y `/intranet/`; la administración técnica usa `wp-admin/wp-login.php`. Mantiene esquema 10.
+
+= 1.9.43 =
+* Añade una página pública dedicada `/login/` para el acceso de asociados; `/intranet/` y las demás páginas ASCLA redirigen allí cuando no existe sesión y conservan un destino interno seguro.
+* El formulario de acceso sigue autenticando con `wp_signon()` y las cookies/permisos de WordPress; no duplica el sistema de cuentas ni contraseñas.
+* Cloudflare Turnstile adaptativo protege también el nuevo formulario y mantiene el conteo/bloqueo de intentos fallidos.
+* Añade `/administracion/` como workspace de Ejecutivo, Moderador y Administrador. Ejecutivo/Moderador que intentan abrir `/wp-admin/` son redirigidos allí; el backoffice WordPress queda reservado a administradores técnicos con `manage_options`.
+* `wp-login.php` permanece como respaldo para recuperación/restablecimiento de contraseña y autenticación técnica; cerrar sesión desde la Intranet vuelve a `/login/` con confirmación. Mantiene esquema 10.
 
 = 1.9.42 =
 * RF-040: la afinidad entre asociados conserva intereses, áreas, industrias, objetivos e idiomas como señales principales y añade experiencia profesional relacionada como señal secundaria, respetando campos ocultos.

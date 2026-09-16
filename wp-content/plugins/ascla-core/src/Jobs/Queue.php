@@ -1,10 +1,10 @@
 <?php
 namespace ASCLA\Core\Jobs;
 use ASCLA\Core\Repositories\Store;
-use ASCLA\Core\Services\{Access,Audit,Knowledge,MicroEvents,Notifications,Content,Discovery};
+use ASCLA\Core\Services\{Access,Audit,Knowledge,MicroEvents,Notifications,Content,Discovery,Birthdays};
 final class Queue
 {
-    public static function boot(): void { add_action('ascla_jobs',[self::class,'run']); add_action('ascla_jobs_continue',[self::class,'run']); add_action('ascla_monthly',[MicroEvents::class,'monthly']); add_action('ascla_discovery',static fn()=>self::enqueue('discovery',[],0)); }
+    public static function boot(): void { add_action('ascla_jobs',[self::class,'run']); add_action('ascla_jobs',[Birthdays::class,'maybeProcess'],20); add_action('ascla_jobs_continue',[self::class,'run']); add_action('ascla_monthly',[MicroEvents::class,'monthly']); add_action('ascla_discovery',static fn()=>self::enqueue('discovery',[],0)); }
     public static function enqueue(string $kind,array $payload,int $user=-1): array
     {
         Access::require(in_array($kind,['multimedia','answer','microevents','social','resource_notifications','discovery','video_metadata'],true),'Trabajo no válido.',400);

@@ -58,6 +58,42 @@ final class Administration
             return Content::serialize($post);
         });
     }
+    private const COMMUNITY_ROLES=['ascla_member','ascla_executive','ascla_moderator'];
+
+    private static function roleLabel(string $role): string
+    {
+        $labels=[
+            'administrator'=>'Administrador',
+            'ascla_member'=>'Asociado ASCLA',
+            'ascla_executive'=>'Ejecutivo ASCLA',
+            'ascla_moderator'=>'Moderador ASCLA',
+        ];
+        if(isset($labels[$role])) return $labels[$role];
+        $data=wp_roles()->roles[$role]??null;
+        return $data?translate_user_role($data['name']):$role;
+    }
+
+    private static function editableMember(int $id): \WP_User
+    {
+        Access::require(current_user_can('ascla_manage'),'Acceso no autorizado.',403);
+        $user=get_userdata($id);
+        Access::require($user instanceof \WP_User,'Usuario no encontrado.',404);
+        Access::require($id!==get_current_user_id(),'Tu cuenta administrativa se gestiona desde WordPress.',400);
+        Access::require(!user_can($id,'manage_options'),'Los administradores técnicos se gestionan desde WordPress.',403);
+        Access::require(user_can($id,'ascla_access'),'La cuenta no pertenece a la comunidad ASCLA.',400);
+        return $user;
+    }
+
+    private static function communityRoles(): array
+    {
+        $roles=[];
+        foreach(self::COMMUNITY_ROLES as $id) {
+            $roleData=wp_roles()->roles[$id]??null;
+            if($roleData) $roles[]=['id'=>$id,'name'=>self::roleLabel($id)];
+        }
+        return $roles;
+    }
+
     public static function users(array $filter): array
     {
         Access::require(current_user_can('ascla_manage'));
@@ -72,11 +108,185 @@ final class Administration
         $query=new \WP_User_Query($args);$items=[];
         foreach($query->get_results() as $user) {
             $id=(int)$user->ID;$card=Profiles::card($id);
-            $items[]=['id'=>$id,'name'=>$user->display_name,'login'=>$user->user_login,'email'=>$user->user_email,'roles'=>array_values($user->roles),'registered'=>$user->user_registered,'suspended'=>(bool)get_user_meta($id,'_ascla_suspended',true),'photo_url'=>$card['photo_url'],'profile_url'=>$card['profile_url'],'edit_url'=>current_user_can('edit_user',$id)?get_edit_user_link($id):'','can_suspend'=>$id!==get_current_user_id()&&!user_can($id,'manage_options')&&user_can($id,'ascla_access')];
+            $technical=user_can($id,'manage_options');
+            $community=user_can($id,'ascla_access');
+            $items[]=[
+                'id'=>$id,
+                'name'=>$user->display_name,
+                'login'=>$user->user_login,
+                'email'=>$user->user_email,
+                'roles'=>array_values($user->roles),
+                'registered'=>$user->user_registered,
+                'suspended'=>(bool)get_user_meta($id,'_ascla_suspended',true),
+                'photo_url'=>$card['photo_url'],
+                'profile_url'=>$card['profile_url'],
+                'technical_admin'=>$technical,
+                'can_edit'=>$community&&!$technical&&$id!==get_current_user_id()&&current_user_can('edit_user',$id),
+                'can_delete'=>$community&&!$technical&&$id!==get_current_user_id()&&current_user_can('delete_user',$id),
+                'can_suspend'=>$id!==get_current_user_id()&&!$technical&&$community,
+            ];
         }
-        $roles=[];foreach(wp_roles()->roles as $id=>$roleData)$roles[]=['id'=>$id,'name'=>['administrator'=>'Administrador','ascla_member'=>'Asociado ASCLA','ascla_executive'=>'Ejecutivo ASCLA','ascla_moderator'=>'Moderador ASCLA'][$id]??translate_user_role($roleData['name'])];
-        return ['items'=>$items,'page'=>$page,'total'=>$query->get_total(),'pages'=>(int)ceil($query->get_total()/20),'roles'=>$roles,'create_url'=>current_user_can('create_users')?admin_url('user-new.php'):''];
+        $roles=[];foreach(wp_roles()->roles as $id=>$roleData)$roles[]=['id'=>$id,'name'=>self::roleLabel($id)];
+        return [
+            'items'=>$items,
+            'page'=>$page,
+            'total'=>$query->get_total(),
+            'pages'=>(int)ceil($query->get_total()/20),
+            'roles'=>$roles,
+            'can_create'=>current_user_can('create_users'),
+            'create_roles'=>self::communityRoles(),
+        ];
     }
+
+    public static function createUser(array $input): array
+    {
+        Access::require(current_user_can('ascla_manage')&&current_user_can('create_users'),'No puedes crear cuentas.',403);
+        Access::limit('admin_user_create',12,300);
+
+        $loginInput=trim(Access::text($input['login']??'',60));
+        $login=sanitize_user($loginInput,true);
+        Access::require($login!==''&&$login===$loginInput&&validate_username($login),'Use un nombre de usuario válido, sin espacios ni caracteres especiales no permitidos.',400);
+        Access::require(!username_exists($login),'Ese nombre de usuario ya está registrado.',409);
+
+        $email=sanitize_email(Access::text($input['email']??'',100));
+        Access::require($email!==''&&is_email($email),'Correo electrónico no válido.',400);
+        Access::require(!email_exists($email),'Ese correo ya pertenece a otra cuenta.',409);
+
+        $role=Access::text($input['role']??'ascla_member',60);
+        Access::require(in_array($role,self::COMMUNITY_ROLES,true),'Rol no válido para la comunidad.',400);
+        $first=Access::text($input['first_name']??'',100);
+        $last=Access::text($input['last_name']??'',100);
+        Access::require(trim($first.$last)!=='','Indica al menos un nombre o apellido.',400);
+        $position=Access::text($input['position']??'',200);
+        $company=Access::text($input['company']??'',200);
+        $memberType=Access::text($input['member_type']??'',200);
+        $birthDate=Birthdays::normalize($input['birth_date']??'');
+        $sendInvite=!array_key_exists('send_invite',$input)||rest_sanitize_boolean($input['send_invite']);
+
+        return Store::lock('admin-create-user:'.hash('sha256',$login.'|'.$email),static function()use($login,$email,$role,$first,$last,$position,$company,$memberType,$birthDate,$sendInvite){
+            Access::require(!username_exists($login),'Ese nombre de usuario ya está registrado.',409);
+            Access::require(!email_exists($email),'Ese correo ya pertenece a otra cuenta.',409);
+            $password=wp_generate_password(32,true,true);
+            $id=wp_insert_user([
+                'user_login'=>$login,
+                'user_email'=>$email,
+                'user_pass'=>$password,
+                'display_name'=>trim($first.' '.$last)?:$login,
+                'first_name'=>$first,
+                'last_name'=>$last,
+                'role'=>$role,
+            ]);
+            Access::require(!is_wp_error($id),is_wp_error($id)?$id->get_error_message():'No se pudo crear la cuenta.',400);
+            $id=(int)$id;
+            update_user_meta($id,'_ascla_profile',[
+                'first_name'=>$first,
+                'last_name'=>$last,
+                'position'=>$position,
+                'company'=>$company,
+                'member_type'=>$memberType,
+                'birth_date'=>$birthDate,
+                'directory'=>true,
+                'networking'=>true,
+                'microevents'=>true,
+                'hidden'=>[],
+                'revision'=>1,
+            ]);
+            update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+
+            if($sendInvite) {
+                try { wp_new_user_notification($id,null,'user'); }
+                catch (\Throwable $error) { /* La cuenta no depende del transporte de correo. */ }
+            }
+            Audit::record('member_created',$id,'role='.$role.'; invite='.($sendInvite?'requested':'disabled'));
+            Birthdays::celebrate($id);
+            $user=self::user($id);
+            $user['created']=true;
+            $user['invite_requested']=$sendInvite;
+            $user['message']=$sendInvite
+                ?'Usuario creado. Se solicitó el correo para que configure su contraseña.'
+                :'Usuario creado. Puede usar “¿Olvidaste tu contraseña?” en /login/ para establecer su acceso.';
+            return $user;
+        });
+    }
+
+    public static function user(int $id): array
+    {
+        $user=self::editableMember($id);
+        $profile=(array)get_user_meta($id,'_ascla_profile',true);
+        $role='ascla_member';
+        foreach(self::COMMUNITY_ROLES as $candidate) if(in_array($candidate,$user->roles,true)) {$role=$candidate;break;}
+        return [
+            'id'=>$id,
+            'login'=>$user->user_login,
+            'email'=>$user->user_email,
+            'registered'=>$user->user_registered,
+            'role'=>$role,
+            'roles'=>self::communityRoles(),
+            'first_name'=>$profile['first_name']??$user->first_name,
+            'last_name'=>$profile['last_name']??$user->last_name,
+            'position'=>$profile['position']??'',
+            'company'=>$profile['company']??'',
+            'member_type'=>$profile['member_type']??'',
+            'birth_date'=>$profile['birth_date']??'',
+            'photo_url'=>Profiles::card($id)['photo_url'],
+            'suspended'=>(bool)get_user_meta($id,'_ascla_suspended',true),
+        ];
+    }
+
+    public static function updateUser(int $id,array $input): array
+    {
+        $user=self::editableMember($id);
+        Access::require(current_user_can('edit_user',$id),'No puedes editar esta cuenta.',403);
+        $email=sanitize_email(Access::text($input['email']??'',100));
+        Access::require($email!==''&&is_email($email),'Correo electrónico no válido.',400);
+        $existing=email_exists($email);
+        Access::require(!$existing||(int)$existing===$id,'Ese correo ya pertenece a otra cuenta.',409);
+        $role=Access::text($input['role']??'',60);
+        Access::require(in_array($role,self::COMMUNITY_ROLES,true),'Rol no válido para la comunidad.',400);
+        $first=Access::text($input['first_name']??'',100);
+        $last=Access::text($input['last_name']??'',100);
+        Access::require(trim($first.$last)!=='','Indica al menos un nombre o apellido.',400);
+        $display=trim($first.' '.$last)?:$user->display_name;
+        $result=wp_update_user(['ID'=>$id,'user_email'=>$email,'first_name'=>$first,'last_name'=>$last,'display_name'=>$display]);
+        Access::require(!is_wp_error($result),is_wp_error($result)?$result->get_error_message():'No se pudo actualizar la cuenta.',400);
+        $user->set_role($role);
+        $profile=(array)get_user_meta($id,'_ascla_profile',true);
+        $profile['first_name']=$first;$profile['last_name']=$last;
+        $profile['position']=Access::text($input['position']??'',200);
+        $profile['company']=Access::text($input['company']??'',200);
+        $profile['member_type']=Access::text($input['member_type']??'',200);
+        $profile['birth_date']=Birthdays::normalize($input['birth_date']??'');
+        $profile['revision']=(int)($profile['revision']??0)+1;
+        update_user_meta($id,'_ascla_profile',$profile);
+        update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+        Audit::record('member_updated',$id,'role='.$role);
+        Birthdays::celebrate($id);
+        return self::user($id);
+    }
+
+    public static function deleteUser(int $id): array
+    {
+        $target=self::editableMember($id);
+        Access::require(current_user_can('delete_user',$id),'No puedes eliminar esta cuenta.',403);
+        $actor=get_current_user_id();
+        $login=$target->user_login;
+        return Store::lock('admin-delete-user:'.$id,static function()use($id,$actor,$login){
+            require_once ABSPATH.'wp-admin/includes/user.php';
+            $deleted=wp_delete_user($id,$actor);
+            Access::require($deleted===true,'No se pudo eliminar la cuenta.',500);
+            Store::delete('relations',['user_id'=>$id]);
+            Store::delete('relations',['target_id'=>$id]);
+            Events::removeMemberRegistrations($id);
+            Store::delete('notifications',['user_id'=>$id]);
+            Store::delete('jobs',['user_id'=>$id]);
+            Store::update('media',['user_id'=>$actor],['user_id'=>$id]);
+            \ASCLA\Core\Integrations\Secrets::remove('google_calendar_'.$id);
+            Audit::record('member_deleted',$id,$login);
+            update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+            return ['id'=>$id,'deleted'=>true,'message'=>'Usuario eliminado. El contenido publicado se conservó bajo administración de ASCLA.'];
+        });
+    }
+
     public static function suspend(int $id,bool $suspended): array
     {
         Access::require(current_user_can('ascla_manage'));

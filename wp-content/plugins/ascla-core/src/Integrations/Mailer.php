@@ -119,6 +119,19 @@ final class Mailer
         }
     }
 
+    public static function birthday(int $user): bool
+    {
+        $account=get_userdata($user);
+        if (!$account || !is_email($account->user_email) || !Access::member($user)) return false;
+        $profile=(array)get_user_meta($user,'_ascla_profile',true);
+        $name=trim((string)($profile['first_name']??''));
+        if ($name==='') $name=trim((string)$account->display_name)?:'asociado';
+        $subject='ASCLA · ¡Feliz cumpleaños! 🎉';
+        $body="Hola {$name},\n\n¡Feliz cumpleaños! 🎉\n\nEn ASCLA queremos acompañarte en este día y desearte un nuevo año lleno de buenas conexiones, aprendizajes, proyectos y motivos para celebrar.\n\nGracias por ser parte de nuestra comunidad.\n\n— ASCLA";
+        try { return (bool)wp_mail($account->user_email,$subject,$body); }
+        catch (\Throwable $error) { self::record('failed'); return false; }
+    }
+
     public static function localNotice(string $message): string
     {
         if (self::local() && (($_REQUEST['action']??'')==='lostpassword' || isset($_GET['checkemail']))) {

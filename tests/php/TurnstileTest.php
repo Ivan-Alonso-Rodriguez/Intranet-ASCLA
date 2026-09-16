@@ -64,6 +64,17 @@ final class TurnstileTest extends TestCase
         self::assertSame('ascla_login_locked',$result->get_error_code());
     }
 
+
+    public function testIpBurstIsTemporarilyBlockedAcrossDifferentUsernames(): void
+    {
+        for($i=0;$i<20;$i++){
+            Turnstile::loginFailed('burst-'.$i,new WP_Error('incorrect_password','bad'));
+        }
+        $result=Turnstile::authenticate(null,'another-user','wrong-password');
+        self::assertInstanceOf(WP_Error::class,$result);
+        self::assertSame('ascla_login_locked',$result->get_error_code());
+    }
+
     public function testServerValidationUsesSiteverifyAndCreatesTwentyFourHourTrust(): void
     {
         $_POST['cf-turnstile-response']='test-token';
