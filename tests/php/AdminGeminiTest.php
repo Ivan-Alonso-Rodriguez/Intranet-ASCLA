@@ -71,7 +71,7 @@ final class AdminGeminiTest extends TestCase
     public function testUsersAreAdminOnlyAndSuspensionCannotTargetSelfOrAdministrator(): void
     {
         $member=get_userdata($this->users[2]);$list=Administration::users(['q'=>$member->user_login]);
-        self::assertCount(1,$list['items']);self::assertSame($member->user_email,$list['items'][0]['email']);self::assertNotEmpty($list['items'][0]['edit_url']);
+        self::assertCount(1,$list['items']);self::assertSame($member->user_email,$list['items'][0]['email']);self::assertTrue($list['items'][0]['can_edit']);
         Administration::suspend($member->ID,true);self::assertCount(1,Administration::users(['q'=>$member->user_login,'state'=>'suspended'])['items']);
         Administration::suspend($member->ID,false);self::assertCount(1,Administration::users(['q'=>$member->user_login,'state'=>'active'])['items']);
         self::assertSame(400,$this->api('POST','admin/member/'.$this->users[0],['suspended'=>true])->get_status());

@@ -4,11 +4,12 @@ use ASCLA\Core\Domain\Catalog;
 
 final class Installer
 {
+    public const SCHEMA_VERSION=11;
     public static function activate(bool $networkWide=false): void
     {
         if ($networkWide) { wp_die('Active ASCLA Core individualmente en cada sitio; no se admite activación de red.'); }
         Catalog::register();
-        self::roles();
+        \ASCLA\Core\Domain\Roles::sync();
         self::migrate();
         self::migrateIndexes();
         self::migrateDiscovery();
@@ -19,6 +20,7 @@ final class Installer
         self::migrateConversationGroups();
         self::migrateConversationPhotos();
         self::migrateConversationDescriptions();
+        self::migrateTemporaryMedia();
         self::loginPage();
         self::pages();
         self::adminPage();
@@ -31,7 +33,8 @@ final class Installer
     }
     public static function upgrade(): void
     {
-        if (get_option('ascla_version') !== ASCLA_VERSION) { self::activate(false); }
+        if (get_option('ascla_version') !== ASCLA_VERSION || (int)get_option('ascla_schema',0)<self::SCHEMA_VERSION) { self::activate(false); }
+        \ASCLA\Core\Domain\Roles::upgrade();
     }
     private static function migrateIndexes(): void
     {
@@ -161,36 +164,22 @@ final class Installer
         update_option('ascla_schema',10,false);
     }
 
-    /**
-     * Four ASCLA roles map directly onto the process diagram's swimlanes:
-     *  - Asociado (ascla_member): base community access, no publishing/moderation power.
-     *  - Ejecutivo (ascla_executive): publishes and manages events, uploads session recordings
-     *    and publishes technical notes/resources (ascla_publish), without touching site config.
-     *  - Moderador (ascla_moderator): audits forum threads/comments and approves or removes them
-     *    (ascla_moderate), independent of event/resource publishing.
-     *  - Administrator: retains every capability (system administration, plugin/source management,
-     *    deployment) plus the Ejecutivo and Moderador capabilities, so nothing that worked before
-     *    for site admins stops working.
-     * ascla_admin_area is the shared capability for the ASCLA administration workspace.
-     * Ejecutivo and Moderador use `/administracion/`; WordPress `/wp-admin/` stays reserved for
-     * technical Administrators with `manage_options`. Plain Asociados never receive this capability.
-     */
-    private static function roles(): void
+    /** Preserve saved files while allowing the -1 marker used by uncommitted uploads. */
+    private static function migrateTemporaryMedia(): void
     {
-        $base=['read'=>true,'ascla_access'=>true,'ascla_write'=>true];
-        $staff=$base+['ascla_admin_area'=>true];
-        add_role('ascla_member', 'Asociado ASCLA', $base);
-        add_role('ascla_executive','Ejecutivo ASCLA', $staff+['ascla_publish'=>true]);
-        add_role('ascla_moderator','Moderador ASCLA', $staff+['ascla_moderate'=>true]);
-        foreach ([
-            'ascla_member'=>$base,
-            'ascla_executive'=>$staff+['ascla_publish'=>true],
-            'ascla_moderator'=>$staff+['ascla_moderate'=>true],
-            'administrator'=>$staff+['ascla_publish'=>true,'ascla_moderate'=>true,'ascla_manage'=>true],
-        ] as $name=>$caps) {
-            $role=get_role($name);
-            if ($role) { foreach ($caps as $cap=>$grant) { $role->add_cap($cap); } }
+        if((int)get_option('ascla_schema',0)>=11){return;}
+        global $wpdb;$table=$wpdb->prefix.'ascla_media';
+        if((int)$wpdb->get_var("SELECT COUNT(*) FROM $table WHERE post_id>9223372036854775807")>0){
+            throw new MigrationException('Hay referencias de archivos fuera del rango admitido. No se modificaron los datos.');
         }
+        $column=$wpdb->get_row("SHOW COLUMNS FROM $table LIKE 'post_id'",ARRAY_A);
+        if(!$column){throw new MigrationException('No se encontró la referencia de archivos.');}
+        if(str_contains(strtolower($column['Type']),'unsigned')){
+            if($wpdb->query("ALTER TABLE $table MODIFY post_id bigint(20) NOT NULL DEFAULT 0")===false){
+                throw new MigrationException('No se pudo habilitar el almacenamiento temporal de archivos.');
+            }
+        }
+        update_option('ascla_schema',self::SCHEMA_VERSION,false);
     }
     private static function migrate(): void
     {
@@ -207,7 +196,7 @@ final class Installer
             'notifications'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nuser_id bigint(20) unsigned NOT NULL,\nkind varchar(32) NOT NULL,\nlabel varchar(255) NOT NULL,\nurl text NOT NULL,\nread_at datetime DEFAULT NULL,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nKEY user_unread (user_id,read_at,id)",
             'audit'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nactor_id bigint(20) unsigned NOT NULL,\naction varchar(64) NOT NULL,\nobject_id bigint(20) unsigned NOT NULL DEFAULT 0,\ndetail varchar(255) NOT NULL DEFAULT '',\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nKEY action_date (action,created_at)",
             'jobs'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nkind varchar(32) NOT NULL,\nuser_id bigint(20) unsigned NOT NULL,\npayload longtext NOT NULL,\nstatus varchar(24) NOT NULL,\nattempts int(11) NOT NULL DEFAULT 0,\nresult longtext DEFAULT NULL,\nerror varchar(255) DEFAULT NULL,\nlocked_at datetime DEFAULT NULL,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nKEY queue (status,id),\nKEY owner (user_id,id)",
-            'media'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nuser_id bigint(20) unsigned NOT NULL,\npost_id bigint(20) unsigned NOT NULL DEFAULT 0,\noriginal_id bigint(20) unsigned NOT NULL DEFAULT 0,\nname varchar(255) NOT NULL,\nmime varchar(80) NOT NULL,\nbytes longblob NOT NULL,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nKEY owner (user_id),\nKEY post_id (post_id),\nKEY original_id (original_id)",
+            'media'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nuser_id bigint(20) unsigned NOT NULL,\npost_id bigint(20) NOT NULL DEFAULT 0,\noriginal_id bigint(20) unsigned NOT NULL DEFAULT 0,\nname varchar(255) NOT NULL,\nmime varchar(80) NOT NULL,\nbytes longblob NOT NULL,\ncreated_at datetime NOT NULL,\nPRIMARY KEY  (id),\nKEY owner (user_id),\nKEY post_id (post_id),\nKEY original_id (original_id)",
         ];
         foreach ($tables as $name=>$schema) {
             dbDelta("CREATE TABLE {$p}{$name} (\n{$schema}\n) ENGINE=InnoDB {$collate};");

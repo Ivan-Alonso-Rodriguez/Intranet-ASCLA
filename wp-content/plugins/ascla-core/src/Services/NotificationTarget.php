@@ -243,7 +243,7 @@ final class NotificationTarget
     private static function job(array $view,array $context): array
     {
         $job=Store::one('jobs',absint($context['id']??0));
-        if (!$job || ((int)$job['user_id']!==get_current_user_id() && !current_user_can('ascla_moderate'))) { return self::unavailable($view); }
+        if (!$job || ((int)$job['user_id']!==get_current_user_id() && !current_user_can('ascla_manage'))) { return self::unavailable($view); }
         $payload=json_decode($job['payload'],true)?:[];
         $result=json_decode($job['result']??'null',true)?:[];
         if ($job['kind']==='answer') {

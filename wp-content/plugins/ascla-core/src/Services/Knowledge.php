@@ -4,6 +4,7 @@ use ASCLA\Core\Integrations\{AIProviderInterface,MockAIProvider,RealAIProvider,O
 use ASCLA\Core\Domain\{Anonymizer,EntityRedactor,Grounding};
 final class Knowledge
 {
+    private const ABSTENTION='No existe suficiente información en ASCLA para responder esta consulta. Prueba con una pregunta sobre eventos, publicaciones o recursos de la comunidad.';
     private const IDENTITIES_SEPARATOR='/[\n,;]+/u';
     private const VIDEO_TOPICS=[
         'Gestión de riesgos'=>['/\bgesti[oó]n de riesgos?\b/iu','/\briesgos?\b/iu','/\brisk management\b/iu'],
@@ -57,7 +58,7 @@ final class Knowledge
         }
         $conversation=self::conversational($question);
         if (!$sources && empty($context['answerable']) && !$conversation) {
-            return ['answer'=>'No existe suficiente información en ASCLA para responder esta consulta. Prueba con una pregunta sobre eventos, publicaciones o recursos de la comunidad.','sources'=>[],'mode'=>self::provider()->mode(),'grounding'=>['policy'=>Grounding::POLICY,'context_source_ids'=>[],'valid_references'=>0,'ignored_references'=>0,'live_context_used'=>false,'conversation_only'=>false]];
+            return ['answer'=>self::ABSTENTION,'sources'=>[],'mode'=>self::provider()->mode(),'grounding'=>['policy'=>Grounding::POLICY,'context_source_ids'=>[],'valid_references'=>0,'ignored_references'=>0,'live_context_used'=>false,'conversation_only'=>false]];
         }
         $inputQuestion=$protected?EntityRedactor::redact($question,$allIdentities):$question;
         if($protected){ $history=EntityRedactor::tree($history,$allIdentities); }
@@ -107,7 +108,7 @@ final class Knowledge
             if(!empty($result['grounding']['live_context_used'])||!empty($result['grounding']['conversation_only'])){
                 return ['answer'=>Access::text($result['answer']??'',20000),'sources'=>[],'mode'=>$result['mode']??'ASCLA','grounding'=>$result['grounding']??[]];
             }
-            return ['answer'=>'No existe suficiente información en ASCLA para responder esta consulta.','sources'=>[],'mode'=>$result['mode']??'Fuentes actualizadas'];
+            return ['answer'=>self::ABSTENTION,'sources'=>[],'mode'=>$result['mode']??'Fuentes actualizadas'];
         }
         if(count($sources)!==count($originalIds)) return ['answer'=>'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar al Asistente ASCLA.','sources'=>[],'mode'=>$result['mode']??'Fuentes actualizadas'];
         $candidate=['answer'=>$result['answer']??'','source_ids'=>array_column($result['sources']??[],'id')];
@@ -220,7 +221,6 @@ final class Knowledge
         $grounded=array_map(static function($clip) use($id,$meta) {
             $clip['duration']=$clip['end']-$clip['start'];$clip['source_id']=$id;
             $clip['description']=$clip['title'];$clip['reason']=$clip['selection'];
-            $clip['youtube_url']=empty($meta['video_id'])?'':'https://www.youtube.com/watch?v='.$meta['video_id'].'&t='.$clip['start'].'s';
             return $clip;
         },$grounded);
 
@@ -256,6 +256,7 @@ final class Knowledge
         ];
         // Sanitize only generated material. Original source URLs, video IDs and editorial metadata must remain untouched.
         $generatedFields=self::cleanGenerated($generatedFields,!empty($meta['chatham']),$identities);
+        foreach(['moments','excerpts'] as $field){$generatedFields[$field]=\ASCLA\Core\Domain\Transcript::videoLinks($generatedFields[$field],(string)($meta['video_id']??''));}
         $updated=array_merge($meta,$generatedFields);
         $updated['copyright']='© ASCLA – Asociación de Secretarios Corporativos de América Latina';
         $updated['ai_mode']=$ai->mode();

@@ -256,7 +256,7 @@ final class Media
             $id=absint($_GET['id']??0);
             $row=Store::one('media',$id);
             Access::require((bool)$row,'Archivo no encontrado.',404);
-            $allowed=(int)$row['user_id']===get_current_user_id()||current_user_can('ascla_moderate');
+            $allowed=(int)$row['user_id']===get_current_user_id()||current_user_can('ascla_manage');
             if (!$allowed && $row['post_id']) {
                 $post=get_post($row['post_id']);
                 $allowed=$post && Content::canRead($post);

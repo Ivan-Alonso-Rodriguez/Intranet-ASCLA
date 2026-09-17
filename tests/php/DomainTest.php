@@ -72,7 +72,9 @@ final class DomainTest extends TestCase
         self::assertSame([],$result['excerpts'],'Sin duración verificada no deben generarse cápsulas temporales.');
         $timed=$ai->generate('multimedia',['transcript'=>$video['text'],'source_id'=>123,'duration_seconds'=>210]);
         self::assertLessThanOrEqual(1,count($timed['excerpts']));foreach($timed['excerpts'] as $clip){self::assertGreaterThanOrEqual(60,$clip['end']-$clip['start']);self::assertLessThanOrEqual(180,$clip['end']-$clip['start']);self::assertLessThanOrEqual(210,$clip['end']);}
-        self::assertSame([],$ai->generate('answer',[])['source_ids']);self::assertSame([7],$ai->generate('answer',['sources'=>[['id'=>7,'title'=>'Fuente','body'=>'Texto']]])['source_ids']);
+        self::assertSame([],$ai->generate('answer',[])['source_ids']);self::assertSame([],$ai->generate('answer',['sources'=>[['id'=>7,'title'=>'Fuente','body'=>'Texto']]])['source_ids']);
+        $answer=$ai->generate('answer',['sources'=>[['id'=>7,'title'=>'Fuente','body'=>'El directorio debe documentar el seguimiento de sus acuerdos.'],['id'=>8,'title'=>'Insuficiente','body'=>'Texto']]]);
+        self::assertSame([7],$answer['source_ids']);self::assertStringContainsString('seguimiento',$answer['answer']);
         self::assertFalse($ai->generate('social',['text'=>'Compra nuestro curso de gobierno corporativo con descuento'])['relevant']);
         self::assertTrue($ai->generate('social',['text'=>'La gobernanza de la junta requiere seguimiento'])['relevant']);
         self::assertArrayHasKey('text',$ai->generate('intro',[]));

@@ -4,6 +4,15 @@ namespace ASCLA\Core\Domain;
 /** Select playable references to source timestamps; never create or download media files. */
 final class Transcript
 {
+    public static function videoLinks(array $clips,string $videoId): array
+    {
+        $valid=(bool)preg_match('/^[A-Za-z0-9_-]{11}$/D',$videoId);
+        return array_map(static function(array $clip)use($valid,$videoId):array{
+            $start=max(0,(int)($clip['start']??0));
+            $clip['youtube_url']=$valid?'https://www.youtube.com/watch?v='.$videoId.'&t='.$start.'s':'';
+            return $clip;
+        },array_values(array_filter($clips,'is_array')));
+    }
     private static function seconds(string $value): float
     {
         $parts=explode(':',str_replace(',','.',$value));

@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.9.50
+Stable tag: 1.10
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,15 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.10 =
+* Corrige los 16 pendientes de pruebas: archivos temporales, enlaces de cápsulas, privacidad editorial y respuestas del asistente, junto con pruebas de contratos antiguos.
+* La migración al esquema 11 admite archivos temporales sin modificar referencias existentes. Los lectores reciben recursos anonimizados; los editores autorizados conservan las fuentes originales.
+* Roles jerárquicos y acumulativos: Administrador > Ejecutivo ASCLA > Moderador > Asociado. Migración compatible de capacidades existentes, también para instalaciones que ya indican 1.10.
+* Menús y botones reflejan permisos del servidor; REST y servicios validan capacidades y acceso por objeto. Moderar no concede acceso a archivos personales ni consultas privadas de IA.
+* La ficha de asociado muestra sus datos y acciones antes de la explicación de IA. La afinidad determinística se carga en paralelo y la explicación actualiza solo su bloque, respetando cierre y navegación.
+* Conserva explicaciones y mensajes sugeridos válidos por pareja en una caché privada limitada a 20 resultados por usuario. Los cambios profesionales, de intereses, privacidad o proveedor invalidan la entrada; las preferencias de correo y cumpleaños no provocan regeneración.
+* Valida las respuestas de IA antes de guardarlas y usa respuestas básicas ante errores, cuota o llamadas concurrentes. La corrección de archivos temporales actualiza el esquema a 11, conservando datos existentes.
 
 = 1.9.50 =
 * Las imágenes y archivos recién subidos permanecen temporales hasta que el formulario se guarda; si el usuario cancela, cierra o reemplaza la selección, ASCLA los descarta y no aparecen en Mis archivos. Los temporales abandonados se limpian automáticamente.

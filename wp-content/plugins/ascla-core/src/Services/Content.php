@@ -36,10 +36,42 @@ final class Content
         delete_post_meta($postId,'_ascla_invitee');
         foreach (array_unique(array_map('absint',$value['invitees']??[])) as $uid) { add_post_meta($postId,'_ascla_invitee',$uid); }
     }
+    private const EDITORIAL_TYPES=['gallery','resource','event'];
+    private const COMMUNITY_TYPES=['hub','forum','topic'];
+
+    public static function canCreate(string $type): bool
+    {
+        if(!Access::member() || !current_user_can('ascla_write') || !isset(Catalog::TYPES[$type])){return false;}
+        if(in_array($type,self::EDITORIAL_TYPES,true)){return Access::canPublish();}
+        return current_user_can('ascla_moderate') || in_array($type,array_merge(self::COMMUNITY_TYPES,['contact']),true);
+    }
+    public static function canEdit(\WP_Post $post): bool
+    {
+        $type=substr($post->post_type,6);
+        return self::canRead($post) && self::canCreate($type)
+            && (current_user_can('ascla_manage') || (int)$post->post_author===get_current_user_id()
+                || (current_user_can('ascla_moderate') && !in_array($type,self::EDITORIAL_TYPES,true)));
+    }
+    public static function canModerate(\WP_Post $post): bool
+    {
+        if(!self::canRead($post) || $post->post_type==='ascla_contact'){return false;}
+        if(in_array(substr($post->post_type,6),self::EDITORIAL_TYPES,true)){
+            $meta=(array)get_post_meta($post->ID,'_ascla',true);
+            return self::canEdit($post) && (empty($meta['micro']) || current_user_can('ascla_manage'));
+        }
+        return current_user_can('ascla_moderate');
+    }
+    public static function canDeleteComment(\WP_Comment $comment): bool
+    {
+        $post=get_post($comment->comment_post_ID);
+        return $post && self::canRead($post)
+            && (current_user_can('ascla_moderate') || current_user_can('ascla_manage') || (int)$comment->user_id===get_current_user_id());
+    }
     public static function canRead(\WP_Post $post): bool
     {
         if (!Access::member() || $post->post_status==='trash' || !str_starts_with($post->post_type,'ascla_') || !isset(Catalog::TYPES[substr($post->post_type,6)])) { return false; }
-        if (current_user_can('ascla_moderate') || (int)$post->post_author===get_current_user_id()) { return true; }
+        if (current_user_can('ascla_manage') || (int)$post->post_author===get_current_user_id()) { return true; }
+        if(current_user_can('ascla_moderate') && !in_array(substr($post->post_type,6),self::EDITORIAL_TYPES,true)){return true;}
         if ($post->post_type==='ascla_contact' || $post->post_status!=='publish') { return false; }
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
         if (!empty($meta['micro'])) { return in_array(get_current_user_id(),array_map('intval',$meta['invitees']??[]),true); }
@@ -76,12 +108,17 @@ final class Content
                 $meta[$field]=trim($text);
             }
         }
+        $title=$legacyRedaction($post->post_title);$body=$legacyRedaction($post->post_content);
+        if(in_array(substr($post->post_type,6),self::EDITORIAL_TYPES,true) && !self::canEdit($post)){
+            $view=\ASCLA\Core\Domain\EditorialPrivacy::reader($title,$body,$meta);
+            $title=$view['title'];$body=$view['body'];$meta=$view['meta'];
+        }
         if (!current_user_can('ascla_moderate') && !Access::canPublish()) { unset($meta['transcript'],$meta['identities'],$meta['invitees'],$meta['moderation'],$meta['transcript_error'],$meta['transcript_mode'],$meta['transcript_checked_at']); }
         $author=get_userdata($post->post_author);
         $date=$post->post_date_gmt;
         if (!$date || str_starts_with($date,'0000-')) { $date=get_gmt_from_date($post->post_date); }
         $terms=wp_get_object_terms($post->ID,['ascla_interest','ascla_category','ascla_tag']);
-        return ['id'=>$post->ID,'can_delete'=>self::canDelete($post),'type'=>substr($post->post_type,6),'title'=>$legacyRedaction($post->post_title),'body'=>$legacyRedaction($post->post_content),'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?Profiles::publicName((int)$author->ID):'ASCLA'],'date'=>$date,'parent'=>(int)$post->post_parent,'meta'=>$meta,'media'=>Media::metadata($post->ID,(array)($meta['media_ids']??[])),'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name,'taxonomy'=>$t->taxonomy],$terms),'reactions'=>Store::count('relations',"target_id=%d AND kind='like'",[$post->ID]),'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='like'",[$post->ID,get_current_user_id()])>0,'following'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='follow'",[$post->ID,get_current_user_id()])>0,'comments'=>(int)$post->comment_count,'url'=>Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID])];
+        return ['id'=>$post->ID,'can_delete'=>self::canDelete($post),'can_edit'=>self::canEdit($post),'can_moderate'=>self::canModerate($post),'type'=>substr($post->post_type,6),'title'=>$title,'body'=>$body,'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?Profiles::publicName((int)$author->ID):'ASCLA'],'date'=>$date,'parent'=>(int)$post->post_parent,'meta'=>$meta,'media'=>Media::metadata($post->ID,(array)($meta['media_ids']??[])),'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name,'taxonomy'=>$t->taxonomy],$terms),'reactions'=>Store::count('relations',"target_id=%d AND kind='like'",[$post->ID]),'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='like'",[$post->ID,get_current_user_id()])>0,'following'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='follow'",[$post->ID,get_current_user_id()])>0,'comments'=>(int)$post->comment_count,'url'=>Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID])];
     }
     public static function page(string $type): string { return ['resource'=>'centro-conocimiento','event'=>'eventos','topic'=>'foros','forum'=>'foros','gallery'=>'galeria','ally'=>'aliados','contact'=>'contacto'][$type]??'hub'; }
     public static function listing(string $type,array $filter=[]): array
@@ -144,10 +181,10 @@ final class Content
         $editor=current_user_can('ascla_moderate');
         $publisher=Access::canPublish();
         Access::require(!in_array($type,['gallery','resource','event'],true)||$publisher,'Solo un Ejecutivo o un administrador pueden crear o editar eventos, Galería y Centro de Conocimiento.',403);
-        Access::require($editor||in_array($type,['hub','topic','gallery','contact'],true),'Se requiere moderación.',403);
+        Access::require(self::canCreate($type),'No puede crear contenido en esta sección.',403);
         $oldMeta=[]; $oldTitle='';
         if ($id) {
-            $post=self::get($id); Access::require($post->post_type==='ascla_'.$type && ($editor||(int)$post->post_author===get_current_user_id()),'No puede editar este contenido.');
+            $post=self::get($id); Access::require($post->post_type==='ascla_'.$type && self::canEdit($post),'No puede editar este contenido.');
             if ($type==='event') { $oldMeta=(array)get_post_meta($id,'_ascla',true); $oldTitle=(string)$post->post_title; }
         }
         $title=trim(Access::text($input['title']??'',200)); $body=trim(Access::text($input['body']??'',30000));
@@ -240,12 +277,13 @@ final class Content
     public static function canDelete(\WP_Post $post): bool
     {
         return Access::member() && str_starts_with($post->post_type,'ascla_') && isset(Catalog::TYPES[substr($post->post_type,6)]) && $post->post_status!=='trash'
-            && (current_user_can('ascla_manage') || (int)$post->post_author===get_current_user_id());
+            && (current_user_can('ascla_manage') || (int)$post->post_author===get_current_user_id()
+                || (current_user_can('ascla_moderate') && in_array(substr($post->post_type,6),self::COMMUNITY_TYPES,true)));
     }
     /** Trash the selected contribution; other authors' forum topics remain in the general list. */
     public static function remove(int $id): array
     {
-        $post=self::get($id); Access::require(self::canDelete($post),'Solo el autor o un administrador puede eliminar este contenido.',403);
+        $post=self::get($id); Access::require(self::canDelete($post),'No tienes permisos para eliminar este contenido.',403);
         return Store::lock('content:'.$id,static function()use($id,$post){
             $meta=(array)get_post_meta($id,'_ascla',true);
             Access::require((bool)wp_trash_post($id),'No se pudo eliminar el contenido.',500);
@@ -265,7 +303,7 @@ final class Content
     {
         $comment=get_comment($id);Access::require($comment && !in_array((string)$comment->comment_approved,['trash','post-trashed'],true),'Comentario no encontrado.',404);
         self::get((int)$comment->comment_post_ID);
-        Access::require(current_user_can('ascla_manage') || (int)$comment->user_id===get_current_user_id(),'Solo el autor o un administrador puede eliminar este comentario.',403);
+        Access::require(self::canDeleteComment($comment),'No tienes permisos para eliminar este comentario.',403);
         Access::require((bool)wp_trash_comment($id),'No se pudo eliminar el comentario.',500);
         Store::delete('relations',['target_id'=>$id,'kind'=>'comment_like']);
         Store::delete('relations',['target_id'=>$id,'kind'=>'comment_report']);
@@ -294,7 +332,7 @@ final class Content
                 'id'=>$cid,
                 'parent'=>(int)$c->comment_parent,
                 'author_id'=>(int)$c->user_id,
-                'can_delete'=>current_user_can('ascla_manage')||(int)$c->user_id===$me,
+                'can_delete'=>self::canDeleteComment($c),
                 'can_report'=>(string)$c->comment_approved==='1' && (int)$c->user_id!==$me,
                 'status'=>(string)$c->comment_approved==='1'?'publish':'pending',
                 'author'=>$c->user_id?Profiles::publicName((int)$c->user_id):'Comunidad ASCLA',
@@ -437,8 +475,9 @@ final class Content
     }
     public static function moderate(int $id,string $decision,string $reason,bool $reviewed=false): array
     {
-        Access::require(current_user_can('ascla_moderate'));
-        $post=self::get($id); $statuses=['approve'=>'publish','reject'=>'ascla_rejected','hide'=>'ascla_hidden','suspend'=>'ascla_hidden'];
+        $post=self::get($id);
+        Access::require(self::canModerate($post),'No tienes permisos para moderar este contenido.',403);
+        $statuses=['approve'=>'publish','reject'=>'ascla_rejected','hide'=>'ascla_hidden','suspend'=>'ascla_hidden'];
         Access::require(isset($statuses[$decision])&&$post->post_type!=='ascla_contact','Decisión no válida.',400);
         Access::require(!in_array($post->post_type,['ascla_gallery','ascla_resource','ascla_event'],true)||Access::canPublish(),'Solo un Ejecutivo o un administrador pueden gestionar estas publicaciones.',403);
         $reason=Access::text($reason,1000); Access::require(trim($reason)!=='','Indique un motivo de moderación.',400);

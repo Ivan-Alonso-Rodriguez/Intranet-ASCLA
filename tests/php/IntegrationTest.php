@@ -114,7 +114,7 @@ final class IntegrationTest extends TestCase
 
         foreach($before as $slug=>$id)self::assertSame($slug,get_post_meta($id,'_ascla_page',true));
 
-        update_option('ascla_schema',0);Installer::activate(false);self::assertSame(9,(int)get_option('ascla_schema'));
+        update_option('ascla_schema',0);Installer::activate(false);self::assertSame(Installer::SCHEMA_VERSION,(int)get_option('ascla_schema'));
 
     }
 
@@ -183,7 +183,7 @@ final class IntegrationTest extends TestCase
 
         $p=$this->make('hub');$this->user(1);$r=Content::comment($p['id'],'Un comentario constructivo.');self::assertSame('publish',$r['status']);self::assertCount(1,Content::comments($p['id']));
 
-        Content::react($p['id'],'like',true);Content::react($p['id'],'like',true);Content::react($p['id'],'follow',true);Content::react($p['id'],'report',true);self::assertSame(1,Content::serialize(Content::get($p['id']))['reactions']);Content::react($p['id'],'like',false);self::assertSame(0,Content::serialize(Content::get($p['id']))['reactions']);
+        Content::react($p['id'],'like',true);Content::react($p['id'],'like',true);Content::react($p['id'],'follow',true);Content::report($p['id'],'spam');self::assertSame(1,Content::serialize(Content::get($p['id']))['reactions']);Content::react($p['id'],'like',false);self::assertSame(0,Content::serialize(Content::get($p['id']))['reactions']);
 
         $this->user(0);Settings::save(['moderate_comments'=>true]);$this->user(2);self::assertSame('pending',Content::comment($p['id'],'Revisión previa.')['status']);
 
@@ -293,7 +293,12 @@ Compañía Privada"]]);
         $beforeStatus=get_post_status($p['id']);$r=Knowledge::multimedia($p['id']);
         self::assertSame($p['id'],$r['resource_id']);self::assertSame(0,$r['hub_id']);self::assertSame([],$r['capsule_ids']);self::assertSame($beforeStatus,get_post_status($p['id']));
         $meta=get_post_meta($p['id'],'_ascla',true);self::assertTrue((bool)$meta['ai_enriched']);self::assertNotEmpty($meta['technical_note']);self::assertNotEmpty($meta['summary']);
-        $text=wp_json_encode($meta,JSON_UNESCAPED_UNICODE);self::assertStringNotContainsString('Persona Prueba',$text);self::assertStringNotContainsString('Compañía Privada',$text);
+        // Originals are retained for authorized editorial review; reader output must be anonymous.
+        self::assertStringContainsString('Persona Prueba',$meta['transcript']);
+        self::assertSame("Persona Prueba\nCompañía Privada",$meta['identities']);
+        $this->user(1);$view=Content::serialize(Content::get($p['id']));
+        self::assertArrayNotHasKey('transcript',$view['meta']);self::assertArrayNotHasKey('identities',$view['meta']);
+        $text=wp_json_encode($view,JSON_UNESCAPED_UNICODE);self::assertStringNotContainsString('Persona Prueba',$text);self::assertStringNotContainsString('Compañía Privada',$text);
     }
 
     public function testAssistantUsesOnlyPublishedSourcesAndAbstains(): void

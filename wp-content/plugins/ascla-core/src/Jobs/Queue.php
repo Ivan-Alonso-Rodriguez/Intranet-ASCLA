@@ -13,7 +13,7 @@ final class Queue
     }
     public static function get(int $id): array
     {
-        $row=Store::one('jobs',$id); Access::require($row && ((int)$row['user_id']===get_current_user_id()||current_user_can('ascla_moderate')),'Trabajo no encontrado.',404);
+        $row=Store::one('jobs',$id); Access::require($row && ((int)$row['user_id']===get_current_user_id()||current_user_can('ascla_manage')),'Trabajo no encontrado.',404);
         $payload=json_decode($row['payload'],true)?:[];
         unset($row['payload']); $row['result']=json_decode($row['result']??'null',true);
         if ($row['kind']==='microevents' && is_array($row['result'])) { $row['result']=MicroEvents::sanitizeResult($row['result']); }

@@ -184,7 +184,7 @@ final class CompletionTest extends TestCase
             Knowledge::multimedia($p['id']);
             self::fail('La generación debe detenerse si no existe una transcripción verificable.');
         } catch (ASCLA\Core\Rest\ApiException $e) {
-            self::assertSame(409,$e->get_status());
+            self::assertSame(409,$e->getCode());
             self::assertStringContainsString('transcripción verificable',$e->getMessage());
         }
         $saved=(array)get_post_meta($p['id'],'_ascla',true);

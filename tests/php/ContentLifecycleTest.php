@@ -36,10 +36,10 @@ final class ContentLifecycleTest extends TestCase
             self::assertNotContains($p['id'],array_column(Content::listing($type)['items'],'id'));
         }
     }
-    public function testAuthorCanDeleteOwnPendingContentButAnotherMemberOrModeratorCannot():void
+    public function testAuthorCanDeleteOwnPendingContentAndModeratorCanReviewButOtherMembersCannot():void
     {
         wp_set_current_user($this->users[2]);$p=$this->post();self::assertSame('pending',$p['status']);self::assertTrue($p['can_delete']);
-        wp_set_current_user($this->users[1]);self::assertFalse(Content::serialize(Content::get($p['id']))['can_delete']);self::assertSame(403,$this->api('DELETE','items/'.$p['id'])->get_status());
+        wp_set_current_user($this->users[1]);self::assertTrue(Content::serialize(Content::get($p['id']))['can_delete']);
         wp_set_current_user($this->users[3]);self::assertSame(404,$this->api('DELETE','items/'.$p['id'])->get_status());
         wp_set_current_user($this->users[2]);self::assertSame(200,$this->api('DELETE','items/'.$p['id'])->get_status());
         wp_set_current_user(0);self::assertSame(401,$this->api('DELETE','items/'.$p['id'])->get_status());
@@ -50,11 +50,11 @@ final class ContentLifecycleTest extends TestCase
         wp_set_current_user($this->users[0]);Content::remove($forum['id']);
         wp_set_current_user($this->users[2]);$p=Content::get($topic['id']);self::assertSame(0,(int)$p->post_parent);self::assertSame('publish',$p->post_status);
     }
-    public function testCommentsRequireAuthorOrAdministratorAndPendingOwnCommentsAreVisible():void
+    public function testCommentsRequireAuthorOrModeratorAndPendingOwnCommentsAreVisible():void
     {
         $hub=$this->post();wp_set_current_user($this->users[2]);$c=Content::comment($hub['id'],'Comentario propio');
         self::assertContains($c['id'],array_column(Content::comments($hub['id']),'id'));
-        wp_set_current_user($this->users[1]);self::assertSame(403,$this->api('DELETE','comments/'.$c['id'])->get_status());
+        wp_set_current_user($this->users[1]);self::assertTrue(Content::canDeleteComment(get_comment($c['id'])));
         wp_set_current_user($this->users[3]);self::assertSame(403,$this->api('DELETE','comments/'.$c['id'])->get_status());
         wp_set_current_user($this->users[2]);self::assertSame(200,$this->api('DELETE','comments/'.$c['id'])->get_status());self::assertNotContains($c['id'],array_column(Content::comments($hub['id']),'id'));
     }
@@ -64,7 +64,7 @@ final class ContentLifecycleTest extends TestCase
         Profiles::save(['photo_id'=>$id]);$post=$this->post('hub',['meta'=>['media_ids'=>[$id]]]);self::assertTrue($post['media'][0]['can_delete']);
         wp_set_current_user($this->users[3]);self::assertNotContains($id,array_column(Media::listing()['items'],'id'));self::assertSame(403,$this->api('DELETE','media/'.$id)->get_status());
         wp_set_current_user($this->users[1]);self::assertSame(403,$this->api('DELETE','media/'.$id)->get_status());
-        wp_set_current_user($this->users[0]);self::assertContains($id,array_column(Media::listing(['q'=>'lifecycle-private'])['items'],'id'));self::assertSame(200,$this->api('DELETE','media/'.$id)->get_status());
+        wp_set_current_user($this->users[0]);self::assertContains($id,array_column(Media::listing(['q'=>'lifecycle-private','scope'=>'all'])['items'],'id'));self::assertSame(200,$this->api('DELETE','media/'.$id)->get_status());
         self::assertNull(Store::one('media',$id));self::assertSame([],get_post_meta($post['id'],'_ascla',true)['media_ids']);self::assertSame(0,get_user_meta($this->users[2],'_ascla_profile',true)['photo_id']);self::assertSame(404,$this->api('DELETE','media/'.$id)->get_status());
         wp_set_current_user($this->users[2]);$id=Store::insert('media',['user_id'=>$this->users[2],'post_id'=>0,'name'=>'owned.pdf','mime'=>'application/pdf','bytes'=>'test','created_at'=>current_time('mysql',true)]);$this->media[]=$id;self::assertSame(200,$this->api('DELETE','media/'.$id)->get_status());
     }
@@ -91,7 +91,7 @@ final class ContentLifecycleTest extends TestCase
         $payload=['title'=>'Evento directo','body'=>'Descripción','meta'=>['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000)]];
         $p=$this->post('event',$payload+['status'=>'pending']);self::assertSame('publish',$p['status']);
         $draft=$this->post('event',$payload+['status'=>'draft']);self::assertSame('draft',$draft['status']);
-        foreach(array_slice($this->users,1) as $id){wp_set_current_user($id);self::assertSame(403,$this->api('POST','content/event',$payload)->get_status());self::assertSame(403,$this->api('POST','content/event/'.$p['id'],$payload)->get_status());self::assertSame(403,$this->api('POST','items/'.$draft['id'].'/moderate',['decision'=>'approve','reason'=>'Publicar'])->get_status());}
+        foreach(array_slice($this->users,1) as $id){wp_set_current_user($id);self::assertSame(403,$this->api('POST','content/event',$payload)->get_status());self::assertSame(403,$this->api('POST','content/event/'.$p['id'],$payload)->get_status());self::assertSame($id===$this->users[1]?404:403,$this->api('POST','items/'.$draft['id'].'/moderate',['decision'=>'approve','reason'=>'Publicar'])->get_status());}
         wp_set_current_user($this->users[2]);Content::comment($p['id'],'Participaré');self::assertSame('publish',get_post_status($p['id']));
     }
     public function testEventCoverAcceptsOneImageAndRejectsMultipleFilesOrPdf():void

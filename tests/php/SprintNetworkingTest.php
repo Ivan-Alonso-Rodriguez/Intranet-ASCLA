@@ -56,7 +56,13 @@ final class SprintNetworkingTest extends TestCase
         };add_filter('pre_http_request',$this->http,10,3);
         $answer=Knowledge::answer($token);self::assertCount(1,$answer['sources']);self::assertStringContainsString('La evaluación incluyó',$answer['answer']);
         $result=Knowledge::multimedia($id);self::assertSame($id,$result['resource_id']);self::assertSame(0,$result['hub_id']);self::assertSame([],$result['capsule_ids']);
-        $meta=get_post_meta($id,'_ascla',true);$text=wp_json_encode($meta,JSON_UNESCAPED_UNICODE).' '.get_post($id)->post_content;
+        $meta=get_post_meta($id,'_ascla',true);
+        self::assertSame($source,$meta['transcript']);self::assertSame($source,get_post($id)->post_content);
+        wp_set_current_user($this->users[1]);
+        $view=ASCLA\Core\Services\Content::serialize(ASCLA\Core\Services\Content::get($id));
+        self::assertArrayNotHasKey('transcript',$view['meta']);self::assertArrayNotHasKey('identities',$view['meta']);
+        $text=wp_json_encode($view,JSON_UNESCAPED_UNICODE);
+        wp_set_current_user($this->users[0]);
         foreach(['María','Aurora','Juan Pérez','Boreal'] as $unsupported)self::assertStringNotContainsString($unsupported,$text);
         self::assertStringContainsString('35 %',$text);self::assertSame('publish',get_post_status($id));self::assertTrue((bool)$meta['ai_enriched']);
         self::assertNotEmpty($meta['infographic']['statistics']);self::assertNotEmpty($meta['infographic']['timeline']);

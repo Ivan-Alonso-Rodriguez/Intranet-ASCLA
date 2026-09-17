@@ -40,10 +40,10 @@ final class Store
         global $wpdb;
         return $where.$wpdb->prepare(" AND NOT EXISTS (SELECT 1 FROM {$wpdb->posts} AS ascla_parent WHERE ascla_parent.ID={$wpdb->comments}.comment_post_ID AND ascla_parent.post_type LIKE %s)",$wpdb->esc_like('ascla_').'%');
     }
-    public static function lock(string $key,callable $callback): mixed
+    public static function lock(string $key,callable $callback,int $timeout=3): mixed
     {
         global $wpdb; $name='ascla_'.substr(hash('sha256',$wpdb->prefix.$key),0,56);
-        if ((int)$wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 3)',$name))!==1) { throw new \RuntimeException('Operación en curso. Intente nuevamente.'); }
+        if ((int)$wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, %d)',$name,max(0,min(3,$timeout))))!==1) { throw new \RuntimeException('Operación en curso. Intente nuevamente.'); }
         try { return $callback(); } finally { $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)',$name)); }
     }
 }

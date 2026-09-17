@@ -102,7 +102,9 @@ final class NotificationsTest extends TestCase
     }
     public function testToastFeedShowsOnlyEligibleUnreadAndKeepsNotificationInCenter(): void
     {
-        $event=$this->post('event');
+        $publisher=get_userdata($this->users[1]);$publisher->set_role('ascla_executive');
+        wp_set_current_user($this->users[1]);$event=$this->post('event');
+        self::assertSame('publish',get_post_status($event));wp_set_current_user($this->users[0]);
         update_post_meta($event,'_ascla',[
             'start'=>gmdate('c',time()+DAY_IN_SECONDS),
             'end'=>gmdate('c',time()+DAY_IN_SECONDS+HOUR_IN_SECONDS),

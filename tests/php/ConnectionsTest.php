@@ -80,7 +80,7 @@ final class ConnectionsTest extends TestCase
         $after=Connections::remove($b);
         self::assertSame('none',$after['state']); self::assertFalse($after['can_message']);
         self::assertSame(1,Store::count('messages','conversation_id=%d',[$id]));
-        self::assertSame(403,$this->api('GET','conversations/'.$id)->get_status());
+        self::assertSame(404,$this->api('GET','conversations/'.$id)->get_status());
         self::assertSame([],Messaging::conversations());
     }
 
@@ -95,9 +95,9 @@ final class ConnectionsTest extends TestCase
             foreach([$a,$b] as $user) {
                 wp_set_current_user($user);
                 self::assertSame(403,$this->api('POST','conversations',['target'=>$user===$a?$b:$a])->get_status());
-                self::assertSame(403,$this->api('GET','conversations/'.$id)->get_status());
-                self::assertSame(403,$this->api('GET','conversations/'.$id.'/messages',['after'=>0])->get_status());
-                self::assertSame(403,$this->api('POST','conversations/'.$id.'/messages',['body'=>'Blocked'])->get_status());
+                self::assertSame(404,$this->api('GET','conversations/'.$id)->get_status());
+                self::assertSame(404,$this->api('GET','conversations/'.$id.'/messages',['after'=>0])->get_status());
+                self::assertSame(404,$this->api('POST','conversations/'.$id.'/messages',['body'=>'Blocked'])->get_status());
                 self::assertSame([],Messaging::conversations());
             }
             wp_set_current_user($a);
@@ -130,8 +130,8 @@ final class ConnectionsTest extends TestCase
         wp_set_current_user($a);self::assertSame(403,$this->api('POST','conversations/'.$id.'/messages',['body'=>'Blocked'])->get_status());
         wp_set_current_user($b);Messaging::relation($a,'block',false); Messaging::send($id,'After unblock');
         $connection=Connections::between($a,$b)['connection_id']; Store::delete('relations',['id'=>$connection]);
-        self::assertSame(403,$this->api('GET','conversations/'.$id)->get_status());self::assertSame([],Messaging::conversations());
-        self::assertSame(403,$this->api('POST','conversations/'.$id.'/messages',['body'=>'Revoked'])->get_status());
+        self::assertSame(404,$this->api('GET','conversations/'.$id)->get_status());self::assertSame([],Messaging::conversations());
+        self::assertSame(404,$this->api('POST','conversations/'.$id.'/messages',['body'=>'Revoked'])->get_status());
         self::assertSame(2,Store::count('messages','conversation_id=%d',[$id]));
     }
     public function testLegacyReciprocalRequestsRequireExplicitConsentAndAreNormalizedOnDecision(): void

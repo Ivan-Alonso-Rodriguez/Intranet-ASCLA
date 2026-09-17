@@ -62,4 +62,24 @@ final class MediaTemporaryTest extends TestCase
         self::assertFalse(Media::discard($id)['discarded']);
         self::assertNotNull(Store::one('media',$id));
     }
+    public function testAnotherMemberCannotDiscardOrListTheOwnersTemporaryFile(): void
+    {
+        $id=$this->row(-1);$other=wp_insert_user(['user_login'=>'media_other_'.bin2hex(random_bytes(5)),'user_pass'=>wp_generate_password(32),'role'=>'ascla_member']);
+        try{wp_set_current_user($other);self::assertFalse(Media::discard($id)['discarded']);self::assertNotContains($id,array_column(Media::listing()['items'],'id'));self::assertNotNull(Store::one('media',$id));}
+        finally{wp_delete_user($other);wp_set_current_user($this->user);}
+    }
+    public function testAbandonedCleanupPreservesFreshCommittedAndProfileReferencedFiles(): void
+    {
+        $expired=$this->row(-1);$fresh=$this->row(-1);$committed=$this->row(0);$profile=$this->row(-1);
+        foreach([$expired,$committed,$profile] as $id){Store::update('media',['created_at'=>gmdate('Y-m-d H:i:s',time()-13*3600)],['id'=>$id]);}
+        update_user_meta($this->user,'_ascla_profile',['photo_id'=>$profile]);Media::cleanupAbandoned();
+        self::assertNull(Store::one('media',$expired));self::assertSame(-1,(int)Store::one('media',$fresh)['post_id']);
+        self::assertNotNull(Store::one('media',$committed));self::assertSame(0,(int)Store::one('media',$profile)['post_id']);
+    }
+    public function testDiscardingACropRemovesItsUnusedTemporaryMaster(): void
+    {
+        $master=$this->row(-1);$crop=$this->row(-1);Store::update('media',['original_id'=>$master],['id'=>$crop]);
+        self::assertTrue(Media::discard($crop)['discarded']);self::assertNull(Store::one('media',$crop));self::assertNull(Store::one('media',$master));
+    }
+
 }

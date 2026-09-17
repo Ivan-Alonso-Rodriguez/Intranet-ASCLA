@@ -17,6 +17,7 @@ final class GoogleOAuth
         try {
             Access::require(Access::member()); $state=sanitize_text_field(wp_unslash($_GET['state']??'')); $key='ascla_oauth_'.hash('sha256',$state); $stored=get_transient($key); delete_transient($key);
             Access::require($stored && (int)$stored['user']===get_current_user_id() && hash_equals($stored['session'],hash('sha256',wp_get_session_token())),'Estado OAuth inválido.');
+            if($stored['service']==='youtube'){Access::require(Access::canPublish());}
             $code=sanitize_text_field(wp_unslash($_GET['code']??'')); Access::require($code!=='','Autorización cancelada.',400);
             $tokens=self::tokenRequest(['code'=>$code,'grant_type'=>'authorization_code','redirect_uri'=>admin_url('admin-post.php?action=ascla_google_callback')]);
             self::saveTokens(get_current_user_id(),$stored['service'],$tokens); Audit::record('oauth_connected',0,$stored['service']);

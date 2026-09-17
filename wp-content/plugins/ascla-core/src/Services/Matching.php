@@ -60,7 +60,7 @@ final class Matching
             'explanation'=>implode(' ',$parts),
         ];
         if($explain){
-            $prose=NetworkingAI::generate('matching',NetworkingAI::context($a,$b,$affinity));
+            $prose=NetworkingAI::generate('matching',NetworkingAI::context($a,$b,$affinity),[$a,$b]);
             $affinity['explanation']=Access::excerpt($prose['explanation']??$affinity['explanation'],2000);
             $affinity['conversation_proposal']=Access::excerpt($prose['conversation_proposal']??'',2000);
             $affinity['mode']=$prose['mode'];$affinity['fallback']=$prose['fallback'];
@@ -105,7 +105,7 @@ final class Matching
     {
         $me=get_current_user_id();$affinity=self::between($me,$id,false);
         $context=NetworkingAI::context($me,$id,$affinity);
-        $result=NetworkingAI::generate('intro',$context);
+        $result=NetworkingAI::generate('intro',$context,[$me,$id]);
         $text=trim(Access::excerpt($result['text']??'',5000));
         // A suggested private message must sound like the member, never like the AI service itself.
         if($text==='' || preg_match('/\b(?:soy|somos)\s+(?:(?:el|la|un|una)\s+)?(?:asistente|chatbot|ASCLA)\b|\b(?:como|en calidad de)\s+(?:asistente|chatbot)\b/iu',$text)){

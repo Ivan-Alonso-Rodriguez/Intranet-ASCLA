@@ -678,7 +678,7 @@
   "personas en espera": "people waiting",
   "aforo completo": "full capacity",
   "disponibles": "available",
-  "Participantes y lista de espera (moderación)": "Participants and waitlist (moderation)",
+  "Participantes y lista de espera (gestión de eventos)": "Participants and waitlist (event management)",
   "Portada del evento": "Event cover",
   "Imagen del evento": "Event image",
   "Elegir imagen": "Choose image",
@@ -717,5 +717,11 @@
   "Cerrar notificación": "Close notification",
   "Un evento cambió información importante": "An event has important updates",
   "Ver cambios del evento": "View event updates",
-  "Revisar cambios": "Review updates"
+  "Revisar cambios": "Review updates",
+  "Cargando perfil…": "Loading profile…",
+  "Cargando afinidad…": "Loading affinity…",
+  "Preparando explicación de IA…": "Preparing AI explanation…",
+  "La explicación de IA no está disponible ahora. Puedes seguir usando el perfil.": "The AI explanation is unavailable right now. You can keep using the profile.",
+  "Crear tema": "Create topic",
+  "No puede editar este contenido.": "You cannot edit this content."
 }

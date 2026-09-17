@@ -108,7 +108,7 @@ final class Events
             $item['attendees']=$attendees['items'];
             $item['attendees_hidden']=$attendees['hidden'];
         }
-        if (current_user_can('ascla_moderate')) {
+        if (Access::canPublish()) {
             $item['participants']=array_map(static function ($r) { $u=get_userdata($r['user_id']); return ['id'=>(int)$r['user_id'],'name'=>$u?Profiles::publicName((int)$u->ID):'Miembro','status'=>$r['status']]; },Store::rows('registrations','event_id=%d',[$id],'ORDER BY id ASC'));
         }
         return $item;
@@ -116,7 +116,7 @@ final class Events
 
     public static function invite(int $id,array $users): array
     {
-        Access::require(current_user_can('ascla_moderate'));
+        Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador puede invitar asociados a eventos.',403);
         Access::limit('event_invite',10,300);
         $post=Content::get($id); $meta=(array)get_post_meta($id,'_ascla',true);
         Access::require($post->post_type==='ascla_event' && $post->post_status==='publish' && empty($meta['micro']) && empty($meta['cancelled']),'Seleccione un evento publicado y activo de la comunidad.',400);

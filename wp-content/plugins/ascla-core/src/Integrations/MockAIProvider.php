@@ -34,9 +34,12 @@ final class MockAIProvider implements AIProviderInterface
             if (preg_match('/^(hola|hello|hi|buenas)|\b(que puedes hacer|como me ayudas|help|what can you do)\b/u',$question)) {
                 return ['answer'=>$english?'Hello! I can help you check upcoming ASCLA events, recent posts, community resources, notifications, and member recommendations. Ask me naturally.':'¡Hola! Puedo ayudarte a consultar eventos próximos, publicaciones recientes, recursos de la comunidad, notificaciones y recomendaciones de asociados. Pregúntame con naturalidad.','source_ids'=>[],'mode'=>$this->mode()];
             }
-            $quotes=[];foreach($sources as $source){ $quotes=array_merge($quotes,array_slice(\ASCLA\Core\Domain\Grounding::sentences($source['body']),0,3)); }
+            $quotes=[];$used=[];foreach($sources as $source){
+                $sentences=array_slice(\ASCLA\Core\Domain\Grounding::sentences($source['body']),0,3);
+                if($sentences){$quotes=array_merge($quotes,$sentences);$used[]=(int)$source['id'];}
+            }
             if(!$quotes) return ['answer'=>$english?'I do not have enough information in ASCLA to verify that yet. Try asking about events, posts, or community resources.':'No existe suficiente información en ASCLA para verificar eso todavía. Prueba con eventos, publicaciones o recursos de la comunidad.','source_ids'=>[],'mode'=>$this->mode()];
-            return ['answer'=>implode("\n\n",$quotes),'source_ids'=>array_column($sources,'id'),'mode'=>$this->mode()];
+            return ['answer'=>implode("\n\n",$quotes),'source_ids'=>array_values(array_unique($used)),'mode'=>$this->mode()];
         }
         if(in_array($task,['matching','intro'],true)){
             $shared=implode(' y ',array_slice($context['shared']??[],0,3));$signals=(array)($context['signals']??[]);

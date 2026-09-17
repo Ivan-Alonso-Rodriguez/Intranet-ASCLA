@@ -2,9 +2,9 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.9.50`  
-> **Esquema de base de datos:** `10`  
-> La versión `1.9.50` evita conservar archivos de cargas canceladas y añade notificaciones tipo toast mediante REST + polling cada 7 segundos, reutilizando el centro de notificaciones sin afectar el sitio público.
+> **Versión actual:** `1.10`
+> **Esquema de base de datos:** `11`
+> La versión `1.10` incorpora roles acumulativos, validaciones de permisos en servidor e interfaz, carga progresiva de perfiles y caché privada de explicaciones de IA.
 
 ## Resumen de versiones
 
@@ -64,7 +64,8 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.40 | RF-025: imagen de portada del evento | Completada |
 | 1.9.41 | RF-031: participantes visibles después del RSVP | Completada |
 | 1.9.42 | RF-040 y RF-041: recomendaciones enriquecidas y explicables | Completada |
-| 1.9.50 | Cargas temporales cancelables y notificaciones toast | **Actual** |
+| 1.10 | Roles acumulativos, perfiles sin espera de IA y caché persistente | **Actual · pruebas locales aprobadas** |
+| 1.9.50 | Cargas temporales cancelables y notificaciones toast | Anterior |
 | 1.9.49 | Perfil de cumpleaños refinado y Turnstile adaptativo | Completada |
 | 1.9.48 | Cumpleaños privados y Turnstile oficial visible | Anterior |
 | 1.9.47 | Creación de usuarios dentro de Administración ASCLA | Completada |
@@ -72,6 +73,35 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.45 | `/login/` limpio con retorno interno seguro sin `redirect_to` visible | Completada |
 | 1.9.44 | Login de comunidad con diseño anterior + acceso nativo identificado como Administración ASCLA | Completada |
 | 1.9.43 | Acceso ASCLA separado en `/login/` y protección de `/intranet/` | Anterior |
+
+---
+
+## 1.10 — roles acumulativos, carga progresiva de perfiles y caché de IA
+
+- Se implementa **Administrador > Ejecutivo ASCLA > Moderador > Asociado** con capacidades acumulativas de WordPress. Ejecutivo hereda `ascla_moderate` y conserva `ascla_publish`; Administrador incluye todos los niveles y `ascla_manage`.
+- `Domain/Roles.php` centraliza la definición y sincronización de capacidades; `Installer` ejecuta una migración idempotente de roles independiente de la versión general. También actualiza instalaciones que ya indican 1.10, sin recrear usuarios, cambiar contraseñas ni sustituir permisos personalizados ajenos a ASCLA.
+- Asociados y roles superiores pueden crear foros, temas y aportaciones. Moderadores, Ejecutivos y Administradores pueden editar, aprobar, ocultar y eliminar aportaciones de la comunidad y moderar comentarios; la gestión editorial permanece en Ejecutivo/Administrador.
+- El servidor expone permisos por objeto para los botones; las rutas y servicios comprueban capacidades, sesión, propiedad y visibilidad. Las pestañas y menús nativos usan el mismo reparto; Usuarios, Archivos globales, Configuración, Auditoría y Microeventos quedan reservados al Administrador.
+- Se limita el panel de gestión al contenido accesible y a los trabajos propios, salvo administración global. Moderar no permite descargar archivos personales ajenos ni leer consultas privadas al asistente. OAuth vuelve a comprobar el permiso editorial al recibir la autorización de YouTube.
+- La ficha muestra nombre, fotografía, cargo, empresa, ubicación, biografía, experiencia, intereses, enlaces y acciones en cuanto llegan los datos del perfil, sin esperar a Gemini u OpenAI.
+- Perfil y afinidad determinística se solicitan en paralelo. La explicación de IA llega después y actualiza únicamente el bloque correspondiente, con estados de carga traducidos al inglés.
+- Cerrar el modal, abrir otro perfil o navegar descarta los efectos de respuestas tardías. Los errores de IA conservan los datos principales y las acciones de la ficha.
+- `GET /matching/{id}?explain=0` devuelve afinidad sin llamar a IA. La ruta sin ese parámetro mantiene su comportamiento anterior y las comprobaciones de acceso, privacidad, participación en networking y bloqueos.
+- Las explicaciones y los mensajes sugeridos válidos se conservan por visitante, destinatario y tarea en el `user_meta` privado `_ascla_network_ai`, con un máximo de **20 resultados por usuario**. Al alcanzar el límite se retira el resultado generado más antiguo; los resultados conservados no caducan cada hora.
+- Una huella local invalida la entrada cuando cambian nombres, datos profesionales, biografía, experiencia, intereses, preferencias relevantes de networking o privacidad de cualquiera de los dos perfiles. El contexto, proveedor, modelo y disponibilidad de configuración también forman parte de la clave. Fotografías, cumpleaños y preferencias de correo no provocan regeneración; los campos privados no se añaden al contexto enviado al proveedor.
+- Las respuestas se validan antes de guardarse. Un error de transporte, timeout, cuota agotada, JSON inválido, texto vacío o estructura incorrecta usa una respuesta básica temporal durante **60 segundos**, sin guardarla como resultado persistente válido. Las agendas mantienen su caché temporal de una hora y ahora se validan antes de almacenarse.
+- Los bloqueos por clave evitan llamadas simultáneas duplicadas. Si otra solicitud ya está generando el texto, se entrega una respuesta básica sin sobrescribir su resultado. La escritura de metadatos se serializa brevemente por usuario para conservar resultados de parejas distintas.
+- Se añade `Repositories/NetworkingCache.php` y se actualizan la vista de perfil, las rutas REST, `Matching` y `NetworkingAI`. `Store::lock` permite una espera opcional de cero segundos; conserva los tres segundos por defecto para sus consumidores existentes.
+- La versión del plugin, su constante de assets y el `Stable tag` quedan unificados en **1.10**. El verificador del paquete utiliza la versión declarada en el código y comprueba su coherencia con el readme de WordPress.
+- El esquema pasa a **11** para permitir el marcador temporal `post_id=-1` mediante una columna con signo. La migración es idempotente, se ejecuta aunque la versión del plugin ya sea 1.10 y conserva las filas existentes. Las referencias antiguas con valor cero se mantienen para evitar borrar archivos personales legítimos. La actualización de capacidades conserva su opción de versión independiente.
+- Se corrigen los enlaces temporizados de cápsulas: se reconstruyen después de anonimizar, únicamente a partir del ID de YouTube validado y los tiempos calculados localmente.
+- `Domain/EditorialPrivacy.php` separa la vista de lectores del material fuente. Conserva los originales para el propietario editorial y administración, y anonimiza título, cuerpo y campos descriptivos para los demás lectores sin exponer transcripciones ni identidades.
+- Se unifica el mensaje del asistente sin evidencia para que no cambie al consultar el historial. El proveedor demo excluye de sus referencias fuentes demasiado cortas que no aportaron contenido.
+- Se corrigen expectativas antiguas de las pruebas: `can_edit`, usuario inexistente como `false`, códigos de excepción, ámbito global de archivos, HTTP 404 para conversaciones inaccesibles, esquema vigente y método específico de reportes. La prueba del aviso de evento usa ahora una publicación autorizada, en lugar de un evento que la protección editorial dejaba pendiente.
+
+**Validación del 17/09/2026:** suite PHP completa aprobada: **193 pruebas, 4.264 comprobaciones, cero fallos, errores y advertencias**. Incluye roles acumulativos, perfiles progresivos y siete pruebas adicionales de migración, privacidad editorial, enlaces de vídeo y ciclo de archivos temporales. Pasan también **27 recorridos de navegador** (3 de archivos, 16 de permisos y 8 de perfiles), sin errores JavaScript no capturados. Sintaxis validada en 108 PHP y 21 JS/CJS, Python/JSON y diferencias sin errores de formato.
+
+La línea base original tenía 19 pruebas problemáticas. La jerarquía corrigió las tres del Ejecutivo y esta revisión resuelve las 16 restantes mediante correcciones funcionales y actualización de contratos de prueba obsoletos. Se conservan las validaciones de denegación de acceso, confidencialidad y preservación de datos. Los cambios continúan en `development`; no se han publicado en GitHub ni desplegado. La aceptación con integraciones reales y la promoción `development → qa → uat → main` siguen pendientes.
 
 ---
 

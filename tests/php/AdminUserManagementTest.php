@@ -150,7 +150,7 @@ final class AdminUserManagementTest extends TestCase
 
         $response=$this->api('DELETE','admin/users/'.$this->member);
         self::assertSame(200,$response->get_status());
-        self::assertNull(get_userdata($this->member));
+        self::assertFalse(get_userdata($this->member));
         self::assertSame($this->admin,(int)get_post($post)->post_author);
         self::assertSame(0,Store::count('relations','user_id=%d',[$this->member]));
     }
