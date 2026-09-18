@@ -6,7 +6,7 @@ final class Notifications
     private const EMAIL_META='_ascla_email_notifications';
     private const MESSAGE_EMAIL_META='_ascla_message_email_last_sent';
     private const MESSAGE_EMAIL_WINDOW=900;
-    private const EMAIL_DEFAULTS=['connections'=>true,'messages'=>true,'events'=>true];
+    private const EMAIL_DEFAULTS=['connections'=>true,'messages'=>true,'events'=>true,'support'=>true];
     private const EMAIL_KINDS=[
         'connection'=>'connections',
         'connection_accepted'=>'connections',
@@ -19,6 +19,7 @@ final class Notifications
         'event_cancelled'=>'events',
         'event_updated'=>'events',
         'microevent'=>'events',
+        'support_received'=>'support','support_request'=>'support','support_update'=>'support',
     ];
     private const TOAST_KINDS=[
         'message',
@@ -77,6 +78,7 @@ final class Notifications
             'event_cancelled'=>'Un evento en el que participabas o estabas en espera fue cancelado. Revisa los detalles en ASCLA.',
             'event_updated'=>'Un evento relacionado contigo cambió información importante. Revisa los detalles actualizados en ASCLA.',
             'microevent'=>'Tienes una nueva invitación a un círculo ASCLA.',
+            'support_received','support_request','support_update'=>'Hay una actualización de una solicitud en ASCLA. Ingresa para consultar sus detalles.',
             default=>Access::excerpt($fallback,255),
         };
     }

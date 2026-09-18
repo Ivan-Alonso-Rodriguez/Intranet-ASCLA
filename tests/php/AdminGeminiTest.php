@@ -6,7 +6,7 @@ use ASCLA\Core\Repositories\Store;
 
 final class AdminGeminiTest extends TestCase
 {
-    private array $users=[],$posts=[],$settings=[];private mixed $secret;private $http;
+    private array $users=[],$posts=[],$terms=[],$settings=[];private mixed $secret;private $http;
     protected function setUp(): void
     {
         $this->settings=Settings::get();$this->secret=get_option('ascla_secret_ai_key',false);
@@ -19,7 +19,7 @@ final class AdminGeminiTest extends TestCase
     {
         if($this->http)remove_filter('pre_http_request',$this->http,10);
         wp_set_current_user($this->users[0]);foreach($this->posts as $id)wp_delete_post($id,true);
-        foreach($this->users as $id){foreach(['notifications','jobs','relations'] as $t)Store::delete($t,['user_id'=>$id]);wp_delete_user($id);}
+        foreach($this->users as $id){foreach(['notifications','jobs','relations'] as $t)Store::delete($t,['user_id'=>$id]);wp_delete_user($id);}foreach($this->terms as $id)wp_delete_term($id,'ascla_interest');
         if($this->secret===false)delete_option('ascla_secret_ai_key');else update_option('ascla_secret_ai_key',$this->secret,false);
         update_option('ascla_settings',$this->settings,false);wp_set_current_user(0);
     }
@@ -88,6 +88,17 @@ final class AdminGeminiTest extends TestCase
         $r=$this->api('POST','ai/test');self::assertSame(200,$r->get_status());self::assertTrue($r->get_data()['ok']);self::assertStringNotContainsString('fixture-Gemini-key',wp_json_encode($r->get_data()));
         wp_set_current_user($this->users[1]);self::assertSame(403,$this->api('POST','ai/test')->get_status());
         wp_set_current_user($this->users[0]);self::assertStringNotContainsString('fixture-Gemini-key',get_option('ascla_secret_ai_key'));Settings::save(['clear_ai_key'=>true]);self::assertFalse(Settings::status()['has_ai_key']);
+    }
+    public function testFormsGeminiDiagnosticUsesSyntheticTextAndValidCatalogIds(): void
+    {
+        $created=wp_insert_term('Gemini Forms '.bin2hex(random_bytes(5)),'ascla_interest');self::assertFalse(is_wp_error($created));$term=(int)$created['term_id'];$this->terms[]=$term;
+        $this->mock(static function($pre,$args,$url)use($term){
+            self::assertStringContainsString('generativelanguage.googleapis.com',$url);$payload=json_decode($args['body'],true);$request=json_decode($payload['contents'][0]['parts'][0]['text'],true);
+            self::assertSame('form_interests',$request['task']);self::assertSame(['text','catalog'],array_keys($request['context']));self::assertStringStartsWith('Me interesan ',$request['context']['text']);self::assertContains($term,array_column($request['context']['catalog'],'id'));
+            self::assertStringNotContainsString('@example.invalid',$args['body']);self::assertStringNotContainsString('fixture-Gemini-key-never-send',$args['body']);return self::response(['intereses'=>[$term],'confianza'=>'alta']);
+        });
+        $r=$this->api('POST','admin/interest-imports/ai-test');self::assertSame(200,$r->get_status());$data=$r->get_data();self::assertTrue($data['ok']);self::assertSame('alta',$data['confidence']);self::assertSame($term,$data['topics'][0]['id']);self::assertSame(1,$data['selected_count']);self::assertStringNotContainsString('fixture-Gemini-key',wp_json_encode($data));
+        wp_set_current_user($this->users[1]);self::assertSame(403,$this->api('POST','admin/interest-imports/ai-test')->get_status());
     }
     public function testModelValidationBlocksPathInjectionAndOldOpenAIModel(): void
     {

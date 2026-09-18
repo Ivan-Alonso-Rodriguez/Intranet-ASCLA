@@ -33,6 +33,7 @@ final class Content
         if(get_post_type($postId)==='ascla_contact') update_post_meta($postId,'_ascla_request_status',$value['request_status']??'open');
         foreach (['resource_type','start','end','source'] as $field) { update_post_meta($postId,'_ascla_'.$field,$value[$field]??''); }
         update_post_meta($postId,'_ascla_micro',empty($value['micro'])?'0':'1');
+        update_post_meta($postId,'_ascla_cancelled',empty($value['cancelled'])?'0':'1');
         delete_post_meta($postId,'_ascla_invitee');
         foreach (array_unique(array_map('absint',$value['invitees']??[])) as $uid) { add_post_meta($postId,'_ascla_invitee',$uid); }
     }
@@ -276,6 +277,10 @@ final class Content
     }
     public static function canDelete(\WP_Post $post): bool
     {
+        if($post->post_type==='ascla_contact') {
+            $meta=(array)get_post_meta($post->ID,'_ascla',true);
+            return Access::member() && current_user_can('ascla_moderate') && $post->post_status!=='trash' && ($meta['request_status']??'open')==='closed';
+        }
         return Access::member() && str_starts_with($post->post_type,'ascla_') && isset(Catalog::TYPES[substr($post->post_type,6)]) && $post->post_status!=='trash'
             && (current_user_can('ascla_manage') || (int)$post->post_author===get_current_user_id()
                 || (current_user_can('ascla_moderate') && in_array(substr($post->post_type,6),self::COMMUNITY_TYPES,true)));
@@ -283,7 +288,9 @@ final class Content
     /** Trash the selected contribution; other authors' forum topics remain in the general list. */
     public static function remove(int $id): array
     {
-        $post=self::get($id); Access::require(self::canDelete($post),'No tienes permisos para eliminar este contenido.',403);
+        $post=self::get($id);
+        if($post->post_type==='ascla_contact') return Administration::deleteContact($id);
+        Access::require(self::canDelete($post),'No tienes permisos para eliminar este contenido.',403);
         return Store::lock('content:'.$id,static function()use($id,$post){
             $meta=(array)get_post_meta($id,'_ascla',true);
             Access::require((bool)wp_trash_post($id),'No se pudo eliminar el contenido.',500);
@@ -465,13 +472,7 @@ final class Content
     }
     public static function reviewReport(int $id): array
     {
-        Access::require(current_user_can('ascla_moderate'),'No tienes permisos para revisar reportes.',403);
-        $report=Store::one('relations',$id);
-        Access::require($report && in_array((string)$report['kind'],['report','comment_report'],true),'Reporte no encontrado.',404);
-        $when=current_time('mysql',true);
-        Store::update('relations',['reviewed_at'=>$when,'reviewed_by'=>get_current_user_id()],['id'=>$id]);
-        Audit::record('report_reviewed',$id,(string)$report['kind']);
-        return ['id'=>$id,'reviewed'=>true,'reviewed_at'=>$when];
+        return Reports::review($id);
     }
     public static function moderate(int $id,string $decision,string $reason,bool $reviewed=false): array
     {

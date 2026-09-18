@@ -21,7 +21,7 @@ final class Profiles
     {
         $data=self::raw($id);
         foreach((array)$data['hidden'] as $field){ unset($data[$field]); }
-        unset($data['first_name'],$data['last_name'],$data['birth_date'],$data['bio'],$data['experience'],$data['company'],$data['linkedin'],$data['twitter'],$data['website']);
+        unset($data['phone'],$data['phone_visibility'],$data['first_name'],$data['last_name'],$data['birth_date'],$data['bio'],$data['experience'],$data['company'],$data['linkedin'],$data['twitter'],$data['website']);
         $data['name']=self::publicName($id);
         return $data;
     }
@@ -43,7 +43,7 @@ final class Profiles
     {
         $user=get_userdata($id); Access::require($user && Access::member($id),'Perfil no encontrado.',404);
         $data=(array)get_user_meta($id,'_ascla_profile',true);
-        return array_merge(['id'=>$id,'name'=>$user->display_name,'first_name'=>$user->first_name,'last_name'=>$user->last_name,'birth_date'=>'','directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[],'revision'=>0],$data,['id'=>$id,'name'=>$user->display_name]);
+        return array_merge(['id'=>$id,'name'=>$user->display_name,'first_name'=>$user->first_name,'last_name'=>$user->last_name,'birth_date'=>'','phone'=>'','phone_visibility'=>'private','directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[],'revision'=>0],$data,['id'=>$id,'name'=>$user->display_name]);
     }
     public static function visible(int $id): array
     {
@@ -59,6 +59,8 @@ final class Profiles
         }
         // Birth date is always private. Only the profile owner and ASCLA administrators may retrieve it.
         if (!$own && !current_user_can('ascla_manage')) { unset($data['birth_date']); }
+        if(!$own && !current_user_can('ascla_manage') && (($data['phone_visibility']??'private')!=='members' || !Access::member()))unset($data['phone']);
+        if(!$own && !current_user_can('ascla_manage'))unset($data['phone_visibility']);
         unset($data['revision']);
         $data['photo_url']=!empty($data['photo_id'])?Media::profilePhotoUrl((int)$data['photo_id'],$id):'';
         if ($own) {
@@ -105,7 +107,12 @@ final class Profiles
 
     public static function save(array $input,int $id=0): array
     {
-        $id=$id?:get_current_user_id(); $old=self::raw($id); $data=$old;
+        $id=$id?:get_current_user_id();
+        return \ASCLA\Core\Repositories\Store::lock('profile-interests:'.$id,static fn()=>self::saveUnlocked($input,$id));
+    }
+    private static function saveUnlocked(array $input,int $id): array
+    {
+        $old=self::raw($id); $data=$old;
         foreach (self::TEXT as $field) {
             if (!array_key_exists($field,$input)) { continue; }
             $value=Access::text($input[$field],in_array($field,['bio','experience'],true)?3000:200);
@@ -119,6 +126,11 @@ final class Profiles
                 $value=$country['es'];
             }
             $data[$field]=$value;
+        }
+        if(array_key_exists('phone',$input) || array_key_exists('phone_visibility',$input)){
+            Access::require(Access::member() && ($id===get_current_user_id() || (current_user_can('ascla_manage') && current_user_can('edit_user',$id))));
+            if(array_key_exists('phone',$input))$data['phone']=\ASCLA\Core\Domain\Phone::normalize($input['phone']);
+            if(array_key_exists('phone_visibility',$input))$data['phone_visibility']=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']);
         }
         if (array_key_exists('birth_date',$input)) { $data['birth_date']=Birthdays::normalize($input['birth_date']); }
         foreach (self::TERMS as $field=>$tax) {

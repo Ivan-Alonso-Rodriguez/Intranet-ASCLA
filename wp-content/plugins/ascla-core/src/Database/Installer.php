@@ -4,7 +4,7 @@ use ASCLA\Core\Domain\Catalog;
 
 final class Installer
 {
-    public const SCHEMA_VERSION=11;
+    public const SCHEMA_VERSION=13;
     public static function activate(bool $networkWide=false): void
     {
         if ($networkWide) { wp_die('Active ASCLA Core individualmente en cada sitio; no se admite activación de red.'); }
@@ -21,6 +21,8 @@ final class Installer
         self::migrateConversationPhotos();
         self::migrateConversationDescriptions();
         self::migrateTemporaryMedia();
+        self::migrateAttendance();
+        self::migrateImports();
         self::loginPage();
         self::pages();
         self::adminPage();
@@ -179,7 +181,47 @@ final class Installer
                 throw new MigrationException('No se pudo habilitar el almacenamiento temporal de archivos.');
             }
         }
-        update_option('ascla_schema',self::SCHEMA_VERSION,false);
+        update_option('ascla_schema',11,false);
+    }
+    private static function migrateAttendance(): void
+    {
+        if((int)get_option('ascla_schema',0)>=12) return;
+        global $wpdb;
+        require_once ABSPATH.'wp-admin/includes/upgrade.php';
+        $table=$wpdb->prefix.'ascla_attendance';$collate=$wpdb->get_charset_collate();
+        dbDelta("CREATE TABLE $table (
+            id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            event_id bigint(20) unsigned NOT NULL,
+            user_id bigint(20) unsigned NOT NULL,
+            status varchar(16) NOT NULL,
+            minutes int(11) unsigned DEFAULT NULL,
+            source varchar(16) NOT NULL,
+            recorded_by bigint(20) unsigned NOT NULL,
+            updated_at datetime NOT NULL,
+            PRIMARY KEY  (id),
+            UNIQUE KEY attendance (event_id,user_id),
+            KEY user_event (user_id,event_id)
+        ) ENGINE=InnoDB $collate;");
+        if($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s',$wpdb->esc_like($table)))!==$table) {
+            throw new MigrationException('No se pudo crear el registro de asistencia.');
+        }
+        update_option('ascla_schema',12,false);
+    }
+    private static function migrateImports(): void
+    {
+        if((int)get_option('ascla_schema',0)>=13)return;
+        global $wpdb;require_once ABSPATH.'wp-admin/includes/upgrade.php';$p=$wpdb->prefix.'ascla_';$collate=$wpdb->get_charset_collate();
+        $schemas=[
+            'imports'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nkind varchar(20) NOT NULL,\nactor_id bigint(20) unsigned NOT NULL,\nevent_id bigint(20) unsigned NOT NULL DEFAULT 0,\nfilename varchar(255) NOT NULL,\nstatus varchar(20) NOT NULL,\ntotal int unsigned NOT NULL DEFAULT 0,\nconfig longtext NOT NULL,\ncreated_at datetime NOT NULL,\ncompleted_at datetime DEFAULT NULL,\nPRIMARY KEY  (id),\nKEY kind_date (kind,created_at)",
+            'import_rows'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nimport_id bigint(20) unsigned NOT NULL,\nposition int unsigned NOT NULL,\nstate varchar(20) NOT NULL,\nuser_id bigint(20) unsigned NOT NULL DEFAULT 0,\npayload longtext NOT NULL,\nPRIMARY KEY  (id),\nUNIQUE KEY import_position (import_id,position),\nKEY batch (import_id,state,id)",
+            'user_interests'=>"id bigint(20) unsigned NOT NULL AUTO_INCREMENT,\nuser_id bigint(20) unsigned NOT NULL,\nterm_id bigint(20) unsigned NOT NULL,\nsource varchar(16) NOT NULL,\nPRIMARY KEY  (id),\nUNIQUE KEY interest (user_id,term_id,source),\nKEY topic_source (term_id,source)"
+        ];
+        foreach($schemas as $name=>$schema){dbDelta("CREATE TABLE {$p}{$name} (\n$schema\n) ENGINE=InnoDB $collate;");if($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s',$wpdb->esc_like($p.$name)))!==$p.$name)throw new MigrationException('No se pudo crear el registro de importaciones.');}
+        $columns=['seconds'=>'int unsigned DEFAULT NULL','sessions'=>'longtext DEFAULT NULL','review_reason'=>"varchar(255) NOT NULL DEFAULT ''"];
+        foreach($columns as $column=>$type)if(!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM {$p}attendance LIKE %s",$column)) && $wpdb->query("ALTER TABLE {$p}attendance ADD $column $type")===false)throw new MigrationException('No se pudo ampliar el registro de asistencia.');
+        update_option('ascla_schema',13,false);
+        update_option('ascla_interest_index_cursor',0,false);
+        if(!wp_next_scheduled('ascla_interest_index'))wp_schedule_single_event(time()+1,'ascla_interest_index');
     }
     private static function migrate(): void
     {

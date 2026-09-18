@@ -243,14 +243,14 @@ final class NotificationsTest extends TestCase
     public function testEmailPreferencesDefaultActiveAndCanBeChangedPerCategory(): void
     {
         $defaults=Notifications::emailPreferences($this->users[0]);
-        self::assertSame(['connections'=>true,'messages'=>true,'events'=>true],$defaults);
+        self::assertSame(['connections'=>true,'messages'=>true,'events'=>true,'support'=>true],$defaults);
         $saved=Notifications::saveEmailPreferences($this->users[0],['messages'=>false]);
         self::assertTrue($saved['connections']);
         self::assertFalse($saved['messages']);
         self::assertTrue($saved['events']);
         self::assertSame($saved,Profiles::visible($this->users[0])['email_notifications']);
         $saved=Notifications::saveEmailPreferences($this->users[0],['connections'=>false,'events'=>false]);
-        self::assertSame(['connections'=>false,'messages'=>false,'events'=>false],$saved);
+        self::assertSame(['connections'=>false,'messages'=>false,'events'=>false,'support'=>true],$saved);
     }
 
     public function testMessageEmailIsThrottledPerConversationButInternalNoticesAreNot(): void

@@ -2,9 +2,9 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.10`
-> **Esquema de base de datos:** `11`
-> La versión `1.10` incorpora roles acumulativos, validaciones de permisos en servidor e interfaz, carga progresiva de perfiles y caché privada de explicaciones de IA.
+> **Versión actual:** `1.10.2`
+> **Esquema de base de datos:** `13`
+> La versión `1.10.2` sincroniza el esquema 13 con Google Forms, teléfono y privacidad, correos HTML institucionales, asistencia Zoom por intervalos y mejoras de analítica/rendimiento; conserva las funciones de 1.10.1.
 
 ## Resumen de versiones
 
@@ -64,7 +64,9 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.40 | RF-025: imagen de portada del evento | Completada |
 | 1.9.41 | RF-031: participantes visibles después del RSVP | Completada |
 | 1.9.42 | RF-040 y RF-041: recomendaciones enriquecidas y explicables | Completada |
-| 1.10 | Roles acumulativos, perfiles sin espera de IA y caché persistente | **Actual · pruebas locales aprobadas** |
+| 1.10.2 | Forms, teléfono, correos HTML, Zoom por intervalos y analítica ampliada | **Actual · cierre técnico en curso** |
+| 1.10.1 | Estadísticas, asistencia manual/Zoom y eliminación tras revisión o resolución | Completada |
+| 1.10 | Roles acumulativos, perfiles sin espera de IA y caché persistente | Completada |
 | 1.9.50 | Cargas temporales cancelables y notificaciones toast | Anterior |
 | 1.9.49 | Perfil de cumpleaños refinado y Turnstile adaptativo | Completada |
 | 1.9.48 | Cumpleaños privados y Turnstile oficial visible | Anterior |
@@ -75,6 +77,30 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.43 | Acceso ASCLA separado en `/login/` y protección de `/intranet/` | Anterior |
 
 ---
+
+## 1.10.2 — Forms, teléfono, correos institucionales y cierre técnico
+
+- **Esquema y versión sincronizados:** versión del plugin, constante `ASCLA_VERSION`, `Stable tag`, Sonar y documentación principal quedan en **1.10.2**. El esquema vigente es **13**; la migración de importaciones/intereses permanece idempotente y conserva los datos existentes.
+- **Google Forms e intereses:** importación CSV con mapeo de columnas, catálogo y sinónimos, historial, revisión administrativa y procesamiento por lotes. Una fila aprobada admite **como máximo 3 intereses**; el límite se valida en interfaz, servicio y aplicación final.
+- **Gemini en respuestas abiertas:** recibe únicamente texto libre depurado y catálogo permitido. Devuelve propuestas con confianza/origen visibles que el administrador puede aceptar, editar o ignorar; nunca aplica cambios sin revisión.
+- **Teléfono y privacidad:** formato internacional canónico `+<código><número>` de 8 a 15 dígitos, con edición/eliminación y visibilidad `private` o `members`. El número no se incorpora al contexto de IA ni al matching.
+- **Correos institucionales:** `EmailTemplate` centraliza HTML, logo, CTA y pie ASCLA. El correo de prueba SMTP usa la misma plantilla y cabecera `text/html`.
+- **Zoom y asistencia:** se conservan intervalos de entrada/salida, se fusionan solapamientos para evitar doble conteo y se aplica un umbral configurable de permanencia (70 % por defecto) para distinguir `present`, `partial`, `absent` y `review`.
+- **Analítica y rendimiento:** los intereses de Forms y contenido relacionado alimentan el análisis; agregaciones/rankings se desplazan a SQL cuando corresponde, las vistas usan paginación y las importaciones grandes se procesan por lotes con progreso.
+- **Foros:** la cabecera de Foros vuelve a mostrar una sola acción de creación. Se elimina el botón redundante **Crear tema** y se conserva **Crear foro**, sin eliminar el tipo interno `topic` ni los datos existentes.
+- **Estado de validación:** se añadieron pruebas de regresión para los cierres recientes y una comprobación `release-sanity` ejecutable sin WordPress. El cierre actual pasa **44 verificaciones puras/estáticas**, incluyendo cobertura de los flujos nuevos y traducciones; la suite PHPUnit integrada, integraciones reales (Gemini/SMTP/Zoom), migración sobre copia de datos y QA/UAT siguen siendo obligatorias antes de producción.
+
+## 1.10.1 — estadísticas, asistencia y eliminación de casos finalizados
+
+- **Reportes de comunidad:** eliminación disponible después de marcar como revisado, con confirmación, auditoría y validación de estado en servidor. Se conserva la publicación o comentario. Un nuevo reporte reabre la revisión; la revisión/eliminación comparte el bloqueo de concurrencia con el registro de reportes.
+- **Solicitudes:** Administrador, Ejecutivo y Moderador pueden enviar a la papelera las solicitudes resueltas. Los estados recibida/en atención/reabierta quedan bloqueados también en la ruta general de contenido. La resolución y eliminación comparten el mismo bloqueo y vuelven a comprobar el objeto.
+- **Administración → Estadísticas:** cinco vistas: Estadísticas, Usuarios que más asisten, Temas de mayor interés, Tendencias e IA y tendencias. Permiso `ascla_publish` para Administrador y Ejecutivo; menús de frontend/WordPress, vistas y REST respetan el mismo alcance, sesión y nonce.
+- **Asistencia comprobada:** tabla privada independiente de RSVP, con un registro único por evento/usuario, duración opcional, fuente y responsable. Registro manual y CSV de Zoom con vista previa obligatoria, validación de UTF-8/tamaño/filas, asociación exacta por correo, agrupación de reconexiones, omisión de duplicados y protección de correcciones manuales. Las importaciones repetidas no duplican asistencias y una vista previa obsoleta no sobrescribe cambios posteriores.
+- **Cobertura explícita:** los registros incompletos no producen tasas de ausencia. El responsable confirma el registro completo; los cambios vuelven a abrirlo. Solo se registran eventos publicados, finalizados, no cancelados y visibles para la cuenta. El CSV y las filas sin asociar no se almacenan.
+- **Cifras calculadas en PHP/SQL:** usuarios, actividad registrada, altas, eventos, inscripciones aceptadas, asistencias, asistentes únicos, recurrencia, tasa y promedio sobre registros completos. Ranking con duración disponible y última asistencia; intereses actuales de perfil separados de participación real; filtros por fechas/evento/tema/categoría y comparación con el período previo de igual longitud. Sin base previa positiva no se inventa un crecimiento porcentual. Se informa el alcance de los datos y la ausencia de respuestas Google Forms conectadas.
+- **IA y tendencias:** clasificación semántica explícita por lotes de 30 títulos depurados, validación estricta de IDs y caché invalidada por título/catálogo/proveedor/modelo. Usa los proveedores Gemini/OpenAI existentes o clasificación local identificada en modo demo. Excluye microeventos privados y Chatham House, no recibe correos/perfiles/asistencia, no altera taxonomías publicadas y nunca calcula cifras. Las propuestas y su cobertura quedan separadas de los temas editoriales.
+- **Compatibilidad y responsabilidades:** esquema **12**, migración idempotente y versión/constante/Stable tag **1.10.1**. No se recrean cuentas ni se cambian roles o contraseñas. Servicios y repositorio separados para cifras, asistencia, CSV, clasificación y reportes; limpieza de asistencia al eliminar definitivamente usuarios/eventos. Interfaz en español/inglés, cabecera móvil ajustada y tablas con desplazamiento interno.
+- **Validación local:** suite completa aprobada: **208 pruebas PHP / 4.399 comprobaciones**, sin fallos ni errores. **28 recorridos de navegador aprobados**: 12 nuevos y 16 de regresión de roles; sin errores JavaScript no capturados. Se comprobaron roles, estados reabiertos, nonces, exactitud numérica, más de 100 registros, importación repetida, CSV malformado, protección manual, clasificación demo, privacidad, wp-admin y móvil. Las llamadas reales a Gemini/OpenAI y la aceptación en el servidor de destino siguen el proceso de promoción; no se hizo push ni despliegue remoto.
 
 ## 1.10 — roles acumulativos, carga progresiva de perfiles y caché de IA
 
@@ -101,7 +127,7 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 
 **Validación del 17/09/2026:** suite PHP completa aprobada: **193 pruebas, 4.264 comprobaciones, cero fallos, errores y advertencias**. Incluye roles acumulativos, perfiles progresivos y siete pruebas adicionales de migración, privacidad editorial, enlaces de vídeo y ciclo de archivos temporales. Pasan también **27 recorridos de navegador** (3 de archivos, 16 de permisos y 8 de perfiles), sin errores JavaScript no capturados. Sintaxis validada en 108 PHP y 21 JS/CJS, Python/JSON y diferencias sin errores de formato.
 
-La línea base original tenía 19 pruebas problemáticas. La jerarquía corrigió las tres del Ejecutivo y esta revisión resuelve las 16 restantes mediante correcciones funcionales y actualización de contratos de prueba obsoletos. Se conservan las validaciones de denegación de acceso, confidencialidad y preservación de datos. Los cambios continúan en `development`; no se han publicado en GitHub ni desplegado. La aceptación con integraciones reales y la promoción `development → qa → uat → main` siguen pendientes.
+La línea base original tenía 19 pruebas problemáticas. La jerarquía corrigió las tres del Ejecutivo y esta revisión resuelve las 16 restantes mediante correcciones funcionales y actualización de contratos de prueba obsoletos. Se conservan las validaciones de denegación de acceso, confidencialidad y preservación de datos. Los cambios continúan en `development`; no se han publicado en GitHub ni desplegado. El flujo Git obligatorio del curso es `development → qa → uat → main`; `main` se mantiene protegido y la aceptación con integraciones reales sigue pendiente antes de producción.
 
 ---
 

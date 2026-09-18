@@ -14,6 +14,9 @@ final class Plugin
         Rest\Router::boot();
         Jobs\Queue::boot();
         Services\Media::boot();
+        Services\InterestIndex::boot();
+        add_action('deleted_user',static fn($id)=>Repositories\Store::delete('attendance',['user_id'=>(int)$id]));
+        add_action('before_delete_post',static fn($id)=>Repositories\Store::delete('attendance',['event_id'=>(int)$id]));
         add_action('added_post_meta',[Services\Content::class,'indexMeta'],10,4);
         add_action('updated_post_meta',[Services\Content::class,'indexMeta'],10,4);
         Integrations\GoogleOAuth::boot();

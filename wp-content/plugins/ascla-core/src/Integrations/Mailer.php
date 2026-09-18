@@ -89,7 +89,17 @@ final class Mailer
         Access::require(current_user_can('ascla_manage')); Access::limit('mail_test',3,300);
         $email=wp_get_current_user()->user_email;
         Access::require((bool)is_email($email),'Su cuenta necesita un correo válido para recibir la prueba.',400);
-        $ok=wp_mail($email,'ASCLA · prueba de correo','El transporte de correo de ASCLA ha aceptado este mensaje de prueba.');
+        $subject='ASCLA · prueba de correo';
+        $name=trim((string)wp_get_current_user()->display_name) ?: 'administrador';
+        $body=EmailTemplate::render(
+            $subject,
+            $name,
+            'El transporte de correo de ASCLA ha aceptado este mensaje de prueba. Si puedes verlo correctamente, la plantilla institucional HTML y el envío están funcionando.',
+            'Ir a ASCLA',
+            home_url('/'),
+            'Este es un mensaje de prueba generado desde Administración ASCLA.'
+        );
+        $ok=wp_mail($email,$subject,$body,['Content-Type: text/html; charset=UTF-8']);
         Access::require($ok,'No se pudo enviar. Revise los datos SMTP, el remitente autorizado y la conexión del servidor.',502);
         return ['message'=>self::local()?'Correo recibido por el buzón local de pruebas.':'El servidor aceptó el correo. Revise su bandeja de entrada y spam.'];
     }
@@ -101,18 +111,16 @@ final class Mailer
             'connections'=>'ASCLA · Novedad en tus conexiones',
             'messages'=>'ASCLA · Novedad en mensajería',
             'events'=>'ASCLA · Novedad de eventos',
+            'support'=>'ASCLA · Atención de tu solicitud',
         ];
         if (!isset($subjects[$category])) return false;
         $name=trim((string)$account->display_name) ?: 'asociado';
         $message=trim(wp_strip_all_tags($message));
         $safeUrl=$url!==''?esc_url_raw($url):'';
         $profileUrl=\ASCLA\Core\Domain\Catalog::url('perfil');
-        $body="Hola {$name},\n\n{$message}";
-        if ($safeUrl!=='') $body.="\n\nVer en ASCLA: {$safeUrl}";
-        $body.="\n\nPuedes activar o desactivar este tipo de correo desde Mi perfil > Notificaciones por correo: {$profileUrl}";
-        $body.="\n\n— ASCLA";
+        $body=EmailTemplate::render($subjects[$category],$name,$message,'Ver en ASCLA',$safeUrl,'Puedes gestionar estos correos desde Mi perfil > Notificaciones por correo: '.$profileUrl);
         try {
-            return (bool)wp_mail($account->user_email,$subjects[$category],$body);
+            return (bool)wp_mail($account->user_email,$subjects[$category],$body,['Content-Type: text/html; charset=UTF-8']);
         } catch (\Throwable $error) {
             self::record('failed');
             return false;
@@ -127,8 +135,8 @@ final class Mailer
         $name=trim((string)($profile['first_name']??''));
         if ($name==='') $name=trim((string)$account->display_name)?:'asociado';
         $subject='ASCLA · ¡Feliz cumpleaños! 🎉';
-        $body="Hola {$name},\n\n¡Feliz cumpleaños! 🎉\n\nEn ASCLA queremos acompañarte en este día y desearte un nuevo año lleno de buenas conexiones, aprendizajes, proyectos y motivos para celebrar.\n\nGracias por ser parte de nuestra comunidad.\n\n— ASCLA";
-        try { return (bool)wp_mail($account->user_email,$subject,$body); }
+        $body=EmailTemplate::render($subject,$name,"¡Feliz cumpleaños! 🎉\n\nEn ASCLA queremos acompañarte en este día y desearte un nuevo año lleno de buenas conexiones, aprendizajes, proyectos y motivos para celebrar.\n\nGracias por ser parte de nuestra comunidad.",'Visitar mi comunidad',\ASCLA\Core\Domain\Catalog::url('intranet'));
+        try { return (bool)wp_mail($account->user_email,$subject,$body,['Content-Type: text/html; charset=UTF-8']); }
         catch (\Throwable $error) { self::record('failed'); return false; }
     }
 

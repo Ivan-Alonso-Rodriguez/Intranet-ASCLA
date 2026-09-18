@@ -3,7 +3,7 @@ namespace ASCLA\Core\Repositories;
 
 final class Store
 {
-    private const TABLES=['conversations','participants','messages','relations','registrations','notifications','audit','jobs','media'];
+    private const TABLES=['conversations','participants','messages','relations','registrations','notifications','audit','jobs','media','attendance','imports','import_rows','user_interests'];
     public static function table(string $name): string
     {
         global $wpdb;

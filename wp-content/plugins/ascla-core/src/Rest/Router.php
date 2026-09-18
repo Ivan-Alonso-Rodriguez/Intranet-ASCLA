@@ -102,11 +102,37 @@ final class Router
         self::route('/admin/users/(?P<id>\d+)','GET',static fn($r)=>\ASCLA\Core\Services\Administration::user((int)$r['id']),'ascla_manage');
         self::route('/admin/users/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Administration::updateUser((int)$r['id'],$r->get_json_params()?:[]),'ascla_manage');
         self::route('/admin/users/(?P<id>\d+)','DELETE',static fn($r)=>\ASCLA\Core\Services\Administration::deleteUser((int)$r['id']),'ascla_manage');
+        self::route('/admin/interest-catalog','POST',static fn($r)=>!empty($r['seed'])?\ASCLA\Core\Domain\InterestCatalog::seed():\ASCLA\Core\Domain\InterestCatalog::create(Access::text($r['name']??'',100)),'ascla_manage');
+        self::route('/admin/interest-imports/ai-test','POST',static fn()=>\ASCLA\Core\Services\InterestImports::diagnoseAI(),'ascla_manage');
+        self::route('/admin/interest-imports','GET',static fn($r)=>\ASCLA\Core\Services\InterestImports::history((int)($r['page']??1)),'ascla_manage');
+        self::route('/admin/interest-imports/inspect','POST',static fn($r)=>\ASCLA\Core\Services\InterestImports::inspect($r->get_params()),'ascla_manage');
+        self::route('/admin/interest-imports','POST',static fn($r)=>\ASCLA\Core\Services\InterestImports::start($r->get_params()),'ascla_manage');
+        self::route('/admin/interest-imports/(?P<id>\d+)','GET',static fn($r)=>\ASCLA\Core\Services\InterestImports::detail((int)$r['id'],(int)($r['page']??1)),'ascla_manage');
+        self::route('/admin/interest-imports/(?P<id>\d+)/process','POST',static fn($r)=>\ASCLA\Core\Services\InterestImports::process((int)$r['id']),'ascla_manage');
+        self::route('/admin/interest-imports/(?P<id>\d+)/confirm','POST',static fn($r)=>\ASCLA\Core\Services\InterestImports::confirm((int)$r['id']),'ascla_manage');
+        self::route('/admin/interest-imports/(?P<id>\d+)/apply','POST',static fn($r)=>\ASCLA\Core\Services\InterestImports::apply((int)$r['id']),'ascla_manage');
+        self::route('/admin/interest-imports/(?P<id>\d+)/cancel','POST',static fn($r)=>\ASCLA\Core\Services\InterestImports::cancel((int)$r['id']),'ascla_manage');
+        self::route('/admin/interest-imports/(?P<id>\d+)/rows/(?P<row>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\InterestImports::review((int)$r['id'],(int)$r['row'],$r->get_params()),'ascla_manage');
+        self::route('/admin/interest-imports/(?P<id>\d+)/rows/(?P<row>\d+)/ai','POST',static fn($r)=>\ASCLA\Core\Services\InterestImports::classify((int)$r['id'],(int)$r['row']),'ascla_manage');
+        self::route('/admin/statistics','GET',static fn($r)=>\ASCLA\Core\Services\Statistics::dashboard($r->get_params()),'ascla_publish');
+        self::route('/admin/statistics/topics','GET',static fn($r)=>\ASCLA\Core\Services\TopicInsights::summary($r->get_params()),'ascla_publish');
+        self::route('/admin/statistics/topics','POST',static fn($r)=>\ASCLA\Core\Services\TopicInsights::analyze($r->get_params()),'ascla_publish');
+        self::route('/admin/attendance/(?P<id>\d+)','GET',static fn($r)=>\ASCLA\Core\Services\Attendance::roster((int)$r['id'],(int)($r['page']??1)),'ascla_publish');
+        self::route('/admin/attendance/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Attendance::save((int)$r['id'],$r->get_params()),'ascla_publish');
+        self::route('/admin/attendance/(?P<id>\d+)/complete','POST',static fn($r)=>\ASCLA\Core\Services\Attendance::complete((int)$r['id'],rest_sanitize_boolean($r['complete'])),'ascla_publish');
+        self::route('/admin/attendance/(?P<id>\d+)/settings','POST',static fn($r)=>\ASCLA\Core\Services\Attendance::configure((int)$r['id'],$r->get_params()),'ascla_publish');
+        self::route('/admin/attendance/(?P<id>\d+)/imports','GET',static fn($r)=>\ASCLA\Core\Services\Attendance::history((int)$r['id'],(int)($r['page']??1)),'ascla_publish');
+        self::route('/admin/attendance/(?P<id>\d+)/imports/(?P<import>\d+)','GET',static fn($r)=>\ASCLA\Core\Services\Attendance::importDetail((int)$r['id'],(int)$r['import'],(int)($r['page']??1)),'ascla_publish');
+        self::route('/admin/attendance/(?P<id>\d+)/imports/(?P<import>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Attendance::apply((int)$r['id'],(int)$r['import']),'ascla_publish');
+        self::route('/admin/attendance/(?P<id>\d+)/preview','POST',static fn($r)=>\ASCLA\Core\Services\Attendance::preview((int)$r['id'],\ASCLA\Core\Domain\ZoomCsv::input($r['csv']??''),$r->get_params()),'ascla_publish');
+        self::route('/admin/attendance/(?P<id>\d+)/import','POST',static fn($r)=>\ASCLA\Core\Services\Attendance::import((int)$r['id'],\ASCLA\Core\Domain\ZoomCsv::input($r['csv']??''),Access::text($r['token']??'',64),$r->get_params()),'ascla_publish');
         self::route('/admin/contacts','GET',static fn($r)=>\ASCLA\Core\Services\Administration::contacts($r->get_params()),'ascla_moderate');
         self::route('/mail/test','POST',static fn()=>\ASCLA\Core\Integrations\Mailer::test(),'ascla_manage');
         self::route('/settings','GET',static fn()=>Settings::status(),'ascla_manage');
         self::route('/settings','POST',static fn($r)=>Settings::save($r->get_json_params()?:[]),'ascla_manage');
         self::route('/admin','GET',static fn()=>self::admin(),'ascla_admin_area');
+        self::route('/admin/reports/(?P<id>\d+)','DELETE',static fn($r)=>\ASCLA\Core\Services\Reports::remove((int)$r['id']),'ascla_moderate');
+        self::route('/admin/contact/(?P<id>\d+)','DELETE',static fn($r)=>\ASCLA\Core\Services\Administration::deleteContact((int)$r['id']),'ascla_moderate');
         self::route('/admin/reports/(?P<id>\d+)/review','POST',static fn($r)=>Content::reviewReport((int)$r['id']),'ascla_moderate');
         self::route('/admin/comments/(?P<id>\d+)','POST',static function($r) {
             $comment=get_comment((int)$r['id']); Access::require($comment && Content::get((int)$comment->comment_post_ID),'Comentario no válido.',404);
@@ -151,7 +177,7 @@ final class Router
             $report['report_type']='comment';
             $reports[]=$report;
         }
-        foreach ($reports as &$report) { $report['reviewed']=!empty($report['reviewed_at']); $report['reviewed_by_name']=!empty($report['reviewed_by'])?Profiles::publicName((int)$report['reviewed_by']):''; } unset($report);
+        foreach ($reports as &$report) { $report['reviewed']=!empty($report['reviewed_at']); $report['can_delete']=$moderator && $report['reviewed']; $report['reviewed_by_name']=!empty($report['reviewed_by'])?Profiles::publicName((int)$report['reviewed_by']):''; } unset($report);
         usort($reports,static fn($a,$b)=>(($a['reviewed']?1:0)<=>($b['reviewed']?1:0)) ?: strcmp((string)($b['created_at']??''),(string)($a['created_at']??'')));
         $audit=$admin?Store::rows('audit'):[];
         $actorNames=[];

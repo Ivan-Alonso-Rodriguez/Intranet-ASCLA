@@ -30,7 +30,9 @@ final class ContentLifecycleTest extends TestCase
     {
         foreach(array_keys(ASCLA\Core\Domain\Catalog::TYPES) as $type){
             $meta=$type==='event'?['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000)]:[];
-            $p=$this->post($type,['meta'=>$meta]);self::assertTrue($p['can_delete']);
+            $p=$this->post($type,['meta'=>$meta]);
+            if($type==='contact')$p=ASCLA\Core\Services\Administration::contactStatus($p['id'],'closed');
+            self::assertTrue($p['can_delete']);
             self::assertSame(200,$this->api('DELETE','items/'.$p['id'])->get_status());self::assertSame('trash',get_post_status($p['id']));
             self::assertSame(404,$this->api('GET','items/'.$p['id'])->get_status());self::assertSame(404,$this->api('DELETE','items/'.$p['id'])->get_status());
             self::assertNotContains($p['id'],array_column(Content::listing($type)['items'],'id'));

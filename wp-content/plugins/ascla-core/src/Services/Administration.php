@@ -37,6 +37,7 @@ final class Administration
         Access::require($post->post_type==='ascla_contact','Solicitud no válida.',400);
         Access::require(in_array($status,self::REQUEST_STATES,true),'Estado no válido.',400);
         return Store::lock('contact:'.$id,static function()use($id,$status,$post){
+            clean_post_cache($id);$post=Content::get($id); // Recheck after acquiring the same lock used by deletion.
             $meta=(array)get_post_meta($id,'_ascla',true);$previous=$meta['request_status']??'open';
             if($previous!==$status) {
                 $meta['request_status']=$status;$meta['request_updated_at']=gmdate('c');
@@ -56,6 +57,19 @@ final class Administration
             }
             update_post_meta($id,'_ascla_request_status',$status);
             return Content::serialize($post);
+        });
+    }
+    public static function deleteContact(int $id): array
+    {
+        Access::require(Access::member() && current_user_can('ascla_moderate'));
+        return Store::lock('contact:'.$id,static function()use($id){
+            $post=Content::get($id);
+            Access::require($post->post_type==='ascla_contact','Solicitud no válida.',400);
+            $meta=(array)get_post_meta($id,'_ascla',true);
+            Access::require(($meta['request_status']??'open')==='closed','Resuelve la solicitud antes de eliminarla.',409);
+            Access::require((bool)wp_trash_post($id),'No se pudo eliminar la solicitud.',500);
+            Audit::record('contact_deleted',$id,'closed');
+            return ['id'=>$id,'deleted'=>true,'message'=>'Solicitud enviada a la papelera.'];
         });
     }
     private const COMMUNITY_ROLES=['ascla_member','ascla_executive','ascla_moderator'];
@@ -161,9 +175,11 @@ final class Administration
         $company=Access::text($input['company']??'',200);
         $memberType=Access::text($input['member_type']??'',200);
         $birthDate=Birthdays::normalize($input['birth_date']??'');
+        $phone=\ASCLA\Core\Domain\Phone::normalize($input['phone']??'');
+        $phoneVisibility=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']??'private');
         $sendInvite=!array_key_exists('send_invite',$input)||rest_sanitize_boolean($input['send_invite']);
 
-        return Store::lock('admin-create-user:'.hash('sha256',$login.'|'.$email),static function()use($login,$email,$role,$first,$last,$position,$company,$memberType,$birthDate,$sendInvite){
+        return Store::lock('admin-create-user:'.hash('sha256',$login.'|'.$email),static function()use($login,$email,$role,$first,$last,$position,$company,$memberType,$birthDate,$sendInvite,$phone,$phoneVisibility){
             Access::require(!username_exists($login),'Ese nombre de usuario ya está registrado.',409);
             Access::require(!email_exists($email),'Ese correo ya pertenece a otra cuenta.',409);
             $password=wp_generate_password(32,true,true);
@@ -185,6 +201,7 @@ final class Administration
                 'company'=>$company,
                 'member_type'=>$memberType,
                 'birth_date'=>$birthDate,
+                'phone'=>$phone,'phone_visibility'=>$phoneVisibility,
                 'directory'=>true,
                 'networking'=>true,
                 'microevents'=>true,
@@ -228,6 +245,7 @@ final class Administration
             'company'=>$profile['company']??'',
             'member_type'=>$profile['member_type']??'',
             'birth_date'=>$profile['birth_date']??'',
+            'phone'=>$profile['phone']??'','phone_visibility'=>$profile['phone_visibility']??'private',
             'photo_url'=>Profiles::card($id)['photo_url'],
             'suspended'=>(bool)get_user_meta($id,'_ascla_suspended',true),
         ];
@@ -246,12 +264,16 @@ final class Administration
         $first=Access::text($input['first_name']??'',100);
         $last=Access::text($input['last_name']??'',100);
         Access::require(trim($first.$last)!=='','Indica al menos un nombre o apellido.',400);
+        $previousProfile=(array)get_user_meta($id,'_ascla_profile',true);
+        $phone=\ASCLA\Core\Domain\Phone::normalize($input['phone']??($previousProfile['phone']??''));
+        $phoneVisibility=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']??($previousProfile['phone_visibility']??'private'));
         $display=trim($first.' '.$last)?:$user->display_name;
         $result=wp_update_user(['ID'=>$id,'user_email'=>$email,'first_name'=>$first,'last_name'=>$last,'display_name'=>$display]);
         Access::require(!is_wp_error($result),is_wp_error($result)?$result->get_error_message():'No se pudo actualizar la cuenta.',400);
         $user->set_role($role);
         $profile=(array)get_user_meta($id,'_ascla_profile',true);
         $profile['first_name']=$first;$profile['last_name']=$last;
+        $profile['phone']=$phone;$profile['phone_visibility']=$phoneVisibility;
         $profile['position']=Access::text($input['position']??'',200);
         $profile['company']=Access::text($input['company']??'',200);
         $profile['member_type']=Access::text($input['member_type']??'',200);

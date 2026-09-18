@@ -5,6 +5,21 @@ final class MockAIProvider implements AIProviderInterface
     public function mode(): string { return 'DEMO MODE'; }
     public function generate(string $task,array $context): array
     {
+        if($task==='form_interests') {
+            $terms=$context['catalog']??[];$text=mb_strtolower(remove_accents($context['text']??''));$ids=[];
+            foreach($terms as $term){$name=mb_strtolower(remove_accents($term['name']));if(str_contains($text,$name) || ((str_contains($name,'gobernanza de la ia') || str_contains($name,'inteligencia artificial')) && preg_match('/\b(chatgpt|gemini|llm|ia generativa)\b/',$text)) || (str_contains($name,'ciberseguridad') && preg_match('/hackeo|cyber|seguridad informatica/',$text)))$ids[]=(int)$term['id'];}
+            return ['intereses'=>array_slice(array_values(array_unique($ids)),0,3),'confianza'=>$ids?'media':'baja'];
+        }
+        if($task==='interest_classification') {
+            $aliases=['inteligencia artificial'=>'/\b(ia|ai|llm|chatgpt|gemini|inteligencia artificial|machine learning)\b/u','gestion de riesgos'=>'/\b(riesgo|riesgos|risk|coso)\b/u','gobierno corporativo'=>'/\b(gobierno corporativo|gobernanza|corporate governance)\b/u','juntas directivas'=>'/\b(juntas? directivas?|directorio|directorios|board)\b/u','sostenibilidad'=>'/\b(sostenibilidad|sustentabilidad|esg|asg)\b/u','transformacion digital'=>'/\b(digital|digitalizacion|transformacion digital)\b/u'];
+            $assignments=[];
+            foreach($context['items']??[] as $item) {
+                $text=mb_strtolower(remove_accents($item['title']));$topic=0;
+                foreach($context['topics']??[] as $term){$label=mb_strtolower(remove_accents($term['name']));if(preg_match($aliases[$label]??('/'.preg_quote($label,'/').'/u'),$text)){$topic=(int)$term['id'];break;}}
+                $assignments[]=['id'=>(int)$item['id'],'topic_id'=>$topic];
+            }
+            return ['assignments'=>$assignments,'mode'=>$this->mode()];
+        }
         if ($task==='answer') {
             $sources=$context['sources']??[];$live=(array)($context['live_context']??[]);
             $question=mb_strtolower(remove_accents((string)($context['question']??'')));

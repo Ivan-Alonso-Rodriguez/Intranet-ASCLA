@@ -4,7 +4,49 @@ Plugin WordPress portable para una comunidad profesional privada. Incluye perfil
 
 Toda la funcionalidad propia está en `wp-content/plugins/ascla-core/`. Elementor es opcional. No se modifica WordPress Core ni se necesita un tema específico. El plugin conserva sus datos al desactivarse o desinstalarse.
 
-## Versión actual: 1.10 · esquema 11
+## Versión actual: 1.10.2 · esquema 13
+
+**Administración → Estadísticas** incorpora cinco vistas: **Estadísticas**, **Usuarios que más asisten**, **Temas de mayor interés**, **Tendencias** e **IA y tendencias**. Administrador y Ejecutivo ASCLA pueden consultarlas y registrar asistencia. Moderador y Asociado no tienen acceso, tampoco mediante peticiones REST directas. El menú nativo de WordPress usa la misma capacidad `ascla_publish`; las capacidades y roles acumulativos existentes se conservan.
+
+### Eliminación de reportes y solicitudes
+
+- En **Moderación → Reportes de la comunidad**, marca el reporte como revisado para habilitar **Eliminar reporte**. La eliminación retira el reporte y conserva la publicación o el comentario reportado. Un reporte recibido nuevamente vuelve a quedar pendiente y no puede eliminarse hasta revisarlo otra vez.
+- En **Solicitudes**, cambia el estado a **Resuelta** para habilitar **Eliminar solicitud**. La solicitud pasa a la papelera de WordPress. Las solicitudes recibidas, en atención o reabiertas no se pueden eliminar. Esta regla también se comprueba en la ruta general de eliminación de contenido.
+- Administrador, Ejecutivo y Moderador conservan esta gestión mediante `ascla_moderate`, validación por objeto, sesión y nonce. Ambas acciones piden confirmación en la interfaz, registran auditoría y vuelven a comprobar el estado en el servidor.
+
+### Registrar asistencia y consultar estadísticas
+
+1. Entra en **Administración → Estadísticas**. Selecciona fechas y, si corresponde, tema, categoría o evento. Se admiten períodos de hasta 366 días y solo eventos publicados, finalizados, no cancelados y accesibles para la cuenta.
+2. En **Registro de asistencia**, abre **Registrar asistencia** junto al evento. Puedes localizar a una persona por su correo ASCLA o actualizar a un inscrito: asistió, no asistió o sin verificar; los minutos son opcionales.
+3. Para Zoom, selecciona un CSV UTF-8 de hasta **512 KB y 5.000 filas** y pulsa **Revisar CSV**. Se reconocen cabeceras habituales en español/inglés y separadores coma, punto y coma o tabulación. El correo identifica al usuario; no se crean cuentas ni se deducen identidades por nombre.
+4. Revisa participantes, correos sin asociar, duplicados y registros manuales protegidos antes de **Confirmar importación**. Las reconexiones se agrupan por usuario y evento, conservando entradas/salidas y fusionando intervalos superpuestos para evitar doble conteo. La permanencia se compara con un umbral configurable (70 % por defecto) para distinguir asistencia confirmada, parcial, ausente o pendiente de revisión. Importar de nuevo actualiza los participantes del archivo sin sumar otra asistencia ni borrar otras personas. Las correcciones manuales prevalecen. Los correos sin cuenta se informan y no se importan.
+5. Una vez comprobada toda la lista, confirma **Registro completo**. Los inscritos sin marcar cuentan como ausentes para calcular la tasa. Cualquier cambio o nueva importación vuelve a abrir el registro. También puede reabrirse explícitamente.
+
+Las inscripciones existentes **no se convierten en asistencias**. La migración idempotente agrega `ascla_attendance`, con unicidad por evento/usuario, fuente, duración opcional y responsable. No recrea usuarios ni modifica sus roles, contraseñas o datos anteriores. El CSV se procesa en memoria; no se guarda el archivo ni los participantes sin asociar. La eliminación definitiva de una cuenta o evento limpia sus registros de asistencia.
+
+### Cómo interpretar las cifras
+
+- **Asistencias verificadas:** una por persona y evento; **asistentes únicos:** personas distintas. **Recurrente:** quien asistió a dos o más eventos del período. Los minutos muestran solo las duraciones registradas.
+- **Tasa:** inscritos que asistieron divididos entre inscripciones aceptadas, exclusivamente en eventos con registro completo. Quien asiste sin inscripción aparece como asistente, pero no aumenta ese numerador. **Promedio por evento:** asistentes de eventos completos dividido entre esos eventos. Sin un denominador válido se muestra `—`.
+- **Usuarios:** cuentas ASCLA actuales, incluidas las suspendidas. Usuarios nuevos y usuarios con actividad registrada usan el período de fechas; estos últimos corresponden a acciones guardadas en auditoría, no a personas conectadas ahora. Los filtros de tema/categoría/evento se aplican a participación, no a esas cifras generales.
+- **Interés declarado:** combina la selección actual del perfil y los intereses aprobados provenientes de Google Forms. **Participación real:** asistencia verificada a eventos vinculados a cada tema. Se muestran por separado; las filas de temas pueden solaparse y no deben sumarse como usuarios únicos. El análisis de temas también puede relacionar contenido publicado pertinente.
+- **Tendencias:** comparación con el período inmediatamente anterior, de igual número de días, usando la zona horaria de WordPress. Si el valor anterior es cero y el actual es positivo, se muestra **Sin base previa**, sin inventar un porcentaje. Se informa la cobertura de registros completos de ambos períodos y si el actual incluye hoy. Los cambios reflejan los registros conservados; no existe un historial de versiones de intereses de perfil ni de RSVP.
+
+### IA y tendencias
+
+La clasificación se solicita explícitamente, en lotes de hasta **30 eventos**, con Gemini/OpenAI según la configuración existente. Envía únicamente títulos depurados y el catálogo de temas; excluye sesiones Chatham House y microeventos privados. No envía perfiles, correos ni listas de asistencia. En modo demo se identifica claramente como clasificación local por palabras clave.
+
+El servidor valida los identificadores devueltos y guarda las propuestas por evento, invalidándolas si cambian el título, el catálogo, el proveedor o el modelo. No cambia los temas publicados. **Todos los conteos y porcentajes se calculan en PHP/SQL con los registros guardados**, incluso en esta vista. Se informa cuántos eventos faltan por clasificar; un resultado parcial no se presenta como cobertura completa. La información no modifica roles, permisos ni aplica sanciones.
+
+### Validación heredada de 1.10.1 y cierre de 1.10.2
+
+- La línea base de **1.10.1** registró **208 pruebas PHP y 4.399 comprobaciones** sin fallos ni errores. En 1.10.2 se añadieron pruebas de regresión para el máximo de tres intereses, teléfono internacional y correo de prueba HTML; la suite completa de cierre debe ejecutarse nuevamente antes de promover a QA/UAT.
+- **1.10.2** incorpora `php tests/release-sanity.php`, una verificación independiente de WordPress/PHPUnit para los cierres críticos. La ejecución actual pasa **44 comprobaciones** (Forms máx. 3, teléfono internacional, intervalos Zoom, plantilla HTML, coherencia versión/esquema y cobertura de traducciones de los flujos nuevos). Esto no sustituye la suite PHPUnit integrada.
+- La línea base de **1.10.1** registró **28 recorridos de navegador aprobados**. Las funciones nuevas de 1.10.2 requieren repetir los recorridos relevantes y validar Gemini/SMTP/Zoom en un entorno integrado.
+- Los servicios nuevos separan lectura de datos, cálculos, asistencia, lectura CSV, clasificación y ciclo de reportes. Las pruebas de IA usan un proveedor controlado; las credenciales reales de Gemini/OpenAI y la aceptación en el servidor de destino se validan en QA/UAT antes de promover los cambios por el flujo obligatorio `development → qa → uat → main`.
+
+### Mejoras conservadas de 1.10
+
 
 La versión **1.10** muestra los datos y las acciones del perfil sin esperar a Gemini u OpenAI. El perfil y la afinidad determinística se solicitan en paralelo; la explicación de IA se carga después y actualiza únicamente su bloque. Cerrar la ficha, abrir otra persona o navegar impide que una respuesta tardía modifique la nueva vista.
 
@@ -136,9 +178,9 @@ La implementación incluida en **1.10** tiene **12 pruebas PHP específicas apro
 
 La jerarquía y su migración se verificaron con **19 pruebas PHP aprobadas (262 comprobaciones)** en `CapabilityHierarchyTest.php` y `RoleWorkflowTest.php`, y **16 recorridos de navegador aprobados** en `tests/role-workflow.cjs`. Incluyen los cuatro roles, promoción/degradación, cuentas suspendidas, conservación de usuarios existentes, menús/botones, vistas administrativas, peticiones REST directas, nonces inválidos o ausentes y descargas privadas por `admin-post.php`. Los 8 recorridos de perfiles se repitieron y siguen aprobados.
 
-La suite PHP completa del **17/09/2026** pasa con **193 pruebas y 4.264 comprobaciones, sin fallos, errores ni advertencias**. Se cerraron los 16 pendientes tras la corrección de roles: migración de archivos temporales, enlaces de cápsulas, privacidad editorial, conservación del mensaje de abstención y coherencia de fuentes demo; además se actualizaron pruebas que usaban respuestas, métodos, permisos o esquemas antiguos. La prueba de notificaciones ahora publica el evento desde una cuenta autorizada y verifica su estado antes de comprobar el aviso.
+En la entrega **1.10**, la suite PHP completa del **17/09/2026** pasó con **193 pruebas y 4.264 comprobaciones, sin fallos, errores ni advertencias**. Se cerraron los 16 pendientes tras la corrección de roles: migración de archivos temporales, enlaces de cápsulas, privacidad editorial, conservación del mensaje de abstención y coherencia de fuentes demo; además se actualizaron pruebas que usaban respuestas, métodos, permisos o esquemas antiguos. La prueba de notificaciones ahora publica el evento desde una cuenta autorizada y verifica su estado antes de comprobar el aviso.
 
-Se añadieron pruebas de migración desde una columna sin signo, conservación de archivos, limpieza de temporales, acceso editorial y enlaces seguros. Los **27 recorridos de navegador** pasaron: 3 de cargas reales y biblioteca (`tests/media-temporary.cjs`), 16 de permisos y 8 de perfiles, sin errores JavaScript no capturados. También pasan la revisión de sintaxis de 108 archivos PHP y 21 JS/CJS, Python/JSON y `git diff --check`. La promoción sigue `development → qa → uat → main`; las integraciones con credenciales reales y la aceptación en el entorno de destino siguen pendientes de esa promoción.
+Se añadieron pruebas de migración desde una columna sin signo, conservación de archivos, limpieza de temporales, acceso editorial y enlaces seguros. En esa entrega, los **27 recorridos de navegador** pasaron: 3 de cargas reales y biblioteca (`tests/media-temporary.cjs`), 16 de permisos y 8 de perfiles, sin errores JavaScript no capturados. También pasan la revisión de sintaxis de 108 archivos PHP y 21 JS/CJS, Python/JSON y `git diff --check`. El flujo Git obligatorio del curso es `development → qa → uat → main`; `main` se mantiene protegido y no recibe `push` directo. Las integraciones con credenciales reales y la aceptación en el entorno de destino siguen pendientes de esas etapas.
 
 El entorno Docker incluye un servicio `cron` que ejecuta los eventos pendientes cada diez segundos. Se desactivan las actualizaciones automáticas sólo en los contenedores de pruebas para conservar una versión reproducible; mantén el sitio real actualizado mediante su procedimiento de operación.
 

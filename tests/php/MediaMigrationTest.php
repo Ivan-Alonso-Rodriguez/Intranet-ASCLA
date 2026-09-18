@@ -18,7 +18,7 @@ final class MediaMigrationTest extends TestCase
             foreach([0,42] as $post){$id=Store::insert('media',['user_id'=>1,'post_id'=>$post,'name'=>'preserved.pdf','mime'=>'application/pdf','bytes'=>'original bytes '.$post,'created_at'=>current_time('mysql',true)]);$rows[$id]=Store::one('media',$id);}
             update_option('ascla_schema',10);update_option('ascla_version',ASCLA_VERSION);
             Installer::upgrade();
-            self::assertSame(11,(int)get_option('ascla_schema'));
+            self::assertSame(Installer::SCHEMA_VERSION,(int)get_option('ascla_schema'));
             foreach($rows as $id=>$row){self::assertSame($row,Store::one('media',$id));}
             $id=Store::insert('media',['user_id'=>1,'post_id'=>-1,'name'=>'temporary.pdf','mime'=>'application/pdf','bytes'=>'temporary','created_at'=>current_time('mysql',true)]);
             self::assertSame(-1,(int)Store::one('media',$id)['post_id']);

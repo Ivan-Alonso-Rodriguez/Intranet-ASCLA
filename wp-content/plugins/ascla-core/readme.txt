@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.10
+Stable tag: 1.10.2
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,25 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.10.2 =
+* Sincroniza la versión pública con el esquema 13 y las migraciones de importaciones/intereses.
+* Google Forms admite importación por lotes, normalización por catálogo y sinónimos, revisión administrativa e historial; una fila aprobada queda limitada estrictamente a un máximo de 3 intereses.
+* Las respuestas abiertas pueden recibir propuestas de Gemini con confianza y origen visibles, siempre sujetas a aceptar, editar o ignorar antes de modificar el perfil.
+* Añade teléfono en formato internacional canónico (+ y código de país), edición/eliminación y privacidad private/members sin exponerlo al contexto de IA o matching.
+* Unifica los correos institucionales con plantilla HTML reutilizable, logo, llamada a la acción y pie ASCLA, incluido el correo de prueba SMTP.
+* Zoom conserva entradas/salidas, fusiona intervalos superpuestos y clasifica asistencia según un umbral configurable de permanencia; la analítica incorpora intereses de Forms y contenido relacionado.
+* Mejora agregaciones/paginación e importaciones por lotes con progreso. La validación final de integraciones reales y QA/UAT se documenta por separado.
+* Foros vuelve a una sola acción principal de creación: se elimina el botón redundante Crear tema y se conserva Crear foro.
+
+= 1.10.1 =
+* Permite eliminar reportes revisados y enviar a la papelera solicitudes resueltas, con comprobaciones de permisos/estado en servidor, confirmación y auditoría.
+* Administración > Estadísticas incorpora resumen, usuarios que más asisten, temas de mayor interés, tendencias e IA y tendencias, para Administrador y Ejecutivo.
+* Asistencia manual y CSV de Zoom con vista previa, asociación por correo, reconexiones, importación repetible y prioridad de correcciones manuales; las inscripciones no se convierten en asistencias.
+* Tasas basadas en registros completos, interés declarado separado de participación real y comparación de períodos calculada en PHP/SQL.
+* IA clasifica títulos depurados en lotes, sin recibir datos de asistencia ni generar cifras; modo demo identificado y validación de resultados.
+* Migración compatible al esquema 12; conserva cuentas, roles y datos anteriores. Interfaz en español/inglés y tablas adaptadas a móvil.
+* Validación local: 208 pruebas PHP (4.399 comprobaciones) y 28 recorridos de navegador aprobados.
 
 = 1.10 =
 * Corrige los 16 pendientes de pruebas: archivos temporales, enlaces de cápsulas, privacidad editorial y respuestas del asistente, junto con pruebas de contratos antiguos.
