@@ -36,6 +36,29 @@ final class ContentLifecycleTest extends TestCase
             self::assertNotContains($p['id'],array_column(Content::listing($type)['items'],'id'));
         }
     }
+    public function testDraftsArePrivateToTheirAuthorEvenForAdministrators():void
+    {
+        foreach (['hub','resource'] as $type) {
+            wp_set_current_user($this->users[0]);
+            $post=$this->post($type,['status'=>'draft']);
+            self::assertTrue(Content::canRead(get_post($post['id'])));
+            self::assertContains($post['id'],array_column(Content::listing($type,['mine'=>true,'status'=>'draft'])['items'],'id'));
+            // Give another account full administrator permissions as well.
+            (new WP_User($this->users[3]))->set_role('administrator');
+            foreach ([$this->users[1],$this->users[2],$this->users[3]] as $viewer) {
+                wp_set_current_user($viewer);
+                self::assertFalse(Content::canRead(get_post($post['id'])));
+                self::assertSame(404,$this->api('GET','items/'.$post['id'])->get_status());
+                if ($viewer===$this->users[3]) {
+                    self::assertSame(404,$this->api('POST','content/'.$type.'/'.$post['id'],['title'=>'Changed','body'=>'Changed','status'=>'publish'])->get_status());
+                    self::assertSame(404,$this->api('POST','items/'.$post['id'].'/moderate',['decision'=>'approve'])->get_status());
+                }
+                $listing=Content::listing($type,['status'=>'draft','author'=>$this->users[0],'q'=>$post['title']]);
+                self::assertSame(0,$listing['total']);
+                self::assertSame([],$listing['items']);
+            }
+        }
+    }
     public function testAuthorCanDeleteOwnPendingContentButAnotherMemberOrModeratorCannot():void
     {
         wp_set_current_user($this->users[2]);$p=$this->post();self::assertSame('pending',$p['status']);self::assertTrue($p['can_delete']);

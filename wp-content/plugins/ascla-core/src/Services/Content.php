@@ -39,6 +39,7 @@ final class Content
     public static function canRead(\WP_Post $post): bool
     {
         if (!Access::member() || $post->post_status==='trash' || !str_starts_with($post->post_type,'ascla_') || !isset(Catalog::TYPES[substr($post->post_type,6)])) { return false; }
+        if ($post->post_status==='draft' && (int)$post->post_author!==get_current_user_id()) { return false; }
         if (current_user_can('ascla_moderate') || (int)$post->post_author===get_current_user_id()) { return true; }
         if ($post->post_type==='ascla_contact' || $post->post_status!=='publish') { return false; }
         $meta=(array)get_post_meta($post->ID,'_ascla',true);

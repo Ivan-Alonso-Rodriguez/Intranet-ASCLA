@@ -123,7 +123,7 @@ final class Router
     {
         $pending=[];
         foreach (\ASCLA\Core\Domain\Catalog::TYPES as $key=>$label) {
-            foreach (get_posts(['post_type'=>'ascla_'.$key,'post_status'=>['pending','draft'],'numberposts'=>50]) as $post) { $pending[]=Content::serialize($post); }
+            foreach (get_posts(['post_type'=>'ascla_'.$key,'post_status'=>['pending'],'numberposts'=>50]) as $post) { $pending[]=Content::serialize($post); }
         }
         $comments=[];
         foreach (get_comments(['status'=>'hold','number'=>100]) as $c) { $post=get_post($c->comment_post_ID); if ($post&&str_starts_with($post->post_type,'ascla_')) { $comments[]=['id'=>(int)$c->comment_ID,'body'=>$c->comment_content,'can_delete'=>current_user_can('ascla_manage')||(int)$c->user_id===get_current_user_id(),'author'=>$c->user_id?Profiles::publicName((int)$c->user_id):'Comunidad ASCLA']; } }
