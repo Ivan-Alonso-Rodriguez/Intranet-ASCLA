@@ -157,7 +157,7 @@ docker compose run --rm cli wp ascla seed
 
 La sintaxis de comillas del primer comando de instalación es compatible con PowerShell y shells POSIX. No reemplaces la variable por una contraseña dentro de un archivo versionado. Para un sitio ya instalado omite `wp core install`. Abre `http://localhost:8088/intranet/`. Usuario demo: `demo.asociado`; contraseña: valor local de `ASCLA_DEMO_PASSWORD`. Administrador local: `ascla.admin`; contraseña: `ASCLA_ADMIN_PASSWORD`.
 
-También puedes crear la demo desde **ASCLA → Configuración → Preparar datos de demostración**, introduciendo una contraseña. Se generan 20 asociados ficticios y el perfil de prueba solicitado por Ivan (21 cuentas en total); los datos profesionales son de demostración. Las siguientes ejecuciones conservan ediciones y contraseñas existentes. No hay borrado automático de datos demo.
+También puedes crear la demo desde **ASCLA → Configuración → Preparar datos de demostración**, introduciendo una contraseña. Se generan 21 cuentas ficticias de demostración; los datos profesionales son únicamente de prueba. Las siguientes ejecuciones conservan ediciones y contraseñas existentes. No hay borrado automático de datos demo.
 
 ## Integraciones
 
@@ -189,3 +189,13 @@ Jobs: WordPress cron ejecuta `ascla_jobs`, continúa la cola pendiente con `ascl
 Si faltan páginas, reactiva el plugin o ejecuta `wp ascla migrate`. Si aparecen respuestas antiguas o sesiones mezcladas, excluye todas las páginas ASCLA y `/wp-json/ascla/v1/` del caché y purga la caché. Si falla una integración, comprueba modo, permisos, expiración y conectividad; nunca pegues tokens en logs o capturas. Si la demo ya existe, cambiar el password del formulario no reinicia contraseñas: usa la recuperación de WordPress.
 
 La documentación interna de desarrollo se conserva localmente en `docs/`, pero esa carpeta está excluida deliberadamente del repositorio de GitHub.
+
+## Jenkins + SonarQube del curso
+
+El repositorio incluye un `Jenkinsfile` con el mismo flujo general del proyecto de referencia del curso: `development` despliega; `qa` y `uat` ejecutan pruebas PHP con cobertura, SonarQube, Quality Gate y luego despliegan; `main` permanece protegida sin despliegue automático.
+
+En Jenkins deben existir las credenciales de tipo **Secret file** `ASCLA_DEV`, `ASCLA_QA` y `ASCLA_UAT`. Cada archivo debe definir sus propios puertos (`ASCLA_HTTP_PORT`, `ASCLA_MAILPIT_PORT`) y la URL del entorno (`ASCLA_SITE_URL`) para evitar colisiones. También deben estar configurados globalmente `SonarScanner` y `SonarQube-Server`.
+
+Antes de activar el job hay que confirmar con el TA el `sonar.projectKey` definitivo y que el webhook de SonarQube hacia Jenkins esté configurado para que `waitForQualityGate` pueda recibir el resultado. Las credenciales de SonarQube no se guardan en Git.
+
+La cobertura PHP se genera en `coverage/clover.xml` y los resultados PHPUnit en `coverage/junit.xml`. La cobertura JavaScript (`coverage/lcov.info`) queda pendiente de integrar al CI; por eso su propiedad está comentada en `sonar-project.properties`.

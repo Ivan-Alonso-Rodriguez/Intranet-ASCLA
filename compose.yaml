@@ -3,8 +3,8 @@ services:
   db:
     image: mariadb:11.4
     environment:
-      MARIADB_DATABASE: wordpress
-      MARIADB_USER: wordpress
+      MARIADB_DATABASE: ${ASCLA_DB_NAME:-wordpress}
+      MARIADB_USER: ${ASCLA_DB_USER:-wordpress}
       MARIADB_PASSWORD: ${ASCLA_DB_PASSWORD:?Set ASCLA_DB_PASSWORD in .env}
       MARIADB_ROOT_PASSWORD: ${ASCLA_DB_ROOT_PASSWORD:?Set ASCLA_DB_ROOT_PASSWORD in .env}
     volumes: ["db:/var/lib/mysql"]
@@ -12,23 +12,26 @@ services:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 5s
       retries: 30
+
   mailpit:
     image: axllent/mailpit:v1.27.10
-    ports: ["127.0.0.1:8025:8025"]
+    ports: ["127.0.0.1:${ASCLA_MAILPIT_PORT:-8025}:8025"]
     environment:
       MP_MAX_MESSAGES: 200
       MP_MAX_AGE: 24h
+
   wordpress:
     image: wordpress:6.8.3-php8.3-apache
-    ports: ["127.0.0.1:8088:80"]
+    ports: ["127.0.0.1:${ASCLA_HTTP_PORT:-8088}:80"]
     environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_HOST: ${ASCLA_DB_HOST:-db}
+      WORDPRESS_DB_USER: ${ASCLA_DB_USER:-wordpress}
       WORDPRESS_DB_PASSWORD: ${ASCLA_DB_PASSWORD}
-      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_NAME: ${ASCLA_DB_NAME:-wordpress}
+      ASCLA_PROJECT_ROOT: /opt/ascla-project
       WORDPRESS_CONFIG_EXTRA: |
-        define('WP_ENVIRONMENT_TYPE', 'local');
-        define('ASCLA_LOCAL_MAIL_CAPTURE', true);
+        define('WP_ENVIRONMENT_TYPE', '${ASCLA_WP_ENVIRONMENT_TYPE:-local}');
+        define('ASCLA_LOCAL_MAIL_CAPTURE', filter_var('${ASCLA_LOCAL_MAIL_CAPTURE:-true}', FILTER_VALIDATE_BOOLEAN));
         define('WP_DEBUG_LOG', true);
         define('WP_DEBUG_DISPLAY', false);
         define('AUTOMATIC_UPDATER_DISABLED', true);
@@ -38,42 +41,58 @@ services:
       - wordpress:/var/www/html
       - ./wp-content/plugins/ascla-core:/var/www/html/wp-content/plugins/ascla-core
       - ./tests:/opt/ascla-tests:ro
+      - ./sonar-project.properties:/opt/ascla-project/sonar-project.properties:ro
+      - ./README.md:/opt/ascla-project/README.md:ro
+      - ./VERSION_HISTORY.md:/opt/ascla-project/VERSION_HISTORY.md:ro
       - ./config/uploads.ini:/usr/local/etc/php/conf.d/ascla-uploads.ini:ro
     depends_on:
       db: {condition: service_healthy}
       mailpit: {condition: service_started}
+
   cron:
     image: wordpress:cli-php8.3
     user: "33:33"
     environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_HOST: ${ASCLA_DB_HOST:-db}
+      WORDPRESS_DB_USER: ${ASCLA_DB_USER:-wordpress}
       WORDPRESS_DB_PASSWORD: ${ASCLA_DB_PASSWORD}
-      WORDPRESS_DB_NAME: wordpress
-      WORDPRESS_CONFIG_EXTRA: "define('ASCLA_LOCAL_MAIL_CAPTURE', true); define('WP_ENVIRONMENT_TYPE', 'local'); define('AUTOMATIC_UPDATER_DISABLED', true); define('WP_AUTO_UPDATE_CORE', false);"
+      WORDPRESS_DB_NAME: ${ASCLA_DB_NAME:-wordpress}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('ASCLA_LOCAL_MAIL_CAPTURE', filter_var('${ASCLA_LOCAL_MAIL_CAPTURE:-true}', FILTER_VALIDATE_BOOLEAN));
+        define('WP_ENVIRONMENT_TYPE', '${ASCLA_WP_ENVIRONMENT_TYPE:-local}');
+        define('AUTOMATIC_UPDATER_DISABLED', true);
+        define('WP_AUTO_UPDATE_CORE', false);
     command: ["sh", "-c", "while true; do if wp core is-installed --quiet; then wp cron event run --due-now --quiet; fi; sleep 10; done"]
     volumes:
       - wordpress:/var/www/html
       - ./wp-content/plugins/ascla-core:/var/www/html/wp-content/plugins/ascla-core
     depends_on: [wordpress]
+
   cli:
     image: wordpress:cli-php8.3
     user: "33:33"
     profiles: ["tools"]
     environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_HOST: ${ASCLA_DB_HOST:-db}
+      WORDPRESS_DB_USER: ${ASCLA_DB_USER:-wordpress}
       WORDPRESS_DB_PASSWORD: ${ASCLA_DB_PASSWORD}
-      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_NAME: ${ASCLA_DB_NAME:-wordpress}
+      ASCLA_HTTP_PORT: ${ASCLA_HTTP_PORT:-8088}
+      ASCLA_SITE_URL: ${ASCLA_SITE_URL:-}
+      ASCLA_SITE_TITLE: ${ASCLA_SITE_TITLE:-ASCLA Comunidad profesional}
+      ASCLA_ADMIN_USER: ${ASCLA_ADMIN_USER:-ascla.admin}
+      ASCLA_ADMIN_EMAIL: ${ASCLA_ADMIN_EMAIL:-admin@example.invalid}
       ASCLA_ADMIN_PASSWORD: ${ASCLA_ADMIN_PASSWORD}
       ASCLA_DEMO_PASSWORD: ${ASCLA_DEMO_PASSWORD}
-      ASCLA_IVAN_DEMO_PASSWORD: ${ASCLA_IVAN_DEMO_PASSWORD:-}
+      ASCLA_PROFILE_DEMO_PASSWORD: ${ASCLA_PROFILE_DEMO_PASSWORD:-}
+      ASCLA_SEED_DATA: ${ASCLA_SEED_DATA:-false}
     volumes:
       - wordpress:/var/www/html
       - ./wp-content/plugins/ascla-core:/var/www/html/wp-content/plugins/ascla-core
       - ./scripts:/opt/ascla-scripts:ro
       - ./tests:/opt/ascla-tests:ro
     depends_on: [wordpress]
+
 volumes:
   db:
   wordpress:

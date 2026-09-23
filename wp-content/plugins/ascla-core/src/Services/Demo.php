@@ -64,9 +64,9 @@ final class Demo
                 wp_set_current_user($users[0]); Notifications::send($users[0],'welcome','Tu comunidad ASCLA está lista para explorar.'); update_option('ascla_demo_messages',true,false);
             }
             wp_set_current_user($original);
-            $ivan=DemoUser::ivan($password);
-            DemoShowcase::seed($make,array_merge($users,[$ivan['id']],$ivan['peer_ids']));
-            wp_set_current_user($original); Audit::record('demo_seeded'); return ['users'=>21,'fictional_users'=>20,'ivan'=>$ivan['login'],'companies'=>9,'login'=>'demo.asociado','message'=>'Datos ficticios preparados. Una segunda ejecución conserva cambios y contraseñas existentes.'];
+            $profile=DemoUser::sample($password);
+            DemoShowcase::seed($make,array_merge($users,[$profile['id']],$profile['peer_ids']));
+            wp_set_current_user($original); Audit::record('demo_seeded'); return ['users'=>21,'fictional_users'=>21,'profile'=>$profile['login'],'companies'=>9,'login'=>'demo.asociado','message'=>'Datos ficticios preparados. Una segunda ejecución conserva cambios y contraseñas existentes.'];
         }); } finally { wp_set_current_user($actor); }
     }
 }

@@ -59,12 +59,12 @@ final class Plugin
                 try{Services\Demo::seed($password);}
                 catch(\Throwable $error){\WP_CLI::error($error instanceof Rest\ApiException?$error->getMessage():'No se pudo crear la demo. Revise permisos y datos existentes.');}
                 finally{wp_set_current_user($previous);}
-                \WP_CLI::success('Demo preparada: demo.asociado e ivan.alonso2602. Contraseñas existentes conservadas.');
+                \WP_CLI::success('Demo preparada: demo.asociado y demo.prueba. Contraseñas existentes conservadas.');
             });
             \WP_CLI::add_command('ascla demo-user',static function($args,$options){
-                if(($args[0]??'')!=='ivan'){\WP_CLI::error('Uso: wp ascla demo-user ivan [--reset-password]');}
-                $result=Services\DemoUser::ivan(getenv('ASCLA_DEMO_PASSWORD')?:'',isset($options['reset-password']));
-                \WP_CLI::success('Usuario '.Services\DemoUser::EMAIL.' preparado. '.($result['password_reset']?'Contraseña actualizada desde ASCLA_IVAN_DEMO_PASSWORD.':'El seed conserva la contraseña existente.'));
+                if(($args[0]??'')!=='profile'){\WP_CLI::error('Uso: wp ascla demo-user profile [--reset-password]');}
+                $result=Services\DemoUser::sample(getenv('ASCLA_DEMO_PASSWORD')?:'',isset($options['reset-password']));
+                \WP_CLI::success('Usuario '.Services\DemoUser::EMAIL.' preparado. '.($result['password_reset']?'Contraseña actualizada desde ASCLA_PROFILE_DEMO_PASSWORD.':'El seed conserva la contraseña existente.'));
             });
             \WP_CLI::add_command('ascla migrate', static function () { Database\Installer::activate(false); \WP_CLI::success('Migraciones aplicadas.'); });
             \WP_CLI::add_command('ascla jobs', [Jobs\Queue::class, 'run']);

@@ -108,9 +108,9 @@ final class ReleaseCompletionTest extends TestCase
     }
     public function testReleaseMetadataMatchesPluginVersionAndSchema():void
     {
-        $root=dirname(__DIR__,2);
-        $plugin=file_get_contents($root.'/wp-content/plugins/ascla-core/ascla-core.php');
-        $readme=file_get_contents($root.'/wp-content/plugins/ascla-core/readme.txt');
+        $root=getenv('ASCLA_PROJECT_ROOT')?:dirname(__DIR__,2);
+        $plugin=file_get_contents(WP_PLUGIN_DIR.'/ascla-core/ascla-core.php');
+        $readme=file_get_contents(WP_PLUGIN_DIR.'/ascla-core/readme.txt');
         $sonar=file_get_contents($root.'/sonar-project.properties');
         $docs=file_get_contents($root.'/README.md');
         $history=file_get_contents($root.'/VERSION_HISTORY.md');

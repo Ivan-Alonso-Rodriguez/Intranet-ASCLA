@@ -353,7 +353,7 @@ Panel de administración con solicitudes y usuarios; mensajería cada 2 segundos
 * Perfil: etiquetas de intereses, grupos desplegables, interruptores y estados de privacidad accesibles.
 
 = 1.4.0 =
-Navegación interna sin recarga con History API, shell inicial desde WordPress y usuario Ivan idempotente con contraseña configurable.
+Navegación interna sin recarga con History API, shell inicial desde WordPress y perfil demo idempotente con contraseña configurable.
 = 1.3.0 =
 Privacidad consistente, avisos robustos, validación previa de ediciones, fidelidad extractiva y redacción pre/post IA. Networking y microagendas conectados a providers; multimedia demo con cápsulas e infografía sustentadas.
 = 1.2.0 =

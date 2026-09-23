@@ -7,13 +7,13 @@ final class NavigationDemoTest extends TestCase
     private array $users=[];
     protected function setUp():void {wp_set_current_user(get_users(['role'=>'administrator','number'=>1])[0]->ID);}
     protected function tearDown():void {foreach($this->users as $id)wp_delete_user($id);wp_set_current_user(0);}
-    public function testRequestedIdentityIsIdempotentAndPreservesManualProfileAndPassword():void
+    public function testDemoIdentityIsIdempotentAndPreservesManualProfileAndPassword():void
     {
-        $first=DemoUser::ivan(wp_generate_password(24));$id=$first['id'];$before=Profiles::raw($id);$hash=get_userdata($id)->user_pass;
+        $first=DemoUser::sample(wp_generate_password(24));$id=$first['id'];$before=Profiles::raw($id);$hash=get_userdata($id)->user_pass;
         $count=count(get_users(['meta_key'=>'_ascla_demo','meta_value'=>1]));
-        $again=DemoUser::ivan(wp_generate_password(24));self::assertSame($id,$again['id']);self::assertSame($before,Profiles::raw($id));self::assertSame($hash,get_userdata($id)->user_pass);self::assertSame($count,count(get_users(['meta_key'=>'_ascla_demo','meta_value'=>1])));
+        $again=DemoUser::sample(wp_generate_password(24));self::assertSame($id,$again['id']);self::assertSame($before,Profiles::raw($id));self::assertSame($hash,get_userdata($id)->user_pass);self::assertSame($count,count(get_users(['meta_key'=>'_ascla_demo','meta_value'=>1])));
         self::assertSame(DemoUser::EMAIL,get_userdata($id)->user_email);self::assertContains('ascla_member',get_userdata($id)->roles);self::assertCount(2,$first['peer_ids']);
-        try{Profiles::save(['company'=>'Cambio manual de prueba','networking'=>false],$id);DemoUser::ivan(wp_generate_password(24));$saved=Profiles::raw($id);self::assertSame('Cambio manual de prueba',$saved['company']);self::assertFalse($saved['networking']);}
+        try{Profiles::save(['company'=>'Cambio manual de prueba','networking'=>false],$id);DemoUser::sample(wp_generate_password(24));$saved=Profiles::raw($id);self::assertSame('Cambio manual de prueba',$saved['company']);self::assertFalse($saved['networking']);}
         finally{Profiles::save(['company'=>$before['company'],'networking'=>$before['networking']],$id);}
     }
     public function testDemoUpsertDoesNotDuplicateEmailOrTakeOverOtherAccounts():void

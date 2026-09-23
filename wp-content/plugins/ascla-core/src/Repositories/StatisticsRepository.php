@@ -40,7 +40,7 @@ final class StatisticsRepository
             "p.post_type='ascla_event'",
             "p.post_status='publish'",
             $wpdb->prepare('ending.meta_value >= %s AND ending.meta_value < %s AND ending.meta_value <= %s',$from,$until,$now),
-            'starting.meta_value < ending.meta_value',
+            'start_meta.meta_value < ending.meta_value',
             "NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} cancelled WHERE cancelled.post_id=p.ID AND cancelled.meta_key='_ascla_cancelled' AND cancelled.meta_value='1')",
             // Compatibility with pre-index events that have not been edited since _ascla_cancelled was introduced.
             $wpdb->prepare("NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} legacy_cancelled WHERE legacy_cancelled.post_id=p.ID AND legacy_cancelled.meta_key='_ascla' AND legacy_cancelled.meta_value LIKE %s)",'%'.$wpdb->esc_like('s:9:"cancelled";b:1;').'%'),
@@ -59,7 +59,7 @@ final class StatisticsRepository
             EXISTS(SELECT 1 FROM {$wpdb->postmeta} complete WHERE complete.post_id=p.ID AND complete.meta_key='_ascla_attendance_complete' AND complete.meta_value NOT IN ('','0')) complete
             FROM {$wpdb->posts} p
             JOIN {$wpdb->postmeta} ending ON ending.post_id=p.ID AND ending.meta_key='_ascla_end'
-            JOIN {$wpdb->postmeta} starting ON starting.post_id=p.ID AND starting.meta_key='_ascla_start'
+            JOIN {$wpdb->postmeta} start_meta ON start_meta.post_id=p.ID AND start_meta.meta_key='_ascla_start'
             WHERE ".implode(' AND ',$where);
     }
 

@@ -47,7 +47,7 @@ services:
       WORDPRESS_CONFIG_EXTRA: "define('WP_ENVIRONMENT_TYPE', 'local'); define('AUTOMATIC_UPDATER_DISABLED', true);"
       ASCLA_ADMIN_PASSWORD: ${ASCLA_ADMIN_PASSWORD}
       ASCLA_DEMO_PASSWORD: ${ASCLA_DEMO_PASSWORD}
-      ASCLA_IVAN_DEMO_PASSWORD: ${ASCLA_IVAN_DEMO_PASSWORD:-}
+      ASCLA_PROFILE_DEMO_PASSWORD: ${ASCLA_PROFILE_DEMO_PASSWORD:-}
     volumes:
       - zip_wordpress:/var/www/html
       - ./dist:/dist:ro

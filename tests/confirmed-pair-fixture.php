@@ -5,7 +5,7 @@ if (PHP_SAPI!=='cli' || wp_get_environment_type()!=='local') exit(1);
 use ASCLA\Core\Repositories\Store;
 use ASCLA\Core\Services\Connections;
 $input=json_decode(stream_get_contents(STDIN),true);$a=(int)($input['a']??0);$b=(int)($input['b']??0);
-foreach([$a,$b] as $id) { $user=get_userdata($id); if (!$user || !(str_starts_with($user->user_login,'demo.') || $user->user_login==='ivan.alonso2602')) exit(2); }
+foreach([$a,$b] as $id) { $user=get_userdata($id); if (!$user || !str_starts_with($user->user_login,'demo.')) exit(2); }
 if (($input['action']??'')==='setup') {
     $state=Connections::between($a,$b); if ($state['blocked']) exit(3);
     $created=$state['state']!=='connected';
