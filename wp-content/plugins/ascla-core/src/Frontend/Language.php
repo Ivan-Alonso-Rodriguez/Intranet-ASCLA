@@ -28,6 +28,7 @@ final class Language
     public static function label(string $text): string {return self::english()?(self::labels()[$text]??$text):$text;}
     public static function remember(string $login,\WP_User $user): void
     {
+        unset($login);
         $locale=self::requested();
         if($locale!=='') {update_user_meta($user->ID,'locale',$locale); }
     }
@@ -73,31 +74,47 @@ final class Language
         check_admin_referer('ascla_change_language','_ascla_language_nonce');
         $locale=self::valid($_POST['_ascla_locale']??'');
         if($locale!=='') {update_user_meta(get_current_user_id(),'locale',$locale); }
-        $redirect=wp_get_referer()?:(current_user_can('manage_options')?admin_url('admin.php?page=ascla'):App::adminUrl());
+        $redirect=wp_get_referer();
+        if(!$redirect){$redirect=current_user_can('manage_options')?admin_url('admin.php?page=ascla'):App::adminUrl();}
         wp_safe_redirect($redirect);
         exit;
     }
+    private static function determinedLocale(string $locale): string
+    {
+        if(($GLOBALS['pagenow']??'')==='wp-login.php' || Login::isFrontendRequest()) {return self::requested()?:'es_ES';}
+        if(did_action('set_current_user')) {return self::valid(get_user_meta(get_current_user_id(),'locale',true))?:$locale;}
+        return $locale;
+    }
+
+    private static function accountLocale(string $locale): string
+    {
+        if(did_action('set_current_user') && get_current_user_id()) {return self::valid(get_user_meta(get_current_user_id(),'locale',true))?:$locale;}
+        return $locale;
+    }
+
+    private static function loginLocaleField(): void
+    {
+        echo '<input type="hidden" name="_ascla_locale" value="'.esc_attr(self::requested()).'">';
+    }
+
+    private static function localizedAttributes(string $attributes): string
+    {
+        if(($GLOBALS['pagenow']??'')==='wp-login.php' || Login::isFrontendPage() || App::page()) {return preg_replace('/lang="[^"]*"/','lang="'.esc_attr(str_replace('_','-',self::current())).'"',$attributes);}
+        return $attributes;
+    }
+
     public static function boot(): void
     {
         add_action('wp_login',[self::class,'remember'],10,2);
         add_action('template_redirect',[self::class,'change'],1);
         add_action('admin_init',[self::class,'changeAdmin'],1);
         add_action('login_footer',[self::class,'selector']);
-        add_filter('determine_locale',static function($locale){
-            if(($GLOBALS['pagenow']??'')==='wp-login.php' || Login::isFrontendRequest()) {return self::requested()?:'es_ES'; }
-            if(did_action('set_current_user')) {return self::valid(get_user_meta(get_current_user_id(),'locale',true))?:$locale; }
-            return $locale;
-        });
-        add_filter('locale',static function($locale){
-            if(did_action('set_current_user') && get_current_user_id()) {return self::valid(get_user_meta(get_current_user_id(),'locale',true))?:$locale; }
-            return $locale;
-        });
+        add_filter('determine_locale',static fn($locale)=>self::determinedLocale((string)$locale));
+        add_filter('locale',static fn($locale)=>self::accountLocale((string)$locale));
         // Disable WordPress' native login selector: it may inject its own en_US option.
         add_filter('login_display_language_dropdown','__return_false');
-        foreach(['login_form','lostpassword_form','resetpass_form'] as $hook) {add_action($hook,static function(){echo '<input type="hidden" name="_ascla_locale" value="'.esc_attr(self::requested()).'">';}); }
-        add_filter('language_attributes',static function($attributes){
-            if(($GLOBALS['pagenow']??'')==='wp-login.php' || Login::isFrontendPage() || App::page()) {return preg_replace('/lang="[^"]*"/','lang="'.esc_attr(str_replace('_','-',self::current())).'"',$attributes); }
-            return $attributes;
-        });
+        foreach(['login_form','lostpassword_form','resetpass_form'] as $hook) {add_action($hook,static fn()=>self::loginLocaleField());}
+        add_filter('language_attributes',static fn($attributes)=>self::localizedAttributes((string)$attributes));
     }
+
 }

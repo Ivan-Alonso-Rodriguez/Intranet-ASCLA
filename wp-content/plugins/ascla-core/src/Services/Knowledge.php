@@ -25,73 +25,33 @@ final class Knowledge
     }
     public static function answer(string $question,array $history=[]): array
     {
-        $question=Access::text($question,2000);
-        $tokens=\ASCLA\Core\Repositories\KnowledgeSearch::tokens($question);
-        $ranked=[]; $protected=false; $allIdentities=[];
-        $posts=\ASCLA\Core\Repositories\KnowledgeSearch::candidates($tokens);
-        foreach ($posts as $post) {
-            if (!Content::canRead($post)) { continue; }
-            $meta=(array)get_post_meta($post->ID,'_ascla',true);
-            if (!empty($meta['generated'])&&empty($meta['reviewed'])) { continue; }
-            $body=wp_strip_all_tags($post->post_content);
-            if (!empty($meta['chatham'])) {
-                $identities=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];
-                $protected=true; $allIdentities=array_merge($allIdentities,$identities);
-                $body=Anonymizer::redact($body,$identities);
-            }
-            $title=!empty($meta['chatham'])?Anonymizer::redact($post->post_title,$identities):$post->post_title;
-            $score=\ASCLA\Core\Repositories\KnowledgeSearch::score($title,$body,$tokens);
-            if($score>0) { $ranked[]=['id'=>$post->ID,'title'=>$title,'body'=>\ASCLA\Core\Repositories\KnowledgeSearch::excerpt($body,$tokens),'score'=>$score,'url'=>Content::serialize($post)['url'],'kind'=>'resource']; }
-        }
-        usort($ranked,static fn($a,$b)=>($b['score']<=>$a['score'])?:($b['id']<=>$a['id']));
-
-        $history=array_values(array_slice(array_filter($history,static fn($turn)=>is_array($turn)&&trim((string)($turn['question']??''))!==''&&trim((string)($turn['answer']??''))!==''),-6));
-        $contextQuestion=$question;
-        if($history && self::followUp($question)){
-            $last=end($history);$contextQuestion.=' '.Access::text($last['question']??'',1000);
-        }
-        $context=AssistantContext::build($contextQuestion);
-        $sources=[];$seen=[];
-        // Live intranet context comes first for operational questions such as upcoming events.
-        foreach(array_merge($context['sources'],array_slice($ranked,0,6)) as $source){
-            $id=(int)($source['id']??0);if($id<=0||isset($seen[$id])) {continue; }
-            $seen[$id]=true;$sources[]=$source;if(count($sources)>=8) {break; }
-        }
-        $conversation=self::conversational($question);
-        if (!$sources && empty($context['answerable']) && !$conversation) {
-            return ['answer'=>self::ABSTENTION,'sources'=>[],'mode'=>self::provider()->mode(),'grounding'=>['policy'=>Grounding::POLICY,'context_source_ids'=>[],'valid_references'=>0,'ignored_references'=>0,'live_context_used'=>false,'conversation_only'=>false]];
-        }
-        $inputQuestion=$protected?EntityRedactor::redact($question,$allIdentities):$question;
-        if($protected){ $history=EntityRedactor::tree($history,$allIdentities); }
-        $result=self::provider()->generate('answer',['question'=>$inputQuestion,'sources'=>$sources,'live_context'=>$context['live'],'history'=>$history]);
-        if($protected){ $result=EntityRedactor::tree($result,$allIdentities); }
-        $verified=Grounding::answer($result,$sources);
-        $verified['grounding']['live_context_used']=!empty($context['answerable']);
-        $verified['grounding']['conversation_only']=$conversation&&!$sources&&!$context['answerable'];
-        $verified['grounding']['snapshot_at']=current_datetime()->format(DATE_ATOM);
-        if (!$verified['answer']) { return ['answer'=>'No pude preparar una respuesta verificable con la información disponible en ASCLA. Intenta reformular la pregunta.','sources'=>[],'mode'=>self::provider()->mode(),'grounding'=>$verified['grounding']]; }
-        $answer=$protected?EntityRedactor::redact($verified['answer'],$allIdentities):$verified['answer'];
-        if($protected){ Access::require(EntityRedactor::validateRedaction($answer,$allIdentities)['valid'],'La respuesta requiere revisión de anonimización.',502); }
-        return ['answer'=>Access::text($answer,20000),'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url'],'kind'=>$source['kind']??'content'],$verified['sources']),'mode'=>self::provider()->mode(),'grounding'=>$verified['grounding']];
+        return KnowledgeAnswer::run($question,$history);
     }
 
-    private static function conversational(string $question): bool
-    {
-        $plain=mb_strtolower(remove_accents(trim($question)));
-        return (bool)preg_match('/(?:^(hola|hello|hi|buenas|buenos dias|buenas tardes|buenas noches|gracias|thanks)\b)|(?:\b(que puedes hacer|como me ayudas|ayuda|help|what can you do)\b)/u',$plain);
-    }
 
-    private static function followUp(string $question): bool
-    {
-        $plain=mb_strtolower(remove_accents(trim($question)));
-        return mb_strlen($plain)<=120 && (bool)preg_match('/(?:^(y|pero|entonces)\b)|(?:\b(cual|cuales|cuando|hora|donde|virtual|presencial|ese|esa|eso|este|esta|primero|primera|segundo|segunda|tambien|more|which|when|where|what time|that one|the first|the second)\b)/u',$plain);
-    }
+
+
 
     /** Revalidate saved answers against the currently readable, reviewed evidence. */
     public static function storedAnswer(array $result): array
     {
-        $sources=[];$identities=[];$protected=false;
         $originalIds=array_values(array_unique(array_filter(array_map('intval',$result['grounding']['context_source_ids']??array_column($result['sources']??[],'id')),static fn($id)=>$id>0)));
+        if (!$originalIds) {
+            $grounding=$result['grounding']??[];$usable=!empty($grounding['live_context_used']) || !empty($grounding['conversation_only']);
+            return $usable?['answer'=>Access::text($result['answer']??'',20000),'sources'=>[],'mode'=>$result['mode']??'ASCLA','grounding'=>$grounding]:['answer'=>self::ABSTENTION,'sources'=>[],'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL];
+        }
+        [$sources,$identities,$protected]=self::storedSources($originalIds);
+        if (count($sources)!==count($originalIds)) {return ['answer'=>'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar al Asistente ASCLA.','sources'=>[],'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL];}
+        $candidate=['answer'=>$result['answer']??'','source_ids'=>array_column($result['sources']??[],'id')];
+        if ($protected) { $candidate=EntityRedactor::tree($candidate,$identities); }
+        $verified=Grounding::answer($candidate,$sources);$answer=$verified['answer']?:'No existe suficiente información verificable en las fuentes actuales. Puedes volver a consultar al Asistente ASCLA.';
+        $verified['grounding']=array_merge($result['grounding']??[],$verified['grounding']);
+        return ['answer'=>$answer,'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url']],$verified['sources']),'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL,'grounding'=>$verified['grounding']];
+    }
+
+    private static function storedSources(array $originalIds): array
+    {
+        $sources=[];$identities=[];$protected=false;
         foreach ($originalIds as $sourceId) {
             $post=get_post($sourceId);
             if (!$post || $post->post_status!=='publish' || !Content::canRead($post)) { continue; }
@@ -99,25 +59,12 @@ final class Knowledge
             if (!empty($meta['generated']) && empty($meta['reviewed'])) { continue; }
             $body=wp_strip_all_tags($post->post_content);$title=$post->post_title;
             if (!empty($meta['chatham'])) {
-                $protected=true;$known=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];
-                $identities=array_merge($identities,$known);
+                $protected=true;$known=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];$identities=array_merge($identities,$known);
                 $body=EntityRedactor::redact($body,$known);$title=EntityRedactor::redact($title,$known);
             }
             $sources[]=['id'=>$post->ID,'body'=>$body,'title'=>$title,'url'=>Content::serialize($post)['url']];
         }
-        if(!$originalIds){
-            if(!empty($result['grounding']['live_context_used'])||!empty($result['grounding']['conversation_only'])){
-                return ['answer'=>Access::text($result['answer']??'',20000),'sources'=>[],'mode'=>$result['mode']??'ASCLA','grounding'=>$result['grounding']??[]];
-            }
-            return ['answer'=>self::ABSTENTION,'sources'=>[],'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL];
-        }
-        if(count($sources)!==count($originalIds)) { return ['answer'=>'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar al Asistente ASCLA.','sources'=>[],'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL]; }
-        $candidate=['answer'=>$result['answer']??'','source_ids'=>array_column($result['sources']??[],'id')];
-        if($protected){ $candidate=EntityRedactor::tree($candidate,$identities); }
-        $verified=Grounding::answer($candidate,$sources);
-        $answer=$verified['answer']?:'No existe suficiente información verificable en las fuentes actuales. Puedes volver a consultar al Asistente ASCLA.';
-        $verified['grounding']=array_merge($result['grounding']??[],$verified['grounding']);
-        return ['answer'=>$answer,'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url']],$verified['sources']),'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL,'grounding'=>$verified['grounding']];
+        return [$sources,$identities,$protected];
     }
 
     public static function videoMetadata(int $id): array
@@ -148,40 +95,7 @@ final class Knowledge
     }
     private static function syncVideoMetadata(int $id,bool $strict): array
     {
-        $post=Content::get($id); $meta=(array)get_post_meta($id,'_ascla',true);
-        Access::require($post->post_type==='ascla_resource' && !empty($meta['video_id']),'Seleccione un recurso con video de YouTube.',400);
-        $duration=0; $mode=''; $title='';
-        $previousMode=(string)($meta['video_metadata_mode']??'');
-        $previousDuration=str_contains($previousMode,'transcripci')?0:max(0,min(604800,(int)($meta['duration_seconds']??0)));
-        $apiError=null;
-        // Metadata is independent from transcript mode: if this account has YouTube OAuth,
-        // always prefer the official videos.list contentDetails.duration value.
-        try {
-            $data=(new YouTubeVideoProvider())->metadata($meta['video_id']);
-            $duration=max(0,min(604800,(int)($data['duration_seconds']??0)));
-            $mode=(string)($data['mode']??'API REAL YouTube');
-            $title=sanitize_text_field($data['source_title']??'');
-        } catch (\Throwable $e) { $apiError=$e; }
-        if ($duration<=0) {
-            try {
-                $data=YouTubeVideoProvider::publicMetadata($meta['video_id']);
-                $duration=max(0,min(604800,(int)($data['duration_seconds']??0)));
-                $mode=(string)($data['mode']??'Metadatos públicos de YouTube');
-            } catch (\Throwable $e) {
-                if ($strict && $previousDuration<=0) {
-                    throw new \RuntimeException('No se pudo verificar la duración directamente desde YouTube. Conecta YouTube OAuth y vuelve a intentar; ASCLA no estimará la duración usando la transcripción.');
-                }
-            }
-        }
-        if ($duration<=0) { $duration=$previousDuration; }
-        if ($duration>0) { $meta['duration_seconds']=$duration; }
-        else { unset($meta['duration_seconds']); if (str_contains($previousMode,'transcripci')) { unset($meta['video_metadata_mode']); } }
-        $meta['thumbnail_url']=YouTubeVideoProvider::thumbnail($meta['video_id']);
-        if ($mode!=='') { $meta['video_metadata_mode']=$mode; }
-        if ($title!=='') { $meta['video_source_title']=$title; }
-        update_post_meta($id,'_ascla',$meta);
-        if ($mode!=='') { Audit::record('video_metadata_updated',$id,$mode); }
-        return ['resource_id'=>$id,'mode'=>$mode?:($meta['video_metadata_mode']??'Datos conservados'),'duration_seconds'=>$duration,'message'=>$duration>0?'Duración y miniatura actualizadas automáticamente.':'No fue posible detectar la duración; se conservaron los datos disponibles.'];
+        return KnowledgeVideoMetadata::sync($id,$strict);
     }
     public static function multimedia(int $id,?AIProviderInterface $ai=null): array
     {
@@ -219,7 +133,7 @@ final class Knowledge
         $grounded=$durationSeconds>0
             ? \ASCLA\Core\Domain\Transcript::moments($transcript,array_merge((array)($result['moments']??[]),(array)($result['excerpts']??[])),$durationSeconds)
             : [];
-        $grounded=array_map(static function($clip) use($id,$meta) {
+        $grounded=array_map(static function($clip) use($id) {
             $clip['duration']=$clip['end']-$clip['start'];$clip['source_id']=$id;
             $clip['description']=$clip['title'];$clip['reason']=$clip['selection'];
             return $clip;
@@ -313,7 +227,7 @@ final class Knowledge
                 $transcript=trim((string)($video['text']??'')); $videoMode=(string)($video['mode']??'API REAL YouTube');
             } catch (\Throwable $e) {
                 self::rememberTranscriptFailure($id,$meta,$e->getMessage());
-                throw new \RuntimeException('No se pudo obtener una transcripción autorizada desde YouTube. Puede que el video no tenga subtítulos accesibles para esta cuenta. Pega una transcripción manual antes de generar el resumen; ASCLA no inventará contenido.');
+                throw new ServiceException('No se pudo obtener una transcripción autorizada desde YouTube. Puede que el video no tenga subtítulos accesibles para esta cuenta. Pega una transcripción manual antes de generar el resumen; ASCLA no inventará contenido.');
             }
         }
         if (mb_strlen($transcript)<30) {
@@ -405,3 +319,169 @@ final class Knowledge
     }
 
 }
+
+final class KnowledgeAnswer
+{
+    private const ABSTENTION='No existe suficiente información en ASCLA para responder esta consulta. Prueba con una pregunta sobre eventos, publicaciones o recursos de la comunidad.';
+    private const IDENTITIES_SEPARATOR='/[\n,;]+/u';
+
+    public static function run(string $question,array $history): array
+    {
+        $question=Access::text($question,2000);
+        $tokens=\ASCLA\Core\Repositories\KnowledgeSearch::tokens($question);
+        [$ranked,$protected,$identities]=self::ranked($tokens);
+        $history=self::history($history);
+        $contextQuestion=self::contextQuestion($question,$history);
+        $context=AssistantContext::build($contextQuestion);
+        $sources=self::sources($context,$ranked);
+        $conversation=self::conversational($question);
+        if (!$sources && empty($context['answerable']) && !$conversation) {
+            return ['answer'=>self::ABSTENTION,'sources'=>[],'mode'=>Knowledge::provider()->mode(),'grounding'=>['policy'=>Grounding::POLICY,'context_source_ids'=>[],'valid_references'=>0,'ignored_references'=>0,'live_context_used'=>false,'conversation_only'=>false]];
+        }
+        return self::generate($question,$history,$context,$sources,$conversation,$protected,$identities);
+    }
+
+    private static function ranked(array $tokens): array
+    {
+        $ranked=[];$protected=false;$allIdentities=[];
+        foreach (\ASCLA\Core\Repositories\KnowledgeSearch::candidates($tokens) as $post) {
+            if (!Content::canRead($post)) { continue; }
+            $meta=(array)get_post_meta($post->ID,'_ascla',true);
+            if (!empty($meta['generated']) && empty($meta['reviewed'])) { continue; }
+            [$title,$body,$identities]=self::sourceText($post,$meta);
+            if ($identities) { $protected=true;$allIdentities=array_merge($allIdentities,$identities); }
+            $score=\ASCLA\Core\Repositories\KnowledgeSearch::score($title,$body,$tokens);
+            if ($score>0) {
+                $ranked[]=['id'=>$post->ID,'title'=>$title,'body'=>\ASCLA\Core\Repositories\KnowledgeSearch::excerpt($body,$tokens),'score'=>$score,'url'=>Content::serialize($post)['url'],'kind'=>'resource'];
+            }
+        }
+        usort($ranked,static fn($a,$b)=>($b['score']<=>$a['score'])?:($b['id']<=>$a['id']));
+        return [$ranked,$protected,$allIdentities];
+    }
+
+    private static function sourceText(\WP_Post $post,array $meta): array
+    {
+        $body=wp_strip_all_tags($post->post_content);$title=$post->post_title;$identities=[];
+        if (!empty($meta['chatham'])) {
+            $identities=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];
+            $body=Anonymizer::redact($body,$identities);
+            $title=Anonymizer::redact($title,$identities);
+        }
+        return [$title,$body,$identities];
+    }
+
+    private static function history(array $history): array
+    {
+        return array_values(array_slice(array_filter(
+            $history,
+            static fn($turn)=>is_array($turn)&&trim((string)($turn['question']??''))!==''&&trim((string)($turn['answer']??''))!==''
+        ),-6));
+    }
+
+    private static function contextQuestion(string $question,array $history): string
+    {
+        if (!$history || !self::followUp($question)) { return $question; }
+        $last=end($history);
+        return $question.' '.Access::text($last['question']??'',1000);
+    }
+
+    private static function sources(array $context,array $ranked): array
+    {
+        $sources=[];$seen=[];
+        foreach (array_merge($context['sources'],array_slice($ranked,0,6)) as $source) {
+            $id=(int)($source['id']??0);
+            if ($id<=0 || isset($seen[$id])) { continue; }
+            $seen[$id]=true;$sources[]=$source;
+            if (count($sources)>=8) { break; }
+        }
+        return $sources;
+    }
+
+    private static function generate(string $question,array $history,array $context,array $sources,bool $conversation,bool $protected,array $identities): array
+    {
+        $inputQuestion=$protected?EntityRedactor::redact($question,$identities):$question;
+        if ($protected) { $history=EntityRedactor::tree($history,$identities); }
+        $result=Knowledge::provider()->generate('answer',['question'=>$inputQuestion,'sources'=>$sources,'live_context'=>$context['live'],'history'=>$history]);
+        if ($protected) { $result=EntityRedactor::tree($result,$identities); }
+        $verified=Grounding::answer($result,$sources);
+        $verified['grounding']['live_context_used']=!empty($context['answerable']);
+        $verified['grounding']['conversation_only']=$conversation&&!$sources&&!$context['answerable'];
+        $verified['grounding']['snapshot_at']=current_datetime()->format(DATE_ATOM);
+        if (!$verified['answer']) {
+            return ['answer'=>'No pude preparar una respuesta verificable con la información disponible en ASCLA. Intenta reformular la pregunta.','sources'=>[],'mode'=>Knowledge::provider()->mode(),'grounding'=>$verified['grounding']];
+        }
+        $answer=$protected?EntityRedactor::redact($verified['answer'],$identities):$verified['answer'];
+        if ($protected) { Access::require(EntityRedactor::validateRedaction($answer,$identities)['valid'],'La respuesta requiere revisión de anonimización.',502); }
+        return ['answer'=>Access::text($answer,20000),'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url'],'kind'=>$source['kind']??'content'],$verified['sources']),'mode'=>Knowledge::provider()->mode(),'grounding'=>$verified['grounding']];
+    }
+
+    private static function conversational(string $question): bool
+    {
+        $plain=mb_strtolower(remove_accents(trim($question)));
+        return (bool)preg_match('/^(?:hola|hello|hi|buenas|buenos dias|buenas tardes|buenas noches|gracias|thanks)\b/u',$plain)
+            || (bool)preg_match('/\b(?:que puedes hacer|como me ayudas|ayuda|help|what can you do)\b/u',$plain);
+    }
+
+    private static function followUp(string $question): bool
+    {
+        $plain=mb_strtolower(remove_accents(trim($question)));
+        if (mb_strlen($plain)>120) { return false; }
+        return (bool)preg_match('/^(?:y|pero|entonces)\b/u',$plain)
+            || (bool)preg_match('/\b(?:cual|cuales|cuando|hora|donde|virtual|presencial|ese|esa|eso|este|esta|primero|primera|segundo|segunda|tambien)\b/u',$plain)
+            || (bool)preg_match('/\b(?:more|which|when|where|what time|that one|the first|the second)\b/u',$plain);
+    }
+}
+
+final class KnowledgeVideoMetadata
+{
+    public static function sync(int $id,bool $strict): array
+    {
+        $post=Content::get($id);$meta=(array)get_post_meta($id,'_ascla',true);
+        Access::require($post->post_type==='ascla_resource' && !empty($meta['video_id']),'Seleccione un recurso con video de YouTube.',400);
+        $previousMode=(string)($meta['video_metadata_mode']??'');
+        $previousDuration=str_contains($previousMode,'transcripci')?0:max(0,min(604800,(int)($meta['duration_seconds']??0)));
+        [$duration,$mode,$title]=self::officialMetadata((string)$meta['video_id']);
+        if ($duration<=0) { [$duration,$mode]=self::publicMetadata((string)$meta['video_id'],$strict,$previousDuration); }
+        if ($duration<=0) { $duration=$previousDuration; }
+        self::apply($meta,$duration,$mode,$title,$previousMode);
+        update_post_meta($id,'_ascla',$meta);
+        if ($mode!=='') { Audit::record('video_metadata_updated',$id,$mode); }
+        return ['resource_id'=>$id,'mode'=>$mode?:($meta['video_metadata_mode']??'Datos conservados'),'duration_seconds'=>$duration,'message'=>$duration>0?'Duración y miniatura actualizadas automáticamente.':'No fue posible detectar la duración; se conservaron los datos disponibles.'];
+    }
+
+    private static function officialMetadata(string $videoId): array
+    {
+        try {
+            $data=(new YouTubeVideoProvider())->metadata($videoId);
+            return [max(0,min(604800,(int)($data['duration_seconds']??0))),(string)($data['mode']??'API REAL YouTube'),sanitize_text_field($data['source_title']??'')];
+        } catch (\Throwable) {
+            return [0,'',''];
+        }
+    }
+
+    private static function publicMetadata(string $videoId,bool $strict,int $previousDuration): array
+    {
+        try {
+            $data=YouTubeVideoProvider::publicMetadata($videoId);
+            return [max(0,min(604800,(int)($data['duration_seconds']??0))),(string)($data['mode']??'Metadatos públicos de YouTube')];
+        } catch (\Throwable) {
+            if ($strict && $previousDuration<=0) {
+                throw new ServiceException('No se pudo verificar la duración directamente desde YouTube. Conecta YouTube OAuth y vuelve a intentar; ASCLA no estimará la duración usando la transcripción.');
+            }
+            return [0,''];
+        }
+    }
+
+    private static function apply(array &$meta,int $duration,string $mode,string $title,string $previousMode): void
+    {
+        if ($duration>0) { $meta['duration_seconds']=$duration; }
+        else {
+            unset($meta['duration_seconds']);
+            if (str_contains($previousMode,'transcripci')) { unset($meta['video_metadata_mode']); }
+        }
+        $meta['thumbnail_url']=YouTubeVideoProvider::thumbnail($meta['video_id']);
+        if ($mode!=='') { $meta['video_metadata_mode']=$mode; }
+        if ($title!=='') { $meta['video_source_title']=$title; }
+    }
+}
+

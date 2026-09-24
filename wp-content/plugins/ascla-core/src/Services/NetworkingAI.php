@@ -7,45 +7,48 @@ use ASCLA\Core\Repositories\{NetworkingCache,Store};
 final class NetworkingAI
 {
     private const DEMO_MODE='DEMO MODE';
+    private static function providerState(array $settings): array
+    {
+        $selected=$settings['ai_provider']??'mock';
+        $configured=match($selected){'gemini'=>Secrets::get('ai_key')!==''&&!empty($settings['ai_model']),'openai'=>Secrets::get('openai_key')!==''&&!empty($settings['openai_model']),default=>true};
+        $fallback=$selected!=='mock'&&!$configured;$provider=$fallback?new MockAIProvider():Knowledge::provider();
+        $model=$selected==='openai'?($settings['openai_model']??''):($settings['ai_model']??'');
+        return [$selected,$configured,$fallback,$provider,$model];
+    }
+    private static function cachedResult(bool $persistent,array $pair,string $task,string $key,bool $fresh=false): ?array
+    {
+        if ($persistent) {
+            $saved=NetworkingCache::get($pair[0],$pair[1],$task,$key,$fresh);
+            if ($saved!==null) { return $saved; }
+        }
+        $cached=get_transient($key);return is_array($cached)?$cached:null;
+    }
+    private static function generateLocked(string $task,array $context,array $pair,bool $persistent,string $key,object $provider,bool $fallback): array
+    {
+        $cached=self::cachedResult($persistent,$pair,$task,$key,true);if($cached!==null){return $cached;}
+        try {
+            Access::limit('network-ai',20,300);$result=self::validateProse($task,$provider->generate($task,$context));
+        } catch(\RuntimeException $error) {
+            Audit::record('network_ai_unavailable',0,$task);$provider=new MockAIProvider();$fallback=true;
+            $result=self::validateProse($task,$provider->generate($task,$context));
+        }
+        $result['mode']=$provider->mode();$result['fallback']=$fallback;
+        if ($persistent&&!$fallback) { NetworkingCache::put($pair[0],$pair[1],$task,$key,$result); }
+        else { set_transient($key,$result,$fallback?MINUTE_IN_SECONDS:HOUR_IN_SECONDS); }
+        return $result;
+    }
     /** Pair IDs are local cache metadata and are never sent to the provider. */
     public static function generate(string $task,array $context,array $pair=[]): array
     {
-        $settings=Settings::get();$selected=$settings['ai_provider']??'mock';
-        $configured=match($selected){'gemini'=>Secrets::get('ai_key')!==''&&!empty($settings['ai_model']),'openai'=>Secrets::get('openai_key')!==''&&!empty($settings['openai_model']),default=>true};
-        $fallback=$selected!=='mock'&&!$configured;
-        $provider=$fallback?new MockAIProvider():Knowledge::provider();
-        $model=$selected==='openai'?($settings['openai_model']??''):($settings['ai_model']??'');
+        [$selected,$configured,$fallback,$provider,$model]=self::providerState(Settings::get());
         $persistent=count($pair)===2 && in_array($task,['matching','intro'],true);
         $fingerprints=$persistent?array_map([self::class,'profileFingerprint'],$pair):[];
         $key='ascla_prose_'.hash('sha256',wp_json_encode([$task,$context,$selected,$configured,$provider->mode(),$model,$pair,$fingerprints,'v4']));
-        $read=static function(bool $fresh=false)use($persistent,$pair,$task,$key){
-            if($persistent){
-                $saved=NetworkingCache::get($pair[0],$pair[1],$task,$key,$fresh);
-                if($saved!==null){return $saved;}
-            }
-            $cached=get_transient($key);return is_array($cached)?$cached:null;
-        };
-        $cached=$read();if($cached!==null){return $cached;}
+        $cached=self::cachedResult($persistent,$pair,$task,$key);if($cached!==null){return $cached;}
         try {
-            // A concurrent visitor receives the deterministic fallback without another API call.
-            return Store::lock($key,static function()use($read,$provider,$fallback,$task,$context,$persistent,$pair,$key){
-                $cached=$read(true);if($cached!==null){return $cached;}
-                try {
-                    Access::limit('network-ai',20,300);
-                    $result=self::validateProse($task,$provider->generate($task,$context));
-                } catch(\RuntimeException $error){
-                    Audit::record('network_ai_unavailable',0,$task);$provider=new MockAIProvider();$fallback=true;
-                    $result=self::validateProse($task,$provider->generate($task,$context));
-                }
-                $result['mode']=$provider->mode();$result['fallback']=$fallback;
-                if($persistent&&!$fallback){NetworkingCache::put($pair[0],$pair[1],$task,$key,$result);}
-                else{set_transient($key,$result,$fallback?MINUTE_IN_SECONDS:HOUR_IN_SECONDS);}
-                return $result;
-            },0);
-        } catch(\RuntimeException $error){
-            $result=(new MockAIProvider())->generate($task,$context);
-            $result['mode']=self::DEMO_MODE;$result['fallback']=true;
-            return $result; // Never overwrite an in-flight successful result with a busy fallback.
+            return Store::lock($key,static fn()=>self::generateLocked($task,$context,$pair,$persistent,$key,$provider,$fallback),0);
+        } catch(\RuntimeException $error) {
+            $result=(new MockAIProvider())->generate($task,$context);$result['mode']=self::DEMO_MODE;$result['fallback']=true;return $result;
         }
     }
     private static function profileFingerprint(int $id): string
@@ -66,7 +69,9 @@ final class NetworkingAI
             Access::require($text!=='','Respuesta de IA vacía.',502);$clean[$field]=$text;
         }
         if($task==='intro'){
-            Access::require(!preg_match('/\b(?:soy|somos)\s+(?:(?:el|la|un|una)\s+)?(?:asistente|chatbot|ASCLA)\b|\b(?:como|en calidad de)\s+(?:asistente|chatbot)\b/iu',$clean['text']),'Mensaje de IA no válido.',502);
+            $claimsIdentity=(bool)preg_match('/\b(?:soy|somos)\s+(?:(?:el|la|un|una)\s+)?(?:asistente|chatbot|ASCLA)\b/iu',$clean['text']);
+            $claimsAssistantRole=(bool)preg_match('/\b(?:como|en calidad de)\s+(?:asistente|chatbot)\b/iu',$clean['text']);
+            Access::require(!$claimsIdentity && !$claimsAssistantRole,'Mensaje de IA no válido.',502);
         }
         return $fields?$clean:$result;
     }

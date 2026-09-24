@@ -46,21 +46,32 @@ final class Media
     {
         $file=Store::one('media',$id);
         if (!$file || (int)$file['user_id']!==$user || (int)$file['post_id']!==self::TEMP_POST_ID) { return false; }
-        // Never remove something that has already been referenced despite a stale temporary flag.
-        $profile=(array)get_user_meta($user,'_ascla_profile',true);
-        if ((int)($profile['photo_id']??0)===$id) { self::commit($id,$user); return false; }
-        global $wpdb;
-        $conversations=Store::table('conversations');
-        if ((int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $conversations WHERE photo_id=%d",$id))>0) { self::commit($id,$user); return false; }
+        if (self::temporaryReferenced($id,$user)) {
+            self::commit($id,$user);
+            return false;
+        }
         $originalId=(int)($file['original_id']??0);
         Store::delete('media',['id'=>$id,'user_id'=>$user,'post_id'=>self::TEMP_POST_ID]);
-        if ($originalId>0 && Store::count('media',self::ORIGINAL_FILTER,[$originalId])===0) {
-            $source=Store::one('media',$originalId);
-            if ($source && (int)$source['user_id']===$user && (int)$source['post_id']===self::TEMP_POST_ID) {
-                Store::delete('media',['id'=>$originalId,'user_id'=>$user,'post_id'=>self::TEMP_POST_ID]);
-            }
-        }
+        self::discardOrphanedOriginal($originalId,$user);
         return true;
+    }
+
+    private static function temporaryReferenced(int $id,int $user): bool
+    {
+        $profile=(array)get_user_meta($user,'_ascla_profile',true);
+        if ((int)($profile['photo_id']??0)===$id) { return true; }
+        global $wpdb;
+        $conversations=Store::table('conversations');
+        return (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $conversations WHERE photo_id=%d",$id))>0;
+    }
+
+    private static function discardOrphanedOriginal(int $originalId,int $user): void
+    {
+        if ($originalId<=0 || Store::count('media',self::ORIGINAL_FILTER,[$originalId])!==0) { return; }
+        $source=Store::one('media',$originalId);
+        if ($source && (int)$source['user_id']===$user && (int)$source['post_id']===self::TEMP_POST_ID) {
+            Store::delete('media',['id'=>$originalId,'user_id'=>$user,'post_id'=>self::TEMP_POST_ID]);
+        }
     }
 
     /** Explicitly discard an upload that the user cancelled before saving its form. */
@@ -130,49 +141,46 @@ final class Media
         ],$rows);
     }
 
+    private static function listingWhere(bool $all,int $owner,string $query,string $table): string
+    {
+        global $wpdb;
+        $where=($all?'1=1':$wpdb->prepare('m.user_id=%d',get_current_user_id())).$wpdb->prepare(' AND m.post_id<>%d',self::TEMP_POST_ID);
+        if($all && $owner>0) {$where.=$wpdb->prepare(' AND m.user_id=%d',$owner);}
+        if($query!=='') {$where.=$wpdb->prepare(' AND m.name LIKE %s','%'.$wpdb->esc_like($query).'%');}
+        return $where." AND NOT EXISTS (SELECT 1 FROM $table AS derivative WHERE derivative.original_id=m.id)";
+    }
+
+    private static function listingOwner(int $userId): ?array
+    {
+        $user=get_userdata($userId);
+        return $user?['id'=>$userId,'name'=>Profiles::publicName($userId),'email'=>$user->user_email]:null;
+    }
+
+    private static function listingOwners(string $table): array
+    {
+        global $wpdb;
+        $ids=array_map('intval',$wpdb->get_col($wpdb->prepare("SELECT DISTINCT m.user_id FROM $table AS m WHERE m.post_id<>%d AND NOT EXISTS (SELECT 1 FROM $table AS derivative WHERE derivative.original_id=m.id) ORDER BY m.user_id",self::TEMP_POST_ID)));
+        return array_values(array_filter(array_map(static fn($id)=>self::listingOwner((int)$id),$ids)));
+    }
+
     /**
      * The library exposes the display-ready file and hides its preserved uncropped master.
      * The master still counts toward storage and is removed together with the display derivative.
      */
     public static function listing(array $filter=[]): array
     {
-        Access::require(Access::member());
-        global $wpdb;
-        $page=max(1,min(10000,(int)($filter['page']??1)));
-        $query=Access::text($filter['q']??'',120);
-        $table=Store::table('media');
-        self::cleanupTemporary(get_current_user_id());
-        $scope=Access::text($filter['scope']??'mine',20);
-        $all=$scope==='all' && current_user_can('ascla_manage');
-        $owner=$all?absint($filter['owner']??0):get_current_user_id();
-        $where=($all?'1=1':$wpdb->prepare('m.user_id=%d',get_current_user_id())).$wpdb->prepare(' AND m.post_id<>%d',self::TEMP_POST_ID);
-        if($all && $owner>0) {$where.=$wpdb->prepare(' AND m.user_id=%d',$owner); }
-        if($query!=='') {$where.=$wpdb->prepare(' AND m.name LIKE %s','%'.$wpdb->esc_like($query).'%'); }
-        $where.=" AND NOT EXISTS (SELECT 1 FROM $table AS derivative WHERE derivative.original_id=m.id)";
-        $total=(int)$wpdb->get_var("SELECT COUNT(*) FROM $table AS m WHERE $where");
+        Access::require(Access::member());global $wpdb;
+        $page=max(1,min(10000,(int)($filter['page']??1)));$query=Access::text($filter['q']??'',120);$table=Store::table('media');self::cleanupTemporary(get_current_user_id());
+        $scope=Access::text($filter['scope']??'mine',20);$all=$scope==='all' && current_user_can('ascla_manage');$owner=$all?absint($filter['owner']??0):get_current_user_id();
+        $where=self::listingWhere($all,$owner,$query,$table);$total=(int)$wpdb->get_var("SELECT COUNT(*) FROM $table AS m WHERE $where");
         $rows=$wpdb->get_results($wpdb->prepare("SELECT m.id,m.user_id,m.post_id,m.name,m.mime,m.original_id,m.created_at,OCTET_LENGTH(m.bytes) AS size,(SELECT OCTET_LENGTH(source.bytes) FROM $table AS source WHERE source.id=m.original_id) AS original_size FROM $table AS m WHERE $where ORDER BY m.id DESC LIMIT 20 OFFSET %d",($page-1)*20),ARRAY_A);
         return [
             'items'=>array_map(static fn($row)=>[
-                'id'=>(int)$row['id'],
-                'name'=>$row['name'],
-                'mime'=>$row['mime'],
-                'size'=>(int)$row['size'],
-                'original_size'=>(int)($row['original_size']??0),
-                'stored_size'=>(int)$row['size']+(int)($row['original_size']??0),
-                'has_master'=>(int)($row['original_id']??0)>0,
-                'author'=>Profiles::publicName((int)$row['user_id']),
-                'post_id'=>(int)$row['post_id'],
-                'date'=>$row['created_at'],
-                'url'=>self::url((int)$row['id'])
+                'id'=>(int)$row['id'],'name'=>$row['name'],'mime'=>$row['mime'],'size'=>(int)$row['size'],'original_size'=>(int)($row['original_size']??0),
+                'stored_size'=>(int)$row['size']+(int)($row['original_size']??0),'has_master'=>(int)($row['original_id']??0)>0,'author'=>Profiles::publicName((int)$row['user_id']),
+                'post_id'=>(int)$row['post_id'],'date'=>$row['created_at'],'url'=>self::url((int)$row['id'])
             ],$rows),
-            'total'=>$total,
-            'page'=>$page,
-            'pages'=>max(1,(int)ceil($total/20)),
-            'owner'=>(int)$owner,
-            'owners'=>$all?array_values(array_filter(array_map(static function($uid){
-                $user=get_userdata((int)$uid);
-                return $user?['id'=>(int)$uid,'name'=>Profiles::publicName((int)$uid),'email'=>$user->user_email]:null;
-            },array_map('intval',$wpdb->get_col($wpdb->prepare("SELECT DISTINCT m.user_id FROM $table AS m WHERE m.post_id<>%d AND NOT EXISTS (SELECT 1 FROM $table AS derivative WHERE derivative.original_id=m.id) ORDER BY m.user_id",self::TEMP_POST_ID)))))):[]
+            'total'=>$total,'page'=>$page,'pages'=>max(1,(int)ceil($total/20)),'owner'=>(int)$owner,'owners'=>$all?self::listingOwners($table):[]
         ];
     }
 
@@ -184,32 +192,7 @@ final class Media
         Access::require((bool)$file,self::FILE_NOT_FOUND,404);
         Access::require(current_user_can('ascla_manage') || (int)$file['user_id']===get_current_user_id(),'Solo el propietario o un administrador puede eliminar este archivo.',403);
         Access::require(Store::count('media',self::ORIGINAL_FILTER,[$id])===0,'Esta imagen es la copia maestra de una versión recortada. Elimina primero la imagen visible.',409);
-        return Store::lock('media:'.$id,static function()use($id,$file){
-            global $wpdb;
-            // Metadata is serialized; inspect candidate rows rather than doing an unsafe string replacement.
-            $posts=$wpdb->get_col($wpdb->prepare("SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key=%s AND meta_value LIKE %s",'_ascla','%media_ids%'));
-            foreach($posts as $postId){
-                $meta=(array)get_post_meta($postId,'_ascla',true);
-                $ids=array_map('intval',(array)($meta['media_ids']??[]));
-                if(in_array($id,$ids,true)){$meta['media_ids']=array_values(array_diff($ids,[$id]));update_post_meta($postId,'_ascla',$meta);}
-            }
-            $profile=(array)get_user_meta($file['user_id'],'_ascla_profile',true);
-            if((int)($profile['photo_id']??0)===$id){$profile['photo_id']=0;$profile['revision']=(int)($profile['revision']??0)+1;update_user_meta($file['user_id'],'_ascla_profile',$profile);}
-            $conversations=Store::table('conversations');
-            $wpdb->query($wpdb->prepare("UPDATE $conversations SET photo_id=0 WHERE photo_id=%d",$id));
-            $originalId=(int)($file['original_id']??0);
-            Store::delete('media',['id'=>$id]);
-            $deletedSource=false;
-            if($originalId>0 && Store::count('media',self::ORIGINAL_FILTER,[$originalId])===0){
-                $source=Store::one('media',$originalId);
-                if($source && (int)$source['user_id']===(int)$file['user_id'] && (int)$source['post_id']<=0){
-                    Store::delete('media',['id'=>$originalId]);
-                    $deletedSource=true;
-                }
-            }
-            Audit::record('media_deleted',$id,$deletedSource?'master_removed':'');
-            return ['id'=>$id,'deleted'=>true,'master_deleted'=>$deletedSource];
-        });
+        return Store::lock('media:'.$id,static fn()=>MediaRemoval::run($id,$file));
     }
 
     /**

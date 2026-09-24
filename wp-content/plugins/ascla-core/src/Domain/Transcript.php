@@ -47,10 +47,12 @@ final class Transcript
     /** A short video is already capsule-sized; longer material gets only a few useful excerpts. */
     public static function capsuleLimit(int $durationSeconds): int
     {
-        if ($durationSeconds<=180) { return 0; }
-        if ($durationSeconds<=600) { return 1; }
-        if ($durationSeconds<=1800) { return 2; }
-        return 3;
+        return match(true) {
+            $durationSeconds<=180=>0,
+            $durationSeconds<=600=>1,
+            $durationSeconds<=1800=>2,
+            default=>3,
+        };
     }
     private static function clampSegments(array $segments,int $durationSeconds): array
     {
@@ -121,17 +123,8 @@ final class Transcript
         }
         return false;
     }
-    public static function moments(string $text,array $suggestions=[],int $durationSeconds=0,?int $limit=null): array
+    private static function selectMoments(array $candidates,int $durationSeconds,int $limit): array
     {
-        $segments=self::segments($text);
-        if (!$segments) { return []; }
-        $durationProvided=$durationSeconds>0;
-        $durationSeconds=$durationProvided?$durationSeconds:self::duration($text);
-        $limit=$limit??($durationProvided?self::capsuleLimit($durationSeconds):8);
-        if ($limit<=0) { return []; }
-        $segments=self::clampSegments($segments,$durationSeconds);
-        if (!$segments) { return []; }
-        $candidates=array_merge(self::suggestedCandidates($segments,$suggestions,$durationSeconds),self::contentCandidates($segments));
         usort($candidates,static fn($a,$b)=>($b['score']<=>$a['score'])?:($a['start']<=>$b['start']));
         $selected=[];
         foreach ($candidates as $candidate) {
@@ -141,5 +134,17 @@ final class Transcript
         }
         usort($selected,static fn($a,$b)=>$a['start']<=>$b['start']);
         return $selected;
+    }
+    public static function moments(string $text,array $suggestions=[],int $durationSeconds=0,?int $limit=null): array
+    {
+        $segments=self::segments($text);
+        if (!$segments) { return []; }
+        $durationProvided=$durationSeconds>0;
+        $durationSeconds=$durationProvided?$durationSeconds:self::duration($text);
+        $limit=$limit??($durationProvided?self::capsuleLimit($durationSeconds):8);
+        $segments=$limit>0?self::clampSegments($segments,$durationSeconds):[];
+        if (!$segments) { return []; }
+        $candidates=array_merge(self::suggestedCandidates($segments,$suggestions,$durationSeconds),self::contentCandidates($segments));
+        return self::selectMoments($candidates,$durationSeconds,$limit);
     }
 }

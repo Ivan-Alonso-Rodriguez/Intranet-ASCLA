@@ -104,7 +104,7 @@ final class MicroEvents
                 $start=(new \DateTimeImmutable('+14 days 16:00',wp_timezone()))->setTimezone(new \DateTimeZone('UTC'));
                 $meta=['micro'=>true,'invitees'=>$group,'start'=>$start->format('c'),'end'=>$start->modify('+'.$proposal['duration_minutes'].' minutes')->format('c'),'capacity'=>count($group),'chatham'=>true,'modality'=>'Virtual','location'=>'Por confirmar','agenda'=>implode("\n",array_map(static fn($item)=>$item['minutes'].' min · '.$item['topic'],$proposal['agenda'])),'agenda_ai'=>$proposal,'invited'=>false];
                 $id=wp_insert_post(wp_slash(['post_type'=>'ascla_event','post_title'=>$proposal['title'],'post_content'=>$proposal['objective'],'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
-                if (is_wp_error($id)) { throw new \RuntimeException('No se pudo crear el microevento.'); }
+                if (is_wp_error($id)) { throw new ServiceException('No se pudo crear el microevento.'); }
                 update_post_meta($id,'_ascla',$meta);
                 wp_update_post(['ID'=>$id,'post_status'=>Settings::get()['micro_approval']?'pending':'publish']);
 

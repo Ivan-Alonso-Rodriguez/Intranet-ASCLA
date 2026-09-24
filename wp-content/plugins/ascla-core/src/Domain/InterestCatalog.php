@@ -35,9 +35,11 @@ final class InterestCatalog
         $aliases=self::aliases(self::terms());$rest=self::fold(str_replace(["\r\n","\r","\n"],';',$text));$items=[];$unknown=[];$ids=[];
         while($rest!=='') {
             $found=false;
-            foreach($aliases as $label=>$id) {if(preg_match('/^'.preg_quote($label,'/').'(?:\s*[,;|\n]\s*|$)/u',$rest,$match)){
-                $items[]=['original'=>$label,'topic_id'=>$id,'method'=>'deterministic','confidence'=>'high'];$ids[]=$id;$rest=ltrim(substr($rest,strlen($match[0])));$found=true;break;
-            } }
+            foreach($aliases as $label=>$id) {
+                if(preg_match('/^'.preg_quote($label,'/').'(?:\s*[,;|\n]\s*|$)/u',$rest,$match)){
+                    $items[]=['original'=>$label,'topic_id'=>$id,'method'=>'deterministic','confidence'=>'high'];$ids[]=$id;$rest=ltrim(substr($rest,strlen($match[0])));$found=true;break;
+                }
+            }
             if(!$found){$parts=preg_split('/\s*[,;|\n]\s*/u',$rest,2);$unknown[]=$parts[0];$items[]=['original'=>$parts[0],'topic_id'=>0,'method'=>'manual','confidence'=>'unknown'];$rest=$parts[1]??'';}
         }
         return ['ids'=>array_values(array_unique($ids)),'items'=>$items,'unknown'=>$unknown,'selected_count'=>count($items)];

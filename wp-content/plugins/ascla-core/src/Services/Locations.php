@@ -287,7 +287,7 @@ final class Locations
                 if (!$exact && count($matches)>=40) { break; }
             }
         }
-        return ['country'=>$resolved,'items'=>$matches,'available'=>true,'exact'=>$exact ? count($matches)>0 : null];
+        return ['country'=>$resolved,'items'=>$matches,'available'=>true,'exact'=>$exact ? !empty($matches) : null];
     }
 
     private static function countryCities(array $country): ?array
@@ -298,19 +298,22 @@ final class Locations
         $apiName=str_replace(' & ',' and ',$country['en']);
         $url='https://countriesnow.space/api/v0.1/countries/cities/q?country='.rawurlencode($apiName);
         $response=wp_safe_remote_get($url,['timeout'=>8,'redirection'=>2,'user-agent'=>'ASCLA/'.(defined('ASCLA_VERSION')?ASCLA_VERSION:'1')]);
-        if (is_wp_error($response) || wp_remote_retrieve_response_code($response)!==200) { return null; }
-        $payload=json_decode((string)wp_remote_retrieve_body($response),true);
-        if (!is_array($payload) || !empty($payload['error']) || !is_array($payload['data']??null)) { return null; }
-        $cities=[];
-        foreach ($payload['data'] as $city) {
-            $city=trim(wp_strip_all_tags((string)$city));
-            if ($city!=='' && mb_strlen($city)<=120) { $cities[$city]=true; }
-            if (count($cities)>=25000) { break; }
+        $payload=is_wp_error($response)||wp_remote_retrieve_response_code($response)!==200
+            ?null
+            :json_decode((string)wp_remote_retrieve_body($response),true);
+        $cities=null;
+        if (is_array($payload) && empty($payload['error']) && is_array($payload['data']??null)) {
+            $unique=[];
+            foreach ($payload['data'] as $city) {
+                $city=trim(wp_strip_all_tags((string)$city));
+                if ($city!=='' && mb_strlen($city)<=120) { $unique[$city]=true; }
+                if (count($unique)>=25000) { break; }
+            }
+            $cities=array_keys($unique);
+            natcasesort($cities);
+            $cities=array_values($cities);
+            set_transient($key,$cities,7*DAY_IN_SECONDS);
         }
-        $cities=array_keys($cities);
-        natcasesort($cities);
-        $cities=array_values($cities);
-        set_transient($key,$cities,7*DAY_IN_SECONDS);
         return $cities;
     }
 

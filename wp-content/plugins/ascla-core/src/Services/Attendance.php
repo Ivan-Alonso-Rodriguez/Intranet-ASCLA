@@ -83,22 +83,36 @@ final class Attendance
             delete_post_meta($id,'_ascla_attendance_complete');Audit::record('attendance_threshold',$id,(string)$threshold);return self::roster($id);
         });
     }
+    private static function cacheCsvUsers(array $rows): void
+    {
+        global $wpdb;$emails=array_values(array_unique(array_filter(array_column($rows,'email'),'is_email')));
+        foreach (array_chunk($emails,200) as $chunk) {
+            $ids=$wpdb->get_col($wpdb->prepare("SELECT ID FROM {$wpdb->users} WHERE user_email IN (".implode(',',array_fill(0,count($chunk),'%s')).')',...$chunk));
+            if ($ids) { cache_users($ids); }
+        }
+    }
+    private static function partitionCsvRows(array $rows): array
+    {
+        return AttendanceCsv::partitionRows($rows);
+    }
+    private static function enrichMatchedRows(array &$matched,array $existing,array $meta,array $options,int $threshold): int
+    {
+        $protected=0;$start=strtotime($meta['start']);$end=strtotime($meta['end']);
+        foreach ($matched as $uid=>&$member) {
+            $evidence=AttendanceSessions::calculate($member['rows'],$start,$end,$threshold,$options);unset($member['rows']);$member+=$evidence;
+            $member['protected']=($existing[$uid]['source']??'')==='manual';$member['snapshot']=hash('sha256',wp_json_encode($existing[$uid]??null));
+            if ($member['protected']) { ++$protected; }
+        }
+        unset($member);return $protected;
+    }
     private static function plan(int $id,string $csv,array $options): array
     {
-        $options=AttendanceSessions::options($options);$rows=ZoomCsv::parse($csv);$matched=[];$unmatched=[];$duplicates=0;$seen=[];$lookup=[];
-        global $wpdb;$emails=array_values(array_unique(array_filter(array_column($rows,'email'),'is_email')));
-        foreach(array_chunk($emails,200) as $chunk){$ids=$wpdb->get_col($wpdb->prepare("SELECT ID FROM {$wpdb->users} WHERE user_email IN (".implode(',',array_fill(0,count($chunk),'%s')).')',...$chunk));if($ids) {cache_users($ids); }}
-        foreach($rows as $row){
-            if(isset($seen[$row['signature']])){++$duplicates;continue;}$seen[$row['signature']]=true;
-            if(!array_key_exists($row['email'],$lookup)) {$lookup[$row['email']]=$row['error']===''?get_user_by('email',$row['email']):false; }
-            $user=$lookup[$row['email']];
-            if($row['error']!=='' || !$user || !user_can($user,'ascla_access')){$unmatched[]=['line'=>$row['line'],'email'=>Access::excerpt($row['email'],100),'name'=>$row['name'],'reason'=>$row['error']?:'Correo sin cuenta ASCLA','sessions'=>[$row]];continue;}
-            $uid=(int)$user->ID;if(!isset($matched[$uid])) {$matched[$uid]=['id'=>$uid,'name'=>Profiles::publicName($uid),'email'=>$user->user_email,'rows'=>[]]; }$matched[$uid]['rows'][]=$row;
-        }
-        $existing=[];foreach(Store::rows('attendance','event_id=%d',[$id],'ORDER BY id ASC') as $r) {$existing[(int)$r['user_id']]=$r; }
-        $meta=(array)get_post_meta($id,'_ascla',true);$protected=0;
-        foreach($matched as $uid=>&$m){$evidence=AttendanceSessions::calculate($m['rows'],strtotime($meta['start']),strtotime($meta['end']),self::threshold($id),$options);unset($m['rows']);$m+=$evidence;$m['protected']=($existing[$uid]['source']??'')==='manual';$m['snapshot']=hash('sha256',wp_json_encode($existing[$uid]??null));if($m['protected']) {++$protected; }}unset($m);
-        $plan=['matched'=>array_values($matched),'unmatched'=>$unmatched,'duplicates'=>$duplicates,'protected'=>$protected,'importable'=>count($matched)-$protected,'options'=>$options,'threshold'=>self::threshold($id)];
+        $options=AttendanceSessions::options($options);$rows=ZoomCsv::parse($csv);self::cacheCsvUsers($rows);
+        [$matched,$unmatched,$duplicates]=self::partitionCsvRows($rows);
+        $existing=[];foreach(Store::rows('attendance','event_id=%d',[$id],'ORDER BY id ASC') as $row) {$existing[(int)$row['user_id']]=$row; }
+        $meta=(array)get_post_meta($id,'_ascla',true);$threshold=self::threshold($id);
+        $protected=self::enrichMatchedRows($matched,$existing,$meta,$options,$threshold);
+        $plan=['matched'=>array_values($matched),'unmatched'=>$unmatched,'duplicates'=>$duplicates,'protected'=>$protected,'importable'=>count($matched)-$protected,'options'=>$options,'threshold'=>$threshold];
         $plan['token']=hash_hmac('sha256',wp_json_encode([get_current_user_id(),$id,hash('sha256',$csv),$plan,$existing,get_post_meta($id,'_ascla_attendance_complete',true)]),wp_salt('nonce'));return $plan;
     }
     public static function preview(int $id,string $csv,array $options=[]): array
@@ -115,21 +129,30 @@ final class Attendance
             Store::update('imports',['status'=>'applying'],['id'=>$importId]);return $importId;
         });return self::apply($id,$importId);
     }
+    private static function applyPendingRows(int $id,int $importId): void
+    {
+        global $wpdb;$wpdb->query('START TRANSACTION');
+        try {
+            foreach (ImportRecords::rows($importId,'pending',50) as $row) {
+                $payload=$row['payload'];$uid=(int)($payload['id']??0);
+                if ($payload['kind']==='unidentified') { ImportRecords::save($row,'unidentified',$payload);continue; }
+                $old=Store::rows('attendance','event_id=%d AND user_id=%d',[$id,$uid],'LIMIT 1')[0]??null;
+                if ($payload['protected'] || ($old['source']??'')==='manual') { ImportRecords::save($row,'protected',$payload,$uid);continue; }
+                if (!user_can($uid,'ascla_access') || !hash_equals($payload['snapshot'],hash('sha256',wp_json_encode($old)))) { ImportRecords::save($row,'conflict',$payload,$uid);continue; }
+                self::upsert($id,$uid,$payload['status'],$payload['minutes'],'zoom',$payload);ImportRecords::save($row,'updated',$payload,$uid);
+            }
+            if ($wpdb->query('COMMIT')===false) { throw new ServiceException('No se pudo confirmar el lote.'); }
+        } catch (\Throwable $error) { $wpdb->query('ROLLBACK');throw $error; }
+    }
     public static function apply(int $id,int $importId): array
     {
         self::event($id);return Store::lock('attendance:'.$id,static function()use($id,$importId){
             self::event($id);$import=ImportRecords::get($importId,'attendance');Access::require((int)$import['event_id']===$id,'Importación no disponible.',404);Access::require(in_array($import['status'],['applying','complete'],true),'Importación no confirmada.',409);
-            if($import['status']==='applying'){
+            if ($import['status']==='applying') {
                 Access::require((int)$import['config']['threshold']===self::threshold($id) && $import['config']['window']===get_post_meta($id,'_ascla_end',true).'|'.get_post_meta($id,'_ascla_start',true),'El evento o el umbral cambió. Genera una nueva vista previa.',409);
-                global $wpdb;$wpdb->query('START TRANSACTION');
-                try{foreach(ImportRecords::rows($importId,'pending',50) as $row){$p=$row['payload'];$uid=(int)($p['id']??0);
-                    if($p['kind']==='unidentified'){ImportRecords::save($row,'unidentified',$p);continue;}
-                    $old=Store::rows('attendance','event_id=%d AND user_id=%d',[$id,$uid],'LIMIT 1')[0]??null;
-                    if($p['protected'] || ($old['source']??'')==='manual'){ImportRecords::save($row,'protected',$p,$uid);continue;}
-                    if(!user_can($uid,'ascla_access') || !hash_equals($p['snapshot'],hash('sha256',wp_json_encode($old)))){ImportRecords::save($row,'conflict',$p,$uid);continue;}
-                    self::upsert($id,$uid,$p['status'],$p['minutes'],'zoom',$p);ImportRecords::save($row,'updated',$p,$uid);
-                }if($wpdb->query('COMMIT')===false) {throw new \RuntimeException('No se pudo confirmar el lote.'); }}catch(\Throwable $e){$wpdb->query('ROLLBACK');throw $e;}
-                delete_post_meta($id,'_ascla_attendance_complete');$counts=ImportRecords::counts($importId);if(empty($counts['pending'])){Store::update('imports',['status'=>'complete','completed_at'=>current_time('mysql',true)],['id'=>$importId]);Audit::record('attendance_imported',$id,'import='.$importId.'; updated='.($counts['updated']??0));}
+                self::applyPendingRows($id,$importId);delete_post_meta($id,'_ascla_attendance_complete');
+                $counts=ImportRecords::counts($importId);
+                if (empty($counts['pending'])) { Store::update('imports',['status'=>'complete','completed_at'=>current_time('mysql',true)],['id'=>$importId]);Audit::record('attendance_imported',$id,'import='.$importId.'; updated='.($counts['updated']??0)); }
             }
             $counts=ImportRecords::counts($importId);$done=empty($counts['pending']);return ['import_id'=>$importId,'complete'=>$done,'total'=>(int)$import['total'],'processed'=>(int)$import['total']-($counts['pending']??0),'counts'=>$counts,'imported'=>$counts['updated']??0,'unmatched'=>$counts['unidentified']??0,'roster'=>$done?self::roster($id):null];
         });
@@ -143,3 +166,31 @@ final class Attendance
         self::event($id);$import=ImportRecords::get($importId,'attendance');Access::require((int)$import['event_id']===$id,'Importación no disponible.',404);$import['rows']=ImportRecords::rows($importId,'',50,(max(1,$page)-1)*50);$import['counts']=ImportRecords::counts($importId);$import['page']=max(1,$page);$import['pages']=max(1,(int)ceil($import['total']/50));return $import;
     }
 }
+
+final class AttendanceCsv
+{
+    public static function partitionRows(array $rows): array
+    {
+        $matched=[];$unmatched=[];$duplicates=0;$seen=[];$lookup=[];
+        foreach ($rows as $row) {
+            if (isset($seen[$row['signature']])) { ++$duplicates;continue; }
+            $seen[$row['signature']]=true;
+            self::appendRow($row,$matched,$unmatched,$lookup);
+        }
+        return [$matched,$unmatched,$duplicates];
+    }
+
+    private static function appendRow(array $row,array &$matched,array &$unmatched,array &$lookup): void
+    {
+        if (!array_key_exists($row['email'],$lookup)) { $lookup[$row['email']]=$row['error']===''?get_user_by('email',$row['email']):false; }
+        $user=$lookup[$row['email']];
+        if ($row['error']!=='' || !$user || !user_can($user,'ascla_access')) {
+            $unmatched[]=['line'=>$row['line'],'email'=>Access::excerpt($row['email'],100),'name'=>$row['name'],'reason'=>$row['error']?:'Correo sin cuenta ASCLA','sessions'=>[$row]];
+            return;
+        }
+        $uid=(int)$user->ID;
+        if (!isset($matched[$uid])) { $matched[$uid]=['id'=>$uid,'name'=>Profiles::publicName($uid),'email'=>$user->user_email,'rows'=>[]]; }
+        $matched[$uid]['rows'][]=$row;
+    }
+}
+

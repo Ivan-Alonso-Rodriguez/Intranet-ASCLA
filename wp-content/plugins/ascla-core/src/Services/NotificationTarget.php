@@ -103,42 +103,10 @@ final class NotificationTarget
         if ($post->post_type==='ascla_contact') { return self::support($view,$context,$post); }
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
         $actor=empty($meta['chatham'])?self::actor($context):self::tr('Un asociado','A member');
-        $view['title']=match($view['kind']) {
-            'comment'=>Language::english()?$actor.' commented on your post':$actor.' comentó en tu publicación',
-            'comment_reply'=>Language::english()?$actor.' replied to your comment':$actor.' respondió a tu comentario',
-            'reaction'=>Language::english()?$actor.' reacted to your post':$actor.' reaccionó a tu publicación',
-            'mention'=>empty($meta['chatham'])?(Language::english()?$actor.' mentioned you in the Hub':$actor.' te mencionó en el Hub'):self::tr('Te mencionaron en una conversación privada','You were mentioned in a private conversation'),
-            'resource'=>self::tr('Un nuevo recurso para tus intereses','A new resource for your interests'),
-            'event'=>self::tr('Tienes una invitación a un evento','You have an event invitation'),
-            'event_waitlist_available'=>self::tr('Se liberó un cupo para ti','A spot is available for you'),
-            'event_cancelled'=>self::tr('Un evento fue cancelado','An event was cancelled'),
-            'event_updated'=>self::tr('Un evento cambió información importante','An event has important updates'),
-            'microevent'=>self::tr('Tu círculo ASCLA te espera','Your ASCLA circle is waiting'),
-            default=>$view['title'],
-        };
-        $view['description']=Access::excerpt($post->post_title,180);
-        if ($view['kind']==='event_updated') {
-            $changes=is_array($context['changes']??null)?$context['changes']:[];
-            if ($changes) {
-                $labelsEs=['title'=>'nombre','start'=>'inicio','end'=>'finalización','modality'=>'modalidad','location'=>'ubicación','url'=>'enlace','capacity'=>'aforo'];
-                $labelsEn=['title'=>'name','start'=>'start time','end'=>'end time','modality'=>'format','location'=>'location','url'=>'meeting link','capacity'=>'capacity'];
-                $labels=Language::english()?$labelsEn:$labelsEs;
-                $visible=array_values(array_filter(array_map(static fn($key)=>$labels[$key]??'',array_slice($changes,0,4))));
-                if ($visible) {
-                    $prefix=Language::english()?'Updated: ':'Cambios: ';
-                    $view['description']=Access::excerpt($post->post_title.' · '.$prefix.implode(', ',$visible).(count($changes)>4?'…':''),180);
-                }
-            } elseif (!empty($context['note'])) {
-                // Compatibility with notices created by a previous plugin version.
-                $view['description']=Access::excerpt($post->post_title.' · '.$context['note'],180);
-            }
-        }
+        $view['title']=NotificationCopy::postTitle($view['kind'],$actor,!empty($meta['chatham']),$view['title']);
+        $view['description']=NotificationCopy::postDescription($post,$view['kind'],$context);
         $view['url']=Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$post->ID]);
-        $view['action_label']=match($post->post_type) {
-            'ascla_event'=>match($view['kind']) { 'event_waitlist_available'=>self::tr('Confirmar cupo','Confirm spot'), 'event_cancelled'=>self::tr('Ver evento cancelado','View cancelled event'), 'event_updated'=>self::tr('Revisar cambios','Review updates'), default=>self::tr('Ver encuentro e invitación','View event and invitation') },
-            'ascla_resource'=>self::tr('Abrir recurso','Open resource'),
-            default=>self::tr('Ver publicación','View post'),
-        };
+        $view['action_label']=NotificationCopy::postActionLabel($post->post_type,$view['kind']);
         return $view;
     }
 
@@ -156,21 +124,16 @@ final class NotificationTarget
             $view['description']=$number.' · '.Access::excerpt($post->post_title,160);
             $view['url']=current_user_can('ascla_moderate')?App::adminUrl(['page'=>'ascla-solicitudes']):Catalog::url('contacto');
             $view['action_label']=self::tr(self::REVIEW_REQUEST_LABEL,'Review request');
-            return $view;
-        }
-        if ($view['kind']==='support_received') {
+        } elseif ($view['kind']==='support_received') {
             $view['title']=self::tr('Recibimos tu solicitud de soporte','We received your support request');
             $view['description']=$number.' · '.Access::excerpt($post->post_title,140).' · '.$stateLabel;
             $view['url']=Catalog::url('contacto');
             $view['action_label']=self::tr('Ver mis solicitudes','View my requests');
-            return $view;
-        }
-        if ($view['kind']==='support_update') {
+        } elseif ($view['kind']==='support_update') {
             $view['title']=Language::english()?'Your request '.$number.' is now '.$stateLabel:'Tu solicitud '.$number.' ahora está '.$stateLabel;
             $view['description']=Access::excerpt($post->post_title,180);
             $view['url']=Catalog::url('contacto');
             $view['action_label']=self::tr('Ver estado','View status');
-            return $view;
         }
         return $view;
     }
@@ -178,66 +141,112 @@ final class NotificationTarget
     private static function conversation(array $view,array $context): array
     {
         $id=absint($context['id']??0);
-        try { $conversation=Messaging::conversation($id); } catch (\ASCLA\Core\Rest\ApiException $e) { return self::unavailable($view); }
+        try { $conversation=Messaging::conversation($id); }
+        catch (\ASCLA\Core\Rest\ApiException) { return self::unavailable($view); }
         $actor=self::actor($context);
-        if (($conversation['kind']??'direct')==='group') {
-            $title=Access::excerpt((string)($conversation['title']??self::tr('Grupo ASCLA','ASCLA group')),100);
-            $view['title']=$view['kind']==='conversation_group'
-                ? (Language::english()?$actor.' added you to '.$title:$actor.' te añadió a '.$title)
-                : (Language::english()?$actor.' wrote in '.$title:$actor.' escribió en '.$title);
-            $view['description']=self::tr('Abre el chat grupal para ver la conversación.','Open the group chat to view the conversation.');
-            $view['action_label']=self::tr('Abrir grupo','Open group');
-        } else {
-            if (empty($context['actor']) && !empty($conversation['other']['id'])) { $actor=self::actor(['actor'=>$conversation['other']['id']]); }
-            if ($view['kind']==='conversation_request') {
-                $view['title']=Language::english()?$actor.' sent you a conversation request':$actor.' te envió una solicitud de conversación';
-                $view['description']=self::tr('Lee el primer mensaje y decide si deseas aceptar la conversación.','Read the first message and decide whether to accept the conversation.');
-                $view['action_label']=self::tr(self::REVIEW_REQUEST_LABEL,'Review request');
-            } elseif ($view['kind']==='conversation_accepted') {
-                $view['title']=Language::english()?$actor.' accepted your conversation request':$actor.' aceptó tu solicitud de conversación';
-                $view['description']=self::tr('Ya puedes continuar la conversación en Mensajería.','You can now continue the conversation in Messages.');
-                $view['action_label']=self::tr('Continuar conversación','Continue conversation');
-            } else {
-                $view['title']=Language::english()?$actor.' sent you a message':$actor.' te envió un mensaje';
-                $view['description']=self::tr('Continúa la conversación privada en Mensajería.','Continue the private conversation in Messages.');
-                $view['action_label']=self::tr('Leer mensaje','Read message');
-            }
-        }
+        $view=($conversation['kind']??'direct')==='group'
+            ?self::groupConversationView($view,$conversation,$actor)
+            :self::directConversationView($view,$conversation,$context,$actor);
         $view['url']=Catalog::url('mensajeria',['conversation'=>$id]);
+        return $view;
+    }
+
+    private static function groupConversationView(array $view,array $conversation,string $actor): array
+    {
+        $title=Access::excerpt((string)($conversation['title']??self::tr('Grupo ASCLA','ASCLA group')),100);
+        $view['title']=$view['kind']==='conversation_group'
+            ?self::tr($actor.' te añadió a '.$title,$actor.' added you to '.$title)
+            :self::tr($actor.' escribió en '.$title,$actor.' wrote in '.$title);
+        $view['description']=self::tr('Abre el chat grupal para ver la conversación.','Open the group chat to view the conversation.');
+        $view['action_label']=self::tr('Abrir grupo','Open group');
+        return $view;
+    }
+
+    private static function directConversationView(array $view,array $conversation,array $context,string $actor): array
+    {
+        if (empty($context['actor']) && !empty($conversation['other']['id'])) { $actor=self::actor(['actor'=>$conversation['other']['id']]); }
+        if ($view['kind']==='conversation_request') {
+            $view['title']=Language::english()?$actor.' sent you a conversation request':$actor.' te envió una solicitud de conversación';
+            $view['description']=self::tr('Lee el primer mensaje y decide si deseas aceptar la conversación.','Read the first message and decide whether to accept the conversation.');
+            $view['action_label']=self::tr(self::REVIEW_REQUEST_LABEL,'Review request');
+        } elseif ($view['kind']==='conversation_accepted') {
+            $view['title']=Language::english()?$actor.' accepted your conversation request':$actor.' aceptó tu solicitud de conversación';
+            $view['description']=self::tr('Ya puedes continuar la conversación en Mensajería.','You can now continue the conversation in Messages.');
+            $view['action_label']=self::tr('Continuar conversación','Continue conversation');
+        } else {
+            $view['title']=Language::english()?$actor.' sent you a message':$actor.' te envió un mensaje';
+            $view['description']=self::tr('Continúa la conversación privada en Mensajería.','Continue the private conversation in Messages.');
+            $view['action_label']=self::tr('Leer mensaje','Read message');
+        }
         return $view;
     }
 
     private static function profile(array $view,array $context): array
     {
+        $profile=self::notificationProfile($view,$context);
+        if ($profile===null) { return self::unavailable($view); }
+        $name=Access::excerpt($profile['name'],80);
+        if ($view['kind']==='birthday') {
+            $view=self::birthdayProfileView($view,$profile,$name);
+        } elseif (in_array($view['kind'],['conversation_request','conversation_accepted'],true)) {
+            $view=self::conversationProfileView($view,$profile,$name);
+        } else {
+            $view=self::connectionProfileView($view,$profile,$name);
+        }
+        return $view;
+    }
+
+    private static function notificationProfile(array $view,array $context): ?array
+    {
         try {
             $profile=Profiles::visible(absint($context['id']??0));
             $blocked=Messaging::blocked(get_current_user_id(),(int)$profile['id']);
             $optedOut=$view['kind']==='networking' && (empty($profile['networking']) || empty(Profiles::raw(get_current_user_id())['networking']));
-            if ($blocked || $optedOut) { return self::unavailable($view); }
-        } catch (\ASCLA\Core\Rest\ApiException $e) { return self::unavailable($view); }
-        $name=Access::excerpt($profile['name'],80);
-        if ($view['kind']==='birthday') {
-            $view['title']=Language::english()?'🎉 Today is '.$name.'’s birthday':'🎉 Hoy cumple años '.$name;
-            $view['description']=self::tr('Puedes abrir su perfil y enviarle un saludo desde ASCLA.','Open their profile and send a birthday greeting from ASCLA.');
-            $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
-            $view['action_label']=self::tr(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN);
-            return $view;
+            return $blocked||$optedOut?null:$profile;
+        } catch (\ASCLA\Core\Rest\ApiException) {
+            return null;
         }
-        if (in_array($view['kind'],['conversation_request','conversation_accepted'],true)) {
-            $state=ConversationRequests::between(get_current_user_id(),(int)$profile['id']);
-            $view['title']=match($state['state']) {
-                'incoming_pending'=>Language::english()?$name.' wants to start a conversation with you':$name.' quiere iniciar una conversación contigo',
-                'outgoing_pending'=>Language::english()?'Your conversation request to '.$name.' is pending':'Tu solicitud de conversación a '.$name.' está pendiente',
-                'allowed'=>Language::english()?'You can now message '.$name:'Ya puedes conversar con '.$name,
-                default=>self::tr('Solicitud de conversación cerrada','Conversation request closed'),
-            };
-            $view['description']=self::tr('Puedes aceptar la solicitud sin crear una conexión profesional.','You can accept the request without creating a professional connection.');
-            $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
-            $view['action_label']=$state['state']==='incoming_pending'?self::tr('Aceptar o rechazar solicitud','Accept or reject request'):($state['state']==='allowed'?self::tr('Enviar mensaje','Send message'):self::tr(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN));
-            return $view;
-        }
+    }
+
+    private static function birthdayProfileView(array $view,array $profile,string $name): array
+    {
+        $view['title']=Language::english()?'🎉 Today is '.$name.'’s birthday':'🎉 Hoy cumple años '.$name;
+        $view['description']=self::tr('Puedes abrir su perfil y enviarle un saludo desde ASCLA.','Open their profile and send a birthday greeting from ASCLA.');
+        $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
+        $view['action_label']=self::tr(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN);
+        return $view;
+    }
+
+    private static function conversationProfileView(array $view,array $profile,string $name): array
+    {
+        $state=ConversationRequests::between(get_current_user_id(),(int)$profile['id']);
+        $view['title']=match($state['state']) {
+            'incoming_pending'=>Language::english()?$name.' wants to start a conversation with you':$name.' quiere iniciar una conversación contigo',
+            'outgoing_pending'=>Language::english()?'Your conversation request to '.$name.' is pending':'Tu solicitud de conversación a '.$name.' está pendiente',
+            'allowed'=>Language::english()?'You can now message '.$name:'Ya puedes conversar con '.$name,
+            default=>self::tr('Solicitud de conversación cerrada','Conversation request closed'),
+        };
+        $view['description']=self::tr('Puedes aceptar la solicitud sin crear una conexión profesional.','You can accept the request without creating a professional connection.');
+        $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
+        $view['action_label']=match($state['state']) {
+            'incoming_pending'=>self::tr('Aceptar o rechazar solicitud','Accept or reject request'),
+            'allowed'=>self::tr('Enviar mensaje','Send message'),
+            default=>self::tr(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN),
+        };
+        return $view;
+    }
+
+    private static function connectionProfileView(array $view,array $profile,string $name): array
+    {
         $state=Connections::between(get_current_user_id(),(int)$profile['id']);
-        $view['title']=in_array($view['kind'],['connection','connection_accepted'],true)?match($state['state']) { 'incoming_pending'=>Language::english()?$name.' wants to connect with you':$name.' quiere conectar contigo', 'outgoing_pending'=>Language::english()?'Your request to '.$name.' is pending':'Tu solicitud a '.$name.' está pendiente', 'connected'=>Language::english()?'You are now connected with '.$name:'Ya estás conectado con '.$name, default=>self::tr('Solicitud de conexión cerrada','Connection request closed') }:(Language::english()?'A connection for you: '.$name:'Una conexión para ti: '.$name);
+        $view['title']=in_array($view['kind'],['connection','connection_accepted'],true)
+            ?match($state['state']) {
+                'incoming_pending'=>self::tr($name.' quiere conectar contigo',$name.' wants to connect with you'),
+                'outgoing_pending'=>self::tr('Tu solicitud a '.$name.' está pendiente','Your request to '.$name.' is pending'),
+                'connected'=>self::tr('Ya estás conectado con '.$name,'You are now connected with '.$name),
+                default=>self::tr('Solicitud de conexión cerrada','Connection request closed'),
+            }
+            :self::tr('Una conexión para ti: '.$name,'A connection for you: '.$name);
         $view['description']=self::tr('Conoce su experiencia y encuentra temas para conversar.','Explore their experience and find topics to discuss.');
         $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
         $view['action_label']=$state['state']==='incoming_pending'?self::tr('Aceptar o rechazar solicitud','Accept or reject request'):self::tr(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN);

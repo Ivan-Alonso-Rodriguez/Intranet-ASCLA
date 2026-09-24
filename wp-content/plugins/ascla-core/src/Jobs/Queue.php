@@ -71,40 +71,69 @@ final class Queue
         $row=self::get($id); Access::require($row['status']==='error','Sólo se pueden reintentar trabajos fallidos.',400);
         Store::update('jobs',['status'=>'pending','attempts'=>0,'error'=>null,'locked_at'=>null],['id'=>$id]); self::wake(); return self::get($id);
     }
+    private static function authorizeJob(array $row): void
+    {
+        $kind=(string)$row['kind'];$user=(int)$row['user_id'];
+        if (!in_array($kind,['microevents','resource_notifications','discovery'],true) || $user!==0) { Access::require(Access::member(),'La cuenta ya no tiene acceso.'); }
+        if ($kind==='microevents' && $user!==0) { Access::require(current_user_can('ascla_manage'),'Permiso de administración revocado.'); }
+        if ($kind==='social') { Access::require(current_user_can('ascla_moderate'),'Permiso de moderación revocado.'); }
+        if (in_array($kind,['multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Permiso de publicación revocado.'); }
+    }
+
+    private static function executeJob(array $row,array $payload): array
+    {
+        return match($row['kind']) {
+            'answer'=>Knowledge::answer($payload['question']??'',self::history((int)$row['user_id'],(string)($payload['thread']??'legacy'),(int)$row['id'])),
+            'multimedia'=>Knowledge::multimedia((int)($payload['resource_id']??0)),
+            'microevents'=>MicroEvents::create(),
+            'social'=>self::social(),
+            'resource_notifications'=>Discovery::resource((int)($payload['resource_id']??0)),
+            'discovery'=>Discovery::networking(),
+            'video_metadata'=>Knowledge::videoMetadata((int)($payload['resource_id']??0)),
+        };
+    }
+
+    private static function completeJob(array $row,array $result): void
+    {
+        Store::update('jobs',['status'=>'completed','result'=>wp_json_encode($result),'error'=>null,'locked_at'=>null],['id'=>$row['id']]);
+        Notifications::send((int)$row['user_id'],'job','Tu trabajo en segundo plano ha finalizado.','',['type'=>'job','id'=>(int)$row['id']]);
+        Audit::record('job_completed',(int)$row['id'],$row['kind']);
+    }
+
+    private static function failJob(array $row,\Throwable $error): void
+    {
+        $safe=$error instanceof \ASCLA\Core\Rest\ApiException||$error instanceof \RuntimeException?$error->getMessage():'No se pudo completar el trabajo. Revise la configuración o reintente.';
+        Store::update('jobs',['status'=>'error','error'=>substr(sanitize_text_field($safe),0,255),'locked_at'=>null],['id'=>$row['id']]);
+        Audit::record('job_failed',(int)$row['id'],$row['kind']);
+        Notifications::send((int)$row['user_id'],'job_error','Una tarea necesita revisión.','',['type'=>'job','id'=>(int)$row['id']]);
+    }
+
+    private static function processRow(array $row,string $table,int $original): void
+    {
+        global $wpdb;
+        $claimed=$wpdb->query($wpdb->prepare("UPDATE $table SET status='processing', attempts=attempts+1, locked_at=UTC_TIMESTAMP() WHERE id=%d AND status='pending'",$row['id']));
+        if ($claimed!==1) { return; }
+        try {
+            wp_set_current_user((int)$row['user_id']);$payload=json_decode($row['payload'],true)?:[];
+            self::authorizeJob($row);
+            self::completeJob($row,self::executeJob($row,$payload));
+        } catch (\Throwable $error) {
+            self::failJob($row,$error);
+        } finally {
+            wp_set_current_user($original);
+        }
+    }
+
     public static function run(): void
     {
-        global $wpdb; $table=Store::table('jobs');
+        global $wpdb;$table=Store::table('jobs');
         $wpdb->query("UPDATE $table SET status='error', error='Trabajo interrumpido. Reintente desde administración.' WHERE status='processing' AND locked_at < UTC_TIMESTAMP() - INTERVAL 10 MINUTE");
-        $rows=Store::rows('jobs',"status='pending' AND attempts<3",[],'ORDER BY id ASC LIMIT 2'); $original=get_current_user_id();
-        foreach ($rows as $row) {
-            $claimed=$wpdb->query($wpdb->prepare("UPDATE $table SET status='processing', attempts=attempts+1, locked_at=UTC_TIMESTAMP() WHERE id=%d AND status='pending'",$row['id']));
-            if ($claimed!==1) { continue; }
-            try {
-                wp_set_current_user((int)$row['user_id']); $p=json_decode($row['payload'],true)?:[];
-                if (!in_array($row['kind'],['microevents','resource_notifications','discovery'],true) || (int)$row['user_id']!==0) { Access::require(Access::member(),'La cuenta ya no tiene acceso.'); }
-                if ($row['kind']==='microevents' && (int)$row['user_id']!==0) { Access::require(current_user_can('ascla_manage'),'Permiso de administración revocado.'); }
-                if ($row['kind']==='social') { Access::require(current_user_can('ascla_moderate'),'Permiso de moderación revocado.'); }
-                if (in_array($row['kind'],['multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Permiso de publicación revocado.'); }
-                $result=match($row['kind']) {
-                    'answer'=>Knowledge::answer($p['question']??'',self::history((int)$row['user_id'],(string)($p['thread']??'legacy'),(int)$row['id'])),
-                    'multimedia'=>Knowledge::multimedia((int)($p['resource_id']??0)),
-                    'microevents'=>MicroEvents::create(),
-                    'social'=>self::social(),
-                    'resource_notifications'=>Discovery::resource((int)($p['resource_id']??0)),
-                    'discovery'=>Discovery::networking(),
-                    'video_metadata'=>Knowledge::videoMetadata((int)($p['resource_id']??0)),
-                };
-                Store::update('jobs',['status'=>'completed','result'=>wp_json_encode($result),'error'=>null,'locked_at'=>null],['id'=>$row['id']]);
-                Notifications::send((int)$row['user_id'],'job','Tu trabajo en segundo plano ha finalizado.','',['type'=>'job','id'=>(int)$row['id']]); Audit::record('job_completed',(int)$row['id'],$row['kind']);
-            } catch (\Throwable $e) {
-                $safe=$e instanceof \ASCLA\Core\Rest\ApiException||get_class($e)===\RuntimeException::class?$e->getMessage():'No se pudo completar el trabajo. Revise la configuración o reintente.';
-                Store::update('jobs',['status'=>'error','error'=>substr(sanitize_text_field($safe),0,255),'locked_at'=>null],['id'=>$row['id']]); Audit::record('job_failed',(int)$row['id'],$row['kind']);
-                Notifications::send((int)$row['user_id'],'job_error','Una tarea necesita revisión.','',['type'=>'job','id'=>(int)$row['id']]);
-            } finally { wp_set_current_user($original); }
-        }
+        $rows=Store::rows('jobs',"status='pending' AND attempts<3",[],'ORDER BY id ASC LIMIT 2');$original=get_current_user_id();
+        foreach ($rows as $row) { self::processRow($row,$table,$original); }
         // WordPress deduplicates identical single events; use a continuation hook for backlog.
         if (Store::count('jobs','status=%s AND attempts<3',['pending'])) { self::wake(5); }
     }
+
     /** A dedicated one-shot wakeup avoids WordPress deduplicating against the hourly safety event. */
     private static function wake(int $delay=1): void
     {

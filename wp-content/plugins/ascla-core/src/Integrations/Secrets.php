@@ -7,7 +7,7 @@ final class Secrets
     {
         $iv=random_bytes(12); $tag='';
         $cipher=openssl_encrypt($value,'aes-256-gcm',self::key(),OPENSSL_RAW_DATA,$iv,$tag,$name);
-        if ($cipher===false) { throw new \RuntimeException('No fue posible cifrar la credencial.'); }
+        if ($cipher===false) { throw new IntegrationException('No fue posible cifrar la credencial.'); }
         update_option('ascla_secret_'.$name,base64_encode($iv.$tag.$cipher),false);
     }
     public static function get(string $name): string

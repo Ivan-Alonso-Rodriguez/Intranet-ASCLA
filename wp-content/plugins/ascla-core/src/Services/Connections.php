@@ -22,27 +22,58 @@ final class Connections
     }
     public static function statesFor(int $me,array $targets,?array $rows=null): array
     {
-        $targets=array_values(array_unique(array_map('intval',$targets))); if (!$targets) { return []; }
-        $states=[]; $mine=Access::member($me)?Profiles::raw($me):[];
-        foreach ($targets as $id) { $states[$id]=['state'=>'none','request_id'=>0,'connection_id'=>0,'blocked'=>false,'blocked_by_me'=>false,'can_message'=>false,'can_read_messages'=>false,'can_request'=>false]; }
-        foreach ($rows??self::rows($me,$targets) as $row) {
-            $outgoing=(int)$row['user_id']===$me; $id=(int)($outgoing?$row['target_id']:$row['user_id']);
-            if (!isset($states[$id])) { continue; }
-            $s=&$states[$id];
-            if ($row['kind']==='block') { $s['blocked']=true; if ($outgoing) { $s['blocked_by_me']=true; } }
-            elseif ($row['kind']==='connected') { $s['state']='connected'; $s['connection_id']=(int)$row['id']; $s['request_id']=0; }
-            elseif ($s['state']!=='connected' && ($s['state']==='none' || !$outgoing)) { $s['state']=$outgoing?'outgoing_pending':'incoming_pending'; $s['request_id']=(int)$row['id']; }
-            unset($s);
+        $targets=array_values(array_unique(array_map('intval',$targets)));
+        if (!$targets) { return []; }
+        $states=self::emptyStates($targets);
+        self::applyRelationRows($states,$rows??self::rows($me,$targets),$me);
+        self::applyStatePermissions($states,$me);
+        return $states;
+    }
+
+    private static function emptyStates(array $targets): array
+    {
+        $states=[];
+        foreach ($targets as $id) {
+            $states[$id]=['state'=>'none','request_id'=>0,'connection_id'=>0,'blocked'=>false,'blocked_by_me'=>false,'can_message'=>false,'can_read_messages'=>false,'can_request'=>false];
         }
-        foreach ($states as $id=>&$s) {
+        return $states;
+    }
+
+    private static function applyRelationRow(array &$states,array $row,int $me): void
+    {
+        $outgoing=(int)$row['user_id']===$me;
+        $id=(int)($outgoing?$row['target_id']:$row['user_id']);
+        if (!isset($states[$id])) { return; }
+        $state=&$states[$id];
+        if ($row['kind']==='block') {
+            $state['blocked']=true;
+            if ($outgoing) { $state['blocked_by_me']=true; }
+        } elseif ($row['kind']==='connected') {
+            $state['state']='connected';$state['connection_id']=(int)$row['id'];$state['request_id']=0;
+        } elseif ($state['state']!=='connected' && ($state['state']==='none' || !$outgoing)) {
+            $state['state']=$outgoing?'outgoing_pending':'incoming_pending';$state['request_id']=(int)$row['id'];
+        }
+        unset($state);
+    }
+
+    private static function applyRelationRows(array &$states,array $rows,int $me): void
+    {
+        foreach ($rows as $row) { self::applyRelationRow($states,$row,$me); }
+    }
+
+    private static function applyStatePermissions(array &$states,int $me): void
+    {
+        $mine=Access::member($me)?Profiles::raw($me):[];
+        foreach ($states as $id=>&$state) {
             $valid=$id>0 && $id!==$me && Access::member($me) && Access::member($id);
-            $s['can_read_messages']=$valid && $s['state']==='connected';
-            $s['can_message']=$s['can_read_messages'] && !$s['blocked'];
-            if ($valid && !$s['blocked'] && $s['state']==='none') {
-                $other=Profiles::raw($id); $s['can_request']=!empty($mine['networking']) && !empty($other['networking']) && !empty($other['directory']);
+            $state['can_read_messages']=$valid && $state['state']==='connected';
+            $state['can_message']=$state['can_read_messages'] && !$state['blocked'];
+            if ($valid && !$state['blocked'] && $state['state']==='none') {
+                $other=Profiles::raw($id);
+                $state['can_request']=!empty($mine['networking']) && !empty($other['networking']) && !empty($other['directory']);
             }
         }
-        unset($s); return $states;
+        unset($state);
     }
     public static function between(int $a,int $b): array { return self::statesFor($a,[$b])[$b]; }
     public static function areConnected(int $a,int $b): bool { return self::between($a,$b)['can_read_messages']; }
@@ -90,24 +121,31 @@ final class Connections
     }
     public static function respond(int $id,string $decision): array
     {
-        $me=self::writer(); Access::require(in_array($decision,['accept','reject'],true),'Decisión no válida.',400);
+        $me=self::writer();
+        Access::require(in_array($decision,['accept','reject'],true),'Decisión no válida.',400);
         $request=Store::one('relations',$id);
         Access::require($request && $request['kind']==='connect' && (int)$request['target_id']===$me,'Solicitud pendiente no encontrada.',404);
         $sender=(int)$request['user_id'];
-        return self::lockPair($me,$sender,static function () use($id,$me,$sender,$decision) {
-            $row=Store::one('relations',$id);
-            Access::require($row && $row['kind']==='connect' && (int)$row['target_id']===$me,'Esta solicitud ya fue resuelta.',409);
-            if ($decision==='accept') {
-                Access::require($sender!==$me && Access::member($sender) && !self::between($me,$sender)['blocked'],'No se puede confirmar esta conexión.',403);
-                if (!self::areConnected($me,$sender)) { Store::update('relations',['kind'=>'connected'],['id'=>$id]); }
-            }
-            // Remove reciprocal legacy requests too; neither is implicit consent.
-            foreach(self::rows($me,[$sender]) as $pending) { if ($pending['kind']==='connect') { Store::delete('relations',['id'=>(int)$pending['id']]); } }
-            self::readRequests($me,$sender);
-            Audit::record($decision==='accept'?'connection_accepted':'connection_rejected',$id);
-            if ($decision==='accept') { Notifications::once($sender,'connection-accepted:'.$id,'connection_accepted',Profiles::publicName($me).' aceptó tu solicitud de conexión.',Catalog::url('perfil',['member'=>$me]),['type'=>'profile','id'=>$me]); }
-            return self::between($me,$sender);
-        });
+        return self::lockPair($me,$sender,static fn()=>self::resolveRequest($id,$me,$sender,$decision));
+    }
+
+    private static function resolveRequest(int $id,int $me,int $sender,string $decision): array
+    {
+        $row=Store::one('relations',$id);
+        Access::require($row && $row['kind']==='connect' && (int)$row['target_id']===$me,'Esta solicitud ya fue resuelta.',409);
+        if ($decision==='accept') {
+            Access::require($sender!==$me && Access::member($sender) && !self::between($me,$sender)['blocked'],'No se puede confirmar esta conexión.',403);
+            if (!self::areConnected($me,$sender)) { Store::update('relations',['kind'=>'connected'],['id'=>$id]); }
+        }
+        foreach (self::rows($me,[$sender]) as $pending) {
+            if ($pending['kind']==='connect') { Store::delete('relations',['id'=>(int)$pending['id']]); }
+        }
+        self::readRequests($me,$sender);
+        Audit::record($decision==='accept'?'connection_accepted':'connection_rejected',$id);
+        if ($decision==='accept') {
+            Notifications::once($sender,'connection-accepted:'.$id,'connection_accepted',Profiles::publicName($me).' aceptó tu solicitud de conexión.',Catalog::url('perfil',['member'=>$me]),['type'=>'profile','id'=>$me]);
+        }
+        return self::between($me,$sender);
     }
     private static function readRequests(int $me,int $sender): void
     {

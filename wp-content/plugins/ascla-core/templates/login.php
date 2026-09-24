@@ -25,7 +25,7 @@ $asclaAdminContext=false;
 <?php Theme::printScript(); wp_head(); ?>
 </head>
 <body class="login login-action-login wp-core-ui ascla-login ascla-frontend-login">
-<?php require ASCLA_PATH.'templates/login-welcome.php'; ?>
+<?php require_once ASCLA_PATH.'templates/login-welcome.php'; ?>
 
 <div id="login">
     <h1><a href="<?php echo esc_url(Login::url()); ?>" aria-label="ASCLA">ASCLA</a></h1>
@@ -37,7 +37,7 @@ $asclaAdminContext=false;
     </div>
 
     <?php if($loggedOut): ?>
-        <div class="message success" role="status"><?php echo esc_html(Language::text('Has cerrado sesión correctamente.','You have signed out successfully.')); ?></div>
+        <output class="message success"><?php echo esc_html(Language::text('Has cerrado sesión correctamente.','You have signed out successfully.')); ?></output>
     <?php endif; ?>
     <?php if($error!==''): ?>
         <div id="login_error" role="alert"><?php echo esc_html($error); ?></div>

@@ -88,9 +88,9 @@
     return new XMLSerializer().serializeToString(svg);
   }
 /* Content views share the app's escaping and controls. */
-window.ASCLAContent = function ({ escape: E, icon: I, config: C, T = (text) => text }) {
+globalThis.ASCLAContent = function ({ escape: E, icon: I, config: C, T = (text) => text }) {
   const option = (name, label, values, selected = "") =>
-    `<label class="filter-control"><span>${E(T(label))}</span><select name="${E(name)}" aria-label="${E(T(label))}"><option value="">${E(T("Todos"))}</option>${values.map((t) => `<option value="${E(t.id)}" ${String(selected) === String(t.id) ? "selected" : ""}>${E(t.name)}</option>`).join("")}</select></label>`;
+    `<label class="filter-control"><span>${E(T(label))}</span><select name="${E(name)}" aria-label="${E(T(label))}"><option value="">${E(T("Todos"))}</option>${values.map((t) => ("<option value=\"" + (E(t.id)) + "\" " + (String(selected) === String(t.id) ? "selected" : "") + ">" + (E(t.name)) + "</option>")).join("")}</select></label>`;
   const termFilter = (name, label, terms, filter) =>
     option(name, label, terms || [], filter[name]);
   const duration = (seconds) => {
@@ -98,9 +98,9 @@ window.ASCLAContent = function ({ escape: E, icon: I, config: C, T = (text) => t
     if (!total) return "";
     const hours = Math.floor(total / 3600),
       minutes = Math.floor(total / 60) % 60;
-    return hours
-      ? `${hours} h ${minutes} min`
-      : `${minutes} min ${total % 60 ? (total % 60) + " s" : ""}`.trim();
+    if (hours) return `${hours} h ${minutes} min`;
+    const secondsPart = total % 60 ? (total % 60) + " s" : "";
+    return `${minutes} min ${secondsPart}`.trim();
   };
   const images = (p) =>
     (p.media || []).filter((m) => m.mime.startsWith("image/"));
@@ -110,9 +110,9 @@ window.ASCLAContent = function ({ escape: E, icon: I, config: C, T = (text) => t
     return `<div class="${compact ? "feed-images" : "gallery-images"}">${files
       .map((m) => {
         const visual = m.mime.startsWith("image/")
-          ? `<img src="${E(m.url)}" alt="${E(m.name)}" loading="lazy">`
-          : `<span>${I("download")} ${E(m.name)}</span>`;
-        return `<a href="${E(compact ? p.url : m.url)}"${compact ? "" : ' target="_blank" rel="noopener"'}>${visual}</a>`;
+          ? ("<img src=\"" + (E(m.url)) + "\" alt=\"" + (E(m.name)) + "\" loading=\"lazy\">")
+          : ("<span>" + (I("download")) + " " + (E(m.name)) + "</span>");
+        return ("<a href=\"" + (E(compact ? p.url : m.url)) + "\"" + (compact ? "" : ' target="_blank" rel="noopener"') + ">" + (visual) + "</a>");
       })
       .join("")}</div>`;
   }
@@ -177,7 +177,7 @@ window.ASCLAContent = function ({ escape: E, icon: I, config: C, T = (text) => t
     if (Array.isArray(data))
       return `<ul>${data
         .slice(0, 20)
-        .map((x) => `<li>${value(x, depth + 1)}</li>`)
+        .map((x) => ("<li>" + (value(x, depth + 1)) + "</li>"))
         .join("")}</ul>`;
     if (typeof data === "object")
       return Object.entries(data)
@@ -204,11 +204,10 @@ window.ASCLAContent = function ({ escape: E, icon: I, config: C, T = (text) => t
     let html = Object.entries(sections)
       .filter(([key]) => p.meta[key]?.length)
       .map(([key, label]) => {
-        const body = key === "moments"
-          ? fragments(p.meta[key])
-          : key === "technical_note"
-            ? `<p class="detail-body">${E(String(p.meta[key] || "")).replace(/\n/g, "<br>")}</p>`
-            : value(p.meta[key]);
+        let body;
+        if (key === "moments") body = fragments(p.meta[key]);
+        else if (key === "technical_note") body = `<p class="detail-body">${E(String(p.meta[key] || "")).replaceAll("\n", "<br>")}</p>`;
+        else body = value(p.meta[key]);
         return `<section class="knowledge-inline-section ${key === "moments" ? "knowledge-inline-capsules" : ""}"><h3>${E(T(label))}</h3>${body}</section>`;
       })
       .join("");

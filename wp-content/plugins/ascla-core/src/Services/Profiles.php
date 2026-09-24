@@ -47,20 +47,10 @@ final class Profiles
     }
     public static function visible(int $id): array
     {
-        $data=self::raw($id); $own=$id===get_current_user_id();
+        $data=self::raw($id);
+        $own=$id===get_current_user_id();
         Access::require($own||current_user_can('ascla_moderate')||!empty($data['directory']),'Perfil no disponible.',404);
-        if (!$own && !current_user_can('ascla_moderate')) {
-            foreach ((array)($data['hidden']??[]) as $field) { unset($data[$field]); }
-            unset($data['learn'],$data['help'],$data['goals'],$data['connect_topics'],$data['microevents']);
-        }
-        if (!$own && self::privateName($id)) {
-            unset($data['first_name'],$data['last_name'],$data['display_name']);
-            $data['name']=self::publicName($id);
-        }
-        // Birth date is always private. Only the profile owner and ASCLA administrators may retrieve it.
-        if (!$own && !current_user_can('ascla_manage')) { unset($data['birth_date']); }
-        if(!$own && !current_user_can('ascla_manage') && (($data['phone_visibility']??'private')!=='members' || !Access::member())) {unset($data['phone']); }
-        if(!$own && !current_user_can('ascla_manage')) {unset($data['phone_visibility']); }
+        $data=self::applyVisibility($data,$id,$own);
         unset($data['revision']);
         $data['photo_url']=!empty($data['photo_id'])?Media::profilePhotoUrl((int)$data['photo_id'],$id):'';
         if ($own) {
@@ -68,6 +58,26 @@ final class Profiles
             $data['email_notifications']=Notifications::emailPreferences($id);
         }
         $data['terms']=self::labels($data);
+        return $data;
+    }
+
+    private static function applyVisibility(array $data,int $id,bool $own): array
+    {
+        $moderate=current_user_can('ascla_moderate');
+        $manage=current_user_can('ascla_manage');
+        if (!$own && !$moderate) {
+            foreach ((array)($data['hidden']??[]) as $field) { unset($data[$field]); }
+            unset($data['learn'],$data['help'],$data['goals'],$data['connect_topics'],$data['microevents']);
+        }
+        if (!$own && self::privateName($id)) {
+            unset($data['first_name'],$data['last_name'],$data['display_name']);
+            $data['name']=self::publicName($id);
+        }
+        if (!$own && !$manage) {
+            $phoneVisibility=$data['phone_visibility']??'private';
+            unset($data['birth_date'],$data['phone_visibility']);
+            if ($phoneVisibility!=='members' || !Access::member()) { unset($data['phone']); }
+        }
         return $data;
     }
     public static function card(int $id): array
@@ -112,7 +122,24 @@ final class Profiles
     }
     private static function saveUnlocked(array $input,int $id): array
     {
-        $old=self::raw($id); $data=$old;
+        $old=self::raw($id);
+        $data=self::saveTextFields($old,$input);
+        $data=self::savePhoneFields($data,$input,$id);
+        if (array_key_exists('birth_date',$input)) { $data['birth_date']=Birthdays::normalize($input['birth_date']); }
+        $data=self::saveTermFields($data,$input);
+        $data=self::savePreferenceFields($data,$input,$id);
+        $data['revision']=(int)($old['revision']??0)+1;
+        unset($data['email'],$data['terms'],$data['photo_url']);
+        update_user_meta($id,'_ascla_profile',$data);
+        if (!empty($data['photo_id'])) { Media::commit((int)$data['photo_id'],$id); }
+        wp_update_user(['ID'=>$id,'first_name'=>$data['first_name'],'last_name'=>$data['last_name'],'display_name'=>trim($data['first_name'].' '.$data['last_name'])?:$data['name']]);
+        update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+        Birthdays::celebrate($id);
+        return self::visible($id);
+    }
+
+    private static function saveTextFields(array $data,array $input): array
+    {
         foreach (self::TEXT as $field) {
             if (!array_key_exists($field,$input)) { continue; }
             $value=Access::text($input[$field],in_array($field,['bio','experience'],true)?3000:200);
@@ -120,19 +147,27 @@ final class Profiles
                 Access::require((bool)filter_var($value,FILTER_VALIDATE_URL) && in_array(wp_parse_url($value,PHP_URL_SCHEME),['https','http'],true),'URL no válida.',400);
                 $value=esc_url_raw($value);
             }
-            if ($field==='country' && $value!=='' && $value!==(string)($old['country']??'')) {
+            if ($field==='country' && $value!=='' && $value!==(string)($data['country']??'')) {
                 $country=Locations::resolveCountry($value);
                 Access::require((bool)$country,'Seleccione un país de la lista.',400);
                 $value=$country['es'];
             }
             $data[$field]=$value;
         }
-        if(array_key_exists('phone',$input) || array_key_exists('phone_visibility',$input)){
-            Access::require(Access::member() && ($id===get_current_user_id() || (current_user_can('ascla_manage') && current_user_can('edit_user',$id))));
-            if(array_key_exists('phone',$input)) {$data['phone']=\ASCLA\Core\Domain\Phone::normalize($input['phone']); }
-            if(array_key_exists('phone_visibility',$input)) {$data['phone_visibility']=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']); }
-        }
-        if (array_key_exists('birth_date',$input)) { $data['birth_date']=Birthdays::normalize($input['birth_date']); }
+        return $data;
+    }
+
+    private static function savePhoneFields(array $data,array $input,int $id): array
+    {
+        if (!array_key_exists('phone',$input) && !array_key_exists('phone_visibility',$input)) { return $data; }
+        Access::require(Access::member() && ($id===get_current_user_id() || (current_user_can('ascla_manage') && current_user_can('edit_user',$id))));
+        if (array_key_exists('phone',$input)) { $data['phone']=\ASCLA\Core\Domain\Phone::normalize($input['phone']); }
+        if (array_key_exists('phone_visibility',$input)) { $data['phone_visibility']=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']); }
+        return $data;
+    }
+
+    private static function saveTermFields(array $data,array $input): array
+    {
         foreach (self::TERMS as $field=>$tax) {
             if (!array_key_exists($field,$input)) { continue; }
             Access::require(is_array($input[$field]) && count($input[$field])<=20,'Selección no válida.',400);
@@ -140,7 +175,14 @@ final class Profiles
             foreach ($ids as $tid) { Access::require((bool)term_exists($tid,'ascla_'.$tax),'Tema no válido.',400); }
             $data[$field]=$ids;
         }
-        foreach (['directory','networking','microevents'] as $flag) { if (isset($input[$flag])) { $data[$flag]=rest_sanitize_boolean($input[$flag]); } }
+        return $data;
+    }
+
+    private static function savePreferenceFields(array $data,array $input,int $id): array
+    {
+        foreach (['directory','networking','microevents'] as $flag) {
+            if (isset($input[$flag])) { $data[$flag]=rest_sanitize_boolean($input[$flag]); }
+        }
         if (isset($input['hidden'])) { $data['hidden']=array_values(array_intersect((array)$input['hidden'],array_merge(self::TEXT,array_keys(self::TERMS),['photo_id']))); }
         if (isset($input['photo_id'])) {
             $photo=absint($input['photo_id']);
@@ -151,36 +193,37 @@ final class Profiles
             Access::require(is_array($input['email_notifications']),'Preferencias de correo no válidas.',400);
             Notifications::saveEmailPreferences($id,$input['email_notifications']);
         }
-        $data['revision']=(int)($old['revision']??0)+1;
-        unset($data['email'],$data['terms'],$data['photo_url']);
-        update_user_meta($id,'_ascla_profile',$data);
-        if (!empty($data['photo_id'])) { Media::commit((int)$data['photo_id'],$id); }
-        wp_update_user(['ID'=>$id,'first_name'=>$data['first_name'],'last_name'=>$data['last_name'],'display_name'=>trim($data['first_name'].' '.$data['last_name'])?:$data['name']]);
-        update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
-        Birthdays::celebrate($id);
-        return self::visible($id);
+        return $data;
     }
+
     public static function directory(array $filter=[]): array
     {
-        $page=max(1,(int)($filter['page']??1)); $q=mb_strtolower(Access::text($filter['q']??'',120));
-        $results=[]; $offset=0;
-        // Batch scan supports custom member roles via capabilities, avoids relying on role names.
+        $page=max(1,(int)($filter['page']??1));
+        $query=mb_strtolower(Access::text($filter['q']??'',120));
+        $results=[];$offset=0;
         do {
-            $users=get_users(['number'=>200,'offset'=>$offset,'orderby'=>'display_name','order'=>'ASC','capability'=>'ascla_access']); $offset+=200;
+            $users=get_users(['number'=>200,'offset'=>$offset,'orderby'=>'display_name','order'=>'ASC','capability'=>'ascla_access']);
+            $offset+=200;
             foreach ($users as $user) {
-                if (!Access::member($user->ID)) { continue; }
-                $raw=self::raw($user->ID);
-                if (empty($raw['directory']) && $user->ID!==get_current_user_id()) { continue; }
-                $data=self::visible($user->ID);
-                $haystack=mb_strtolower(implode(' ',array_map(static fn($v)=>is_scalar($v)?(string)$v:'', $data)).' '.wp_json_encode($data['terms'],JSON_UNESCAPED_UNICODE));
-                if ($q && !str_contains($haystack,$q)) { continue; }
-                if (!empty($filter['country']) && ($data['country']??'')!==$filter['country']) { continue; }
-                $match=true;
-                foreach (['industries','interests','areas'] as $key) { if (!empty($filter[$key])&&!in_array((int)$filter[$key],$data[$key]??[],true)) { $match=false; } }
-                if ($match) { $results[]=$data; }
+                $data=self::directoryCandidate($user,$filter,$query);
+                if ($data!==null) { $results[]=$data; }
             }
         } while (count($users)===200);
         return ['items'=>Connections::attach(array_slice($results,($page-1)*18,18)),'total'=>count($results),'page'=>$page,'pages'=>max(1,(int)ceil(count($results)/18))];
+    }
+
+    private static function directoryCandidate(\WP_User $user,array $filter,string $query): ?array
+    {
+        if (!Access::member($user->ID)) { return null; }
+        $raw=self::raw($user->ID);
+        if (empty($raw['directory']) && $user->ID!==get_current_user_id()) { return null; }
+        $data=self::visible($user->ID);
+        $haystack=mb_strtolower(implode(' ',array_map(static fn($value)=>is_scalar($value)?(string)$value:'',$data)).' '.wp_json_encode($data['terms'],JSON_UNESCAPED_UNICODE));
+        $matches=!($query && !str_contains($haystack,$query)) && (empty($filter['country']) || ($data['country']??'')===$filter['country']);
+        foreach (['industries','interests','areas'] as $key) {
+            if (!empty($filter[$key]) && !in_array((int)$filter[$key],$data[$key]??[],true)) { $matches=false;break; }
+        }
+        return $matches?$data:null;
     }
     public static function catalogs(): array
     {

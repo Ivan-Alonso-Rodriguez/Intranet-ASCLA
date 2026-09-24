@@ -29,6 +29,7 @@ final class StatisticsPeriod
     }
     public static function change(int $current,int $previous): ?float
     {
-        return $previous===0?($current===0?0.0:null):round(($current-$previous)*100/$previous,1);
+        if($previous===0){return $current===0?0.0:null;}
+        return round(($current-$previous)*100/$previous,1);
     }
 }
