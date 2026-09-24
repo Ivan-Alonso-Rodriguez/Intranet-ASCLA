@@ -5,7 +5,6 @@ use ASCLA\Core\Domain\Catalog;
 final class Profiles
 {
     public const TEXT=['first_name','last_name','position','company','country','city','member_type','bio','experience','linkedin','twitter','website'];
-    public const REQUIRED=['first_name'=>'Nombres','last_name'=>'Apellidos','position'=>'Cargo','company'=>'Empresa / organización'];
     public const TERMS=['interests'=>'interest','areas'=>'area','industries'=>'industry','goals'=>'goal','languages'=>'language','learn'=>'area','help'=>'area','connect_topics'=>'interest'];
     public static function privateName(int $id): bool
     {
@@ -126,7 +125,7 @@ final class Profiles
     private static function saveUnlocked(array $input,int $id): array
     {
         $old=self::raw($id);
-        self::validateRequired($input);
+        ProfileValidation::validateRequired($input);
         $data=self::saveTextFields($old,$input);
         $data=self::savePhoneFields($data,$input,$id);
         if (array_key_exists('birth_date',$input)) { $data['birth_date']=Birthdays::normalize($input['birth_date']); }
@@ -140,16 +139,6 @@ final class Profiles
         update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
         Birthdays::celebrate($id);
         return self::visible($id);
-    }
-
-    /** Partial updates preserve omitted fields; supplied required fields cannot be cleared. */
-    public static function validateRequired(array $input): void
-    {
-        foreach (self::REQUIRED as $field=>$label) {
-            if (!array_key_exists($field,$input)) { continue; }
-            $value=Access::text($input[$field],200);
-            Access::require((bool)preg_match('/[^\s\p{Z}\x{200B}\x{FEFF}]/u',$value),$label.': este campo es obligatorio.',400);
-        }
     }
 
     private static function saveTextFields(array $data,array $input): array

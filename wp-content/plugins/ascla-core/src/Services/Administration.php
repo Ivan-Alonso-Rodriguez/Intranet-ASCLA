@@ -256,7 +256,7 @@ final class Administration
         foreach (['position','company'] as $field) {
             $profile[$field]=Access::text($input[$field]??($previousProfile[$field]??''),200);
             if ($profile[$field]!==($previousProfile[$field]??'')) {
-                Profiles::validateRequired([$field=>$profile[$field]]);
+                ProfileValidation::validateRequired([$field=>$profile[$field]]);
                 $changed[]=$field;
             }
         }
