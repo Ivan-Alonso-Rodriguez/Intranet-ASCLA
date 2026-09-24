@@ -479,6 +479,7 @@ final class ContentSaveState
         $autoEvent=$type==='event' && empty($meta['micro']) && empty($meta['generated']);
         if ($type==='contact') { $status='private'; }
         elseif ($requested==='draft') { $status='draft'; }
+        elseif ($type==='event' && !empty($meta['micro']) && !current_user_can('ascla_manage') && Settings::get()['micro_approval']) { $status='pending'; }
         elseif ($autoEvent || in_array($type,['topic','forum'],true)) { $status='publish'; }
         elseif (($editor || ($publisher && in_array($type,['gallery','resource'],true))) && $requested==='publish' && (empty($meta['generated']) || $direct)) { $status='publish'; }
         elseif (!$editor && !Settings::get()['moderation_required'] && $type==='hub') { $status='publish'; }

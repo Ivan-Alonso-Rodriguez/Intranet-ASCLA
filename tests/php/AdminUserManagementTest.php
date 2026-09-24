@@ -95,6 +95,9 @@ final class AdminUserManagementTest extends TestCase
 
     public function testAdministratorEditsCommunityUserInsideAscla(): void
     {
+        wp_set_current_user($this->member);
+        $request=\ASCLA\Core\Services\Content::save('contact',['title'=>'Cambio profesional','body'=>'Solicito actualizar Cargo y Empresa.']);
+        $this->posts[]=$request['id'];
         wp_set_current_user($this->admin);
         $detail=$this->api('GET','admin/users/'.$this->member);
         self::assertSame(200,$detail->get_status());
@@ -103,6 +106,7 @@ final class AdminUserManagementTest extends TestCase
         $newEmail='updated_'.bin2hex(random_bytes(4)).'@example.invalid';
         $response=$this->api('POST','admin/users/'.$this->member,[
             'email'=>$newEmail,
+            'professional_request_id'=>$request['id'],
             'role'=>'ascla_executive',
             'first_name'=>'Ana María',
             'last_name'=>'Actualizada',

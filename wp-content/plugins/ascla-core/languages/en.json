@@ -1069,5 +1069,15 @@
   "El teléfono debe ser texto.": "The phone number must be text.",
   "Usa un teléfono internacional válido que empiece con + y el código de país, por ejemplo +51 999 123 456.": "Use a valid international phone number starting with + and the country code, for example +51 999 123 456.",
   "El teléfono debe usar formato internacional: +, código de país y entre 8 y 15 dígitos en total.": "The phone number must use international format: +, country code, and 8 to 15 digits in total.",
-  "Privacidad del teléfono no válida.": "Invalid phone privacy setting."
+  "Privacidad del teléfono no válida.": "Invalid phone privacy setting.",
+  "Selecciona una solicitud de Contacto": "Select a Contact request",
+  "Solicitud que autoriza el cambio profesional": "Request authorizing the professional change",
+  "Para cambiar Cargo o Empresa, selecciona una solicitud activa del asociado que autorice ese cambio. Cada solicitud se puede utilizar una vez.": "To change Position or Company, select an active request from the member authorizing that change. Each request can be used once.",
+  "Selecciona una solicitud del asociado en Contacto para cambiar Cargo o Empresa.": "Select a Contact request from the member to change Position or Company.",
+  "La solicitud debe pertenecer al asociado, estar activa y no haber sido utilizada.": "The request must belong to the member, be active and not have been used.",
+  "Nombres: este campo es obligatorio.": "First name: this field is required.",
+  "Apellidos: este campo es obligatorio.": "Last name: this field is required.",
+  "Cargo: este campo es obligatorio.": "Position: this field is required.",
+  "Empresa / organización: este campo es obligatorio.": "Company / organization: this field is required.",
+  "Datos profesionales actualizados": "Professional details updated"
 }
