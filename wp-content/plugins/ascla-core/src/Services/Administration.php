@@ -217,6 +217,7 @@ final class Administration
             'roles'=>self::communityRoles(),
             'first_name'=>$profile['first_name']??$user->first_name,
             'last_name'=>$profile['last_name']??$user->last_name,
+            'professional_requests'=>ProfessionalChanges::pending($id),
             'position'=>$profile['position']??'',
             'company'=>$profile['company']??'',
             'member_type'=>$profile['member_type']??'',
@@ -228,6 +229,11 @@ final class Administration
     }
 
     public static function updateUser(int $id,array $input): array
+    {
+        return Store::lock('profile-interests:'.$id,static fn()=>self::updateUserUnlocked($id,$input));
+    }
+
+    private static function updateUserUnlocked(int $id,array $input): array
     {
         $user=self::editableMember($id);
         Access::require(current_user_can('edit_user',$id),'No puedes editar esta cuenta.',403);
@@ -243,21 +249,31 @@ final class Administration
         $previousProfile=(array)get_user_meta($id,'_ascla_profile',true);
         $phone=\ASCLA\Core\Domain\Phone::normalize($input['phone']??($previousProfile['phone']??''));
         $phoneVisibility=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']??($previousProfile['phone_visibility']??'private'));
-        $display=trim($first.' '.$last)?:$user->display_name;
-        $result=wp_update_user(['ID'=>$id,'user_email'=>$email,'first_name'=>$first,'last_name'=>$last,'display_name'=>$display]);
-        Access::require(!is_wp_error($result),is_wp_error($result)?$result->get_error_message():'No se pudo actualizar la cuenta.',400);
-        $user->set_role($role);
-        $profile=(array)get_user_meta($id,'_ascla_profile',true);
+        $profile=$previousProfile;
         $profile['first_name']=$first;$profile['last_name']=$last;
         $profile['phone']=$phone;$profile['phone_visibility']=$phoneVisibility;
-        $profile['position']=Access::text($input['position']??'',200);
-        $profile['company']=Access::text($input['company']??'',200);
-        $profile['member_type']=Access::text($input['member_type']??'',200);
-        $profile['birth_date']=Birthdays::normalize($input['birth_date']??'');
+        $changed=[];
+        foreach (['position','company'] as $field) {
+            $profile[$field]=Access::text($input[$field]??($previousProfile[$field]??''),200);
+            if ($profile[$field]!==($previousProfile[$field]??'')) {
+                Profiles::validateRequired([$field=>$profile[$field]]);
+                $changed[]=$field;
+            }
+        }
+        $profile['member_type']=Access::text($input['member_type']??($previousProfile['member_type']??''),200);
+        $profile['birth_date']=Birthdays::normalize($input['birth_date']??($previousProfile['birth_date']??''));
         $profile['revision']=(int)($profile['revision']??0)+1;
-        update_user_meta($id,'_ascla_profile',$profile);
-        update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
-        Audit::record('member_updated',$id,'role='.$role);
+        $save=static function()use($id,$user,$email,$first,$last,$role,$profile): void {
+            $display=trim($first.' '.$last)?:$user->display_name;
+            $result=wp_update_user(['ID'=>$id,'user_email'=>$email,'first_name'=>$first,'last_name'=>$last,'display_name'=>$display]);
+            Access::require(!is_wp_error($result),is_wp_error($result)?$result->get_error_message():'No se pudo actualizar la cuenta.',400);
+            $user->set_role($role);
+            update_user_meta($id,'_ascla_profile',$profile);
+            update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+            Audit::record('member_updated',$id,'role='.$role);
+        };
+        if ($changed) { ProfessionalChanges::apply($id,absint($input['professional_request_id']??0),$changed,$save); }
+        else { $save(); }
         Birthdays::celebrate($id);
         return self::user($id);
     }

@@ -121,7 +121,7 @@ final class RouterRoutes
         Router::route('/jobs/(?P<id>\d+)/retry','POST',static fn($r)=>Queue::retry((int)$r['id']));
         Router::route('/jobs','POST',static function($r) {
             $kind=(string)$r['kind']; Access::require(in_array($kind,['multimedia','microevents','social','video_metadata'],true),'Tipo de trabajo no válido.',400);
-            if ($kind==='microevents') { Access::require(current_user_can('ascla_manage')); }
+            if ($kind==='microevents') { Access::require(Access::canPublish()); }
             if ($kind==='social') { Access::require(current_user_can('ascla_moderate')); }
             if (in_array($kind,['multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden gestionar recursos.',403); Content::get((int)$r['resource_id']); }
             Access::limit('admin_job',10,300); return Queue::enqueue($kind,['resource_id'=>(int)$r['resource_id']]);

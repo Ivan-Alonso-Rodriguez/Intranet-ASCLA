@@ -4,7 +4,9 @@ Plugin WordPress portable para una comunidad profesional privada. Incluye perfil
 
 Toda la funcionalidad propia está en `wp-content/plugins/ascla-core/`. Elementor es opcional. No se modifica WordPress Core ni se necesita un tema específico. El plugin conserva sus datos al desactivarse o desinstalarse.
 
-## Versión actual: 1.10.2 · esquema 13
+## Versión actual: 1.10.3 · esquema 13
+
+La versión **1.10.3** corrige el bloqueo de acceso tras cinco intentos fallidos, exige una solicitud de Contacto del asociado para editar administrativamente Cargo/Empresa, valida los cuatro campos obligatorios del perfil y permite buscar la etiqueta visible «Miembro ASCLA». Los ejecutivos pueden preparar microeventos; se conserva la aprobación administrativa configurada. Consulta el detalle en [VERSION_HISTORY.md](VERSION_HISTORY.md).
 
 **Administración → Estadísticas** incorpora cinco vistas: **Estadísticas**, **Usuarios que más asisten**, **Temas de mayor interés**, **Tendencias** e **IA y tendencias**. Administrador y Ejecutivo ASCLA pueden consultarlas y registrar asistencia. Moderador y Asociado no tienen acceso, tampoco mediante peticiones REST directas. El menú nativo de WordPress usa la misma capacidad `ascla_publish`; las capacidades y roles acumulativos existentes se conservan.
 

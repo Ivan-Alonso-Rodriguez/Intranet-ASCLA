@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.10.2
+Stable tag: 1.10.3
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,13 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.10.3 =
+* Bloquea la cuenta diez minutos tras cinco intentos fallidos, incluso con contraseña correcta, acceso por correo y Turnstile desactivado.
+* Exige seleccionar una solicitud activa del asociado en Contacto para cambiar Cargo o Empresa desde Administración, con uso único y auditoría.
+* Valida Nombres, Apellidos, Cargo y Empresa obligatorios en el perfil, tanto en la interfaz como en REST.
+* Incluye la etiqueta visible Miembro ASCLA en la búsqueda del directorio respetando privacidad e idioma.
+* Permite a ejecutivos preparar propuestas de microeventos; conserva la aprobación administrativa configurada y el esquema 13.
 
 = 1.10.2 =
 * Sincroniza la versión pública con el esquema 13 y las migraciones de importaciones/intereses.

@@ -18,7 +18,7 @@ final class Turnstile
 
     public static function boot(): void
     {
-        add_filter('authenticate', [self::class, 'authenticate'], 5, 3);
+        add_filter('authenticate', [self::class, 'authenticate'], 99, 3);
         add_action('wp_login_failed', [self::class, 'loginFailed'], 10, 2);
         add_action('wp_login', [self::class, 'loginSucceeded'], 10, 2);
         add_action('lostpassword_post', [self::class, 'lostPasswordPost'], 10, 2);
@@ -47,10 +47,7 @@ final class Turnstile
     public static function authenticate($user, string $username, string $password)
     {
         $result=$user;
-        $eligible=!($user instanceof \WP_User)
-            && !is_wp_error($user)
-            && self::protects('login')
-            && TurnstileChallenge::isLoginRequest()
+        $eligible=TurnstileChallenge::isLoginRequest()
             && $username!==''
             && $password!=='';
         if ($eligible) {
@@ -62,7 +59,7 @@ final class Turnstile
                     Language::text('Demasiados intentos fallidos. Inténtalo nuevamente en %d minuto(s).','Too many failed attempts. Try again in %d minute(s).'),
                     $minutes
                 ));
-            } elseif (self::loginChallengeRequired($username)) {
+            } elseif (!is_wp_error($user) && self::loginChallengeRequired($username)) {
                 $verification=self::verifyRequest('login','ascla_login',false);
                 if ($verification!==true) { $result=$verification; }
             }
@@ -72,7 +69,7 @@ final class Turnstile
 
     public static function loginFailed(string $username, \WP_Error $error): void
     {
-        if (!self::protects('login') || !TurnstileChallenge::isLoginRequest()) { return; }
+        if ($username==='' || !TurnstileChallenge::isLoginRequest()) { return; }
         $ignore = ['empty_username', 'empty_password', 'ascla_turnstile_required', 'ascla_turnstile_failed', 'ascla_login_locked'];
         if (in_array((string)$error->get_error_code(), $ignore, true)) { return; }
         $state = TurnstileState::increment('login', $username);
@@ -489,7 +486,13 @@ final class TurnstileState
     public static function stateKey(string $flow, string $identifier): string
     {
         $identifier = strtolower(trim($identifier));
-        return substr(hash_hmac('sha256', $flow . '|' . TurnstileTrust::clientIp() . '|' . $identifier, wp_salt('auth')), 0, 40);
+        $scope=TurnstileTrust::clientIp();
+        if ($flow==='login') {
+            // Username and email share an account lock, including attempts from another IP.
+            $account=get_user_by('login',$identifier) ?: get_user_by('email',$identifier);
+            if ($account) { $identifier='account:'.$account->ID; $scope='account'; }
+        }
+        return substr(hash_hmac('sha256', $flow . '|' . $scope . '|' . $identifier, wp_salt('auth')), 0, 40);
     }
 
     public static function transientName(string $flow, string $key): string

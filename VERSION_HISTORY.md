@@ -2,9 +2,9 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.10.2`
+> **Versión actual:** `1.10.3`
 > **Esquema de base de datos:** `13`
-> La versión `1.10.2` sincroniza el esquema 13 con Google Forms, teléfono y privacidad, correos HTML institucionales, asistencia Zoom por intervalos y mejoras de analítica/rendimiento; conserva las funciones de 1.10.1.
+> La versión `1.10.3` corrige los casos de aceptación 004, 008, 013 y 019 y habilita la preparación de microeventos para ejecutivos; conserva el esquema 13 y las funciones de 1.10.2.
 
 ## Resumen de versiones
 
@@ -64,7 +64,8 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.40 | RF-025: imagen de portada del evento | Completada |
 | 1.9.41 | RF-031: participantes visibles después del RSVP | Completada |
 | 1.9.42 | RF-040 y RF-041: recomendaciones enriquecidas y explicables | Completada |
-| 1.10.2 | Forms, teléfono, correos HTML, Zoom por intervalos y analítica ampliada | **Actual · cierre técnico en curso** |
+| 1.10.2 | Forms, teléfono, correos HTML, Zoom por intervalos y analítica ampliada | Anterior |
+| 1.10.3 | Bloqueo de acceso, solicitudes profesionales, perfil obligatorio, directorio y microeventos ejecutivos | **Actual** |
 | 1.10.1 | Estadísticas, asistencia manual/Zoom y eliminación tras revisión o resolución | Completada |
 | 1.10 | Roles acumulativos, perfiles sin espera de IA y caché persistente | Completada |
 | 1.9.50 | Cargas temporales cancelables y notificaciones toast | Anterior |
@@ -77,6 +78,16 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.43 | Acceso ASCLA separado en `/login/` y protección de `/intranet/` | Anterior |
 
 ---
+
+## 1.10.3 — correcciones de acceso, perfiles y microeventos
+
+- **Caso 004 / #146:** cinco intentos fallidos bloquean la cuenta durante diez minutos, incluso con contraseña correcta, Turnstile desactivado, acceso por correo o cambio de IP. La comprobación se ejecuta después de los autenticadores de WordPress; los intentos durante el bloqueo no prolongan su duración.
+- **Caso 008 / #147:** para cambiar Cargo o Empresa desde Administración → Usuarios se debe seleccionar una solicitud activa de Contacto del mismo asociado. El formulario muestra su contenido; el servidor comprueba autor, estado y uso único antes de modificar la cuenta. La auditoría vincula la solicitud, el administrador y los campos modificados. La solicitud mantiene su estado de atención para que el equipo pueda responder y resolverla.
+- **Caso 013 / #148:** Nombres, Apellidos, Cargo y Empresa son obligatorios en el formulario de perfil y no admiten valores vacíos o compuestos solo por espacios en REST. Las actualizaciones parciales conservan los campos omitidos; una validación fallida no guarda otros cambios.
+- **Caso 019 / #149:** la búsqueda del directorio incluye la etiqueta visible “Miembro ASCLA” (o “ASCLA member” en inglés) cuando Cargo está vacío u oculto para quien consulta. Los cargos privados no se incorporan a la búsqueda de otros asociados.
+- **Microeventos:** el Ejecutivo puede preparar propuestas desde Administración y ejecutarlas en la cola. Los permisos se revisan nuevamente al procesar el trabajo. La aprobación administrativa configurada se conserva, también al editar una propuesta.
+- **Compatibilidad:** versión pública **1.10.3**, esquema **13**, sin nuevas tablas ni cambios a la jerarquía de roles.
+- **Validación local (24/09/2026):** suite PHP completa con **274 pruebas y 4.842 comprobaciones**; **5 recorridos de navegador** de esta versión, sin errores JavaScript; **44 verificaciones** de release-sanity. Las pruebas añadidas están en `tests/php/Release103RegressionTest.php` y `tests/release103.cjs`; sus cuentas temporales se preparan/limpian con `tests/release103-fixtures.php` exclusivamente en un WordPress local desechable.
 
 ## 1.10.2 — Forms, teléfono, correos institucionales y cierre técnico
 
