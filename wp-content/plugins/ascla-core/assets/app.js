@@ -68,12 +68,21 @@
   };
   let liveToasts = null;
   const ASSISTANT_THREAD_PREFIX = "ascla-assistant-thread-";
+  function secureRandomId() {
+    if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+    if (globalThis.crypto?.getRandomValues) {
+      const bytes = new Uint8Array(16);
+      globalThis.crypto.getRandomValues(bytes);
+      return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+    }
+    throw new Error("No hay un generador criptográfico seguro disponible.");
+  }
   function assistantThread(reset = false, forced = "") {
     const key = ASSISTANT_THREAD_PREFIX + String(S.boot?.me?.id || "member");
     let value = forced;
     if (!value && !reset) { try { value = localStorage.getItem(key) || ""; } catch {} }
     if (!/^[a-zA-Z0-9_-]{6,80}$/.test(value)) {
-      const random = globalThis.crypto?.randomUUID?.() || (Date.now().toString(36) + Math.random().toString(36).slice(2));
+      const random = secureRandomId();
       value = "chat_" + random.replace(/[^a-zA-Z0-9_-]/g, "");
     }
     S.assistantThread = value;
@@ -161,31 +170,52 @@
   let youtubeIframeApiPromise = null;
   function youtubeIframeApi() {
     if (window.YT?.Player) return Promise.resolve(window.YT);
-    if (youtubeIframeApiPromise) return youtubeIframeApiPromise;
-    youtubeIframeApiPromise = new Promise((resolve, reject) => {
+    if (!youtubeIframeApiPromise) {
+      youtubeIframeApiPromise = requestYouTubeIframeApi().catch(error => {
+        youtubeIframeApiPromise = null;
+        throw error;
+      });
+    }
+    return youtubeIframeApiPromise;
+  }
+  function requestYouTubeIframeApi() {
+    return new Promise((resolve, reject) => {
       const previous = window.onYouTubeIframeAPIReady;
-      let settled = false;
-      const finish = () => {
+      let settled = false, timer;
+      let script = document.querySelector('script[data-ascla-youtube-api]');
+      const settle = (error) => {
         if (settled) return;
         settled = true;
-        try { if (typeof previous === "function") previous(); } catch {}
-        window.YT?.Player ? resolve(window.YT) : reject(new Error(T("No se pudo cargar el reproductor de YouTube.")));
+        clearTimeout(timer);
+        if (window.onYouTubeIframeAPIReady === finish) window.onYouTubeIframeAPIReady = previous;
+        if (script) script.onerror = null;
+        if (error) {
+          script?.remove();
+          reject(error);
+        } else resolve(window.YT);
+      };
+      const finish = () => {
+        if (settled) return;
+        try { if (typeof previous === "function") previous(); } catch { /* Preserve other integrations without blocking this loader. */ }
+        settle(window.YT?.Player ? null : new Error(T("No se pudo cargar el reproductor de YouTube.")));
       };
       window.onYouTubeIframeAPIReady = finish;
-      if (!document.querySelector('script[data-ascla-youtube-api]')) {
-        const script = document.createElement("script");
+      timer = setTimeout(() => {
+        if (window.YT?.Player) finish();
+        else settle(new Error(T("YouTube tardó demasiado en responder.")));
+      }, 12000);
+      if (!script) {
+        script = document.createElement("script");
+        // Unversioned official loader: a fixed SRI hash would block upstream updates.
+        // Keep this HTTPS URL literal; security review and mitigations: QUALITY.md.
         script.src = "https://www.youtube.com/iframe_api";
+        script.referrerPolicy = "strict-origin-when-cross-origin";
         script.async = true;
         script.dataset.asclaYoutubeApi = "1";
-        script.onerror = () => reject(new Error(T("No se pudo cargar el reproductor de YouTube.")));
+        script.onerror = () => settle(new Error(T("No se pudo cargar el reproductor de YouTube.")));
         document.head.appendChild(script);
       }
-      setTimeout(() => {
-        if (!settled && window.YT?.Player) finish();
-        else if (!settled) reject(new Error(T("YouTube tardó demasiado en responder.")));
-      }, 12000);
     });
-    return youtubeIframeApiPromise;
   }
   async function detectYouTubeDuration(videoId) {
     if (!/^[A-Za-z0-9_-]{11}$/.test(String(videoId || ""))) throw new Error(T("Video de YouTube no válido."));
@@ -1728,12 +1758,13 @@
         if (j.status === "error") {
           if (onError) {
             try {
-              const handled = await onError(j.error);
-              if (handled) return;
+              // The supplied error renderer owns both success and failure UI.
+              await onError(j.error);
             } catch (fallbackError) {
               target.innerHTML = `<div class="error">${E(j.error)}<br>${E(fallbackError.message || "")}</div>`;
               return;
             }
+            return;
           }
           target.innerHTML = `<div class="error">${E(j.error)} ${btn("Reintentar", "retry-job", 'data-id="' + id + '"', "small")}</div>`;
           return;
@@ -1786,11 +1817,20 @@
   async function refreshNotifications() {
     try { notificationCount((await api("notifications/summary")).unread_total); } catch {}
   }
+  function trimTrailingSlashes(path) {
+    let end = path.length;
+    while (end > 1 && path.charCodeAt(end - 1) === 47) end--;
+    return path.slice(0, end);
+  }
   function notificationPageKey(url) {
     try {
       const target = new URL(url, location.href);
+      const targetPath = trimTrailingSlashes(target.pathname);
       return Object.entries(C.pages || {}).find(([, page]) => {
-        try { return new URL(page.url, location.href).pathname.replace(/\/+$/, '') === target.pathname.replace(/\/+$/, ''); } catch { return false; }
+        try {
+          const pagePath = new URL(page.url, location.href).pathname;
+          return trimTrailingSlashes(pagePath) === targetPath;
+        } catch { return false; }
       })?.[0] || '';
     } catch { return ''; }
   }
@@ -2423,10 +2463,8 @@
             const seconds = await ensureYouTubeDuration(id, true);
             target.innerHTML = `<div class="alert">${E(T("Duración verificada directamente desde el video"))}: ${E(UI.duration(seconds))}</div>`;
             setTimeout(() => item(id), 700);
-            return true;
           } catch (error) {
             target.innerHTML = `<div class="error">${E(serverError)}<br>${E(T("Tampoco fue posible verificar la duración desde el reproductor."))}</div>`;
-            return true;
           }
         });
       } else if (a === "micro-job") {

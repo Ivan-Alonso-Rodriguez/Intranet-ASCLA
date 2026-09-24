@@ -59,8 +59,8 @@ final class Profiles
         }
         // Birth date is always private. Only the profile owner and ASCLA administrators may retrieve it.
         if (!$own && !current_user_can('ascla_manage')) { unset($data['birth_date']); }
-        if(!$own && !current_user_can('ascla_manage') && (($data['phone_visibility']??'private')!=='members' || !Access::member()))unset($data['phone']);
-        if(!$own && !current_user_can('ascla_manage'))unset($data['phone_visibility']);
+        if(!$own && !current_user_can('ascla_manage') && (($data['phone_visibility']??'private')!=='members' || !Access::member())) {unset($data['phone']); }
+        if(!$own && !current_user_can('ascla_manage')) {unset($data['phone_visibility']); }
         unset($data['revision']);
         $data['photo_url']=!empty($data['photo_id'])?Media::profilePhotoUrl((int)$data['photo_id'],$id):'';
         if ($own) {
@@ -129,8 +129,8 @@ final class Profiles
         }
         if(array_key_exists('phone',$input) || array_key_exists('phone_visibility',$input)){
             Access::require(Access::member() && ($id===get_current_user_id() || (current_user_can('ascla_manage') && current_user_can('edit_user',$id))));
-            if(array_key_exists('phone',$input))$data['phone']=\ASCLA\Core\Domain\Phone::normalize($input['phone']);
-            if(array_key_exists('phone_visibility',$input))$data['phone_visibility']=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']);
+            if(array_key_exists('phone',$input)) {$data['phone']=\ASCLA\Core\Domain\Phone::normalize($input['phone']); }
+            if(array_key_exists('phone_visibility',$input)) {$data['phone_visibility']=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']); }
         }
         if (array_key_exists('birth_date',$input)) { $data['birth_date']=Birthdays::normalize($input['birth_date']); }
         foreach (self::TERMS as $field=>$tax) {

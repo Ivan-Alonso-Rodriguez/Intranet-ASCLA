@@ -4,6 +4,8 @@ use ASCLA\Core\Repositories\Store;
 use ASCLA\Core\Domain\Calendar;
 final class Events
 {
+    private const ORDER_BY_ID_ASC='ORDER BY id ASC';
+    private const EVENT_FINISHED='El evento ya finalizó.';
     private const REGISTRATION='event_id=%d AND user_id=%d';
 
     private static function capacity(array $meta): int
@@ -23,7 +25,7 @@ final class Events
 
     private static function waitlistPosition(int $id,int $user): int
     {
-        $rows=Store::rows('registrations',"event_id=%d AND status='waitlisted'",[$id],'ORDER BY id ASC');
+        $rows=Store::rows('registrations',"event_id=%d AND status='waitlisted'",[$id],self::ORDER_BY_ID_ASC);
         foreach ($rows as $index=>$row) {
             if ((int)$row['user_id']===$user) { return $index+1; }
         }
@@ -45,7 +47,7 @@ final class Events
     private static function visibleAttendees(int $id,int $viewer): array
     {
         $items=[]; $hidden=0;
-        foreach (Store::rows('registrations',"event_id=%d AND status='accepted'",[$id],'ORDER BY id ASC') as $row) {
+        foreach (Store::rows('registrations',"event_id=%d AND status='accepted'",[$id],self::ORDER_BY_ID_ASC) as $row) {
             $uid=absint($row['user_id']??0);
             if ($uid<=0 || !Access::member($uid)) { continue; }
             $profile=Profiles::raw($uid);
@@ -109,7 +111,7 @@ final class Events
             $item['attendees_hidden']=$attendees['hidden'];
         }
         if (Access::canPublish()) {
-            $item['participants']=array_map(static function ($r) { $u=get_userdata($r['user_id']); return ['id'=>(int)$r['user_id'],'name'=>$u?Profiles::publicName((int)$u->ID):'Miembro','status'=>$r['status']]; },Store::rows('registrations','event_id=%d',[$id],'ORDER BY id ASC'));
+            $item['participants']=array_map(static function ($r) { $u=get_userdata($r['user_id']); return ['id'=>(int)$r['user_id'],'name'=>$u?Profiles::publicName((int)$u->ID):'Miembro','status'=>$r['status']]; },Store::rows('registrations','event_id=%d',[$id],self::ORDER_BY_ID_ASC));
         }
         return $item;
     }
@@ -120,7 +122,7 @@ final class Events
         Access::limit('event_invite',10,300);
         $post=Content::get($id); $meta=(array)get_post_meta($id,'_ascla',true);
         Access::require($post->post_type==='ascla_event' && $post->post_status==='publish' && empty($meta['micro']) && empty($meta['cancelled']),'Seleccione un evento publicado y activo de la comunidad.',400);
-        Access::require(strtotime($meta['end']??'')>time(),'El evento ya finalizó.',400);
+        Access::require(strtotime($meta['end']??'')>time(),self::EVENT_FINISHED,400);
         $users=array_values(array_unique(array_map('absint',$users)));
         Access::require(!empty($users) && count($users)<=50,'Seleccione entre 1 y 50 asociados.',400);
         foreach ($users as $uid) { Access::require(Access::member($uid),'Asociado no disponible.',400); }
@@ -153,15 +155,15 @@ final class Events
         foreach ($fields as $key=>$contextKey) {
             $left=is_scalar($before[$key]??null)?trim((string)$before[$key]):'';
             $right=is_scalar($after[$key]??null)?trim((string)$after[$key]):'';
-            if ($left!==$right) $changed[]=$contextKey;
+            if ($left!==$right) { $changed[]=$contextKey; }
         }
-        if (!$changed) return 0;
+        if (!$changed) { return 0; }
         $post=get_post($id);
-        if (!$post || $post->post_type!=='ascla_event' || $post->post_status!=='publish' || !empty($after['cancelled'])) return 0;
+        if (!$post || $post->post_type!=='ascla_event' || $post->post_status!=='publish' || !empty($after['cancelled'])) { return 0; }
         $users=[];
-        foreach (Store::rows('registrations',"event_id=%d AND status IN ('accepted','offered','waitlisted','invited')",[$id],'ORDER BY id ASC') as $row) {
+        foreach (Store::rows('registrations',"event_id=%d AND status IN ('accepted','offered','waitlisted','invited')",[$id],self::ORDER_BY_ID_ASC) as $row) {
             $uid=absint($row['user_id']??0);
-            if ($uid>0 && $uid!==get_current_user_id() && Access::member($uid)) $users[$uid]=true;
+            if ($uid>0 && $uid!==get_current_user_id() && Access::member($uid)) { $users[$uid]=true; }
         }
         foreach (array_keys($users) as $uid) {
             Notifications::send(
@@ -184,15 +186,15 @@ final class Events
         $users=Store::lock('event:'.$id,static function () use($id) {
             $meta=(array)get_post_meta($id,'_ascla',true);
             Access::require(empty($meta['cancelled']),'El evento ya fue cancelado.',409);
-            Access::require(strtotime((string)($meta['end']??''))>time(),'El evento ya finalizó.',400);
+            Access::require(strtotime((string)($meta['end']??''))>time(),self::EVENT_FINISHED,400);
             $meta['cancelled']=true;
             $meta['cancelled_at']=current_time('mysql',true);
             $meta['cancelled_by']=get_current_user_id();
             update_post_meta($id,'_ascla',$meta);
             $users=[];
-            foreach (Store::rows('registrations',"event_id=%d AND status IN ('accepted','offered','waitlisted','invited')",[$id],'ORDER BY id ASC') as $row) {
+            foreach (Store::rows('registrations',"event_id=%d AND status IN ('accepted','offered','waitlisted','invited')",[$id],self::ORDER_BY_ID_ASC) as $row) {
                 $uid=absint($row['user_id']??0);
-                if ($uid>0) $users[$uid]=true;
+                if ($uid>0) { $users[$uid]=true; }
             }
             return array_keys($users);
         });
@@ -213,8 +215,8 @@ final class Events
     /** Remove a deleted member from event participation and release any reserved seat fairly. */
     public static function removeMemberRegistrations(int $user): void
     {
-        if($user<=0) return;
-        $rows=Store::rows('registrations','user_id=%d',[$user],'ORDER BY id ASC');
+        if($user<=0) { return; }
+        $rows=Store::rows('registrations','user_id=%d',[$user],self::ORDER_BY_ID_ASC);
         $events=[];
         foreach($rows as $row) {
             $eventId=(int)$row['event_id'];
@@ -223,7 +225,7 @@ final class Events
         foreach($events as $eventId=>$releasedSeat) {
             Store::lock('event:'.$eventId,static function()use($eventId,$user,$releasedSeat){
                 Store::delete('registrations',['event_id'=>$eventId,'user_id'=>$user]);
-                if(!$releasedSeat) return;
+                if(!$releasedSeat) { return; }
                 $post=get_post($eventId);
                 $meta=(array)get_post_meta($eventId,'_ascla',true);
                 if($post && $post->post_type==='ascla_event' && $post->post_status==='publish' && empty($meta['cancelled']) && strtotime((string)($meta['end']??''))>time()) {
@@ -241,7 +243,7 @@ final class Events
         Store::lock('event:'.$id,static function () use($id,$status,$user) {
             $meta=(array)get_post_meta($id,'_ascla',true);
             Access::require(empty($meta['cancelled']),'El evento fue cancelado y ya no admite inscripciones.',409);
-            Access::require(strtotime((string)($meta['end']??''))>time(),'El evento ya finalizó.',400);
+            Access::require(strtotime((string)($meta['end']??''))>time(),self::EVENT_FINISHED,400);
             $existing=Store::rows('registrations',self::REGISTRATION,[$id,$user],'LIMIT 1')[0]??null;
             $before=(string)($existing['status']??'none');
             $capacity=self::capacity($meta);

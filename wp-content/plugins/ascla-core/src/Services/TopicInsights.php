@@ -14,7 +14,7 @@ final class TopicInsights
     {
         $id=(int)$event['id'];$meta=(array)get_post_meta($id,'_ascla',true);
         // Private microevents and Chatham House sessions are deliberately excluded from this external task.
-        if(!empty($meta['micro']) || !empty($meta['chatham']))return null;
+        if(!empty($meta['micro']) || !empty($meta['chatham'])) {return null; }
         $known=preg_split('/[\n,;]+/u',(string)($meta['identities']??''),-1,PREG_SPLIT_NO_EMPTY)?:[];
         $title=EntityRedactor::redact(wp_strip_all_tags($event['title']),$known);
         $fingerprint=hash('sha256',wp_json_encode([$title,$context['terms'],$settings['ai_provider']??'mock',$settings['ai_model']??'',$settings['openai_model']??'',1]));
@@ -27,7 +27,7 @@ final class TopicInsights
     {
         $result=[];$settings=Settings::get();
         foreach(Data::eventBatches($context['allScope']) as $events){
-            foreach($events as $event){$input=self::input($context,$event,$settings);if($input && !$input['saved']){$result[$input['id']]=$input;if(count($result)>=$limit)return $result;}}
+            foreach($events as $event){$input=self::input($context,$event,$settings);if($input && !$input['saved']){$result[$input['id']]=$input;if(count($result)>=$limit) {return $result; }}}
         }
         return $result;
     }
@@ -39,14 +39,14 @@ final class TopicInsights
             $counts=Queries::eventCounts($c['allScope'],array_column($events,'id'));
             foreach($events as $event){
                 $input=self::input($c,$event,$settings);if(!$input){++$excluded;continue;}++$eligible;
-                if(!$input['saved'])continue;++$classified;$saved=$input['saved'];$topic=(int)$saved['topic_id'];$modes[$saved['mode']]=true;
+                if(!$input['saved']) {continue; }++$classified;$saved=$input['saved'];$topic=(int)$saved['topic_id'];$modes[$saved['mode']]=true;
                 if(!$topic){++$unclassified;continue;}
-                if(!isset($groups[$topic]))$groups[$topic]=['id'=>$topic,'name'=>$terms[$topic],'events'=>0,'previous_events'=>0,'attendances'=>0,'previous_attendances'=>0];
+                if(!isset($groups[$topic])) {$groups[$topic]=['id'=>$topic,'name'=>$terms[$topic],'events'=>0,'previous_events'=>0,'attendances'=>0,'previous_attendances'=>0]; }
                 $current=strtotime($event['end']) >= $c['period']->from->getTimestamp();++$groups[$topic][$current?'events':'previous_events'];$groups[$topic][$current?'attendances':'previous_attendances']+=($counts[$input['id']]['attended']??0);
-                if($last===null || strcmp($saved['at'],$last)>0)$last=$saved['at'];
+                if($last===null || strcmp($saved['at'],$last)>0) {$last=$saved['at']; }
             }
         }
-        foreach($groups as &$g)$g['change']=StatisticsPeriod::change($g['attendances'],$g['previous_attendances']);unset($g);
+        foreach($groups as &$g) {$g['change']=StatisticsPeriod::change($g['attendances'],$g['previous_attendances']); }unset($g);
         usort($groups,static fn($a,$b)=>($b['attendances']<=>$a['attendances']) ?: ($b['events']<=>$a['events']));
         return ['eligible'=>$eligible,'excluded'=>$excluded,'classified'=>$classified,'pending'=>$eligible-$classified,'unclassified'=>$unclassified,'groups'=>array_values($groups),'modes'=>array_keys($modes),'last'=>$last,'provider'=>Settings::get()['ai_provider']??'mock'];
     }
@@ -55,7 +55,7 @@ final class TopicInsights
     {
         $c=Statistics::context($filter);Access::limit('statistics_ai',6,300);
         return \ASCLA\Core\Repositories\Store::lock('statistics-ai',static function()use($filter,$c,$provider){
-            $batch=self::pending($c,30);if(!$batch)return self::summary($filter);
+            $batch=self::pending($c,30);if(!$batch) {return self::summary($filter); }
             $provider??=Knowledge::provider();
             $result=$provider->generate('interest_classification',['topics'=>$c['terms'],'items'=>array_values(array_map(static fn($i)=>['id'=>$i['id'],'title'=>$i['title']],$batch))]);
             $assignments=$result['assignments']??null;
@@ -68,7 +68,7 @@ final class TopicInsights
             $settings=Settings::get();$liveEvents=Data::eventsByIds($c['allScope'],array_keys($validated));
             foreach($validated as $id=>$topic){
                 $live=isset($liveEvents[$id])?self::input($c,$liveEvents[$id],$settings):null;
-                if($live && $live['fingerprint']===$batch[$id]['fingerprint'])update_post_meta($id,'_ascla_statistics_topic',['fingerprint'=>$batch[$id]['fingerprint'],'topic_id'=>$topic,'mode'=>$provider->mode(),'at'=>gmdate('c')]);
+                if($live && $live['fingerprint']===$batch[$id]['fingerprint']) {update_post_meta($id,'_ascla_statistics_topic',['fingerprint'=>$batch[$id]['fingerprint'],'topic_id'=>$topic,'mode'=>$provider->mode(),'at'=>gmdate('c')]); }
             }
             Audit::record('statistics_topics',0,'classified='.count($validated));return self::summary($filter);
         },0);

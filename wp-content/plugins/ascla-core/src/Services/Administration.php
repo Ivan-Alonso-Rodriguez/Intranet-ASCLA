@@ -5,6 +5,8 @@ use ASCLA\Core\Repositories\Store;
 /** Administration reads and decisions reuse WordPress users, posts and existing metadata. */
 final class Administration
 {
+    private const EMAIL_IN_USE='Ese correo ya pertenece a otra cuenta.';
+    private const INVALID_STATUS='Estado no válido.';
     private const REQUEST_STATES=['open','progress','closed'];
     private static function requestStateLabel(string $state): string
     {
@@ -13,8 +15,8 @@ final class Administration
     private static function contactArgs(string $state,string $q): array
     {
         $args=['post_type'=>'ascla_contact','post_status'=>'private','s'=>$q,'orderby'=>['date'=>'DESC','ID'=>'DESC'],'posts_per_page'=>20];
-        if($state==='open') $args['meta_query']=[['relation'=>'OR',['key'=>'_ascla_request_status','compare'=>'NOT EXISTS'],['key'=>'_ascla_request_status','value'=>'open']]];
-        elseif(in_array($state,self::REQUEST_STATES,true)) $args['meta_query']=[['key'=>'_ascla_request_status','value'=>$state]];
+        if($state==='open') { $args['meta_query']=[['relation'=>'OR',['key'=>'_ascla_request_status','compare'=>'NOT EXISTS'],['key'=>'_ascla_request_status','value'=>'open']]]; }
+        elseif(in_array($state,self::REQUEST_STATES,true)) { $args['meta_query']=[['key'=>'_ascla_request_status','value'=>$state]]; }
         return $args;
     }
     public static function contacts(array $filter): array
@@ -25,7 +27,7 @@ final class Administration
             foreach(get_posts(['post_type'=>'ascla_contact','post_status'=>'private','numberposts'=>-1,'fields'=>'ids']) as $id) { $meta=(array)get_post_meta($id,'_ascla',true);update_post_meta($id,'_ascla_request_status',$meta['request_status']??'open'); }
             update_option('ascla_contacts_indexed_v1',true,false);
         }
-        $state=Access::text($filter['state']??'',20);Access::require($state===''||in_array($state,self::REQUEST_STATES,true),'Estado no válido.',400);
+        $state=Access::text($filter['state']??'',20);Access::require($state===''||in_array($state,self::REQUEST_STATES,true),self::INVALID_STATUS,400);
         $q=Access::text($filter['q']??'',120);$page=max(1,min(10000,(int)($filter['page']??1)));
         $query=new \WP_Query(self::contactArgs($state,$q)+['paged'=>$page]);$counts=[];
         foreach(self::REQUEST_STATES as $key) {$args=self::contactArgs($key,'');$args['posts_per_page']=1;$args['fields']='ids';$counts[$key]=(int)(new \WP_Query($args))->found_posts;}
@@ -35,7 +37,7 @@ final class Administration
     {
         Access::require(current_user_can('ascla_moderate'));$post=Content::get($id);
         Access::require($post->post_type==='ascla_contact','Solicitud no válida.',400);
-        Access::require(in_array($status,self::REQUEST_STATES,true),'Estado no válido.',400);
+        Access::require(in_array($status,self::REQUEST_STATES,true),self::INVALID_STATUS,400);
         return Store::lock('contact:'.$id,static function()use($id,$status,$post){
             clean_post_cache($id);$post=Content::get($id); // Recheck after acquiring the same lock used by deletion.
             $meta=(array)get_post_meta($id,'_ascla',true);$previous=$meta['request_status']??'open';
@@ -82,7 +84,7 @@ final class Administration
             'ascla_executive'=>'Ejecutivo ASCLA',
             'ascla_moderator'=>'Moderador ASCLA',
         ];
-        if(isset($labels[$role])) return $labels[$role];
+        if(isset($labels[$role])) { return $labels[$role]; }
         $data=wp_roles()->roles[$role]??null;
         return $data?translate_user_role($data['name']):$role;
     }
@@ -103,7 +105,7 @@ final class Administration
         $roles=[];
         foreach(self::COMMUNITY_ROLES as $id) {
             $roleData=wp_roles()->roles[$id]??null;
-            if($roleData) $roles[]=['id'=>$id,'name'=>self::roleLabel($id)];
+            if($roleData) { $roles[]=['id'=>$id,'name'=>self::roleLabel($id)]; }
         }
         return $roles;
     }
@@ -113,12 +115,12 @@ final class Administration
         Access::require(current_user_can('ascla_manage'));
         $q=Access::text($filter['q']??'',100);$role=Access::text($filter['role']??'',60);$state=Access::text($filter['state']??'',20);
         Access::require($role===''||isset(wp_roles()->roles[$role]),'Rol no válido.',400);
-        Access::require(in_array($state,['','active','suspended'],true),'Estado no válido.',400);
+        Access::require(in_array($state,['','active','suspended'],true),self::INVALID_STATUS,400);
         $page=max(1,min(10000,(int)($filter['page']??1)));$args=['number'=>20,'paged'=>$page,'orderby'=>'display_name','order'=>'ASC'];
         if($q!=='') {$args['search']='*'.str_replace('*','',$q).'*';$args['search_columns']=['user_login','user_email','display_name'];}
-        if($role!=='')$args['role']=$role;
-        if($state==='suspended')$args['meta_query']=[['key'=>'_ascla_suspended','value'=>'1']];
-        elseif($state==='active')$args['meta_query']=[['relation'=>'OR',['key'=>'_ascla_suspended','compare'=>'NOT EXISTS'],['key'=>'_ascla_suspended','value'=>'1','compare'=>'!=']]];
+        if($role!=='') {$args['role']=$role; }
+        if($state==='suspended') {$args['meta_query']=[['key'=>'_ascla_suspended','value'=>'1']]; }
+        elseif($state==='active') {$args['meta_query']=[['relation'=>'OR',['key'=>'_ascla_suspended','compare'=>'NOT EXISTS'],['key'=>'_ascla_suspended','value'=>'1','compare'=>'!=']]]; }
         $query=new \WP_User_Query($args);$items=[];
         foreach($query->get_results() as $user) {
             $id=(int)$user->ID;$card=Profiles::card($id);
@@ -140,7 +142,7 @@ final class Administration
                 'can_suspend'=>$id!==get_current_user_id()&&!$technical&&$community,
             ];
         }
-        $roles=[];foreach(wp_roles()->roles as $id=>$roleData)$roles[]=['id'=>$id,'name'=>self::roleLabel($id)];
+        $roles=[];foreach(wp_roles()->roles as $id=>$roleData) {$roles[]=['id'=>$id,'name'=>self::roleLabel($id)]; }
         return [
             'items'=>$items,
             'page'=>$page,
@@ -164,7 +166,7 @@ final class Administration
 
         $email=sanitize_email(Access::text($input['email']??'',100));
         Access::require($email!==''&&is_email($email),'Correo electrónico no válido.',400);
-        Access::require(!email_exists($email),'Ese correo ya pertenece a otra cuenta.',409);
+        Access::require(!email_exists($email),self::EMAIL_IN_USE,409);
 
         $role=Access::text($input['role']??'ascla_member',60);
         Access::require(in_array($role,self::COMMUNITY_ROLES,true),'Rol no válido para la comunidad.',400);
@@ -181,7 +183,7 @@ final class Administration
 
         return Store::lock('admin-create-user:'.hash('sha256',$login.'|'.$email),static function()use($login,$email,$role,$first,$last,$position,$company,$memberType,$birthDate,$sendInvite,$phone,$phoneVisibility){
             Access::require(!username_exists($login),'Ese nombre de usuario ya está registrado.',409);
-            Access::require(!email_exists($email),'Ese correo ya pertenece a otra cuenta.',409);
+            Access::require(!email_exists($email),self::EMAIL_IN_USE,409);
             $password=wp_generate_password(32,true,true);
             $id=wp_insert_user([
                 'user_login'=>$login,
@@ -231,7 +233,7 @@ final class Administration
         $user=self::editableMember($id);
         $profile=(array)get_user_meta($id,'_ascla_profile',true);
         $role='ascla_member';
-        foreach(self::COMMUNITY_ROLES as $candidate) if(in_array($candidate,$user->roles,true)) {$role=$candidate;break;}
+        foreach(self::COMMUNITY_ROLES as $candidate) { if(in_array($candidate,$user->roles,true)) {$role=$candidate;break;} }
         return [
             'id'=>$id,
             'login'=>$user->user_login,
@@ -258,7 +260,7 @@ final class Administration
         $email=sanitize_email(Access::text($input['email']??'',100));
         Access::require($email!==''&&is_email($email),'Correo electrónico no válido.',400);
         $existing=email_exists($email);
-        Access::require(!$existing||(int)$existing===$id,'Ese correo ya pertenece a otra cuenta.',409);
+        Access::require(!$existing||(int)$existing===$id,self::EMAIL_IN_USE,409);
         $role=Access::text($input['role']??'',60);
         Access::require(in_array($role,self::COMMUNITY_ROLES,true),'Rol no válido para la comunidad.',400);
         $first=Access::text($input['first_name']??'',100);

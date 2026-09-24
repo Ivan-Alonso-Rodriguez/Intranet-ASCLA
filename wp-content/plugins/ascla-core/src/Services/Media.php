@@ -4,6 +4,10 @@ use ASCLA\Core\Repositories\Store;
 
 final class Media
 {
+    private const ORIGINAL_FILTER='original_id=%d';
+    private const UNAUTHORIZED_FILE='Archivo no autorizado.';
+    private const IMAGE_MIME_PREFIX='image/';
+    private const FILE_NOT_FOUND='Archivo no encontrado.';
     private const TEMP_POST_ID=-1;
     private const TEMP_TTL=43200; // 12 h: abandoned uploads are never kept indefinitely.
 
@@ -27,7 +31,7 @@ final class Media
     /** Remove old, never-committed uploads for the current owner. */
     private static function cleanupTemporary(int $user): void
     {
-        if ($user<=0) return;
+        if ($user<=0) { return; }
         global $wpdb;
         $table=Store::table('media');
         $cutoff=gmdate('Y-m-d H:i:s',time()-self::TEMP_TTL);
@@ -41,7 +45,7 @@ final class Media
     private static function discardTemporary(int $id,int $user): bool
     {
         $file=Store::one('media',$id);
-        if (!$file || (int)$file['user_id']!==$user || (int)$file['post_id']!==self::TEMP_POST_ID) return false;
+        if (!$file || (int)$file['user_id']!==$user || (int)$file['post_id']!==self::TEMP_POST_ID) { return false; }
         // Never remove something that has already been referenced despite a stale temporary flag.
         $profile=(array)get_user_meta($user,'_ascla_profile',true);
         if ((int)($profile['photo_id']??0)===$id) { self::commit($id,$user); return false; }
@@ -50,7 +54,7 @@ final class Media
         if ((int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $conversations WHERE photo_id=%d",$id))>0) { self::commit($id,$user); return false; }
         $originalId=(int)($file['original_id']??0);
         Store::delete('media',['id'=>$id,'user_id'=>$user,'post_id'=>self::TEMP_POST_ID]);
-        if ($originalId>0 && Store::count('media','original_id=%d',[$originalId])===0) {
+        if ($originalId>0 && Store::count('media',self::ORIGINAL_FILTER,[$originalId])===0) {
             $source=Store::one('media',$originalId);
             if ($source && (int)$source['user_id']===$user && (int)$source['post_id']===self::TEMP_POST_ID) {
                 Store::delete('media',['id'=>$originalId,'user_id'=>$user,'post_id'=>self::TEMP_POST_ID]);
@@ -70,10 +74,10 @@ final class Media
     /** Promote a temporary private upload once a profile/group reference is successfully saved. */
     public static function commit(int $id,int $user=0): void
     {
-        if ($id<=0) return;
+        if ($id<=0) { return; }
         $user=$user?:get_current_user_id();
         $file=Store::one('media',$id);
-        Access::require($file && (int)$file['user_id']===$user,'Archivo no autorizado.');
+        Access::require($file && (int)$file['user_id']===$user,self::UNAUTHORIZED_FILE);
         if ((int)$file['post_id']===self::TEMP_POST_ID) { Store::update('media',['post_id'=>0],['id'=>$id]); }
         $originalId=(int)($file['original_id']??0);
         if ($originalId>0) {
@@ -94,13 +98,13 @@ final class Media
     public static function requireOwned(int $id,int $user,bool $image=false): void
     {
         $row=Store::one('media',$id);
-        Access::require($row && (int)$row['user_id']===$user && (!$image||str_starts_with($row['mime'],'image/')),'Archivo no autorizado.');
+        Access::require($row && (int)$row['user_id']===$user && (!$image||str_starts_with($row['mime'],self::IMAGE_MIME_PREFIX)),self::UNAUTHORIZED_FILE);
     }
 
     public static function attach(int $id,int $post): void
     {
         $file=Store::one('media',$id);
-        Access::require($file && ((int)$file['user_id']===get_current_user_id()||(int)$file['post_id']===$post),'Archivo no autorizado.');
+        Access::require($file && ((int)$file['user_id']===get_current_user_id()||(int)$file['post_id']===$post),self::UNAUTHORIZED_FILE);
         Store::update('media',['post_id'=>$post],['id'=>$id]);
         $originalId=(int)($file['original_id']??0);
         if ($originalId>0) {
@@ -142,8 +146,8 @@ final class Media
         $all=$scope==='all' && current_user_can('ascla_manage');
         $owner=$all?absint($filter['owner']??0):get_current_user_id();
         $where=($all?'1=1':$wpdb->prepare('m.user_id=%d',get_current_user_id())).$wpdb->prepare(' AND m.post_id<>%d',self::TEMP_POST_ID);
-        if($all && $owner>0)$where.=$wpdb->prepare(' AND m.user_id=%d',$owner);
-        if($query!=='')$where.=$wpdb->prepare(' AND m.name LIKE %s','%'.$wpdb->esc_like($query).'%');
+        if($all && $owner>0) {$where.=$wpdb->prepare(' AND m.user_id=%d',$owner); }
+        if($query!=='') {$where.=$wpdb->prepare(' AND m.name LIKE %s','%'.$wpdb->esc_like($query).'%'); }
         $where.=" AND NOT EXISTS (SELECT 1 FROM $table AS derivative WHERE derivative.original_id=m.id)";
         $total=(int)$wpdb->get_var("SELECT COUNT(*) FROM $table AS m WHERE $where");
         $rows=$wpdb->get_results($wpdb->prepare("SELECT m.id,m.user_id,m.post_id,m.name,m.mime,m.original_id,m.created_at,OCTET_LENGTH(m.bytes) AS size,(SELECT OCTET_LENGTH(source.bytes) FROM $table AS source WHERE source.id=m.original_id) AS original_size FROM $table AS m WHERE $where ORDER BY m.id DESC LIMIT 20 OFFSET %d",($page-1)*20),ARRAY_A);
@@ -177,9 +181,9 @@ final class Media
     {
         Access::require(Access::member());
         $file=Store::one('media',$id);
-        Access::require((bool)$file,'Archivo no encontrado.',404);
+        Access::require((bool)$file,self::FILE_NOT_FOUND,404);
         Access::require(current_user_can('ascla_manage') || (int)$file['user_id']===get_current_user_id(),'Solo el propietario o un administrador puede eliminar este archivo.',403);
-        Access::require(Store::count('media','original_id=%d',[$id])===0,'Esta imagen es la copia maestra de una versión recortada. Elimina primero la imagen visible.',409);
+        Access::require(Store::count('media',self::ORIGINAL_FILTER,[$id])===0,'Esta imagen es la copia maestra de una versión recortada. Elimina primero la imagen visible.',409);
         return Store::lock('media:'.$id,static function()use($id,$file){
             global $wpdb;
             // Metadata is serialized; inspect candidate rows rather than doing an unsafe string replacement.
@@ -196,7 +200,7 @@ final class Media
             $originalId=(int)($file['original_id']??0);
             Store::delete('media',['id'=>$id]);
             $deletedSource=false;
-            if($originalId>0 && Store::count('media','original_id=%d',[$originalId])===0){
+            if($originalId>0 && Store::count('media',self::ORIGINAL_FILTER,[$originalId])===0){
                 $source=Store::one('media',$originalId);
                 if($source && (int)$source['user_id']===(int)$file['user_id'] && (int)$source['post_id']<=0){
                     Store::delete('media',['id'=>$originalId]);
@@ -225,11 +229,11 @@ final class Media
         $originalId=absint($options['original_id']??0);
         if ($originalId) {
             self::requireOwned($originalId,get_current_user_id(),true);
-            Access::require(str_starts_with($mime,'image/'),'La copia maestra sólo puede asociarse a una imagen.',400);
+            Access::require(str_starts_with($mime,self::IMAGE_MIME_PREFIX),'La copia maestra sólo puede asociarse a una imagen.',400);
             $source=Store::one('media',$originalId);
             Access::require($source && (int)$source['post_id']<=0 && (int)($source['original_id']??0)===0,'Copia maestra no válida.',400);
         }
-        if (str_starts_with($mime,'image/')) {
+        if (str_starts_with($mime,self::IMAGE_MIME_PREFIX)) {
             $dim=getimagesize($file['tmp_name']);
             Access::require($dim && $dim[0]*$dim[1]<=20000000 && $size<=3*1024*1024,'Imagen demasiado grande después de optimizar (3 MB / 20 MP máximo).',400);
         } else {
@@ -255,16 +259,16 @@ final class Media
             Access::require(Access::member());
             $id=absint($_GET['id']??0);
             $row=Store::one('media',$id);
-            Access::require((bool)$row,'Archivo no encontrado.',404);
+            Access::require((bool)$row,self::FILE_NOT_FOUND,404);
             $allowed=(int)$row['user_id']===get_current_user_id()||current_user_can('ascla_manage');
             if (!$allowed && $row['post_id']) {
                 $post=get_post($row['post_id']);
                 $allowed=$post && Content::canRead($post);
             }
-            if (!$allowed && str_starts_with($row['mime'],'image/')) {
+            if (!$allowed && str_starts_with($row['mime'],self::IMAGE_MIME_PREFIX)) {
                 try { $profile=Profiles::visible((int)$row['user_id']); $allowed=(int)($profile['photo_id']??0)===$id; } catch (\Throwable $e) { $allowed=false; }
             }
-            if (!$allowed && str_starts_with($row['mime'],'image/')) {
+            if (!$allowed && str_starts_with($row['mime'],self::IMAGE_MIME_PREFIX)) {
                 global $wpdb;
                 $c=Store::table('conversations'); $p=Store::table('participants');
                 $allowed=(bool)$wpdb->get_var($wpdb->prepare(
@@ -272,7 +276,7 @@ final class Media
                     $id,get_current_user_id()
                 ));
             }
-            Access::require($allowed,'Archivo no encontrado.',404);
+            Access::require($allowed,self::FILE_NOT_FOUND,404);
             nocache_headers();
             header('Content-Type: '.$row['mime']);
             header('X-Content-Type-Options: nosniff');

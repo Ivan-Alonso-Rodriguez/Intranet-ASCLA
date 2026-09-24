@@ -6,6 +6,9 @@ use ASCLA\Core\Repositories\Store;
 
 final class Content
 {
+    private const COMMENT_NOT_FOUND='Comentario no encontrado.';
+    private const RELATION_FILTER='user_id=%d AND target_id=%d AND kind=%s';
+    private const UNPUBLISHED_CONTENT='Contenido no publicado.';
     private const REPORT_REASONS=[
         'harassment'=>'Acoso',
         'fraud'=>'Fraude o estafa',
@@ -30,7 +33,7 @@ final class Content
     public static function indexMeta(int $metaId,int $postId,string $key,mixed $value): void
     {
         if ($key!=='_ascla' || !is_array($value)) { return; }
-        if(get_post_type($postId)==='ascla_contact') update_post_meta($postId,'_ascla_request_status',$value['request_status']??'open');
+        if(get_post_type($postId)==='ascla_contact') { update_post_meta($postId,'_ascla_request_status',$value['request_status']??'open'); }
         foreach (['resource_type','start','end','source'] as $field) { update_post_meta($postId,'_ascla_'.$field,$value[$field]??''); }
         update_post_meta($postId,'_ascla_micro',empty($value['micro'])?'0':'1');
         update_post_meta($postId,'_ascla_cancelled',empty($value['cancelled'])?'0':'1');
@@ -308,7 +311,7 @@ final class Content
     public static function remove(int $id): array
     {
         $post=self::get($id);
-        if($post->post_type==='ascla_contact') return Administration::deleteContact($id);
+        if($post->post_type==='ascla_contact') { return Administration::deleteContact($id); }
         Access::require(self::canDelete($post),'No tienes permisos para eliminar este contenido.',403);
         return Store::lock('content:'.$id,static function()use($id,$post){
             $meta=(array)get_post_meta($id,'_ascla',true);
@@ -318,16 +321,16 @@ final class Content
                 Store::delete('registrations',['event_id'=>$id]);
             }
             if($post->post_type==='ascla_forum') {
-                foreach(get_posts(['post_type'=>'ascla_topic','post_parent'=>$id,'post_status'=>['publish','pending','draft','ascla_hidden','ascla_rejected'],'numberposts'=>-1]) as $child) wp_update_post(['ID'=>$child->ID,'post_parent'=>0]);
+                foreach(get_posts(['post_type'=>'ascla_topic','post_parent'=>$id,'post_status'=>['publish','pending','draft','ascla_hidden','ascla_rejected'],'numberposts'=>-1]) as $child) { wp_update_post(['ID'=>$child->ID,'post_parent'=>0]); }
             }
-            foreach(['like','follow','report'] as $kind) Store::delete('relations',['target_id'=>$id,'kind'=>$kind]);
+            foreach(['like','follow','report'] as $kind) { Store::delete('relations',['target_id'=>$id,'kind'=>$kind]); }
             Audit::record('content_trashed',$id,$post->post_type);
             return ['id'=>$id,'deleted'=>true,'message'=>'Contenido enviado a la papelera.'];
         });
     }
     public static function removeComment(int $id): array
     {
-        $comment=get_comment($id);Access::require($comment && !in_array((string)$comment->comment_approved,['trash','post-trashed'],true),'Comentario no encontrado.',404);
+        $comment=get_comment($id);Access::require($comment && !in_array((string)$comment->comment_approved,['trash','post-trashed'],true),self::COMMENT_NOT_FOUND,404);
         self::get((int)$comment->comment_post_ID);
         Access::require(self::canDeleteComment($comment),'No tienes permisos para eliminar este comentario.',403);
         Access::require((bool)wp_trash_comment($id),'No se pudo eliminar el comentario.',500);
@@ -389,11 +392,11 @@ final class Content
     public static function reactComment(int $id,bool $active): array
     {
         $comment=get_comment($id);
-        Access::require($comment && (string)$comment->comment_approved==='1','Comentario no encontrado.',404);
+        Access::require($comment && (string)$comment->comment_approved==='1',self::COMMENT_NOT_FOUND,404);
         self::get((int)$comment->comment_post_ID);
         $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>'comment_like'];
         Store::lock('comment-reaction:'.get_current_user_id().':'.$id,static function()use($where,$active){
-            if ($active && !Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where))) {
+            if ($active && !Store::count('relations',self::RELATION_FILTER,array_values($where))) {
                 Store::insert('relations',$where+['created_at'=>current_time('mysql',true)]);
             } elseif (!$active) { Store::delete('relations',$where); }
         });
@@ -432,9 +435,9 @@ final class Content
     {
         Access::limit('comment_report',8,300);
         $comment=get_comment($id);
-        Access::require($comment && (string)$comment->comment_approved==='1','Comentario no encontrado.',404);
+        Access::require($comment && (string)$comment->comment_approved==='1',self::COMMENT_NOT_FOUND,404);
         $post=self::get((int)$comment->comment_post_ID);
-        Access::require($post->post_status==='publish','Contenido no publicado.',400);
+        Access::require($post->post_status==='publish',self::UNPUBLISHED_CONTENT,400);
         Access::require((int)$comment->user_id!==get_current_user_id(),'No puedes reportar tu propio comentario.',400);
         $reason=trim(Access::text($reason,64));
         Access::require(isset(self::REPORT_REASONS[$reason]),'Selecciona un motivo de reporte válido.',400);
@@ -442,10 +445,10 @@ final class Content
         Access::require($reason!=='other' || $detail!=='','Describe brevemente el motivo del reporte cuando selecciones “Otro motivo”.',400);
         $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>'comment_report'];
         Store::lock('comment-report:'.implode(':',$where),static function () use($where,$reason,$detail,$comment) {
-            $existing=Store::rows('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where),'LIMIT 1')[0]??null;
+            $existing=Store::rows('relations',self::RELATION_FILTER,array_values($where),'LIMIT 1')[0]??null;
             $data=['reason'=>$reason,'detail'=>$detail,'reviewed_at'=>null,'reviewed_by'=>0,'created_at'=>current_time('mysql',true)];
-            if ($existing) Store::update('relations',$data,['id'=>(int)$existing['id']]);
-            else Store::insert('relations',$where+$data);
+            if ($existing) { Store::update('relations',$data,['id'=>(int)$existing['id']]); }
+            else { Store::insert('relations',$where+$data); }
             Audit::record('comment_reported',(int)$comment->comment_ID,self::reportLabel($reason));
         });
         return ['reported'=>true,'reason'=>$reason,'reason_label'=>self::reportLabel($reason)];
@@ -453,7 +456,7 @@ final class Content
     public static function react(int $id,string $kind,bool $active): array
     {
         Access::require(in_array($kind,['like','follow'],true),'Acción no válida.',400);
-        $post=self::get($id); Access::require($post->post_status==='publish','Contenido no publicado.',400);
+        $post=self::get($id); Access::require($post->post_status==='publish',self::UNPUBLISHED_CONTENT,400);
         if ($kind==='follow' && $active && $post->post_type==='ascla_event') {
             $meta=(array)get_post_meta($id,'_ascla',true); $end=strtotime((string)($meta['end']??''));
             Access::require(empty($meta['cancelled']),'No puedes seguir un evento cancelado.',409);
@@ -461,7 +464,7 @@ final class Content
         }
         $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>$kind];
         Store::lock('reaction:'.implode(':',$where),static function () use($where,$active,$post,$kind) {
-            if ($active && !Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where))) {
+            if ($active && !Store::count('relations',self::RELATION_FILTER,array_values($where))) {
                 Store::insert('relations',$where+['created_at'=>current_time('mysql',true)]);
                 if ($kind==='like') { Notifications::send((int)$post->post_author,'reaction','Tu publicación recibió una reacción.',Catalog::url(self::page(substr($post->post_type,6)),['item'=>$post->ID]),['type'=>'post','id'=>$post->ID,'actor'=>get_current_user_id()]); }
             } elseif (!$active) { Store::delete('relations',$where); }
@@ -473,7 +476,7 @@ final class Content
     {
         Access::limit('content_report',8,300);
         $post=self::get($id);
-        Access::require($post->post_status==='publish','Contenido no publicado.',400);
+        Access::require($post->post_status==='publish',self::UNPUBLISHED_CONTENT,400);
         Access::require((int)$post->post_author!==get_current_user_id(),'No puedes reportar tu propia publicación.',400);
         $reason=trim(Access::text($reason,64));
         Access::require(isset(self::REPORT_REASONS[$reason]),'Selecciona un motivo de reporte válido.',400);
@@ -481,10 +484,10 @@ final class Content
         Access::require($reason!=='other' || $detail!=='','Describe brevemente el motivo del reporte cuando selecciones “Otro motivo”.',400);
         $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>'report'];
         Store::lock('report:'.implode(':',$where),static function () use($where,$reason,$detail,$post) {
-            $existing=Store::rows('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where),'LIMIT 1')[0]??null;
+            $existing=Store::rows('relations',self::RELATION_FILTER,array_values($where),'LIMIT 1')[0]??null;
             $data=['reason'=>$reason,'detail'=>$detail,'reviewed_at'=>null,'reviewed_by'=>0,'created_at'=>current_time('mysql',true)];
-            if ($existing) Store::update('relations',$data,['id'=>(int)$existing['id']]);
-            else Store::insert('relations',$where+$data);
+            if ($existing) { Store::update('relations',$data,['id'=>(int)$existing['id']]); }
+            else { Store::insert('relations',$where+$data); }
             Audit::record('content_reported',$post->ID,self::reportLabel($reason));
         });
         return ['reported'=>true,'reason'=>$reason,'reason_label'=>self::reportLabel($reason)];
@@ -513,7 +516,7 @@ final class Content
     }
     public static function guardPublication(array $data,array $postarr): array
     {
-        if (($data['post_status']??'')==='publish' && in_array($data['post_type']??'',['ascla_gallery','ascla_resource','ascla_event'],true) && !Access::canPublish() && (empty($postarr['ID']) || get_post_status($postarr['ID'])!=='publish')) $data['post_status']='pending';
+        if (($data['post_status']??'')==='publish' && in_array($data['post_type']??'',['ascla_gallery','ascla_resource','ascla_event'],true) && !Access::canPublish() && (empty($postarr['ID']) || get_post_status($postarr['ID'])!=='publish')) { $data['post_status']='pending'; }
         if (($data['post_status']??'')==='publish' && str_starts_with($data['post_type']??'','ascla_') && !empty($postarr['ID'])) {
             $meta=(array)get_post_meta($postarr['ID'],'_ascla',true);
             if (!empty($meta['generated']) && empty($meta['reviewed'])) { $data['post_status']='pending'; }

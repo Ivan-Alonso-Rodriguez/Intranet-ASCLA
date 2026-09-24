@@ -9,12 +9,16 @@ use ASCLA\Core\Repositories\Store;
 /** Resolve notification destinations against the recipient's current permissions. */
 final class NotificationTarget
 {
+    private const VIEW_PROFILE_ES='Ver perfil';
+    private const VIEW_PROFILE_EN='View profile';
+    private const NETWORK_LABEL='Tu red';
+    private const REVIEW_REQUEST_LABEL='Revisar solicitud';
     private const HUB_ACTION='Ver el Hub';
     private const TYPES = [
         'message'=>['Mensajes','mail','mensajeria','Abrir mensajería'],
         'conversation_group'=>['Mensajes','mail','mensajeria','Abrir grupo'],
-        'conversation_request'=>['Tu red','mail','directorio','Revisar solicitud'],
-        'conversation_accepted'=>['Tu red','mail','directorio','Abrir conversación'],
+        'conversation_request'=>[self::NETWORK_LABEL,'mail','directorio',self::REVIEW_REQUEST_LABEL],
+        'conversation_accepted'=>[self::NETWORK_LABEL,'mail','directorio','Abrir conversación'],
         'comment'=>['Comunidad','hub','hub',self::HUB_ACTION],
         'comment_reply'=>['Comunidad','reply','hub',self::HUB_ACTION],
         'reaction'=>['Comunidad','heart','hub',self::HUB_ACTION],
@@ -26,16 +30,16 @@ final class NotificationTarget
         'event_updated'=>['Eventos','calendar','eventos','Ver cambios del evento'],
         'microevent'=>['Eventos','calendar','eventos','Ver eventos'],
         'resource'=>['Conocimiento','book','centro-conocimiento','Explorar recursos'],
-        'networking'=>['Tu red','users','directorio','Explorar directorio'],
-        'connection_accepted'=>['Tu red','users','directorio','Ver conexión'],
-        'connection'=>['Tu red','users','directorio','Explorar directorio'],
-        'support_request'=>['Soporte','contact','contacto','Revisar solicitud'],
+        'networking'=>[self::NETWORK_LABEL,'users','directorio','Explorar directorio'],
+        'connection_accepted'=>[self::NETWORK_LABEL,'users','directorio','Ver conexión'],
+        'connection'=>[self::NETWORK_LABEL,'users','directorio','Explorar directorio'],
+        'support_request'=>['Soporte','contact','contacto',self::REVIEW_REQUEST_LABEL],
         'support_received'=>['Soporte','contact','contacto','Ver mis solicitudes'],
         'support_update'=>['Soporte','contact','contacto','Ver estado'],
         'job'=>['Asistente y contenidos','spark','asistente','Ver mis consultas'],
         'job_error'=>['Asistente y contenidos','spark','asistente','Revisar consulta'],
         'welcome'=>['Comunidad','users','intranet','Explorar la comunidad'],
-        'birthday'=>['Comunidad','users','directorio','Ver perfil'],
+        'birthday'=>['Comunidad','users','directorio',self::VIEW_PROFILE_ES],
     ];
 
     private static function tr(string $es,string $en): string { return Language::text($es,$en); }
@@ -151,7 +155,7 @@ final class NotificationTarget
             $view['title']=Language::english()?$actor.' sent a new support request':$actor.' envió una nueva solicitud de soporte';
             $view['description']=$number.' · '.Access::excerpt($post->post_title,160);
             $view['url']=current_user_can('ascla_moderate')?App::adminUrl(['page'=>'ascla-solicitudes']):Catalog::url('contacto');
-            $view['action_label']=self::tr('Revisar solicitud','Review request');
+            $view['action_label']=self::tr(self::REVIEW_REQUEST_LABEL,'Review request');
             return $view;
         }
         if ($view['kind']==='support_received') {
@@ -184,11 +188,11 @@ final class NotificationTarget
             $view['description']=self::tr('Abre el chat grupal para ver la conversación.','Open the group chat to view the conversation.');
             $view['action_label']=self::tr('Abrir grupo','Open group');
         } else {
-            if (empty($context['actor']) && !empty($conversation['other']['id'])) $actor=self::actor(['actor'=>$conversation['other']['id']]);
+            if (empty($context['actor']) && !empty($conversation['other']['id'])) { $actor=self::actor(['actor'=>$conversation['other']['id']]); }
             if ($view['kind']==='conversation_request') {
                 $view['title']=Language::english()?$actor.' sent you a conversation request':$actor.' te envió una solicitud de conversación';
                 $view['description']=self::tr('Lee el primer mensaje y decide si deseas aceptar la conversación.','Read the first message and decide whether to accept the conversation.');
-                $view['action_label']=self::tr('Revisar solicitud','Review request');
+                $view['action_label']=self::tr(self::REVIEW_REQUEST_LABEL,'Review request');
             } elseif ($view['kind']==='conversation_accepted') {
                 $view['title']=Language::english()?$actor.' accepted your conversation request':$actor.' aceptó tu solicitud de conversación';
                 $view['description']=self::tr('Ya puedes continuar la conversación en Mensajería.','You can now continue the conversation in Messages.');
@@ -216,7 +220,7 @@ final class NotificationTarget
             $view['title']=Language::english()?'🎉 Today is '.$name.'’s birthday':'🎉 Hoy cumple años '.$name;
             $view['description']=self::tr('Puedes abrir su perfil y enviarle un saludo desde ASCLA.','Open their profile and send a birthday greeting from ASCLA.');
             $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
-            $view['action_label']=self::tr('Ver perfil','View profile');
+            $view['action_label']=self::tr(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN);
             return $view;
         }
         if (in_array($view['kind'],['conversation_request','conversation_accepted'],true)) {
@@ -229,14 +233,14 @@ final class NotificationTarget
             };
             $view['description']=self::tr('Puedes aceptar la solicitud sin crear una conexión profesional.','You can accept the request without creating a professional connection.');
             $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
-            $view['action_label']=$state['state']==='incoming_pending'?self::tr('Aceptar o rechazar solicitud','Accept or reject request'):($state['state']==='allowed'?self::tr('Enviar mensaje','Send message'):self::tr('Ver perfil','View profile'));
+            $view['action_label']=$state['state']==='incoming_pending'?self::tr('Aceptar o rechazar solicitud','Accept or reject request'):($state['state']==='allowed'?self::tr('Enviar mensaje','Send message'):self::tr(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN));
             return $view;
         }
         $state=Connections::between(get_current_user_id(),(int)$profile['id']);
         $view['title']=in_array($view['kind'],['connection','connection_accepted'],true)?match($state['state']) { 'incoming_pending'=>Language::english()?$name.' wants to connect with you':$name.' quiere conectar contigo', 'outgoing_pending'=>Language::english()?'Your request to '.$name.' is pending':'Tu solicitud a '.$name.' está pendiente', 'connected'=>Language::english()?'You are now connected with '.$name:'Ya estás conectado con '.$name, default=>self::tr('Solicitud de conexión cerrada','Connection request closed') }:(Language::english()?'A connection for you: '.$name:'Una conexión para ti: '.$name);
         $view['description']=self::tr('Conoce su experiencia y encuentra temas para conversar.','Explore their experience and find topics to discuss.');
         $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
-        $view['action_label']=$state['state']==='incoming_pending'?self::tr('Aceptar o rechazar solicitud','Accept or reject request'):self::tr('Ver perfil','View profile');
+        $view['action_label']=$state['state']==='incoming_pending'?self::tr('Aceptar o rechazar solicitud','Accept or reject request'):self::tr(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN);
         return $view;
     }
 

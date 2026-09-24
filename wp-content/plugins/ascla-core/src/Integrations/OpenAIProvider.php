@@ -54,28 +54,28 @@ final class OpenAIProvider implements AIProviderInterface
                 'max_output_tokens'=>$task==='probe'?512:8192,
             ],JSON_UNESCAPED_UNICODE),
         ]);
-        if(is_wp_error($response)) throw new ApiException('No se pudo conectar con OpenAI. Revisa la conexión del servidor.',502);
+        if(is_wp_error($response)) { throw new ApiException('No se pudo conectar con OpenAI. Revisa la conexión del servidor.',502); }
         $code=wp_remote_retrieve_response_code($response);
         if($code!==200){
             $detail=match($code){400=>'Revisa el modelo y la configuración de OpenAI.',401=>'Revisa la OpenAI API Key.',403=>'La API Key no tiene permisos para esta solicitud.',404=>'El modelo o endpoint no está disponible.',429=>'La cuota o el límite de solicitudes de OpenAI se agotó.',default=>'OpenAI no pudo completar la solicitud. Inténtalo nuevamente.'};
             throw new ApiException($detail.' (HTTP '.$code.')',502);
         }
         $data=json_decode(wp_remote_retrieve_body($response),true);
-        if(!is_array($data)) throw new ApiException('OpenAI devolvió una respuesta no válida.',502);
-        if(($data['status']??'completed')==='failed') throw new ApiException('OpenAI no pudo completar la respuesta.',502);
+        if(!is_array($data)) { throw new ApiException('OpenAI devolvió una respuesta no válida.',502); }
+        if(($data['status']??'completed')==='failed') { throw new ApiException('OpenAI no pudo completar la respuesta.',502); }
         $text=is_string($data['output_text']??null)?$data['output_text']:'';
         if($text===''){
             foreach((array)($data['output']??[]) as $output){
-                if(($output['type']??'')!=='message') continue;
+                if(($output['type']??'')!=='message') { continue; }
                 foreach((array)($output['content']??[]) as $piece){
-                    if(($piece['type']??'')==='output_text' && is_string($piece['text']??null)) $text.=$piece['text'];
+                    if(($piece['type']??'')==='output_text' && is_string($piece['text']??null)) { $text.=$piece['text']; }
                 }
             }
         }
         $text=trim($text);
-        if(str_starts_with($text,'```')) $text=preg_replace('/^```(?:json)?\s*|\s*```$/iu','',$text)??$text;
+        if(str_starts_with($text,'```')) { $text=preg_replace('/(?:^```(?:json)?\s*)|(?:\s*```$)/iu','',$text)??$text; }
         $result=json_decode(trim($text),true);
-        if(!is_array($result) || array_is_list($result)) throw new ApiException('OpenAI devolvió un formato no válido. Inténtalo nuevamente.',502);
+        if(!is_array($result) || array_is_list($result)) { throw new ApiException('OpenAI devolvió un formato no válido. Inténtalo nuevamente.',502); }
         $result['mode']=$this->mode();
         return $result;
     }

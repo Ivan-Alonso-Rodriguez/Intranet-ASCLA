@@ -21,16 +21,16 @@ final class InterestImports
         $columns=[];foreach(['email','code','structured','free'] as $key){$v=$map[$key]??-1;Access::require(filter_var($v,FILTER_VALIDATE_INT)!==false && (int)$v>=-1 && (int)$v<count($file['headers']),'Columna no válida.',400);$columns[$key]=(int)$v;}
         Access::require(($columns['email']>=0 || $columns['code']>=0) && ($columns['structured']>=0 || $columns['free']>=0),'Selecciona identidad y respuestas.',400);
         $mode=Access::text($input['mode']??'merge',20);Access::require(in_array($mode,['merge','replace'],true),'Modo de importación no válido.',400);
-        $rows=[];foreach($file['rows'] as $row){$p=['line'=>$row['line']];foreach($columns as $key=>$n)$p[$key]=$n<0?'':Access::text($row['values'][$n],in_array($key,['email','code'],true)?200:6000);$rows[]=$p;}
+        $rows=[];foreach($file['rows'] as $row){$p=['line'=>$row['line']];foreach($columns as $key=>$n) {$p[$key]=$n<0?'':Access::text($row['values'][$n],in_array($key,['email','code'],true)?200:6000); }$rows[]=$p;}
         $id=ImportRecords::create('interests',$filename,['mode'=>$mode],$rows);Audit::record('interests_import_created',$id,'rows='.count($rows));return self::detail($id);
     }
     private static function resolve(array $p): array
     {
         $email=trim($p['email']);$code=trim($p['code']);$byEmail=$email!=='' && is_email($email)?get_user_by('email',$email):false;$byCode=[];
-        if($code!=='')$byCode=array_unique(array_map('intval',get_users(['fields'=>'ID','meta_query'=>['relation'=>'OR',['key'=>'_ascla_member_code','value'=>$code],['key'=>'ascla_member_code','value'=>$code]]])));
-        if(count($byCode)>1 || ($byCode && $byEmail && $byCode[0]!== (int)$byEmail->ID))return [0,'Código y correo ambiguos; revisión manual.'];
+        if($code!=='') {$byCode=array_unique(array_map('intval',get_users(['fields'=>'ID','meta_query'=>['relation'=>'OR',['key'=>'_ascla_member_code','value'=>$code],['key'=>'ascla_member_code','value'=>$code]]]))); }
+        if(count($byCode)>1 || ($byCode && $byEmail && $byCode[0]!== (int)$byEmail->ID)) {return [0,'Código y correo ambiguos; revisión manual.']; }
         $id=$byCode?(int)$byCode[0]:($byEmail?(int)$byEmail->ID:0);
-        if(!$id || !user_can($id,'ascla_access') || !current_user_can('edit_user',$id))return [0,'Usuario no encontrado o sin permiso de edición.'];
+        if(!$id || !user_can($id,'ascla_access') || !current_user_can('edit_user',$id)) {return [0,'Usuario no encontrado o sin permiso de edición.']; }
         return [$id,($code!=='' && !$byCode)?'Código no encontrado; coincidencia por correo.':''];
     }
     private static function profile(int $id): array{return (array)get_user_meta($id,'_ascla_profile',true);}
@@ -41,11 +41,11 @@ final class InterestImports
             $import=ImportRecords::get($id,'interests');Access::require($import['status']==='processing','La importación ya fue analizada.',409);
             foreach(ImportRecords::rows($id,'pending',50) as $row){$p=$row['payload'];[$uid,$warning]=self::resolve($p);$proposal=InterestCatalog::propose($p['structured']);
                 $p+=['topics'=>$proposal['ids'],'classification'=>$proposal['items'],'unknown'=>$proposal['unknown'],'selected_count'=>$proposal['selected_count'],'warnings'=>[],'method'=>'deterministic','confidence'=>'high'];
-                if($warning!=='')$p['warnings'][]=$warning;if($proposal['selected_count']>3)$p['warnings'][]='La respuesta contiene más de tres opciones.';if($proposal['unknown'])$p['warnings'][]='Hay categorías sin correspondencia en el catálogo.';if(trim($p['free'])!=='')$p['warnings'][]='Texto libre pendiente de clasificación o revisión.';
+                if($warning!=='') {$p['warnings'][]=$warning; }if($proposal['selected_count']>3) {$p['warnings'][]='La respuesta contiene más de tres opciones.'; }if($proposal['unknown']) {$p['warnings'][]='Hay categorías sin correspondencia en el catálogo.'; }if(trim($p['free'])!=='') {$p['warnings'][]='Texto libre pendiente de clasificación o revisión.'; }
                 if($uid){$p['name']=Profiles::publicName($uid);$p['profile_hash']=self::fingerprint($uid);$p['previous']=(array)(self::profile($uid)['interests']??[]);}
                 ImportRecords::save($row,'review',$p,$uid);
             }
-            if(empty(ImportRecords::counts($id)['pending']))Store::update('imports',['status'=>'review'],['id'=>$id]);return self::detail($id);
+            if(empty(ImportRecords::counts($id)['pending'])) {Store::update('imports',['status'=>'review'],['id'=>$id]); }return self::detail($id);
         });
     }
     public static function detail(int $id,int $page=1): array
@@ -100,7 +100,7 @@ final class InterestImports
         $sample=array_slice($terms,0,min(2,count($terms)));$text='Me interesan '.implode(' y ',array_column($sample,'name')).'.';
         $result=self::validateAIResult($provider->generate('form_interests',['text'=>$text,'catalog'=>$terms]),$terms);
         Access::require(!empty($result['intereses']),'Gemini respondió, pero no clasificó la muestra sintética de Forms.',502);
-        $byId=[];foreach($terms as $term)$byId[(int)$term['id']]=$term['name'];$topics=[];foreach($result['intereses'] as $id)$topics[]=['id'=>$id,'name'=>$byId[$id]];
+        $byId=[];foreach($terms as $term) {$byId[(int)$term['id']]=$term['name']; }$topics=[];foreach($result['intereses'] as $id) {$topics[]=['id'=>$id,'name'=>$byId[$id]]; }
         return ['ok'=>true,'provider'=>$provider->mode(),'model'=>$settings['ai_model']??'','confidence'=>$result['confianza'],'selected_count'=>count($topics),'topics'=>$topics,'message'=>'Gemini respondió con el formato de Forms, confianza válida e IDs existentes del catálogo.'];
     }
     public static function confirm(int $id): array
@@ -126,12 +126,12 @@ final class InterestImports
                     if(!$p['topics']){ImportRecords::save($row,'unchanged',$p,$uid);return;}
                     global $wpdb;$wpdb->query('START TRANSACTION');
                     try {
-                        $changed=$old!==$next;$profile['interests']=$next;if($changed)$profile['revision']=(int)($profile['revision']??0)+1;
-                        if($changed && update_user_meta($uid,'_ascla_profile',$profile)===false)throw new \RuntimeException('No se pudo actualizar el perfil.');
-                        $forms=['ids'=>$p['topics'],'import_id'=>$id,'at'=>gmdate('c')];if(get_user_meta($uid,'_ascla_forms_interests',true)!==$forms && update_user_meta($uid,'_ascla_forms_interests',$forms)===false)throw new \RuntimeException('No se pudo guardar la fuente de intereses.');
-                        ImportRecords::save($row,$changed?'updated':'unchanged',$p,$uid);if($wpdb->query('COMMIT')===false)throw new \RuntimeException('No se pudo confirmar el lote.');
+                        $changed=$old!==$next;$profile['interests']=$next;if($changed) {$profile['revision']=(int)($profile['revision']??0)+1; }
+                        if($changed && update_user_meta($uid,'_ascla_profile',$profile)===false) {throw new \RuntimeException('No se pudo actualizar el perfil.'); }
+                        $forms=['ids'=>$p['topics'],'import_id'=>$id,'at'=>gmdate('c')];if(get_user_meta($uid,'_ascla_forms_interests',true)!==$forms && update_user_meta($uid,'_ascla_forms_interests',$forms)===false) {throw new \RuntimeException('No se pudo guardar la fuente de intereses.'); }
+                        ImportRecords::save($row,$changed?'updated':'unchanged',$p,$uid);if($wpdb->query('COMMIT')===false) {throw new \RuntimeException('No se pudo confirmar el lote.'); }
                     }catch(\Throwable $e){$wpdb->query('ROLLBACK');clean_user_cache($uid);throw $e;}
-                    if($changed)update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+                    if($changed) {update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false); }
                 });
             }
             $counts=ImportRecords::counts($id);if(empty($counts['approved'])){Store::update('imports',['status'=>empty($counts['conflict'])?'complete':'review','completed_at'=>empty($counts['conflict'])?current_time('mysql',true):null],['id'=>$id]);Audit::record('interests_import_applied',$id,'updated='.($counts['updated']??0));}

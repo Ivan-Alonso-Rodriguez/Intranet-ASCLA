@@ -64,7 +64,7 @@ final class AssistantContext
         $seen=[];$safe=[];
         foreach($sources as $source){
             $id=(int)($source['id']??0);
-            if($id<=0||isset($seen[$id]))continue;
+            if($id<=0||isset($seen[$id])) {continue; }
             $seen[$id]=true;$safe[]=$source;
         }
         return ['live'=>$live,'sources'=>array_slice($safe,0,8),'answerable'=>in_array(true,$intents,true)];
@@ -78,12 +78,12 @@ final class AssistantContext
         ]);
         $items=[];$sources=[];$now=time();$me=get_current_user_id();
         foreach($posts as $post){
-            if(!Content::canRead($post))continue;
+            if(!Content::canRead($post)) {continue; }
             $meta=(array)get_post_meta($post->ID,'_ascla',true);
             $end=strtotime((string)($meta['end']??''));
-            if($end!==false&&$end<=$now)continue;
+            if($end!==false&&$end<=$now) {continue; }
             $start=strtotime((string)($meta['start']??''));
-            if($start===false)continue;
+            if($start===false) {continue; }
             $registration=Store::rows('registrations','event_id=%d AND user_id=%d',[$post->ID,$me],'LIMIT 1')[0]['status']??'none';
             [$title,$body]=self::safeText($post,$meta);
             $url=Content::serialize($post)['url'];
@@ -92,7 +92,7 @@ final class AssistantContext
             $item=['id'=>(int)$post->ID,'title'=>$title,'start'=>$humanStart,'end'=>$humanEnd,'modality'=>$meta['modality']??'','location'=>$meta['location']??'','registration'=>$registration,'url'=>$url];
             $items[]=$item;
             $sources[]=['id'=>(int)$post->ID,'title'=>$title,'body'=>trim("Evento ASCLA. Inicio: {$humanStart}. Fin: {$humanEnd}. Modalidad: ".($meta['modality']??'').". Lugar: ".($meta['location']??'').". Estado de inscripción del usuario: {$registration}. ".$body),'score'=>100,'url'=>$url,'kind'=>'event'];
-            if(count($items)>=8)break;
+            if(count($items)>=8) {break; }
         }
         return [$items,$sources];
     }
@@ -102,16 +102,16 @@ final class AssistantContext
         $posts=get_posts(['post_type'=>['ascla_hub','ascla_resource','ascla_gallery'],'post_status'=>'publish','numberposts'=>24,'orderby'=>'date','order'=>'DESC']);
         $items=[];$sources=[];
         foreach($posts as $post){
-            if(!Content::canRead($post))continue;
+            if(!Content::canRead($post)) {continue; }
             $meta=(array)get_post_meta($post->ID,'_ascla',true);
-            if(!empty($meta['generated'])&&empty($meta['reviewed']))continue;
+            if(!empty($meta['generated'])&&empty($meta['reviewed'])) {continue; }
             [$title,$body]=self::safeText($post,$meta);
             $url=Content::serialize($post)['url'];
             $date=$post->post_date_gmt?:get_gmt_from_date($post->post_date);
             $kind=substr($post->post_type,6);
             $items[]=['id'=>(int)$post->ID,'type'=>$kind,'title'=>$title,'date'=>$date,'url'=>$url];
             $sources[]=['id'=>(int)$post->ID,'title'=>$title,'body'=>trim('Contenido ASCLA publicado el '.$date.'. '.mb_substr(wp_strip_all_tags($body),0,4500)),'score'=>80,'url'=>$url,'kind'=>$kind];
-            if(count($items)>=6)break;
+            if(count($items)>=6) {break; }
         }
         return [$items,$sources];
     }
@@ -121,7 +121,7 @@ final class AssistantContext
         try{$rows=Matching::recommendations();}catch(\Throwable $e){return [];}
         $items=[];
         foreach(array_slice($rows,0,5) as $row){
-            $id=(int)($row['id']??0);if(!$id)continue;
+            $id=(int)($row['id']??0);if(!$id) {continue; }
             $items[]=[
                 'id'=>$id,'name'=>$row['name']??Profiles::publicName($id),
                 'position'=>$row['position']??'','company'=>$row['company']??'',

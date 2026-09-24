@@ -18,14 +18,14 @@ final class KnowledgeSearch
     }
     public static function excerpt(string $body,array $tokens): string
     {
-        if(mb_strlen($body)<=5000) return $body;
+        if(mb_strlen($body)<=5000) { return $body; }
         $hay=mb_strtolower(remove_accents($body));$first=null;
-        foreach($tokens as $token) {$pos=mb_strpos($hay,$token);if($pos!==false) $first=$first===null?$pos:min($first,$pos);}
+        foreach($tokens as $token) {$pos=mb_strpos($hay,$token);if($pos!==false) { $first=$first===null?$pos:min($first,$pos); }}
         return mb_substr($body,max(0,($first??0)-500),5000);
     }
     public static function candidates(array $tokens): array
     {
-        if(!$tokens)return [];
+        if(!$tokens) {return []; }
         global $wpdb;$expressions=[];$parameters=[];
         foreach($tokens as $token) {
             $expressions[]='(CASE WHEN post_title LIKE %s THEN 3 ELSE 0 END + CASE WHEN post_content LIKE %s THEN 1 ELSE 0 END)';
@@ -34,7 +34,7 @@ final class KnowledgeSearch
         $score=implode(' + ',$expressions);$parameters[]='ascla_resource';$parameters[]='publish';
         $sql="SELECT ID, ($score) AS relevance FROM {$wpdb->posts} WHERE post_type=%s AND post_status=%s HAVING relevance > 0 ORDER BY relevance DESC, post_date DESC, ID DESC LIMIT 100";
         $ids=array_map('intval',$wpdb->get_col($wpdb->prepare($sql,...$parameters)));
-        if($ids)_prime_post_caches($ids,true,true);
+        if($ids) {_prime_post_caches($ids,true,true); }
         return array_values(array_filter(array_map('get_post',$ids)));
     }
 }

@@ -56,7 +56,7 @@ final class Plugin
                 $password = getenv('ASCLA_DEMO_PASSWORD');
                 if (!$password || strlen($password) < 12) { \WP_CLI::error('Configure ASCLA_DEMO_PASSWORD (12 caracteres mínimo).'); }
                 $previous=get_current_user_id();
-                if(!$previous){$admins=get_users(['capability'=>'ascla_manage','number'=>1,'fields'=>'ID']);if(!$admins)\WP_CLI::error('No hay administrador ASCLA disponible.');wp_set_current_user((int)$admins[0]);}
+                if(!$previous){$admins=get_users(['capability'=>'ascla_manage','number'=>1,'fields'=>'ID']);if(!$admins) {\WP_CLI::error('No hay administrador ASCLA disponible.'); }wp_set_current_user((int)$admins[0]);}
                 try{Services\Demo::seed($password);}
                 catch(\Throwable $error){\WP_CLI::error($error instanceof Rest\ApiException?$error->getMessage():'No se pudo crear la demo. Revise permisos y datos existentes.');}
                 finally{wp_set_current_user($previous);}

@@ -22,14 +22,14 @@ final class Connections
     }
     public static function statesFor(int $me,array $targets,?array $rows=null): array
     {
-        $targets=array_values(array_unique(array_map('intval',$targets))); if (!$targets) return [];
+        $targets=array_values(array_unique(array_map('intval',$targets))); if (!$targets) { return []; }
         $states=[]; $mine=Access::member($me)?Profiles::raw($me):[];
-        foreach ($targets as $id) $states[$id]=['state'=>'none','request_id'=>0,'connection_id'=>0,'blocked'=>false,'blocked_by_me'=>false,'can_message'=>false,'can_read_messages'=>false,'can_request'=>false];
+        foreach ($targets as $id) { $states[$id]=['state'=>'none','request_id'=>0,'connection_id'=>0,'blocked'=>false,'blocked_by_me'=>false,'can_message'=>false,'can_read_messages'=>false,'can_request'=>false]; }
         foreach ($rows??self::rows($me,$targets) as $row) {
             $outgoing=(int)$row['user_id']===$me; $id=(int)($outgoing?$row['target_id']:$row['user_id']);
-            if (!isset($states[$id])) continue;
+            if (!isset($states[$id])) { continue; }
             $s=&$states[$id];
-            if ($row['kind']==='block') { $s['blocked']=true; if ($outgoing) $s['blocked_by_me']=true; }
+            if ($row['kind']==='block') { $s['blocked']=true; if ($outgoing) { $s['blocked_by_me']=true; } }
             elseif ($row['kind']==='connected') { $s['state']='connected'; $s['connection_id']=(int)$row['id']; $s['request_id']=0; }
             elseif ($s['state']!=='connected' && ($s['state']==='none' || !$outgoing)) { $s['state']=$outgoing?'outgoing_pending':'incoming_pending'; $s['request_id']=(int)$row['id']; }
             unset($s);
@@ -61,11 +61,11 @@ final class Connections
     public static function listing(): array
     {
         $me=get_current_user_id(); $rows=self::rows($me); $ids=[];
-        foreach($rows as $row) $ids[]=(int)((int)$row['user_id']===$me?$row['target_id']:$row['user_id']);
+        foreach($rows as $row) { $ids[]=(int)((int)$row['user_id']===$me?$row['target_id']:$row['user_id']); }
         $out=['incoming'=>[],'outgoing'=>[],'connected'=>[]];
         $conversationStates=ConversationRequests::statesFor($me,$ids);
         foreach(self::statesFor($me,$ids,$rows) as $id=>$state) {
-            if (!Access::member($id) || $state['state']==='none') continue;
+            if (!Access::member($id) || $state['state']==='none') { continue; }
             $key=['incoming_pending'=>'incoming','outgoing_pending'=>'outgoing','connected'=>'connected'][$state['state']];
             $out[$key][]=Profiles::card($id)+['connection'=>$state,'conversation'=>$conversationStates[$id]??ConversationRequests::between($me,$id)];
         }
@@ -99,13 +99,13 @@ final class Connections
             Access::require($row && $row['kind']==='connect' && (int)$row['target_id']===$me,'Esta solicitud ya fue resuelta.',409);
             if ($decision==='accept') {
                 Access::require($sender!==$me && Access::member($sender) && !self::between($me,$sender)['blocked'],'No se puede confirmar esta conexión.',403);
-                if (!self::areConnected($me,$sender)) Store::update('relations',['kind'=>'connected'],['id'=>$id]);
+                if (!self::areConnected($me,$sender)) { Store::update('relations',['kind'=>'connected'],['id'=>$id]); }
             }
             // Remove reciprocal legacy requests too; neither is implicit consent.
-            foreach(self::rows($me,[$sender]) as $pending) if ($pending['kind']==='connect') Store::delete('relations',['id'=>(int)$pending['id']]);
+            foreach(self::rows($me,[$sender]) as $pending) { if ($pending['kind']==='connect') { Store::delete('relations',['id'=>(int)$pending['id']]); } }
             self::readRequests($me,$sender);
             Audit::record($decision==='accept'?'connection_accepted':'connection_rejected',$id);
-            if ($decision==='accept') Notifications::once($sender,'connection-accepted:'.$id,'connection_accepted',Profiles::publicName($me).' aceptó tu solicitud de conexión.',Catalog::url('perfil',['member'=>$me]),['type'=>'profile','id'=>$me]);
+            if ($decision==='accept') { Notifications::once($sender,'connection-accepted:'.$id,'connection_accepted',Profiles::publicName($me).' aceptó tu solicitud de conexión.',Catalog::url('perfil',['member'=>$me]),['type'=>'profile','id'=>$me]); }
             return self::between($me,$sender);
         });
     }
@@ -113,7 +113,7 @@ final class Connections
     {
         foreach(Store::rows('notifications',"user_id=%d AND kind='connection' AND read_at IS NULL",[$me],'') as $row) {
             $context=json_decode($row['context']??'null',true); parse_str((string)wp_parse_url($row['url'],PHP_URL_QUERY),$query);
-            if ((int)($context['id']??$query['member']??0)===$sender) Notifications::read((int)$row['id']);
+            if ((int)($context['id']??$query['member']??0)===$sender) { Notifications::read((int)$row['id']); }
         }
     }
     public static function remove(int $target): array
@@ -124,13 +124,13 @@ final class Connections
             Access::require(in_array($state['state'],['outgoing_pending','connected'],true),'No hay una solicitud enviada ni una conexión que puedas eliminar.',409);
             if ($state['state']==='outgoing_pending') {
                 $requestId=(int)$state['request_id'];
-                if ($requestId) Store::delete('relations',['id'=>$requestId,'user_id'=>$me,'target_id'=>$target,'kind'=>'connect']);
+                if ($requestId) { Store::delete('relations',['id'=>$requestId,'user_id'=>$me,'target_id'=>$target,'kind'=>'connect']); }
                 Notifications::removeProfileNotices($target,['connection'],$me);
                 Audit::record('connection_cancelled',$requestId,'profile-'.$target);
             } else {
                 $connectionId=(int)$state['connection_id'];
                 foreach (self::rows($me,[$target]) as $row) {
-                    if ($row['kind']==='connected') Store::delete('relations',['id'=>(int)$row['id']]);
+                    if ($row['kind']==='connected') { Store::delete('relations',['id'=>(int)$row['id']]); }
                 }
                 Audit::record('connection_removed',$connectionId,'profile-'.$target);
             }

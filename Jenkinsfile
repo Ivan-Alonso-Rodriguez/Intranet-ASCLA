@@ -1,7 +1,7 @@
 // Pipeline de ASCLA (Jenkins multibranch del curso).
 //
 //   development -> despliegue
-//   qa, uat     -> pruebas PHP + cobertura, SonarQube,
+//   qa, uat     -> pruebas PHP + E2E, cobertura, SonarQube,
 //                  Quality Gate y despliegue
 //   main        -> todavía no despliega
 //

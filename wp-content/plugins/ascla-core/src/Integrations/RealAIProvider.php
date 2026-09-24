@@ -40,17 +40,17 @@ final class RealAIProvider implements AIProviderInterface
                 'contents'=>[['role'=>'user','parts'=>[['text'=>wp_json_encode(['task'=>$task,'context'=>$context],JSON_UNESCAPED_UNICODE)]]]],
                 'generationConfig'=>['responseMimeType'=>'application/json','temperature'=>$task==='answer'?0.35:0.2,'maxOutputTokens'=>$task==='probe'?1024:8192]])
         ]);
-        if(is_wp_error($response)) throw new ApiException('No se pudo conectar con Google Gemini. Revisa la conexión del servidor.',502);
+        if(is_wp_error($response)) { throw new ApiException('No se pudo conectar con Google Gemini. Revisa la conexión del servidor.',502); }
         $code=wp_remote_retrieve_response_code($response);
         if($code!==200) {
             $detail=match($code){400=>'Revisa el modelo y la configuración de Gemini.',401,403=>'Revisa la API Key y los permisos de Gemini.',404=>'El modelo no está disponible para esta API Key.',429=>'La cuota o el límite de solicitudes de Gemini se agotó.',default=>'Gemini no pudo completar la solicitud. Inténtalo nuevamente.'};
             throw new ApiException($detail.' (HTTP '.$code.')',502);
         }
         $data=json_decode(wp_remote_retrieve_body($response),true);$candidate=$data['candidates'][0]??[];
-        if(($candidate['finishReason']??'STOP')!=='STOP') throw new ApiException('Gemini no devolvió una respuesta completa. Revisa la consulta o prueba otro modelo.',502);
-        $text='';foreach($candidate['content']['parts']??[] as $piece) if(empty($piece['thought']) && is_string($piece['text']??null)) $text.=$piece['text'];
+        if(($candidate['finishReason']??'STOP')!=='STOP') { throw new ApiException('Gemini no devolvió una respuesta completa. Revisa la consulta o prueba otro modelo.',502); }
+        $text='';foreach($candidate['content']['parts']??[] as $piece) { if(empty($piece['thought']) && is_string($piece['text']??null)) { $text.=$piece['text']; } }
         $result=json_decode($text,true);
-        if(!is_array($result) || array_is_list($result)) throw new ApiException('Gemini devolvió un formato no válido. Inténtalo nuevamente.',502);
+        if(!is_array($result) || array_is_list($result)) { throw new ApiException('Gemini devolvió un formato no válido. Inténtalo nuevamente.',502); }
         $result['mode']=$this->mode();return $result;
     }
     public static function test(): array

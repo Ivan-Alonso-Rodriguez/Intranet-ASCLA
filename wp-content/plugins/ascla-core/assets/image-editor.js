@@ -17,8 +17,19 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   })[char]);
 
+  function trimHyphens(value) {
+    let start = 0;
+    let end = value.length;
+    while (start < end && value[start] === '-') start++;
+    while (end > start && value[end - 1] === '-') end--;
+    return value.slice(start, end);
+  }
+
   function filenameBase(name) {
-    return String(name || 'imagen').replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'imagen';
+    const clean = String(name || 'imagen')
+      .replace(/\.[^.]+$/, '')
+      .replace(/[^a-zA-Z0-9._-]+/g, '-');
+    return trimHyphens(clean) || 'imagen';
   }
 
   function fileFromBlob(blob, name) {
@@ -135,8 +146,7 @@
     return `${(bytes / MB).toFixed(bytes < 10 * MB ? 1 : 0)} MB`;
   }
 
-  function edit(file, options = {}) {
-    return new Promise(async (resolve, reject) => {
+  async function edit(file, options = {}) {
       const messages = {
         invalid: options.messages?.invalid || 'Selecciona una imagen JPG, PNG o WebP.',
         tooLarge: options.messages?.tooLarge || 'La imagen original supera 15 MB. Reduce su tamaño antes de continuar.',
@@ -144,24 +154,22 @@
         tooManyPixels: options.messages?.tooManyPixels || 'La imagen supera el límite de 28 megapíxeles.',
       };
       if (!(file instanceof File) || !/^image\/(jpeg|png|webp)$/.test(file.type)) {
-        reject(new Error(messages.invalid));
-        return;
+        throw new Error(messages.invalid);
       }
       if (file.size > 15 * MB) {
-        reject(new Error(messages.tooLarge));
-        return;
+        throw new Error(messages.tooLarge);
       }
       const context = options.context in contexts ? options.context : 'hub';
       const config = { ...contexts[context], ...(options.config || {}) };
       let loaded;
-      try { loaded = await imageFromFile(file); } catch (error) { reject(new Error(messages.readError)); return; }
+      try { loaded = await imageFromFile(file); } catch { throw new Error(messages.readError); }
       const { image, url } = loaded;
       if (!image.naturalWidth || !image.naturalHeight || image.naturalWidth * image.naturalHeight > 28_000_000) {
         URL.revokeObjectURL(url);
-        reject(new Error(messages.tooManyPixels));
-        return;
+        throw new Error(messages.tooManyPixels);
       }
 
+    return new Promise((resolve, reject) => {
       const labels = {
         title: options.title || 'Ajustar imagen',
         hint: options.hint || 'Arrastra la imagen para moverla y usa el control de zoom antes de guardar.',

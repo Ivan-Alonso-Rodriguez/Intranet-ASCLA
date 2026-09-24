@@ -91,7 +91,7 @@ final class Login
     {
         if (self::isFrontendRequest()) { return false; }
         if (!empty($_REQUEST['interim-login'])) { return false; }
-        return (($GLOBALS['action'] ?? 'login') === 'login');
+        return ($GLOBALS['action'] ?? 'login') === 'login';
     }
 
     public static function pageId(): int
@@ -421,13 +421,13 @@ final class Login
                 'register' => ['Acceso exclusivo para asociados', 'Las cuentas ASCLA son creadas únicamente por la administración.'],
                 default => ['Tu cuenta ASCLA', 'Gestiona tu acceso a la comunidad.'],
             };
-            if(Language::english()) $copy=match($GLOBALS['action']??'login') {
+            if(Language::english()) { $copy=match($GLOBALS['action']??'login') {
                 'login'=>['Welcome to ASCLA','Sign in to access your community.'],
                 'lostpassword','retrievepassword'=>['Recover your access','Let us help you return to your community.'],
                 'resetpass','rp'=>['Choose a new password','Protect your account with a unique password.'],
                 'register'=>['Members-only access','ASCLA accounts are created only by the administration.'],
                 default=>['Your ASCLA account','Manage access to your community.'],
-            };
+            }; }
             $eyebrow = 'INTRANET ASCLA';
         }
         return '<div class="ascla-login-intro"><p class="ascla-login-eyebrow">' . esc_html($eyebrow) . '</p><h2>'
