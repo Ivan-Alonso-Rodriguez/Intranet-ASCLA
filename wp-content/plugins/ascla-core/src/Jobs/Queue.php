@@ -75,7 +75,7 @@ final class Queue
     {
         $kind=(string)$row['kind'];$user=(int)$row['user_id'];
         if (!in_array($kind,['microevents','resource_notifications','discovery'],true) || $user!==0) { Access::require(Access::member(),'La cuenta ya no tiene acceso.'); }
-        if ($kind==='microevents' && $user!==0) { Access::require(current_user_can('ascla_manage'),'Permiso de administración revocado.'); }
+        if ($kind==='microevents' && $user!==0) { Access::require(Access::canPublish(),'Permiso de publicación revocado.'); }
         if ($kind==='social') { Access::require(current_user_can('ascla_moderate'),'Permiso de moderación revocado.'); }
         if (in_array($kind,['multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Permiso de publicación revocado.'); }
     }

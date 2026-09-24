@@ -58,6 +58,8 @@ final class Profiles
             $data['email_notifications']=Notifications::emailPreferences($id);
         }
         $data['terms']=self::labels($data);
+        $data['position_label']=$data['position']??'';
+        if ($data['position_label']==='') { $data['position_label']=\ASCLA\Core\Frontend\Language::label('Miembro ASCLA'); }
         return $data;
     }
 
@@ -123,6 +125,7 @@ final class Profiles
     private static function saveUnlocked(array $input,int $id): array
     {
         $old=self::raw($id);
+        ProfileValidation::validateRequired($input);
         $data=self::saveTextFields($old,$input);
         $data=self::savePhoneFields($data,$input,$id);
         if (array_key_exists('birth_date',$input)) { $data['birth_date']=Birthdays::normalize($input['birth_date']); }
