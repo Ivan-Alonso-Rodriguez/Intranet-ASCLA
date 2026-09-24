@@ -81,6 +81,8 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 
 ## 1.10.3 — correcciones de acceso, perfiles y microeventos
 
+- **Mantenibilidad:** la validación de campos obligatorios se centraliza en `ProfileValidation`, compartida por Perfil y Administración. `Profiles` queda en 20 métodos y cumple el límite de la regla SonarQube `php:S1448`, sin modificar el comportamiento de validación.
+
 - **Caso 004 / #146:** cinco intentos fallidos bloquean la cuenta durante diez minutos, incluso con contraseña correcta, Turnstile desactivado, acceso por correo o cambio de IP. La comprobación se ejecuta después de los autenticadores de WordPress; los intentos durante el bloqueo no prolongan su duración.
 - **Caso 008 / #147:** para cambiar Cargo o Empresa desde Administración → Usuarios se debe seleccionar una solicitud activa de Contacto del mismo asociado. El formulario muestra su contenido; el servidor comprueba autor, estado y uso único antes de modificar la cuenta. La auditoría vincula la solicitud, el administrador y los campos modificados. La solicitud mantiene su estado de atención para que el equipo pueda responder y resolverla.
 - **Caso 013 / #148:** Nombres, Apellidos, Cargo y Empresa son obligatorios en el formulario de perfil y no admiten valores vacíos o compuestos solo por espacios en REST. Las actualizaciones parciales conservan los campos omitidos; una validación fallida no guarda otros cambios.
