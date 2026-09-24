@@ -6,6 +6,13 @@ use ASCLA\Core\Domain\Catalog;
 
 final class Messaging
 {
+    private const PAIR_FILTER='pair_key=%s';
+    private const SINGLE_ROW='LIMIT 1';
+    private const PARTICIPANT_FILTER='conversation_id=%d AND user_id=%d';
+    private const CANNOT_MESSAGE='No puede enviar mensajes a este miembro.';
+    private const CONVERSATION_FILTER='conversation_id=%d';
+    private const LATEST_ROW='ORDER BY id DESC LIMIT 1';
+    private const ORDER_BY_ID_ASC='ORDER BY id ASC';
     private const NOT_FOUND='Conversación no encontrada.';
 
     public static function blocked(int $a,int $b): bool
@@ -21,7 +28,7 @@ final class Messaging
     private static function ensureDirect(int $a,int $b,int $creator): array
     {
         $pair=self::pairKey($a,$b);
-        $existing=Store::rows('conversations','pair_key=%s',[$pair],'LIMIT 1');
+        $existing=Store::rows('conversations',self::PAIR_FILTER,[$pair],self::SINGLE_ROW);
         if ($existing) {
             $conversation=$existing[0];
             Access::require(($conversation['kind']??'direct')==='direct','No se puede reutilizar esta conversación.',409);
@@ -32,7 +39,7 @@ final class Messaging
             $conversation=Store::one('conversations',$id);
         }
         foreach ([$a,$b] as $uid) {
-            if (!Store::count('participants','conversation_id=%d AND user_id=%d',[(int)$conversation['id'],$uid])) {
+            if (!Store::count('participants',self::PARTICIPANT_FILTER,[(int)$conversation['id'],$uid])) {
                 Store::insert('participants',['conversation_id'=>(int)$conversation['id'],'user_id'=>$uid,'last_read'=>0]);
             }
         }
@@ -44,10 +51,10 @@ final class Messaging
         $me=get_current_user_id();
         Access::require($target>0 && $target!==$me && Access::member($target),'No se puede iniciar esta conversación.',400);
         ConversationRequests::requireAuthorized($me,$target);
-        Access::require(!self::blocked($me,$target),'No puede enviar mensajes a este miembro.',403);
+        Access::require(!self::blocked($me,$target),self::CANNOT_MESSAGE,403);
         return Connections::lockPair($me,$target,static function () use($me,$target) {
             ConversationRequests::requireAuthorized($me,$target);
-            Access::require(!self::blocked($me,$target),'No puede enviar mensajes a este miembro.',403);
+            Access::require(!self::blocked($me,$target),self::CANNOT_MESSAGE,403);
             $conversation=self::ensureDirect($me,$target,$me);
             Audit::record('conversation_started',(int)$conversation['id'],'direct');
             return $conversation;
@@ -71,8 +78,8 @@ final class Messaging
     public static function discardPendingRequest(int $requester,int $target,string $createdAt): void
     {
         $pair=self::pairKey($requester,$target);
-        $rows=Store::rows('conversations','pair_key=%s',[$pair],'LIMIT 1');
-        if (!$rows || ($rows[0]['kind']??'direct')!=='direct') return;
+        $rows=Store::rows('conversations',self::PAIR_FILTER,[$pair],self::SINGLE_ROW);
+        if (!$rows || ($rows[0]['kind']??'direct')!=='direct') { return; }
         $conversationId=(int)$rows[0]['id'];
         global $wpdb;
         $messages=Store::table('messages');
@@ -80,7 +87,7 @@ final class Messaging
             "DELETE FROM $messages WHERE conversation_id=%d AND sender_id=%d AND created_at>=%s",
             $conversationId,$requester,$createdAt
         ));
-        $last=Store::rows('messages','conversation_id=%d',[$conversationId],'ORDER BY id DESC LIMIT 1')[0]??null;
+        $last=Store::rows('messages',self::CONVERSATION_FILTER,[$conversationId],self::LATEST_ROW)[0]??null;
         if ($last) {
             Store::update('conversations',['updated_at'=>(string)$last['created_at']],['id'=>$conversationId]);
         } else {
@@ -92,10 +99,10 @@ final class Messaging
     public static function requestSummary(int $a,int $b): array
     {
         $pair=self::pairKey($a,$b);
-        $rows=Store::rows('conversations','pair_key=%s',[$pair],'LIMIT 1');
-        if (!$rows || ($rows[0]['kind']??'direct')!=='direct') return ['conversation_id'=>0,'initial_message'=>'','message_created_at'=>''];
+        $rows=Store::rows('conversations',self::PAIR_FILTER,[$pair],self::SINGLE_ROW);
+        if (!$rows || ($rows[0]['kind']??'direct')!=='direct') { return ['conversation_id'=>0,'initial_message'=>'','message_created_at'=>'']; }
         $conversationId=(int)$rows[0]['id'];
-        $last=Store::rows('messages','conversation_id=%d',[$conversationId],'ORDER BY id DESC LIMIT 1')[0]??null;
+        $last=Store::rows('messages',self::CONVERSATION_FILTER,[$conversationId],self::LATEST_ROW)[0]??null;
         return [
             'conversation_id'=>$conversationId,
             'initial_message'=>$last?mb_substr((string)$last['body'],0,500):'',
@@ -114,7 +121,7 @@ final class Messaging
         $ids=array_values(array_unique(array_filter(array_map('absint',$users),static fn($id)=>$id>0 && $id!==$me)));
         Access::require(count($ids)>=2,'Selecciona al menos dos asociados para crear un grupo.',400);
         Access::require(count($ids)<=49,'Un grupo puede tener como máximo 50 participantes, incluido su creador.',400);
-        if ($photoId>0) Media::requireOwned($photoId,$me,true);
+        if ($photoId>0) { Media::requireOwned($photoId,$me,true); }
         foreach ($ids as $id) {
             Access::require(Access::member($id),'Uno de los participantes ya no está disponible.',400);
             Access::require(Connections::areConnected($me,$id),'Solo puedes añadir al grupo conexiones confirmadas.',403);
@@ -125,7 +132,7 @@ final class Messaging
             $id=Store::insert('conversations',[
                 'pair_key'=>$key,'kind'=>'group','title'=>$title,'description'=>$description,'created_by'=>$me,'photo_id'=>$photoId,'updated_at'=>current_time('mysql',true),
             ]);
-            foreach (array_merge([$me],$ids) as $uid) Store::insert('participants',['conversation_id'=>$id,'user_id'=>$uid,'last_read'=>0]);
+            foreach (array_merge([$me],$ids) as $uid) { Store::insert('participants',['conversation_id'=>$id,'user_id'=>$uid,'last_read'=>0]); }
             if ($photoId>0) { Media::commit($photoId,$me); }
             foreach ($ids as $uid) {
                 Notifications::send(
@@ -146,9 +153,9 @@ final class Messaging
         $conversation=Store::one('conversations',$id);
         Access::require((bool)$conversation,self::NOT_FOUND,404);
         $me=get_current_user_id();
-        $rows=Store::rows('participants','conversation_id=%d AND user_id=%d',[$id,$me],'LIMIT 1');
+        $rows=Store::rows('participants',self::PARTICIPANT_FILTER,[$id,$me],self::SINGLE_ROW);
         Access::require((bool)$rows,self::NOT_FOUND,404);
-        $members=Store::rows('participants','conversation_id=%d',[$id],'ORDER BY id ASC');
+        $members=Store::rows('participants',self::CONVERSATION_FILTER,[$id],self::ORDER_BY_ID_ASC);
         $kind=(string)($conversation['kind']??'direct');
         if ($kind==='group') {
             Access::require(count($members)>=3,self::NOT_FOUND,404);
@@ -173,11 +180,11 @@ final class Messaging
         $out=[];
         foreach ($rows as $row) {
             $decorated=self::decorate($row);
-            if (!$decorated) continue;
+            if (!$decorated) { continue; }
             $haystack=$decorated['kind']==='group'
                 ? $decorated['title'].' '.($decorated['description']??'').' '.implode(' ',array_column($decorated['members'],'name')).' '.$decorated['preview']
                 : ($decorated['other']['name']??'').' '.$decorated['preview'];
-            if (!$query || mb_stripos($haystack,$query)!==false) $out[]=$decorated;
+            if (!$query || mb_stripos($haystack,$query)!==false) { $out[]=$decorated; }
         }
         return $out;
     }
@@ -190,9 +197,9 @@ final class Messaging
         $row['description']=(string)($row['description']??'');
         $row['created_by']=(int)($row['created_by']??0);
         $row['photo_id']=(int)($row['photo_id']??0);
-        $participants=Store::rows('participants','conversation_id=%d',[(int)$row['id']],'ORDER BY id ASC');
-        if (!array_filter($participants,static fn($p)=>(int)$p['user_id']===$me)) return null;
-        $last=Store::rows('messages','conversation_id=%d',[(int)$row['id']],'ORDER BY id DESC LIMIT 1')[0]??null;
+        $participants=Store::rows('participants',self::CONVERSATION_FILTER,[(int)$row['id']],self::ORDER_BY_ID_ASC);
+        if (!array_filter($participants,static fn($p)=>(int)$p['user_id']===$me)) { return null; }
+        $last=Store::rows('messages',self::CONVERSATION_FILTER,[(int)$row['id']],self::LATEST_ROW)[0]??null;
         $row['preview']=$last?mb_substr((string)$last['body'],0,100):'Conversación nueva';
         $row['unread']=Store::count('messages','conversation_id=%d AND id>%d AND sender_id<>%d',[(int)$row['id'],(int)($row['last_read']??0),$me]);
         if ($row['kind']==='group') {
@@ -207,12 +214,12 @@ final class Messaging
             return $row;
         }
         $others=array_values(array_filter($participants,static fn($p)=>(int)$p['user_id']!==$me));
-        if (count($others)!==1) return null;
+        if (count($others)!==1) { return null; }
         $other=(int)$others[0]['user_id'];
-        if (!Access::member($other)) return null;
+        if (!Access::member($other)) { return null; }
         $connection=Connections::between($me,$other);
         $permission=ConversationRequests::between($me,$other);
-        if ($connection['state']!=='connected' && !in_array($permission['state'],['allowed','incoming_pending','outgoing_pending'],true)) return null;
+        if ($connection['state']!=='connected' && !in_array($permission['state'],['allowed','incoming_pending','outgoing_pending'],true)) { return null; }
         $row['other']=Profiles::card($other);
         $row['connection']=$connection;
         $row['conversation_request']=$permission;
@@ -233,7 +240,7 @@ final class Messaging
 
     private static function readState(int $id,int $me): array
     {
-        $rows=Store::rows('participants','conversation_id=%d AND user_id<>%d',[$id,$me],'ORDER BY id ASC');
+        $rows=Store::rows('participants','conversation_id=%d AND user_id<>%d',[$id,$me],self::ORDER_BY_ID_ASC);
         $out=[];
         foreach ($rows as $row) {
             $uid=(int)$row['user_id'];
@@ -251,7 +258,7 @@ final class Messaging
             $message['sender']=Profiles::card($message['sender_id']);
             if ($message['sender_id']===$me) {
                 $read=0;
-                foreach ($readState as $state) if ((int)$state['last_read']>=(int)$message['id']) $read++;
+                foreach ($readState as $state) { if ((int)$state['last_read']>=(int)$message['id']) { $read++; } }
                 $message['read_count']=$read;
                 $message['read_total']=count($readState);
             }
@@ -264,12 +271,12 @@ final class Messaging
     {
         self::participant($id);
         Access::require($before>=0 && ($after===null || $after>=0) && !($before && $after!==null),'Cursor no válido.',400);
-        $args=[$id]; $where='conversation_id=%d';
+        $args=[$id]; $where=self::CONVERSATION_FILTER;
         if ($before>0) { $where.=' AND id<%d'; $args[]=$before; }
         if ($after!==null) { $where.=' AND id>%d'; $args[]=$after; }
         $rows=Store::rows('messages',$where,$args,$after===null?'ORDER BY id DESC LIMIT 61':'ORDER BY id ASC LIMIT 61');
         $more=count($rows)>60; $rows=array_slice($rows,0,60);
-        if ($after===null) $rows=array_reverse($rows);
+        if ($after===null) { $rows=array_reverse($rows); }
         $last=$rows?(int)end($rows)['id']:($after??0);
         if (!$before && $rows) {
             global $wpdb; $table=Store::table('participants');
@@ -297,7 +304,7 @@ final class Messaging
                 Store::update('conversations',['updated_at'=>current_time('mysql',true)],['id'=>$id]);
                 $title=(string)($participant['conversation']['title']??'Grupo ASCLA');
                 foreach ($participant['members'] as $member) {
-                    $uid=(int)$member['user_id']; if ($uid===$me) continue;
+                    $uid=(int)$member['user_id']; if ($uid===$me) { continue; }
                     Notifications::send($uid,'message',Profiles::publicName($me).' escribió en '.$title.'.',Catalog::url('mensajeria',['conversation'=>$id]),['type'=>'conversation','id'=>$id,'actor'=>$me]);
                 }
                 return Store::one('messages',$mid);
@@ -306,7 +313,7 @@ final class Messaging
         $other=(int)$participant['other_id'];
         return Connections::lockPair($me,$other,static function () use($id,$body,$me,$other) {
             ConversationRequests::requireAuthorized($me,$other);
-            Access::require(!self::blocked($me,$other),'No puede enviar mensajes a este miembro.',403);
+            Access::require(!self::blocked($me,$other),self::CANNOT_MESSAGE,403);
             $mid=Store::insert('messages',['conversation_id'=>$id,'sender_id'=>$me,'body'=>$body,'created_at'=>current_time('mysql',true)]);
             Store::update('conversations',['updated_at'=>current_time('mysql',true)],['id'=>$id]);
             Notifications::send($other,'message','Tienes un nuevo mensaje.',Catalog::url('mensajeria',['conversation'=>$id]),['type'=>'conversation','id'=>$id,'actor'=>$me]);
@@ -321,7 +328,7 @@ final class Messaging
         Access::require($message && (int)$message['conversation_id']===$conversationId,'Mensaje no encontrado.',404);
         Access::require((int)$message['sender_id']===get_current_user_id(),'Solo puedes eliminar tus propios mensajes.',403);
         Store::delete('messages',['id'=>$messageId,'conversation_id'=>$conversationId,'sender_id'=>get_current_user_id()]);
-        $last=Store::rows('messages','conversation_id=%d',[$conversationId],'ORDER BY id DESC LIMIT 1')[0]??null;
+        $last=Store::rows('messages',self::CONVERSATION_FILTER,[$conversationId],self::LATEST_ROW)[0]??null;
         Store::update('conversations',['updated_at'=>$last?(string)$last['created_at']:current_time('mysql',true)],['id'=>$conversationId]);
         Audit::record('message_deleted',$messageId,'conversation:'.$conversationId);
         return ['id'=>$messageId,'deleted'=>true];
@@ -334,12 +341,12 @@ final class Messaging
         $title=trim(Access::text($title,120));
         $description=trim(Access::text($description,240));
         Access::require($title!=='','Escriba un nombre para el grupo.',400);
-        if ($photoId>0) Media::requireOwned($photoId,$me,true);
+        if ($photoId>0) { Media::requireOwned($photoId,$me,true); }
         return Store::lock('conversation:'.$conversationId,static function () use($conversationId,$me,$title,$description,$photoId) {
             $conversation=Store::one('conversations',$conversationId);
             Access::require($conversation && ($conversation['kind']??'direct')==='group',self::NOT_FOUND,404);
             Access::require((int)$conversation['created_by']===$me,'Solo quien creó el grupo puede editarlo.',403);
-            Access::require(Store::count('participants','conversation_id=%d AND user_id=%d',[$conversationId,$me])>0,self::NOT_FOUND,404);
+            Access::require(Store::count('participants',self::PARTICIPANT_FILTER,[$conversationId,$me])>0,self::NOT_FOUND,404);
             Store::update('conversations',[
                 'title'=>$title,
                 'description'=>$description,
@@ -360,7 +367,7 @@ final class Messaging
             $conversation=Store::one('conversations',$conversationId);
             Access::require($conversation && ($conversation['kind']??'direct')==='group',self::NOT_FOUND,404);
             Access::require((int)$conversation['created_by']===$me,'Solo quien creó el grupo puede eliminarlo.',403);
-            Access::require(Store::count('participants','conversation_id=%d AND user_id=%d',[$conversationId,$me])>0,self::NOT_FOUND,404);
+            Access::require(Store::count('participants',self::PARTICIPANT_FILTER,[$conversationId,$me])>0,self::NOT_FOUND,404);
             Notifications::removeConversationNotices($conversationId);
             Store::delete('messages',['conversation_id'=>$conversationId]);
             Store::delete('participants',['conversation_id'=>$conversationId]);
@@ -373,13 +380,13 @@ final class Messaging
     public static function relation(int $target,string $kind,bool $active): array
     {
         Access::require(in_array($kind,['block','connect'],true)&&$target>0&&$target!==get_current_user_id()&&Access::member($target),'Acción no válida.',400);
-        if ($kind==='connect') return $active?Connections::request($target):Connections::remove($target);
+        if ($kind==='connect') { return $active?Connections::request($target):Connections::remove($target); }
         $me=get_current_user_id();
         return Connections::lockPair($me,$target,static function () use($me,$target,$active) {
             $where=['user_id'=>$me,'target_id'=>$target,'kind'=>'block'];
             if ($active) {
-                if (!Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where))) Store::insert('relations',$where+['created_at'=>current_time('mysql',true)]);
-            } else Store::delete('relations',$where);
+                if (!Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where))) { Store::insert('relations',$where+['created_at'=>current_time('mysql',true)]); }
+            } else { Store::delete('relations',$where); }
             return ['active'=>$active];
         });
     }

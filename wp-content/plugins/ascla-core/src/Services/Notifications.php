@@ -36,12 +36,12 @@ final class Notifications
     public static function emailPreferences(int $user=0): array
     {
         $user=$user?:get_current_user_id();
-        if (!$user || !Access::member($user)) return self::EMAIL_DEFAULTS;
+        if (!$user || !Access::member($user)) { return self::EMAIL_DEFAULTS; }
         $stored=get_user_meta($user,self::EMAIL_META,true);
         $stored=is_array($stored)?$stored:[];
         $preferences=self::EMAIL_DEFAULTS;
         foreach (array_keys(self::EMAIL_DEFAULTS) as $key) {
-            if (array_key_exists($key,$stored)) $preferences[$key]=(bool)$stored[$key];
+            if (array_key_exists($key,$stored)) { $preferences[$key]=(bool)$stored[$key]; }
         }
         return $preferences;
     }
@@ -51,7 +51,7 @@ final class Notifications
         Access::require($user>0 && Access::member($user),'Usuario no válido.',400);
         $preferences=self::emailPreferences($user);
         foreach (array_keys(self::EMAIL_DEFAULTS) as $key) {
-            if (array_key_exists($key,$input)) $preferences[$key]=rest_sanitize_boolean($input[$key]);
+            if (array_key_exists($key,$input)) { $preferences[$key]=rest_sanitize_boolean($input[$key]); }
         }
         update_user_meta($user,self::EMAIL_META,$preferences);
         return $preferences;
@@ -93,7 +93,7 @@ final class Notifications
             $history=get_user_meta($user,self::MESSAGE_EMAIL_META,true);
             $history=is_array($history)?$history:[];
             foreach ($history as $conversation=>$sentAt) {
-                if ((int)$sentAt < $now-DAY_IN_SECONDS) unset($history[$conversation]);
+                if ((int)$sentAt < $now-DAY_IN_SECONDS) { unset($history[$conversation]); }
             }
             $last=(int)($history[$key]??0);
             if ($last>0 && ($now-$last)<self::MESSAGE_EMAIL_WINDOW) {
@@ -110,8 +110,8 @@ final class Notifications
     private static function email(int $user,string $kind,string $label,string $url,array $context): void
     {
         $category=self::emailCategory($kind);
-        if ($category==='' || empty(self::emailPreferences($user)[$category])) return;
-        if (sanitize_key($kind)==='message' && !self::messageEmailAllowed($user,$context)) return;
+        if ($category==='' || empty(self::emailPreferences($user)[$category])) { return; }
+        if (sanitize_key($kind)==='message' && !self::messageEmailAllowed($user,$context)) { return; }
         try {
             \ASCLA\Core\Integrations\Mailer::notification($user,$category,self::emailCopy($kind,$label,$context),$url);
         } catch (\Throwable $error) {
@@ -165,9 +165,9 @@ final class Notifications
         $cursor=$after; $items=[];
         foreach ($rows as $row) {
             $cursor=max($cursor,(int)$row['id']);
-            if (!empty($row['read_at']) || !in_array((string)$row['kind'],self::TOAST_KINDS,true)) continue;
+            if (!empty($row['read_at']) || !in_array((string)$row['kind'],self::TOAST_KINDS,true)) { continue; }
             $items[]=NotificationTarget::view($row);
-            if (count($items)>=12) break;
+            if (count($items)>=12) { break; }
         }
         return ['cursor'=>$cursor,'items'=>$items]+self::summary();
     }
@@ -212,7 +212,7 @@ final class Notifications
     {
         $user=absint($user); $profileId=absint($profileId);
         $kinds=array_values(array_filter(array_map('sanitize_key',$kinds)));
-        if (!$user || !$profileId || !$kinds) return 0;
+        if (!$user || !$profileId || !$kinds) { return 0; }
         $removed=0;
         $placeholders=implode(',',array_fill(0,count($kinds),'%s'));
         foreach (Store::rows('notifications',"user_id=%d AND kind IN ($placeholders)",array_merge([$user],$kinds),'') as $row) {
@@ -228,7 +228,7 @@ final class Notifications
     }
     public static function removeConversationRequestNotices(int $user,int $actor): int
     {
-        $user=absint($user); $actor=absint($actor); if (!$user || !$actor) return 0;
+        $user=absint($user); $actor=absint($actor); if (!$user || !$actor) { return 0; }
         $removed=0;
         foreach (Store::rows('notifications',"user_id=%d AND kind='conversation_request'",[$user],'') as $row) {
             $context=json_decode($row['context']??'null',true);
@@ -241,7 +241,7 @@ final class Notifications
 
     public static function removeConversationNotices(int $conversationId): int
     {
-        $conversationId=absint($conversationId); if (!$conversationId) return 0;
+        $conversationId=absint($conversationId); if (!$conversationId) { return 0; }
         $removed=0;
         foreach (Store::rows('notifications',"kind IN ('message','conversation_group','conversation_request','conversation_accepted')",[],'') as $row) {
             $context=json_decode($row['context']??'null',true);

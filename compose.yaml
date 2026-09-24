@@ -47,8 +47,10 @@ services:
       db: {condition: service_healthy}
       mailpit: {condition: service_started}
     networks:
-      - default
-      - proxy_net
+      default: {}
+      proxy_net:
+        aliases:
+          - ${COMPOSE_PROJECT_NAME:-ascla-dev}-wordpress
 
   cron:
     image: wordpress:cli-php8.3

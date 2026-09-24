@@ -26,8 +26,8 @@ final class InterestCatalog
     }
     private static function aliases(array $terms): array
     {
-        $aliases=[];foreach($terms as $t)$aliases[self::fold($t['name'])]=(int)$t['id'];
-        foreach(self::GROUPS as $group){$id=0;foreach($group as $name)if(isset($aliases[self::fold($name)])){$id=$aliases[self::fold($name)];break;}if($id)foreach($group as $name)$aliases[self::fold($name)]=$id;}
+        $aliases=[];foreach($terms as $t) {$aliases[self::fold($t['name'])]=(int)$t['id']; }
+        foreach(self::GROUPS as $group){$id=0;foreach($group as $name) {if(isset($aliases[self::fold($name)])){$id=$aliases[self::fold($name)];break;} }if($id) {foreach($group as $name) {$aliases[self::fold($name)]=$id; } }}
         uksort($aliases,static fn($a,$b)=>mb_strlen($b)<=>mb_strlen($a));return $aliases;
     }
     public static function propose(string $text): array
@@ -35,9 +35,9 @@ final class InterestCatalog
         $aliases=self::aliases(self::terms());$rest=self::fold(str_replace(["\r\n","\r","\n"],';',$text));$items=[];$unknown=[];$ids=[];
         while($rest!=='') {
             $found=false;
-            foreach($aliases as $label=>$id)if(preg_match('/^'.preg_quote($label,'/').'(?:\s*[,;|\n]\s*|$)/u',$rest,$match)){
+            foreach($aliases as $label=>$id) {if(preg_match('/^'.preg_quote($label,'/').'(?:\s*[,;|\n]\s*|$)/u',$rest,$match)){
                 $items[]=['original'=>$label,'topic_id'=>$id,'method'=>'deterministic','confidence'=>'high'];$ids[]=$id;$rest=ltrim(substr($rest,strlen($match[0])));$found=true;break;
-            }
+            } }
             if(!$found){$parts=preg_split('/\s*[,;|\n]\s*/u',$rest,2);$unknown[]=$parts[0];$items[]=['original'=>$parts[0],'topic_id'=>0,'method'=>'manual','confidence'=>'unknown'];$rest=$parts[1]??'';}
         }
         return ['ids'=>array_values(array_unique($ids)),'items'=>$items,'unknown'=>$unknown,'selected_count'=>count($items)];
@@ -51,7 +51,7 @@ final class InterestCatalog
     public static function seed(): array
     {
         Access::require(Access::member() && current_user_can('ascla_manage'));
-        foreach(self::GROUPS as $group)self::create($group[0]);return self::terms();
+        foreach(self::GROUPS as $group) {self::create($group[0]); }return self::terms();
     }
     public static function create(string $name): array
     {

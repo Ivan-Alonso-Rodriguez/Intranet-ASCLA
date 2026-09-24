@@ -23,7 +23,7 @@ final class ZoomCsv
         // Zoom can prepend a meeting summary. Locate the participant header, not that summary.
         while(($raw=fgets($stream))!==false && ++$line<=30) {
             foreach([',',';','\t'] as $separator) {
-                if($separator==='\t')$separator="\t";
+                if($separator==='\t') {$separator="\t"; }
                 $cells=str_getcsv($raw,$separator,'"','');$keys=array_map([self::class,'key'],$cells);
                 $email=array_search(true,array_map(static fn($k)=>in_array($k,['email','useremail','emailaddress','correo','correoelectronico','correoelectronicodelusuario'],true),$keys),true);
                 if($email!==false) {
@@ -38,7 +38,7 @@ final class ZoomCsv
         try {
             Access::require($header!==null,'No se encontró la columna de correo del participante en el CSV.',400);
             while(($cells=fgetcsv($stream,0,$delimiter,'"',''))!==false) {
-                ++$line;if(count($cells)===1 && trim((string)$cells[0])==='')continue;
+                ++$line;if(count($cells)===1 && trim((string)$cells[0])==='') {continue; }
                 Access::require(count($rows)<5000,'El CSV admite hasta 5000 filas de participantes.',400);
                 $rawEmail=trim((string)($cells[$header['email']]??''));$email=strtolower($rawEmail);
                 $duration=$header['minutes']===false?'':trim((string)($cells[$header['minutes']]??''));

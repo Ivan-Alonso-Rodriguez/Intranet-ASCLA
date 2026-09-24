@@ -1,16 +1,18 @@
 /* Browser coverage for 1.10.1 against disposable local WordPress. */
 const {chromium}=require('playwright'),{execFileSync}=require('node:child_process');
 const assert=require('node:assert/strict'),fs=require('node:fs');
-const base='http://localhost:8088',results=[],errors=[];
-const fixture=input=>JSON.parse(execFileSync('docker',['compose','exec','-T','wordpress','php','/opt/ascla-tests/statistics-fixture.php'],{input:JSON.stringify(input),encoding:'utf8'}));
+const base=process.env.ASCLA_SITE_URL || 'http://localhost:8088',results=[],errors=[];
+const ephemeral=process.env.ASCLA_E2E_EPHEMERAL==='1';
+const {startCoverage,stopCoverage}=require('./helpers/browser.cjs');
+const fixture=input=>ephemeral ? (input.action==='setup' ? JSON.parse(fs.readFileSync(process.env.ASCLA_STATISTICS_FIXTURE || 'test-results/statistics-fixture.json','utf8')) : {}) : JSON.parse(execFileSync('docker',['compose','exec','-T','wordpress','php','/opt/ascla-tests/statistics-fixture.php'],{input:JSON.stringify(input),encoding:'utf8'}));
 async function api(p,path,method='GET',body,nonce=true){return p.evaluate(async({path,method,body,nonce})=>{const r=await fetch(ASCLA.api+path,{method,headers:{'Content-Type':'application/json',...(nonce?{'X-WP-Nonce':nonce===true?ASCLA.nonce:nonce}:{})},...(body?{body:JSON.stringify(body)}:{})});return {status:r.status,data:await r.json()};},{path,method,body,nonce});}
 async function test(name,fn){await fn();results.push({name,status:'passed'});console.log('PASS '+name);}
-(async()=>{let f,browser,page;
+async function runStatistics(){let f,browser,page;const coverage=[];
  try{
-  fs.mkdirSync('test-results',{recursive:true});f=fixture({action:'setup'});browser=await chromium.launch({headless:true,channel:'msedge'});
+  fs.mkdirSync('test-results',{recursive:true});f=fixture({action:'setup'});browser=await chromium.launch(ephemeral ? {headless:true} : {headless:true,channel:process.env.ASCLA_BROWSER_CHANNEL || 'msedge'});
   for(const u of f.users){
-   const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));const publisher=['administrator','ascla_executive'].includes(u.role);
-   await page.goto(base+'/wp-login.php');await page.locator('#user_login').fill(u.login);await page.locator('#user_pass').fill(u.password);await Promise.all([page.waitForNavigation(),page.locator('#wp-submit').click()]);
+   const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});page=await context.newPage();await startCoverage(page,coverage);page.on('pageerror',e=>errors.push(e.message));const publisher=['administrator','ascla_executive'].includes(u.role);
+   await page.goto(base+'/wp-login.php');await page.locator('#user_login').fill(u.login);await page.locator('#user_pass').fill(u.password);await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),page.locator('#wp-submit').click()]);
    await page.goto(base+'/intranet/');await page.locator('.nav-link').first().waitFor();
    await test(u.role+': estadísticas y asistencia requieren capacidad en REST',async()=>{
     for(const path of ['admin/statistics','admin/statistics/topics','admin/attendance/'+f.events[0]])assert.equal((await api(page,path)).status,publisher?200:403,path);
@@ -19,7 +21,7 @@ async function test(name,fn){await fn();results.push({name,status:'passed'});con
     assert.equal((await api(page,`admin/attendance/${f.events[0]}/complete`,'POST',{complete:true},'invalid')).status,403);
     assert.equal((await api(page,`admin/attendance/${f.events[0]}/complete`,'POST',{complete:true},false)).status,401);
    });
-   if(u.role==='ascla_member'){assert.equal(await page.locator('.nav-link[href*="administracion"]').count(),0);await context.close();continue;}
+   if(u.role==='ascla_member'){assert.equal(await page.locator('.nav-link[href*="administracion"]').count(),0);await stopCoverage(page,coverage);await context.close();continue;}
    await page.goto(base+'/administracion/?section=estadisticas');await page.locator('.admin-tabs').waitFor();
    await test(u.role+': acceso al menú y vistas',async()=>{
     assert.equal(await page.locator('.admin-tabs [data-tab="estadisticas"]').count(),publisher?1:0);
@@ -80,9 +82,12 @@ async function test(name,fn){await fn();results.push({name,status:'passed'});con
      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),'Page has horizontal overflow');await page.setViewportSize({width:1440,height:1000});
     });
    }
-   await context.close();
+   await stopCoverage(page,coverage);await context.close();
   }
   assert.deepEqual(errors,[]);console.log('PASS '+results.length+' statistics browser tests; no uncaught errors.');
- }catch(e){console.error(e);process.exitCode=1;if(page)await page.screenshot({path:'test-results/statistics-failure.png',fullPage:true}).catch(()=>{});}
- finally{if(browser)await browser.close();if(f)fixture({action:'cleanup',users:f.users.map(u=>u.id),topic:f.topic});fs.writeFileSync('test-results/statistics.json',JSON.stringify({results,errors},null,2));}
-})();
+ }catch(e){if(page)await page.screenshot({path:'test-results/statistics-failure.png',fullPage:true}).catch(()=>{});throw e;}
+ finally{if(page&&!page.isClosed())await stopCoverage(page,coverage).catch(()=>{});if(browser)await browser.close();if(f)fixture({action:'cleanup',users:f.users.map(u=>u.id),topic:f.topic});fs.writeFileSync('test-results/statistics.json',JSON.stringify({results,errors},null,2));}
+ return coverage;
+}
+module.exports=runStatistics;
+if(require.main===module)runStatistics().catch(error=>{console.error(error);process.exitCode=1;});

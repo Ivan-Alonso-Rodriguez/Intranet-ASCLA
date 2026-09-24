@@ -30,9 +30,9 @@ final class Grounding
     public static function answer(array $result,array $sources): array
     {
         $ids=[];
-        foreach((array)($result['source_ids']??[]) as $id) if((is_int($id)||is_string($id)) && ctype_digit((string)$id) && (int)$id>0) $ids[]=(int)$id;
+        foreach((array)($result['source_ids']??[]) as $id) { if((is_int($id)||is_string($id)) && ctype_digit((string)$id) && (int)$id>0) { $ids[]=(int)$id; } }
         $ids=array_values(array_unique($ids));$used=[];
-        foreach($sources as $source) if(in_array((int)$source['id'],$ids,true)) $used[]=$source;
+        foreach($sources as $source) { if(in_array((int)$source['id'],$ids,true)) { $used[]=$source; } }
         $text=is_string($result['answer']??null)?$result['answer']:'';
         return ['answer'=>$text,'sources'=>$used,'grounding'=>['policy'=>self::POLICY,'context_source_ids'=>array_map('intval',array_column($sources,'id')),'valid_references'=>count($used),'ignored_references'=>count(array_diff($ids,array_column($used,'id')))]];
     }
@@ -42,11 +42,11 @@ final class Grounding
     }
     public static function multimedia(array $result,string $source): array
     {
-        foreach(['summary','technical_note','suggested_hub'] as $field) $result[$field]=is_string($result[$field]??null)?$result[$field]:'';
-        foreach(['frameworks','norms','conclusions','concepts','tags','topics'] as $field) $result[$field]=self::strings((array)($result[$field]??[]));
+        foreach(['summary','technical_note','suggested_hub'] as $field) { $result[$field]=is_string($result[$field]??null)?$result[$field]:''; }
+        foreach(['frameworks','norms','conclusions','concepts','tags','topics'] as $field) { $result[$field]=self::strings((array)($result[$field]??[])); }
         $info=is_array($result['infographic']??null)?$result['infographic']:[];
         $result['infographic']=['title'=>is_string($info['title']??null)?$info['title']:'Claves de la sesión'];
-        foreach(['key_points','sections','statistics'] as $field) $result['infographic'][$field]=self::strings((array)($info[$field]??[]));
+        foreach(['key_points','sections','statistics'] as $field) { $result['infographic'][$field]=self::strings((array)($info[$field]??[])); }
         $result['infographic']['timeline']=array_values(array_filter(array_slice((array)($info['timeline']??[]),0,20),static fn($item)=>is_array($item)&&is_string($item['date']??null)&&is_string($item['text']??null)));
         $result['grounding']=['policy'=>self::POLICY,'review_required'=>true];
         return $result;

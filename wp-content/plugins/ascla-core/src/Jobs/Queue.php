@@ -4,6 +4,7 @@ use ASCLA\Core\Repositories\Store;
 use ASCLA\Core\Services\{Access,Audit,Knowledge,MicroEvents,Notifications,Content,Discovery,Birthdays};
 final class Queue
 {
+    private const DEMO_MODE='DEMO MODE';
     public static function boot(): void { add_action('ascla_jobs',[self::class,'run']); add_action('ascla_jobs',[Birthdays::class,'maybeProcess'],20); add_action('ascla_jobs_continue',[self::class,'run']); add_action('ascla_monthly',[MicroEvents::class,'monthly']); add_action('ascla_discovery',static fn()=>self::enqueue('discovery',[],0)); }
     public static function enqueue(string $kind,array $payload,int $user=-1): array
     {
@@ -38,25 +39,25 @@ final class Queue
         $rows=Store::rows('jobs','user_id=%d AND kind=%s',[get_current_user_id(),'answer'],'ORDER BY id DESC LIMIT 100');$items=[];
         foreach($rows as $row){
             $payload=json_decode($row['payload'],true)?:[];
-            if(self::threadKey((string)($payload['thread']??'legacy'))!==$thread)continue;
+            if(self::threadKey((string)($payload['thread']??'legacy'))!==$thread) {continue; }
             $result=json_decode($row['result']??'null',true);
-            if($row['status']==='completed'&&is_array($result))$result=Knowledge::storedAnswer($result);
+            if($row['status']==='completed'&&is_array($result)) {$result=Knowledge::storedAnswer($result); }
             $items[]=['id'=>(int)$row['id'],'question'=>Access::text($payload['question']??'',2000),'status'=>$row['status'],'error'=>$row['error']??'','result'=>$result,'created_at'=>$row['created_at']];
-            if(count($items)>=30)break;
+            if(count($items)>=30) {break; }
         }
         return array_reverse($items);
     }
     private static function history(int $user,string $thread,int $beforeId): array
     {
-        $thread=self::threadKey($thread);if($thread==='')return [];
+        $thread=self::threadKey($thread);if($thread==='') {return []; }
         $rows=Store::rows('jobs','user_id=%d AND kind=%s AND status=%s AND id<%d',[$user,'answer','completed',$beforeId],'ORDER BY id DESC LIMIT 40');$turns=[];
         foreach($rows as $row){
             $payload=json_decode($row['payload'],true)?:[];
-            if(self::threadKey((string)($payload['thread']??'legacy'))!==$thread)continue;
+            if(self::threadKey((string)($payload['thread']??'legacy'))!==$thread) {continue; }
             $result=json_decode($row['result']??'null',true);
-            if(!is_array($result)||trim((string)($result['answer']??''))==='')continue;
+            if(!is_array($result)||trim((string)($result['answer']??''))==='') {continue; }
             $turns[]=['question'=>Access::text($payload['question']??'',2000),'answer'=>Access::text($result['answer'],20000)];
-            if(count($turns)>=6)break;
+            if(count($turns)>=6) {break; }
         }
         return array_reverse($turns);
     }
@@ -109,9 +110,9 @@ final class Queue
     {
         Store::lock('queue-wakeup',static function()use($delay){
             $at=time()+$delay;$next=wp_next_scheduled('ascla_jobs_continue');
-            if($next && $next>time() && $next<=$at)return;
+            if($next && $next>time() && $next<=$at) {return; }
             // CLI may still expose the currently executing tick. Replace it before scheduling its successor.
-            if($next)wp_unschedule_event($next,'ascla_jobs_continue');
+            if($next) {wp_unschedule_event($next,'ascla_jobs_continue'); }
             wp_schedule_single_event($at,'ascla_jobs_continue');
         });
     }
@@ -122,10 +123,10 @@ final class Queue
             $result=Knowledge::provider()->generate('social',['text'=>$post['text']]);
             if (!empty($result['relevant'])&&empty($result['commercial'])) {
                 $item=Content::save('hub',['title'=>'Conversación sobre gobernanza · DEMO','body'=>$post['text'],'status'=>'draft']);
-                $meta=(array)get_post_meta($item['id'],'_ascla',true); $meta['generated']=true; $meta['reviewed']=false; $meta['social_mode']='DEMO MODE'; update_post_meta($item['id'],'_ascla',$meta);
-                $items[]=['draft_id'=>$item['id'],'suggested_reply'=>$result['suggested_reply']??'','mode'=>'DEMO MODE'];
+                $meta=(array)get_post_meta($item['id'],'_ascla',true); $meta['generated']=true; $meta['reviewed']=false; $meta['social_mode']=self::DEMO_MODE; update_post_meta($item['id'],'_ascla',$meta);
+                $items[]=['draft_id'=>$item['id'],'suggested_reply'=>$result['suggested_reply']??'','mode'=>self::DEMO_MODE];
             }
         }
-        return ['items'=>$items,'rejected'=>count($posts)-count($items),'mode'=>'DEMO MODE','sent_externally'=>false];
+        return ['items'=>$items,'rejected'=>count($posts)-count($items),'mode'=>self::DEMO_MODE,'sent_externally'=>false];
     }
 }

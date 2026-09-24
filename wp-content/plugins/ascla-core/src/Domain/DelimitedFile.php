@@ -15,7 +15,7 @@ final class DelimitedFile
             $first=fgets($f);$delimiter=',';$size=0;foreach([',',';',"\t"] as $d){$n=count(str_getcsv($first,$d,'"',''));if($n>$size){$size=$n;$delimiter=$d;}}
             rewind($f);$headers=fgetcsv($f,0,$delimiter,'"','');Access::require(is_array($headers) && count($headers)<=100,'Cabecera CSV no válida.',400);
             $headers=array_map(static fn($v)=>Access::text($v,500),$headers);$rows=[];$line=1;
-            while(($row=fgetcsv($f,0,$delimiter,'"',''))!==false){++$line;if(count($row)===1 && trim((string)$row[0])==='')continue;Access::require(count($rows)<5000,'El CSV admite hasta 5000 filas.',400);Access::require(count($row)===count($headers),'La fila '.$line.' no coincide con las columnas de la cabecera.',400);$rows[]=['line'=>$line,'values'=>$row];}
+            while(($row=fgetcsv($f,0,$delimiter,'"',''))!==false){++$line;if(count($row)===1 && trim((string)$row[0])==='') {continue; }Access::require(count($rows)<5000,'El CSV admite hasta 5000 filas.',400);Access::require(count($row)===count($headers),'La fila '.$line.' no coincide con las columnas de la cabecera.',400);$rows[]=['line'=>$line,'values'=>$row];}
             Access::require((bool)$rows,'El CSV no contiene filas.',400);return ['headers'=>$headers,'rows'=>$rows];
         } finally {fclose($f);}
     }

@@ -56,7 +56,7 @@ final class Demo
                 wp_set_current_user($users[1]);
                 if (!Connections::areConnected($users[1],$users[0])) {
                     $state=Connections::between($users[1],$users[0]);
-                    if ($state['state']==='none') $state=Connections::request($users[0]);
+                    if ($state['state']==='none') { $state=Connections::request($users[0]); }
                     wp_set_current_user($state['state']==='incoming_pending'?$users[1]:$users[0]);
                     Connections::respond($state['request_id'],'accept');
                 }

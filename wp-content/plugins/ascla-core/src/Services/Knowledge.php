@@ -4,6 +4,7 @@ use ASCLA\Core\Integrations\{AIProviderInterface,MockAIProvider,RealAIProvider,O
 use ASCLA\Core\Domain\{Anonymizer,EntityRedactor,Grounding};
 final class Knowledge
 {
+    private const UPDATED_SOURCES_LABEL='Fuentes actualizadas';
     private const ABSTENTION='No existe suficiente información en ASCLA para responder esta consulta. Prueba con una pregunta sobre eventos, publicaciones o recursos de la comunidad.';
     private const IDENTITIES_SEPARATOR='/[\n,;]+/u';
     private const VIDEO_TOPICS=[
@@ -40,7 +41,7 @@ final class Knowledge
             }
             $title=!empty($meta['chatham'])?Anonymizer::redact($post->post_title,$identities):$post->post_title;
             $score=\ASCLA\Core\Repositories\KnowledgeSearch::score($title,$body,$tokens);
-            if($score>0) $ranked[]=['id'=>$post->ID,'title'=>$title,'body'=>\ASCLA\Core\Repositories\KnowledgeSearch::excerpt($body,$tokens),'score'=>$score,'url'=>Content::serialize($post)['url'],'kind'=>'resource'];
+            if($score>0) { $ranked[]=['id'=>$post->ID,'title'=>$title,'body'=>\ASCLA\Core\Repositories\KnowledgeSearch::excerpt($body,$tokens),'score'=>$score,'url'=>Content::serialize($post)['url'],'kind'=>'resource']; }
         }
         usort($ranked,static fn($a,$b)=>($b['score']<=>$a['score'])?:($b['id']<=>$a['id']));
 
@@ -53,8 +54,8 @@ final class Knowledge
         $sources=[];$seen=[];
         // Live intranet context comes first for operational questions such as upcoming events.
         foreach(array_merge($context['sources'],array_slice($ranked,0,6)) as $source){
-            $id=(int)($source['id']??0);if($id<=0||isset($seen[$id]))continue;
-            $seen[$id]=true;$sources[]=$source;if(count($sources)>=8)break;
+            $id=(int)($source['id']??0);if($id<=0||isset($seen[$id])) {continue; }
+            $seen[$id]=true;$sources[]=$source;if(count($sources)>=8) {break; }
         }
         $conversation=self::conversational($question);
         if (!$sources && empty($context['answerable']) && !$conversation) {
@@ -77,13 +78,13 @@ final class Knowledge
     private static function conversational(string $question): bool
     {
         $plain=mb_strtolower(remove_accents(trim($question)));
-        return (bool)preg_match('/^(hola|hello|hi|buenas|buenos dias|buenas tardes|buenas noches|gracias|thanks)\b|\b(que puedes hacer|como me ayudas|ayuda|help|what can you do)\b/u',$plain);
+        return (bool)preg_match('/(?:^(hola|hello|hi|buenas|buenos dias|buenas tardes|buenas noches|gracias|thanks)\b)|(?:\b(que puedes hacer|como me ayudas|ayuda|help|what can you do)\b)/u',$plain);
     }
 
     private static function followUp(string $question): bool
     {
         $plain=mb_strtolower(remove_accents(trim($question)));
-        return mb_strlen($plain)<=120 && (bool)preg_match('/^(y|pero|entonces)\b|\b(cual|cuales|cuando|hora|donde|virtual|presencial|ese|esa|eso|este|esta|primero|primera|segundo|segunda|tambien|more|which|when|where|what time|that one|the first|the second)\b/u',$plain);
+        return mb_strlen($plain)<=120 && (bool)preg_match('/(?:^(y|pero|entonces)\b)|(?:\b(cual|cuales|cuando|hora|donde|virtual|presencial|ese|esa|eso|este|esta|primero|primera|segundo|segunda|tambien|more|which|when|where|what time|that one|the first|the second)\b)/u',$plain);
     }
 
     /** Revalidate saved answers against the currently readable, reviewed evidence. */
@@ -108,15 +109,15 @@ final class Knowledge
             if(!empty($result['grounding']['live_context_used'])||!empty($result['grounding']['conversation_only'])){
                 return ['answer'=>Access::text($result['answer']??'',20000),'sources'=>[],'mode'=>$result['mode']??'ASCLA','grounding'=>$result['grounding']??[]];
             }
-            return ['answer'=>self::ABSTENTION,'sources'=>[],'mode'=>$result['mode']??'Fuentes actualizadas'];
+            return ['answer'=>self::ABSTENTION,'sources'=>[],'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL];
         }
-        if(count($sources)!==count($originalIds)) return ['answer'=>'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar al Asistente ASCLA.','sources'=>[],'mode'=>$result['mode']??'Fuentes actualizadas'];
+        if(count($sources)!==count($originalIds)) { return ['answer'=>'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar al Asistente ASCLA.','sources'=>[],'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL]; }
         $candidate=['answer'=>$result['answer']??'','source_ids'=>array_column($result['sources']??[],'id')];
         if($protected){ $candidate=EntityRedactor::tree($candidate,$identities); }
         $verified=Grounding::answer($candidate,$sources);
         $answer=$verified['answer']?:'No existe suficiente información verificable en las fuentes actuales. Puedes volver a consultar al Asistente ASCLA.';
         $verified['grounding']=array_merge($result['grounding']??[],$verified['grounding']);
-        return ['answer'=>$answer,'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url']],$verified['sources']),'mode'=>$result['mode']??'Fuentes actualizadas','grounding'=>$verified['grounding']];
+        return ['answer'=>$answer,'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url']],$verified['sources']),'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL,'grounding'=>$verified['grounding']];
     }
 
     public static function videoMetadata(int $id): array

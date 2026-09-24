@@ -7,7 +7,7 @@ final class MockAIProvider implements AIProviderInterface
     {
         if($task==='form_interests') {
             $terms=$context['catalog']??[];$text=mb_strtolower(remove_accents($context['text']??''));$ids=[];
-            foreach($terms as $term){$name=mb_strtolower(remove_accents($term['name']));if(str_contains($text,$name) || ((str_contains($name,'gobernanza de la ia') || str_contains($name,'inteligencia artificial')) && preg_match('/\b(chatgpt|gemini|llm|ia generativa)\b/',$text)) || (str_contains($name,'ciberseguridad') && preg_match('/hackeo|cyber|seguridad informatica/',$text)))$ids[]=(int)$term['id'];}
+            foreach($terms as $term){$name=mb_strtolower(remove_accents($term['name']));if(str_contains($text,$name) || ((str_contains($name,'gobernanza de la ia') || str_contains($name,'inteligencia artificial')) && preg_match('/\b(chatgpt|gemini|llm|ia generativa)\b/',$text)) || (str_contains($name,'ciberseguridad') && preg_match('/hackeo|cyber|seguridad informatica/',$text))) {$ids[]=(int)$term['id']; }}
             return ['intereses'=>array_slice(array_values(array_unique($ids)),0,3),'confianza'=>$ids?'media':'baja'];
         }
         if($task==='interest_classification') {
@@ -26,19 +26,19 @@ final class MockAIProvider implements AIProviderInterface
             $english=(($live['language']??'')==='English');
             $events=(array)($live['upcoming_events']??[]);
             if (!empty($live['intents']['events'])) {
-                if (!$events) return ['answer'=>$english?'I do not see any upcoming ASCLA events available to you right now.':'No veo eventos próximos de ASCLA disponibles para ti en este momento.','source_ids'=>[],'mode'=>$this->mode()];
+                if (!$events) { return ['answer'=>$english?'I do not see any upcoming ASCLA events available to you right now.':'No veo eventos próximos de ASCLA disponibles para ti en este momento.','source_ids'=>[],'mode'=>$this->mode()]; }
                 $lines=[];foreach(array_slice($events,0,3) as $event){$lines[]='• '.($event['title']??'Evento').' — '.($event['start']??'').' · '.($event['modality']??'');}
                 return ['answer'=>($english?'Yes. The next events I can see in ASCLA are:':'Sí. Los próximos eventos que veo en ASCLA son:')."\n".implode("\n",$lines),'source_ids'=>array_map('intval',array_column(array_slice($events,0,3),'id')),'mode'=>$this->mode()];
             }
             $recent=(array)($live['recent_content']??[]);
             if (!empty($live['intents']['recent'])) {
-                if (!$recent) return ['answer'=>$english?'I do not see recent published content available to you right now.':'No veo contenido publicado recientemente disponible para ti en este momento.','source_ids'=>[],'mode'=>$this->mode()];
+                if (!$recent) { return ['answer'=>$english?'I do not see recent published content available to you right now.':'No veo contenido publicado recientemente disponible para ti en este momento.','source_ids'=>[],'mode'=>$this->mode()]; }
                 $lines=[];foreach(array_slice($recent,0,4) as $item){$lines[]='• '.($item['title']??'Contenido');}
                 return ['answer'=>($english?'Here is the most recent content I can see in ASCLA:':'Esto es lo más reciente que veo publicado en ASCLA:')."\n".implode("\n",$lines),'source_ids'=>array_map('intval',array_column(array_slice($recent,0,4),'id')),'mode'=>$this->mode()];
             }
             $people=(array)($live['recommended_people']??[]);
             if (!empty($live['intents']['people'])) {
-                if (!$people) return ['answer'=>$english?'I do not have member recommendations above the configured affinity threshold right now.':'Ahora mismo no tengo recomendaciones de asociados que superen el mínimo de afinidad configurado.','source_ids'=>[],'mode'=>$this->mode()];
+                if (!$people) { return ['answer'=>$english?'I do not have member recommendations above the configured affinity threshold right now.':'Ahora mismo no tengo recomendaciones de asociados que superen el mínimo de afinidad configurado.','source_ids'=>[],'mode'=>$this->mode()]; }
                 $lines=[];foreach(array_slice($people,0,4) as $person){$lines[]='• '.($person['name']??'Asociado').' · '.((int)($person['affinity']??0)).'%';}
                 return ['answer'=>($english?'These are your strongest current ASCLA recommendations:':'Estas son tus recomendaciones actuales con mayor afinidad en ASCLA:')."\n".implode("\n",$lines),'source_ids'=>[],'mode'=>$this->mode()];
             }
@@ -46,14 +46,14 @@ final class MockAIProvider implements AIProviderInterface
                 $count=(int)($live['unread_notifications']??0);
                 return ['answer'=>$english?('You have '.$count.' unread ASCLA notification'.($count===1?'':'s').'.'):('Tienes '.$count.' notificación'.($count===1?'':'es').' sin leer en ASCLA.'),'source_ids'=>[],'mode'=>$this->mode()];
             }
-            if (preg_match('/^(hola|hello|hi|buenas)|\b(que puedes hacer|como me ayudas|help|what can you do)\b/u',$question)) {
+            if (preg_match('/(?:^(hola|hello|hi|buenas))|(?:\b(que puedes hacer|como me ayudas|help|what can you do)\b)/u',$question)) {
                 return ['answer'=>$english?'Hello! I can help you check upcoming ASCLA events, recent posts, community resources, notifications, and member recommendations. Ask me naturally.':'¡Hola! Puedo ayudarte a consultar eventos próximos, publicaciones recientes, recursos de la comunidad, notificaciones y recomendaciones de asociados. Pregúntame con naturalidad.','source_ids'=>[],'mode'=>$this->mode()];
             }
             $quotes=[];$used=[];foreach($sources as $source){
                 $sentences=array_slice(\ASCLA\Core\Domain\Grounding::sentences($source['body']),0,3);
                 if($sentences){$quotes=array_merge($quotes,$sentences);$used[]=(int)$source['id'];}
             }
-            if(!$quotes) return ['answer'=>$english?'I do not have enough information in ASCLA to verify that yet. Try asking about events, posts, or community resources.':'No existe suficiente información en ASCLA para verificar eso todavía. Prueba con eventos, publicaciones o recursos de la comunidad.','source_ids'=>[],'mode'=>$this->mode()];
+            if(!$quotes) { return ['answer'=>$english?'I do not have enough information in ASCLA to verify that yet. Try asking about events, posts, or community resources.':'No existe suficiente información en ASCLA para verificar eso todavía. Prueba con eventos, publicaciones o recursos de la comunidad.','source_ids'=>[],'mode'=>$this->mode()]; }
             return ['answer'=>implode("\n\n",$quotes),'source_ids'=>array_values(array_unique($used)),'mode'=>$this->mode()];
         }
         if(in_array($task,['matching','intro'],true)){
@@ -61,10 +61,10 @@ final class MockAIProvider implements AIProviderInterface
             $topic=$shared?:((in_array('experience',$signals,true))?'experiencia profesional relacionada':'sus objetivos de networking');
             $proposal='¿Qué experiencia les gustaría compartir sobre '.$topic.'?';
             $details=[];
-            if($shared)$details[]='Comparten interés en '.$shared.'.';
-            if(in_array('experience',$signals,true))$details[]='También tienen experiencia profesional relacionada.';
-            if(in_array('participation',$signals,true))$details[]='Su actividad pública en la comunidad muestra temas en común.';
-            if(!$details)$details[]='Completen sus intereses y experiencia para descubrir afinidades.';
+            if($shared) {$details[]='Comparten interés en '.$shared.'.'; }
+            if(in_array('experience',$signals,true)) {$details[]='También tienen experiencia profesional relacionada.'; }
+            if(in_array('participation',$signals,true)) {$details[]='Su actividad pública en la comunidad muestra temas en común.'; }
+            if(!$details) {$details[]='Completen sus intereses y experiencia para descubrir afinidades.'; }
             return ['explanation'=>implode(' ',$details),'text'=>'Hola '.($context['right']['name']??'asociado').', vi que podemos conversar sobre '.$topic.'. '.$proposal,'conversation_proposal'=>$proposal,'mode'=>$this->mode()];
         }
         if($task==='microagenda'){
@@ -96,12 +96,12 @@ final class MockAIProvider implements AIProviderInterface
         $moments=$duration>0?\ASCLA\Core\Domain\Transcript::moments($text,[],$duration):[];
         $topics=[];
         $topicText=mb_strtolower(remove_accents($text));
-        if (preg_match('/riesgo/',$topicText)) $topics[]='Gestión de riesgos';
-        if (preg_match('/gobierno corporativo|gobernanza corporativa/',$topicText)) $topics[]='Gobierno corporativo';
-        if (preg_match('/inteligencia artificial|\bia\b/',$topicText)) $topics[]='Inteligencia artificial';
-        if (preg_match('/junta directiva|directorio|consejo de administracion/',$topicText)) $topics[]='Juntas directivas';
-        if (preg_match('/sostenibilidad|sustentabilidad|\besg\b|\basg\b/',$topicText)) $topics[]='Sostenibilidad';
-        if (preg_match('/transformacion digital|digitalizacion|innovacion digital/',$topicText)) $topics[]='Transformación digital';
+        if (preg_match('/riesgo/',$topicText)) { $topics[]='Gestión de riesgos'; }
+        if (preg_match('/gobierno corporativo|gobernanza corporativa/',$topicText)) { $topics[]='Gobierno corporativo'; }
+        if (preg_match('/inteligencia artificial|\bia\b/',$topicText)) { $topics[]='Inteligencia artificial'; }
+        if (preg_match('/junta directiva|directorio|consejo de administracion/',$topicText)) { $topics[]='Juntas directivas'; }
+        if (preg_match('/sostenibilidad|sustentabilidad|\besg\b|\basg\b/',$topicText)) { $topics[]='Sostenibilidad'; }
+        if (preg_match('/transformacion digital|digitalizacion|innovacion digital/',$topicText)) { $topics[]='Transformación digital'; }
         return ['summary'=>$summary,'technical_note'=>"Ideas principales del video:\n\n".implode("\n\n",$points),'frameworks'=>$frameworks,'conclusions'=>$points,'norms'=>array_values(array_unique($norms[0])),'concepts'=>$points,'tags'=>$tags,'topics'=>array_values(array_unique($topics)),'suggested_hub'=>$summary,'infographic'=>['title'=>'Claves de la sesión','sections'=>$points,'statistics'=>$statistics,'timeline'=>$timeline,'key_points'=>$points,'source'=>$context['source_id']??0],'moments'=>$moments,'excerpts'=>$moments,'mode'=>$this->mode()];
     }
 }

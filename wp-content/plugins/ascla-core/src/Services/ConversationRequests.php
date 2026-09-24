@@ -24,7 +24,7 @@ final class ConversationRequests
     public static function statesFor(int $me,array $targets,?array $rows=null): array
     {
         $targets=array_values(array_unique(array_filter(array_map('intval',$targets),static fn($id)=>$id>0)));
-        if (!$targets) return [];
+        if (!$targets) { return []; }
         $states=[];
         $mine=Access::member($me)?Profiles::raw($me):[];
         foreach ($targets as $id) {
@@ -36,7 +36,7 @@ final class ConversationRequests
         foreach ($rows??self::rows($me,$targets) as $row) {
             $outgoing=(int)$row['user_id']===$me;
             $id=(int)($outgoing?$row['target_id']:$row['user_id']);
-            if (!isset($states[$id])) continue;
+            if (!isset($states[$id])) { continue; }
             $state=&$states[$id];
             if ($row['kind']==='conversation_allowed') {
                 $state['state']='allowed';
@@ -53,7 +53,7 @@ final class ConversationRequests
             if ($valid) {
                 $blockRows=Store::rows('relations',"kind='block' AND ((user_id=%d AND target_id=%d) OR (user_id=%d AND target_id=%d))",[$me,$id,$id,$me],'');
                 $state['blocked']=(bool)$blockRows;
-                foreach ($blockRows as $block) if ((int)$block['user_id']===$me) $state['blocked_by_me']=true;
+                foreach ($blockRows as $block) { if ((int)$block['user_id']===$me) { $state['blocked_by_me']=true; } }
             }
             $connected=$valid && Connections::areConnected($me,$id);
             $state['can_message']=$valid && !$state['blocked'] && ($connected || $state['state']==='allowed');
@@ -69,13 +69,13 @@ final class ConversationRequests
     public static function between(int $a,int $b): array
     {
         $state=self::statesFor($a,[$b])[$b];
-        if ($state['state']!=='none') $state+=Messaging::requestSummary($a,$b);
+        if ($state['state']!=='none') { $state+=Messaging::requestSummary($a,$b); }
         return $state;
     }
 
     public static function isAuthorized(int $a,int $b): bool
     {
-        if (Connections::areConnected($a,$b)) return true;
+        if (Connections::areConnected($a,$b)) { return true; }
         $state=self::between($a,$b);
         return $state['state']==='allowed';
     }
@@ -144,7 +144,7 @@ final class ConversationRequests
                 Store::delete('relations',['id'=>$id]);
                 Messaging::discardPendingRequest($sender,$me,(string)$row['created_at']);
             }
-            if ($decision==='accept') self::readRequests($me,$sender);
+            if ($decision==='accept') { self::readRequests($me,$sender); }
             Audit::record($decision==='accept'?'conversation_request_accepted':'conversation_request_rejected',$id);
             if ($decision==='accept') {
                 $summary=Messaging::requestSummary($me,$sender);
@@ -171,7 +171,7 @@ final class ConversationRequests
             $id=(int)$state['request_id'];
             $row=Store::one('relations',$id);
             Store::delete('relations',['id'=>$id,'user_id'=>$me,'target_id'=>$target,'kind'=>'conversation_request']);
-            if ($row) Messaging::discardPendingRequest($me,$target,(string)$row['created_at']);
+            if ($row) { Messaging::discardPendingRequest($me,$target,(string)$row['created_at']); }
             Notifications::removeProfileNotices($target,['conversation_request'],$me);
             Notifications::removeConversationRequestNotices($target,$me);
             Audit::record('conversation_request_cancelled',$id,'profile-'.$target);
@@ -183,14 +183,14 @@ final class ConversationRequests
     {
         $me=get_current_user_id();
         $rows=self::rows($me); $ids=[];
-        foreach ($rows as $row) $ids[]=(int)((int)$row['user_id']===$me?$row['target_id']:$row['user_id']);
+        foreach ($rows as $row) { $ids[]=(int)((int)$row['user_id']===$me?$row['target_id']:$row['user_id']); }
         $out=['incoming'=>[],'outgoing'=>[],'allowed'=>[]];
         $states=self::statesFor($me,$ids,$rows);
         $connections=Connections::statesFor($me,$ids);
         foreach ($states as $id=>$state) {
-            if (!Access::member($id) || $state['state']==='none') continue;
+            if (!Access::member($id) || $state['state']==='none') { continue; }
             $key=['incoming_pending'=>'incoming','outgoing_pending'=>'outgoing','allowed'=>'allowed'][$state['state']]??null;
-            if (!$key) continue;
+            if (!$key) { continue; }
             $state+=Messaging::requestSummary($me,$id);
             $out[$key][]=Profiles::card($id)+['connection'=>$connections[$id]??Connections::between($me,$id),'conversation'=>$state];
         }
@@ -203,11 +203,11 @@ final class ConversationRequests
             $context=json_decode($row['context']??'null',true);
             if (is_array($context) && ($context['type']??'')==='conversation') {
                 $summary=Messaging::requestSummary($me,$sender);
-                if ((int)($context['id']??0)===(int)$summary['conversation_id']) Notifications::read((int)$row['id']);
+                if ((int)($context['id']??0)===(int)$summary['conversation_id']) { Notifications::read((int)$row['id']); }
                 continue;
             }
             parse_str((string)wp_parse_url($row['url']??'',PHP_URL_QUERY),$query);
-            if ((int)($context['id']??$query['member']??0)===$sender) Notifications::read((int)$row['id']);
+            if ((int)($context['id']??$query['member']??0)===$sender) { Notifications::read((int)$row['id']); }
         }
     }
 }

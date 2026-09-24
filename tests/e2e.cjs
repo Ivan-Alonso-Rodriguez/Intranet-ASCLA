@@ -4,19 +4,20 @@ const fs = require("node:fs"),
   path = require("node:path"),
   assert = require("node:assert/strict");
 const { execFileSync } = require("node:child_process");
-const v8toIstanbul = require("v8-to-istanbul");
-const libCoverage = require("istanbul-lib-coverage"),
-  libReport = require("istanbul-lib-report"),
-  reports = require("istanbul-reports");
-const root = path.resolve(__dirname, ".."),
-  base = "http://localhost:8088";
-const env = Object.fromEntries(
-  fs
-    .readFileSync(path.join(root, ".env"), "utf8")
-    .split(/\r?\n/)
-    .filter((x) => x.includes("="))
-    .map((x) => [x.slice(0, x.indexOf("=")), x.slice(x.indexOf("=") + 1)]),
-);
+const root = path.resolve(__dirname, "..");
+const envFile = process.env.ASCLA_ENV_FILE || path.join(root, ".env");
+const env = fs.existsSync(envFile)
+  ? Object.fromEntries(
+      fs
+        .readFileSync(envFile, "utf8")
+        .split(/\r?\n/)
+        .filter((x) => x.includes("="))
+        .map((x) => [x.slice(0, x.indexOf("=")), x.slice(x.indexOf("=") + 1)]),
+    )
+  : {};
+Object.assign(env, Object.fromEntries(Object.entries(process.env).filter(([key]) => key.startsWith("ASCLA_"))));
+const base = (process.env.ASCLA_SITE_URL || env.ASCLA_SITE_URL || "http://localhost:8088").replace(/\/+$/, "");
+const ephemeralCI = process.env.ASCLA_E2E_EPHEMERAL === "1";
 const results = [],
   fixtures = [],
   messageIds = [],
@@ -27,22 +28,13 @@ async function login(browser, name, password) {
     viewport: { width: 1440, height: 1000 },
   });
   const page = await context.newPage();
-  await page.coverage.startJSCoverage({ resetOnNavigation: false });
-  // Chromium discards profiler counters with destroyed page contexts. Capture before each navigation.
-  for (const method of ['goto','reload']) {
-    const original=page[method].bind(page);
-    page[method]=async (...args) => {
-      coverage.push(...await page.coverage.stopJSCoverage());
-      await page.coverage.startJSCoverage({resetOnNavigation:false});
-      return original(...args);
-    };
-  }
+  await require("./helpers/browser.cjs").startCoverage(page, coverage);
 
   await page.goto(base + "/wp-login.php");
   await page.locator("#user_login").fill(name);
   await page.locator("#user_pass").fill(password);
   await Promise.all([
-    page.waitForNavigation(),
+    page.waitForNavigation({waitUntil: "domcontentloaded"}),
     page.locator("#wp-submit").click(),
   ]);
   await page.goto(base + "/intranet/");
@@ -89,7 +81,7 @@ async function goto(page, route) {
 (async () => {
   fs.mkdirSync(path.join(root, "test-results"), { recursive: true });
   fs.mkdirSync(path.join(root, "coverage"), { recursive: true });
-  const browser = await chromium.launch({ headless: true, channel: "msedge" });
+  const browser = await chromium.launch(ephemeralCI ? { headless: true } : { headless: true, channel: process.env.ASCLA_BROWSER_CHANNEL || "msedge" });
   let member, admin, originalProfile, confirmedPair;
   const errors = [];
   let failed = null;
@@ -100,11 +92,14 @@ async function goto(page, route) {
       a = admin.page;
     p.on("pageerror", (e) => errors.push(e.message));
     a.on("pageerror", (e) => errors.push(e.message));
+    await require("./image-editor.cjs")({page: a, test, root});
+    await require("./video-metadata.cjs")({test, admin: a, request, base, fixtures});
     await test("Anonymous routes, REST nonce and cache isolation", async () => {
       const guest = await browser.newContext();
       const g = await guest.newPage();
       await g.goto(base + "/intranet/");
-      assert.match(g.url(), /wp-login/);
+      assert.match(new URL(g.url()).pathname, /^\/(?:wp-login\.php|login\/)$/);
+      assert.equal(await g.locator('input[name="log"]').count(), 1);
       const response = await g.request.get(base + "/wp-json/ascla/v1/profiles");
       assert.equal(response.status(), 401);
       const unauth = await p.evaluate(async () => {
@@ -235,8 +230,12 @@ async function goto(page, route) {
       const data = (await request(p, "items/" + post.id)).body;
       assert.equal(data.liked, true);
       assert.equal(data.following, true);
-      await p.locator(".modal [data-action=report]").click();
-      await p
+      assert.equal(await p.locator(".modal [data-action=report]").count(), 0, "Authors cannot report their own content");
+      await a.goto(base + "/hub/?item=" + post.id);
+      await a.locator(".modal [data-action=report]").click();
+      await a.locator('.modal .report-reason').first().click();
+      await a.getByRole("button", {name: "Enviar reporte", exact: true}).click();
+      await a
         .getByRole("status")
         .filter({ hasText: "Reporte enviado" })
         .waitFor();
@@ -249,38 +248,60 @@ async function goto(page, route) {
       const submitted=await guest.request.post(base+'/wp-comments-post.php',{form:{comment_post_ID:String(post.id),author:'Guest fixture',email:'guest@example.invalid',comment:'E2E NATIVE BYPASS MUST FAIL'}});assert.equal(submitted.status(),403);
       await guest.close();
     });
-    await test("Suggested introduction is editable and never auto-sends", async () => {
-      await goto(p, "directorio");
-      await p
-        .locator("[data-action=member]")
-        .filter({ hasText: "Ver perfil" })
-        .first()
-        .click();
-      const introButton = p.locator(".modal [data-action=intro]");
-      if (await introButton.count()) {
-        await introButton.click();
-        await p.locator(".modal [name=body]").waitFor();
-        assert.ok(
-          (await p.locator(".modal [name=body]").inputValue()).length > 30,
-        );
-        await p.getByRole("button", { name: "Cancelar", exact: true }).click();
-      }
-      assert.equal(await p.locator(".modal").count(), 0);
-    });
-    await test("Forum topic and reply publish immediately", async () => {
-      await goto(p,"foros");await p.getByRole("button",{name:"Nuevo tema",exact:true}).click();
-      await p.locator('.modal [name=parent]').selectOption({index:1});await p.locator('.modal [name=title]').fill('E2E Tema de foro');await p.locator('.modal [name=body]').fill('E2E Consulta sobre prácticas de supervisión.');
-      const saving=p.waitForResponse(r=>r.url().includes('/content/topic')&&r.request().method()==='POST');await p.getByRole('button',{name:'Guardar tema',exact:true}).click();
-      const topic=await(await saving).json();fixtures.push(topic.id);assert.equal(topic.status,'publish');assert.ok(topic.parent>0);
+    await test("Forum and reply publish immediately", async () => {
+      await goto(p,"foros");await p.getByRole("button",{name:"Crear foro",exact:true}).click();
+      await p.locator('.modal [name=title]').fill('E2E Tema de foro');await p.locator('.modal [name=body]').fill('E2E Consulta sobre prácticas de supervisión.');
+      const saving=p.waitForResponse(r=>r.url().includes('/content/forum')&&r.request().method()==='POST');await p.getByRole('button',{name:'Guardar foro',exact:true}).click();
+      const topic=await(await saving).json();fixtures.push(topic.id);assert.equal(topic.status,'publish');assert.equal(topic.type,'forum');
       await p.goto(base+'/foros/?item='+topic.id);await p.locator('.modal [name=body]').fill('E2E Respuesta de la comunidad.');await p.getByRole('button',{name:'Publicar comentario'}).click();await p.locator('#comments-list').getByText('E2E Respuesta de la comunidad.').waitFor();
     });
     let conversation;
     await test("Private message delivery, read state and blocking", async () => {
       const target = (await request(p, "profiles?q=Tomás")).body.items[0];
       const me = (await request(p, "bootstrap")).body.me.id;
-      confirmedPair = JSON.parse(execFileSync('docker', ['compose','exec','-T','wordpress','php','/opt/ascla-tests/confirmed-pair-fixture.php'], {input:JSON.stringify({action:'setup',a:me,b:target.id}),encoding:'utf8'}));
+      if (ephemeralCI) {
+        const current = (await request(p, `profiles/${target.id}`)).body.connection;
+        assert.equal(current.blocked, false, "The E2E messaging pair must not be blocked.");
+        if (current.state !== "connected") {
+          let requestId = Number(current.request_id || 0);
+          if (current.state === "incoming_pending") {
+            const accepted = await request(p, `connections/${requestId}/respond`, { decision: "accept" });
+            assert.equal(accepted.status, 200, JSON.stringify(accepted.body));
+          } else {
+            if (current.state === "none") {
+              const created = await request(p, "relations", { target: target.id, kind: "connect", active: true });
+              assert.equal(created.status, 200, JSON.stringify(created.body));
+              requestId = Number(created.body.request_id || 0);
+            }
+            assert.ok(requestId > 0, "Expected a pending connection request.");
+            const targetSession = await login(browser, "demo.miembro.18", env.ASCLA_DEMO_PASSWORD);
+            try {
+              const accepted = await request(targetSession.page, `connections/${requestId}/respond`, { decision: "accept" });
+              assert.equal(accepted.status, 200, JSON.stringify(accepted.body));
+            } finally {
+              try { coverage.push(...(await targetSession.page.coverage.stopJSCoverage())); } catch {}
+              await targetSession.context.close();
+            }
+          }
+        }
+        confirmedPair = { a: me, b: target.id, created: false };
+      } else {
+        confirmedPair = JSON.parse(execFileSync('docker', ['compose','exec','-T','wordpress','php','/opt/ascla-tests/confirmed-pair-fixture.php'], {input:JSON.stringify({action:'setup',a:me,b:target.id}),encoding:'utf8'}));
+      }
       conversation = (await request(p, "conversations", { target: target.id }))
         .body;
+      await test("Suggested introduction is editable and never auto-sends", async () => {
+        const before = (await request(p, "conversations/" + conversation.id + "/messages")).body;
+        await p.goto(base + "/perfil/?member=" + target.id);
+        await p.locator(".modal [data-action=intro]").click();
+        await p.locator(".modal [name=body]").waitFor();
+        assert.ok((await p.locator(".modal [name=body]").inputValue()).length > 30);
+        await p.locator(".modal [name=body]").fill("Edited suggestion, never sent");
+        await p.getByRole("button", {name: "Cancelar", exact: true}).click();
+        await p.locator(".modal").waitFor({state: "detached"});
+        const after = (await request(p, "conversations/" + conversation.id + "/messages")).body;
+        assert.deepEqual(after, before);
+      });
       await p.goto(base + "/mensajeria/?conversation=" + conversation.id);
       await p
         .locator(".chat-compose textarea")
@@ -377,7 +398,7 @@ async function goto(page, route) {
       assert.equal(gal.status, "pending");
     });
     let resource;
-    await test("Multimedia job creates drafts, capsules and review gate", async () => {
+    await test("Multimedia job enriches the resource without creating unsolicited drafts", async () => {
       resource = (
         await request(a, "content/resource", {
           title: "E2E Conferencia de gobernanza",
@@ -399,13 +420,15 @@ async function goto(page, route) {
           resource_id: resource.id,
         })
       ).body;
-      execFileSync(
-        "docker",
-        ["compose", "run", "--rm", "cli", "wp", "ascla", "jobs"],
-        { cwd: root, stdio: "pipe" },
-      );
+      if (!ephemeralCI) {
+        execFileSync(
+          "docker",
+          ["compose", "run", "--rm", "cli", "wp", "ascla", "jobs"],
+          { cwd: root, stdio: "pipe" },
+        );
+      }
       let job;
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < (ephemeralCI ? 40 : 20); i++) {
         job = (await request(a, "jobs/" + j.id)).body;
         if (job.status === "completed" || job.status === "error") break;
         await new Promise((r) => setTimeout(r, 1500));
@@ -418,40 +441,29 @@ async function goto(page, route) {
       assert.equal(enriched.id, resource.id);
       assert.ok(enriched.meta.ai_enriched);
       assert.ok(enriched.meta.technical_note);
-      assert.ok(!JSON.stringify(enriched.meta).includes("Ana Identificable"));
+      assert.ok(!enriched.meta.technical_note.includes("Ana Identificable"));
+      const readerView = (await request(p, "items/" + enriched.id)).body;
+      assert.equal(readerView.meta.transcript, undefined);
+      assert.equal(readerView.meta.identities, undefined);
+      assert.ok(!JSON.stringify(readerView.meta).includes("Ana Identificable"));
       assert.ok(Array.isArray(enriched.meta.moments));
       await a.goto(base + "/centro-conocimiento/?item=" + enriched.id);
-      await a.locator(".modal [data-action=infographic]").waitFor();
-      const down = a.waitForEvent("download");
-      await a.locator(".modal [data-action=infographic]").click();
-      await (
-        await down
-      ).saveAs(path.join(root, "test-results/infographic.svg"));
-      assert.match(
-        fs.readFileSync(
-          path.join(root, "test-results/infographic.svg"),
-          "utf8",
-        ),
-        /© ASCLA/,
-      );
-      await request(a, "items/" + draft.id + "/moderate", {
-        decision: "approve",
-        reason: "Fuentes y anonimización revisadas.",
-        reviewed: true,
-      });
+      await a.locator(".generated-inline-content").waitFor();
+      assert.match(await a.locator(".generated-inline-content").innerText(), /Nota técnica/);
+      assert.equal(enriched.status, "publish", "Enrichment preserves the published resource");
     });
     await test("Knowledge assistant shows verified sources and abstains", async () => {
       await goto(p, "asistente");
       await p
         .locator("[name=question]")
         .fill("¿Cómo supervisar los riesgos de inteligencia artificial?");
-      await p.getByRole("button", { name: "Consultar al asistente" }).click();
+      await p.getByRole("button", { name: "Enviar pregunta" }).click();
       await p
         .locator(".assistant-message.assistant .sources a")
         .first()
         .waitFor({ timeout: 90000 });
       await p.locator("[name=question]").fill("ZXCV987654321INEXISTENTE");
-      await p.getByRole("button", { name: "Consultar al asistente" }).click();
+      await p.getByRole("button", { name: "Enviar pregunta" }).click();
       await p
         .locator(".assistant-message.assistant")
         .last()
@@ -512,6 +524,7 @@ async function goto(page, route) {
         fullPage: true,
       });
     });
+    coverage.push(...await require("./statistics.cjs")());
     assert.deepEqual(errors, []);
     results.push({
       name: "JavaScript runtime errors",
@@ -544,32 +557,8 @@ async function goto(page, route) {
         } catch {}
       }
     await browser.close();
-    if (confirmedPair) execFileSync('docker', ['compose','exec','-T','wordpress','php','/opt/ascla-tests/confirmed-pair-fixture.php'], {input:JSON.stringify({...confirmedPair,action:'cleanup'}),encoding:'utf8'});
-    const assetRoot = path.join(root, "wp-content/plugins/ascla-core/assets");
-    const productionScript = entry => {
-      if (!entry.url.includes("/ascla-core/assets/")) return null;
-      const name = new URL(entry.url).pathname.split("/").pop();
-      const file = path.join(assetRoot, name);
-      return name.endsWith(".js") && fs.existsSync(file) && entry.source === fs.readFileSync(file, "utf8") ? file : null;
-    };
-    for (const report of ["zip-v8.json", "completion-v8.json", "sprint-v8.json", "navigation-v8.json"]) {
-      const file = path.join(root, "coverage", report);
-      if (fs.existsSync(file)) coverage.push(...JSON.parse(fs.readFileSync(file, "utf8")).filter(productionScript));
-    }
-    fs.writeFileSync(path.join(root,"coverage/raw-v8.json"), JSON.stringify(coverage.filter(productionScript)));
-    const map = libCoverage.createCoverageMap({});
-    for (const entry of coverage.filter(productionScript)) {
-      const converter = v8toIstanbul(productionScript(entry), 0, { source: entry.source });
-      await converter.load();
-      converter.applyCoverage(entry.functions);
-      map.merge(converter.toIstanbul());
-    }
-    const context = libReport.createContext({
-      dir: path.join(root, "coverage"),
-      coverageMap: map,
-    });
-    reports.create("lcovonly").execute(context);
-    reports.create("text-summary").execute(context);
+    if (confirmedPair && !ephemeralCI) execFileSync('docker', ['compose','exec','-T','wordpress','php','/opt/ascla-tests/confirmed-pair-fixture.php'], {input:JSON.stringify({...confirmedPair,action:'cleanup'}),encoding:'utf8'});
+    await require("./helpers/coverage.cjs").writeCoverage(root, coverage);
     fs.writeFileSync(
       path.join(root, "test-results/e2e.json"),
       JSON.stringify(
@@ -583,17 +572,19 @@ async function goto(page, route) {
         2,
       ),
     );
-    // Remove only IDs created by this suite, never existing demo/community content.
-    const ids = fixtures.filter(Number.isInteger);
-    const code = `foreach (${JSON.stringify(ids)} as $id) { if (get_post($id)) wp_delete_post($id,true); foreach (['like','follow','report'] as $kind) ASCLA\\Core\\Repositories\\Store::delete('relations',['target_id'=>$id,'kind'=>$kind]); ASCLA\\Core\\Repositories\\Store::delete('registrations',['event_id'=>$id]); } foreach (${JSON.stringify(messageIds)} as $id) { ASCLA\\Core\\Repositories\\Store::delete('messages',['id'=>$id]); } foreach (${JSON.stringify(mediaIds)} as $id) { ASCLA\\Core\\Repositories\\Store::delete('media',['id'=>$id]); }`;
-    try {
-      execFileSync(
-        "docker",
-        ["compose", "run", "--rm", "cli", "wp", "eval", code],
-        { cwd: root, stdio: "pipe" },
-      );
-    } catch (e) {
-      console.error("Fixture cleanup needs attention:", e.message);
+    // Local runs clean their fixtures. CI uses a disposable Docker volume and removes it after the suite.
+    if (!ephemeralCI) {
+      const ids = fixtures.filter(Number.isInteger);
+      const code = `foreach (${JSON.stringify(ids)} as $id) { if (get_post($id)) wp_delete_post($id,true); foreach (['like','follow','report'] as $kind) ASCLA\\Core\\Repositories\\Store::delete('relations',['target_id'=>$id,'kind'=>$kind]); ASCLA\\Core\\Repositories\\Store::delete('registrations',['event_id'=>$id]); } foreach (${JSON.stringify(messageIds)} as $id) { ASCLA\\Core\\Repositories\\Store::delete('messages',['id'=>$id]); } foreach (${JSON.stringify(mediaIds)} as $id) { ASCLA\\Core\\Repositories\\Store::delete('media',['id'=>$id]); }`;
+      try {
+        execFileSync(
+          "docker",
+          ["compose", "run", "--rm", "cli", "wp", "eval", code],
+          { cwd: root, stdio: "pipe" },
+        );
+      } catch (e) {
+        console.error("Fixture cleanup needs attention:", e.message);
+      }
     }
   }
   if (failed) process.exit(1);
