@@ -8,6 +8,7 @@ final class Plugin
         add_action('init', [Domain\Catalog::class, 'register']);
         add_action('init', [Database\Installer::class, 'upgrade'], 20);
         add_filter('posts_search',[Repositories\ContentQuery::class,'search'],10,2);
+        add_filter('posts_where',[Repositories\ContentQuery::class,'draftVisibility'],10,2);
         Frontend\App::boot();
         Services\Turnstile::boot();
         Admin\Panel::boot();

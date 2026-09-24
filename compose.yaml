@@ -15,14 +15,12 @@ services:
 
   mailpit:
     image: axllent/mailpit:v1.27.10
-    ports: ["127.0.0.1:${ASCLA_MAILPIT_PORT:-8025}:8025"]
     environment:
       MP_MAX_MESSAGES: 200
       MP_MAX_AGE: 24h
 
   wordpress:
     image: wordpress:6.8.3-php8.3-apache
-    ports: ["127.0.0.1:${ASCLA_HTTP_PORT:-8088}:80"]
     environment:
       WORDPRESS_DB_HOST: ${ASCLA_DB_HOST:-db}
       WORDPRESS_DB_USER: ${ASCLA_DB_USER:-wordpress}
@@ -48,6 +46,9 @@ services:
     depends_on:
       db: {condition: service_healthy}
       mailpit: {condition: service_started}
+    networks:
+      - default
+      - proxy_net
 
   cron:
     image: wordpress:cli-php8.3
@@ -96,3 +97,9 @@ services:
 volumes:
   db:
   wordpress:
+
+networks:
+  default:
+  proxy_net:
+    external: true
+    name: proxy_net

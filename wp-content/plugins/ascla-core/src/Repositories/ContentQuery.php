@@ -7,6 +7,13 @@ use ASCLA\Core\Services\Profiles;
 /** Search and sorting run before pagination, inside the private content query. */
 final class ContentQuery
 {
+    public static function draftVisibility(string $sql, \WP_Query $query): string
+    {
+        if (!$query->get('ascla_search')) { return $sql; }
+        global $wpdb;
+        return $sql.$wpdb->prepare(" AND ({$wpdb->posts}.post_status <> 'draft' OR {$wpdb->posts}.post_author = %d)", get_current_user_id());
+    }
+
     public static function search(string $sql, \WP_Query $query): string
     {
         if (!$query->get('ascla_search')) { return $sql; }
@@ -25,7 +32,7 @@ final class ContentQuery
     public static function authors(): array
     {
         global $wpdb;
-        $visibility = current_user_can('ascla_moderate') ? "p.post_status IN ('publish','draft','pending','ascla_rejected','ascla_hidden')" : "p.post_status='publish'";
+        $visibility = current_user_can('ascla_moderate') ? $wpdb->prepare("(p.post_status IN ('publish','pending','ascla_rejected','ascla_hidden') OR (p.post_status='draft' AND p.post_author=%d))",get_current_user_id()) : "p.post_status='publish'";
         $authors=$wpdb->get_results("SELECT DISTINCT u.ID AS id,u.display_name AS name FROM {$wpdb->users} u INNER JOIN {$wpdb->posts} p ON p.post_author=u.ID WHERE p.post_type='ascla_resource' AND $visibility ORDER BY u.display_name,u.ID", ARRAY_A);
         return array_map(static fn($author)=>['id'=>$author['id'],'name'=>Profiles::publicName((int)$author['id'])],$authors);
     }

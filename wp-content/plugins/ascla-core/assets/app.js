@@ -608,7 +608,7 @@
       if (element.tagName === "SELECT" && element.multiple) return [element.name, [...element.selectedOptions].map((option) => option.value)];
       return [element.name, element.value];
     }).filter(Boolean);
-    return JSON.stringify(values);
+    return JSON.stringify([values, [...form.querySelectorAll("[data-media]")].map(node => node.dataset.media)]);
   }
   function registerUnsavedForm(form) {
     unsavedGuard.form = form || null;
@@ -1377,7 +1377,7 @@
     const eventCoverEditor = type === "event" ? `<section class="event-cover-editor"><label>${E(T("Portada del evento"))}</label><div id="event-cover-preview" class="event-cover-preview">${eventCoverFile ? `<span class="event-cover-ready" data-media="${Number(eventCoverFile.id)}"><img src="${E(eventCoverFile.url)}" alt="${E(T("Portada del evento"))}"><span class="event-cover-actions"><strong>${E(eventCoverFile.name || T("Imagen del evento"))}</strong>${btn("Quitar portada","event-cover-clear","","ghost small")}</span></span>` : `<span class="event-cover-placeholder">${I("gallery")}<small>${E(T("Aún no has seleccionado una portada."))}</small></span>`}</div><label class="btn small">${I("plus")} ${E(T(eventCoverFile ? "Cambiar portada" : "Elegir imagen"))}<input type="file" data-upload="event-cover" accept="image/jpeg,image/png,image/webp" hidden></label><p class="private-note">${E(T("JPG, PNG o WebP. Proporción recomendada 16:9. La imagen se recorta y optimiza antes de guardarse."))}</p></section>` : "";
     modal(
       (id ? "Editar " : "Crear ") + typeLabel[type],
-      `<form data-form="editor" data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => `<label class="chip-check"><input type="checkbox" name="interest" value="${t.id}" ${p.tags.some((x) => x.id === t.id) ? "checked" : ""}>${E(t.name)}</label>`).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? `<label class="btn small">${I("plus")} ${E(T("Adjuntar imagen o PDF"))}<input type="file" data-upload="content" accept="image/jpeg,image/png,image/webp,application/pdf" hidden></label><div id="attachments">${(m.media_ids || []).map((mid) => `<span class="attached-file" data-media="${mid}">Archivo #${mid}${btn("Quitar", "detach-media", `data-id="${mid}"`, "ghost small")}</span>`).join("")}</div><p class="private-note">${E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))}</p>` : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${select("status", "Guardar como", statusOptions, statusValue)}${m.generated && directResourcePublisher ? `<p class="private-note">${E(T("Si eliges Publicar ahora, confirmas que revisaste fuentes, anonimización y derechos antes de publicar."))}</p>` : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar ${typeLabel[type]}</button></div></form>`,
+      `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => `<label class="chip-check"><input type="checkbox" name="interest" value="${t.id}" ${p.tags.some((x) => x.id === t.id) ? "checked" : ""}>${E(t.name)}</label>`).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? `<label class="btn small">${I("plus")} ${E(T("Adjuntar imagen o PDF"))}<input type="file" data-upload="content" accept="image/jpeg,image/png,image/webp,application/pdf" hidden></label><div id="attachments">${(m.media_ids || []).map((mid) => `<span class="attached-file" data-media="${mid}">Archivo #${mid}${btn("Quitar", "detach-media", `data-id="${mid}"`, "ghost small")}</span>`).join("")}</div><p class="private-note">${E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))}</p>` : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${select("status", "Guardar como", statusOptions, statusValue)}${m.generated && directResourcePublisher ? `<p class="private-note">${E(T("Si eliges Publicar ahora, confirmas que revisaste fuentes, anonimización y derechos antes de publicar."))}</p>` : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar ${typeLabel[type]}</button></div></form>`,
       true,
     );
   }
@@ -2878,7 +2878,7 @@
   themeMedia?.addEventListener?.("change", () => { if (themeMode() === "system") applyTheme("system"); });
   window.addEventListener("storage", (event) => { if (event.key === THEME_KEY) applyTheme(themeMode()); });
   window.addEventListener("beforeunload", (event) => {
-    if (!hasUnsavedChanges()) return;
+    if (!hasUnsavedChanges() && ![...document.querySelectorAll("form[data-guard-modal-unsaved]")].some(modalHasUnsavedChanges)) return;
     event.preventDefault();
     event.returnValue = "";
   });
@@ -2886,7 +2886,7 @@
     if (!event.persisted) discardPendingWithin(root, true);
   });
   document.addEventListener("keydown", (event) => {
-    const dialog = document.querySelector(".modal");
+    const dialog = document.querySelector(".modal-decision") || document.querySelector(".modal");
     if (event.key === "Escape") {
       if (document.querySelector(".modal-decision-backdrop")) closeModalDecision();
       else if (document.querySelector(".modal-backdrop")) requestModalClose();

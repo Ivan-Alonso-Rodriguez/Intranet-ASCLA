@@ -150,7 +150,7 @@ final class Router
         $moderator=current_user_can('ascla_moderate');$admin=current_user_can('ascla_manage');
         $pending=[];
         foreach (\ASCLA\Core\Domain\Catalog::TYPES as $key=>$label) {
-            foreach (get_posts(['post_type'=>'ascla_'.$key,'post_status'=>['pending','draft'],'numberposts'=>50]) as $post) { if(Content::canRead($post)){$pending[]=Content::serialize($post);} }
+            foreach (get_posts(['post_type'=>'ascla_'.$key,'post_status'=>['pending'],'numberposts'=>50]) as $post) { if(Content::canRead($post)){$pending[]=Content::serialize($post);} }
         }
         $comments=[];
         foreach ($moderator?get_comments(['status'=>'hold','number'=>100]):[] as $c) { $post=get_post($c->comment_post_ID); if ($post&&Content::canRead($post)) { $comments[]=['id'=>(int)$c->comment_ID,'body'=>$c->comment_content,'can_delete'=>Content::canDeleteComment($c),'author'=>$c->user_id?Profiles::publicName((int)$c->user_id):'Comunidad ASCLA']; } }
