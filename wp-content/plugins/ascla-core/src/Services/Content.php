@@ -71,12 +71,30 @@ final class Content
     public static function canRead(\WP_Post $post): bool
     {
         if (!Access::member() || $post->post_status==='trash' || !str_starts_with($post->post_type,'ascla_') || !isset(Catalog::TYPES[substr($post->post_type,6)])) { return false; }
-        if ($post->post_status==='draft' && (int)$post->post_author!==get_current_user_id()) { return false; }
-        if (current_user_can('ascla_manage') || (int)$post->post_author===get_current_user_id()) { return true; }
-        if(current_user_can('ascla_moderate') && !in_array(substr($post->post_type,6),self::EDITORIAL_TYPES,true)){return true;}
+        $type=substr($post->post_type,6);
+        $author=(int)$post->post_author;
+        $me=get_current_user_id();
+
+        // A draft created by an administrator remains private to that administrator.
+        // Community drafts from ordinary members can still enter the moderation lane,
+        // while editorial drafts can only be reviewed by their author or an administrator.
+        if ($post->post_status==='draft') {
+            if ($author===$me) { return true; }
+            $authorUser=get_userdata($author);
+            // Drafts authored by a WordPress administrator remain private even
+            // from other administrators. This is stricter than capability-based
+            // moderation and matches the explicit draft-privacy contract.
+            if ($authorUser && in_array('administrator',(array)$authorUser->roles,true)) { return false; }
+            if (in_array($type,self::COMMUNITY_TYPES,true)) { return current_user_can('ascla_moderate'); }
+            if (in_array($type,self::EDITORIAL_TYPES,true)) { return current_user_can('ascla_manage'); }
+            return false;
+        }
+
+        if (current_user_can('ascla_manage') || $author===$me) { return true; }
+        if (current_user_can('ascla_moderate') && !in_array($type,self::EDITORIAL_TYPES,true)) { return true; }
         if ($post->post_type==='ascla_contact' || $post->post_status!=='publish') { return false; }
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
-        if (!empty($meta['micro'])) { return in_array(get_current_user_id(),array_map('intval',$meta['invitees']??[]),true); }
+        if (!empty($meta['micro'])) { return in_array($me,array_map('intval',$meta['invitees']??[]),true); }
         return true;
     }
     public static function get(int $id): \WP_Post
