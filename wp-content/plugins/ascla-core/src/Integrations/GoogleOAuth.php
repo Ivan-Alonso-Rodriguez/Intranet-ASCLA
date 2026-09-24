@@ -28,9 +28,9 @@ final class GoogleOAuth
     {
         $params['client_id']=Settings::get()['google_client_id']; $params['client_secret']=Secrets::get('google_client_secret');
         $response=wp_remote_post('https://oauth2.googleapis.com/token',['timeout'=>20,'redirection'=>0,'limit_response_size'=>65536,'body'=>$params]);
-        if (is_wp_error($response)||wp_remote_retrieve_response_code($response)!==200) { throw new \RuntimeException('Google OAuth expirado o configuración inválida. Vuelva a conectar.'); }
+        if (is_wp_error($response)||wp_remote_retrieve_response_code($response)!==200) { throw new IntegrationException('Google OAuth expirado o configuración inválida. Vuelva a conectar.'); }
         $tokens=json_decode(wp_remote_retrieve_body($response),true);
-        if (empty($tokens['access_token'])) { throw new \RuntimeException('Google no devolvió una credencial válida.'); }
+        if (empty($tokens['access_token'])) { throw new IntegrationException('Google no devolvió una credencial válida.'); }
         return $tokens;
     }
     private static function saveTokens(int $user,string $service,array $tokens): void
@@ -42,9 +42,9 @@ final class GoogleOAuth
     public static function accessToken(int $user,string $service='youtube'): string
     {
         $tokens=json_decode(Secrets::get('google_'.$service.'_'.$user),true)?:[];
-        if (!$tokens) { throw new \RuntimeException('Integración Google '.ucfirst($service).' no configurada.'); }
+        if (!$tokens) { throw new IntegrationException('Integración Google '.ucfirst($service).' no configurada.'); }
         if (($tokens['expires_at']??0)<time()+60) {
-            if (empty($tokens['refresh_token'])) { throw new \RuntimeException('Google OAuth expirado. Vuelva a conectar.'); }
+            if (empty($tokens['refresh_token'])) { throw new IntegrationException('Google OAuth expirado. Vuelva a conectar.'); }
             $new=self::tokenRequest(['grant_type'=>'refresh_token','refresh_token'=>$tokens['refresh_token']]); self::saveTokens($user,$service,$new); $tokens=$new;
         }
         return $tokens['access_token'];
@@ -65,9 +65,12 @@ final class GoogleOAuth
         if ($operation==='cancel'&&!$remote) { return ['ok'=>true]; }
         $url='https://www.googleapis.com/calendar/v3/calendars/primary/events'.($remote?'/'.rawurlencode($remote):'');
         $body=['summary'=>$post->post_title,'description'=>'Evento privado ASCLA. '.(!empty($meta['chatham'])?'Regla de Chatham House.':''),'start'=>['dateTime'=>$meta['start']],'end'=>['dateTime'=>$meta['end']],'location'=>$meta['location']??'','visibility'=>'private'];
-        $response=wp_remote_request($url,['method'=>$operation==='cancel'?'DELETE':($remote?'PATCH':'POST'),'timeout'=>25,'redirection'=>0,'limit_response_size'=>262144,'headers'=>['Authorization'=>'Bearer '.$token,'Content-Type'=>'application/json'],'body'=>$operation==='cancel'?'':wp_json_encode($body)]);
+        $method='POST';
+        if($operation==='cancel'){$method='DELETE';}
+        elseif($remote){$method='PATCH';}
+        $response=wp_remote_request($url,['method'=>$method,'timeout'=>25,'redirection'=>0,'limit_response_size'=>262144,'headers'=>['Authorization'=>'Bearer '.$token,'Content-Type'=>'application/json'],'body'=>$operation==='cancel'?'':wp_json_encode($body)]);
         $code=wp_remote_retrieve_response_code($response);
-        if (is_wp_error($response)||!in_array($code,[200,201,204],true)) { throw new \RuntimeException('Google Calendar no pudo completar la operación.'); }
+        if (is_wp_error($response)||!in_array($code,[200,201,204],true)) { throw new IntegrationException('Google Calendar no pudo completar la operación.'); }
         $data=json_decode(wp_remote_retrieve_body($response),true);
         if ($operation==='cancel') { delete_user_meta(get_current_user_id(),$key); }
         elseif (!empty($data['id'])) { update_user_meta(get_current_user_id(),$key,sanitize_text_field($data['id'])); }

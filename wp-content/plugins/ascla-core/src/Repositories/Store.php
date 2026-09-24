@@ -13,13 +13,13 @@ final class Store
     public static function insert(string $table,array $data): int
     {
         global $wpdb;
-        if ($wpdb->insert(self::table($table),$data)===false) { throw new \RuntimeException('No se pudo guardar. Reintente la operación.'); }
+        if ($wpdb->insert(self::table($table),$data)===false) { throw new RepositoryException('No se pudo guardar. Reintente la operación.'); }
         return (int)$wpdb->insert_id;
     }
     public static function update(string $table,array $data,array $where): void
     {
         global $wpdb;
-        if ($wpdb->update(self::table($table),$data,$where)===false) { throw new \RuntimeException('No se pudo actualizar.'); }
+        if ($wpdb->update(self::table($table),$data,$where)===false) { throw new RepositoryException('No se pudo actualizar.'); }
     }
     public static function delete(string $table,array $where): void
     {
@@ -28,7 +28,9 @@ final class Store
     public static function rows(string $table,string $where='1=1',array $args=[],string $suffix='ORDER BY id DESC LIMIT 100'): array
     {
         global $wpdb; $sql='SELECT * FROM '.self::table($table).' WHERE '.$where.' '.$suffix;
-        return $wpdb->get_results($args?$wpdb->prepare($sql,...$args):$sql,ARRAY_A) ?: [];
+        $query=$sql;
+        if($args){$query=$wpdb->prepare($sql,...$args);}
+        return $wpdb->get_results($query,ARRAY_A) ?: [];
     }
     public static function one(string $table,int $id): ?array { return self::rows($table,'id=%d',[$id],'LIMIT 1')[0]??null; }
     public static function count(string $table,string $where,array $args): int
@@ -43,7 +45,7 @@ final class Store
     public static function lock(string $key,callable $callback,int $timeout=3): mixed
     {
         global $wpdb; $name='ascla_'.substr(hash('sha256',$wpdb->prefix.$key),0,56);
-        if ((int)$wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, %d)',$name,max(0,min(3,$timeout))))!==1) { throw new \RuntimeException('Operación en curso. Intente nuevamente.'); }
+        if ((int)$wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, %d)',$name,max(0,min(3,$timeout))))!==1) { throw new RepositoryException('Operación en curso. Intente nuevamente.'); }
         try { return $callback(); } finally { $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)',$name)); }
     }
 }

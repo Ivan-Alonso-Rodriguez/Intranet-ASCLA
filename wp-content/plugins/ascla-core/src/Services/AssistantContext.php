@@ -18,7 +18,8 @@ final class AssistantContext
         $plain=mb_strtolower(remove_accents($question));
         $intents=[
             'events'=>(bool)preg_match('/\b(evento|eventos|reunion|reuniones|encuentro|encuentros|capacitacion|capacitaciones|agenda|calendario|proximo|proximos|pronto|semana|mes|inscrito|inscripcion)\b/u',$plain),
-            'recent'=>(bool)preg_match('/\b(reciente|recientes|nuevo|nuevos|nueva|nuevas|publicado|publicados|publicacion|publicaciones|novedad|novedades|contenido|contenidos|recurso|recursos|articulo|articulos|hub|conocimiento|ultimo|ultimos)\b/u',$plain),
+            'recent'=>(bool)preg_match('/\b(reciente|recientes|nuevo|nuevos|nueva|nuevas|publicado|publicados|publicacion|publicaciones|novedad|novedades)\b/u',$plain)
+                || (bool)preg_match('/\b(contenido|contenidos|recurso|recursos|articulo|articulos|hub|conocimiento|ultimo|ultimos)\b/u',$plain),
             'people'=>(bool)preg_match('/\b(recomiend|recomendad|conectar|conexion|conexiones|persona|personas|asociado|asociados|networking|afinidad|contactar|conocer)\w*/u',$plain),
             'notifications'=>(bool)preg_match('/\b(notificacion|notificaciones|aviso|avisos|pendiente|pendientes|sin leer)\b/u',$plain),
         ];

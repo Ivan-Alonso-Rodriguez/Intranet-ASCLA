@@ -2,18 +2,21 @@
 (() => {
   "use strict";
   const root = document.getElementById("ascla-root");
-  if (!root || !window.ASCLA) return;
-  const C = window.ASCLA;
+  if (!root || !globalThis.ASCLA) return;
+  const C = globalThis.ASCLA;
   const T = text => C.translations?.[text] || text;
   const THEME_KEY = "ascla-theme";
-  const themeMedia = window.matchMedia?.("(prefers-color-scheme: dark)");
+  const themeMedia = globalThis.matchMedia?.("(prefers-color-scheme: dark)");
   const themeMode = () => {
     try {
       const mode = localStorage.getItem(THEME_KEY);
       return ["light", "dark", "system"].includes(mode) ? mode : "system";
     } catch { return "system"; }
   };
-  const effectiveTheme = (mode = themeMode()) => mode === "system" ? (themeMedia?.matches ? "dark" : "light") : mode;
+  function effectiveTheme(mode = themeMode()) {
+    if (mode !== "system") return mode;
+    return themeMedia?.matches ? "dark" : "light";
+  }
   function applyTheme(mode = themeMode(), persist = false) {
     if (!["light", "dark", "system"].includes(mode)) mode = "system";
     if (persist) { try { localStorage.setItem(THEME_KEY, mode); } catch {} }
@@ -35,7 +38,7 @@
     modal(T("Apariencia"), `<p class="private-note">${E(T("Elige cómo quieres ver la intranet. En Automático, ASCLA sigue la preferencia de tu dispositivo."))}</p><div class="theme-options">${option("system", "Automático (sistema)", "Usa el modo claro u oscuro configurado en tu dispositivo.")}${option("light", "Claro", "Mantiene la interfaz clara en este navegador.")}${option("dark", "Oscuro", "Mantiene la interfaz oscura en este navegador.")}</div>`);
   }
   // Translate interface labels only; source content and user input keep their original language.
-  const labelHTML = label => String(label).replace(/(^|>)([^<>]+)(?=<|$)/g, (all, prefix, text) => {
+  const labelHTML = label => String(label).replaceAll(/(^|>)([^<>]+)(?=<|$)/g, (all, prefix, text) => {
     const trimmed = text.trim();return prefix + text.replace(trimmed, T(trimmed));
   });
   let navigation;
@@ -83,7 +86,7 @@
     if (!value && !reset) { try { value = localStorage.getItem(key) || ""; } catch {} }
     if (!/^[a-zA-Z0-9_-]{6,80}$/.test(value)) {
       const random = secureRandomId();
-      value = "chat_" + random.replace(/[^a-zA-Z0-9_-]/g, "");
+      value = "chat_" + random.replaceAll(/[^a-zA-Z0-9_-]/g, "");
     }
     S.assistantThread = value;
     try { localStorage.setItem(key, value); } catch {}
@@ -96,10 +99,10 @@
   function adminLanguageControl() {
     const options = Object.entries(C.languageOptions || { es_ES: "Español", en_US: "English" });
     const selected = C.userLocale || (String(C.language).startsWith("en") ? "en_US" : "es_ES");
-    return `<form class="header-language admin-language-control" method="post" action="" data-native aria-label="${E(T("Cambiar idioma"))}"><span class="admin-language-icon">${I("globe")}</span><label class="screen-reader-text" for="ascla-admin-language">${E(T("Idioma"))}</label><select id="ascla-admin-language" name="_ascla_locale" data-admin-language-select aria-label="${E(T("Idioma"))}">${options.map(([value,label]) => `<option value="${E(value)}" ${value===selected?"selected":""}>${E(label)}</option>`).join("")}</select><input type="hidden" name="_ascla_change_language" value="1"><input type="hidden" name="_ascla_language_nonce" value="${E(C.languageNonce || "")}"></form>`;
+    return `<form class="header-language admin-language-control" method="post" action="" data-native aria-label="${E(T("Cambiar idioma"))}"><span class="admin-language-icon">${I("globe")}</span><label class="screen-reader-text" for="ascla-admin-language">${E(T("Idioma"))}</label><select id="ascla-admin-language" name="_ascla_locale" data-admin-language-select aria-label="${E(T("Idioma"))}">${options.map(([value,label]) => ("<option value=\"" + (E(value)) + "\" " + (value===selected?"selected":"") + ">" + (E(label)) + "</option>")).join("")}</select><input type="hidden" name="_ascla_change_language" value="1"><input type="hidden" name="_ascla_language_nonce" value="${E(C.languageNonce || "")}"></form>`;
   }
   const E = (v) =>
-    String(v ?? "").replace(
+    String(v ?? "").replaceAll(
       /[&<>"']/g,
       (c) =>
         ({
@@ -118,14 +121,13 @@
       return "#";
     }
   };
-  const date = (value, opts = { day: "numeric", month: "short" }) =>
-    value
-      ? new Date(
-          /(?:Z|[+-]\d\d:\d\d)$/.test(value)
-            ? value
-            : value.replace(" ", "T") + "Z",
-        ).toLocaleDateString(C.locale || "es-PE", opts)
-      : T("Por confirmar");
+  const DEFAULT_DATE_OPTIONS = { day: "numeric", month: "short" };
+  function date(value, opts = DEFAULT_DATE_OPTIONS) {
+    if (!value) return T("Por confirmar");
+    let normalized = value;
+    if (!/(?:Z|[+-]\d\d:\d\d)$/.test(value)) normalized = value.replace(" ", "T") + "Z";
+    return new Date(normalized).toLocaleDateString(C.locale || "es-PE", opts);
+  }
   const time = (value) =>
     value
       ? new Date(value).toLocaleTimeString(C.locale || "es-PE", {
@@ -144,7 +146,7 @@
   const avatar = (p, size = "") => {
     let url = '';
     try { const candidate = new URL(p.photo_url); if (['http:', 'https:'].includes(candidate.protocol)) url = candidate.href; } catch { /* Initials are the shared fallback. */ }
-    return `<span class="avatar ${size}">${url ? `<img src="${E(url)}" alt="${E(p.name)}">` : ''}<span class="avatar-initials">${E(initials(p.name))}</span></span>`;
+    return `<span class="avatar ${size}">${url ? ("<img src=\"" + (E(url)) + "\" alt=\"" + (E(p.name)) + "\">") : ''}<span class="avatar-initials">${E(initials(p.name))}</span></span>`;
   };
   root.addEventListener('error', event => {
     if (event.target.matches?.('.avatar img')) event.target.remove();
@@ -155,7 +157,7 @@
     `<a class="btn ${kind}" href="${E(C.pages[page]?.url || "#")}">${labelHTML(label)}</a>`;
   const empty = (title, text = "") =>
     `<div class="empty">${I("users")}<strong>${E(T(title))}</strong><p>${E(T(text))}</p></div>`;
-  const UI = window.ASCLAContent({ escape: E, icon: I, config: C, T });
+  const UI = globalThis.ASCLAContent({ escape: E, icon: I, config: C, T });
   function apiURL(path) {
     const url = new URL(C.api, location.href);
     const [route, query = ""] = path.split("?", 2);
@@ -169,7 +171,7 @@
   }
   let youtubeIframeApiPromise = null;
   function youtubeIframeApi() {
-    if (window.YT?.Player) return Promise.resolve(window.YT);
+    if (globalThis.YT?.Player) return Promise.resolve(globalThis.YT);
     if (!youtubeIframeApiPromise) {
       youtubeIframeApiPromise = requestYouTubeIframeApi().catch(error => {
         youtubeIframeApiPromise = null;
@@ -180,28 +182,28 @@
   }
   function requestYouTubeIframeApi() {
     return new Promise((resolve, reject) => {
-      const previous = window.onYouTubeIframeAPIReady;
+      const previous = globalThis.onYouTubeIframeAPIReady;
       let settled = false, timer;
       let script = document.querySelector('script[data-ascla-youtube-api]');
       const settle = (error) => {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
-        if (window.onYouTubeIframeAPIReady === finish) window.onYouTubeIframeAPIReady = previous;
+        if (globalThis.onYouTubeIframeAPIReady === finish) globalThis.onYouTubeIframeAPIReady = previous;
         if (script) script.onerror = null;
         if (error) {
           script?.remove();
           reject(error);
-        } else resolve(window.YT);
+        } else resolve(globalThis.YT);
       };
       const finish = () => {
         if (settled) return;
         try { if (typeof previous === "function") previous(); } catch { /* Preserve other integrations without blocking this loader. */ }
-        settle(window.YT?.Player ? null : new Error(T("No se pudo cargar el reproductor de YouTube.")));
+        settle(globalThis.YT?.Player ? null : new Error(T("No se pudo cargar el reproductor de YouTube.")));
       };
-      window.onYouTubeIframeAPIReady = finish;
+      globalThis.onYouTubeIframeAPIReady = finish;
       timer = setTimeout(() => {
-        if (window.YT?.Player) finish();
+        if (globalThis.YT?.Player) finish();
         else settle(new Error(T("YouTube tardó demasiado en responder.")));
       }, 12000);
       if (!script) {
@@ -316,7 +318,7 @@
   }
   function discardPendingWithin(scope, keepalive = false) {
     const ids = pendingMediaIds(scope);
-    scope?.querySelectorAll?.("[data-pending-media]").forEach(node => node.removeAttribute("data-pending-media"));
+    scope?.querySelectorAll?.("[data-pending-media]").forEach(node => { delete node.dataset.pendingMedia; });
     ids.forEach(id => { void discardTemporaryMedia(id, keepalive); });
     return ids.length;
   }
@@ -325,14 +327,14 @@
     const previous = Number(node.dataset.pendingMedia || 0);
     if (previous && previous !== Number(id)) void discardTemporaryMedia(previous);
     if (id) node.dataset.pendingMedia = String(Number(id));
-    else node.removeAttribute("data-pending-media");
+    else delete node.dataset.pendingMedia;
   }
   const modalUnsavedBaselines = new WeakMap();
   function modalDecision(title, body) {
     document.querySelector(".modal-decision-backdrop")?.remove();
     const div = document.createElement("div");
     div.className = "modal-backdrop modal-decision-backdrop";
-    div.innerHTML = `<section role="alertdialog" aria-modal="true" aria-label="${E(title)}" class="modal modal-decision"><div class="modal-top"><h2>${E(title)}</h2>${btn(I("close"), "modal-unsaved-stay", `aria-label="${E(T("Seguir editando"))}"`, "ghost")}</div><div class="modal-content">${body}</div></section>`;
+    div.innerHTML = `<section role="alertdialog" aria-modal="true" aria-label="${E(title)}" class="modal modal-decision"><div class="modal-top"><h2>${E(title)}</h2>${btn(I("close"), "modal-unsaved-stay", ("aria-label=\"" + (E(T("Seguir editando"))) + "\""), "ghost")}</div><div class="modal-content">${body}</div></section>`;
     root.append(div);
     div.addEventListener("click", event => { if (event.target === div) closeModalDecision(); });
     div.querySelector("button")?.focus();
@@ -356,7 +358,7 @@
     closeModal();
     const div = document.createElement("div");
     div.className = "modal-backdrop";
-    div.innerHTML = `<section role="dialog" aria-modal="true" aria-label="${E(title)}" class="modal ${wide ? "wide" : ""}"><div class="modal-top"><h2>${E(title)}</h2>${btn(I("close"), "close", `aria-label="${E(T("Cerrar"))}"`, "ghost")}</div><div class="modal-content">${body}</div></section>`;
+    div.innerHTML = `<section role="dialog" aria-modal="true" aria-label="${E(title)}" class="modal ${wide ? "wide" : ""}"><div class="modal-top"><h2>${E(title)}</h2>${btn(I("close"), "close", ("aria-label=\"" + (E(T("Cerrar"))) + "\""), "ghost")}</div><div class="modal-content">${body}</div></section>`;
     root.append(div);
     const guarded = div.querySelector("form[data-guard-modal-unsaved]");
     if (guarded) modalUnsavedBaselines.set(guarded, formSnapshot(guarded));
@@ -376,7 +378,7 @@
     if (pending) pending(false);
   }
   function field(name, label, value = "", type = "text", extra = "") {
-    return `<div class="field"><label for="f-${E(name)}">${E(T(label))}</label>${type === "textarea" ? `<textarea id="f-${E(name)}" name="${E(name)}" ${extra}>${E(value)}</textarea>` : `<input id="f-${E(name)}" name="${E(name)}" type="${type}" value="${E(value)}" ${extra}>`}</div>`;
+    return `<div class="field"><label for="f-${E(name)}">${E(T(label))}</label>${type === "textarea" ? ("<textarea id=\"f-" + (E(name)) + "\" name=\"" + (E(name)) + "\" " + (extra) + ">" + (E(value)) + "</textarea>") : ("<input id=\"f-" + (E(name)) + "\" name=\"" + (E(name)) + "\" type=\"" + (type) + "\" value=\"" + (E(value)) + "\" " + (extra) + ">")}</div>`;
   }
   const check = (name, label, value) =>
     `<label class="check"><input type="checkbox" name="${E(name)}" ${value ? "checked" : ""}> <span>${E(T(label))}</span></label>`;
@@ -384,13 +386,13 @@
     `<div class="field"><label for="f-${E(name)}">${E(T(label))}</label><select name="${E(name)}" id="f-${E(name)}">${values
       .map((v) => {
         const pair = Array.isArray(v) ? v : [v, v];
-        return `<option value="${E(pair[0])}" ${String(value) === String(pair[0]) ? "selected" : ""}>${E(T(pair[1]))}</option>`;
+        return ("<option value=\"" + (E(pair[0])) + "\" " + (String(value) === String(pair[0]) ? "selected" : "") + ">" + (E(T(pair[1]))) + "</option>");
       })
       .join("")}</select></div>`;
   function formData(form) {
     return Object.fromEntries(new FormData(form));
   }
-  const locationNormalize = value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  const locationNormalize = value => String(value || "").normalize("NFD").replaceAll(/[\u0300-\u036f]/g, "").toLowerCase().replaceAll(/[^\p{L}\p{N}]+/gu, " ").trim();
   function profileLocationFields(p) {
     const countryPlaceholder = E(T("Busca un país o región"));
     const cityPlaceholder = E(T("Busca una ciudad"));
@@ -457,17 +459,38 @@
     locationRender(box, items, (country, i) => {
       const primary = C.language === 'en' ? country.en : country.es;
       const secondary = C.language === 'en' ? country.es : country.en;
-      return `<button type="button" class="location-option" role="option" id="ascla-country-option-${i}" data-country-code="${E(country.code)}" data-country-value="${E(primary)}"><span>${E(primary)}</span>${secondary && secondary !== primary ? `<small>${E(secondary)}</small>` : ''}</button>`;
+      return `<button type="button" class="location-option" role="option" id="ascla-country-option-${i}" data-country-code="${E(country.code)}" data-country-value="${E(primary)}"><span>${E(primary)}</span>${secondary && secondary !== primary ? ("<small>" + (E(secondary)) + "</small>") : ''}</button>`;
     }, "No encontramos países con ese nombre.");
   }
-  async function loadCitySuggestions(form, exact = false) {
+  function citySuggestionInputs(form) {
     const countryInput = form?.querySelector('[data-location-country]');
     const cityInput = form?.querySelector('[data-location-city]');
     const box = cityInput?.closest('.location-combobox');
-    if (!countryInput || !cityInput || !box) return null;
+    return countryInput && cityInput && box ? { countryInput, cityInput, box } : null;
+  }
+  function invalidCitySuggestionSearch(country, query, exact) {
+    if (!country) return true;
+    return exact ? !query : query.length < 2;
+  }
+  function renderCitySuggestionResult(box, result, country) {
+    box.classList.remove('is-loading');
+    const items = result.items || [];
+    const emptyText = result.available ? "No encontramos ciudades con ese nombre." : "No se pudieron cargar las ciudades en este momento.";
+    locationRender(box, items, (city, i) => `<button type="button" class="location-option" role="option" id="ascla-city-option-${i}" data-city-value="${E(city)}"><span>${E(city)}</span><small>${E(C.language === 'en' ? country.en : country.es)}</small></button>`, emptyText);
+  }
+  function citySuggestionFailure(box, exact, error) {
+    box.classList.remove('is-loading');
+    if (error.name === "AbortError") throw error;
+    if (!exact) locationRender(box, [], () => '', "No se pudieron cargar las ciudades en este momento.");
+    return {available:false, items:[]};
+  }
+  async function loadCitySuggestions(form, exact = false) {
+    const inputs = citySuggestionInputs(form);
+    if (!inputs) return null;
+    const { countryInput, cityInput, box } = inputs;
     const country = locationCountryMatch(countryInput.value);
     const query = cityInput.value.trim();
-    if (!country || (!exact && query.length < 2) || (exact && !query)) {
+    if (invalidCitySuggestionSearch(country, query, exact)) {
       if (!exact) locationRender(box, [], () => '', query && !country ? "Selecciona primero un país." : "");
       return null;
     }
@@ -476,18 +499,12 @@
       box.classList.add('is-loading');
     }
     try {
-      const result = await api(`locations/cities?country=${encodeURIComponent(country.code)}&q=${encodeURIComponent(query)}${exact ? "&exact=1" : ""}`);
-      if (!exact) {
-        box.classList.remove('is-loading');
-        const items = result.items || [];
-        locationRender(box, items, (city, i) => `<button type="button" class="location-option" role="option" id="ascla-city-option-${i}" data-city-value="${E(city)}"><span>${E(city)}</span><small>${E(C.language === 'en' ? country.en : country.es)}</small></button>`, result.available ? "No encontramos ciudades con ese nombre." : "No se pudieron cargar las ciudades en este momento.");
-      }
+      const suffix = exact ? "&exact=1" : "";
+      const result = await api(`locations/cities?country=${encodeURIComponent(country.code)}&q=${encodeURIComponent(query)}${suffix}`);
+      if (!exact) renderCitySuggestionResult(box, result, country);
       return result;
     } catch (error) {
-      box.classList.remove('is-loading');
-      if (error.name === "AbortError") throw error;
-      if (!exact) locationRender(box, [], () => '', "No se pudieron cargar las ciudades en este momento.");
-      return {available:false, items:[]};
+      return citySuggestionFailure(box, exact, error);
     }
   }
   function locationKeyboard(input, event) {
@@ -500,6 +517,13 @@
     if (event.key === 'ArrowUp') { event.preventDefault(); locationSetActive(box, current > 0 ? current - 1 : options.length - 1); return true; }
     if (event.key === 'Enter' && current >= 0) { event.preventDefault(); options[current].click(); return true; }
     return false;
+  }
+  function loadCitySuggestionsSilently(form) {
+    void loadCitySuggestions(form).catch(() => {});
+  }
+  function scheduleCitySuggestions(form) {
+    clearTimeout(S.locationTimer);
+    S.locationTimer = setTimeout(loadCitySuggestionsSilently, 220, form);
   }
   async function setupProfileLocations(form) {
     if (!form) return;
@@ -568,8 +592,7 @@
     cityInput.addEventListener('input', () => {
       cityInput.dataset.selectedCity = '';
       cityValue.value = '';
-      clearTimeout(S.locationTimer);
-      S.locationTimer = setTimeout(() => loadCitySuggestions(form).catch(() => {}), 220);
+      scheduleCitySuggestions(form);
     });
     cityInput.addEventListener('keydown', event => locationKeyboard(cityInput, event));
     cityBox.querySelector('.location-suggestions')?.addEventListener('mousedown', event => event.preventDefault());
@@ -609,7 +632,8 @@
         cityInput.focus();
         throw new Error(T("Selecciona una ciudad real de las sugerencias para el país elegido."));
       }
-      cityValue.value = result?.available === false ? cityInput.value.trim() : (result?.exact ? cityInput.value.trim() : '');
+      cityValue.value = '';
+      if (result?.available === false || result?.exact) cityValue.value = cityInput.value.trim();
     } else if (!cityInput.value.trim()) {
       cityValue.value = '';
     }
@@ -618,7 +642,10 @@
     const birthday = S.boot?.birthday;
     if (!birthday?.today) return false;
     const key = `ascla-birthday-${S.boot.me.id}-${birthday.date || new Date().toISOString().slice(0,10)}`;
-    try { if (localStorage.getItem(key)) return false; localStorage.setItem(key, "1"); } catch {}
+    try {
+      if (localStorage.getItem(key)) return false;
+      localStorage.setItem(key, "1");
+    } catch {}
     modal(T("¡Feliz cumpleaños! 🎉"), `<div class="birthday-celebration"><div class="birthday-confetti" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div><div class="birthday-emblem">🎂</div><h3>${E(T("Hoy celebramos contigo"))}, ${E(birthday.first_name || S.boot.me.first_name || S.boot.me.name)}.</h3><p>${E(T("Todo ASCLA te desea un gran día y un nuevo año lleno de buenas conexiones, aprendizajes y proyectos."))}</p><div class="birthday-signature">— ASCLA</div></div><div class="form-actions"><button type="button" class="btn primary" data-action="close">${E(T("¡Gracias!"))}</button></div>`);
     return true;
   }
@@ -626,7 +653,10 @@
     const completion = S.boot?.profile_completion;
     if (!completion || Number(completion.percent) >= Number(completion.minimum || 40) || S.page !== "intranet") return;
     const key = `ascla-profile-completion-${S.boot.me.id}`;
-    try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch {}
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+    } catch {}
     modal(T("Completa tu perfil"), `<div class="profile-completion-nudge"><div class="completion-ring" style="--completion:${Math.max(0, Math.min(100, Number(completion.percent) || 0))}"><strong>${Number(completion.percent) || 0}%</strong></div><div><h3>${E(T("Tu perfil todavía tiene información pendiente"))}</h3><p>${E(T("Completar al menos el 40% ayuda a ASCLA a ofrecerte mejores recomendaciones, conexiones y experiencias dentro de la comunidad."))}</p></div></div><div class="form-actions">${btn(T("Ahora no"), "profile-nudge-later")}${btn(T("Completar mi perfil"), "profile-nudge-go", "", "primary")}</div>`);
   }
   const unsavedGuard = { form: null, baseline: "", dirty: false };
@@ -697,7 +727,7 @@
     ["other", "Otro motivo"],
   ];
   function updateReportDetailRequirement(form) {
-    if (!form || form.dataset.form !== "report") return;
+    if (form?.dataset.form !== "report") return;
     const detail = form.elements.detail;
     if (!detail) return;
     const required = form.querySelector('input[name="reason"]:checked')?.value === "other";
@@ -712,7 +742,7 @@
     const placeholder = E(T("Describe brevemente el motivo del reporte…"));
     modal(
       T(isComment ? "Denuncia este comentario" : "Denuncia esta publicación"),
-      `<form data-form="report" data-kind="${isComment ? 'comment' : 'content'}" data-id="${Number(id)}" class="report-form"><h3>${E(T("Selecciona el motivo de la denuncia"))}</h3><p class="private-note">${E(T("Tu reporte será revisado por el equipo de moderación de ASCLA."))}</p><div class="report-reasons">${reportReasons.map(([value, label]) => `<label class="report-reason"><input type="radio" name="reason" value="${E(value)}" required><span>${E(T(label))}</span></label>`).join("")}</div><div class="field report-detail-field"><label for="f-detail" data-report-detail-label>${E(T("Información adicional (opcional)"))}</label><textarea id="f-detail" name="detail" maxlength="1000" placeholder="${placeholder}"></textarea></div><div class="form-actions"><button type="button" class="btn" data-action="close">${E(T("Cancelar"))}</button><button class="btn primary">${E(T("Enviar reporte"))}</button></div></form>`,
+      `<form data-form="report" data-kind="${isComment ? 'comment' : 'content'}" data-id="${Number(id)}" class="report-form"><h3>${E(T("Selecciona el motivo de la denuncia"))}</h3><p class="private-note">${E(T("Tu reporte será revisado por el equipo de moderación de ASCLA."))}</p><div class="report-reasons">${reportReasons.map(([value, label]) => ("<label class=\"report-reason\"><input type=\"radio\" name=\"reason\" value=\"" + (E(value)) + "\" required><span>" + (E(T(label))) + "</span></label>")).join("")}</div><div class="field report-detail-field"><label for="f-detail" data-report-detail-label>${E(T("Información adicional (opcional)"))}</label><textarea id="f-detail" name="detail" maxlength="1000" placeholder="${placeholder}"></textarea></div><div class="form-actions"><button type="button" class="btn" data-action="close">${E(T("Cancelar"))}</button><button class="btn primary">${E(T("Enviar reporte"))}</button></div></form>`,
     );
     updateReportDetailRequirement(root.querySelector('.report-form[data-id="' + Number(id) + '"]'));
   }
@@ -749,7 +779,7 @@
     const p = S.boot.me;
     const links = navOrder.map((k) => `<a class="nav-link ${S.page === k ? "active" : ""}" href="${E(C.pages[k].url)}">${I(pageIcon[k])}<span>${E(C.pages[k].label)}</span></a>`).join("");
     const adminLink = S.boot.admin_area ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}${E(T("Administración"))}</a>` : "";
-    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></a><div class="brand-sub">${E(T("COMUNIDAD DE ASOCIADOS"))}</div><nav aria-label="${E(T("Navegación principal"))}">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}${E(T("Cerrar sesión"))}</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img class="brand-logo-normal" src="${E(C.logo)}" alt="ASCLA"><img class="brand-logo-inverse" src="${E(C.logoWhite || C.logo)}" alt="" aria-hidden="true"></a>${btn(I("menu"), "menu", `aria-label="${E(T("Abrir navegación"))}"`, "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="${E(T("Buscar en ASCLA"))}" placeholder="${E(T("Buscar en tu comunidad…"))}" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${C.page === "admin" ? adminLanguageControl() + btn(themeIcons(), "theme-menu", `aria-label="${E(T("Apariencia"))}"`, "icon-button theme-button") : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", `aria-label="${E(T("Notificaciones"))}"`, "icon-button")}<a class="header-profile" aria-label="${E(T("Mi perfil"))}" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || T("Comunidad ASCLA"))}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || T("Administración"))}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · ${E(T("Conectamos conocimiento, fortalecemos la gobernanza."))}${S.boot.demo ? " · " + E(T("Datos ficticios de demostración.")) : ""}</div></main></div>`;
+    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></a><div class="brand-sub">${E(T("COMUNIDAD DE ASOCIADOS"))}</div><nav aria-label="${E(T("Navegación principal"))}">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}${E(T("Cerrar sesión"))}</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img class="brand-logo-normal" src="${E(C.logo)}" alt="ASCLA"><img class="brand-logo-inverse" src="${E(C.logoWhite || C.logo)}" alt="" aria-hidden="true"></a>${btn(I("menu"), "menu", ("aria-label=\"" + (E(T("Abrir navegación"))) + "\""), "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="${E(T("Buscar en ASCLA"))}" placeholder="${E(T("Buscar en tu comunidad…"))}" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${C.page === "admin" ? adminLanguageControl() + btn(themeIcons(), "theme-menu", ("aria-label=\"" + (E(T("Apariencia"))) + "\""), "icon-button theme-button") : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", ("aria-label=\"" + (E(T("Notificaciones"))) + "\""), "icon-button")}<a class="header-profile" aria-label="${E(T("Mi perfil"))}" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || T("Comunidad ASCLA"))}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || T("Administración"))}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · ${E(T("Conectamos conocimiento, fortalecemos la gobernanza."))}${S.boot.demo ? " · " + E(T("Datos ficticios de demostración.")) : ""}</div></main></div>`;
     refreshNotifications();
   }
   function heading(title, subtitle, action = "") {
@@ -760,32 +790,42 @@
     const c = p.connection || {}, r = p.conversation || {}, id = Number(p.id);
     if (c.state === 'connected') return '';
     if (r.state === 'incoming_pending') {
-      return `<div class="conversation-request-actions"><span class="connection-state pending">${E(T('Solicitud de conversación recibida'))}</span>${r.conversation_id ? btn('Ver mensaje','conversation-open',`data-conversation="${Number(r.conversation_id)}"`,'small') : ''}${btn('Aceptar conversación','conversation-request-respond',`data-id="${id}" data-request="${Number(r.request_id)}" data-decision="accept" ${r.blocked ? 'disabled' : ''}`,'primary small')}${btn('Rechazar','conversation-request-respond',`data-id="${id}" data-request="${Number(r.request_id)}" data-decision="reject"`,'small')}</div>`;
+      return `<div class="conversation-request-actions"><span class="connection-state pending">${E(T('Solicitud de conversación recibida'))}</span>${r.conversation_id ? btn('Ver mensaje','conversation-open',("data-conversation=\"" + (Number(r.conversation_id)) + "\""),'small') : ''}${btn('Aceptar conversación','conversation-request-respond',("data-id=\"" + (id) + "\" data-request=\"" + (Number(r.request_id)) + "\" data-decision=\"accept\" " + (r.blocked ? 'disabled' : '') + ""),'primary small')}${btn('Rechazar','conversation-request-respond',("data-id=\"" + (id) + "\" data-request=\"" + (Number(r.request_id)) + "\" data-decision=\"reject\""),'small')}</div>`;
     }
     if (r.state === 'outgoing_pending') {
-      return `<div class="conversation-request-actions"><span class="connection-state pending">${E(T('Mensaje enviado · Esperando aceptación'))}</span>${r.conversation_id ? btn('Ver mensaje','conversation-open',`data-conversation="${Number(r.conversation_id)}"`,'small') : ''}${btn(T('Cancelar solicitud'),'conversation-request-cancel',`data-id="${id}"`,'ghost danger small')}</div>`;
+      return `<div class="conversation-request-actions"><span class="connection-state pending">${E(T('Mensaje enviado · Esperando aceptación'))}</span>${r.conversation_id ? btn('Ver mensaje','conversation-open',("data-conversation=\"" + (Number(r.conversation_id)) + "\""),'small') : ''}${btn(T('Cancelar solicitud'),'conversation-request-cancel',("data-id=\"" + (id) + "\""),'ghost danger small')}</div>`;
     }
     if (r.state === 'allowed') {
-      return r.can_message ? `<div class="conversation-request-actions conversation-request-actions-authorized">${btn(I('mail')+' '+T('Enviar mensaje'),'message-start',`data-id="${id}"`,'primary small')}</div>` : '';
+      return r.can_message ? `<div class="conversation-request-actions conversation-request-actions-authorized">${btn(I('mail')+' '+T('Enviar mensaje'),'message-start',("data-id=\"" + (id) + "\""),'primary small')}</div>` : '';
     }
-    return `<div class="conversation-request-actions">${btn(I('mail')+' '+T('Enviar mensaje'),'conversation-request',`data-id="${id}" ${r.can_request ? '' : 'disabled'}`,'small')}</div>`;
+    return `<div class="conversation-request-actions">${btn(I('mail')+' '+T('Enviar mensaje'),'conversation-request',("data-id=\"" + (id) + "\" " + (r.can_request ? '' : 'disabled') + ""),'small')}</div>`;
+  }
+  function connectionPrimaryActions(c, id, suggested, compactConnected) {
+    if (c.state === 'incoming_pending') {
+      return btn('Aceptar conexión', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="accept" ${c.blocked ? 'disabled' : ''}`, 'primary small') + btn('Rechazar solicitud', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="reject"`, 'small');
+    }
+    if (c.state === 'outgoing_pending') {
+      return `<span class="connection-state pending">${E(T('Solicitud enviada · Pendiente'))}</span>` + btn(T('Cancelar solicitud'), 'connection-remove-request', `data-id="${id}" data-mode="cancel"`, 'ghost danger small');
+    }
+    if (c.state === 'connected') {
+      let actions = compactConnected ? '' : '<span class="connection-state connected">' + I('check') + ' ' + E(T('Conectados')) + '</span>';
+      if (c.can_message) actions += btn(I('mail') + ' ' + T('Enviar mensaje'), 'message-start', `data-id="${id}"`, 'primary small') + (suggested ? btn(T('Mensaje sugerido'), 'intro', `data-id="${id}"`, 'small') : '');
+      return actions + btn(T('Eliminar conexión'), 'connection-remove-request', `data-id="${id}" data-mode="disconnect"`, 'ghost danger small');
+    }
+    return btn('Enviar solicitud de conexión', 'connect', `data-id="${id}" ${c.can_request ? '' : 'disabled'}`, 'small');
+  }
+  function connectionNote(c) {
+    if (c.blocked) return T('La mensajería está bloqueada entre estas cuentas.');
+    if (c.state === 'none' && !c.can_request) return T('Ambos asociados deben tener activado networking para conectar.');
+    return '';
   }
   function connectionActions(p, suggested = false, compactConnected = false) {
     if (Number(p.id) === S.boot.me.id || !p.connection) return '';
     const c = p.connection, id = Number(p.id);
-    let actions = '';
-    if (c.state === 'incoming_pending') {
-      actions = btn('Aceptar conexión', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="accept" ${c.blocked ? 'disabled' : ''}`, 'primary small') + btn('Rechazar solicitud', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="reject"`, 'small');
-    } else if (c.state === 'outgoing_pending') {
-      actions = `<span class="connection-state pending">${E(T('Solicitud enviada · Pendiente'))}</span>` + btn(T('Cancelar solicitud'), 'connection-remove-request', `data-id="${id}" data-mode="cancel"`, 'ghost danger small');
-    } else if (c.state === 'connected') {
-      actions = compactConnected ? '' : '<span class="connection-state connected">' + I('check') + ' ' + E(T('Conectados')) + '</span>';
-      if (c.can_message) actions += btn(I('mail') + ' ' + T('Enviar mensaje'), 'message-start', `data-id="${id}"`, 'primary small') + (suggested ? btn(T('Mensaje sugerido'), 'intro', `data-id="${id}"`, 'small') : '');
-      actions += btn(T('Eliminar conexión'), 'connection-remove-request', `data-id="${id}" data-mode="disconnect"`, 'ghost danger small');
-    } else actions = btn('Enviar solicitud de conexión', 'connect', `data-id="${id}" ${c.can_request ? '' : 'disabled'}`, 'small');
-    const conversationActions = conversationRequestActions(p);
-    const note = c.blocked ? T('La mensajería está bloqueada entre estas cuentas.') : c.state !== 'connected' ? (c.state === 'none' && !c.can_request ? T('Ambos asociados deben tener activado networking para conectar.') : '') : '';
+    let actions = connectionPrimaryActions(c, id, suggested, compactConnected);
     if (c.blocked_by_me) actions += btn('Desbloquear', 'block', `data-id="${id}" data-active="false"`, 'small');
+    const conversationActions = conversationRequestActions(p);
+    const note = connectionNote(c);
     return `<div class="connection-controls" data-member-connection="${id}" data-suggested="${suggested}" data-compact-connected="${compactConnected}" data-state="${E(c.state)}"><div class="connection-actions">${actions}</div>${conversationActions}${note ? '<p class="private-note">' + E(note) + '</p>' : ''}</div>`;
   }
   function memberRelationshipState(connection) {
@@ -793,7 +833,7 @@
   }
   function updateRelationshipState(p) {
     const id = Number(p.id);
-    for (const element of [...root.querySelectorAll(`[data-member-connection="${id}"]`)]) {
+    for (const element of root.querySelectorAll(`[data-member-connection="${id}"]`)) {
       const card = element.closest('.member-card');
       const suggested = element.dataset.suggested === 'true';
       const compactConnected = element.dataset.compactConnected === 'true';
@@ -808,12 +848,12 @@
   }
   function connectionRow(p) {
     const preview = p.conversation?.initial_message ? `<div class="conversation-request-preview"><span>${E(T('Mensaje'))}</span><p>${E(p.conversation.initial_message)}</p></div>` : '';
-    return `<article class="connection-row"><div class="connection-person">${avatar(p)}<div><strong>${E(p.name)}</strong>${p.profile_url ? `<button type="button" class="profile-inline-link" data-action="member" data-id="${Number(p.id)}">${E(T('Ver perfil'))}</button>` : `<small>${E(T('Perfil no disponible'))}</small>`}${preview}</div></div>${connectionActions(p)}</article>`;
+    return `<article class="connection-row"><div class="connection-person">${avatar(p)}<div><strong>${E(p.name)}</strong>${p.profile_url ? ("<button type=\"button\" class=\"profile-inline-link\" data-action=\"member\" data-id=\"" + (Number(p.id)) + "\">" + (E(T('Ver perfil'))) + "</button>") : ("<small>" + (E(T('Perfil no disponible'))) + "</small>")}${preview}</div></div>${connectionActions(p)}</article>`;
   }
   async function refreshConnectionsPanel() {
     const panel = document.getElementById('connections-panel'); if (!panel) return;
     const [data, requests] = await Promise.all([api('connections'), api('conversation-requests')]); if (!panel.isConnected) return;
-    panel.innerHTML = `<div class="section-top"><h2>${E(T('Mis conexiones'))}</h2>${btn('Actualizar conexiones','connections-refresh','','ghost small')}</div><h3>${E(T('Solicitudes recibidas'))} (${data.incoming.length})</h3>${data.incoming.map(connectionRow).join('') || `<p class="private-note">${E(T('No tienes solicitudes pendientes.'))}</p>`}<details><summary>${E(T('Solicitudes enviadas'))} (${data.outgoing.length})</summary>${data.outgoing.map(connectionRow).join('') || `<p class="private-note">${E(T('No hay solicitudes enviadas pendientes.'))}</p>`}</details><details><summary>${E(T('Conexiones confirmadas'))} (${data.connected.length})</summary>${data.connected.map(connectionRow).join('') || `<p class="private-note">${E(T('Tus conexiones aparecerán aquí cuando acepten la solicitud.'))}</p>`}</details><div class="conversation-request-panel"><h3>${E(T('Solicitudes de conversación'))} (${requests.incoming.length})</h3>${requests.incoming.map(connectionRow).join('') || `<p class="private-note">${E(T('No tienes solicitudes de conversación pendientes.'))}</p>`}<details><summary>${E(T('Conversaciones solicitadas'))} (${requests.outgoing.length})</summary>${requests.outgoing.map(connectionRow).join('') || `<p class="private-note">${E(T('No hay solicitudes de conversación enviadas.'))}</p>`}</details></div>`;
+    panel.innerHTML = `<div class="section-top"><h2>${E(T('Mis conexiones'))}</h2>${btn('Actualizar conexiones','connections-refresh','','ghost small')}</div><h3>${E(T('Solicitudes recibidas'))} (${data.incoming.length})</h3>${data.incoming.map(connectionRow).join('') || ("<p class=\"private-note\">" + (E(T('No tienes solicitudes pendientes.'))) + "</p>")}<details><summary>${E(T('Solicitudes enviadas'))} (${data.outgoing.length})</summary>${data.outgoing.map(connectionRow).join('') || ("<p class=\"private-note\">" + (E(T('No hay solicitudes enviadas pendientes.'))) + "</p>")}</details><details><summary>${E(T('Conexiones confirmadas'))} (${data.connected.length})</summary>${data.connected.map(connectionRow).join('') || ("<p class=\"private-note\">" + (E(T('Tus conexiones aparecerán aquí cuando acepten la solicitud.'))) + "</p>")}</details><div class="conversation-request-panel"><h3>${E(T('Solicitudes de conversación'))} (${requests.incoming.length})</h3>${requests.incoming.map(connectionRow).join('') || ("<p class=\"private-note\">" + (E(T('No tienes solicitudes de conversación pendientes.'))) + "</p>")}<details><summary>${E(T('Conversaciones solicitadas'))} (${requests.outgoing.length})</summary>${requests.outgoing.map(connectionRow).join('') || ("<p class=\"private-note\">" + (E(T('No hay solicitudes de conversación enviadas.'))) + "</p>")}</details></div>`;
   }
   let relationshipRefreshing = false;
   async function refreshOpenConnection() {
@@ -834,7 +874,7 @@
       : T('Dejarán de aparecer como conectados y la mensajería quedará deshabilitada. El historial de mensajes no se elimina.');
     const keep = cancelling ? T('Mantener solicitud') : T('Mantener conexión');
     const remove = cancelling ? T('Cancelar solicitud') : T('Eliminar conexión');
-    modal(title, `<p class="detail-body">${E(description)}</p><div class="form-actions">${btn(keep,'close')}${btn(remove,'connection-remove-confirm',`data-id="${Number(id)}" data-mode="${E(mode)}"`,'danger primary')}</div>`);
+    modal(title, `<p class="detail-body">${E(description)}</p><div class="form-actions">${btn(keep,'close')}${btn(remove,'connection-remove-confirm',("data-id=\"" + (Number(id)) + "\" data-mode=\"" + (E(mode)) + "\""),'danger primary')}</div>`);
   }
   function affinityContext(affinity) {
     if (!affinity) return "";
@@ -850,13 +890,13 @@
       ? `<div class="match-pill">${I("spark")}${p.affinity.score}% ${E(T("de afinidad"))}</div>${affinityContext(p.affinity)}`
       : `<div class="tag-row">${(p.terms?.interests || [])
           .slice(0, 2)
-          .map((t) => `<span class="tag">${E(t)}</span>`)
+          .map((t) => ("<span class=\"tag\">" + (E(t)) + "</span>"))
           .join("")}</div>`;
     const relationship = isMe
       ? `<div class="connection-controls member-own-actions"><div class="connection-actions">${link("perfil", "Editar mi perfil", "small")}</div></div>`
       : connectionActions(p, false, true);
     const relationshipState = isMe ? '' : memberRelationshipState(p.connection);
-    return `<article class="card member-card"><div class="member-card-profile">${avatar(p, "lg")}<h3>${E(p.name)}</h3><div class="role">${E(p.position || T("Miembro ASCLA"))}</div><div class="company">${E(p.company || T("Comunidad profesional"))}</div><span class="country">${I("pin")}${E(p.country || T("América Latina"))}</span><div class="member-card-signal">${signal}<span class="member-card-relationship-state">${relationshipState}</span></div></div><div class="member-card-actions">${btn("Ver perfil " + I("arrow"), "member", `data-id="${p.id}"`, "small")}${relationship || '<div class="connection-controls member-action-placeholder" aria-hidden="true"></div>'}</div></article>`;
+    return `<article class="card member-card"><div class="member-card-profile">${avatar(p, "lg")}<h3>${E(p.name)}</h3><div class="role">${E(p.position || T("Miembro ASCLA"))}</div><div class="company">${E(p.company || T("Comunidad profesional"))}</div><span class="country">${I("pin")}${E(p.country || T("América Latina"))}</span><div class="member-card-signal">${signal}<span class="member-card-relationship-state">${relationshipState}</span></div></div><div class="member-card-actions">${btn("Ver perfil " + I("arrow"), "member", ("data-id=\"" + (p.id) + "\""), "small")}${relationship || '<div class="connection-controls member-action-placeholder" aria-hidden="true"></div>'}</div></article>`;
   }
   function resourceRecommendation(recommendation) {
     if (!recommendation) return "";
@@ -869,11 +909,13 @@
     return `<div class="recommendation-context" title="${E(T("Por qué te lo recomendamos"))}">${I("spark")}<span>${E(labels.slice(0, 2).join(" · "))}</span></div>`;
   }
   function resourceCard(p, i = 0) {
+    const durationLabel = p.meta.duration_seconds ? E(UI.duration(p.meta.duration_seconds)) : E(T("Duración por confirmar"));
+    const resourceIcon = p.meta.resource_type === "Video" ? "play" : "book";
     const cover = p.meta.thumbnail_url
-      ? `<a href="${E(p.url)}" class="resource-video-cover"><img class="resource-thumbnail" src="${E(p.meta.thumbnail_url)}" alt="${E(T("Miniatura de"))} ${E(p.title)}" loading="lazy"><span>${I("play")} ${p.meta.duration_seconds ? E(UI.duration(p.meta.duration_seconds)) : E(T("Duración por confirmar"))}</span></a>`
-      : `<a href="${E(p.url)}" class="resource-cover v${i % 3}"><div class="cover-label">${E(T("ASCLA · CONOCIMIENTO"))}</div><strong>${E(p.title.split(":")[0])}</strong><span class="cover-icon">${I(p.meta.resource_type === "Video" ? "play" : "book")}</span></a>`;
-    const editorialState = p.status !== "publish" ? status(p.status) : "";
-    return `<article class="card resource-card">${cover}<div class="resource-content"><div class="resource-card-badges"><span class="tag">${E(T(p.meta.resource_type || "Artículo"))}</span>${editorialState}</div>${resourceRecommendation(p.recommendation)}<h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E((p.meta.summary || p.body).slice(0, 115))}${(p.meta.summary || p.body).length > 115 ? "…" : ""}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Explorar " + I("arrow"), "item", `data-id="${p.id}"`, "ghost")}</div></div></article>`;
+      ? `<a href="${E(p.url)}" class="resource-video-cover"><img class="resource-thumbnail" src="${E(p.meta.thumbnail_url)}" alt="${E(T("Miniatura de"))} ${E(p.title)}" loading="lazy"><span>${I("play")} ${durationLabel}</span></a>`
+      : `<a href="${E(p.url)}" class="resource-cover v${i % 3}"><div class="cover-label">${E(T("ASCLA · CONOCIMIENTO"))}</div><strong>${E(p.title.split(":")[0])}</strong><span class="cover-icon">${I(resourceIcon)}</span></a>`;
+    const editorialState = p.status === "publish" ? "" : status(p.status);
+    return `<article class="card resource-card">${cover}<div class="resource-content"><div class="resource-card-badges"><span class="tag">${E(T(p.meta.resource_type || "Artículo"))}</span>${editorialState}</div>${resourceRecommendation(p.recommendation)}<h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E((p.meta.summary || p.body).slice(0, 115))}${(p.meta.summary || p.body).length > 115 ? "…" : ""}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Explorar " + I("arrow"), "item", ("data-id=\"" + (p.id) + "\""), "ghost")}</div></div></article>`;
   }
   function eventMini(p) {
     const d = new Date(p.meta.start);
@@ -885,12 +927,26 @@
     const first = (new Date(d.getFullYear(), d.getMonth(), 1).getDay() + 6) % 7;
     const days = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
     const today = new Date();
-    const eventDays = Array.from({ length: days }, (_, index) => index + 1).filter(day => {
+    const eventDays = new Set(Array.from({ length: days }, (_, index) => index + 1).filter(day => {
       const from = new Date(d.getFullYear(), d.getMonth(), day), to = new Date(d.getFullYear(), d.getMonth(), day + 1);
       return events.some(p => new Date(p.meta.start) < to && new Date(p.meta.end) > from);
-    });
+    }));
     const weekdays = Array.from({length:7},(_,i)=>new Intl.DateTimeFormat(C.locale || "es-PE",{weekday:"narrow"}).format(new Date(2024,0,1+i)));
-    return `<div class="calendar-head"><strong>${E(d.toLocaleDateString(C.locale || "es-PE", { month: "long", year: "numeric" }))}</strong><span>${btn("‹", "calendar-prev", `aria-label="${E(T("Mes anterior"))}"`, "ghost")}${btn("›", "calendar-next", `aria-label="${E(T("Mes siguiente"))}"`, "ghost")}</span></div><div class="calendar">${weekdays.map((x) => `<span class="weekday">${E(x)}</span>`).join("")}${"<span></span>".repeat(first)}${Array.from({ length: days }, (_, i) => `<span class="${today.getFullYear() === d.getFullYear() && today.getMonth() === d.getMonth() && today.getDate() === i + 1 ? "today" : eventDays.includes(i + 1) ? "event-day" : ""}">${eventDays.includes(i + 1) ? `<button class="calendar-day" data-action="calendar-day" data-day="${i + 1}" aria-label="${E(T("Ver eventos del día"))} ${i + 1}">${i + 1}</button>` : i + 1}</span>`).join("")}</div><div class="calendar-legend"><i></i> ${E(T("Eventos de la comunidad"))}</div>`;
+    const previousAttrs = 'aria-label="' + E(T("Mes anterior")) + '"';
+    const nextAttrs = 'aria-label="' + E(T("Mes siguiente")) + '"';
+    const weekdayHtml = weekdays.map(x => `<span class="weekday">${E(x)}</span>`).join("");
+    const dayHtml = Array.from({ length: days }, (_, i) => {
+      const day = i + 1;
+      const isToday = today.getFullYear() === d.getFullYear() && today.getMonth() === d.getMonth() && today.getDate() === day;
+      let cls = "";
+      if (isToday) cls = "today";
+      else if (eventDays.has(day)) cls = "event-day";
+      const content = eventDays.has(day)
+        ? `<button class="calendar-day" data-action="calendar-day" data-day="${day}" aria-label="${E(T("Ver eventos del día"))} ${day}">${day}</button>`
+        : day;
+      return `<span class="${cls}">${content}</span>`;
+    }).join("");
+    return `<div class="calendar-head"><strong>${E(d.toLocaleDateString(C.locale || "es-PE", { month: "long", year: "numeric" }))}</strong><span>${btn("‹", "calendar-prev", previousAttrs, "ghost")}${btn("›", "calendar-next", nextAttrs, "ghost")}</span></div><div class="calendar">${weekdayHtml}${"<span></span>".repeat(first)}${dayHtml}</div><div class="calendar-legend"><i></i> ${E(T("Eventos de la comunidad"))}</div>`;
   }
   async function dashboard() {
     const [people, events, resources, hub, directory, notes, monthEvents, recentResources] =
@@ -920,19 +976,21 @@
     ]
       .map(
         ([num, label, icon]) =>
-          `<div class="stat"><span class="stat-icon">${I(icon)}</span><div><strong>${num}</strong><small>${E(T(label))}</small></div></div>`,
+          ("<div class=\"stat\"><span class=\"stat-icon\">" + (I(icon)) + "</span><div><strong>" + (num) + "</strong><small>" + (E(T(label))) + "</small></div></div>"),
       )
       .join(
         "",
-      )}</div><div class="dashboard-columns"><div><div class="section-top"><h2>${E(T("Conexiones que suman"))}</h2>${link("directorio", "Ver directorio " + I("arrow"), "ghost")}</div><div class="cards">${people.slice(0, 3).map(memberCard).join("") || (S.boot.me.networking ? empty("Aún no hay coincidencias suficientes", "Las recomendaciones aparecen cuando alcanzan el mínimo de afinidad definido por la comunidad.") : empty("Activa tu networking", "Completa tus intereses en Perfil para descubrir conexiones."))}</div><div class="section-gap"><div class="section-top"><h2>${E(T("Conocimiento para tu día a día"))}</h2>${link("centro-conocimiento", "Ver todo " + I("arrow"), "ghost")}</div><div class="cards two">${resources.items.slice(0, 2).map(resourceCard).join("") || empty("Completa tus intereses para ver recomendaciones")}</div><h3 class="section-gap recent-heading">${E(T("Publicados recientemente"))}</h3><div class="cards two">${recentResources.items.slice(0, 2).map(resourceCard).join("") || empty("Tu biblioteca está por comenzar")}</div></div><div class="section-gap"><div class="section-top"><h2>${E(T("La conversación en nuestra comunidad"))}</h2>${link("hub", "Ir al Hub " + I("arrow"), "ghost")}</div>${hub.items.slice(0, 1).map(feedCard).join("") || empty("Comparte la primera idea")}</div></div><aside class="dashboard-aside"><div><div class="section-top"><h2>${E(T("Tu agenda ASCLA"))}</h2>${I("calendar")}</div><div class="card calendar-card"><div id="calendar-body">${calendar(monthEvents)}</div><div style="border-top:1px solid var(--line);margin-top:16px;padding-top:8px">${upcoming.slice(0, 2).map(eventMini).join("") || `<p class="muted">${E(T("Sin próximos eventos."))}</p>`}</div></div></div><div class="notice-card">${I("spark")}<h3>${E(T("El conocimiento, a una pregunta"))}</h3><p>${E(T("Encuentra respuestas en los recursos de nuestra comunidad con el Asistente ASCLA."))}</p>${link("asistente", "Hacer una pregunta " + I("arrow"), "ghost small")}</div><div class="notice-card trust-card">${I("shield")}<h3>${E(T("Un espacio de confianza"))}</h3><p>${E(T("Compartimos conocimiento con respeto, confidencialidad y bajo la Regla de Chatham House."))}</p>${btn("Normas de la comunidad " + I("arrow"), "rules", "", "ghost small")}</div></aside></div>`;
+      )}</div><div class="dashboard-columns"><div><div class="section-top"><h2>${E(T("Conexiones que suman"))}</h2>${link("directorio", "Ver directorio " + I("arrow"), "ghost")}</div><div class="cards">${people.slice(0, 3).map(memberCard).join("") || (S.boot.me.networking ? empty("Aún no hay coincidencias suficientes", "Las recomendaciones aparecen cuando alcanzan el mínimo de afinidad definido por la comunidad.") : empty("Activa tu networking", "Completa tus intereses en Perfil para descubrir conexiones."))}</div><div class="section-gap"><div class="section-top"><h2>${E(T("Conocimiento para tu día a día"))}</h2>${link("centro-conocimiento", "Ver todo " + I("arrow"), "ghost")}</div><div class="cards two">${resources.items.slice(0, 2).map(resourceCard).join("") || empty("Completa tus intereses para ver recomendaciones")}</div><h3 class="section-gap recent-heading">${E(T("Publicados recientemente"))}</h3><div class="cards two">${recentResources.items.slice(0, 2).map(resourceCard).join("") || empty("Tu biblioteca está por comenzar")}</div></div><div class="section-gap"><div class="section-top"><h2>${E(T("La conversación en nuestra comunidad"))}</h2>${link("hub", "Ir al Hub " + I("arrow"), "ghost")}</div>${hub.items.slice(0, 1).map(feedCard).join("") || empty("Comparte la primera idea")}</div></div><aside class="dashboard-aside"><div><div class="section-top"><h2>${E(T("Tu agenda ASCLA"))}</h2>${I("calendar")}</div><div class="card calendar-card"><div id="calendar-body">${calendar(monthEvents)}</div><div style="border-top:1px solid var(--line);margin-top:16px;padding-top:8px">${upcoming.slice(0, 2).map(eventMini).join("") || ("<p class=\"muted\">" + (E(T("Sin próximos eventos."))) + "</p>")}</div></div></div><div class="notice-card">${I("spark")}<h3>${E(T("El conocimiento, a una pregunta"))}</h3><p>${E(T("Encuentra respuestas en los recursos de nuestra comunidad con el Asistente ASCLA."))}</p>${link("asistente", "Hacer una pregunta " + I("arrow"), "ghost small")}</div><div class="notice-card trust-card">${I("shield")}<h3>${E(T("Un espacio de confianza"))}</h3><p>${E(T("Compartimos conocimiento con respeto, confidencialidad y bajo la Regla de Chatham House."))}</p>${btn("Normas de la comunidad " + I("arrow"), "rules", "", "ghost small")}</div></aside></div>`;
   }
   function feedCard(p) {
-    return `<article class="card feed-card"><div class="feed-top">${avatar({ name: p.author.name })}<div><strong>${E(p.author.name)}</strong><small>${date(p.date)} · Comunidad ASCLA</small></div><span style="margin-left:auto">${p.status !== "publish" ? status(p.status) : ""}</span></div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(p.body.slice(0, 450))}${p.body.length > 450 ? "…" : ""}</p>${UI.attachments(p, true)}${p.tags.length ? `<div class="tag-row">${p.tags.map((t) => `<span class="tag">${E(t.name)}</span>`).join("")}</div>` : ""}<div class="feed-actions">${btn(I("heart") + " " + p.reactions, "like", `data-id="${p.id}" data-active="${!p.liked}" aria-label="${E(T("Me gusta"))}"`)}${btn(I("hub") + " " + p.comments + " " + T(p.comments === 1 ? "comentario" : "comentarios"), "item", `data-id="${p.id}"`)}${btn(I("arrow") + " " + T("Ver conversación"), "item", `data-id="${p.id}"`)}</div></article>`;
+    const editorialState = p.status === "publish" ? "" : status(p.status);
+    return `<article class="card feed-card"><div class="feed-top">${avatar({ name: p.author.name })}<div><strong>${E(p.author.name)}</strong><small>${date(p.date)} · Comunidad ASCLA</small></div><span style="margin-left:auto">${editorialState}</span></div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(p.body.slice(0, 450))}${p.body.length > 450 ? "…" : ""}</p>${UI.attachments(p, true)}${p.tags.length ? ("<div class=\"tag-row\">" + (p.tags.map((t) => ("<span class=\"tag\">" + (E(t.name)) + "</span>")).join("")) + "</div>") : ""}<div class="feed-actions">${btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (p.id) + "\" data-active=\"" + (!p.liked) + "\" aria-label=\"" + (E(T("Me gusta"))) + "\""))}${btn(I("hub") + " " + p.comments + " " + T(p.comments === 1 ? "comentario" : "comentarios"), "item", ("data-id=\"" + (p.id) + "\""))}${btn(I("arrow") + " " + T("Ver conversación"), "item", ("data-id=\"" + (p.id) + "\""))}</div></article>`;
   }
   function pager(list) {
-    return list.pages > 1
-      ? `<div class="pagination">${btn("Anterior", "page", `data-page="${list.page - 1}" ${list.page <= 1 ? "disabled" : ""}`, "small")}<span>${E(T("Página"))} ${list.page} ${E(T("de"))} ${list.pages}</span>${btn("Siguiente", "page", `data-page="${list.page + 1}" ${list.page >= list.pages ? "disabled" : ""}`, "small")}</div>`
-      : "";
+    if (list.pages <= 1) return "";
+    const previousDisabled = list.page <= 1 ? "disabled" : "";
+    const nextDisabled = list.page >= list.pages ? "disabled" : "";
+    return `<div class="pagination">${btn("Anterior", "page", ("data-page=\"" + (list.page - 1) + "\" " + previousDisabled), "small")}<span>${E(T("Página"))} ${list.page} ${E(T("de"))} ${list.pages}</span>${btn("Siguiente", "page", ("data-page=\"" + (list.page + 1) + "\" " + nextDisabled), "small")}</div>`;
   }
   async function directory() {
     const list = await api("profiles?" + new URLSearchParams(S.filter));
@@ -942,7 +1000,7 @@
         "Tu red profesional",
         "Conecta con quienes comparten tus retos, intereses y conocimientos.",
       ) +
-      `<section class="card connections-panel" id="connections-panel" aria-label="${E(T("Mis conexiones"))}"></section><form class="filters directory-filters" data-form="filters"><input aria-label="${E(T("Buscar perfiles"))}" name="q" placeholder="${E(T("Nombre, cargo, empresa o experiencia…"))}" value="${E(S.filter.q || "")}"><input aria-label="${E(T("País"))}" name="country" placeholder="${E(T("País"))}" value="${E(S.filter.country || "")}" style="max-width:180px;min-width:120px"><select name="industries" aria-label="${E(T("Industria"))}" style="max-width:200px"><option value="">${E(T("Todas las industrias"))}</option>${S.boot.catalogs.industry.map((t) => `<option value="${t.id}" ${String(S.filter.industries) === String(t.id) ? "selected" : ""}>${E(t.name)}</option>`).join("")}</select>${UI.termFilter("interests", "Interés", S.boot.catalogs.interest, S.filter)}${UI.termFilter("areas", "Área de conocimiento", S.boot.catalogs.area, S.filter)}<button class="btn primary">${I("search")} ${E(T("Buscar"))}</button></form><div class="section-top"><span class="muted" style="font-size:12px">${list.total} ${E(T("perfiles en la comunidad"))}</span>${link("perfil", "Editar mis intereses", "ghost")}</div><div class="cards directory">${list.items.map(memberCard).join("")}</div>${!list.items.length ? empty("No encontramos perfiles", "Prueba con otro nombre, país o interés.") : ""}${pager(list)}`;
+      `<section class="card connections-panel" id="connections-panel" aria-label="${E(T("Mis conexiones"))}"></section><form class="filters directory-filters" data-form="filters"><input aria-label="${E(T("Buscar perfiles"))}" name="q" placeholder="${E(T("Nombre, cargo, empresa o experiencia…"))}" value="${E(S.filter.q || "")}"><input aria-label="${E(T("País"))}" name="country" placeholder="${E(T("País"))}" value="${E(S.filter.country || "")}" style="max-width:180px;min-width:120px"><select name="industries" aria-label="${E(T("Industria"))}" style="max-width:200px"><option value="">${E(T("Todas las industrias"))}</option>${S.boot.catalogs.industry.map((t) => ("<option value=\"" + (t.id) + "\" " + (String(S.filter.industries) === String(t.id) ? "selected" : "") + ">" + (E(t.name)) + "</option>")).join("")}</select>${UI.termFilter("interests", "Interés", S.boot.catalogs.interest, S.filter)}${UI.termFilter("areas", "Área de conocimiento", S.boot.catalogs.area, S.filter)}<button class="btn primary">${I("search")} ${E(T("Buscar"))}</button></form><div class="section-top"><span class="muted" style="font-size:12px">${list.total} ${E(T("perfiles en la comunidad"))}</span>${link("perfil", "Editar mis intereses", "ghost")}</div><div class="cards directory">${list.items.map(memberCard).join("")}</div>${list.items.length ? "" : empty("No encontramos perfiles", "Prueba con otro nombre, país o interés.")}${pager(list)}`;
     await refreshConnectionsPanel();
   }
   async function member(id) {
@@ -960,15 +1018,24 @@
     if (!dialog.isConnected) return;
     const suggested = other && p.networking && p.directory && S.boot.me.networking && !p.connection?.blocked;
     const actions = other ? connectionActions(p, suggested) : link("perfil", "Editar perfil", "primary");
-    const terms = Object.entries(p.terms || {}).filter(([, v]) => v.length).map(([k, v]) => `<h3>${E(T(profileLabels[k] || k))}</h3><div class="tag-row">${v.map((t) => `<span class="tag">${E(t)}</span>`).join("")}</div>`).join("");
+    const terms = Object.entries(p.terms || {}).filter(([, v]) => v.length).map(([k, v]) => `<h3>${E(T(profileLabels[k] || k))}</h3><div class="tag-row">${v.map((t) => ("<span class=\"tag\">" + (E(t)) + "</span>")).join("")}</div>`).join("");
     const sources = ["linkedin", "twitter", "website"].filter((k) => p[k]).map((k) => `<a href="${E(safeURL(p[k]))}" target="_blank" rel="noopener noreferrer">${E({ linkedin: "LinkedIn", twitter: "X / Twitter", website: T("Sitio personal") }[k])} ↗</a>`).join("");
     dialog.querySelector(".modal-top h2").textContent = p.name;
     dialog.querySelector('[role="dialog"]').setAttribute("aria-label", p.name);
-    dialog.querySelector(".modal-content").innerHTML = `<div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.position || T("Miembro ASCLA"))}</h2><p class="muted">${E(p.company || "")}</p><p class="muted">${E(p.country || "")} ${E(p.city || "")}</p><span data-profile-affinity-score></span></div></div>${other ? `<div data-profile-affinity aria-live="polite" aria-busy="true"><p class="private-note" role="status">${E(T("Cargando afinidad…"))}</p></div>` : ""}<p class="detail-body">${E(p.bio || T("Este miembro aún no ha añadido su biografía."))}</p>${p.experience ? `<h3>${E(T("Experiencia profesional"))}</h3><p class="detail-body">${E(p.experience)}</p>` : ""}${p.phone?`<p><strong>${E(T("Teléfono"))}:</strong> <a href="tel:${E(p.phone.replace(/[^+0-9]/g,''))}">${E(p.phone)}</a></p>`:""}${terms}<div class="sources">${sources}</div><div class="form-actions">${actions}</div>`;
+    const affinitySection = other
+      ? `<div data-profile-affinity aria-live="polite" aria-busy="true"><p class="private-note" role="status">${E(T("Cargando afinidad…"))}</p></div>`
+      : "";
+    const experienceSection = p.experience
+      ? `<h3>${E(T("Experiencia profesional"))}</h3><p class="detail-body">${E(p.experience)}</p>`
+      : "";
+    const phoneSection = p.phone
+      ? `<p><strong>${E(T("Teléfono"))}:</strong> <a href="tel:${E(p.phone.replaceAll(/[^+0-9]/g, ""))}">${E(p.phone)}</a></p>`
+      : "";
+    dialog.querySelector(".modal-content").innerHTML = `<div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.position || T("Miembro ASCLA"))}</h2><p class="muted">${E(p.company || "")}</p><p class="muted">${E(p.country || "")} ${E(p.city || "")}</p><span data-profile-affinity-score></span></div></div>${affinitySection}<p class="detail-body">${E(p.bio || T("Este miembro aún no ha añadido su biografía."))}</p>${experienceSection}${phoneSection}${terms}<div class="sources">${sources}</div><div class="form-actions">${actions}</div>`;
     if (other) void memberAffinity(dialog, id, matchRequest);
   }
   function affinityDetails(match, pending = false, unavailable = false) {
-    return `<div class="alert">${E(match.explanation)}<p class="private-note">${E(match.mode || T("Afinidad determinística"))}</p>${match.conversation_proposal ? `<p>${E(match.conversation_proposal)}</p>` : ""}${pending ? `<p class="private-note" role="status">${E(T("Preparando explicación de IA…"))}</p>` : ""}${unavailable || match.fallback ? `<p class="private-note">${E(T("La explicación de IA no está disponible ahora. Puedes seguir usando el perfil."))}</p>` : ""}</div>`;
+    return `<div class="alert">${E(match.explanation)}<p class="private-note">${E(match.mode || T("Afinidad determinística"))}</p>${match.conversation_proposal ? ("<p>" + (E(match.conversation_proposal)) + "</p>") : ""}${pending ? ("<p class=\"private-note\" role=\"status\">" + (E(T("Preparando explicación de IA…"))) + "</p>") : ""}${unavailable || match.fallback ? ("<p class=\"private-note\">" + (E(T("La explicación de IA no está disponible ahora. Puedes seguir usando el perfil."))) + "</p>") : ""}</div>`;
   }
   async function memberAffinity(dialog, id, matchRequest) {
     const match = await matchRequest;
@@ -1042,7 +1109,7 @@
     const choices = terms.map(t => `<label class="topic-choice"><input type="checkbox" name="${key}" value="${t.id}" data-choice-label="${E(t.name)}" ${selected.has(t.id) ? "checked" : ""}><span>${I("check")}${E(t.name)}</span></label>`).join("");
     return `<details class="profile-topic" ${["interests", "areas"].includes(key) ? "open" : ""}>
       <summary><span class="topic-icon">${I(icon)}</span><span class="topic-caption"><span class="topic-title">${E(T(profileLabels[key]))}</span><span class="topic-selection">${E(names.join(" · ") || T("Aún no has elegido opciones"))}</span></span><span class="topic-count" aria-label="${names.length} ${E(T("seleccionados"))}">${names.length}</span><span class="topic-chevron">${I("chevron")}</span></summary>
-      <div class="topic-options"><p>${E(T(hint))}. ${E(T("Puedes elegir varias opciones."))}</p><div class="topic-choices">${choices || `<span class="muted">${E(T("No hay opciones disponibles."))}</span>`}</div></div>
+      <div class="topic-options"><p>${E(T(hint))}. ${E(T("Puedes elegir varias opciones."))}</p><div class="topic-choices">${choices || ("<span class=\"muted\">" + (E(T("No hay opciones disponibles."))) + "</span>")}</div></div>
     </details>`;
   }
   function profileKnowledge(p) {
@@ -1067,13 +1134,13 @@
     return `<section class="profile-preferences" aria-labelledby="profile-privacy-title"><div class="preference-heading"><span class="preference-emblem privacy-emblem">${I("shield")}</span><div><h2 id="profile-privacy-title">${E(T("Privacidad y participación"))}</h2><p>${E(T("Tú eliges cómo participar y qué información compartir con la comunidad."))}</p></div></div><div class="profile-privacy-layout"><div class="participation-panel"><h3>${E(T("Tu lugar en la comunidad"))}</h3>${profileParticipation(p)}<div class="profile-privacy-note">${I("shield")}<p>${E(T("Tus objetivos y preferencias de aprendizaje se utilizan internamente para ayudarte a conectar."))}</p></div></div><div class="visibility-panel"><h3>${E(T("Qué ven otros asociados"))}</h3><p>${E(T("Pulsa un dato para cambiar entre visible y oculto. La moderación puede consultarlo."))}</p><div class="visibility-options">${controls}</div>${preserved}<span class="profile-save-hint">${E(T("Los cambios se aplican al guardar tu perfil."))}</span></div></div></section>`;
   }
   function profileEmailNotifications(p) {
-    const prefs = { connections: true, messages: true, events: true, support: true, ...(p.email_notifications || {}) };
+    const prefs = { connections: true, messages: true, events: true, support: true, ...p.email_notifications };
     const rows = [
       ["connections", "users", "Conexiones", "Solicitudes de conexión y avisos cuando una conexión sea aceptada."],
       ["messages", "mail", "Mensajes", "Mensajes privados, solicitudes de conversación e invitaciones a grupos."],
       ["events", "calendar", "Eventos", "Invitaciones a eventos y círculos de conversación."],
     ["support", "mail", "Solicitudes y soporte", "Recibir avisos sobre solicitudes y sus respuestas."]];
-    const options = rows.map(([key, icon, title, description]) => `<label class="participation-option"><span class="participation-icon">${I(icon)}</span><span class="participation-copy"><strong>${E(T(title))}</strong><span>${E(T(description))}</span></span><span class="preference-switch"><input type="checkbox" role="switch" name="email_${key}" aria-label="${E(T(title))}" ${prefs[key] !== false ? "checked" : ""}><span class="switch-track" aria-hidden="true"></span></span></label>`).join("");
+    const options = rows.map(([key, icon, title, description]) => `<label class="participation-option"><span class="participation-icon">${I(icon)}</span><span class="participation-copy"><strong>${E(T(title))}</strong><span>${E(T(description))}</span></span><span class="preference-switch"><input type="checkbox" role="switch" name="email_${key}" aria-label="${E(T(title))}" ${prefs[key] === false ? "" : "checked"}><span class="switch-track" aria-hidden="true"></span></span></label>`).join("");
     return `<section class="profile-preferences email-notification-preferences" aria-labelledby="profile-email-title"><div class="preference-heading"><span class="preference-emblem">${I("mail")}</span><div><h2 id="profile-email-title">${E(T("Notificaciones por correo"))}</h2><p>${E(T("Elige qué avisos opcionales quieres recibir también en tu correo. Por defecto están activados."))}</p></div></div><div class="email-notification-panel">${options}<p class="profile-save-hint">${E(T("Las notificaciones internas de ASCLA seguirán disponibles aunque desactives estos correos."))}</p></div></section>`;
   }
 
@@ -1088,11 +1155,12 @@
   }
   function profilePhoneFields(p = {}) {
     const phoneTitle=E(T('Incluye +, código de país y número; por ejemplo +51 987 654 321'));
-    return field('phone','Teléfono',p.phone || '', 'tel', `maxlength="40" autocomplete="tel" inputmode="tel" pattern="\\+[1-9][0-9 ()-]{7,30}" title="${phoneTitle}" placeholder="+51 987 654 321"`) + select('phone_visibility','Visibilidad del teléfono',[['private',T('Solo yo y administradores')],['members',T('Asociados de ASCLA')]],p.phone_visibility || 'private') + '<p class="private-note full">'+E(T('Usa formato internacional con + y código de país. Ejemplo: +51 987 654 321.'))+'</p>';
+    const phoneAttrs = String.raw`maxlength="40" autocomplete="tel" inputmode="tel" pattern="\+[1-9][0-9 ()-]{7,30}" title="${phoneTitle}" placeholder="+51 987 654 321"`;
+    return field('phone','Teléfono',p.phone || '', 'tel', phoneAttrs) + select('phone_visibility','Visibilidad del teléfono',[['private',T('Solo yo y administradores')],['members',T('Asociados de ASCLA')]],p.phone_visibility || 'private') + '<p class="private-note full">'+E(T('Usa formato internacional con + y código de país. Ejemplo: +51 987 654 321.'))+'</p>';
   }
   function profileBirthdayField(p) {
     const maxDate = new Date().toISOString().slice(0, 10);
-    return `<div class="birthday-profile-field">${field("birth_date", "Fecha de nacimiento", p.birth_date || "", "date", `min="1900-01-01" max="${maxDate}"`)}<div class="birthday-inline-note">${I("shield")}<span>${E(T("Dato privado. Solo se usa para felicitarte y avisar a la administración el día de tu cumpleaños."))}</span></div></div>`;
+    return `<div class="birthday-profile-field">${field("birth_date", "Fecha de nacimiento", p.birth_date || "", "date", ("min=\"1900-01-01\" max=\"" + (maxDate) + "\""))}<div class="birthday-inline-note">${I("shield")}<span>${E(T("Dato privado. Solo se usa para felicitarte y avisar a la administración el día de tu cumpleaños."))}</span></div></div>`;
   }
   async function profile() {
     const p = await api("profiles/" + S.boot.me.id);
@@ -1139,68 +1207,88 @@
     const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     return allContent("event", { month, tz_offset: d.getTimezoneOffset(), status: "publish" });
   }
+  function listingCreateAction(type, canWrite) {
+    let createType = type;
+    let createLabel;
+    if (type === "topic") {
+      createLabel = T("Crear foro");
+      createType = "forum";
+    } else {
+      const feminine = type === "hub" || type === "gallery";
+      createLabel = "Nuev" + (feminine ? "a " : "o ") + typeLabel[type];
+    }
+    return canWrite ? btn(I("plus") + " " + createLabel, "editor", 'data-type="' + createType + '"', "primary") : "";
+  }
+  function listingResourceFilters(type) {
+    if (type !== "resource") return "";
+    const resourceTypes = ["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"];
+    const options = resourceTypes.map(resourceType => {
+      const selected = S.filter.resource_type === resourceType ? "selected" : "";
+      return '<option value="' + E(resourceType) + '" ' + selected + '>' + E(T(resourceType)) + '</option>';
+    }).join("");
+    return `<select name="resource_type" aria-label="${E(T("Tipo de recurso"))}" style="max-width:180px"><option value="">${E(T("Todos los tipos"))}</option>${options}</select><input type="date" name="after" value="${E(S.filter.after || "")}" aria-label="${E(T("Desde fecha"))}" style="max-width:160px;min-width:100px">`;
+  }
+  function listingTabs(type, canWrite) {
+    const allLabel = type === "event" ? "Próximos eventos" : "Comunidad";
+    const allButton = btn(allLabel, "filter-all", "", "tab " + (!S.filter.mine && !S.filter.past ? "active" : ""));
+    const pastClass = S.filter.past ? "active" : "";
+    const mineClass = S.filter.mine ? "active" : "";
+    const pastButton = type === "event" ? btn("Eventos anteriores", "filter-past", "", "tab " + pastClass) : "";
+    const mineButton = canWrite ? btn("Mis publicaciones", "filter-mine", "", "tab " + mineClass) : "";
+    return `<div class="tabs">${allButton}${pastButton}${mineButton}</div>`;
+  }
+  function listingForumDirectory(type, forums) {
+    if (type !== "topic" || !forums.length) return "";
+    const forumButtons = forums.map(f => btn(E(f.name), "item", 'data-id="' + f.id + '"', "small")).join("");
+    return `<details class="card forum-directory"><summary>${E(T("Explorar foros"))} (${forums.length})</summary><div class="form-actions">${forumButtons}</div></details>`;
+  }
+  function listingItems(type, items) {
+    const renderers = {
+      resource: () => `<div class="cards">${items.map(resourceCard).join("")}</div>`,
+      event: () => `<div class="cards two">${items.map(eventCard).join("")}</div>`,
+      gallery: () => `<div class="cards">${items.map(galleryCard).join("")}</div>`,
+      ally: () => `<div class="cards">${items.map(allyCard).join("")}</div>`,
+    };
+    return (renderers[type] || (() => items.map(feedCard).join("")))();
+  }
+  function listingEmpty(items) {
+    if (items.length) return "";
+    const emptyText = S.filter.q ? "Prueba una búsqueda diferente." : "Comparte un aporte o vuelve pronto para ver novedades.";
+    return empty("Aún no hay contenido aquí", emptyText);
+  }
   async function listing() {
     const type = typeByPage[S.page];
-    const list = await api(
-      "content/" +
-        type +
-        "?" +
-        new URLSearchParams(
-          type === "event" ? { past: 0, ...S.filter } : S.filter,
-        ),
-    );
+    const params = type === "event" ? { past: 0, ...S.filter } : S.filter;
+    const list = await api("content/" + type + "?" + new URLSearchParams(params));
     S.list = list;
     const canWrite = !!S.boot.can_create?.[type];
     const labels = {
-      hub: [
-        "Hub ASCLA",
-        "Ideas, experiencias y conversaciones que nos acercan.",
-      ],
-      topic: [
-        "Foros de la comunidad",
-        "Comparte una pregunta y construyamos respuestas juntos.",
-      ],
-      event: [
-        "Eventos y Capacitaciones",
-        "Encuentros para aprender, conversar y ampliar tu perspectiva.",
-      ],
-      resource: [
-        "Centro de Conocimiento",
-        "La experiencia de nuestra comunidad, siempre a tu alcance.",
-      ],
+      hub: ["Hub ASCLA", "Ideas, experiencias y conversaciones que nos acercan."],
+      topic: ["Foros de la comunidad", "Comparte una pregunta y construyamos respuestas juntos."],
+      event: ["Eventos y Capacitaciones", "Encuentros para aprender, conversar y ampliar tu perspectiva."],
+      resource: ["Centro de Conocimiento", "La experiencia de nuestra comunidad, siempre a tu alcance."],
       gallery: ["Galería", "Los momentos que construyen nuestra comunidad."],
-      ally: [
-        "Nuestros aliados",
-        "Colaboraciones que impulsan el buen gobierno corporativo.",
-      ],
+      ally: ["Nuestros aliados", "Colaboraciones que impulsan el buen gobierno corporativo."],
     };
     const authors = type === "resource" ? await api("resource-authors") : [];
     const forums = type === "topic" ? (await allContent("forum")).map(p => ({ id: p.id, name: p.title })) : [];
+    const searchPlaceholder = type === "resource" ? "Buscar por tema, autor o contenido…" : "Buscar en esta sección…";
+    const filtersHtml = `<form class="filters" data-form="filters"><input name="q" aria-label="${E(T("Buscar contenido"))}" value="${E(S.filter.q || "")}" placeholder="${E(T(searchPlaceholder))}">${listingResourceFilters(type)}${UI.filters(type, S.filter, S.boot.catalogs, authors, forums)}<button class="btn">${I("search")} ${E(T("Buscar"))}</button></form>`;
     const items = list.items;
-    content().innerHTML =
-      heading(
-        ...labels[type],
-        canWrite
-          ? btn(
-              I("plus") + " " + (type === "topic" ? T("Crear foro") : "Nuev" + (type === "hub" || type === "gallery" ? "a " : "o ") + typeLabel[type]),
-              "editor",
-              `data-type="${type === "topic" ? "forum" : type}"`,
-              "primary",
-            )
-          : "",
-      ) +
-      `<form class="filters" data-form="filters"><input name="q" aria-label="${E(T("Buscar contenido"))}" value="${E(S.filter.q || "")}" placeholder="${E(T(type === "resource" ? "Buscar por tema, autor o contenido…" : "Buscar en esta sección…"))}">${type === "resource" ? `<select name="resource_type" aria-label="${E(T("Tipo de recurso"))}" style="max-width:180px"><option value="">${E(T("Todos los tipos"))}</option>${["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"].map((t) => `<option value="${E(t)}" ${S.filter.resource_type === t ? "selected" : ""}>${E(T(t))}</option>`).join("")}</select><input type="date" name="after" value="${E(S.filter.after || "")}" aria-label="${E(T("Desde fecha"))}" style="max-width:160px;min-width:100px">` : ""}${UI.filters(type, S.filter, S.boot.catalogs, authors, forums)}<button class="btn">${I("search")} ${E(T("Buscar"))}</button></form><div class="tabs">${btn(type === "event" ? "Próximos eventos" : "Comunidad", "filter-all", "", "tab " + (!S.filter.mine && !S.filter.past ? "active" : ""))}${type === "event" ? btn("Eventos anteriores", "filter-past", "", "tab " + (S.filter.past ? "active" : "")) : ""}${canWrite ? btn("Mis publicaciones", "filter-mine", "", "tab " + (S.filter.mine ? "active" : "")) : ""}</div>${type === "topic" && forums.length ? `<details class="card forum-directory"><summary>${E(T("Explorar foros"))} (${forums.length})</summary><div class="form-actions">${forums.map(f => btn(E(f.name), "item", `data-id="${f.id}"`, "small")).join("")}</div></details>` : ""}${type === "resource" ? `<div class="cards">${items.map(resourceCard).join("")}</div>` : type === "event" ? `<div class="cards two">${items.map(eventCard).join("")}</div>` : type === "gallery" ? `<div class="cards">${items.map(galleryCard).join("")}</div>` : type === "ally" ? `<div class="cards">${items.map(allyCard).join("")}</div>` : items.map(feedCard).join("")}${!items.length ? empty("Aún no hay contenido aquí", S.filter.q ? "Prueba una búsqueda diferente." : "Comparte un aporte o vuelve pronto para ver novedades.") : ""}${pager(list)}`;
+    content().innerHTML = heading(...labels[type], listingCreateAction(type, canWrite)) + filtersHtml + listingTabs(type, canWrite) + listingForumDirectory(type, forums) + listingItems(type, items) + listingEmpty(items) + pager(list);
   }
   function eventCard(p) {
-    const state = p.meta.cancelled ? `<span class="tag">${E(T("Cancelado"))}</span>` : (p.status !== "publish" ? status(p.status) : "");
+    let state = "";
+    if (p.meta.cancelled) state = `<span class="tag">${E(T("Cancelado"))}</span>`;
+    else if (p.status !== "publish") state = status(p.status);
     const cover = UI.images(p)[0];
-    return `<article class="card event-card">${cover ? `<button type="button" class="event-card-cover" data-action="item" data-id="${Number(p.id)}" aria-label="${E(T("Ver evento"))}: ${E(p.title)}"><img src="${E(cover.url)}" alt="${E(p.title)}" loading="lazy"></button>` : ""}<div class="section-top"><span class="tag">${I("calendar")} ${E(T(p.meta.modality || "Virtual"))}</span>${state}</div><h3>${E(p.title)}</h3><p class="detail-body" style="font-size:12px">${E(p.body.slice(0, 160))}</p><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start)}</span><span>${I("clock")} ${time(p.meta.start)}</span></div><div class="form-actions" style="justify-content:space-between">${p.meta.chatham ? '<span class="tag">Chatham House</span>' : "<span></span>"}${btn("Ver encuentro " + I("arrow"), "item", `data-id="${p.id}"`, "small primary")}</div></article>`;
+    return `<article class="card event-card">${cover ? ("<button type=\"button\" class=\"event-card-cover\" data-action=\"item\" data-id=\"" + (Number(p.id)) + "\" aria-label=\"" + (E(T("Ver evento"))) + ": " + (E(p.title)) + "\"><img src=\"" + (E(cover.url)) + "\" alt=\"" + (E(p.title)) + "\" loading=\"lazy\"></button>") : ""}<div class="section-top"><span class="tag">${I("calendar")} ${E(T(p.meta.modality || "Virtual"))}</span>${state}</div><h3>${E(p.title)}</h3><p class="detail-body" style="font-size:12px">${E(p.body.slice(0, 160))}</p><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start)}</span><span>${I("clock")} ${time(p.meta.start)}</span></div><div class="form-actions" style="justify-content:space-between">${p.meta.chatham ? '<span class="tag">Chatham House</span>' : "<span></span>"}${btn("Ver encuentro " + I("arrow"), "item", ("data-id=\"" + (p.id) + "\""), "small primary")}</div></article>`;
   }
   function galleryCard(p) {
-    return `<article class="card resource-card">${p.meta.media_ids?.length ? `<img src="${E(C.mediaUrl + p.meta.media_ids[0])}" alt="${E(p.title)}" style="height:190px;object-fit:cover;width:100%">` : `<div class="resource-cover v1"><div class="cover-label">${E(T("ASCLA · ENCUENTROS"))}</div><strong>${E(p.title)}</strong><span class="cover-icon">${I("gallery")}</span></div>`}<div class="resource-content"><h3>${E(p.title)}</h3><p>${E(p.body.slice(0, 120))}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Ver galería", "item", `data-id="${p.id}"`, "ghost")}</div></div></article>`;
+    return `<article class="card resource-card">${p.meta.media_ids?.length ? ("<img src=\"" + (E(C.mediaUrl + p.meta.media_ids[0])) + "\" alt=\"" + (E(p.title)) + "\" style=\"height:190px;object-fit:cover;width:100%\">") : ("<div class=\"resource-cover v1\"><div class=\"cover-label\">" + (E(T("ASCLA · ENCUENTROS"))) + "</div><strong>" + (E(p.title)) + "</strong><span class=\"cover-icon\">" + (I("gallery")) + "</span></div>")}<div class="resource-content"><h3>${E(p.title)}</h3><p>${E(p.body.slice(0, 120))}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Ver galería", "item", ("data-id=\"" + (p.id) + "\""), "ghost")}</div></div></article>`;
   }
   function allyCard(p) {
-    return `<article class="card">${UI.images(p).length ? `<img class="ally-logo" src="${E(UI.images(p)[0].url)}" alt="${E(T("Logo de"))} ${E(p.title)}" loading="lazy">` : `<div class="stat-icon" style="margin-bottom:17px">${I("ally")}</div>`}<span class="tag">${E(T(p.meta.alliance_type || "Alianza"))}</span><h3 style="margin-top:12px">${E(p.title)}</h3><p class="detail-body" style="font-size:12px">${E(p.body)}</p>${btn("Conoce más " + I("arrow"), "item", `data-id="${p.id}"`, "ghost")}</article>`;
+    return `<article class="card">${UI.images(p).length ? ("<img class=\"ally-logo\" src=\"" + (E(UI.images(p)[0].url)) + "\" alt=\"" + (E(T("Logo de"))) + " " + (E(p.title)) + "\" loading=\"lazy\">") : ("<div class=\"stat-icon\" style=\"margin-bottom:17px\">" + (I("ally")) + "</div>")}<span class="tag">${E(T(p.meta.alliance_type || "Alianza"))}</span><h3 style="margin-top:12px">${E(p.title)}</h3><p class="detail-body" style="font-size:12px">${E(p.body)}</p>${btn("Conoce más " + I("arrow"), "item", ("data-id=\"" + (p.id) + "\""), "ghost")}</article>`;
   }
   function overflowDelete(action, id, extra = "", label = "Eliminar") {
     return `<details class="overflow-menu"><summary aria-label="${E(T("Más opciones"))}" title="${E(T("Más opciones"))}">${I("more")}</summary><div class="overflow-popover"><button type="button" class="overflow-item danger-text" data-action="${action}" data-id="${Number(id)}" ${extra}>${E(T(label))}</button></div></details>`;
@@ -1214,7 +1302,6 @@
   }
   function commentsHTML(comments, postId) {
     if (!comments.length) return `<p class="private-note">${E(T('Sé la primera persona en compartir una idea.'))}</p>`;
-    const byId = new Map(comments.map(c => [Number(c.id), c]));
     const children = new Map();
     for (const c of comments) {
       const parent = Number(c.parent || 0);
@@ -1227,7 +1314,7 @@
       seen.add(Number(c.id));
       const menu = commentOverflow(c, postId);
       const canReply = c.status === 'publish';
-      const actions = `<div class="comment-actions">${btn(I('heart') + ` <span>${Number(c.likes || 0)}</span>`, 'comment-like', `data-id="${Number(c.id)}" data-post="${Number(postId)}" data-active="${!c.liked}" aria-pressed="${!!c.liked}" aria-label="${E(T(c.liked ? 'Quitar Me gusta' : 'Me gusta'))}"`, `ghost small comment-like ${c.liked ? 'active' : ''}`)}${canReply ? btn(I('reply') + ' ' + T('Responder'), 'comment-reply', `data-id="${Number(c.id)}" data-post="${Number(postId)}" data-author="${E(c.author)}"`, 'ghost small') : ''}${c.status === 'pending' ? status(c.status) : ''}</div>`;
+      const actions = `<div class="comment-actions">${btn(I('heart') + (" <span>" + (Number(c.likes || 0)) + "</span>"), 'comment-like', ("data-id=\"" + (Number(c.id)) + "\" data-post=\"" + (Number(postId)) + "\" data-active=\"" + (!c.liked) + "\" aria-pressed=\"" + (!!c.liked) + "\" aria-label=\"" + (E(T(c.liked ? 'Quitar Me gusta' : 'Me gusta'))) + "\""), ("ghost small comment-like " + (c.liked ? 'active' : '') + ""))}${canReply ? btn(I('reply') + ' ' + T('Responder'), 'comment-reply', ("data-id=\"" + (Number(c.id)) + "\" data-post=\"" + (Number(postId)) + "\" data-author=\"" + (E(c.author)) + "\""), 'ghost small') : ''}${c.status === 'pending' ? status(c.status) : ''}</div>`;
       const replies = (children.get(Number(c.id)) || []).map(child => renderOne(child, depth + 1)).join('');
       const authorName = Number(c.author_id) > 0
         ? `<button type="button" class="comment-author" data-action="member" data-id="${Number(c.author_id)}" aria-label="${E(T('Ver perfil de'))} ${E(c.author)}">${E(c.author)}</button>`
@@ -1257,83 +1344,221 @@
       const mine = person.is_me ? `<span class="event-attendee-you">${E(T('Tú'))}</span>` : '';
       return `<article class="event-attendee-card${person.is_me ? ' is-me' : ''}"><button type="button" class="event-attendee-profile" data-action="member" data-id="${Number(person.id)}" aria-label="${E(T('Ver perfil de'))} ${E(person.name)}">${avatar(person)}<span class="event-attendee-copy"><span class="event-attendee-name">${E(person.name)}${mine}</span><small>${E(role || T('Miembro ASCLA'))}</small></span><span class="event-attendee-arrow" aria-hidden="true">${I('arrow')}</span></button></article>`;
     }).join('');
+    const hiddenLabel = hidden === 1
+      ? 'participante no se muestra por sus preferencias de privacidad.'
+      : 'participantes no se muestran por sus preferencias de privacidad.';
     const privacy = hidden > 0
-      ? `<p class="event-attendee-privacy">${I('shield')} ${hidden} ${E(T(hidden === 1 ? 'participante no se muestra por sus preferencias de privacidad.' : 'participantes no se muestran por sus preferencias de privacidad.'))}</p>`
+      ? `<p class="event-attendee-privacy">${I('shield')} ${hidden} ${E(T(hiddenLabel))}</p>`
       : `<p class="event-attendee-privacy">${I('shield')} ${E(T('Solo se muestra la información que cada asociado permite compartir con la comunidad.'))}</p>`;
     return `<section class="event-attendees" aria-labelledby="event-attendees-title"><div class="event-attendees-head"><div class="event-attendees-heading"><span class="event-attendees-icon">${I('users')}</span><div><h3 id="event-attendees-title">${E(title)}</h3><p>${E(T('Disponible porque confirmaste tu asistencia. Conoce a otros participantes antes del encuentro.'))}</p></div></div><span class="event-attendees-count"><strong>${Number(d.attending || people.length)}</strong><small>${E(T('confirmados'))}</small></span></div><div class="event-attendee-grid">${cards}</div>${privacy}</section>`;
   }
-  async function item(id) {
-    const p = await api("items/" + id);
-    S.item = p;
-    let extra = "";
-    if (p.type === "event") {
-      const d = await api("events/" + id);
-      S.event = d;
-      let registrationActions = "";
-      let waitlistNotice = "";
-      if (d.cancelled) {
-        waitlistNotice = `<div class="alert" style="margin-top:16px">${I("calendar")} <strong>${E(T("Evento cancelado"))}</strong>. ${E(T("Este encuentro ya no admite inscripciones ni confirmaciones de cupo."))}</div>`;
-        registrationActions = `<span class="tag">${E(T("Cancelado"))}</span>`;
-      } else if (d.is_past) {
-        registrationActions = `<span class="tag">${E(T("Evento finalizado"))}</span>`;
-      } else if (d.registered === "accepted") {
-        registrationActions = btn("Cancelar inscripción", "register", `data-id="${id}" data-status="cancelled"`);
-      } else if (d.registered === "waitlisted") {
-        const position = Number(d.waitlist_position || 0);
-        waitlistNotice = `<div class="alert" style="margin-top:16px">${I("clock")} <strong>${E(T("Estás en la lista de espera"))}</strong>${position ? ` · ${E(T("posición"))} ${position}` : ""}. ${E(T("Te avisaremos cuando se libere un cupo."))}</div>`;
-        registrationActions = btn("Salir de la lista de espera", "register", `data-id="${id}" data-status="cancelled"`, "ghost");
-      } else if (d.registered === "offered") {
-        waitlistNotice = `<div class="alert success" style="margin-top:16px">${I("check")} <strong>${E(T("Se liberó un cupo para ti"))}</strong>. ${E(T("Confirma tu asistencia para ocuparlo."))}</div>`;
-        registrationActions = btn("Confirmar asistencia", "register", `data-id="${id}" data-status="accepted"`, "primary") + btn("Rechazar cupo", "register", `data-id="${id}" data-status="declined"`, "ghost");
-      } else if (d.full) {
-        registrationActions = btn("Unirme a la lista de espera", "register", `data-id="${id}" data-status="waitlisted"`, "primary") + (d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : "");
-      } else {
-        registrationActions = btn(d.registered === "invited" ? "Aceptar invitación" : "Registrarme", "register", `data-id="${id}" data-status="accepted"`, "primary") + (d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : "");
-      }
-      const waitlistSummary = Number(d.waitlist_count || 0) ? ` · ${Number(d.waitlist_count)} ${E(T(Number(d.waitlist_count) === 1 ? "persona en espera" : "personas en espera"))}` : "";
-      const capacitySummary = p.meta.capacity ? ` · ${p.meta.capacity} ${E(T("cupos"))}${Number(d.remaining) === 0 ? ` · ${E(T("aforo completo"))}` : ` · ${Number(d.remaining)} ${E(T("disponibles"))}`}` : ` · ${E(T("Sin límite de cupos"))}`;
-      const eventState = d.cancelled ? ` · ${E(T("Cancelado"))}` : (d.is_past ? ` · ${E(T("Finalizado"))}` : ` · ${status(d.registered)}`);
-      const attendeeSection = eventAttendees(d);
-      extra = `<div class="card" style="background:var(--bg);margin:20px 0"><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span><span>${I("clock")} ${time(p.meta.start)} – ${time(p.meta.end)}</span><span>${I("pin")} ${E(p.meta.location || T("Por confirmar"))}</span></div><p class="private-note">${d.attending} ${E(T("inscritos"))}${capacitySummary}${waitlistSummary}${eventState}</p>${waitlistNotice}${p.meta.agenda ? `<p class="detail-body">${E(p.meta.agenda).replace(/\n/g, "<br>")}</p>` : ""}<div class="form-actions">${registrationActions}${!d.is_past && !d.cancelled && d.google_url ? `<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">${E(T("Añadir a Google Calendar ↗"))}</a>` : ""}${!d.is_past && !d.cancelled && S.boot.google_connected ? btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small") + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small") : ""}</div>${attendeeSection}${d.participants ? `<details class="event-moderation-participants"><summary class="private-note">${E(T("Participantes y lista de espera (gestión de eventos)"))}</summary>${d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("")}</details>` : ""}</div>`;
+  function eventRegistrationPresentation(d, id) {
+    let registrationActions = "";
+    let waitlistNotice = "";
+    if (d.cancelled) {
+      waitlistNotice = `<div class="alert" style="margin-top:16px">${I("calendar")} <strong>${E(T("Evento cancelado"))}</strong>. ${E(T("Este encuentro ya no admite inscripciones ni confirmaciones de cupo."))}</div>`;
+      registrationActions = `<span class="tag">${E(T("Cancelado"))}</span>`;
+    } else if (d.is_past) {
+      registrationActions = `<span class="tag">${E(T("Evento finalizado"))}</span>`;
+    } else if (d.registered === "accepted") {
+      registrationActions = btn("Cancelar inscripción", "register", `data-id="${id}" data-status="cancelled"`);
+    } else if (d.registered === "waitlisted") {
+      const position = Number(d.waitlist_position || 0);
+      waitlistNotice = `<div class="alert" style="margin-top:16px">${I("clock")} <strong>${E(T("Estás en la lista de espera"))}</strong>${position ? (" · " + (E(T("posición"))) + " " + (position) + "") : ""}. ${E(T("Te avisaremos cuando se libere un cupo."))}</div>`;
+      registrationActions = btn("Salir de la lista de espera", "register", `data-id="${id}" data-status="cancelled"`, "ghost");
+    } else if (d.registered === "offered") {
+      waitlistNotice = `<div class="alert success" style="margin-top:16px">${I("check")} <strong>${E(T("Se liberó un cupo para ti"))}</strong>. ${E(T("Confirma tu asistencia para ocuparlo."))}</div>`;
+      registrationActions = btn("Confirmar asistencia", "register", `data-id="${id}" data-status="accepted"`, "primary") + btn("Rechazar cupo", "register", `data-id="${id}" data-status="declined"`, "ghost");
+    } else if (d.full) {
+      registrationActions = btn("Unirme a la lista de espera", "register", `data-id="${id}" data-status="waitlisted"`, "primary") + (d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : "");
+    } else {
+      registrationActions = btn(d.registered === "invited" ? "Aceptar invitación" : "Registrarme", "register", `data-id="${id}" data-status="accepted"`, "primary") + (d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : "");
     }
-    const canEdit = !!p.can_edit;
-    const reviewedLabel = T(p.meta.reviewed ? "Revisado" : "Requiere revisión de fuentes, anonimización y derechos.");
+    return { registrationActions, waitlistNotice };
+  }
+  function eventCapacitySummary(p, d) {
+    if (!p.meta.capacity) return ` · ${E(T("Sin límite de cupos"))}`;
+    const availabilitySummary = Number(d.remaining) === 0
+      ? ` · ${E(T("aforo completo"))}`
+      : ` · ${Number(d.remaining)} ${E(T("disponibles"))}`;
+    return ` · ${p.meta.capacity} ${E(T("cupos"))}${availabilitySummary}`;
+  }
+  function eventStateSummary(d) {
+    if (d.cancelled) return ` · ${E(T("Cancelado"))}`;
+    if (d.is_past) return ` · ${E(T("Finalizado"))}`;
+    return ` · ${status(d.registered)}`;
+  }
+  async function eventItemExtra(p, id) {
+    const d = await api("events/" + id);
+    S.event = d;
+    const { registrationActions, waitlistNotice } = eventRegistrationPresentation(d, id);
+    const waitlistCount = Number(d.waitlist_count || 0);
+    const waitlistLabel = waitlistCount === 1 ? "persona en espera" : "personas en espera";
+    const waitlistSummary = waitlistCount ? ` · ${waitlistCount} ${E(T(waitlistLabel))}` : "";
+    const attendeeSection = eventAttendees(d);
+    const agendaSection = p.meta.agenda ? `<p class="detail-body">${E(p.meta.agenda).replaceAll("\n", "<br>")}</p>` : "";
+    const googleCalendarAction = !d.is_past && !d.cancelled && d.google_url
+      ? `<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">${E(T("Añadir a Google Calendar ↗"))}</a>`
+      : "";
+    const googleConnectedActions = !d.is_past && !d.cancelled && S.boot.google_connected
+      ? btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small") + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small")
+      : "";
+    const participantRows = d.participants ? d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("") : "";
+    const participantsSection = d.participants
+      ? `<details class="event-moderation-participants"><summary class="private-note">${E(T("Participantes y lista de espera (gestión de eventos)"))}</summary>${participantRows}</details>`
+      : "";
+    return `<div class="card" style="background:var(--bg);margin:20px 0"><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span><span>${I("clock")} ${time(p.meta.start)} – ${time(p.meta.end)}</span><span>${I("pin")} ${E(p.meta.location || T("Por confirmar"))}</span></div><p class="private-note">${d.attending} ${E(T("inscritos"))}${eventCapacitySummary(p, d)}${waitlistSummary}${eventStateSummary(d)}</p>${waitlistNotice}${agendaSection}<div class="form-actions">${registrationActions}${googleCalendarAction}${googleConnectedActions}</div>${attendeeSection}${participantsSection}</div>`;
+  }
+  function itemGeneratedNotice(p, reviewedLabel) {
+    if (!p.meta.generated && !p.meta.ai_enriched && !p.meta.generated_sections) return "";
+    const generatedLabel = p.meta.ai_enriched ? "Publicación enriquecida con IA" : "Contenido generado";
+    const reviewedSuffix = p.meta.ai_enriched ? "" : " · " + E(reviewedLabel);
+    return `<div class="alert">${E(T(generatedLabel))} · ${E(p.meta.ai_mode || p.meta.social_mode || "IA")}${reviewedSuffix}</div>`;
+  }
+  function itemActionButtons(p, id, eventIsPast, eventCancelled) {
+    let actionButtons = "";
+    if (p.can_delete) actionButtons += btn("Eliminar", "delete-content", ("data-id=\"" + (id) + "\""), "danger");
+    if (p.can_edit) actionButtons += btn(I("edit") + " Editar", "editor", ("data-type=\"" + (p.type) + "\" data-id=\"" + (id) + "\""));
+    const canManageEvent = (S.boot.admin || S.boot.executive) && p.type === "event" && p.status === "publish" && !p.meta.micro && !eventIsPast && !eventCancelled;
+    if (canManageEvent) {
+      actionButtons += btn("Cancelar evento", "event-cancel-request", ("data-id=\"" + (id) + "\" data-title=\"" + (E(p.title)) + "\""), "danger");
+      actionButtons += btn("Invitar asociados", "event-invite", ("data-id=\"" + (id) + "\""));
+    }
+    const canManageResource = (S.boot.admin || S.boot.executive) && p.type === "resource";
+    if (canManageResource && p.meta.video_id) actionButtons += btn("Actualizar datos de YouTube", "video-metadata", ("data-id=\"" + (id) + "\""));
+    if (canManageResource) actionButtons += btn(I("spark") + " Generar resumen y nota", "generate", ("data-id=\"" + (id) + "\""));
+    if (p.can_moderate) actionButtons += btn(I("shield") + " Moderar", "moderate", ("data-id=\"" + (id) + "\""));
+    actionButtons += publishedItemActions(p, id, eventIsPast, eventCancelled);
+    return `<div class="form-actions">${actionButtons}</div>`;
+  }
+  function publishedItemActions(p, id, eventIsPast, eventCancelled) {
+    if (p.status !== "publish") return "";
+    let actions = btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.liked) + "\""));
+    if (!eventIsPast && !eventCancelled) actions += btn(p.following ? "Dejar de seguir" : "Seguir conversación", "follow", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.following) + "\""));
+    if (Number(p.author.id) !== Number(S.boot.me.id)) actions += btn("Reportar", "report", ("data-id=\"" + (id) + "\""), "ghost");
+    return actions;
+  }  function itemMediaMarkup(p, id) {
     const clipQuery = p.meta.clip ? "?start=" + Number(p.meta.clip.start) + "&end=" + Number(p.meta.clip.end) : "";
     const videoDuration = p.meta.duration_seconds ? E(UI.duration(p.meta.duration_seconds)) : E(T("Duración por confirmar"));
-    const eventIsPast = p.type === "event" && !!S.event?.is_past;
-    const eventCancelled = p.type === "event" && !!S.event?.cancelled;
-    const followingLabel = p.following ? "Dejar de seguir" : "Seguir conversación";
     const videoModeTag = p.meta.video_metadata_mode ? `<span class="tag">${E(p.meta.video_metadata_mode)}</span>` : "";
-    const transcriptWarning = (S.boot.admin || S.boot.executive) && p.type === "resource" && p.meta.video_id && p.meta.transcript_status === "unavailable"
-      ? `<div class="error" style="margin-top:16px">${E(T("No se pudo obtener una transcripción verificable para este video. ASCLA no generará resumen, nota ni temas hasta que agregues una transcripción autorizada o YouTube pueda entregar subtítulos accesibles."))}</div>`
-      : "";
-    const demoTag = p.meta.demo ? `<span class="demo-badge">${E(T("DATOS DEMO"))}</span>` : "";
-    const chatham = p.meta.chatham ? `<div class="alert chatham" style="margin-top:18px">${I("shield")} ${E(T("Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones."))}</div>` : "";
-    const generated = (p.meta.generated || p.meta.ai_enriched || p.meta.generated_sections)
-      ? `<div class="alert">${E(T(p.meta.ai_enriched ? "Publicación enriquecida con IA" : "Contenido generado"))} · ${E(p.meta.ai_mode || p.meta.social_mode || "IA")}${p.meta.ai_enriched ? "" : " · " + E(reviewedLabel)}</div>`
-      : "";
     const video = p.meta.video_id ? `<div class="video-wrap"><iframe loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/${E(p.meta.video_id)}${clipQuery}" title="${E(p.title)}" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe></div><div class="video-metadata"><span>${videoDuration}</span>${videoModeTag}</div>` : "";
     const eventCover = p.type === "event" ? UI.images(p)[0] : null;
     const eventCoverMarkup = eventCover ? `<figure class="event-detail-cover"><img src="${E(eventCover.url)}" alt="${E(p.title)}"></figure>` : "";
     const attachmentsMarkup = p.type === "event" ? "" : UI.attachments(p);
     const deleteMedia = (p.media || []).filter(m => m.can_delete).map(m => btn(`${T("Eliminar archivo")}: ${E(m.name)}`, "delete-media", `data-id="${m.id}" data-post="${id}" data-name="${E(m.name)}"`, "ghost danger small")).join("");
-    const external = p.meta.url ? `<a class="btn" href="${E(safeURL(p.meta.url))}" target="_blank" rel="noopener noreferrer">${E(T("Abrir enlace ↗"))}</a>` : "";
-    const benefits = p.meta.benefits ? `<h3>${E(T("Beneficios"))}</h3><p class="detail-body">${E(p.meta.benefits)}</p>` : "";
-    const initiatives = p.meta.initiatives ? `<h3>${E(T("Iniciativas"))}</h3><p class="detail-body">${E(p.meta.initiatives)}</p>` : "";
-    const clip = p.meta.clip ? `<div class="alert">${E(T("Cápsula sugerida"))}: ${p.meta.clip.start}s – ${p.meta.clip.end}s · ${E(T("Referencia temporal al video de origen. No existe un archivo recortado."))}</div>` : "";
-    const actions = `<div class="form-actions">${p.can_delete ? btn("Eliminar", "delete-content", `data-id="${id}"`, "danger") : ""}${canEdit ? btn(I("edit") + " Editar", "editor", `data-type="${p.type}" data-id="${id}"`) : ""}${(S.boot.admin || S.boot.executive) && p.type === "event" && p.status === "publish" && !p.meta.micro && !eventIsPast && !eventCancelled ? btn("Cancelar evento", "event-cancel-request", `data-id="${id}" data-title="${E(p.title)}"`, "danger") : ""}${(S.boot.admin || S.boot.executive) && p.type === "event" && p.status === "publish" && !p.meta.micro && !eventIsPast && !eventCancelled ? btn("Invitar asociados", "event-invite", `data-id="${id}"`) : ""}${(S.boot.admin || S.boot.executive) && p.type === "resource" && p.meta.video_id ? btn("Actualizar datos de YouTube", "video-metadata", `data-id="${id}"`) : ""}${(S.boot.admin || S.boot.executive) && p.type === "resource" ? btn(I("spark") + " Generar resumen y nota", "generate", `data-id="${id}"`) : ""}${p.can_moderate ? btn(I("shield") + " Moderar", "moderate", `data-id="${id}"`) : ""}${p.status === "publish" ? btn(I("heart") + " " + p.reactions, "like", `data-id="${id}" data-active="${!p.liked}"`) + (!eventIsPast && !eventCancelled ? btn(followingLabel, "follow", `data-id="${id}" data-active="${!p.following}"`) : "") + (Number(p.author.id) !== Number(S.boot.me.id) ? btn("Reportar", "report", `data-id="${id}"`, "ghost") : "") : ""}</div>`;
-    const commentsSection = p.status === "publish" ? `<section class="comments"><h3>${E(T("Conversación"))}</h3><div id="comments-list">${E(T("Cargando comentarios…"))}</div><form data-form="comment" data-id="${id}" style="margin-top:18px">${field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')}<button class="btn primary small">${E(T("Publicar comentario"))}</button></form></section>` : "";
-
+    return { video, eventCoverMarkup, attachmentsMarkup, deleteMedia };
+  }
+  function itemSupplementalMarkup(p) {
+    return {
+      external: p.meta.url ? `<a class="btn" href="${E(safeURL(p.meta.url))}" target="_blank" rel="noopener noreferrer">${E(T("Abrir enlace ↗"))}</a>` : "",
+      benefits: p.meta.benefits ? `<h3>${E(T("Beneficios"))}</h3><p class="detail-body">${E(p.meta.benefits)}</p>` : "",
+      initiatives: p.meta.initiatives ? `<h3>${E(T("Iniciativas"))}</h3><p class="detail-body">${E(p.meta.initiatives)}</p>` : "",
+      clip: p.meta.clip ? `<div class="alert">${E(T("Cápsula sugerida"))}: ${p.meta.clip.start}s – ${p.meta.clip.end}s · ${E(T("Referencia temporal al video de origen. No existe un archivo recortado."))}</div>` : "",
+      copyright: p.meta.copyright ? `<p class="private-note">${E(p.meta.copyright)}</p>` : "",
+      demoSource: p.meta.demo_source_note ? `<p class="alert">${E(p.meta.demo_source_note)}</p>` : "",
+    };
+  }
+  function itemCommentsMarkup(p, id) {
+    if (p.status !== "publish") return "";
+    return `<section class="comments"><h3>${E(T("Conversación"))}</h3><div id="comments-list">${E(T("Cargando comentarios…"))}</div><form data-form="comment" data-id="${id}" style="margin-top:18px">${field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')}<button class="btn primary small">${E(T("Publicar comentario"))}</button></form></section>`;
+  }
+  async function loadItemComments(p, id) {
+    if (p.status !== "publish") return;
+    const comments = await api("items/" + id + "/comments");
+    const target = document.getElementById("comments-list");
+    if (target) target.innerHTML = commentsHTML(comments, id);
+  }
+  async function item(id) {
+    const p = await api("items/" + id);
+    S.item = p;
+    const extra = p.type === "event" ? await eventItemExtra(p, id) : "";
+    const reviewedLabel = T(p.meta.reviewed ? "Revisado" : "Requiere revisión de fuentes, anonimización y derechos.");
+    const eventIsPast = p.type === "event" && !!S.event?.is_past;
+    const eventCancelled = p.type === "event" && !!S.event?.cancelled;
+    const transcriptWarning = (S.boot.admin || S.boot.executive) && p.type === "resource" && p.meta.video_id && p.meta.transcript_status === "unavailable"
+      ? `<div class="error" style="margin-top:16px">${E(T("No se pudo obtener una transcripción verificable para este video. ASCLA no generará resumen, nota ni temas hasta que agregues una transcripción autorizada o YouTube pueda entregar subtítulos accesibles."))}</div>`
+      : "";
+    const demoTag = p.meta.demo ? `<span class="demo-badge">${E(T("DATOS DEMO"))}</span>` : "";
+    const chatham = p.meta.chatham ? `<div class="alert chatham" style="margin-top:18px">${I("shield")} ${E(T("Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones."))}</div>` : "";
+    const generated = itemGeneratedNotice(p, reviewedLabel);
+    const media = itemMediaMarkup(p, id);
+    const supplemental = itemSupplementalMarkup(p);
+    const actions = itemActionButtons(p, id, eventIsPast, eventCancelled);
+    const commentsSection = itemCommentsMarkup(p, id);
     modal(
       p.title,
-      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${demoTag}</div>${eventCoverMarkup}${chatham}${generated}<p class="detail-body">${E(p.body)}</p>${video}${transcriptWarning}${extra}${attachmentsMarkup}${deleteMedia}${UI.generated(p)}${UI.agenda(p)}${p.meta.demo_source_note ? `<p class="alert">${E(p.meta.demo_source_note)}</p>` : ""}${external}${benefits}${initiatives}${clip}${p.meta.copyright ? `<p class="private-note">${E(p.meta.copyright)}</p>` : ""}${actions}${commentsSection}`,
+      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${demoTag}</div>${media.eventCoverMarkup}${chatham}${generated}<p class="detail-body">${E(p.body)}</p>${media.video}${transcriptWarning}${extra}${media.attachmentsMarkup}${media.deleteMedia}${UI.generated(p)}${UI.agenda(p)}${supplemental.demoSource}${supplemental.external}${supplemental.benefits}${supplemental.initiatives}${supplemental.clip}${supplemental.copyright}${actions}${commentsSection}`,
       true,
     );
-    if (p.status === "publish") {
-      const comments = await api("items/" + id + "/comments");
-      const target = document.getElementById("comments-list");
-      if (target) target.innerHTML = commentsHTML(comments, id);
+    await loadItemComments(p, id);
+  }
+  function resourceEditorExtra(m) {
+    let videoNote = "";
+    if (m.video_id) {
+      let durationText;
+      if (m.duration_seconds) durationText = ": " + E(UI.duration(m.duration_seconds));
+      else durationText = ". " + E(T("Si YouTube no la expone públicamente, conecta YouTube OAuth y vuelve a intentar."));
+      videoNote = `<p class="private-note">${E(T("Duración detectada automáticamente"))}${durationText}</p>`;
     }
+    let moderatorFields = "";
+    if (S.boot.moderator || S.boot.executive || S.boot.admin) {
+      let transcriptWarning = "";
+      if (m.video_id && !m.transcript) {
+        transcriptWarning = `<div class="alert">${E(T("No hay una transcripción guardada. ASCLA intentará obtener una transcripción autorizada de YouTube al generar el resumen. Si no puede obtenerla, la generación se detendrá para evitar inventar información."))}</div>`;
+      }
+      moderatorFields = field("transcript", "Transcripción autorizada (opcional)", m.transcript || "", "textarea", 'maxlength="100000"')
+        + transcriptWarning
+        + field("identities", "Identidades y afiliaciones que deben anonimizarse (una por línea)", m.identities || "", "textarea");
+    }
+    return `<div class="form-grid">${select("resource_type", "Tipo de recurso", ["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"], m.resource_type || "Artículo")}${field("source", "Fuente / autoría", m.source || "")}${field("youtube_url", "URL de YouTube", m.youtube_url || "", "url")}${field("url", "URL del recurso externo", m.url || "", "url")}</div>${videoNote}${field("copyright", "Propiedad intelectual", m.copyright || "© ASCLA – Asociación de Secretarios Corporativos de América Latina")}${field("summary", "Resumen", m.summary || "", "textarea")}${moderatorFields}<p class="private-note">Las conferencias completas permanecen en YouTube. La duración se consulta directamente desde los metadatos del video y nunca se estima a partir de la transcripción.</p>`;
+  }
+  function editorStatusOptions(type, m, directResourcePublisher, directContentPublisher) {
+    const directPublishType = ["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated);
+    if (directPublishType) return [["draft", "Borrador"], ["publish", "Publicar ahora"]];
+    if (directContentPublisher && (!m.generated || directResourcePublisher)) {
+      const publishLabel = m.generated ? "Publicar ahora (revisado)" : "Publicado";
+      return [["draft", "Borrador"], ["pending", "Pendiente de revisión"], ["publish", publishLabel]];
+    }
+    return [["draft", "Borrador"], ["pending", "Enviar a revisión"]];
+  }
+  function editorStatusValue(type, id, p, m, directResourcePublisher, directContentPublisher) {
+    const directPublishType = ["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated);
+    if (directPublishType) return id && p.status === "draft" ? "draft" : "publish";
+    if (!id && type === "resource" && directResourcePublisher) return "publish";
+    if (p.status === "publish" && directContentPublisher) return "publish";
+    return p.status;
+  }
+  function eventCoverEditorMarkup(type, eventCoverFile) {
+    if (type !== "event") return "";
+    let preview;
+    let actionLabel;
+    if (eventCoverFile) {
+      preview = `<span class="event-cover-ready" data-media="${Number(eventCoverFile.id)}"><img src="${E(eventCoverFile.url)}" alt="${E(T("Portada del evento"))}"><span class="event-cover-actions"><strong>${E(eventCoverFile.name || T("Imagen del evento"))}</strong>${btn("Quitar portada","event-cover-clear","","ghost small")}</span></span>`;
+      actionLabel = "Cambiar portada";
+    } else {
+      preview = `<span class="event-cover-placeholder">${I("gallery")}<small>${E(T("Aún no has seleccionado una portada."))}</small></span>`;
+      actionLabel = "Elegir imagen";
+    }
+    return `<section class="event-cover-editor"><label>${E(T("Portada del evento"))}</label><div id="event-cover-preview" class="event-cover-preview">${preview}</div><label class="btn small">${I("plus")} ${E(T(actionLabel))}<input type="file" data-upload="event-cover" accept="image/jpeg,image/png,image/webp" hidden></label><p class="private-note">${E(T("JPG, PNG o WebP. Proporción recomendada 16:9. La imagen se recorta y optimiza antes de guardarse."))}</p></section>`;
+  }
+  function editorDateValue(value) {
+    if (!value) return "";
+    const dateValue = new Date(value);
+    return new Date(dateValue - dateValue.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  }
+  async function editorExtra(type, p, m) {
+    if (type === "event") return `<div class="form-grid">${field("start", "Inicio (tu zona horaria)", editorDateValue(m.start), "datetime-local", "required")}${field("end", "Fin (tu zona horaria)", editorDateValue(m.end), "datetime-local", "required")}${field("capacity", "Cupos (0 = ilimitado)", m.capacity || 0, "number", 'min="0" max="100000"')}${select("modality", "Modalidad", ["Virtual", "Presencial", "Híbrido"], m.modality || "Virtual")}${field("location", "Ubicación", m.location || "")}${field("url", "Enlace del encuentro", m.url || "", "url")}</div>${field("agenda", "Agenda", m.agenda || "", "textarea")}`;
+    if (type === "resource") return resourceEditorExtra(m);
+    if (type === "ally") return select("alliance_type", "Tipo de alianza", ["Socio estratégico", "Convenio", "Otro"], m.alliance_type) + field("url", "Sitio del aliado", m.url || "", "url") + field("benefits", "Beneficios", m.benefits || "", "textarea") + field("initiatives", "Iniciativas y recursos", m.initiatives || "", "textarea");
+    if (type === "topic") {
+      const forums = { items: await allContent("forum") };
+      return select("parent", "Foro", [[0, "Conversación general"], ...forums.items.map((f) => [f.id, f.title])], p.parent || 0);
+    }
+    if (type === "gallery") {
+      const events = { items: await allContent("event") };
+      return select("event_id", "Evento relacionado", [[0, "Sin evento"], ...events.items.map((f) => [f.id, f.title])], m.event_id || 0);
+    }
+    return "";
   }
   async function editor(type, id = 0) {
     const p = id
@@ -1342,72 +1567,16 @@
     if (id ? !p.can_edit : !S.boot.can_create?.[type]) { throw new Error(T("No puede editar este contenido.")); }
     S.edit = p;
     const m = p.meta;
-    const localDate = (d) => {
-      if (!d) return "";
-      const t = new Date(d);
-      return new Date(t - t.getTimezoneOffset() * 60000)
-        .toISOString()
-        .slice(0, 16);
-    };
-    let extra = "";
-    if (type === "event")
-      extra = `<div class="form-grid">${field("start", "Inicio (tu zona horaria)", localDate(m.start), "datetime-local", "required")}${field("end", "Fin (tu zona horaria)", localDate(m.end), "datetime-local", "required")}${field("capacity", "Cupos (0 = ilimitado)", m.capacity || 0, "number", 'min="0" max="100000"')}${select("modality", "Modalidad", ["Virtual", "Presencial", "Híbrido"], m.modality || "Virtual")}${field("location", "Ubicación", m.location || "")}${field("url", "Enlace del encuentro", m.url || "", "url")}</div>${field("agenda", "Agenda", m.agenda || "", "textarea")}`;
-    if (type === "resource")
-      extra = `<div class="form-grid">${select("resource_type", "Tipo de recurso", ["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"], m.resource_type || "Artículo")}${field("source", "Fuente / autoría", m.source || "")}${field("youtube_url", "URL de YouTube", m.youtube_url || "", "url")}${field("url", "URL del recurso externo", m.url || "", "url")}</div>${m.video_id ? `<p class="private-note">${E(T("Duración detectada automáticamente"))}${m.duration_seconds ? `: ${E(UI.duration(m.duration_seconds))}` : `. ${E(T("Si YouTube no la expone públicamente, conecta YouTube OAuth y vuelve a intentar."))}`}</p>` : ""}${field("copyright", "Propiedad intelectual", m.copyright || "© ASCLA – Asociación de Secretarios Corporativos de América Latina")}${field("summary", "Resumen", m.summary || "", "textarea")}${(S.boot.moderator || S.boot.executive || S.boot.admin) ? `${field("transcript", "Transcripción autorizada (opcional)", m.transcript || "", "textarea", 'maxlength="100000"')}${m.video_id && !m.transcript ? `<div class="alert">${E(T("No hay una transcripción guardada. ASCLA intentará obtener una transcripción autorizada de YouTube al generar el resumen. Si no puede obtenerla, la generación se detendrá para evitar inventar información."))}</div>` : ""}${field("identities", "Identidades y afiliaciones que deben anonimizarse (una por línea)", m.identities || "", "textarea")}` : ""}<p class="private-note">Las conferencias completas permanecen en YouTube. La duración se consulta directamente desde los metadatos del video y nunca se estima a partir de la transcripción.</p>`;
-    if (type === "ally")
-      extra =
-        select(
-          "alliance_type",
-          "Tipo de alianza",
-          ["Socio estratégico", "Convenio", "Otro"],
-          m.alliance_type,
-        ) +
-        field("url", "Sitio del aliado", m.url || "", "url") +
-        field("benefits", "Beneficios", m.benefits || "", "textarea") +
-        field(
-          "initiatives",
-          "Iniciativas y recursos",
-          m.initiatives || "",
-          "textarea",
-        );
-    if (type === "topic") {
-      const forums = { items: await allContent("forum") };
-      extra = select(
-        "parent",
-        "Foro",
-        [
-          [0, "Conversación general"],
-          ...forums.items.map((f) => [f.id, f.title]),
-        ],
-        p.parent || 0,
-      );
-    }
-    if (type === "gallery") {
-      const events = { items: await allContent("event") };
-      extra = select(
-        "event_id",
-        "Evento relacionado",
-        [[0, "Sin evento"], ...events.items.map((f) => [f.id, f.title])],
-        m.event_id || 0,
-      );
-    }
+    const extra = await editorExtra(type, p, m);
     const directResourcePublisher = type === "resource" && (S.boot.admin || S.boot.executive);
     const directContentPublisher = (["gallery", "resource"].includes(type) ? (S.boot.admin || S.boot.executive) : S.boot.moderator);
-    const statusOptions = (["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated))
-      ? [["draft", "Borrador"], ["publish", "Publicar ahora"]]
-      : directContentPublisher && (!m.generated || directResourcePublisher)
-        ? [["draft", "Borrador"], ["pending", "Pendiente de revisión"], ["publish", m.generated ? "Publicar ahora (revisado)" : "Publicado"]]
-        : [["draft", "Borrador"], ["pending", "Enviar a revisión"]];
-    const statusValue = (["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated))
-      ? (id && p.status === "draft" ? "draft" : "publish")
-      : (!id && type === "resource" && directResourcePublisher
-          ? "publish"
-          : (p.status === "publish" && directContentPublisher ? "publish" : p.status));
+    const statusOptions = editorStatusOptions(type, m, directResourcePublisher, directContentPublisher);
+    const statusValue = editorStatusValue(type, id, p, m, directResourcePublisher, directContentPublisher);
     const eventCoverFile = type === "event" ? (p.media || []).find(file => file.mime?.startsWith("image/")) : null;
-    const eventCoverEditor = type === "event" ? `<section class="event-cover-editor"><label>${E(T("Portada del evento"))}</label><div id="event-cover-preview" class="event-cover-preview">${eventCoverFile ? `<span class="event-cover-ready" data-media="${Number(eventCoverFile.id)}"><img src="${E(eventCoverFile.url)}" alt="${E(T("Portada del evento"))}"><span class="event-cover-actions"><strong>${E(eventCoverFile.name || T("Imagen del evento"))}</strong>${btn("Quitar portada","event-cover-clear","","ghost small")}</span></span>` : `<span class="event-cover-placeholder">${I("gallery")}<small>${E(T("Aún no has seleccionado una portada."))}</small></span>`}</div><label class="btn small">${I("plus")} ${E(T(eventCoverFile ? "Cambiar portada" : "Elegir imagen"))}<input type="file" data-upload="event-cover" accept="image/jpeg,image/png,image/webp" hidden></label><p class="private-note">${E(T("JPG, PNG o WebP. Proporción recomendada 16:9. La imagen se recorta y optimiza antes de guardarse."))}</p></section>` : "";
+    const eventCoverEditor = eventCoverEditorMarkup(type, eventCoverFile);
     modal(
       (id ? "Editar " : "Crear ") + typeLabel[type],
-      `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => `<label class="chip-check"><input type="checkbox" name="interest" value="${t.id}" ${p.tags.some((x) => x.id === t.id) ? "checked" : ""}>${E(t.name)}</label>`).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? `<label class="btn small">${I("plus")} ${E(T("Adjuntar imagen o PDF"))}<input type="file" data-upload="content" accept="image/jpeg,image/png,image/webp,application/pdf" hidden></label><div id="attachments">${(m.media_ids || []).map((mid) => `<span class="attached-file" data-media="${mid}">Archivo #${mid}${btn("Quitar", "detach-media", `data-id="${mid}"`, "ghost small")}</span>`).join("")}</div><p class="private-note">${E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))}</p>` : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${select("status", "Guardar como", statusOptions, statusValue)}${m.generated && directResourcePublisher ? `<p class="private-note">${E(T("Si eliges Publicar ahora, confirmas que revisaste fuentes, anonimización y derechos antes de publicar."))}</p>` : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar ${typeLabel[type]}</button></div></form>`,
+      `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => ("<label class=\"chip-check\"><input type=\"checkbox\" name=\"interest\" value=\"" + (t.id) + "\" " + (p.tags.some((x) => x.id === t.id) ? "checked" : "") + ">" + (E(t.name)) + "</label>")).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? ("<label class=\"btn small\">" + (I("plus")) + " " + (E(T("Adjuntar imagen o PDF"))) + "<input type=\"file\" data-upload=\"content\" accept=\"image/jpeg,image/png,image/webp,application/pdf\" hidden></label><div id=\"attachments\">" + ((m.media_ids || []).map((mid) => ("<span class=\"attached-file\" data-media=\"" + (mid) + "\">Archivo #" + (mid) + "" + (btn("Quitar", "detach-media", ("data-id=\"" + (mid) + "\""), "ghost small")) + "</span>")).join("")) + "</div><p class=\"private-note\">" + (E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))) + "</p>") : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${select("status", "Guardar como", statusOptions, statusValue)}${m.generated && directResourcePublisher ? ("<p class=\"private-note\">" + (E(T("Si eliges Publicar ahora, confirmas que revisaste fuentes, anonimización y derechos antes de publicar."))) + "</p>") : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar ${typeLabel[type]}</button></div></form>`,
       true,
     );
   }
@@ -1418,18 +1587,23 @@
     owner = scope === "all" ? Math.max(0, Number(owner) || 0) : Number(S.boot.me.id);
     const list = await api("media?" + new URLSearchParams({page, q, scope, owner: scope === "all" ? owner : 0}));
     S.files = {page, q, scope, owner: Number(list.owner || owner || 0)};
-    const ownerFilter = scope === "all" ? `<div class="field"><label for="file-owner">${E(T("Usuario propietario"))}</label><select id="file-owner" name="owner"><option value="0">${E(T("Todos los usuarios"))}</option>${(list.owners || []).map(u => `<option value="${Number(u.id)}" ${Number(S.files.owner)===Number(u.id)?"selected":""}>${E(u.name)} · ${E(u.email)}</option>`).join("")}</select></div>` : "";
-    modal(scope === "all" ? "Archivos de la comunidad" : "Mis archivos", `<form data-form="file-search" class="filters file-library-filters"><div class="field"><label for="file-query">${E(T("Buscar archivos"))}</label><input id="file-query" name="q" aria-label="${E(T("Buscar archivos"))}" placeholder="${E(T("Buscar por nombre…"))}" value="${E(q)}"></div>${ownerFilter}<button class="btn">${E(T("Buscar"))}</button></form><p class="private-note">${list.total} ${E(T("archivos"))} · ${E(T("La eliminación es permanente y retira sus referencias."))}</p><div class="file-library">${list.items.map(m => `<article class="file-row" data-file="${m.id}"><div>${I(m.mime.startsWith('image/') ? 'gallery' : 'book')}<strong>${E(m.name)}</strong><small>${E(m.author)} · ${Math.ceil((m.stored_size || m.size) / 1024)} KB${m.has_master ? " · " + E(T("incluye copia maestra optimizada")) : ""} · ${date(m.date)}</small></div><div class="form-actions"><a class="btn small" href="${E(m.url)}" target="_blank" rel="noopener">${E(T("Abrir archivo"))}</a>${btn("Eliminar archivo", "delete-media", `data-id="${m.id}" data-name="${E(m.name)}" data-library="true"`, "danger small")}</div></article>`).join("") || empty("No hay archivos")}</div><div class="pagination">${btn("Anterior", "files", `data-page="${page-1}" ${page<=1?'disabled':''}`)}<span>${page} / ${list.pages}</span>${btn("Siguiente", "files", `data-page="${page+1}" ${page>=list.pages?'disabled':''}`)}</div>`, true);
+    const ownerFilter = scope === "all" ? `<div class="field"><label for="file-owner">${E(T("Usuario propietario"))}</label><select id="file-owner" name="owner"><option value="0">${E(T("Todos los usuarios"))}</option>${(list.owners || []).map(u => ("<option value=\"" + (Number(u.id)) + "\" " + (Number(S.files.owner)===Number(u.id)?"selected":"") + ">" + (E(u.name)) + " · " + (E(u.email)) + "</option>")).join("")}</select></div>` : "";
+    modal(scope === "all" ? "Archivos de la comunidad" : "Mis archivos", `<form data-form="file-search" class="filters file-library-filters"><div class="field"><label for="file-query">${E(T("Buscar archivos"))}</label><input id="file-query" name="q" aria-label="${E(T("Buscar archivos"))}" placeholder="${E(T("Buscar por nombre…"))}" value="${E(q)}"></div>${ownerFilter}<button class="btn">${E(T("Buscar"))}</button></form><p class="private-note">${list.total} ${E(T("archivos"))} · ${E(T("La eliminación es permanente y retira sus referencias."))}</p><div class="file-library">${list.items.map(m => ("<article class=\"file-row\" data-file=\"" + (m.id) + "\"><div>" + (I(m.mime.startsWith('image/') ? 'gallery' : 'book')) + "<strong>" + (E(m.name)) + "</strong><small>" + (E(m.author)) + " · " + (Math.ceil((m.stored_size || m.size) / 1024)) + " KB" + (m.has_master ? " · " + E(T("incluye copia maestra optimizada")) : "") + " · " + (date(m.date)) + "</small></div><div class=\"form-actions\"><a class=\"btn small\" href=\"" + (E(m.url)) + "\" target=\"_blank\" rel=\"noopener\">" + (E(T("Abrir archivo"))) + "</a>" + (btn("Eliminar archivo", "delete-media", ("data-id=\"" + (m.id) + "\" data-name=\"" + (E(m.name)) + "\" data-library=\"true\""), "danger small")) + "</div></article>")).join("") || empty("No hay archivos")}</div><div class="pagination">${btn("Anterior", "files", ("data-page=\"" + (page-1) + "\" " + (page<=1?'disabled':'') + ""))}<span>${page} / ${list.pages}</span>${btn("Siguiente", "files", ("data-page=\"" + (page+1) + "\" " + (page>=list.pages?'disabled':'') + ""))}</div>`, true);
   }
   function confirmDeletion(kind, id, {post = 0, title = "", library = false, forum = false, conversation = 0} = {}) {
-    const description = kind === 'media' ? 'El archivo se eliminará permanentemente, junto con su copia maestra si existe, y se retirará de las publicaciones y de la foto de perfil que lo utilicen.' : kind === 'comment' ? 'El comentario dejará de mostrarse en la conversación.' : kind === 'message' ? 'El mensaje se eliminará de esta conversación para ambos participantes.' : 'El contenido dejará de estar disponible en la comunidad.';
-    modal(T('Confirmar eliminación'), `<p class="detail-body">${E(title)}</p><p>${E(T(description))}</p>${forum?'<p>Los temas de este foro se conservarán en la lista general.</p>':''}<div class="form-actions">${btn('Cancelar','delete-cancel',`data-kind="${kind}" data-id="${id}" data-post="${post}" data-library="${library}" data-conversation="${conversation}"`)}${btn('Eliminar','delete-confirm',`data-kind="${kind}" data-id="${id}" data-post="${post}" data-library="${library}" data-conversation="${conversation}"`,'danger primary')}</div>`);
+    const descriptions = {
+      media: 'El archivo se eliminará permanentemente, junto con su copia maestra si existe, y se retirará de las publicaciones y de la foto de perfil que lo utilicen.',
+      comment: 'El comentario dejará de mostrarse en la conversación.',
+      message: 'El mensaje se eliminará de esta conversación para ambos participantes.',
+    };
+    const description = descriptions[kind] || 'El contenido dejará de estar disponible en la comunidad.';
+    modal(T('Confirmar eliminación'), `<p class="detail-body">${E(title)}</p><p>${E(T(description))}</p>${forum?'<p>Los temas de este foro se conservarán en la lista general.</p>':''}<div class="form-actions">${btn('Cancelar','delete-cancel',("data-kind=\"" + (kind) + "\" data-id=\"" + (id) + "\" data-post=\"" + (post) + "\" data-library=\"" + (library) + "\" data-conversation=\"" + (conversation) + "\""))}${btn('Eliminar','delete-confirm',("data-kind=\"" + (kind) + "\" data-id=\"" + (id) + "\" data-post=\"" + (post) + "\" data-library=\"" + (library) + "\" data-conversation=\"" + (conversation) + "\""),'danger primary')}</div>`);
   }
   async function inviteMembers(id, page = 1, query = "") {
     if (!S.invite || S.invite.id !== id) S.invite = { id, selected: new Set() };
     S.invite.query = query;
     const list = await api("profiles?" + new URLSearchParams({ q: query, page }));
-    modal("Invitar asociados", `<p class="private-note">Selecciona hasta 50 asociados. La invitación es interna y no reserva un cupo.</p><form data-form="invite-search" data-id="${id}" class="filters"><input name="q" aria-label="Buscar invitados" value="${E(query)}" placeholder="Nombre, empresa o interés"><button class="btn">Buscar</button></form><form data-form="event-invite" data-id="${id}"><div class="invite-options">${list.items.map(p => `<label class="check"><input type="checkbox" data-invite-member="${p.id}" ${S.invite.selected.has(p.id) ? "checked" : ""}><span>${E(p.name)}<small class="muted"> · ${E(p.company || "ASCLA")}</small></span></label>`).join("") || empty("No encontramos asociados")}</div><div class="pagination">${btn("Anterior", "invite-page", `data-page="${page - 1}" ${page <= 1 ? "disabled" : ""}`, "small")}<span>${page} / ${list.pages}</span>${btn("Siguiente", "invite-page", `data-page="${page + 1}" ${page >= list.pages ? "disabled" : ""}`, "small")}</div><p class="private-note"><span id="invite-selected">${S.invite.selected.size}</span> seleccionados</p><button class="btn primary">Enviar invitaciones</button></form>`);
+    modal("Invitar asociados", `<p class="private-note">Selecciona hasta 50 asociados. La invitación es interna y no reserva un cupo.</p><form data-form="invite-search" data-id="${id}" class="filters"><input name="q" aria-label="Buscar invitados" value="${E(query)}" placeholder="Nombre, empresa o interés"><button class="btn">Buscar</button></form><form data-form="event-invite" data-id="${id}"><div class="invite-options">${list.items.map(p => ("<label class=\"check\"><input type=\"checkbox\" data-invite-member=\"" + (p.id) + "\" " + (S.invite.selected.has(p.id) ? "checked" : "") + "><span>" + (E(p.name)) + "<small class=\"muted\"> · " + (E(p.company || "ASCLA")) + "</small></span></label>")).join("") || empty("No encontramos asociados")}</div><div class="pagination">${btn("Anterior", "invite-page", ("data-page=\"" + (page - 1) + "\" " + (page <= 1 ? "disabled" : "") + ""), "small")}<span>${page} / ${list.pages}</span>${btn("Siguiente", "invite-page", ("data-page=\"" + (page + 1) + "\" " + (page >= list.pages ? "disabled" : "") + ""), "small")}</div><p class="private-note"><span id="invite-selected">${S.invite.selected.size}</span> seleccionados</p><button class="btn primary">Enviar invitaciones</button></form>`);
   }
   root.addEventListener("change", event => {
     const input = event.target.closest("[data-invite-member]");
@@ -1471,7 +1645,7 @@
       ? `<img src="${E(current.photo_url)}" alt="${E(T('Foto del grupo'))}">${btn('Quitar foto','group-edit-photo-clear','','ghost small')}`
       : `<span class="group-photo-placeholder">${I('users')}</span>`;
     const photo = `<div class="group-photo-field"><div id="group-edit-photo-preview" class="group-photo-preview">${preview}</div><div><label class="btn small">${I('plus')} Cambiar foto<input type="file" accept="image/jpeg,image/png,image/webp" data-upload="group-photo-edit" hidden></label><input type="hidden" name="photo_id" value="${Number(current.photo_id || 0)}"><p class="private-note">JPG, PNG o WebP. La nueva foto reemplazará a la actual al guardar.</p></div></div>`;
-    modal(T('Editar grupo'), `<form data-form="group-edit" data-guard-modal-unsaved data-id="${Number(current.id)}">${photo}${field('title','Nombre del grupo',current.title || '','text','required maxlength="120"')}${field('description','Descripción breve',current.description || '','textarea','maxlength="240" placeholder="Añade una breve descripción del propósito del grupo"')}<div class="form-actions">${btn('Cancelar','group-menu',`data-id="${Number(current.id)}"`)}<button class="btn primary">${I('check')} Guardar cambios</button></div></form>`);
+    modal(T('Editar grupo'), `<form data-form="group-edit" data-guard-modal-unsaved data-id="${Number(current.id)}">${photo}${field('title','Nombre del grupo',current.title || '','text','required maxlength="120"')}${field('description','Descripción breve',current.description || '','textarea','maxlength="240" placeholder="Añade una breve descripción del propósito del grupo"')}<div class="form-actions">${btn('Cancelar','group-menu',("data-id=\"" + (Number(current.id)) + "\""))}<button class="btn primary">${I('check')} Guardar cambios</button></div></form>`);
   }
   async function groupInfoDialog(id) {
     const current = await api('conversations/' + Number(id));
@@ -1483,15 +1657,15 @@
       const creator = memberId === Number(current.created_by);
       const isMe = memberId === me;
       const profileAction = btn(T('Ver perfil')+' '+I('arrow'),'member',`data-id="${memberId}"`,'ghost small group-member-action');
-      const messageAction = !isMe ? btn(I('mail')+' '+T('Mensaje privado'),'group-member-message',`data-id="${memberId}"`,'small group-member-action') : '';
+      const messageAction = isMe ? '' : btn(I('mail')+' '+T('Mensaje privado'),'group-member-message',`data-id="${memberId}"`,'small group-member-action');
       const ownerBadge = creator ? '<span class="group-owner-badge">' + E(T('Creador')) + '</span>' : '';
       const meBadge = isMe ? '<span class="group-me-badge">' + E(T('Tú')) + '</span>' : '';
       return `<div class="group-info-member"><div class="group-info-member-main">${avatar(member)}<div class="group-info-member-copy"><div class="group-info-member-name"><strong>${E(member.name || T('Asociado ASCLA'))}</strong>${ownerBadge}${meBadge}</div><small>${E(member.company || member.role_label || T('Integrante'))}</small></div></div><div class="group-info-member-actions">${profileAction}${messageAction}</div></div>`;
     }).join('');
     const editAction = current.can_delete_group ? btn(I('edit')+' '+T('Editar grupo'),'group-edit-open',`data-id="${Number(current.id)}"`,'ghost small') : '';
     const description = current.description ? `<p class="group-info-description">${E(current.description)}</p>` : `<p class="group-info-description muted">${E(T('Sin descripción del grupo.'))}</p>`;
-    const danger = current.can_delete_group ? `<div class="group-info-danger"><div><strong>${E(T('Eliminar grupo'))}</strong><p class="private-note">${E(T('Elimina esta conversación y sus mensajes para todos los integrantes. Esta acción no se puede deshacer.'))}</p></div>${btn('Eliminar grupo','group-delete-request',`data-id="${Number(current.id)}" data-name="${E(identity.name)}"`,'danger')}</div>` : '';
-    modal(T('Información del grupo'), `<div class="group-info-head">${avatar(identity)}<div class="group-info-head-copy"><h3>${E(identity.name)}</h3><p>${Number(current.member_count || current.members?.length || 0)} ${E(T('integrantes'))}</p>${description}</div>${editAction ? `<div class="group-info-head-action">${editAction}</div>` : ''}</div><div class="group-info-section"><div class="group-info-section-title"><h4>${E(T('Integrantes'))}</h4><span>${Number(current.member_count || current.members?.length || 0)}</span></div><div class="group-info-members">${members}</div></div>${danger}`);
+    const danger = current.can_delete_group ? `<div class="group-info-danger"><div><strong>${E(T('Eliminar grupo'))}</strong><p class="private-note">${E(T('Elimina esta conversación y sus mensajes para todos los integrantes. Esta acción no se puede deshacer.'))}</p></div>${btn('Eliminar grupo','group-delete-request',("data-id=\"" + (Number(current.id)) + "\" data-name=\"" + (E(identity.name)) + "\""),'danger')}</div>` : '';
+    modal(T('Información del grupo'), `<div class="group-info-head">${avatar(identity)}<div class="group-info-head-copy"><h3>${E(identity.name)}</h3><p>${Number(current.member_count || current.members?.length || 0)} ${E(T('integrantes'))}</p>${description}</div>${editAction ? ("<div class=\"group-info-head-action\">" + (editAction) + "</div>") : ''}</div><div class="group-info-section"><div class="group-info-section-title"><h4>${E(T('Integrantes'))}</h4><span>${Number(current.member_count || current.members?.length || 0)}</span></div><div class="group-info-members">${members}</div></div>${danger}`);
   }
 
   function stopChat() {
@@ -1577,16 +1751,21 @@
     chat.last = 0; chat.loaded = false; chat.ids = new Set();
     const group = current.kind === 'group';
     const identity = chatIdentity(current);
-    const title = group
-      ? `<button type="button" class="chat-profile group-chat-profile group-info-trigger" data-action="group-menu" data-id="${Number(current.id)}" aria-label="${E(T('Abrir información del grupo'))}">${avatar(identity)}<span><strong>${E(identity.name)}</strong><small>${Number(current.member_count || current.members?.length || 0)} participantes · ${E(T('Ver integrantes'))}</small></span></button>`
-      : (current.other.profile_url ? `<button type="button" class="chat-profile chat-profile-button" data-action="member" data-id="${Number(current.other.id)}" aria-label="Ver perfil de ${E(current.other.name)}">${avatar(current.other)}<span><strong>${E(current.other.name)}</strong><small>Ver perfil</small></span></button>` : `<span class="chat-profile">${avatar(current.other)}<strong>${E(current.other.name)}</strong></span>`);
+    let title;
+    if (group) {
+      title = `<button type="button" class="chat-profile group-chat-profile group-info-trigger" data-action="group-menu" data-id="${Number(current.id)}" aria-label="${E(T('Abrir información del grupo'))}">${avatar(identity)}<span><strong>${E(identity.name)}</strong><small>${Number(current.member_count || current.members?.length || 0)} participantes · ${E(T('Ver integrantes'))}</small></span></button>`;
+    } else if (current.other.profile_url) {
+      title = `<button type="button" class="chat-profile chat-profile-button" data-action="member" data-id="${Number(current.other.id)}" aria-label="Ver perfil de ${E(current.other.name)}">${avatar(current.other)}<span><strong>${E(current.other.name)}</strong><small>Ver perfil</small></span></button>`;
+    } else {
+      title = `<span class="chat-profile">${avatar(current.other)}<strong>${E(current.other.name)}</strong></span>`;
+    }
     const request = current.conversation_request || {};
     let action = '';
     let requestBanner = '';
     if (group) {
       action = btn(I('more') + ' ' + T('Grupo'),'group-menu',`data-id="${Number(current.id)}"`,'ghost small');
     } else if (request.state === 'incoming_pending') {
-      action = `${btn('Aceptar','conversation-request-respond',`data-id="${Number(current.other.id)}" data-request="${Number(request.request_id)}" data-decision="accept"`,'primary small')}${btn('Rechazar','conversation-request-respond',`data-id="${Number(current.other.id)}" data-request="${Number(request.request_id)}" data-decision="reject"`,'small')}`;
+      action = `${btn('Aceptar','conversation-request-respond',("data-id=\"" + (Number(current.other.id)) + "\" data-request=\"" + (Number(request.request_id)) + "\" data-decision=\"accept\""),'primary small')}${btn('Rechazar','conversation-request-respond',("data-id=\"" + (Number(current.other.id)) + "\" data-request=\"" + (Number(request.request_id)) + "\" data-decision=\"reject\""),'small')}`;
       requestBanner = `<div class="chat-request-banner"><strong>${E(T('Solicitud de conversación'))}</strong><span>${E(T('Puedes leer este mensaje antes de decidir. Acepta para poder responder.'))}</span></div>`;
     } else if (request.state === 'outgoing_pending') {
       action = btn('Cancelar solicitud','conversation-request-cancel',`data-id="${Number(current.other.id)}"`,'ghost danger small');
@@ -1657,6 +1836,38 @@
     applyReadState(data.read_state);
     area.scrollTop = top + area.scrollHeight - height;
   }
+  async function syncChatData(chat) {
+    const conversations = await api('conversations?' + new URLSearchParams({q: S.filter.q || ''}));
+    if (!chatAlive(chat)) return null;
+    S.conversations = conversations;
+    if (!chat.id && conversations.length) openChat(chat, conversations[0]);
+    let current = conversations.find(c => Number(c.id) === chat.id);
+    if (chat.id && !current) current = await api('conversations/' + chat.id);
+    if (!chatAlive(chat)) return null;
+    if (current) { chat.current=current; chatControls(current); }
+    await loadMessages(chat);
+    if (!chatAlive(chat)) return null;
+    if (current && !chat.more) current.unread = 0;
+    chatSidebar();
+    chatStatus('');
+    return chat.more ? 100 : 2000;
+  }
+  function haltChat(chat, error) {
+    chat.halted = true;
+    const form = document.querySelector('.chat-compose');
+    if (form) chatDrafts.set(Number(form.dataset.id), form.elements.body.value);
+    const pane = document.querySelector('.chat-conversation');
+    if (pane) pane.innerHTML = empty('Conversación no disponible', error.message) + link('directorio', 'Revisar mis conversaciones', 'small');
+    chatStatus(error.message || 'No se puede acceder a los mensajes. Recarga la página para revisar tu sesión.', true);
+  }
+  function syncChatFailure(chat, error) {
+    if ([401, 403, 404].includes(error.status)) {
+      haltChat(chat, error);
+      return 2000;
+    }
+    chatStatus('Sin conexión con el servidor. Reintentando…', true);
+    return 8000;
+  }
   async function syncChat() {
     const chat = S.chat;
     if (!chatAlive(chat) || chat.syncing || chat.halted) return;
@@ -1665,29 +1876,10 @@
     chat.syncing = true;
     let delay = 2000;
     try {
-      const conversations = await api('conversations?' + new URLSearchParams({q: S.filter.q || ''}));
-      if (!chatAlive(chat)) return;
-      S.conversations = conversations;
-      if (!chat.id && conversations.length) openChat(chat, conversations[0]);
-      let current = conversations.find(c => Number(c.id) === chat.id);
-      if (chat.id && !current) current = await api('conversations/' + chat.id);
-      if (!chatAlive(chat)) return;
-      if (current) { chat.current=current; chatControls(current); }
-      await loadMessages(chat);
-      if (!chatAlive(chat)) return;
-      if (current && !chat.more) current.unread = 0;
-      chatSidebar(); chatStatus('');
-      if (chat.more) delay = 100;
+      delay = await syncChatData(chat) ?? delay;
     } catch (error) {
       if (!chatAlive(chat) || error.name === 'AbortError') return;
-      if ([401, 403, 404].includes(error.status)) {
-        chat.halted = true;
-        const form = document.querySelector('.chat-compose');
-        if (form) chatDrafts.set(Number(form.dataset.id), form.elements.body.value);
-        const pane = document.querySelector('.chat-conversation');
-        if (pane) pane.innerHTML = empty('Conversación no disponible', error.message) + link('directorio', 'Revisar mis conversaciones', 'small');
-        chatStatus(error.message || 'No se puede acceder a los mensajes. Recarga la página para revisar tu sesión.', true);
-      } else { chatStatus('Sin conexión con el servidor. Reintentando…', true); delay = 8000; }
+      delay = syncChatFailure(chat, error);
     } finally {
       chat.syncing = false;
       if (chatAlive(chat) && !chat.halted && !document.hidden) S.poll = setTimeout(syncChat, delay);
@@ -1711,7 +1903,7 @@
     return `<article class="assistant-message user"><div class="assistant-message-meta"><span>${E(T("Tú"))}</span></div><div class="assistant-message-copy">${E(question)}</div></article>`;
   }
   function assistantBotBubble(content = "", id = "") {
-    return `<article class="assistant-message assistant" ${id ? `id="${E(id)}"` : ""}>${content}</article>`;
+    return `<article class="assistant-message assistant" ${id ? ("id=\"" + (E(id)) + "\"") : ""}>${content}</article>`;
   }
   function assistantLoadingBody(status = "pending") {
     const label = status === "processing" ? T("Consultando la intranet…") : T("Preparando respuesta…");
@@ -1730,11 +1922,11 @@
       "¿Qué recursos tenemos sobre gobierno corporativo?",
       "¿A quién me recomiendas conocer?",
     ];
-    content().innerHTML = `<section class="assistant-intro"><div class="assistant-mark">${I("spark")}</div><div class="eyebrow">${E(T("ASISTENTE ASCLA"))}</div><h1>${E(T("Pregunta a tu comunidad ASCLA"))}</h1><p>${E(T("Conversa con el asistente sobre eventos, publicaciones, recursos y conexiones. Primero consulta la información disponible en la propia intranet."))}</p><span class="demo-badge" style="display:inline-block;margin-top:15px">${E(S.boot.ai_mode)}</span></section><div class="ask-suggestions">${suggestions.map(q => btn(E(T(q)) + " " + I("arrow"), "ask-suggestion", `data-question="${E(T(q))}"`)).join("")}</div><section class="assistant-chat-shell"><header class="assistant-chat-head"><div><strong>${E(T("Conversación con ASCLA"))}</strong><span>${E(T("Los datos internos actuales tienen prioridad sobre el historial de la conversación."))}</span></div><div>${btn(I("plus") + " " + T("Nueva conversación"), "assistant-new", "", "ghost small")}${btn(I("clock") + " " + T("Historial"), "answer-history", "", "ghost small")}</div></header><div class="assistant-messages" id="assistant-messages" role="log" aria-live="polite"><article class="assistant-message assistant welcome"><div class="assistant-message-meta"><span>${I("spark")} ASCLA</span></div><div class="assistant-message-copy">${E(T("Hola. Puedo revisar lo que hay en ASCLA y ayudarte a encontrar eventos próximos, publicaciones recientes, recursos y conexiones recomendadas. ¿Qué quieres saber?"))}</div></article>${rows.map(j => {
+    content().innerHTML = `<section class="assistant-intro"><div class="assistant-mark">${I("spark")}</div><div class="eyebrow">${E(T("ASISTENTE ASCLA"))}</div><h1>${E(T("Pregunta a tu comunidad ASCLA"))}</h1><p>${E(T("Conversa con el asistente sobre eventos, publicaciones, recursos y conexiones. Primero consulta la información disponible en la propia intranet."))}</p><span class="demo-badge" style="display:inline-block;margin-top:15px">${E(S.boot.ai_mode)}</span></section><div class="ask-suggestions">${suggestions.map(q => btn(E(T(q)) + " " + I("arrow"), "ask-suggestion", ("data-question=\"" + (E(T(q))) + "\""))).join("")}</div><section class="assistant-chat-shell"><header class="assistant-chat-head"><div><strong>${E(T("Conversación con ASCLA"))}</strong><span>${E(T("Los datos internos actuales tienen prioridad sobre el historial de la conversación."))}</span></div><div>${btn(I("plus") + " " + T("Nueva conversación"), "assistant-new", "", "ghost small")}${btn(I("clock") + " " + T("Historial"), "answer-history", "", "ghost small")}</div></header><div class="assistant-messages" id="assistant-messages" role="log" aria-live="polite"><article class="assistant-message assistant welcome"><div class="assistant-message-meta"><span>${I("spark")} ASCLA</span></div><div class="assistant-message-copy">${E(T("Hola. Puedo revisar lo que hay en ASCLA y ayudarte a encontrar eventos próximos, publicaciones recientes, recursos y conexiones recomendadas. ¿Qué quieres saber?"))}</div></article>${rows.map(j => {
       const user = assistantUserBubble(j.question);
-      if (j.status === "completed" && j.result) return user + assistantBotBubble(assistantAnswerBody(j.result), `assistant-job-${j.id}`);
-      if (j.status === "error") return user + assistantBotBubble(`<div class="error">${E(T(j.error || "No se pudo completar la consulta."))} ${btn(T("Reintentar"), "retry-job", `data-id="${j.id}"`, "small")}</div>`, `assistant-job-${j.id}`);
-      return user + assistantBotBubble(assistantLoadingBody(j.status), `assistant-job-${j.id}`);
+      if (j.status === "completed" && j.result) return user + assistantBotBubble(assistantAnswerBody(j.result), ("assistant-job-" + (j.id) + ""));
+      if (j.status === "error") return user + assistantBotBubble(("<div class=\"error\">" + (E(T(j.error || "No se pudo completar la consulta."))) + " " + (btn(T("Reintentar"), "retry-job", ("data-id=\"" + (j.id) + "\""), "small")) + "</div>"), ("assistant-job-" + (j.id) + ""));
+      return user + assistantBotBubble(assistantLoadingBody(j.status), ("assistant-job-" + (j.id) + ""));
     }).join("")}</div><form class="assistant-compose" data-form="ask"><textarea name="question" aria-label="${E(T("Tu pregunta"))}" placeholder="${E(T("Escribe una pregunta sobre ASCLA…"))}" required maxlength="2000" rows="2"></textarea><button class="btn primary" aria-label="${E(T("Enviar pregunta"))}">${I("arrow")} <span>${E(T("Enviar"))}</span></button></form><p class="private-note assistant-grounding-note">${E(T("El asistente prioriza la información que tu cuenta puede consultar en ASCLA. Si un dato no puede verificarse dentro de la intranet, te lo indicará."))}</p></section>`;
     rows.filter(j => ["pending", "processing"].includes(j.status)).forEach(j => {
       const target = document.getElementById(`assistant-job-${j.id}`);
@@ -1769,7 +1961,8 @@
           target.innerHTML = `<div class="error">${E(j.error)} ${btn("Reintentar", "retry-job", 'data-id="' + id + '"', "small")}</div>`;
           return;
         }
-        target.innerHTML = assistantMode ? assistantLoadingBody(j.status) : `<div class="alert">${I("clock")} ${j.status === "processing" ? "Procesando" : "Pendiente"} · Trabajo #${id}</div>`;
+        const jobStatusLabel = j.status === "processing" ? "Procesando" : "Pendiente";
+        target.innerHTML = assistantMode ? assistantLoadingBody(j.status) : `<div class="alert">${I("clock")} ${jobStatusLabel} · Trabajo #${id}</div>`;
         if (++attempts < 90) setTimeout(poll, 2500);
         else
           target.innerHTML = assistantMode ? `<div class="assistant-message-meta"><span>${I("spark")} ASCLA</span></div><div class="assistant-message-copy">${E(T("La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta."))}</div>` :
@@ -1803,11 +1996,11 @@
       ]
         .map(
           ([q, a]) =>
-            `<details style="padding:16px 0;border-bottom:1px solid var(--line)"><summary>${E(q)}</summary><p class="private-note">${E(a)}</p></details>`,
+            ("<details style=\"padding:16px 0;border-bottom:1px solid var(--line)\"><summary>" + (E(q)) + "</summary><p class=\"private-note\">" + (E(a)) + "</p></details>"),
         )
         .join(
           "",
-        )}</div><div class="card"><h3>Mis solicitudes</h3>${list.items.map((p) => `<div class="notification-row"><div><strong>${E(p.title)}</strong><p class="private-note">${date(p.date)}</p></div><span class="tag">${E({ closed: "Resuelta", progress: "En atención", open: "Recibida" }[p.meta.request_status] || "Recibida")}</span></div>`).join("") || '<p class="private-note">Aún no has enviado solicitudes.</p>'}</div></div></div>`;
+        )}</div><div class="card"><h3>Mis solicitudes</h3>${list.items.map((p) => ("<div class=\"notification-row\"><div><strong>" + (E(p.title)) + "</strong><p class=\"private-note\">" + (date(p.date)) + "</p></div><span class=\"tag\">" + (E({ closed: "Resuelta", progress: "En atención", open: "Recibida" }[p.meta.request_status] || "Recibida")) + "</span></div>")).join("") || '<p class="private-note">Aún no has enviado solicitudes.</p>'}</div></div></div>`;
   }
   function notificationCount(total) {
     const badge = document.querySelector(".notification-count"), bell = document.querySelector('[data-action="notifications"]');
@@ -1819,7 +2012,7 @@
   }
   function trimTrailingSlashes(path) {
     let end = path.length;
-    while (end > 1 && path.charCodeAt(end - 1) === 47) end--;
+    while (end > 1 && path.codePointAt(end - 1) === 47) end--;
     return path.slice(0, end);
   }
   function notificationPageKey(url) {
@@ -1873,18 +2066,10 @@
     const feed = await api("notifications/feed?" + new URLSearchParams({ filter: S.noticeFilter, page: S.noticePage }));
     S.noticePage = feed.page;
     notificationCount(feed.unread_total);
-    const html = window.ASCLANotifications({ E, I, btn, T, locale: C.locale || "es-PE" }).panel(feed, S.noticeFilter);
+    const html = globalThis.ASCLANotifications({ E, I, btn, T, locale: C.locale || "es-PE" }).panel(feed, S.noticeFilter);
     const existing = document.querySelector(".notification-modal .modal-content");
     if (existing) { existing.innerHTML = html; document.querySelector(`.activity-filters [data-filter="${S.noticeFilter}"]`)?.focus(); }
     else { modal(T("Tus notificaciones"), html); document.querySelector(".modal").classList.add("notification-modal"); S.focus = document.querySelector('[data-action="notifications"]'); }
-  }
-  function answerHTML(question, r) {
-    return assistantUserBubble(question) + assistantBotBubble(assistantAnswerBody(r));
-  }
-  function answerTarget() {
-    const area = document.getElementById("assistant-messages");
-    const target = document.createElement("article"); target.className = "assistant-message assistant";
-    (area || document.getElementById("answers") || content()).append(target); return target;
   }
   async function restoreAnswer(id) {
     const j = await api("jobs/" + id);
@@ -1907,19 +2092,19 @@
     modal(T("Mis consultas anteriores"), `<p class="private-note">${E(T("Tus últimas 50 consultas, guardadas para volver a ellas cuando las necesites."))}</p>${rows.map(j => {
       const url = new URL(C.pages.asistente.url); url.searchParams.set("job", j.id);
       const status = T({ completed: "Respuesta lista", pending: "Pendiente", processing: "Preparando respuesta", error: "Necesita atención" }[j.status] || j.status);
-      return `<a class="answer-history-entry" href="${E(url.href)}"><span>${I("spark")}</span><span><strong>${E(j.question)}</strong><small>${E(status)} · ${date(j.created_at)}</small></span>${I("arrow")}</a>`;
+      return ("<a class=\"answer-history-entry\" href=\"" + (E(url.href)) + "\"><span>" + (I("spark")) + "</span><span><strong>" + (E(j.question)) + "</strong><small>" + (E(status)) + " · " + (date(j.created_at)) + "</small></span>" + (I("arrow")) + "</a>");
     }).join("") || empty("Aún no tienes consultas", "Haz tu primera pregunta al asistente para empezar.")}`);
   }
   const requestLabels = {open: "Recibida", progress: "En atención", closed: "Resuelta"};
   function adminPager(list, area) {
     if (list.pages < 2) return '';
-    return `<div class="admin-pager">${btn("Anterior", "admin-page", `data-area="${area}" data-page="${list.page-1}" ${list.page===1?'disabled':''}`, "small")}<span>Página ${list.page} de ${list.pages}</span>${btn("Siguiente", "admin-page", `data-area="${area}" data-page="${list.page+1}" ${list.page===list.pages?'disabled':''}`, "small")}</div>`;
+    return `<div class="admin-pager">${btn("Anterior", "admin-page", ("data-area=\"" + (area) + "\" data-page=\"" + (list.page-1) + "\" " + (list.page===1?'disabled':'') + ""), "small")}<span>Página ${list.page} de ${list.pages}</span>${btn("Siguiente", "admin-page", ("data-area=\"" + (area) + "\" data-page=\"" + (list.page+1) + "\" " + (list.page===list.pages?'disabled':'') + ""), "small")}</div>`;
   }
   async function adminContacts(panel) {
     const f=S.adminFilters.contacts, list=await api('admin/contacts?'+new URLSearchParams(f));
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ATENCIÓN A LA COMUNIDAD</span><h2>Solicitudes</h2><p>Revisa cada caso y registra su avance. Cuando cambies el estado, el asociado recibirá una notificación.</p></div><span class="admin-total">${list.total} resultados</span></div><div class="request-stats">${Object.entries(requestLabels).map(([k,label])=>btn(`<strong>${list.counts[k]}</strong><span>${label}</span>`, 'request-filter', `data-state="${k}" aria-pressed="${f.state===k}"`, 'request-stat '+k+(f.state===k?' selected':''))).join('')}</div><form class="filters admin-filters" data-form="admin-filter" data-area="contacts"><input name="q" aria-label="Buscar solicitudes" placeholder="Buscar por asunto o contenido…" value="${E(f.q||'')}">${select('state','Estado',[['','Todos los estados'],...Object.entries(requestLabels)],f.state||'')}<button class="btn primary">${I('search')} Buscar</button></form><div class="request-list">${list.items.map(p=>{
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ATENCIÓN A LA COMUNIDAD</span><h2>Solicitudes</h2><p>Revisa cada caso y registra su avance. Cuando cambies el estado, el asociado recibirá una notificación.</p></div><span class="admin-total">${list.total} resultados</span></div><div class="request-stats">${Object.entries(requestLabels).map(([k,label])=>btn(("<strong>" + (list.counts[k]) + "</strong><span>" + (label) + "</span>"), 'request-filter', ("data-state=\"" + (k) + "\" aria-pressed=\"" + (f.state===k) + "\""), 'request-stat '+k+(f.state===k?' selected':''))).join('')}</div><form class="filters admin-filters" data-form="admin-filter" data-area="contacts"><input name="q" aria-label="Buscar solicitudes" placeholder="Buscar por asunto o contenido…" value="${E(f.q||'')}">${select('state','Estado',[['','Todos los estados'],...Object.entries(requestLabels)],f.state||'')}<button class="btn primary">${I('search')} Buscar</button></form><div class="request-list">${list.items.map(p=>{
       const state=p.meta.request_status||'open';
-      return `<article class="request-card ${E(state)}" data-contact="${p.id}" data-state="${E(state)}"><div class="request-card-top"><span class="request-number">SOLICITUD #${p.id}</span><span class="request-status ${E(state)}">${E(requestLabels[state])}</span></div><h3>${E(p.title)}</h3><div class="request-author">${I('users')}<strong>${E(p.author.name)}</strong><span>· ${date(p.date)}</span>${p.meta.description?`<span class="tag">${E(p.meta.description)}</span>`:''}</div><p class="request-body">${E(p.body)}</p><div class="request-footer"><div><small>Cambiar estado</small><div class="request-actions">${Object.entries(requestLabels).map(([key,label])=>btn((state===key?'✓ ':'')+label,'contact-status',`data-id="${p.id}" data-status="${key}" ${state===key?'disabled aria-pressed="true"':'aria-pressed="false"'}`,'small '+(state===key?'selected':''))).join('')}</div></div>${p.meta.request_updated_at?`<small>Actualizada ${date(p.meta.request_updated_at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</small>`:''}</div>${p.can_delete?`<div class="form-actions">${btn('Eliminar solicitud','admin-delete',`data-kind="contact" data-id="${p.id}"`,'danger small')}</div>`:''}${p.meta.request_history?.length?`<details class="request-history"><summary>Historial de atención</summary><ol>${p.meta.request_history.slice().reverse().map(h=>`<li><strong>${E(requestLabels[h.to])}</strong><span>${E(h.actor)} · ${date(h.at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span></li>`).join('')}</ol></details>`:''}</article>`;
+      return ("<article class=\"request-card " + (E(state)) + "\" data-contact=\"" + (p.id) + "\" data-state=\"" + (E(state)) + "\"><div class=\"request-card-top\"><span class=\"request-number\">SOLICITUD #" + (p.id) + "</span><span class=\"request-status " + (E(state)) + "\">" + (E(requestLabels[state])) + "</span></div><h3>" + (E(p.title)) + "</h3><div class=\"request-author\">" + (I('users')) + "<strong>" + (E(p.author.name)) + "</strong><span>· " + (date(p.date)) + "</span>" + (p.meta.description?("<span class=\"tag\">" + (E(p.meta.description)) + "</span>"):'') + "</div><p class=\"request-body\">" + (E(p.body)) + "</p><div class=\"request-footer\"><div><small>Cambiar estado</small><div class=\"request-actions\">" + (Object.entries(requestLabels).map(([key,label])=>btn((state===key?'✓ ':'')+label,'contact-status',("data-id=\"" + (p.id) + "\" data-status=\"" + (key) + "\" " + (state===key?'disabled aria-pressed="true"':'aria-pressed="false"') + ""),'small '+(state===key?'selected':''))).join('')) + "</div></div>" + (p.meta.request_updated_at?("<small>Actualizada " + (date(p.meta.request_updated_at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})) + "</small>"):'') + "</div>" + (p.can_delete?("<div class=\"form-actions\">" + (btn('Eliminar solicitud','admin-delete',("data-kind=\"contact\" data-id=\"" + (p.id) + "\""),'danger small')) + "</div>"):'') + "" + (p.meta.request_history?.length?("<details class=\"request-history\"><summary>Historial de atención</summary><ol>" + (p.meta.request_history.slice().reverse().map(h=>("<li><strong>" + (E(requestLabels[h.to])) + "</strong><span>" + (E(h.actor)) + " · " + (date(h.at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})) + "</span></li>")).join('')) + "</ol></details>"):'') + "</article>");
     }).join('')||empty('No hay solicitudes en esta vista','Prueba otro estado o modifica la búsqueda.')}</div>${adminPager(list,'contacts')}`;
   }
   function adminUserCreator(roles) {
@@ -1939,41 +2124,157 @@
       true,
     );
   }
+  function adminUserCard(u, roles) {
+    const accessClass = u.suspended ? 'closed' : 'open';
+    const accessLabel = u.suspended ? 'Acceso suspendido' : 'Acceso activo';
+    const technicalBadge = u.technical_admin ? '<span class="tag admin-technical-tag">Administración técnica</span>' : '';
+    let actions = '';
+    if (u.profile_url) actions += btn('Ver perfil','member',("data-id=\"" + (Number(u.id)) + "\""),'small');
+    if (u.can_edit) actions += btn(I('edit')+' Editar usuario','user-edit',("data-id=\"" + (u.id) + "\""),'small');
+    if (u.can_suspend) {
+      const suspendLabel = u.suspended ? 'Reactivar acceso' : 'Suspender acceso';
+      actions += btn(suspendLabel,'user-access',("data-id=\"" + (u.id) + "\" data-suspended=\"" + (!u.suspended) + "\" data-name=\"" + (E(u.name)) + "\""),'ghost small');
+    }
+    if (u.can_delete) actions += btn('Eliminar usuario','user-delete',("data-id=\"" + (u.id) + "\" data-name=\"" + (E(u.name)) + "\" data-login=\"" + (E(u.login)) + "\" data-email=\"" + (E(u.email)) + "\""),'danger small');
+    const roleBadges = u.roles.map(r => "<span class=\"tag\">" + E(roles[r] || r) + "</span>").join('');
+    return `<article class="admin-user" data-admin-user="${u.id}"><div class="admin-user-person">${avatar(u)}<div><h3>${E(u.name)}</h3><span>@${E(u.login)}</span><a href="mailto:${E(u.email)}">${E(u.email)}</a></div></div><div class="admin-user-access">${roleBadges}<span class="request-status ${accessClass}">${accessLabel}</span>${technicalBadge}<small>Registro: ${date(u.registered)}</small></div><div class="admin-user-actions">${actions}</div></article>`;
+  }
   async function adminUsers(panel) {
     const f=S.adminFilters.users,list=await api('admin/users?'+new URLSearchParams(f));
     const roles=Object.fromEntries(list.roles.map(r=>[r.id,r.name]));
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PERSONAS Y ACCESOS</span><h2>Usuarios de la comunidad</h2><p>Encuentra cuentas, consulta sus roles y administra su acceso directamente desde ASCLA.</p></div>${list.can_create?btn(I('plus')+' Añadir usuario','user-create',`data-roles="${E(JSON.stringify(list.create_roles||[]))}"`,'primary'):''}</div><form class="filters admin-filters" data-form="admin-filter" data-area="users"><input name="q" aria-label="Buscar usuarios" placeholder="Nombre, usuario o correo…" value="${E(f.q||'')}">${select('role','Rol',[['','Todos los roles'],...list.roles.map(r=>[r.id,r.name])],f.role||'')}${select('state','Acceso',[['','Todos'],['active','Activo'],['suspended','Suspendido']],f.state||'')}<button class="btn primary">${I('search')} Buscar</button></form><p class="private-note">${list.total} usuarios encontrados</p><div class="admin-users">${list.items.map(u=>`<article class="admin-user" data-admin-user="${u.id}"><div class="admin-user-person">${avatar(u)}<div><h3>${E(u.name)}</h3><span>@${E(u.login)}</span><a href="mailto:${E(u.email)}">${E(u.email)}</a></div></div><div class="admin-user-access">${u.roles.map(r=>`<span class="tag">${E(roles[r]||r)}</span>`).join('')}<span class="request-status ${u.suspended?'closed':'open'}">${u.suspended?'Acceso suspendido':'Acceso activo'}</span>${u.technical_admin?'<span class="tag admin-technical-tag">Administración técnica</span>':''}<small>Registro: ${date(u.registered)}</small></div><div class="admin-user-actions">${u.profile_url?btn('Ver perfil','member',`data-id="${Number(u.id)}"`,'small'):''}${u.can_edit?btn(I('edit')+' Editar usuario','user-edit',`data-id="${u.id}"`,'small'):''}${u.can_suspend?btn(u.suspended?'Reactivar acceso':'Suspender acceso','user-access',`data-id="${u.id}" data-suspended="${!u.suspended}" data-name="${E(u.name)}"`,'ghost small'):''}${u.can_delete?btn('Eliminar usuario','user-delete',`data-id="${u.id}" data-name="${E(u.name)}" data-login="${E(u.login)}" data-email="${E(u.email)}"`,'danger small'):''}</div></article>`).join('')||empty('No encontramos usuarios','Prueba otro nombre o cambia los filtros.')}</div>${adminPager(list,'users')}`;
+    const createAction = list.can_create ? btn(I('plus')+' Añadir usuario','user-create',("data-roles=\"" + (E(JSON.stringify(list.create_roles||[]))) + "\""),'primary') : '';
+    const userCards = list.items.map(u => adminUserCard(u, roles)).join('') || empty('No encontramos usuarios','Prueba otro nombre o cambia los filtros.');
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PERSONAS Y ACCESOS</span><h2>Usuarios de la comunidad</h2><p>Encuentra cuentas, consulta sus roles y administra su acceso directamente desde ASCLA.</p></div>${createAction}</div><form class="filters admin-filters" data-form="admin-filter" data-area="users"><input name="q" aria-label="Buscar usuarios" placeholder="Nombre, usuario o correo…" value="${E(f.q||'')}">${select('role','Rol',[['','Todos los roles'],...list.roles.map(r=>[r.id,r.name])],f.role||'')}${select('state','Acceso',[['','Todos'],['active','Activo'],['suspended','Suspendido']],f.state||'')}<button class="btn primary">${I('search')} Buscar</button></form><p class="private-note">${list.total} usuarios encontrados</p><div class="admin-users">${userCards}</div>${adminPager(list,'users')}`;
+  }
+  function adminPendingRow(p) {
+    let badges = "";
+    if (p.meta.generated) badges += " · IA";
+    if (p.meta.chatham) badges += " · Chatham House";
+    let publicationNote = "";
+    if (!S.boot.admin && !S.boot.executive && ["gallery", "resource"].includes(p.type)) {
+      publicationNote = "<small>Publicación administrativa</small>";
+    }
+    const review = btn("Revisar", "item", 'data-id="' + p.id + '"', "small");
+    return `<tr><td><strong>${E(p.title)}</strong><br><small>${E(typeLabel[p.type])}${badges}</small></td><td>${E(p.author.name)}</td><td>${status(p.status)}</td><td>${review}${publicationNote}</td></tr>`;
+  }
+  function adminReportCard(r) {
+    const cardClass = r.reviewed ? "is-reviewed" : "";
+    const title = r.title || "Publicación #" + r.target_id;
+    const stateClass = r.reviewed ? "success" : "";
+    const stateLabel = r.reviewed ? "Revisado" : "Pendiente";
+    const excerpt = r.excerpt ? `<p>${E(r.excerpt)}</p>` : "";
+    const detail = r.detail ? `<br><b>Detalle:</b> ${E(r.detail)}` : "";
+    const reviewedBy = r.reviewed && r.reviewed_by_name
+      ? `<br><b>${E(T("Revisado por:"))}</b> ${E(r.reviewed_by_name)}`
+      : "";
+    const open = Number(r.target_id)
+      ? btn("Abrir contenido", "item", 'data-id="' + r.target_id + '"', "small")
+      : "";
+    const markReviewed = !r.reviewed && S.boot.moderator
+      ? btn("Marcar como revisado", "report-reviewed", 'data-id="' + r.id + '"', "primary small")
+      : "";
+    const remove = r.can_delete
+      ? btn("Eliminar reporte", "admin-delete", 'data-kind="report" data-id="' + r.id + '"', "danger small")
+      : "";
+    return `<div class="admin-report ${cardClass}"><div><div class="admin-report-heading"><strong>${E(title)}</strong><span class="tag ${stateClass}">${E(T(stateLabel))}</span></div>${excerpt}<p class="private-note"><b>Motivo:</b> ${E(r.reason_label || "Sin motivo registrado")}${detail}${reviewedBy}</p></div><div class="form-actions">${open}${markReviewed}${remove}</div></div>`;
+  }
+  function adminCommentCard(c) {
+    const remove = c.can_delete
+      ? btn("Eliminar comentario", "delete-comment", 'data-id="' + c.id + '"', "danger small")
+      : "";
+    const approve = btn("Aprobar", "comment-moderate", 'data-id="' + c.id + '" data-decision="approve"', "small");
+    const reject = btn("Mantener oculto", "comment-moderate", 'data-id="' + c.id + '" data-decision="reject"', "small");
+    return `<div class="comment"><strong>${E(c.author)}</strong><p>${E(c.body)}</p>${approve}${reject}${remove}</div>`;
+  }
+  function adminModeration(d) {
+    const pendingRows = d.pending.map(adminPendingRow).join("") || '<tr><td colspan="4">Todo al día. No hay contenido pendiente.</td></tr>';
+    let reviewGrid = "";
+    if (S.boot.moderator) {
+      const reports = d.reports.map(adminReportCard).join("") || '<p class="private-note">' + E(T("No hay reportes registrados.")) + '</p>';
+      const comments = d.comments.map(adminCommentCard).join("") || '<p class="private-note">No hay comentarios pendientes.</p>';
+      reviewGrid = `<div class="admin-review-grid"><div class="card"><h3>Reportes de la comunidad</h3>${reports}</div><div class="card"><h3>Comentarios pendientes</h3>${comments}</div></div>`;
+    }
+    return `<div class="admin-section-heading"><div><span class="eyebrow">CALIDAD Y CONVIVENCIA</span><h2>Revisión de contenido</h2><p>Los foros se publican directamente. Galería, Eventos y Conocimiento los gestiona el Ejecutivo o un administrador.</p></div></div><div class="card"><h3>Contenido pendiente y borradores</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>Contenido</th><th>Autor</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${pendingRows}</tbody></table></div></div>${reviewGrid}`;
   }
   let statisticsPanel, interestImports;
+  function adminTabs() {
+    const tabs = [];
+    if (S.boot.executive) tabs.push(["estadisticas", "Estadísticas", "users"]);
+    tabs.push(["moderacion", S.boot.moderator ? "Moderación" : "Publicaciones", "shield"]);
+    if (S.boot.moderator) tabs.push(["solicitudes", "Solicitudes", "contact"]);
+    if (S.boot.admin) tabs.push(["importar", "Importar intereses", "book"], ["usuarios", "Usuarios", "users"], ["archivos", "Archivos", "book"]);
+    tabs.push(["trabajos", "IA y trabajos", "spark"]);
+    if (S.boot.admin) tabs.push(["microeventos", "Microeventos", "calendar"], ["logs", "Auditoría", "clock"], ["configuracion", "Configuración", "settings"]);
+    return tabs;
+  }
+  function adminShell(d, tabs, tab) {
+    const overview = [
+      [d.counts.members,'Miembros','users',S.boot.admin?'usuarios':'moderacion'],
+      [d.pending.length,'Contenidos por revisar','shield','moderacion'],
+      [d.jobs.filter(j=>['pending','processing'].includes(j.status)).length,'Trabajos activos','spark','trabajos'],
+      [d.reports.filter(r=>!r.reviewed).length,'Reportes por revisar','bell','moderacion'],
+    ].map(([n,label,icon,target])=>btn(("<span class=\"stat-icon\">" + (I(icon)) + "</span><span class=\"admin-stat-copy\"><strong>" + (n) + "</strong><small>" + (E(T(label))) + "</small></span><span class=\"admin-stat-arrow\">" + (I('chevron')) + "</span>"),'admin-tab',("data-tab=\"" + (target) + "\" aria-label=\"" + (E(T(label))) + "\""),'admin-stat')).join('');
+    const tabButtons = tabs.map(([key,label,icon])=>btn(I(icon)+E(T(label)),'admin-tab',("data-tab=\"" + (key) + "\" aria-pressed=\"" + (tab===key) + "\""),'admin-tab'+(tab===key?' active':''))).join('');
+    return `<div class="admin-workspace"><header class="admin-hero"><div class="admin-hero-main"><div class="admin-hero-logo"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></div><div class="admin-hero-copy"><span class="eyebrow">${E(T("GESTIÓN DE LA COMUNIDAD"))}</span><h1>${E(T("Administración ASCLA"))}</h1><p>${E(T("Personas, contenido y atención en un mismo lugar."))}</p></div></div><div class="admin-hero-actions">${link('intranet',E(T('Ver intranet'))+' '+I('arrow'),'ghost')}</div></header><div class="admin-overview">${overview}</div><nav class="admin-tabs" aria-label="${E(T("Secciones de administración"))}">${tabButtons}</nav><section id="admin-panel" class="admin-panel"></section></div>`;
+  }
+  async function adminStatisticsTab(panel) {
+    if (!S.boot.executive) return;
+    statisticsPanel ||= globalThis.ASCLAStatistics({root,api,E,T,modal,closeModal,toast,date});
+    await statisticsPanel.load(panel);
+  }
+  async function adminImportTab(panel) {
+    if (!S.boot.admin) return;
+    interestImports ||= globalThis.ASCLAInterestImports({root,api,E,T,modal,closeModal,toast,date});
+    await interestImports.load(panel);
+  }
+  async function adminUsersTab(panel) { if (S.boot.admin) await adminUsers(panel); }
+  function adminFilesTab(panel) {
+    if (!S.boot.admin) return;
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T('BIBLIOTECA PRIVADA'))}</span><h2>${E(T('Archivos de la comunidad'))}</h2><p>${E(T('Consulta los archivos privados de todos los asociados y elimina los que corresponda.'))}</p></div></div><div class="card admin-feature-card"><div class="admin-feature-icon">${I('book')}</div><div><h3>${E(T('Biblioteca administrativa'))}</h3><p class="detail-body">${E(T('Busca por archivo o propietario y revisa el material privado almacenado en ASCLA.'))}</p></div>${btn('Administrar archivos','files','data-scope="all"','primary')}</div>`;
+  }
+  function adminModerationTab(panel, d) { panel.innerHTML=adminModeration(d); }
+  function adminJobsTab(panel, d) {
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PROCESAMIENTO Y RESULTADOS</span><h2>IA y trabajos</h2><p>Consulta el avance, abre resultados y reintenta los trabajos con error.</p></div></div><div class="alert">Los derivados de IA quedan en borrador para revisión.</div><div class="admin-actions">${link('centro-conocimiento','Ver recursos','primary')}${S.boot.moderator?btn('Curaduría social demo','social-job'):''}${(S.boot.admin||S.boot.executive)?btn('Conectar YouTube OAuth','google-connect','data-service="youtube"'):''}${btn('Actualizar estados','admin-refresh')}</div><div class="card table-wrap"><table class="data-table"><thead><tr><th>Trabajo</th><th>Estado</th><th>Detalle</th><th>Acción</th></tr></thead><tbody>${d.jobs.map(j=>("<tr><td><strong>#" + (j.id) + "</strong><br>" + (E(j.kind)) + "</td><td>" + (status(j.status)) + "</td><td>" + (E(j.error||date(j.created_at))) + "</td><td>" + (btn('Ver','job-detail',("data-id=\"" + (j.id) + "\""),'small')) + "" + (j.status==='error'?btn('Reintentar','retry-job',("data-id=\"" + (j.id) + "\""),'small'):'') + "</td></tr>")).join('')||'<tr><td colspan="4">No hay trabajos registrados.</td></tr>'}</tbody></table></div>`;
+  }
+  function adminMicroeventsTab(panel) {
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ENCUENTROS ENTRE ASOCIADOS</span><h2>Círculos de conversación</h2><p>Grupos de 4 a 6 personas, con intereses comunes y una agenda para conversar.</p></div></div><div class="card"><h3>Preparar los encuentros del mes</h3><p class="detail-body">Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.</p><div class="admin-actions">${S.boot.admin?btn(I('spark')+' Preparar propuesta del mes','micro-job','','primary'):''}${link('eventos','Ver encuentros','small')}</div><div id="micro-job-result"></div></div>`;
+  }
+  function adminAuditActionName(action) {
+    const labels={settings_updated:'Configuración actualizada',content_saved:'Contenido guardado',content_trashed:'Contenido eliminado',comment_trashed:'Comentario eliminado',content_reported:'Contenido reportado',comment_reported:'Comentario reportado',report_reviewed:'Reporte revisado',moderation:'Decisión de moderación',comment_moderation:'Comentario moderado',member_created:'Usuario creado',member_updated:'Usuario actualizado',member_deleted:'Usuario eliminado',member_suspended:'Acceso suspendido',member_reactivated:'Acceso reactivado',contact_status:'Solicitud actualizada',event_registration:'Inscripción a evento',event_invited:'Invitaciones a evento',event_cancelled:'Evento cancelado',connection_requested:'Solicitud de conexión',connection_accepted:'Conexión aceptada',connection_rejected:'Conexión rechazada',connection_cancelled:'Solicitud de conexión cancelada',connection_removed:'Conexión eliminada',conversation_requested:'Solicitud de conversación',conversation_request_accepted:'Conversación autorizada',conversation_request_rejected:'Solicitud de conversación rechazada',conversation_request_cancelled:'Solicitud de conversación cancelada',conversation_started:'Conversación iniciada',group_conversation_created:'Grupo de mensajería creado',group_conversation_updated:'Grupo de mensajería actualizado',group_conversation_deleted:'Grupo de mensajería eliminado',message_deleted:'Mensaje eliminado',password_changed:'Contraseña cambiada',password_reset_requested:'Recuperación solicitada',media_deleted:'Archivo eliminado',oauth_connected:'Servicio Google conectado',oauth_disconnected:'Servicio Google desconectado',calendar_create:'Evento añadido a Google Calendar',calendar_delete:'Evento retirado de Google Calendar',turnstile_passed:'Verificación de seguridad superada',turnstile_failed:'Verificación de seguridad fallida',turnstile_error:'Error de verificación de seguridad',request_failed:'Solicitud con error',job_completed:'Trabajo en segundo plano completado',job_failed:'Trabajo en segundo plano con error',ai_generated:'Contenido asistido por IA creado'};
+    return labels[action]||String(action||'Actividad del sistema').replaceAll('_',' ');
+  }
+  function adminLogsTab(panel, d) {
+    const auditRows=d.audit||[];
+    const auditActors=new Set(auditRows.map(a=>Number(a.actor_id)).filter(Boolean)).size;
+    const latest=auditRows[0]?.created_at||'';
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">TRAZABILIDAD Y CONTROL</span><h2>Auditoría</h2><p>Este registro ayuda a entender qué cambios importantes ocurrieron en ASCLA, quién los realizó y sobre qué elemento actuaron.</p></div><span class="admin-total">${auditRows.length} registros</span></div><div class="audit-guide"><article>${I('clock')}<div><strong>¿Qué registra?</strong><p>Acciones relevantes como cambios de configuración, moderación, accesos, reportes, archivos e integraciones.</p></div></article><article>${I('users')}<div><strong>¿Para qué sirve?</strong><p>Permite revisar el historial cuando necesitas saber quién hizo un cambio o investigar un problema.</p></div></article><article>${I('shield')}<div><strong>¿Qué no guarda?</strong><p>No almacena contraseñas ni el contenido de mensajes privados. Solo registra metadatos de la acción.</p></div></article></div><div class="audit-summary"><article class="audit-summary-card"><span class="audit-summary-icon">${I('clock')}</span><div><small>Acciones registradas</small><strong>${auditRows.length}</strong></div></article><article class="audit-summary-card"><span class="audit-summary-icon">${I('users')}</span><div><small>Personas identificadas</small><strong>${auditActors}</strong></div></article><article class="audit-summary-card wide"><span class="audit-summary-icon">${I('shield')}</span><div><small>Última actividad</small><strong>${latest?E(date(latest,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'Sin actividad'}</strong></div></article></div><div class="card audit-card"><div class="audit-card-head"><div><h3>Historial de actividad</h3><p class="private-note">Los eventos más recientes aparecen primero. “Elemento” identifica el registro afectado cuando corresponde.</p></div><span class="audit-privacy">${I('shield')} Registro protegido</span></div><div class="table-wrap"><table class="data-table audit-table"><thead><tr><th>Cuándo</th><th>Qué ocurrió</th><th>Quién</th><th>Elemento</th><th>Detalle técnico</th></tr></thead><tbody>${auditRows.map(a=>("<tr><td><time class=\"audit-time\" datetime=\"" + (E(a.created_at)) + "\" title=\"" + (E(a.created_at)) + "\">" + (E(date(a.created_at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))) + "</time></td><td><span class=\"audit-action\">" + (E(adminAuditActionName(a.action))) + "</span></td><td><span class=\"audit-actor\">" + (E(a.actor_name||'Sistema')) + "</span></td><td><span class=\"audit-object\">" + (a.object_id?'#'+Number(a.object_id):'—') + "</span></td><td class=\"audit-detail\">" + (E(a.detail||'—')) + "</td></tr>")).join('')||'<tr><td colspan="5"><div class="audit-empty">No hay acciones registradas todavía.</div></td></tr>'}</tbody></table></div></div>`;
+  }
+  async function adminSettingsTab(panel) { if (S.boot.admin) await settings(panel); }
+  const ADMIN_TAB_HANDLERS = {
+    estadisticas: (panel) => adminStatisticsTab(panel),
+    importar: (panel) => adminImportTab(panel),
+    solicitudes: (panel) => adminContacts(panel),
+    usuarios: (panel) => adminUsersTab(panel),
+    archivos: (panel) => adminFilesTab(panel),
+    moderacion: (panel, d) => adminModerationTab(panel, d),
+    trabajos: (panel, d) => adminJobsTab(panel, d),
+    microeventos: (panel) => adminMicroeventsTab(panel),
+    logs: (panel, d) => adminLogsTab(panel, d),
+    configuracion: (panel) => adminSettingsTab(panel),
+  };
   async function admin() {
-    const d = await api("admin"); S.admin=d;
-    const tabs=[...(S.boot.executive?[["estadisticas","Estadísticas","users"]]:[]),["moderacion",S.boot.moderator?"Moderación":"Publicaciones","shield"],...(S.boot.moderator?[["solicitudes","Solicitudes","contact"]]:[]),...(S.boot.admin?[["importar","Importar intereses","book"],["usuarios","Usuarios","users"],["archivos","Archivos","book"]]:[]),["trabajos","IA y trabajos","spark"],...(S.boot.admin?[["microeventos","Microeventos","calendar"],["logs","Auditoría","clock"],["configuracion","Configuración","settings"]]:[])];
-    const tab=tabs.some(([key])=>key===S.adminTab)?S.adminTab:"moderacion"; S.adminTab=tab;
-    content().innerHTML=`<div class="admin-workspace"><header class="admin-hero"><div class="admin-hero-main"><div class="admin-hero-logo"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></div><div class="admin-hero-copy"><span class="eyebrow">${E(T("GESTIÓN DE LA COMUNIDAD"))}</span><h1>${E(T("Administración ASCLA"))}</h1><p>${E(T("Personas, contenido y atención en un mismo lugar."))}</p></div></div><div class="admin-hero-actions">${link('intranet',E(T('Ver intranet'))+' '+I('arrow'),'ghost')}</div></header><div class="admin-overview">${[[d.counts.members,'Miembros','users',S.boot.admin?'usuarios':'moderacion'],[d.pending.length,'Contenidos por revisar','shield','moderacion'],[d.jobs.filter(j=>['pending','processing'].includes(j.status)).length,'Trabajos activos','spark','trabajos'],[d.reports.filter(r=>!r.reviewed).length,'Reportes por revisar','bell','moderacion']].map(([n,label,icon,target])=>btn(`<span class="stat-icon">${I(icon)}</span><span class="admin-stat-copy"><strong>${n}</strong><small>${E(T(label))}</small></span><span class="admin-stat-arrow">${I('chevron')}</span>`,'admin-tab',`data-tab="${target}" aria-label="${E(T(label))}"`,'admin-stat')).join('')}</div><nav class="admin-tabs" aria-label="${E(T("Secciones de administración"))}">${tabs.map(([key,label,icon])=>btn(I(icon)+E(T(label)),'admin-tab',`data-tab="${key}" aria-pressed="${tab===key}"`,'admin-tab'+(tab===key?' active':''))).join('')}</nav><section id="admin-panel" class="admin-panel"></section></div>`;
+    const d = await api("admin");
+    S.admin=d;
+    const tabs=adminTabs();
+    const tab=tabs.some(([key])=>key===S.adminTab)?S.adminTab:"moderacion";
+    S.adminTab=tab;
+    content().innerHTML=adminShell(d, tabs, tab);
     const panel=document.getElementById('admin-panel');
-    if(tab==='estadisticas' && S.boot.executive) {
-      statisticsPanel ||= window.ASCLAStatistics({root,api,E,T,modal,closeModal,toast,date});
-      await statisticsPanel.load(panel);
+    const handler=ADMIN_TAB_HANDLERS[tab];
+    if (handler) {
+      if (handler.length > 1) await handler(panel, d);
+      else await handler(panel);
     }
-    else if(tab==='importar' && S.boot.admin) {
-      interestImports ||= window.ASCLAInterestImports({root,api,E,T,modal,closeModal,toast,date});
-      await interestImports.load(panel);
-    }
-    else if(tab==='solicitudes') await adminContacts(panel);
-    else if(tab==='usuarios' && S.boot.admin) await adminUsers(panel);
-    else if(tab==='archivos' && S.boot.admin) panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T('BIBLIOTECA PRIVADA'))}</span><h2>${E(T('Archivos de la comunidad'))}</h2><p>${E(T('Consulta los archivos privados de todos los asociados y elimina los que corresponda.'))}</p></div></div><div class="card admin-feature-card"><div class="admin-feature-icon">${I('book')}</div><div><h3>${E(T('Biblioteca administrativa'))}</h3><p class="detail-body">${E(T('Busca por archivo o propietario y revisa el material privado almacenado en ASCLA.'))}</p></div>${btn('Administrar archivos','files','data-scope="all"','primary')}</div>`;
-    else if(tab==='moderacion') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">CALIDAD Y CONVIVENCIA</span><h2>Revisión de contenido</h2><p>Los foros se publican directamente. Galería, Eventos y Conocimiento los gestiona el Ejecutivo o un administrador.</p></div></div><div class="card"><h3>Contenido pendiente y borradores</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>Contenido</th><th>Autor</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${d.pending.map(p=>`<tr><td><strong>${E(p.title)}</strong><br><small>${E(typeLabel[p.type])}${p.meta.generated?' · IA':''}${p.meta.chatham?' · Chatham House':''}</small></td><td>${E(p.author.name)}</td><td>${status(p.status)}</td><td>${btn('Revisar','item',`data-id="${p.id}"`,'small')}${!S.boot.admin&&!S.boot.executive&&['gallery','resource'].includes(p.type)?'<small>Publicación administrativa</small>':''}</td></tr>`).join('')||'<tr><td colspan="4">Todo al día. No hay contenido pendiente.</td></tr>'}</tbody></table></div></div>${S.boot.moderator?`<div class="admin-review-grid"><div class="card"><h3>Reportes de la comunidad</h3>${d.reports.map(r=>`<div class="admin-report ${r.reviewed?'is-reviewed':''}"><div><div class="admin-report-heading"><strong>${E(r.title || `Publicación #${r.target_id}`)}</strong><span class="tag ${r.reviewed?'success':''}">${E(T(r.reviewed?'Revisado':'Pendiente'))}</span></div>${r.excerpt ? `<p>${E(r.excerpt)}</p>` : ''}<p class="private-note"><b>Motivo:</b> ${E(r.reason_label || 'Sin motivo registrado')}${r.detail ? `<br><b>Detalle:</b> ${E(r.detail)}` : ''}${r.reviewed && r.reviewed_by_name ? `<br><b>${E(T('Revisado por:'))}</b> ${E(r.reviewed_by_name)}` : ''}</p></div><div class="form-actions">${Number(r.target_id) ? btn('Abrir contenido','item',`data-id="${r.target_id}"`,'small') : ''}${!r.reviewed && S.boot.moderator ? btn('Marcar como revisado','report-reviewed',`data-id="${r.id}"`,'primary small') : ''}${r.can_delete?btn('Eliminar reporte','admin-delete',`data-kind="report" data-id="${r.id}"`,'danger small'):''}</div></div>`).join('')||'<p class="private-note">'+E(T('No hay reportes registrados.'))+'</p>'}</div><div class="card"><h3>Comentarios pendientes</h3>${d.comments.map(c=>`<div class="comment"><strong>${E(c.author)}</strong><p>${E(c.body)}</p>${btn('Aprobar','comment-moderate',`data-id="${c.id}" data-decision="approve"`,'small')}${btn('Mantener oculto','comment-moderate',`data-id="${c.id}" data-decision="reject"`,'small')}${c.can_delete?btn('Eliminar comentario','delete-comment',`data-id="${c.id}"`,'danger small'):''}</div>`).join('')||'<p class="private-note">No hay comentarios pendientes.</p>'}</div></div>`:''}`;
-    else if(tab==='trabajos') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PROCESAMIENTO Y RESULTADOS</span><h2>IA y trabajos</h2><p>Consulta el avance, abre resultados y reintenta los trabajos con error.</p></div></div><div class="alert">Los derivados de IA quedan en borrador para revisión.</div><div class="admin-actions">${link('centro-conocimiento','Ver recursos','primary')}${S.boot.moderator?btn('Curaduría social demo','social-job'):''}${(S.boot.admin||S.boot.executive)?btn('Conectar YouTube OAuth','google-connect','data-service="youtube"'):''}${btn('Actualizar estados','admin-refresh')}</div><div class="card table-wrap"><table class="data-table"><thead><tr><th>Trabajo</th><th>Estado</th><th>Detalle</th><th>Acción</th></tr></thead><tbody>${d.jobs.map(j=>`<tr><td><strong>#${j.id}</strong><br>${E(j.kind)}</td><td>${status(j.status)}</td><td>${E(j.error||date(j.created_at))}</td><td>${btn('Ver','job-detail',`data-id="${j.id}"`,'small')}${j.status==='error'?btn('Reintentar','retry-job',`data-id="${j.id}"`,'small'):''}</td></tr>`).join('')||'<tr><td colspan="4">No hay trabajos registrados.</td></tr>'}</tbody></table></div>`;
-    else if(tab==='microeventos') panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ENCUENTROS ENTRE ASOCIADOS</span><h2>Círculos de conversación</h2><p>Grupos de 4 a 6 personas, con intereses comunes y una agenda para conversar.</p></div></div><div class="card"><h3>Preparar los encuentros del mes</h3><p class="detail-body">Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.</p><div class="admin-actions">${S.boot.admin?btn(I('spark')+' Preparar propuesta del mes','micro-job','','primary'):''}${link('eventos','Ver encuentros','small')}</div><div id="micro-job-result"></div></div>`;
-    else if(tab==='logs') {
-      const auditRows=d.audit||[];
-      const auditActors=new Set(auditRows.map(a=>Number(a.actor_id)).filter(Boolean)).size;
-      const latest=auditRows[0]?.created_at||'';
-      const auditLabels={settings_updated:'Configuración actualizada',content_saved:'Contenido guardado',content_trashed:'Contenido eliminado',comment_trashed:'Comentario eliminado',content_reported:'Contenido reportado',comment_reported:'Comentario reportado',report_reviewed:'Reporte revisado',moderation:'Decisión de moderación',comment_moderation:'Comentario moderado',member_created:'Usuario creado',member_updated:'Usuario actualizado',member_deleted:'Usuario eliminado',member_suspended:'Acceso suspendido',member_reactivated:'Acceso reactivado',contact_status:'Solicitud actualizada',event_registration:'Inscripción a evento',event_invited:'Invitaciones a evento',event_cancelled:'Evento cancelado',connection_requested:'Solicitud de conexión',connection_accepted:'Conexión aceptada',connection_rejected:'Conexión rechazada',connection_cancelled:'Solicitud de conexión cancelada',connection_removed:'Conexión eliminada',conversation_requested:'Solicitud de conversación',conversation_request_accepted:'Conversación autorizada',conversation_request_rejected:'Solicitud de conversación rechazada',conversation_request_cancelled:'Solicitud de conversación cancelada',conversation_started:'Conversación iniciada',group_conversation_created:'Grupo de mensajería creado',group_conversation_updated:'Grupo de mensajería actualizado',group_conversation_deleted:'Grupo de mensajería eliminado',message_deleted:'Mensaje eliminado',password_changed:'Contraseña cambiada',password_reset_requested:'Recuperación solicitada',media_deleted:'Archivo eliminado',oauth_connected:'Servicio Google conectado',oauth_disconnected:'Servicio Google desconectado',calendar_create:'Evento añadido a Google Calendar',calendar_delete:'Evento retirado de Google Calendar',turnstile_passed:'Verificación de seguridad superada',turnstile_failed:'Verificación de seguridad fallida',turnstile_error:'Error de verificación de seguridad',request_failed:'Solicitud con error',job_completed:'Trabajo en segundo plano completado',job_failed:'Trabajo en segundo plano con error',ai_generated:'Contenido asistido por IA creado'};
-      const actionName=a=>auditLabels[a]||String(a||'Actividad del sistema').replaceAll('_',' ');
-      panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">TRAZABILIDAD Y CONTROL</span><h2>Auditoría</h2><p>Este registro ayuda a entender qué cambios importantes ocurrieron en ASCLA, quién los realizó y sobre qué elemento actuaron.</p></div><span class="admin-total">${auditRows.length} registros</span></div><div class="audit-guide"><article>${I('clock')}<div><strong>¿Qué registra?</strong><p>Acciones relevantes como cambios de configuración, moderación, accesos, reportes, archivos e integraciones.</p></div></article><article>${I('users')}<div><strong>¿Para qué sirve?</strong><p>Permite revisar el historial cuando necesitas saber quién hizo un cambio o investigar un problema.</p></div></article><article>${I('shield')}<div><strong>¿Qué no guarda?</strong><p>No almacena contraseñas ni el contenido de mensajes privados. Solo registra metadatos de la acción.</p></div></article></div><div class="audit-summary"><article class="audit-summary-card"><span class="audit-summary-icon">${I('clock')}</span><div><small>Acciones registradas</small><strong>${auditRows.length}</strong></div></article><article class="audit-summary-card"><span class="audit-summary-icon">${I('users')}</span><div><small>Personas identificadas</small><strong>${auditActors}</strong></div></article><article class="audit-summary-card wide"><span class="audit-summary-icon">${I('shield')}</span><div><small>Última actividad</small><strong>${latest?E(date(latest,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'Sin actividad'}</strong></div></article></div><div class="card audit-card"><div class="audit-card-head"><div><h3>Historial de actividad</h3><p class="private-note">Los eventos más recientes aparecen primero. “Elemento” identifica el registro afectado cuando corresponde.</p></div><span class="audit-privacy">${I('shield')} Registro protegido</span></div><div class="table-wrap"><table class="data-table audit-table"><thead><tr><th>Cuándo</th><th>Qué ocurrió</th><th>Quién</th><th>Elemento</th><th>Detalle técnico</th></tr></thead><tbody>${auditRows.map(a=>`<tr><td><time class="audit-time" datetime="${E(a.created_at)}" title="${E(a.created_at)}">${E(date(a.created_at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))}</time></td><td><span class="audit-action">${E(actionName(a.action))}</span></td><td><span class="audit-actor">${E(a.actor_name||'Sistema')}</span></td><td><span class="audit-object">${a.object_id?'#'+Number(a.object_id):'—'}</span></td><td class="audit-detail">${E(a.detail||'—')}</td></tr>`).join('')||'<tr><td colspan="5"><div class="audit-empty">No hay acciones registradas todavía.</div></td></tr>'}</tbody></table></div></div>`;
-    }
-    else if(tab==='configuracion' && S.boot.admin) await settings(panel);
   }
   function settingsSection(icon, title, description, body, wide = false) {
     return `<section class="settings-group${wide?' wide':''}"><header class="settings-group-head"><span class="settings-group-icon">${I(icon)}</span><div><h3>${E(title)}</h3><p>${E(description)}</p></div></header><div class="settings-group-body">${body}</div></section>`;
@@ -1992,7 +2293,12 @@
   function mailSettings(s) {
     const local = s.mail_local ? '<div class="alert">Buzón local activo: los correos se consultan en <a href="http://localhost:8025/" target="_blank" rel="noopener">Abrir buzón de pruebas</a>. No llegan a una bandeja externa.</div>' : '';
     const last = s.mail_last_result;
-    const body=`${local}<p class="private-note">Usa el servicio de correo de tu hosting o un proveedor SMTP. Si otro plugin ya gestiona los envíos, conserva “Transporte de WordPress”. Guarda los cambios antes de enviar una prueba a tu correo de administrador.</p><div class="form-grid">${select('mail_mode', 'Envío de correos', [['wordpress', 'Transporte de WordPress / otro plugin'], ['smtp', 'Servidor SMTP']], s.mail_mode)}${field('smtp_host', 'Servidor SMTP', s.smtp_host, 'text', 'placeholder="smtp.tuproveedor.com" autocomplete="off"')}${select('smtp_port', 'Puerto', [[587,'587'],[465,'465'],[2525,'2525']], s.smtp_port)}${select('smtp_security', 'Cifrado', [['tls', 'STARTTLS (587 / 2525)'],['ssl', 'SSL/TLS (465)']], s.smtp_security)}${field('smtp_user','Usuario SMTP',s.smtp_user,'text','autocomplete="off"')}${field('smtp_password', s.has_smtp_password ? 'Contraseña SMTP (guardada; vacío para conservar)' : 'Contraseña SMTP', '', 'password', 'autocomplete="new-password"')}${field('smtp_from','Correo remitente autorizado',s.smtp_from,'email')}${field('smtp_name','Nombre del remitente',s.smtp_name)}</div>${check('clear_smtp_password','Eliminar contraseña SMTP guardada',false)}<p class="private-note">La contraseña se guarda cifrada. Para eliminarla, cambia primero al transporte de WordPress. ${last ? 'Último intento: ' + E(last.status === 'accepted' ? 'aceptado por el transporte' : 'falló el envío') + ' · ' + E(date(last.at, {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})) : 'Aún no hay intentos registrados.'}</p>${btn('Enviar correo de prueba a mi cuenta','mail-test','','small')}`;
+    let lastAttempt = 'Aún no hay intentos registrados.';
+    if (last) {
+      const deliveryStatus = last.status === 'accepted' ? 'aceptado por el transporte' : 'falló el envío';
+      lastAttempt = 'Último intento: ' + E(deliveryStatus) + ' · ' + E(date(last.at, {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}));
+    }
+    const body=`${local}<p class="private-note">Usa el servicio de correo de tu hosting o un proveedor SMTP. Si otro plugin ya gestiona los envíos, conserva “Transporte de WordPress”. Guarda los cambios antes de enviar una prueba a tu correo de administrador.</p><div class="form-grid">${select('mail_mode', 'Envío de correos', [['wordpress', 'Transporte de WordPress / otro plugin'], ['smtp', 'Servidor SMTP']], s.mail_mode)}${field('smtp_host', 'Servidor SMTP', s.smtp_host, 'text', 'placeholder="smtp.tuproveedor.com" autocomplete="off"')}${select('smtp_port', 'Puerto', [[587,'587'],[465,'465'],[2525,'2525']], s.smtp_port)}${select('smtp_security', 'Cifrado', [['tls', 'STARTTLS (587 / 2525)'],['ssl', 'SSL/TLS (465)']], s.smtp_security)}${field('smtp_user','Usuario SMTP',s.smtp_user,'text','autocomplete="off"')}${field('smtp_password', s.has_smtp_password ? 'Contraseña SMTP (guardada; vacío para conservar)' : 'Contraseña SMTP', '', 'password', 'autocomplete="new-password"')}${field('smtp_from','Correo remitente autorizado',s.smtp_from,'email')}${field('smtp_name','Nombre del remitente',s.smtp_name)}</div>${check('clear_smtp_password','Eliminar contraseña SMTP guardada',false)}<p class="private-note">La contraseña se guarda cifrada. Para eliminarla, cambia primero al transporte de WordPress. ${lastAttempt}</p>${btn('Enviar correo de prueba a mi cuenta','mail-test','','small')}`;
     return settingsSection('contact','Correo y recuperación','Configura la salida de correos, recuperación de contraseña y pruebas de entrega.',body,true);
   }
   async function settings(panel) {
@@ -2044,7 +2350,7 @@
       ]
         .map(
           ([t, b]) =>
-            `<h3 style="margin-top:18px">${E(t)}</h3><p class="private-note">${E(b)}</p>`,
+            ("<h3 style=\"margin-top:18px\">" + (E(t)) + "</h3><p class=\"private-note\">" + (E(b)) + "</p>"),
         )
         .join("")}`,
     );
@@ -2094,7 +2400,7 @@
   }
   function enableNavigation() {
     if (C.page === 'admin') return;
-    navigation = window.ASCLANavigation({root, pages: C.pages, prepare: prepareView,
+    navigation = globalThis.ASCLANavigation({root, pages: C.pages, prepare: prepareView,
       beforeNavigate: () => confirmUnsavedExit(),
       load: async () => { const version = S.viewVersion; await render(); if (version === S.viewVersion) await routeDetails(); },
       error: error => { if (error.name !== 'AbortError') toast(error.message); }
@@ -2133,7 +2439,678 @@
     input.form?.requestSubmit();
   });
 
-  root.addEventListener("click", async (event) => {
+    async function handleClickActions01(a, _b, _id, _event) {
+    if (a === "close") {
+      requestModalClose();
+    }
+    else if (a === "modal-unsaved-stay") {
+      closeModalDecision();
+    }
+  }
+  async function handleClickActions02(a, _b, _id, _event) {
+    if (a === "modal-unsaved-discard") {
+      closeModalDecision(); S.modalUnsavedForm = null; closeModal();
+    }
+    else if (a === "modal-unsaved-save") {
+      const guarded = S.modalUnsavedForm;
+      closeModalDecision();
+      if (guarded?.isConnected) guarded.requestSubmit();
+    }
+  }
+  async function handleClickActions03(a, _b, _id, _event) {
+    if (a === "profile-nudge-later") {
+      closeModal();
+    }
+    else if (a === "profile-nudge-go") {
+      closeModal(); await navigateTo(C.pages.perfil.url);
+    }
+  }
+  async function handleClickActions04(a, _b, _id, _event) {
+    if (a === "unsaved-stay") {
+      resolveUnsavedExit(false);
+    }
+    else if (a === "unsaved-discard") {
+      resolveUnsavedExit(true);
+    }
+  }
+  async function handleClickActions05(a, b, _id, _event) {
+    if (a === "theme-menu") {
+      themeDialog();
+    }
+    else if (a === "theme-set") {
+      applyTheme(b.dataset.theme || "system", true); closeModal(); toast(T("Apariencia actualizada."));
+    }
+  }
+  async function handleClickActions06(a, _b, _id, _event) {
+    if (a === "menu") {
+      document.querySelector(".ascla-sidebar").classList.toggle("open");
+    }
+    else if (a === "refresh") {
+      if (await confirmUnsavedExit()) await render();
+    }
+  }
+  async function handleClickActions07(a, _b, id, _event) {
+    if (a === "rules") {
+      rules();
+    }
+    else if (a === "member") {
+      await member(id);
+    }
+  }
+  async function handleClickActions08(a, b, id, _event) {
+    if (a === "item") {
+      await item(id);
+    }
+    else if (a === "files") {
+      await files(Number(b.dataset.page) || 1, S.files?.q || "", b.dataset.scope || S.files?.scope || "mine", S.files?.owner || 0);
+    }
+  }
+  async function handleClickActions09(a, b, _id, _event) {
+    if (a === "detach-media") {
+      const row=b.closest('[data-media]'); if (row) { discardPendingWithin(row); row.remove(); }
+    }
+    else if (a === "event-cover-clear") {
+      const preview = document.getElementById('event-cover-preview');
+      if (preview) { discardPendingWithin(preview); preview.innerHTML = `<span class="event-cover-placeholder">${I('gallery')}<small>${E(T('Aún no has seleccionado una portada.'))}</small></span>`; }
+    }
+  }
+  async function handleClickActions10(a, b, id, _event) {
+    if (a === "delete-content") {
+      const p = await api('items/' + id); confirmDeletion('content',id,{title:p.title,forum:p.type==='forum'});
+    }
+    else if (a === "delete-comment") {
+      confirmDeletion('comment',id,{post:Number(b.dataset.post)||0});
+    }
+  }
+  async function handleClickActions11(a, b, id, _event) {
+    if (a === "delete-message") {
+      confirmDeletion('message',id,{conversation:Number(b.dataset.conversation)||S.conversation});
+    }
+    else if (a === "comment-reply") {
+      openCommentReply(b);
+    }
+  }
+  async function handleClickActions12(a, b, id, _event) {
+    if (a === "comment-reply-cancel") {
+      b.closest('.comment-reply-form')?.remove();
+    }
+    else if (a === "report-comment") {
+      reportDialog(id, "comment");
+    }
+  }
+  async function handleClickActions13(a, b, id, _event) {
+    if (a === "comment-like") {
+      const r = await api(`comments/${id}/reaction`, {active:b.dataset.active === 'true'});
+      b.dataset.active=String(!r.active); b.setAttribute('aria-pressed',String(!!r.active)); b.setAttribute('aria-label',T(r.active?'Quitar Me gusta':'Me gusta'));
+      b.classList.toggle('active',!!r.active); const count=b.querySelector('span'); if(count) count.textContent=String(r.likes);
+    }
+    else if (a === "delete-media") {
+      confirmDeletion('media',id,{post:Number(b.dataset.post)||0,title:b.dataset.name,library:b.dataset.library==='true'});
+    }
+  }
+  async function cancelDeletionAction(b, id) {
+    if (b.dataset.kind === 'message') closeModal();
+    else if (b.dataset.library === 'true') await files(S.files.page, S.files.q, S.files.scope, S.files.owner || 0);
+    else if (Number(b.dataset.post)) await item(Number(b.dataset.post));
+    else if (b.dataset.kind === 'content') await item(id);
+    else closeModal();
+  }
+  function deletionEndpoint(kind, id, conversation) {
+    if (kind === 'content') return 'items/' + id;
+    if (kind === 'comment') return 'comments/' + id;
+    if (kind === 'message') return `conversations/${conversation}/messages/${id}`;
+    return 'media/' + id;
+  }
+  async function refreshAfterDeletion(kind, id, post, library) {
+    if (kind === 'message') {
+      document.querySelector(`[data-message-id="${id}"]`)?.remove();
+      S.chat?.ids?.delete(id);
+      if (chatAlive(S.chat)) await syncChat();
+      return;
+    }
+    if (library) { await files(S.files.page, S.files.q, S.files.scope, S.files.owner || 0); return; }
+    if (post) { await item(post); return; }
+    const url = new URL(location.href);
+    url.searchParams.delete('item');
+    history.replaceState(history.state, '', url);
+    S.item = null;
+    await render();
+  }
+  async function confirmDeletionAction(b, id) {
+    const kind = b.dataset.kind;
+    const post = Number(b.dataset.post);
+    const library = b.dataset.library === 'true';
+    const conversation = Number(b.dataset.conversation) || 0;
+    await api(deletionEndpoint(kind, id, conversation), {}, 'DELETE');
+    closeModal();
+    toast(T('Eliminado correctamente.'));
+    await refreshAfterDeletion(kind, id, post, library);
+  }
+  async function handleClickActions14(a, b, id, _event) {
+    if (a === "delete-cancel") await cancelDeletionAction(b, id);
+    else if (a === "delete-confirm") await confirmDeletionAction(b, id);
+  }
+  async function handleClickActions15(a, b, id, _event) {
+    if (a === "editor") {
+      await editor(b.dataset.type, id);
+    }
+    else if (a === "notifications") {
+      S.noticePage = 1; await notifications();
+    }
+  }
+  async function handleClickActions16(a, b, _id, _event) {
+    if (a === "notification-filter") {
+      S.noticeFilter = b.dataset.filter; S.noticePage = 1; await notifications();
+    }
+    else if (a === "notification-page") {
+      S.noticePage = Number(b.dataset.page); await notifications();
+    }
+  }
+  async function handleClickActions17(a, _b, id, _event) {
+    if (a === "notifications-read-all") {
+      await api("notifications/read-all", {}); await notifications();
+    }
+    else if (a === "notification-open") {
+      const destination = await api("notifications/" + id + "/open", {}); await navigateTo(destination.url);
+    }
+  }
+  async function handleClickActions18(a, _b, id, _event) {
+    if (a === "answer-history") {
+      await answerHistory();
+    }
+    else if (a === "report") {
+      reportDialog(id, "content");
+    }
+  }
+  async function handleClickActions19(a, b, id, _event) {
+    if (["like", "follow"].includes(a)) {
+      await api(`items/${id}/reaction`, {
+      kind: a,
+      active: b.dataset.active === "true",
+      });
+      toast("Actualizado.");
+      if (S.item?.id === id && document.querySelector(".modal"))
+      await item(id);
+      else await render();
+    }
+    else if (a === "password-reset-email") {
+      const result = await api("account/password-reset", {});
+      toast(result.message);
+    }
+  }
+  async function handleClickActions20(a, b, id, _event) {
+    if (a === "connect") {
+      await api("relations", { target: id, kind: "connect", active: true });
+      await refreshRelationshipState(id); await refreshConnectionsPanel();
+      toast("Solicitud de conexión enviada.");
+    }
+    else if (a === "connection-respond") {
+      await api(`connections/${Number(b.dataset.request)}/respond`, {decision: b.dataset.decision});
+      await refreshRelationshipState(id); await refreshConnectionsPanel(); await refreshNotifications();
+      toast(b.dataset.decision === 'accept' ? 'Conexión confirmada. Ya pueden enviarse mensajes.' : 'Solicitud rechazada.');
+    }
+  }
+  async function handleClickActions21(a, b, id, _event) {
+    if (a === "conversation-request") {
+      await conversationRequestDialog(id);
+    }
+    else if (a === "conversation-request-respond") {
+      await api(`conversation-requests/${Number(b.dataset.request)}/respond`, {decision:b.dataset.decision});
+      if (S.page === 'mensajeria') {
+      if (b.dataset.decision === 'accept') S.messageTab = 'chats';
+      if (b.dataset.decision === 'reject') {
+      S.conversation = 0;
+      const url=new URL(location.href); url.searchParams.delete('conversation'); history.replaceState(history.state,'',url);
+      }
+      await messages();
+      }
+      else { await refreshRelationshipState(id); await refreshConnectionsPanel(); }
+      await refreshNotifications();
+      toast(b.dataset.decision === 'accept' ? 'Solicitud aceptada. Ya pueden conversar.' : 'Solicitud de conversación rechazada.');
+    }
+  }
+  async function handleClickActions22(a, b, id, _event) {
+    if (a === "conversation-request-cancel") {
+      await api(`conversation-requests/${id}/cancel`, {});
+      if (S.page === 'mensajeria') {
+      S.conversation = 0;
+      const url=new URL(location.href); url.searchParams.delete('conversation'); history.replaceState(history.state,'',url);
+      await messages();
+      }
+      else { await refreshRelationshipState(id); await refreshConnectionsPanel(); }
+      await refreshNotifications();
+      toast('Solicitud de conversación cancelada.');
+    }
+    else if (a === "connection-remove-request") {
+      confirmConnectionRemoval(id, b.dataset.mode);
+    }
+  }
+  async function handleClickActions23(a, b, id, _event) {
+    if (a === "connection-remove-confirm") {
+      const mode = b.dataset.mode;
+      await api("relations", {target:id, kind:"connect", active:false});
+      closeModal(); await refreshRelationshipState(id); await refreshConnectionsPanel(); await refreshNotifications();
+      toast(mode === 'cancel' ? 'Solicitud de conexión cancelada.' : 'Conexión eliminada.');
+    }
+    else if (a === "connections-refresh") {
+      await refreshConnectionsPanel(); await refreshOpenConnection();
+    }
+  }
+  async function handleClickActions24(a, _b, id, _event) {
+    if (a === "intro") {
+      await intro(id);
+    }
+    else if (a === "group-chat-open") {
+      await groupChatDialog();
+    }
+  }
+  async function handleClickActions25(a, _b, id, _event) {
+    if (a === "group-photo-clear") {
+      if (S.groupChat) S.groupChat.photo = null;
+      const hidden=document.querySelector('[data-form="group-chat"] [name="photo_id"]'); if (hidden) { const old=Number(hidden.dataset.pendingMedia||0); if(old) { void discardTemporaryMedia(old); } hidden.value='0'; delete hidden.dataset.pendingMedia; }
+      const preview=document.getElementById('group-photo-preview'); if (preview) preview.innerHTML=`<span class="group-photo-placeholder">${I('users')}</span>`;
+    }
+    else if (a === "group-edit-open") {
+      await groupEditDialog(id);
+    }
+  }
+  async function handleClickActions26(a, b, _id, _event) {
+    if (a === "group-edit-photo-clear") {
+      if (S.groupEdit) { S.groupEdit.photo_id = 0; S.groupEdit.photo_url = ''; }
+      const hidden=document.querySelector('[data-form="group-edit"] [name="photo_id"]'); if (hidden) { const old=Number(hidden.dataset.pendingMedia||0); if(old) { void discardTemporaryMedia(old); } hidden.value='0'; delete hidden.dataset.pendingMedia; }
+      const preview=document.getElementById('group-edit-photo-preview'); if (preview) preview.innerHTML=`<span class="group-photo-placeholder">${I('users')}</span>`;
+    }
+    else if (a === "conversation-open") {
+      const destination=new URL(C.pages.mensajeria.url); destination.searchParams.set('conversation',Number(b.dataset.conversation)); await navigateTo(destination.href);
+    }
+  }
+  async function handleClickActions27(a, b, id, _event) {
+    if (a === "chat-tab") {
+      S.messageTab = b.dataset.tab === 'requests' ? 'requests' : 'chats';
+      S.conversation = 0;
+      const url=new URL(location.href); url.searchParams.delete('conversation'); history.replaceState(history.state,'',url);
+      await messages();
+    }
+    else if (a === "group-menu") {
+      await groupInfoDialog(id);
+    }
+  }
+  async function handleClickActions28(a, _b, id, _event) {
+    if (a === "group-delete-request") {
+      modal('Eliminar grupo', `<p>${E(T('¿Seguro que deseas eliminar este grupo? Se eliminarán sus mensajes para todos los participantes.'))}</p><div class="form-actions">${btn('Cancelar','close')}${btn('Eliminar grupo','group-delete-confirm',("data-id=\"" + (id) + "\""),'danger')}</div>`);
+    }
+    else if (a === "group-delete-confirm") {
+      await api(`conversations/${id}`, null, 'DELETE');
+      closeModal(); S.conversation=0; await messages(); toast('Grupo eliminado.');
+    }
+  }
+  async function handleClickActions29(a, _b, id, _event) {
+    if (a === "group-member-message") {
+      const profile = await api('profiles/' + id);
+      const request = profile.conversation || {};
+      closeModal();
+      if (request.can_message) {
+      const c = await api('conversations', {target:id});
+      const destination = new URL(C.pages.mensajeria.url); destination.searchParams.set('conversation', c.id); await navigateTo(destination.href);
+      } else if (request.conversation_id && ['incoming_pending','outgoing_pending'].includes(request.state)) {
+      const destination = new URL(C.pages.mensajeria.url); destination.searchParams.set('conversation', Number(request.conversation_id)); await navigateTo(destination.href);
+      } else if (request.can_request) {
+      await conversationRequestDialog(id);
+      } else {
+      toast(request.blocked ? 'No puedes iniciar una conversación privada con este integrante.' : 'La conversación privada no está disponible para este integrante.');
+      }
+    }
+    else if (a === "message-start") {
+      const c = await api("conversations", { target: id });
+      const destination = new URL(C.pages.mensajeria.url); destination.searchParams.set("conversation", c.id); await navigateTo(destination.href);
+    }
+  }
+  async function handleClickActions30(a, b, id, _event) {
+    if (a === "conversation") {
+      S.conversation = id;
+      S.messagesLoaded = false;
+      await messages();
+    }
+    else if (a === "block") {
+      await api("relations", {
+      target: id,
+      kind: "block",
+      active: b.dataset.active === "true",
+      });
+      if (S.page === 'mensajeria') await messages();
+      else { const p = await api('profiles/' + id); updateRelationshipState(p); await refreshConnectionsPanel(); }
+    }
+  }
+  async function handleClickActions31(a, b, id, _event) {
+    if (a === "older-messages") {
+      await olderMessages(b);
+    }
+    else if (a === "event-cancel-request") {
+      modal(T("Cancelar evento"), `<p class="detail-body">${E(T("¿Seguro que deseas cancelar este evento?"))}</p><p>${E(T("El evento se conservará como cancelado y se notificará a las personas inscritas, invitadas o en lista de espera. Esta acción no elimina el historial."))}</p><div class="form-actions">${btn(T("Volver"),"item",("data-id=\"" + (id) + "\""))}${btn(T("Cancelar evento"),"event-cancel-confirm",("data-id=\"" + (id) + "\""),'danger primary')}</div>`);
+    }
+  }
+  async function handleClickActions32(a, b, id, _event) {
+    if (a === "event-cancel-confirm") {
+      await api(`events/${id}/cancel`, {});
+      toast("Evento cancelado. Las personas relacionadas fueron notificadas.");
+      if (S.page === "eventos") await listing();
+      await item(id);
+    }
+    else if (a === "register") {
+      const requested = b.dataset.status;
+      const updated = await api(`events/${id}/register`, { status: requested });
+      const messages = {
+      accepted: "Asistencia confirmada.",
+      waitlisted: "Te añadimos a la lista de espera.",
+      declined: "Actualizado. Si había un cupo reservado para ti, se ofreció al siguiente asociado.",
+      cancelled: "Inscripción actualizada.",
+      };
+      toast(messages[requested] || "Inscripción actualizada.");
+      S.event = updated;
+      await item(id);
+    }
+  }
+  async function handleClickActions33(a, b, _id, _event) {
+    if (a === "page") {
+      S.filter.page = b.dataset.page;
+      await render();
+    }
+    else if (a.startsWith("filter-")) {
+      S.filter = {
+      ...S.filter, page: 1,
+      mine: a === "filter-mine" ? 1 : "",
+      past: a === "filter-past" ? 1 : "",
+      };
+      await render();
+    }
+  }
+  async function handleClickActions34(a, b, _id, _event) {
+    if (a === "calendar-prev" || a === "calendar-next") {
+      S.calendar = new Date(
+      S.calendar.getFullYear(),
+      S.calendar.getMonth() + (a === "calendar-next" ? 1 : -1),
+      1,
+      );
+      S.events = await calendarEvents();
+      document.getElementById("calendar-body").innerHTML = calendar(S.events);
+    }
+    else if (a === "calendar-day") {
+      const day = Number(b.dataset.day), from = new Date(S.calendar.getFullYear(), S.calendar.getMonth(), day), to = new Date(S.calendar.getFullYear(), S.calendar.getMonth(), day + 1);
+      const events = S.events.filter(p => new Date(p.meta.start) < to && new Date(p.meta.end) > from);
+      modal("Agenda del " + from.toLocaleDateString("es-PE"), events.map(eventMini).join(""));
+    }
+  }
+  async function handleClickActions35(a, _b, id, _event) {
+    if (a === "notification-read") {
+      await api("notifications/" + id + "/read", {});
+      await notifications();
+      await refreshNotifications();
+    }
+    else if (a === "notification-delete-request") {
+      modal(T('Eliminar notificación'), `<p class="detail-body">${E(T('Esta notificación se eliminará de tu bandeja de actividad.'))}</p><div class="form-actions">${btn(T('Cancelar'),'close')}${btn(T('Eliminar'),'notification-delete-confirm',("data-id=\"" + (id) + "\""),'danger primary')}</div>`);
+    }
+  }
+  async function handleClickActions36(a, b, id, _event) {
+    if (a === "notification-delete-confirm") {
+      await api("notifications/" + id, null, "DELETE");
+      closeModal(); await notifications(); await refreshNotifications(); toast('Notificación eliminada.');
+    }
+    else if (a === "ask-suggestion") {
+      const input=document.querySelector('[data-form="ask"] [name="question"]');
+      if (input) { input.value = b.dataset.question; document.querySelector("[data-form=ask]").requestSubmit(); }
+    }
+  }
+  async function handleClickActions37(a, _b, _id, _event) {
+    if (a === "assistant-new") {
+      assistantThread(true);
+      await assistant();
+      document.querySelector('[data-form="ask"] [name="question"]')?.focus();
+    }
+    else if (a === "ai-test") {
+      const target=document.getElementById('ai-test-result'); target.textContent=T('Probando el proveedor, el modelo y la clave guardados…');
+      try { const r=await api('ai/test',{}); target.textContent=T(r.message)+' '+T('Modelo:')+' '+r.model; target.className='alert success'; }
+      catch(error) { target.textContent=error.message; target.className='alert error'; }
+    }
+  }
+  async function handleClickActions38(a, b, id, _event) {
+    if (a === "admin-delete") {
+      const kind=b.dataset.kind;
+      modal(T('Confirmar eliminación'),`<p>${E(T(kind==='report'?'Se eliminará el reporte revisado. El contenido reportado se conservará.':'La solicitud resuelta se enviará a la papelera.'))}</p><div class="form-actions">${btn('Cancelar','close')}${btn('Eliminar','admin-delete-confirm',("data-kind=\"" + (kind) + "\" data-id=\"" + (id) + "\""),'danger primary')}</div>`);
+    }
+    else if (a === "admin-delete-confirm") {
+      await api((b.dataset.kind==='report'?'admin/reports/':'admin/contact/')+id,{},'DELETE'); closeModal(); toast('Eliminado'); await admin();
+    }
+  }
+  async function handleClickActions39(a, b, id, _event) {
+    if (a === "report-reviewed") {
+      await api('admin/reports/' + id + '/review', {});
+      toast(T('Reporte marcado como revisado.'));
+      await admin();
+    }
+    else if (a === "request-filter") {
+      S.adminFilters.contacts={...S.adminFilters.contacts,state:b.dataset.state,page:1}; await adminContacts(document.getElementById('admin-panel'));
+    }
+  }
+  async function handleClickActions40(a, b, id, _event) {
+    if (a === "admin-page") {
+      const area=b.dataset.area;S.adminFilters[area].page=Number(b.dataset.page);await (area==='users'?adminUsers:adminContacts)(document.getElementById('admin-panel'));
+    }
+    else if (a === "user-access") {
+      const suspended=b.dataset.suspended==='true';
+      modal(suspended?'Suspender acceso':'Reactivar acceso',`<p>¿${suspended?'Suspender':'Reactivar'} el acceso de <strong>${E(b.dataset.name)}</strong> a la comunidad?</p><p class="private-note">La cuenta y su contenido se conservan.</p><div class="form-actions">${btn('Cancelar','close')}${btn('Confirmar','user-status',("data-id=\"" + (id) + "\" data-suspended=\"" + (suspended) + "\""),'primary')}</div>`);
+    }
+  }
+  async function handleClickActions41(a, b, id, _event) {
+    if (a === "user-status") {
+      await api('admin/member/'+id,{suspended:b.dataset.suspended==='true'}); closeModal();toast('Acceso actualizado.');await adminUsers(document.getElementById('admin-panel'));
+    }
+    else if (a === "user-create") {
+      let roles=[];
+      try { roles=JSON.parse(b.dataset.roles||'[]'); } catch {}
+      adminUserCreator(roles);
+    }
+  }
+  async function handleClickActions42(a, b, id, _event) {
+    if (a === "user-edit") {
+      await adminUserEditor(id);
+    }
+    else if (a === "user-delete") {
+      modal('Eliminar usuario',`<div class="admin-delete-warning">${I('shield')}<div><strong>Esta acción es permanente</strong><p>Se eliminará la cuenta de <strong>${E(b.dataset.name)}</strong> (@${E(b.dataset.login)}). Ya no podrá ingresar a ASCLA.</p></div></div><p class="detail-body">Las publicaciones y recursos ya creados se conservarán bajo administración de ASCLA. El historial técnico necesario para auditoría no se elimina.</p><p class="private-note">Correo de la cuenta: ${E(b.dataset.email)}</p><div class="form-actions">${btn('Cancelar','close')}${btn('Sí, eliminar usuario','user-delete-confirm',("data-id=\"" + (id) + "\" data-name=\"" + (E(b.dataset.name)) + "\""),'danger primary')}</div>`);
+    }
+  }
+  async function handleClickActions43(a, b, id, _event) {
+    if (a === "user-delete-confirm") {
+      const result=await api('admin/users/'+id,null,'DELETE'); closeModal(); toast(result.message||'Usuario eliminado.'); await adminUsers(document.getElementById('admin-panel'));
+    }
+    else if (a === "admin-tab") {
+      if (!(await confirmUnsavedExit())) return;
+      S.adminTab = b.dataset.tab;
+      await admin();
+    }
+  }
+  async function handleClickActions44(a, _b, id, _event) {
+    if (a === "admin-refresh") {
+      if (await confirmUnsavedExit()) await admin();
+    }
+    else if (a === "moderate") {
+      const p = await api("items/" + id);
+      modal(
+      "Revisar publicación",
+      `<h3>${E(p.title)}</h3><p class="detail-body">${E(p.body)}</p><form data-form="moderate" data-id="${id}">${select(
+      "decision",
+      "Decisión",
+      [
+      ["approve", "Aprobar y publicar"],
+      ["reject", "Rechazar"],
+      ["hide", "Ocultar"],
+      ["suspend", "Suspender publicación"],
+      ],
+      )}${field("reason", "Motivo de la decisión", "", "textarea", 'required maxlength="1000"')}${p.meta.generated ? check("reviewed", "Revisé fuentes, identidades, afiliaciones y derechos de propiedad intelectual.", false) : ""}<div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar decisión</button></div></form>`,
+      );
+    }
+  }
+  async function handleClickActions45(a, b, id, _event) {
+    if (a === "comment-moderate") {
+      await api("admin/comments/" + id, { decision: b.dataset.decision });
+      toast("Comentario revisado.");
+      await admin();
+    }
+    else if (a === "contact-status") {
+      await api("admin/contact/" + id, { status: b.dataset.status });
+      toast("Solicitud #"+id+": "+requestLabels[b.dataset.status]+". Asociado notificado.");
+      await adminContacts(document.getElementById('admin-panel'));
+    }
+  }
+  async function handleClickActions46(a, _b, id, _event) {
+    if (a === "generate") {
+      try { await ensureYouTubeDuration(id); } catch { /* Server-side metadata remains the primary path. */ }
+      const j = await api("jobs", { kind: "multimedia", resource_id: id });
+      modal("Procesar conferencia", '<div id="job-result"></div>');
+      watchJob(j.id, document.getElementById("job-result"), (r) => {
+      document.getElementById("job-result").innerHTML =
+      `<div class="alert">${E(r.message)} · ${E(r.mode)}</div>${btn("Abrir publicación actualizada", "item", ("data-id=\"" + (r.resource_id) + "\""), "primary")}`;
+      });
+    }
+    else if (a === "event-invite") {
+      S.invite = null;
+      await inviteMembers(id);
+    }
+  }
+  async function handleClickActions47(a, b, id, _event) {
+    if (a === "invite-page") {
+      await inviteMembers(S.invite.id, Number(b.dataset.page), S.invite.query);
+    }
+    else if (a === "video-metadata") {
+      const j = await api("jobs", { kind: "video_metadata", resource_id: id });
+      modal("Datos del video", '<div id="video-job-result" role="status">Consultando metadatos…</div>');
+      const target = document.getElementById("video-job-result");
+      watchJob(j.id, target, () => item(id), async serverError => {
+      target.innerHTML = `<div class="alert">${E(T("YouTube no expuso la duración al servidor. Intentando leerla directamente desde el reproductor…"))}</div>`;
+      try {
+      const seconds = await ensureYouTubeDuration(id, true);
+      target.innerHTML = `<div class="alert">${E(T("Duración verificada directamente desde el video"))}: ${E(UI.duration(seconds))}</div>`;
+      setTimeout(() => item(id), 700);
+      } catch {
+      target.innerHTML = `<div class="error">${E(serverError)}<br>${E(T("Tampoco fue posible verificar la duración desde el reproductor."))}</div>`;
+      }
+      });
+    }
+  }
+  async function handleClickActions48(a, _b, _id, _event) {
+    if (a === "micro-job") {
+      const j = await api("jobs", { kind: "microevents" });
+      watchJob(j.id, document.getElementById("micro-job-result"), (r) => {
+      document.getElementById("micro-job-result").innerHTML =
+      `<div class="alert">${r.events.length} microeventos propuestos. ${r.waiting.length} asociados en espera.</div>${r.events.map((e) => btn("Revisar #" + e, "item", ("data-id=\"" + (e) + "\""), "small")).join("")}`;
+      });
+    }
+    else if (a === "social-job") {
+      const j = await api("jobs", { kind: "social" });
+      toast("Curaduría DEMO en cola: #" + j.id);
+      await admin();
+    }
+  }
+  async function handleClickActions49(a, _b, id, _event) {
+    if (a === "job-detail") {
+      const j = await api("jobs/" + id);
+      modal(
+      "Trabajo #" + id,
+      `${status(j.status)}<p class="detail-body">${E(j.error || j.result?.message || j.result?.answer || "")}</p>${j.result?.resource_id ? btn("Abrir recurso", "item", ("data-id=\"" + (j.result.resource_id) + "\"")) : ""}${j.result?.events ? j.result.events.map((e) => btn("Microevento #" + e, "item", ("data-id=\"" + (e) + "\""))).join("") : ""}${j.result?.items ? j.result.items.map((i) => ("<p>" + (E(i.suggested_reply || "")) + "</p>" + (btn("Abrir borrador", "item", ("data-id=\"" + (i.draft_id) + "\""))) + "")).join("") : ""}`,
+      );
+    }
+    else if (a === "retry-job") {
+      await api("jobs/" + id + "/retry", {});
+      toast("Trabajo nuevamente en cola.");
+      if (S.page === "admin") {
+      closeModal();
+      await admin();
+      } else if (S.page === "asistente") {
+      document.getElementById("answers").innerHTML = "";
+      await restoreAnswer(id);
+      }
+    }
+  }
+  async function handleClickActions50(a, b, _id, _event) {
+    if (a === "google-connect") {
+      const r = await api("google/connect", { service: b.dataset.service });
+      await navigateTo(r.url);
+    }
+    else if (a === "google-disconnect") {
+      await api("google/disconnect", { service: b.dataset.service });
+      toast("Conexión eliminada.");
+      S.boot = await api("bootstrap");
+      await profile();
+    }
+  }
+  async function handleClickActions51(a, b, id, _event) {
+    if (a === "google-event") {
+      await api(`events/${id}/google`, { operation: b.dataset.operation });
+      toast("Google Calendar actualizado.");
+    }
+    else if (a === "mail-test") {
+      const result = await api("mail/test", {}); toast(result.message);
+    }
+  }
+  async function handleClickActions52(a, _b, _id, _event) {
+    if (a === "infographic") {
+      infographic();
+    }
+  }
+  const HANDLECLICKACTIONS_DISPATCH = [
+    { test: (a) => (a === "close") || (a === "modal-unsaved-stay"), run: handleClickActions01 },
+    { test: (a) => (a === "modal-unsaved-discard") || (a === "modal-unsaved-save"), run: handleClickActions02 },
+    { test: (a) => (a === "profile-nudge-later") || (a === "profile-nudge-go"), run: handleClickActions03 },
+    { test: (a) => (a === "unsaved-stay") || (a === "unsaved-discard"), run: handleClickActions04 },
+    { test: (a) => (a === "theme-menu") || (a === "theme-set"), run: handleClickActions05 },
+    { test: (a) => (a === "menu") || (a === "refresh"), run: handleClickActions06 },
+    { test: (a) => (a === "rules") || (a === "member"), run: handleClickActions07 },
+    { test: (a) => (a === "item") || (a === "files"), run: handleClickActions08 },
+    { test: (a) => (a === "detach-media") || (a === "event-cover-clear"), run: handleClickActions09 },
+    { test: (a) => (a === "delete-content") || (a === "delete-comment"), run: handleClickActions10 },
+    { test: (a) => (a === "delete-message") || (a === "comment-reply"), run: handleClickActions11 },
+    { test: (a) => (a === "comment-reply-cancel") || (a === "report-comment"), run: handleClickActions12 },
+    { test: (a) => (a === "comment-like") || (a === "delete-media"), run: handleClickActions13 },
+    { test: (a) => (a === "delete-cancel") || (a === "delete-confirm"), run: handleClickActions14 },
+    { test: (a) => (a === "editor") || (a === "notifications"), run: handleClickActions15 },
+    { test: (a) => (a === "notification-filter") || (a === "notification-page"), run: handleClickActions16 },
+    { test: (a) => (a === "notifications-read-all") || (a === "notification-open"), run: handleClickActions17 },
+    { test: (a) => (a === "answer-history") || (a === "report"), run: handleClickActions18 },
+    { test: (a) => (["like", "follow"].includes(a)) || (a === "password-reset-email"), run: handleClickActions19 },
+    { test: (a) => (a === "connect") || (a === "connection-respond"), run: handleClickActions20 },
+    { test: (a) => (a === "conversation-request") || (a === "conversation-request-respond"), run: handleClickActions21 },
+    { test: (a) => (a === "conversation-request-cancel") || (a === "connection-remove-request"), run: handleClickActions22 },
+    { test: (a) => (a === "connection-remove-confirm") || (a === "connections-refresh"), run: handleClickActions23 },
+    { test: (a) => (a === "intro") || (a === "group-chat-open"), run: handleClickActions24 },
+    { test: (a) => (a === "group-photo-clear") || (a === "group-edit-open"), run: handleClickActions25 },
+    { test: (a) => (a === "group-edit-photo-clear") || (a === "conversation-open"), run: handleClickActions26 },
+    { test: (a) => (a === "chat-tab") || (a === "group-menu"), run: handleClickActions27 },
+    { test: (a) => (a === "group-delete-request") || (a === "group-delete-confirm"), run: handleClickActions28 },
+    { test: (a) => (a === "group-member-message") || (a === "message-start"), run: handleClickActions29 },
+    { test: (a) => (a === "conversation") || (a === "block"), run: handleClickActions30 },
+    { test: (a) => (a === "older-messages") || (a === "event-cancel-request"), run: handleClickActions31 },
+    { test: (a) => (a === "event-cancel-confirm") || (a === "register"), run: handleClickActions32 },
+    { test: (a) => (a === "page") || (a.startsWith("filter-")), run: handleClickActions33 },
+    { test: (a) => (a === "calendar-prev" || a === "calendar-next") || (a === "calendar-day"), run: handleClickActions34 },
+    { test: (a) => (a === "notification-read") || (a === "notification-delete-request"), run: handleClickActions35 },
+    { test: (a) => (a === "notification-delete-confirm") || (a === "ask-suggestion"), run: handleClickActions36 },
+    { test: (a) => (a === "assistant-new") || (a === "ai-test"), run: handleClickActions37 },
+    { test: (a) => (a === "admin-delete") || (a === "admin-delete-confirm"), run: handleClickActions38 },
+    { test: (a) => (a === "report-reviewed") || (a === "request-filter"), run: handleClickActions39 },
+    { test: (a) => (a === "admin-page") || (a === "user-access"), run: handleClickActions40 },
+    { test: (a) => (a === "user-status") || (a === "user-create"), run: handleClickActions41 },
+    { test: (a) => (a === "user-edit") || (a === "user-delete"), run: handleClickActions42 },
+    { test: (a) => (a === "user-delete-confirm") || (a === "admin-tab"), run: handleClickActions43 },
+    { test: (a) => (a === "admin-refresh") || (a === "moderate"), run: handleClickActions44 },
+    { test: (a) => (a === "comment-moderate") || (a === "contact-status"), run: handleClickActions45 },
+    { test: (a) => (a === "generate") || (a === "event-invite"), run: handleClickActions46 },
+    { test: (a) => (a === "invite-page") || (a === "video-metadata"), run: handleClickActions47 },
+    { test: (a) => (a === "micro-job") || (a === "social-job"), run: handleClickActions48 },
+    { test: (a) => (a === "job-detail") || (a === "retry-job"), run: handleClickActions49 },
+    { test: (a) => (a === "google-connect") || (a === "google-disconnect"), run: handleClickActions50 },
+    { test: (a) => (a === "google-event") || (a === "mail-test"), run: handleClickActions51 },
+    { test: (a) => (a === "infographic"), run: handleClickActions52 },
+  ];
+root.addEventListener("click", async (event) => {
     const b = event.target.closest("[data-action]");
     if (!b) return;
     if (b.dataset.action === "notification-open" && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) return;
@@ -2142,370 +3119,8 @@
       id = Number(b.dataset.id || 0);
     b.disabled = true;
     try {
-      if (a === "close") requestModalClose();
-      else if (a === "modal-unsaved-stay") { closeModalDecision(); }
-      else if (a === "modal-unsaved-discard") { closeModalDecision(); S.modalUnsavedForm = null; closeModal(); }
-      else if (a === "modal-unsaved-save") {
-        const guarded = S.modalUnsavedForm;
-        closeModalDecision();
-        if (guarded?.isConnected) guarded.requestSubmit();
-      }
-      else if (a === "profile-nudge-later") closeModal();
-      else if (a === "profile-nudge-go") { closeModal(); await navigateTo(C.pages.perfil.url); }
-      else if (a === "unsaved-stay") resolveUnsavedExit(false);
-      else if (a === "unsaved-discard") resolveUnsavedExit(true);
-      else if (a === "theme-menu") themeDialog();
-      else if (a === "theme-set") { applyTheme(b.dataset.theme || "system", true); closeModal(); toast(T("Apariencia actualizada.")); }
-      else if (a === "menu")
-        document.querySelector(".ascla-sidebar").classList.toggle("open");
-      else if (a === "refresh") { if (await confirmUnsavedExit()) await render(); }
-      else if (a === "rules") rules();
-      else if (a === "member") await member(id);
-      else if (a === "item") await item(id);
-      else if (a === "files") await files(Number(b.dataset.page) || 1, S.files?.q || "", b.dataset.scope || S.files?.scope || "mine", S.files?.owner || 0);
-      else if (a === "detach-media") { const row=b.closest('[data-media]'); if (row) { discardPendingWithin(row); row.remove(); } }
-      else if (a === "event-cover-clear") {
-        const preview = document.getElementById('event-cover-preview');
-        if (preview) { discardPendingWithin(preview); preview.innerHTML = `<span class="event-cover-placeholder">${I('gallery')}<small>${E(T('Aún no has seleccionado una portada.'))}</small></span>`; }
-      }
-      else if (a === "delete-content") { const p = await api('items/' + id); confirmDeletion('content',id,{title:p.title,forum:p.type==='forum'}); }
-      else if (a === "delete-comment") confirmDeletion('comment',id,{post:Number(b.dataset.post)||0});
-      else if (a === "delete-message") confirmDeletion('message',id,{conversation:Number(b.dataset.conversation)||S.conversation});
-      else if (a === "comment-reply") openCommentReply(b);
-      else if (a === "comment-reply-cancel") b.closest('.comment-reply-form')?.remove();
-      else if (a === "report-comment") reportDialog(id, "comment");
-      else if (a === "comment-like") {
-        const r = await api(`comments/${id}/reaction`, {active:b.dataset.active === 'true'});
-        b.dataset.active=String(!r.active); b.setAttribute('aria-pressed',String(!!r.active)); b.setAttribute('aria-label',T(r.active?'Quitar Me gusta':'Me gusta'));
-        b.classList.toggle('active',!!r.active); const count=b.querySelector('span'); if(count) count.textContent=String(r.likes);
-      }
-      else if (a === "delete-media") confirmDeletion('media',id,{post:Number(b.dataset.post)||0,title:b.dataset.name,library:b.dataset.library==='true'});
-      else if (a === "delete-cancel") {
-        if(b.dataset.kind==='message') closeModal();
-        else if(b.dataset.library==='true') await files(S.files.page,S.files.q,S.files.scope,S.files.owner||0);
-        else if(Number(b.dataset.post)) await item(Number(b.dataset.post));
-        else if(b.dataset.kind==='content') await item(id);
-        else closeModal();
-      }
-      else if (a === "delete-confirm") {
-        const kind=b.dataset.kind, post=Number(b.dataset.post), library=b.dataset.library==='true', conversation=Number(b.dataset.conversation)||0;
-        const endpoint=kind==='content'?'items/'+id:kind==='comment'?'comments/'+id:kind==='message'?`conversations/${conversation}/messages/${id}`:'media/'+id;
-        await api(endpoint,{},'DELETE');
-        closeModal();toast(T('Eliminado correctamente.'));
-        if(kind==='message') {
-          document.querySelector(`[data-message-id="${id}"]`)?.remove();
-          S.chat?.ids?.delete(id);
-          if (chatAlive(S.chat)) await syncChat();
-        }
-        else if(library) await files(S.files.page,S.files.q,S.files.scope,S.files.owner||0);
-        else if(post) await item(post);
-        else { const url=new URL(location.href);url.searchParams.delete('item');history.replaceState(history.state,'',url);S.item=null;await render(); }
-      }
-      else if (a === "editor") await editor(b.dataset.type, id);
-      else if (a === "notifications") { S.noticePage = 1; await notifications(); }
-      else if (a === "notification-filter") { S.noticeFilter = b.dataset.filter; S.noticePage = 1; await notifications(); }
-      else if (a === "notification-page") { S.noticePage = Number(b.dataset.page); await notifications(); }
-      else if (a === "notifications-read-all") { await api("notifications/read-all", {}); await notifications(); }
-      else if (a === "notification-open") { const destination = await api("notifications/" + id + "/open", {}); await navigateTo(destination.url); }
-      else if (a === "answer-history") await answerHistory();
-      else if (a === "report") reportDialog(id, "content");
-      else if (["like", "follow"].includes(a)) {
-        await api(`items/${id}/reaction`, {
-          kind: a,
-          active: b.dataset.active === "true",
-        });
-        toast("Actualizado.");
-        if (S.item?.id === id && document.querySelector(".modal"))
-          await item(id);
-        else await render();
-      } else if (a === "password-reset-email") {
-        const result = await api("account/password-reset", {});
-        toast(result.message);
-      } else if (a === "connect") {
-        await api("relations", { target: id, kind: "connect", active: true });
-        await refreshRelationshipState(id); await refreshConnectionsPanel();
-        toast("Solicitud de conexión enviada.");
-      } else if (a === "connection-respond") {
-        await api(`connections/${Number(b.dataset.request)}/respond`, {decision: b.dataset.decision});
-        await refreshRelationshipState(id); await refreshConnectionsPanel(); await refreshNotifications();
-        toast(b.dataset.decision === 'accept' ? 'Conexión confirmada. Ya pueden enviarse mensajes.' : 'Solicitud rechazada.');
-      } else if (a === "conversation-request") {
-        await conversationRequestDialog(id);
-      } else if (a === "conversation-request-respond") {
-        await api(`conversation-requests/${Number(b.dataset.request)}/respond`, {decision:b.dataset.decision});
-        if (S.page === 'mensajeria') {
-          if (b.dataset.decision === 'accept') S.messageTab = 'chats';
-          if (b.dataset.decision === 'reject') {
-            S.conversation = 0;
-            const url=new URL(location.href); url.searchParams.delete('conversation'); history.replaceState(history.state,'',url);
-          }
-          await messages();
-        }
-        else { await refreshRelationshipState(id); await refreshConnectionsPanel(); }
-        await refreshNotifications();
-        toast(b.dataset.decision === 'accept' ? 'Solicitud aceptada. Ya pueden conversar.' : 'Solicitud de conversación rechazada.');
-      } else if (a === "conversation-request-cancel") {
-        await api(`conversation-requests/${id}/cancel`, {});
-        if (S.page === 'mensajeria') {
-          S.conversation = 0;
-          const url=new URL(location.href); url.searchParams.delete('conversation'); history.replaceState(history.state,'',url);
-          await messages();
-        }
-        else { await refreshRelationshipState(id); await refreshConnectionsPanel(); }
-        await refreshNotifications();
-        toast('Solicitud de conversación cancelada.');
-      } else if (a === "connection-remove-request") {
-        confirmConnectionRemoval(id, b.dataset.mode);
-      } else if (a === "connection-remove-confirm") {
-        const mode = b.dataset.mode;
-        await api("relations", {target:id, kind:"connect", active:false});
-        closeModal(); await refreshRelationshipState(id); await refreshConnectionsPanel(); await refreshNotifications();
-        toast(mode === 'cancel' ? 'Solicitud de conexión cancelada.' : 'Conexión eliminada.');
-      } else if (a === "connections-refresh") {
-        await refreshConnectionsPanel(); await refreshOpenConnection();
-      } else if (a === "intro") await intro(id);
-      else if (a === "group-chat-open") {
-        await groupChatDialog();
-      } else if (a === "group-photo-clear") {
-        if (S.groupChat) S.groupChat.photo = null;
-        const hidden=document.querySelector('[data-form="group-chat"] [name="photo_id"]'); if (hidden) { const old=Number(hidden.dataset.pendingMedia||0); if(old) void discardTemporaryMedia(old); hidden.value='0'; hidden.removeAttribute('data-pending-media'); }
-        const preview=document.getElementById('group-photo-preview'); if (preview) preview.innerHTML=`<span class="group-photo-placeholder">${I('users')}</span>`;
-      } else if (a === "group-edit-open") {
-        await groupEditDialog(id);
-      } else if (a === "group-edit-photo-clear") {
-        if (S.groupEdit) { S.groupEdit.photo_id = 0; S.groupEdit.photo_url = ''; }
-        const hidden=document.querySelector('[data-form="group-edit"] [name="photo_id"]'); if (hidden) { const old=Number(hidden.dataset.pendingMedia||0); if(old) void discardTemporaryMedia(old); hidden.value='0'; hidden.removeAttribute('data-pending-media'); }
-        const preview=document.getElementById('group-edit-photo-preview'); if (preview) preview.innerHTML=`<span class="group-photo-placeholder">${I('users')}</span>`;
-      } else if (a === "conversation-open") {
-        const destination=new URL(C.pages.mensajeria.url); destination.searchParams.set('conversation',Number(b.dataset.conversation)); await navigateTo(destination.href);
-      } else if (a === "chat-tab") {
-        S.messageTab = b.dataset.tab === 'requests' ? 'requests' : 'chats';
-        S.conversation = 0;
-        const url=new URL(location.href); url.searchParams.delete('conversation'); history.replaceState(history.state,'',url);
-        await messages();
-      } else if (a === "group-menu") {
-        await groupInfoDialog(id);
-      } else if (a === "group-delete-request") {
-        modal('Eliminar grupo', `<p>${E(T('¿Seguro que deseas eliminar este grupo? Se eliminarán sus mensajes para todos los participantes.'))}</p><div class="form-actions">${btn('Cancelar','close')}${btn('Eliminar grupo','group-delete-confirm',`data-id="${id}"`,'danger')}</div>`);
-      } else if (a === "group-delete-confirm") {
-        await api(`conversations/${id}`, null, 'DELETE');
-        closeModal(); S.conversation=0; await messages(); toast('Grupo eliminado.');
-      } else if (a === "group-member-message") {
-        const profile = await api('profiles/' + id);
-        const request = profile.conversation || {};
-        closeModal();
-        if (request.can_message) {
-          const c = await api('conversations', {target:id});
-          const destination = new URL(C.pages.mensajeria.url); destination.searchParams.set('conversation', c.id); await navigateTo(destination.href);
-        } else if (request.conversation_id && ['incoming_pending','outgoing_pending'].includes(request.state)) {
-          const destination = new URL(C.pages.mensajeria.url); destination.searchParams.set('conversation', Number(request.conversation_id)); await navigateTo(destination.href);
-        } else if (request.can_request) {
-          await conversationRequestDialog(id);
-        } else {
-          toast(request.blocked ? 'No puedes iniciar una conversación privada con este integrante.' : 'La conversación privada no está disponible para este integrante.');
-        }
-      } else if (a === "message-start") {
-        const c = await api("conversations", { target: id });
-        const destination = new URL(C.pages.mensajeria.url); destination.searchParams.set("conversation", c.id); await navigateTo(destination.href);
-      } else if (a === "conversation") {
-        S.conversation = id;
-        S.messagesLoaded = false;
-        await messages();
-      } else if (a === "block") {
-        await api("relations", {
-          target: id,
-          kind: "block",
-          active: b.dataset.active === "true",
-        });
-        if (S.page === 'mensajeria') await messages();
-        else { const p = await api('profiles/' + id); updateRelationshipState(p); await refreshConnectionsPanel(); }
-      } else if (a === "older-messages") {
-        await olderMessages(b);
-      } else if (a === "event-cancel-request") {
-        modal(T("Cancelar evento"), `<p class="detail-body">${E(T("¿Seguro que deseas cancelar este evento?"))}</p><p>${E(T("El evento se conservará como cancelado y se notificará a las personas inscritas, invitadas o en lista de espera. Esta acción no elimina el historial."))}</p><div class="form-actions">${btn(T("Volver"),"item",`data-id="${id}"`)}${btn(T("Cancelar evento"),"event-cancel-confirm",`data-id="${id}"`,'danger primary')}</div>`);
-      } else if (a === "event-cancel-confirm") {
-        await api(`events/${id}/cancel`, {});
-        toast("Evento cancelado. Las personas relacionadas fueron notificadas.");
-        if (S.page === "eventos") await listing();
-        await item(id);
-      } else if (a === "register") {
-        const requested = b.dataset.status;
-        const updated = await api(`events/${id}/register`, { status: requested });
-        const messages = {
-          accepted: "Asistencia confirmada.",
-          waitlisted: "Te añadimos a la lista de espera.",
-          declined: "Actualizado. Si había un cupo reservado para ti, se ofreció al siguiente asociado.",
-          cancelled: "Inscripción actualizada.",
-        };
-        toast(messages[requested] || "Inscripción actualizada.");
-        S.event = updated;
-        await item(id);
-      } else if (a === "page") {
-        S.filter.page = b.dataset.page;
-        await render();
-      } else if (a.startsWith("filter-")) {
-        S.filter = {
-          ...S.filter, page: 1,
-          mine: a === "filter-mine" ? 1 : "",
-          past: a === "filter-past" ? 1 : "",
-        };
-        await render();
-      } else if (a === "calendar-prev" || a === "calendar-next") {
-        S.calendar = new Date(
-          S.calendar.getFullYear(),
-          S.calendar.getMonth() + (a === "calendar-next" ? 1 : -1),
-          1,
-        );
-        S.events = await calendarEvents();
-        document.getElementById("calendar-body").innerHTML = calendar(S.events);
-      } else if (a === "calendar-day") {
-        const day = Number(b.dataset.day), from = new Date(S.calendar.getFullYear(), S.calendar.getMonth(), day), to = new Date(S.calendar.getFullYear(), S.calendar.getMonth(), day + 1);
-        const events = S.events.filter(p => new Date(p.meta.start) < to && new Date(p.meta.end) > from);
-        modal("Agenda del " + from.toLocaleDateString("es-PE"), events.map(eventMini).join(""));
-      } else if (a === "notification-read") {
-        await api("notifications/" + id + "/read", {});
-        await notifications();
-        await refreshNotifications();
-      } else if (a === "notification-delete-request") {
-        modal(T('Eliminar notificación'), `<p class="detail-body">${E(T('Esta notificación se eliminará de tu bandeja de actividad.'))}</p><div class="form-actions">${btn(T('Cancelar'),'close')}${btn(T('Eliminar'),'notification-delete-confirm',`data-id="${id}"`,'danger primary')}</div>`);
-      } else if (a === "notification-delete-confirm") {
-        await api("notifications/" + id, null, "DELETE");
-        closeModal(); await notifications(); await refreshNotifications(); toast('Notificación eliminada.');
-      } else if (a === "ask-suggestion") {
-        const input=document.querySelector('[data-form="ask"] [name="question"]');
-        if (input) { input.value = b.dataset.question; document.querySelector("[data-form=ask]").requestSubmit(); }
-      } else if (a === "assistant-new") {
-        assistantThread(true);
-        await assistant();
-        document.querySelector('[data-form="ask"] [name="question"]')?.focus();
-      } else if (a === "ai-test") {
-        const target=document.getElementById('ai-test-result'); target.textContent=T('Probando el proveedor, el modelo y la clave guardados…');
-        try { const r=await api('ai/test',{}); target.textContent=T(r.message)+' '+T('Modelo:')+' '+r.model; target.className='alert success'; }
-        catch(error) { target.textContent=error.message; target.className='alert error'; }
-      } else if (a === "admin-delete") {
-        const kind=b.dataset.kind;
-        modal(T('Confirmar eliminación'),`<p>${E(T(kind==='report'?'Se eliminará el reporte revisado. El contenido reportado se conservará.':'La solicitud resuelta se enviará a la papelera.'))}</p><div class="form-actions">${btn('Cancelar','close')}${btn('Eliminar','admin-delete-confirm',`data-kind="${kind}" data-id="${id}"`,'danger primary')}</div>`);
-      } else if (a === "admin-delete-confirm") {
-        await api((b.dataset.kind==='report'?'admin/reports/':'admin/contact/')+id,{},'DELETE'); closeModal(); toast('Eliminado'); await admin();
-      } else if (a === "report-reviewed") {
-        await api('admin/reports/' + id + '/review', {});
-        toast(T('Reporte marcado como revisado.'));
-        await admin();
-      } else if (a === "request-filter") {
-        S.adminFilters.contacts={...S.adminFilters.contacts,state:b.dataset.state,page:1}; await adminContacts(document.getElementById('admin-panel'));
-      } else if (a === "admin-page") {
-        const area=b.dataset.area;S.adminFilters[area].page=Number(b.dataset.page);await (area==='users'?adminUsers:adminContacts)(document.getElementById('admin-panel'));
-      } else if (a === "user-access") {
-        const suspended=b.dataset.suspended==='true';
-        modal(suspended?'Suspender acceso':'Reactivar acceso',`<p>¿${suspended?'Suspender':'Reactivar'} el acceso de <strong>${E(b.dataset.name)}</strong> a la comunidad?</p><p class="private-note">La cuenta y su contenido se conservan.</p><div class="form-actions">${btn('Cancelar','close')}${btn('Confirmar','user-status',`data-id="${id}" data-suspended="${suspended}"`,'primary')}</div>`);
-      } else if (a === "user-status") {
-        await api('admin/member/'+id,{suspended:b.dataset.suspended==='true'}); closeModal();toast('Acceso actualizado.');await adminUsers(document.getElementById('admin-panel'));
-      } else if (a === "user-create") {
-        let roles=[];
-        try { roles=JSON.parse(b.dataset.roles||'[]'); } catch {}
-        adminUserCreator(roles);
-      } else if (a === "user-edit") {
-        await adminUserEditor(id);
-      } else if (a === "user-delete") {
-        modal('Eliminar usuario',`<div class="admin-delete-warning">${I('shield')}<div><strong>Esta acción es permanente</strong><p>Se eliminará la cuenta de <strong>${E(b.dataset.name)}</strong> (@${E(b.dataset.login)}). Ya no podrá ingresar a ASCLA.</p></div></div><p class="detail-body">Las publicaciones y recursos ya creados se conservarán bajo administración de ASCLA. El historial técnico necesario para auditoría no se elimina.</p><p class="private-note">Correo de la cuenta: ${E(b.dataset.email)}</p><div class="form-actions">${btn('Cancelar','close')}${btn('Sí, eliminar usuario','user-delete-confirm',`data-id="${id}" data-name="${E(b.dataset.name)}"`,'danger primary')}</div>`);
-      } else if (a === "user-delete-confirm") {
-        const result=await api('admin/users/'+id,null,'DELETE'); closeModal(); toast(result.message||'Usuario eliminado.'); await adminUsers(document.getElementById('admin-panel'));
-      } else if (a === "admin-tab") {
-        if (!(await confirmUnsavedExit())) return;
-        S.adminTab = b.dataset.tab;
-        await admin();
-      } else if (a === "admin-refresh") {
-        if (await confirmUnsavedExit()) await admin();
-      }
-      else if (a === "moderate") {
-        const p = await api("items/" + id);
-        modal(
-          "Revisar publicación",
-          `<h3>${E(p.title)}</h3><p class="detail-body">${E(p.body)}</p><form data-form="moderate" data-id="${id}">${select(
-            "decision",
-            "Decisión",
-            [
-              ["approve", "Aprobar y publicar"],
-              ["reject", "Rechazar"],
-              ["hide", "Ocultar"],
-              ["suspend", "Suspender publicación"],
-            ],
-          )}${field("reason", "Motivo de la decisión", "", "textarea", 'required maxlength="1000"')}${p.meta.generated ? check("reviewed", "Revisé fuentes, identidades, afiliaciones y derechos de propiedad intelectual.", false) : ""}<div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar decisión</button></div></form>`,
-        );
-      } else if (a === "comment-moderate") {
-        await api("admin/comments/" + id, { decision: b.dataset.decision });
-        toast("Comentario revisado.");
-        await admin();
-      } else if (a === "contact-status") {
-        await api("admin/contact/" + id, { status: b.dataset.status });
-        toast("Solicitud #"+id+": "+requestLabels[b.dataset.status]+". Asociado notificado.");
-        await adminContacts(document.getElementById('admin-panel'));
-      } else if (a === "generate") {
-        try { await ensureYouTubeDuration(id); } catch { /* Server-side metadata remains the primary path. */ }
-        const j = await api("jobs", { kind: "multimedia", resource_id: id });
-        modal("Procesar conferencia", '<div id="job-result"></div>');
-        watchJob(j.id, document.getElementById("job-result"), (r) => {
-          document.getElementById("job-result").innerHTML =
-            `<div class="alert">${E(r.message)} · ${E(r.mode)}</div>${btn("Abrir publicación actualizada", "item", `data-id="${r.resource_id}"`, "primary")}`;
-        });
-      } else if (a === "event-invite") {
-        S.invite = null;
-        await inviteMembers(id);
-      } else if (a === "invite-page") {
-        await inviteMembers(S.invite.id, Number(b.dataset.page), S.invite.query);
-      } else if (a === "video-metadata") {
-        const j = await api("jobs", { kind: "video_metadata", resource_id: id });
-        modal("Datos del video", '<div id="video-job-result" role="status">Consultando metadatos…</div>');
-        const target = document.getElementById("video-job-result");
-        watchJob(j.id, target, () => item(id), async serverError => {
-          target.innerHTML = `<div class="alert">${E(T("YouTube no expuso la duración al servidor. Intentando leerla directamente desde el reproductor…"))}</div>`;
-          try {
-            const seconds = await ensureYouTubeDuration(id, true);
-            target.innerHTML = `<div class="alert">${E(T("Duración verificada directamente desde el video"))}: ${E(UI.duration(seconds))}</div>`;
-            setTimeout(() => item(id), 700);
-          } catch (error) {
-            target.innerHTML = `<div class="error">${E(serverError)}<br>${E(T("Tampoco fue posible verificar la duración desde el reproductor."))}</div>`;
-          }
-        });
-      } else if (a === "micro-job") {
-        const j = await api("jobs", { kind: "microevents" });
-        watchJob(j.id, document.getElementById("micro-job-result"), (r) => {
-          document.getElementById("micro-job-result").innerHTML =
-            `<div class="alert">${r.events.length} microeventos propuestos. ${r.waiting.length} asociados en espera.</div>${r.events.map((e) => btn("Revisar #" + e, "item", `data-id="${e}"`, "small")).join("")}`;
-        });
-      } else if (a === "social-job") {
-        const j = await api("jobs", { kind: "social" });
-        toast("Curaduría DEMO en cola: #" + j.id);
-        await admin();
-      } else if (a === "job-detail") {
-        const j = await api("jobs/" + id);
-        modal(
-          "Trabajo #" + id,
-          `${status(j.status)}<p class="detail-body">${E(j.error || j.result?.message || j.result?.answer || "")}</p>${j.result?.resource_id ? btn("Abrir recurso", "item", `data-id="${j.result.resource_id}"`) : ""}${j.result?.events ? j.result.events.map((e) => btn("Microevento #" + e, "item", `data-id="${e}"`)).join("") : ""}${j.result?.items ? j.result.items.map((i) => `<p>${E(i.suggested_reply || "")}</p>${btn("Abrir borrador", "item", `data-id="${i.draft_id}"`)}`).join("") : ""}`,
-        );
-      } else if (a === "retry-job") {
-        await api("jobs/" + id + "/retry", {});
-        toast("Trabajo nuevamente en cola.");
-        if (S.page === "admin") {
-          closeModal();
-          await admin();
-        } else if (S.page === "asistente") {
-          document.getElementById("answers").innerHTML = "";
-          await restoreAnswer(id);
-        }
-      } else if (a === "google-connect") {
-        const r = await api("google/connect", { service: b.dataset.service });
-        await navigateTo(r.url);
-      } else if (a === "google-disconnect") {
-        await api("google/disconnect", { service: b.dataset.service });
-        toast("Conexión eliminada.");
-        S.boot = await api("bootstrap");
-        await profile();
-      } else if (a === "google-event") {
-        await api(`events/${id}/google`, { operation: b.dataset.operation });
-        toast("Google Calendar actualizado.");
-      } else if (a === "mail-test") { const result = await api("mail/test", {}); toast(result.message); }
-      else if (a === "infographic") infographic();
+      const actionHandler = HANDLECLICKACTIONS_DISPATCH.find((entry) => entry.test(a));
+      if (actionHandler) await actionHandler.run(a, b, id, event);
     } catch (e) {
       if (['connect','connection-respond','connection-remove-confirm','conversation-request-respond','conversation-request-cancel'].includes(a) && [404,409].includes(e.status)) { await refreshOpenConnection(); await refreshConnectionsPanel(); }
       if (e.name !== "AbortError") toast(e.message);
@@ -2513,7 +3128,303 @@
       b.disabled = false;
     }
   });
-  root.addEventListener("submit", async (event) => {
+  async function handleSubmitActions01(action, _form, data, _submit, _event) {
+    if (action === "global-search") {
+      const url = new URL(C.pages["centro-conocimiento"].url, location.href);
+      url.searchParams.set("q", data.q);
+      await navigateTo(url.href);
+    }
+    else if (action === "filters") {
+      S.filter = { ...S.filter, ...data, page: 1 };
+      await render();
+    }
+  }
+  async function handleSubmitActions02(action, form, data, _submit, _event) {
+    if (action === "invite-search") {
+      await inviteMembers(Number(form.dataset.id), 1, data.q);
+    }
+    else if (action === "file-search") {
+      await files(1, data.q, S.files?.scope || "mine", Number(data.owner || 0));
+    }
+  }
+  async function handleSubmitActions03(action, form, data, _submit, _event) {
+    if (action === "event-invite") {
+      const r = await api("events/" + form.dataset.id + "/invite", { users: [...S.invite.selected] });
+      closeModal(); S.invite = null;
+      toast(`${r.sent} invitaciones enviadas; ${r.skipped} asociados ya tenían una inscripción o invitación.`);
+      await item(Number(form.dataset.id));
+    }
+    else if (action === "profile") {
+      await validateProfileLocations(form);
+      for (const key of Object.keys(profileTax))
+      data[key] = new FormData(form).getAll(key).map(Number);
+      data.hidden = new FormData(form).getAll("hidden");
+      for (const key of ["directory", "networking", "microevents"])
+      data[key] = form.elements[key].checked;
+      data.email_notifications = {};
+      for (const key of ["connections", "messages", "events", "support"]) {
+      data.email_notifications[key] = !!form.elements[`email_${key}`]?.checked;
+      delete data[`email_${key}`];
+      }
+      delete data.photo;
+      await api("profiles/me", data);
+      const savedPhotoInput = form.querySelector('[name="photo_id"]');
+      if (savedPhotoInput) delete savedPhotoInput.dataset.pendingMedia;
+      clearUnsavedGuard(form);
+      S.boot = await api("bootstrap");
+      const label = root.querySelector(".header-profile strong"); if (label) label.textContent = S.boot.me.name;
+      toast("Perfil actualizado.");
+      await profile();
+    }
+  }
+  async function handleSubmitActions04(action, form, data, _submit, _event) {
+    if (action === "password-change") {
+      const result = await api("account/password", {
+      current_password: data.current_password,
+      new_password: data.new_password,
+      confirm_password: data.confirm_password,
+      });
+      form.reset();
+      toast(result.message + " Actualizando tu sesión…");
+      setTimeout(() => location.reload(), 900);
+    }
+    else if (action === "report") {
+      const target = form.dataset.kind === "comment" ? `comments/${Number(form.dataset.id)}/report` : `items/${Number(form.dataset.id)}/report`;
+      const result = await api(target, {
+      reason: data.reason,
+      detail: data.detail || "",
+      });
+      closeModal();
+      toast(`${form.dataset.kind === "comment" ? "Comentario reportado" : "Reporte enviado"}: ${result.reason_label}.`);
+    }
+  }
+  function editorMeta(form, data, type) {
+    const meta = {};
+    for (const key of [
+      "start", "end", "capacity", "modality", "location", "url", "agenda", "resource_type", "source",
+      "youtube_url", "copyright", "summary", "transcript", "identities", "alliance_type", "benefits",
+      "initiatives", "event_id", "duration_seconds",
+    ]) {
+      if (key in data) meta[key] = data[key];
+    }
+    if (type === "event") {
+      meta.start = new Date(data.start).toISOString();
+      meta.end = new Date(data.end).toISOString();
+    }
+    if (form.elements.chatham) meta.chatham = form.elements.chatham.checked;
+    meta.media_ids = [...form.querySelectorAll("[data-media]")].map((element) => Number(element.dataset.media));
+    return meta;
+  }
+  function editorSavedMessage(statusValue) {
+    if (statusValue === "publish") return "Contenido publicado.";
+    if (statusValue === "draft") return "Borrador guardado.";
+    return "Contenido enviado a revisión.";
+  }
+  async function submitEditorForm(form, data) {
+    const type = form.dataset.type;
+    const id = Number(form.dataset.id);
+    const p = await api("content/" + type + (id ? "/" + id : ""), {
+      title: data.title,
+      body: data.body,
+      status: data.status,
+      parent: Number(data.parent || 0),
+      interest: new FormData(form).getAll("interest").map(Number),
+      category: data.category ? [Number(data.category)] : [],
+      tag_names: data.tag_names.split(",").map(tag => tag.trim()).filter(Boolean),
+      meta: editorMeta(form, data, type),
+    });
+    closeModal();
+    toast(editorSavedMessage(p.status));
+    S.boot = await api("bootstrap");
+    await render();
+  }
+  async function handleSubmitActions05(action, form, data, _submit, _event) {
+    if (action === "editor") {
+      await submitEditorForm(form, data);
+    } else if (action === "comment") {
+      const r = await api("items/" + form.dataset.id + "/comments", { body: data.body });
+      toast(r.status === "pending" ? "Comentario enviado a revisión." : "Comentario publicado.");
+      await item(Number(form.dataset.id));
+    }
+  }
+  async function handleSubmitActions06(action, form, data, _submit, _event) {
+    if (action === "comment-reply") {
+      const r = await api("items/" + form.dataset.id + "/comments", {
+      body: data.body,
+      parent: Number(form.dataset.parent),
+      });
+      toast(r.status === "pending" ? "Respuesta enviada a revisión." : "Respuesta publicada.");
+      await item(Number(form.dataset.id));
+    }
+    else if (action === "message") {
+      const chat = S.chat;
+      form.dataset.sending = 'true';
+      try {
+      await api("conversations/" + form.dataset.id + "/messages", { body: data.body });
+      if (form.elements.body.value === data.body) { form.reset(); chatDrafts.delete(Number(form.dataset.id)); }
+      if (chatAlive(chat)) { await loadMessages(chat); await syncChat(); }
+      } finally { delete form.dataset.sending; }
+    }
+  }
+  async function handleSubmitActions07(action, form, data, _submit, _event) {
+    if (action === "conversation-request-message") {
+      const target=Number(form.dataset.id);
+      const result=await api('conversation-requests',{target,body:data.body});
+      closeModal(); await refreshNotifications();
+      const destination=new URL(C.pages.mensajeria.url); if (result.conversation_id) { destination.searchParams.set('conversation',result.conversation_id); } await navigateTo(destination.href);
+      toast('Mensaje enviado como solicitud de conversación.');
+    }
+    else if (action === "group-chat") {
+      const users=[...form.querySelectorAll('[data-group-member]:checked')].map(input=>Number(input.value));
+      if (users.length < 2) { toast('Selecciona al menos dos asociados para crear un grupo.'); return; }
+      const conversation=await api('conversations/group',{title:data.title,description:data.description || '',users,photo_id:Number(data.photo_id || 0)});
+      S.groupChat=null; closeModal();
+      const destination=new URL(C.pages.mensajeria.url); destination.searchParams.set('conversation',conversation.id); await navigateTo(destination.href);
+      toast('Grupo creado.');
+    }
+  }
+  async function handleSubmitActions08(action, form, data, _submit, _event) {
+    if (action === "group-edit") {
+      const groupId=Number(form.dataset.id);
+      await api(`conversations/${groupId}/group`,{title:data.title,description:data.description || '',photo_id:Number(data.photo_id || 0)});
+      S.groupEdit=null;
+      closeModal();
+      if (S.page === 'mensajeria') await messages();
+      await groupInfoDialog(groupId);
+      toast('Información del grupo actualizada.');
+    }
+    else if (action === "intro") {
+      const c = await api("conversations", {
+      target: Number(form.dataset.id),
+      });
+      await api("conversations/" + c.id + "/messages", { body: data.body });
+      closeModal();
+      toast("Mensaje enviado.");
+    }
+  }
+  async function handleSubmitActions09(action, form, data, _submit, _event) {
+    if (action === "ask") {
+      const question=String(data.question || "").trim();
+      const area=document.getElementById("assistant-messages");
+      if (!question || !area) return;
+      area.insertAdjacentHTML("beforeend", assistantUserBubble(question));
+      const target=document.createElement("article");target.className="assistant-message assistant";target.innerHTML=assistantLoadingBody();area.append(target);
+      form.reset();assistantScroll();
+      try {
+      const j = await api("ask", { question, thread: assistantThread() });
+      target.id=`assistant-job-${j.id}`;
+      watchJob(j.id, target, (r) => { target.innerHTML = assistantAnswerBody(r); assistantScroll(); });
+      } catch(error) { target.innerHTML=`<div class="error">${E(error.message)}</div>`; }
+    }
+    else if (action === "contact") {
+      if (data.website_confirm) throw new Error("Solicitud no válida.");
+      await api("content/contact", {
+      title: data.title,
+      body: data.body,
+      meta: { description: data.category },
+      });
+      toast("Solicitud recibida.");
+      await contact();
+    }
+  }
+  async function handleSubmitActions10(action, form, data, _submit, _event) {
+    if (action === "moderate") {
+      await api("items/" + form.dataset.id + "/moderate", {
+      decision: data.decision,
+      reason: data.reason,
+      reviewed: form.elements.reviewed?.checked || false,
+      });
+      closeModal();
+      toast("Decisión registrada.");
+      await render();
+    }
+    else if (action === "admin-user-create") {
+      const result=await api('admin/users',{
+      login:data.login,
+      email:data.email,
+      role:data.role,
+      first_name:data.first_name,
+      last_name:data.last_name,
+      birth_date:data.birth_date||'',
+      position:data.position||'',
+      company:data.company||'',
+      member_type:data.member_type||'',
+      send_invite:!!form.elements.send_invite?.checked,
+      });
+      closeModal();
+      toast(result.message||'Usuario creado correctamente.');
+      S.adminFilters.users={};
+      await adminUsers(document.getElementById('admin-panel'));
+    }
+  }
+  async function handleSubmitActions11(action, form, data, _submit, _event) {
+    if (action === "admin-user-edit") {
+      const userId=Number(form.dataset.id);
+      const result=await api('admin/users/'+userId,{
+      email:data.email,
+      role:data.role,
+      first_name:data.first_name,
+      last_name:data.last_name,
+      birth_date:data.birth_date||'',
+      position:data.position||'',
+      company:data.company||'',
+      member_type:data.member_type||'',
+      });
+      closeModal();
+      toast('Usuario actualizado: '+([result.first_name,result.last_name].filter(Boolean).join(' ')||result.login));
+      await adminUsers(document.getElementById('admin-panel'));
+    }
+    else if (action === "admin-filter") {
+      const area=form.dataset.area; S.adminFilters[area]={...data,page:1}; await (area==='users'?adminUsers:adminContacts)(document.getElementById('admin-panel'));
+    }
+  }
+  async function handleSubmitActions12(action, form, data, _submit, _event) {
+    if (action === "settings") {
+      for (const k of [
+      "demo",
+      "moderation_required",
+      "moderate_comments",
+      "chatham_default",
+      "micro_enabled",
+      "micro_approval",
+      "clear_smtp_password",
+      "turnstile_enabled",
+      "turnstile_login",
+      "turnstile_recovery",
+      "turnstile_public",
+      "clear_turnstile_secret",
+      ])
+      data[k] = form.elements[k].checked;
+      data.clear_ai_key = data.ai_provider === "gemini" && !!form.elements.clear_ai_key?.checked;
+      data.clear_openai_key = data.ai_provider === "openai" && !!form.elements.clear_openai_key?.checked;
+      data.matching_min_affinity = Number(data.matching_min_affinity);
+      await api("settings", data);
+      clearUnsavedGuard(form);
+      toast("Configuración guardada.");
+      await admin();
+    }
+    else if (action === "demo") {
+      const r = await api("demo", { password: data.password });
+      form.reset();
+      toast(r.message);
+      await admin();
+    }
+  }
+  const HANDLESUBMITACTIONS_DISPATCH = [
+    { test: (action) => (action === "global-search") || (action === "filters"), run: handleSubmitActions01 },
+    { test: (action) => (action === "invite-search") || (action === "file-search"), run: handleSubmitActions02 },
+    { test: (action) => (action === "event-invite") || (action === "profile"), run: handleSubmitActions03 },
+    { test: (action) => (action === "password-change") || (action === "report"), run: handleSubmitActions04 },
+    { test: (action) => (action === "editor") || (action === "comment"), run: handleSubmitActions05 },
+    { test: (action) => (action === "comment-reply") || (action === "message"), run: handleSubmitActions06 },
+    { test: (action) => (action === "conversation-request-message") || (action === "group-chat"), run: handleSubmitActions07 },
+    { test: (action) => (action === "group-edit") || (action === "intro"), run: handleSubmitActions08 },
+    { test: (action) => (action === "ask") || (action === "contact"), run: handleSubmitActions09 },
+    { test: (action) => (action === "moderate") || (action === "admin-user-create"), run: handleSubmitActions10 },
+    { test: (action) => (action === "admin-user-edit") || (action === "admin-filter"), run: handleSubmitActions11 },
+    { test: (action) => (action === "settings") || (action === "demo"), run: handleSubmitActions12 },
+  ];
+root.addEventListener("submit", async (event) => {
     const form = event.target.closest("[data-form]");
     if (!form) return;
     event.preventDefault();
@@ -2522,260 +3433,8 @@
       submit = form.querySelector("button[type=submit],button:not([type])");
     if (submit) submit.disabled = true;
     try {
-      if (action === "global-search") {
-        const url = new URL(C.pages["centro-conocimiento"].url, location.href);
-        url.searchParams.set("q", data.q);
-        await navigateTo(url.href);
-      }
-      else if (action === "filters") {
-        S.filter = { ...S.filter, ...data, page: 1 };
-        await render();
-      } else if (action === "invite-search") {
-        await inviteMembers(Number(form.dataset.id), 1, data.q);
-      } else if (action === "file-search") {
-        await files(1, data.q, S.files?.scope || "mine", Number(data.owner || 0));
-      } else if (action === "event-invite") {
-        const r = await api("events/" + form.dataset.id + "/invite", { users: [...S.invite.selected] });
-        closeModal(); S.invite = null;
-        toast(`${r.sent} invitaciones enviadas; ${r.skipped} asociados ya tenían una inscripción o invitación.`);
-        await item(Number(form.dataset.id));
-      } else if (action === "profile") {
-        await validateProfileLocations(form);
-        for (const key of Object.keys(profileTax))
-          data[key] = new FormData(form).getAll(key).map(Number);
-        data.hidden = new FormData(form).getAll("hidden");
-        for (const key of ["directory", "networking", "microevents"])
-          data[key] = form.elements[key].checked;
-        data.email_notifications = {};
-        for (const key of ["connections", "messages", "events", "support"]) {
-          data.email_notifications[key] = !!form.elements[`email_${key}`]?.checked;
-          delete data[`email_${key}`];
-        }
-        delete data.photo;
-        await api("profiles/me", data);
-        form.querySelector('[name="photo_id"]')?.removeAttribute('data-pending-media');
-        clearUnsavedGuard(form);
-        S.boot = await api("bootstrap");
-        const label = root.querySelector(".header-profile strong"); if (label) label.textContent = S.boot.me.name;
-        toast("Perfil actualizado.");
-        await profile();
-      } else if (action === "password-change") {
-        const result = await api("account/password", {
-          current_password: data.current_password,
-          new_password: data.new_password,
-          confirm_password: data.confirm_password,
-        });
-        form.reset();
-        toast(result.message + " Actualizando tu sesión…");
-        setTimeout(() => location.reload(), 900);
-      } else if (action === "report") {
-        const target = form.dataset.kind === "comment" ? `comments/${Number(form.dataset.id)}/report` : `items/${Number(form.dataset.id)}/report`;
-        const result = await api(target, {
-          reason: data.reason,
-          detail: data.detail || "",
-        });
-        closeModal();
-        toast(`${form.dataset.kind === "comment" ? "Comentario reportado" : "Reporte enviado"}: ${result.reason_label}.`);
-      } else if (action === "editor") {
-        const type = form.dataset.type,
-          id = Number(form.dataset.id),
-          meta = {};
-        for (const k of [
-          "start",
-          "end",
-          "capacity",
-          "modality",
-          "location",
-          "url",
-          "agenda",
-          "resource_type",
-          "source",
-          "youtube_url",
-          "copyright",
-          "summary",
-          "transcript",
-          "identities",
-          "alliance_type",
-          "benefits",
-          "initiatives",
-          "event_id",
-          "duration_seconds",
-        ])
-          if (k in data) meta[k] = data[k];
-        if (type === "event") {
-          meta.start = new Date(data.start).toISOString();
-          meta.end = new Date(data.end).toISOString();
-        }
-        if (form.elements.chatham) meta.chatham = form.elements.chatham.checked;
-        meta.media_ids = [...form.querySelectorAll("[data-media]")].map((x) =>
-          Number(x.dataset.media),
-        );
-        const p = await api("content/" + type + (id ? "/" + id : ""), {
-          title: data.title,
-          body: data.body,
-          status: data.status,
-          parent: Number(data.parent || 0),
-          interest: new FormData(form).getAll("interest").map(Number),
-          category: data.category ? [Number(data.category)] : [],
-          tag_names: data.tag_names.split(",").map(t => t.trim()).filter(Boolean),
-          meta,
-        });
-        closeModal();
-        toast(
-          p.status === "publish"
-            ? "Contenido publicado."
-            : p.status === "draft"
-              ? "Borrador guardado."
-              : "Contenido enviado a revisión.",
-        );
-        S.boot = await api("bootstrap");
-        await render();
-      } else if (action === "comment") {
-        const r = await api("items/" + form.dataset.id + "/comments", {
-          body: data.body,
-        });
-        toast(
-          r.status === "pending"
-            ? "Comentario enviado a revisión."
-            : "Comentario publicado.",
-        );
-        await item(Number(form.dataset.id));
-      } else if (action === "comment-reply") {
-        const r = await api("items/" + form.dataset.id + "/comments", {
-          body: data.body,
-          parent: Number(form.dataset.parent),
-        });
-        toast(r.status === "pending" ? "Respuesta enviada a revisión." : "Respuesta publicada.");
-        await item(Number(form.dataset.id));
-      } else if (action === "message") {
-        const chat = S.chat;
-        form.dataset.sending = 'true';
-        try {
-          await api("conversations/" + form.dataset.id + "/messages", { body: data.body });
-          if (form.elements.body.value === data.body) { form.reset(); chatDrafts.delete(Number(form.dataset.id)); }
-          if (chatAlive(chat)) { await loadMessages(chat); await syncChat(); }
-        } finally { delete form.dataset.sending; }
-      } else if (action === "conversation-request-message") {
-        const target=Number(form.dataset.id);
-        const result=await api('conversation-requests',{target,body:data.body});
-        closeModal(); await refreshNotifications();
-        const destination=new URL(C.pages.mensajeria.url); if (result.conversation_id) destination.searchParams.set('conversation',result.conversation_id); await navigateTo(destination.href);
-        toast('Mensaje enviado como solicitud de conversación.');
-      } else if (action === "group-chat") {
-        const users=[...form.querySelectorAll('[data-group-member]:checked')].map(input=>Number(input.value));
-        if (users.length < 2) { toast('Selecciona al menos dos asociados para crear un grupo.'); return; }
-        const conversation=await api('conversations/group',{title:data.title,description:data.description || '',users,photo_id:Number(data.photo_id || 0)});
-        S.groupChat=null; closeModal();
-        const destination=new URL(C.pages.mensajeria.url); destination.searchParams.set('conversation',conversation.id); await navigateTo(destination.href);
-        toast('Grupo creado.');
-      } else if (action === "group-edit") {
-        const groupId=Number(form.dataset.id);
-        await api(`conversations/${groupId}/group`,{title:data.title,description:data.description || '',photo_id:Number(data.photo_id || 0)});
-        S.groupEdit=null;
-        closeModal();
-        if (S.page === 'mensajeria') await messages();
-        await groupInfoDialog(groupId);
-        toast('Información del grupo actualizada.');
-      } else if (action === "intro") {
-        const c = await api("conversations", {
-          target: Number(form.dataset.id),
-        });
-        await api("conversations/" + c.id + "/messages", { body: data.body });
-        closeModal();
-        toast("Mensaje enviado.");
-      } else if (action === "ask") {
-        const question=String(data.question || "").trim();
-        const area=document.getElementById("assistant-messages");
-        if (!question || !area) return;
-        area.insertAdjacentHTML("beforeend", assistantUserBubble(question));
-        const target=document.createElement("article");target.className="assistant-message assistant";target.innerHTML=assistantLoadingBody();area.append(target);
-        form.reset();assistantScroll();
-        try {
-          const j = await api("ask", { question, thread: assistantThread() });
-          target.id=`assistant-job-${j.id}`;
-          watchJob(j.id, target, (r) => { target.innerHTML = assistantAnswerBody(r); assistantScroll(); });
-        } catch(error) { target.innerHTML=`<div class="error">${E(error.message)}</div>`; }
-      } else if (action === "contact") {
-        if (data.website_confirm) throw new Error("Solicitud no válida.");
-        await api("content/contact", {
-          title: data.title,
-          body: data.body,
-          meta: { description: data.category },
-        });
-        toast("Solicitud recibida.");
-        await contact();
-      } else if (action === "moderate") {
-        await api("items/" + form.dataset.id + "/moderate", {
-          decision: data.decision,
-          reason: data.reason,
-          reviewed: form.elements.reviewed?.checked || false,
-        });
-        closeModal();
-        toast("Decisión registrada.");
-        await render();
-      } else if (action === "admin-user-create") {
-        const result=await api('admin/users',{
-          login:data.login,
-          email:data.email,
-          role:data.role,
-          first_name:data.first_name,
-          last_name:data.last_name,
-          birth_date:data.birth_date||'',
-          position:data.position||'',
-          company:data.company||'',
-          member_type:data.member_type||'',
-          send_invite:!!form.elements.send_invite?.checked,
-        });
-        closeModal();
-        toast(result.message||'Usuario creado correctamente.');
-        S.adminFilters.users={};
-        await adminUsers(document.getElementById('admin-panel'));
-      } else if (action === "admin-user-edit") {
-        const userId=Number(form.dataset.id);
-        const result=await api('admin/users/'+userId,{
-          email:data.email,
-          role:data.role,
-          first_name:data.first_name,
-          last_name:data.last_name,
-          birth_date:data.birth_date||'',
-          position:data.position||'',
-          company:data.company||'',
-          member_type:data.member_type||'',
-        });
-        closeModal();
-        toast('Usuario actualizado: '+([result.first_name,result.last_name].filter(Boolean).join(' ')||result.login));
-        await adminUsers(document.getElementById('admin-panel'));
-      } else if (action === "admin-filter") {
-        const area=form.dataset.area; S.adminFilters[area]={...data,page:1}; await (area==='users'?adminUsers:adminContacts)(document.getElementById('admin-panel'));
-      } else if (action === "settings") {
-        for (const k of [
-          "demo",
-          "moderation_required",
-          "moderate_comments",
-          "chatham_default",
-          "micro_enabled",
-          "micro_approval",
-          "clear_smtp_password",
-          "turnstile_enabled",
-          "turnstile_login",
-          "turnstile_recovery",
-          "turnstile_public",
-          "clear_turnstile_secret",
-        ])
-          data[k] = form.elements[k].checked;
-        data.clear_ai_key = data.ai_provider === "gemini" && !!form.elements.clear_ai_key?.checked;
-        data.clear_openai_key = data.ai_provider === "openai" && !!form.elements.clear_openai_key?.checked;
-        data.matching_min_affinity = Number(data.matching_min_affinity);
-        await api("settings", data);
-        clearUnsavedGuard(form);
-        toast("Configuración guardada.");
-        await admin();
-      } else if (action === "demo") {
-        const r = await api("demo", { password: data.password });
-        form.reset();
-        toast(r.message);
-        await admin();
-      }
+      const actionHandler = HANDLESUBMITACTIONS_DISPATCH.find((entry) => entry.test(action));
+      if (actionHandler) await actionHandler.run(action, form, data, submit, event);
     } catch (e) {
       if (e.name !== "AbortError") toast(e.message);
     } finally {
@@ -2800,12 +3459,20 @@
     const type = input.closest('form[data-form="editor"]')?.dataset.type || "hub";
     return ["hub", "gallery", "resource", "ally", "event"].includes(type) ? type : "hub";
   }
+  function imageEditorTitle(context) {
+    const titles = {
+      profile: "Ajustar fotografía",
+      group: "Ajustar foto del grupo",
+      event: "Ajustar portada del evento",
+    };
+    return titles[context] || "Ajustar imagen";
+  }
   async function prepareImageUpload(input, file) {
-    if (!window.ASCLAImageEditor?.edit) throw new Error(T("El editor de imágenes no está disponible. Recarga la página e inténtalo de nuevo."));
+    if (!globalThis.ASCLAImageEditor?.edit) throw new Error(T("El editor de imágenes no está disponible. Recarga la página e inténtalo de nuevo."));
     const context = imageUploadContext(input);
-    return window.ASCLAImageEditor.edit(file, {
+    return globalThis.ASCLAImageEditor.edit(file, {
       context,
-      title: T(context === "profile" ? "Ajustar fotografía" : context === "group" ? "Ajustar foto del grupo" : context === "event" ? "Ajustar portada del evento" : "Ajustar imagen"),
+      title: T(imageEditorTitle(context)),
       hint: T("Arrastra la imagen para moverla y usa el zoom para elegir el encuadre antes de guardarla."),
       ratioLabel: T("Proporción recomendada"),
       fullLabel: T("Usar imagen completa"),
@@ -2826,13 +3493,97 @@
     });
   }
   function preparedImageMarkup(media) {
-    return `<span class="attached-file image-ready" data-media="${media.id}" data-pending-media="${media.id}"><img src="${E(media.url)}" alt=""><span>${E(media.name)}</span>${btn("Quitar", "detach-media", `data-id="${media.id}"`, "ghost small")}</span>`;
+    return `<span class="attached-file image-ready" data-media="${media.id}" data-pending-media="${media.id}"><img src="${E(media.url)}" alt=""><span>${E(media.name)}</span>${btn("Quitar", "detach-media", ("data-id=\"" + (media.id) + "\""), "ghost small")}</span>`;
   }
   function humanFileSize(bytes) {
     const value = Number(bytes) || 0;
     if (value < 1024) return value + " B";
     if (value < 1024 * 1024) return Math.round(value / 1024) + " KB";
     return (value / 1024 / 1024).toFixed(1) + " MB";
+  }
+  async function applyPhotoUpload(_input, media, prepared) {
+    const photoId = document.querySelector("[name=photo_id]");
+    replacePendingMedia(photoId, media.id);
+    photoId.value = media.id;
+    refreshUnsavedGuard(photoId);
+    const avatarBox = document.querySelector('[data-form="profile"] .profile-summary .avatar');
+    if (avatarBox && media.mime?.startsWith("image/")) {
+      avatarBox.querySelector("img")?.remove();
+      avatarBox.insertAdjacentHTML("afterbegin", `<img src="${E(media.url)}" alt="${E(S.boot.me.name || "")}">`);
+    }
+    const statusBox = document.getElementById("photo-status");
+    if (statusBox) statusBox.textContent = prepared
+      ? `${T("Fotografía preparada")}: ${humanFileSize(prepared.inputBytes)} → ${humanFileSize(prepared.storedBytes)}. ${T("Guarda el perfil para aplicar.")}`
+      : T("Fotografía cargada. Guarda el perfil para aplicar.");
+  }
+  async function applyEventCoverUpload(_input, media) {
+    const preview = document.getElementById('event-cover-preview');
+    if (!preview) { await discardTemporaryMedia(media.id); return; }
+    discardPendingWithin(preview);
+    preview.innerHTML = `<span class="event-cover-ready" data-media="${Number(media.id)}" data-pending-media="${Number(media.id)}"><img src="${E(media.url)}" alt="${E(T('Portada del evento'))}"><span class="event-cover-actions"><strong>${E(media.name || T('Imagen del evento'))}</strong>${btn('Quitar portada','event-cover-clear','','ghost small')}</span></span>`;
+  }
+  async function applyGroupPhotoUpload(_input, media) {
+    if (!S.groupChat) { await discardTemporaryMedia(media.id); return; }
+    S.groupChat.photo = media;
+    const hidden = document.querySelector('[data-form="group-chat"] [name="photo_id"]');
+    if (hidden) { replacePendingMedia(hidden, media.id); hidden.value = String(media.id); }
+    const preview = document.getElementById('group-photo-preview');
+    if (preview) preview.innerHTML = `<img src="${E(media.url)}" alt="${E(T('Foto del grupo'))}">${btn('Quitar','group-photo-clear','','ghost small')}`;
+  }
+  async function applyGroupEditPhotoUpload(_input, media) {
+    if (!S.groupEdit) { await discardTemporaryMedia(media.id); return; }
+    S.groupEdit.photo_id = Number(media.id);
+    S.groupEdit.photo_url = media.url || '';
+    const hidden = document.querySelector('[data-form="group-edit"] [name="photo_id"]');
+    if (hidden) { replacePendingMedia(hidden, media.id); hidden.value = String(media.id); }
+    const preview = document.getElementById('group-edit-photo-preview');
+    if (preview) preview.innerHTML = `<img src="${E(media.url)}" alt="${E(T('Foto del grupo'))}">${btn('Quitar foto','group-edit-photo-clear','','ghost small')}`;
+  }
+  async function applyAttachmentUpload(_input, media) {
+    const attachments = document.getElementById("attachments");
+    if (!attachments) { await discardTemporaryMedia(media.id); return; }
+    const markup = media.mime?.startsWith("image/")
+      ? preparedImageMarkup(media)
+      : `<span class="attached-file" data-media="${media.id}" data-pending-media="${media.id}">${E(media.name)}${btn("Quitar", "detach-media", ("data-id=\"" + (media.id) + "\""), "ghost small")}</span>`;
+    attachments.insertAdjacentHTML("beforeend", markup);
+  }
+  const UPLOAD_RESULT_HANDLERS = [
+    { test: (input) => input.dataset.upload === "photo", run: applyPhotoUpload },
+    { test: (input) => input.dataset.upload === "event-cover", run: applyEventCoverUpload },
+    { test: (input) => input.dataset.upload === "group-photo", run: applyGroupPhotoUpload },
+    { test: (input) => input.dataset.upload === "group-photo-edit", run: applyGroupEditPhotoUpload },
+    { test: () => true, run: applyAttachmentUpload },
+  ];
+  async function handleUploadInput(input) {
+    let sourceId = 0;
+    try {
+      const file = input.files[0];
+      let media;
+      let prepared = null;
+      if (file.type.startsWith("image/")) {
+        prepared = await prepareImageUpload(input, file);
+        if (!prepared) return;
+        toast(T("Guardando imagen optimizada…"));
+        if (prepared.masterFile) {
+          const source = await uploadPrivateMedia(prepared.masterFile);
+          sourceId = Number(source.id) || 0;
+        }
+        media = await uploadPrivateMedia(prepared.outputFile, sourceId);
+        sourceId = 0;
+      } else {
+        toast(T("Subiendo archivo privado…"));
+        media = await uploadPrivateMedia(file);
+      }
+      if (!input.isConnected) { await discardTemporaryMedia(media.id); return; }
+      const handler = UPLOAD_RESULT_HANDLERS.find((entry) => entry.test(input));
+      await handler.run(input, media, prepared);
+      toast(prepared ? T("Imagen preparada y cargada.") : T("Archivo cargado."));
+    } catch (error) {
+      if (sourceId) await discardTemporaryMedia(sourceId);
+      if (error.name !== "AbortError") toast(error.message);
+    } finally {
+      input.value = "";
+    }
   }
   root.addEventListener("change", async (event) => {
     const input = event.target;
@@ -2843,84 +3594,17 @@
     updateProfilePreference(input);
     refreshUnsavedGuard(input);
     if (!input.dataset.upload || !input.files?.length) return;
-    let sourceId = 0;
-    try {
-      const file = input.files[0];
-      let m;
-      let prepared = null;
-      if (file.type.startsWith("image/")) {
-        prepared = await prepareImageUpload(input, file);
-        if (!prepared) return;
-        toast(T("Guardando imagen optimizada…"));
-        if (prepared.masterFile) {
-          const source = await uploadPrivateMedia(prepared.masterFile);
-          sourceId = Number(source.id) || 0;
-        }
-        m = await uploadPrivateMedia(prepared.outputFile, sourceId);
-        sourceId = 0;
-      } else {
-        toast(T("Subiendo archivo privado…"));
-        m = await uploadPrivateMedia(file);
-      }
-      // If the form disappeared while the request was in flight, discard the
-      // temporary upload immediately instead of waiting for scheduled cleanup.
-      if (!input.isConnected) { await discardTemporaryMedia(m.id); return; }
-      if (input.dataset.upload === "photo") {
-        const photoId = document.querySelector("[name=photo_id]");
-        replacePendingMedia(photoId,m.id);
-        photoId.value = m.id;
-        refreshUnsavedGuard(photoId);
-        const avatarBox = document.querySelector('[data-form="profile"] .profile-summary .avatar');
-        if (avatarBox && m.mime?.startsWith("image/")) {
-          avatarBox.querySelector("img")?.remove();
-          avatarBox.insertAdjacentHTML("afterbegin", `<img src="${E(m.url)}" alt="${E(S.boot.me.name || "")}">`);
-        }
-        const statusBox = document.getElementById("photo-status");
-        if (statusBox) statusBox.textContent = prepared
-          ? `${T("Fotografía preparada")}: ${humanFileSize(prepared.inputBytes)} → ${humanFileSize(prepared.storedBytes)}. ${T("Guarda el perfil para aplicar.")}`
-          : T("Fotografía cargada. Guarda el perfil para aplicar.");
-      } else if (input.dataset.upload === "event-cover") {
-        const preview = document.getElementById('event-cover-preview');
-        if (!preview) { await discardTemporaryMedia(m.id); return; }
-        discardPendingWithin(preview);
-        preview.innerHTML = `<span class="event-cover-ready" data-media="${Number(m.id)}" data-pending-media="${Number(m.id)}"><img src="${E(m.url)}" alt="${E(T('Portada del evento'))}"><span class="event-cover-actions"><strong>${E(m.name || T('Imagen del evento'))}</strong>${btn('Quitar portada','event-cover-clear','','ghost small')}</span></span>`;
-      } else if (input.dataset.upload === "group-photo") {
-        if (!S.groupChat) { await discardTemporaryMedia(m.id); return; }
-        S.groupChat.photo = m;
-        const hidden = document.querySelector('[data-form="group-chat"] [name="photo_id"]'); if (hidden) { replacePendingMedia(hidden,m.id); hidden.value = String(m.id); }
-        const preview = document.getElementById('group-photo-preview');
-        if (preview) preview.innerHTML = `<img src="${E(m.url)}" alt="${E(T('Foto del grupo'))}">${btn('Quitar','group-photo-clear','','ghost small')}`;
-      } else if (input.dataset.upload === "group-photo-edit") {
-        if (!S.groupEdit) { await discardTemporaryMedia(m.id); return; }
-        S.groupEdit.photo_id = Number(m.id);
-        S.groupEdit.photo_url = m.url || '';
-        const hidden = document.querySelector('[data-form="group-edit"] [name="photo_id"]'); if (hidden) { replacePendingMedia(hidden,m.id); hidden.value = String(m.id); }
-        const preview = document.getElementById('group-edit-photo-preview');
-        if (preview) preview.innerHTML = `<img src="${E(m.url)}" alt="${E(T('Foto del grupo'))}">${btn('Quitar foto','group-edit-photo-clear','','ghost small')}`;
-      } else {
-        const attachments = document.getElementById("attachments");
-        if (!attachments) { await discardTemporaryMedia(m.id); return; }
-        attachments.insertAdjacentHTML("beforeend", m.mime?.startsWith("image/") ? preparedImageMarkup(m) : `<span class="attached-file" data-media="${m.id}" data-pending-media="${m.id}">${E(m.name)}${btn("Quitar", "detach-media", `data-id="${m.id}"`, "ghost small")}</span>`);
-      }
-      toast(prepared ? T("Imagen preparada y cargada.") : T("Archivo cargado."));
-    } catch (e) {
-      if (sourceId) {
-        await discardTemporaryMedia(sourceId);
-      }
-      if (e.name !== "AbortError") toast(e.message);
-    } finally {
-      input.value = "";
-    }
+    await handleUploadInput(input);
   });
   applyTheme(themeMode());
   themeMedia?.addEventListener?.("change", () => { if (themeMode() === "system") applyTheme("system"); });
-  window.addEventListener("storage", (event) => { if (event.key === THEME_KEY) applyTheme(themeMode()); });
-  window.addEventListener("beforeunload", (event) => {
+  globalThis.addEventListener("storage", (event) => { if (event.key === THEME_KEY) applyTheme(themeMode()); });
+  globalThis.addEventListener("beforeunload", (event) => {
     if (!hasUnsavedChanges() && ![...document.querySelectorAll("form[data-guard-modal-unsaved]")].some(modalHasUnsavedChanges)) return;
     event.preventDefault();
-    event.returnValue = "";
+
   });
-  window.addEventListener("pagehide", (event) => {
+  globalThis.addEventListener("pagehide", (event) => {
     if (!event.persisted) discardPendingWithin(root, true);
   });
   document.addEventListener("keydown", (event) => {
@@ -2976,7 +3660,7 @@
       }
       shell();
       S.liveToastCursor = Number(S.boot.notification_cursor || 0);
-      liveToasts = window.ASCLALiveToasts?.({
+      liveToasts = globalThis.ASCLALiveToasts?.({
         root, E, I, T, timeout: 7000, max: 3,
         shouldSuppress: liveToastRedundant,
         onOpen: openLiveNotification,
@@ -2990,8 +3674,8 @@
         else { refreshNotifications(); pollLiveNotifications(); syncChat(); }
       });
       setInterval(refreshOpenConnection, 8000);
-      window.addEventListener('focus', () => { syncChat(); refreshOpenConnection(); });
-      window.addEventListener('online', () => { syncChat(); });
+      globalThis.addEventListener('focus', () => { syncChat(); refreshOpenConnection(); });
+      globalThis.addEventListener('online', () => { syncChat(); });
       await routeDetails();
       if (!maybeBirthdayGreeting()) maybeProfileCompletionNudge();
     } catch (e) {

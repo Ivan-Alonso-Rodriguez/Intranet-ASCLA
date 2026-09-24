@@ -36,7 +36,7 @@ final class SprintNetworkingTest extends TestCase
     }
     public function testMockMultimediaEnrichesOriginalWithGroundedStructuredSectionsAndCapsules(): void {
         Settings::save(['ai_mode'=>'mock']);$id=wp_insert_post(['post_type'=>'ascla_resource','post_title'=>'Demostración sintética','post_content'=>'Fuente de prueba','post_status'=>'publish','post_author'=>$this->users[0]]);$this->posts[]=$id;
-        update_post_meta($id,'_ascla',['transcript'=>DemoShowcase::transcript(),'chatham'=>true,'video_id'=>'M7lc1UVf-VE']);$r=Knowledge::multimedia($id);$meta=get_post_meta($id,'_ascla',true);
+        update_post_meta($id,'_ascla',['transcript'=>DemoShowcase::transcript(),'chatham'=>true,'video_id'=>'M7lc1UVf-VE','duration_seconds'=>240]);$r=Knowledge::multimedia($id);$meta=get_post_meta($id,'_ascla',true);
         self::assertSame($id,$r['resource_id']);self::assertSame(0,$r['hub_id']);self::assertSame([],$r['capsule_ids']);self::assertSame('publish',get_post_status($id));self::assertTrue((bool)$meta['ai_enriched']);
         self::assertNotEmpty($meta['frameworks'],'frameworks');self::assertNotEmpty($meta['norms'],'norms');self::assertNotEmpty($meta['infographic']['statistics'],'statistics');self::assertNotEmpty($meta['infographic']['timeline'],'timeline');
         $text=wp_json_encode($meta);foreach(['Juan Pérez','Compañía Boreal'] as $identity)self::assertStringNotContainsString($identity,$text);self::assertNotEmpty($meta['moments']);

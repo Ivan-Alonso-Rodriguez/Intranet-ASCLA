@@ -1,5 +1,5 @@
 /* ASCLA near-real-time notification toasts. Rendering only; data remains in the notification center. */
-window.ASCLALiveToasts = ({ root, E, I, T = (text) => text, onOpen, shouldSuppress, timeout = 7000, max = 3 }) => {
+globalThis.ASCLALiveToasts = ({ root, E, I, T = (text) => text, onOpen, shouldSuppress, timeout = 7000, max = 3 }) => {
   const timers = new Map();
 
   const container = () => {

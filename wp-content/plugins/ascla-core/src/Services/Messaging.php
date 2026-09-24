@@ -10,7 +10,7 @@ final class Messaging
     private const SINGLE_ROW='LIMIT 1';
     private const PARTICIPANT_FILTER='conversation_id=%d AND user_id=%d';
     private const CANNOT_MESSAGE='No puede enviar mensajes a este miembro.';
-    private const CONVERSATION_FILTER='conversation_id=%d';
+    public const CONVERSATION_FILTER='conversation_id=%d';
     private const LATEST_ROW='ORDER BY id DESC LIMIT 1';
     private const ORDER_BY_ID_ASC='ORDER BY id ASC';
     private const NOT_FOUND='Conversación no encontrada.';
@@ -191,42 +191,7 @@ final class Messaging
 
     private static function decorate(array $row): ?array
     {
-        $me=get_current_user_id();
-        $row['kind']=(string)($row['kind']??'direct');
-        $row['title']=(string)($row['title']??'');
-        $row['description']=(string)($row['description']??'');
-        $row['created_by']=(int)($row['created_by']??0);
-        $row['photo_id']=(int)($row['photo_id']??0);
-        $participants=Store::rows('participants',self::CONVERSATION_FILTER,[(int)$row['id']],self::ORDER_BY_ID_ASC);
-        if (!array_filter($participants,static fn($p)=>(int)$p['user_id']===$me)) { return null; }
-        $last=Store::rows('messages',self::CONVERSATION_FILTER,[(int)$row['id']],self::LATEST_ROW)[0]??null;
-        $row['preview']=$last?mb_substr((string)$last['body'],0,100):'Conversación nueva';
-        $row['unread']=Store::count('messages','conversation_id=%d AND id>%d AND sender_id<>%d',[(int)$row['id'],(int)($row['last_read']??0),$me]);
-        if ($row['kind']==='group') {
-            $row['members']=array_values(array_map(static fn($p)=>Profiles::card((int)$p['user_id']),$participants));
-            $row['member_count']=count($row['members']);
-            $row['title']=$row['title']!==''?$row['title']:'Grupo ASCLA';
-            $media=$row['photo_id']?Store::one('media',$row['photo_id']):null;
-            $row['photo_url']=$media && str_starts_with((string)$media['mime'],'image/')?Media::url($row['photo_id']):'';
-            $row['can_delete_group']=$row['created_by']===$me;
-            $row['blocked']=false; $row['blocked_by_me']=false; $row['can_message']=true;
-            $row['connection']=null; $row['conversation_request']=null;
-            return $row;
-        }
-        $others=array_values(array_filter($participants,static fn($p)=>(int)$p['user_id']!==$me));
-        if (count($others)!==1) { return null; }
-        $other=(int)$others[0]['user_id'];
-        if (!Access::member($other)) { return null; }
-        $connection=Connections::between($me,$other);
-        $permission=ConversationRequests::between($me,$other);
-        if ($connection['state']!=='connected' && !in_array($permission['state'],['allowed','incoming_pending','outgoing_pending'],true)) { return null; }
-        $row['other']=Profiles::card($other);
-        $row['connection']=$connection;
-        $row['conversation_request']=$permission;
-        $row['blocked']=$connection['blocked'];
-        $row['blocked_by_me']=$connection['blocked_by_me'];
-        $row['can_message']=$permission['can_message'];
-        return $row;
+        return MessagingDecorator::decorate($row);
     }
 
     public static function conversation(int $id): array
@@ -391,3 +356,43 @@ final class Messaging
         });
     }
 }
+
+final class MessagingDecorator
+{
+    public static function decorate(array $row): ?array
+    {
+        $me=get_current_user_id();
+        $row['kind']=(string)($row['kind']??'direct');$row['title']=(string)($row['title']??'');$row['description']=(string)($row['description']??'');
+        $row['created_by']=(int)($row['created_by']??0);$row['photo_id']=(int)($row['photo_id']??0);
+        $participants=Store::rows('participants',Messaging::CONVERSATION_FILTER,[(int)$row['id']],'ORDER BY id ASC');
+        if (!array_filter($participants,static fn($participant)=>(int)$participant['user_id']===$me)) { return null; }
+        $last=Store::rows('messages',Messaging::CONVERSATION_FILTER,[(int)$row['id']],'ORDER BY id DESC LIMIT 1')[0]??null;
+        $row['preview']=$last?mb_substr((string)$last['body'],0,100):'Conversación nueva';
+        $row['unread']=Store::count('messages','conversation_id=%d AND id>%d AND sender_id<>%d',[(int)$row['id'],(int)($row['last_read']??0),$me]);
+        return $row['kind']==='group'?self::group($row,$participants,$me):self::direct($row,$participants,$me);
+    }
+
+    private static function group(array $value,array $members,int $current): array
+    {
+        $value['members']=array_values(array_map(static fn($participant)=>Profiles::card((int)$participant['user_id']),$members));
+        $value['member_count']=count($value['members']);$value['title']=$value['title']!==''?$value['title']:'Grupo ASCLA';
+        $media=$value['photo_id']?Store::one('media',$value['photo_id']):null;
+        $value['photo_url']=$media && str_starts_with((string)$media['mime'],'image/')?Media::url($value['photo_id']):'';
+        $value['can_delete_group']=$value['created_by']===$current;$value['blocked']=false;$value['blocked_by_me']=false;
+        $value['can_message']=true;$value['connection']=null;$value['conversation_request']=null;
+        return $value;
+    }
+
+    private static function direct(array $value,array $members,int $current): ?array
+    {
+        $others=array_values(array_filter($members,static fn($participant)=>(int)$participant['user_id']!==$current));
+        $other=count($others)===1?(int)$others[0]['user_id']:0;
+        if (!$other || !Access::member($other)) { return null; }
+        $connection=Connections::between($current,$other);$permission=ConversationRequests::between($current,$other);
+        if ($connection['state']!=='connected' && !in_array($permission['state'],['allowed','incoming_pending','outgoing_pending'],true)) { return null; }
+        $value['other']=Profiles::card($other);$value['connection']=$connection;$value['conversation_request']=$permission;
+        $value['blocked']=$connection['blocked'];$value['blocked_by_me']=$connection['blocked_by_me'];$value['can_message']=$permission['can_message'];
+        return $value;
+    }
+}
+

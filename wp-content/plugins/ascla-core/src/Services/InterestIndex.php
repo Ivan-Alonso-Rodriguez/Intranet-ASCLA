@@ -21,6 +21,7 @@ final class InterestIndex
     }
     public static function changed($metaId,int $user,string $key,$value): void
     {
+        unset($metaId,$value);
         if(in_array($key,['_ascla_profile','_ascla_forms_interests'],true) && (int)get_option('ascla_schema',0)>=13) {self::sync($user); }
     }
     public static function sync(int $user): void

@@ -104,7 +104,11 @@ final class Events
         $item['full']=$item['capacity']>0 && $item['reserved']>=$item['capacity'];
         $item['waitlist_count']=self::countStatus($id,'waitlisted');
         $item['waitlist_position']=$item['registered']==='waitlisted'?self::waitlistPosition($id,get_current_user_id()):0;
-        $item['google_url']=($item['is_past']||$item['cancelled'])?'':Calendar::google($post->post_title,$meta,!empty($meta['chatham'])?'Sesión bajo la Regla de Chatham House.':$post->post_content);
+        $item['google_url']='';
+        if(!$item['is_past'] && !$item['cancelled']){
+            $calendarDescription=!empty($meta['chatham'])?'Sesión bajo la Regla de Chatham House.':$post->post_content;
+            $item['google_url']=Calendar::google($post->post_title,$meta,$calendarDescription);
+        }
         if ($item['registered']==='accepted') {
             $attendees=self::visibleAttendees($id,get_current_user_id());
             $item['attendees']=$attendees['items'];
@@ -235,57 +239,52 @@ final class Events
         }
     }
 
+    private static function registerWaitlisted(int $id,int $user,array $meta,?array $existing,string $before,int $capacity): void
+    {
+        Access::require($capacity>0,'Este evento no utiliza lista de espera porque no tiene límite de cupos.',400);
+        Access::require(!in_array($before,['accepted','offered'],true),'Ya tienes un cupo disponible o confirmado.',409);
+        if ($before==='waitlisted') { return; }
+        self::fillAvailableSlots($id,$meta);
+        Access::require(self::reserved($id)>=$capacity,'Todavía hay cupos disponibles. Confirma tu asistencia directamente.',409);
+        if ($existing) { Store::delete('registrations',['id'=>(int)$existing['id']]); }
+        Store::insert('registrations',['event_id'=>$id,'user_id'=>$user,'status'=>'waitlisted','created_at'=>current_time('mysql',true)]);
+    }
+
+    private static function registerAccepted(int $id,int $user,array $meta,?array $existing,string $before,int $capacity): void
+    {
+        if ($before==='accepted') { return; }
+        if ($before==='offered') { Store::update('registrations',['status'=>'accepted'],['id'=>(int)$existing['id']]);return; }
+        self::fillAvailableSlots($id,$meta);
+        if ($capacity>0) { Access::require(self::reserved($id)<$capacity,'No quedan cupos disponibles. Puedes unirte a la lista de espera.',409); }
+        if ($existing) { Store::update('registrations',['status'=>'accepted'],['id'=>(int)$existing['id']]); }
+        else { Store::insert('registrations',['event_id'=>$id,'user_id'=>$user,'status'=>'accepted','created_at'=>current_time('mysql',true)]); }
+    }
+
+    private static function registerOther(int $id,int $user,array $meta,?array $existing,string $before,string $status): void
+    {
+        if ($existing) { Store::update('registrations',['status'=>$status],['id'=>(int)$existing['id']]); }
+        else { Store::insert('registrations',['event_id'=>$id,'user_id'=>$user,'status'=>$status,'created_at'=>current_time('mysql',true)]); }
+        if (in_array($before,['accepted','offered'],true) && in_array($status,['declined','cancelled'],true)) { self::fillAvailableSlots($id,$meta); }
+    }
+
+    private static function registerLocked(int $id,string $status,int $user): void
+    {
+        $meta=(array)get_post_meta($id,'_ascla',true);
+        Access::require(empty($meta['cancelled']),'El evento fue cancelado y ya no admite inscripciones.',409);
+        Access::require(strtotime((string)($meta['end']??''))>time(),self::EVENT_FINISHED,400);
+        $existing=Store::rows('registrations',self::REGISTRATION,[$id,$user],'LIMIT 1')[0]??null;$before=(string)($existing['status']??'none');$capacity=self::capacity($meta);
+        if ($status==='waitlisted') { self::registerWaitlisted($id,$user,$meta,$existing,$before,$capacity);return; }
+        if ($status==='accepted') { self::registerAccepted($id,$user,$meta,$existing,$before,$capacity);return; }
+        self::registerOther($id,$user,$meta,$existing,$before,$status);
+    }
+
     public static function register(int $id,string $status): array
     {
         Access::require(in_array($status,['accepted','declined','cancelled','waitlisted'],true),'Estado no válido.',400);
-        $post=Content::get($id); Access::require($post->post_type==='ascla_event'&&$post->post_status==='publish','Evento no disponible.',400);
-        $user=get_current_user_id();
-        Store::lock('event:'.$id,static function () use($id,$status,$user) {
-            $meta=(array)get_post_meta($id,'_ascla',true);
-            Access::require(empty($meta['cancelled']),'El evento fue cancelado y ya no admite inscripciones.',409);
-            Access::require(strtotime((string)($meta['end']??''))>time(),self::EVENT_FINISHED,400);
-            $existing=Store::rows('registrations',self::REGISTRATION,[$id,$user],'LIMIT 1')[0]??null;
-            $before=(string)($existing['status']??'none');
-            $capacity=self::capacity($meta);
-
-            if ($status==='waitlisted') {
-                Access::require($capacity>0,'Este evento no utiliza lista de espera porque no tiene límite de cupos.',400);
-                Access::require(!in_array($before,['accepted','offered'],true),'Ya tienes un cupo disponible o confirmado.',409);
-                if ($before==='waitlisted') { return; }
-                // Reconcile older waiting entries first so nobody can skip the queue if a seat is already free.
-                self::fillAvailableSlots($id,$meta);
-                Access::require(self::reserved($id)>=$capacity,'Todavía hay cupos disponibles. Confirma tu asistencia directamente.',409);
-                // A person who left the queue and joins again must return at the end, never recover an old position.
-                if ($existing) { Store::delete('registrations',['id'=>(int)$existing['id']]); }
-                Store::insert('registrations',['event_id'=>$id,'user_id'=>$user,'status'=>'waitlisted','created_at'=>current_time('mysql',true)]);
-                return;
-            }
-
-            if ($status==='accepted') {
-                if ($before==='accepted') { return; }
-                if ($before==='offered') {
-                    // The queue already reserved this seat for the current user.
-                    Store::update('registrations',['status'=>'accepted'],['id'=>(int)$existing['id']]);
-                    return;
-                }
-                self::fillAvailableSlots($id,$meta);
-                if ($capacity>0) {
-                    Access::require(self::reserved($id)<$capacity,'No quedan cupos disponibles. Puedes unirte a la lista de espera.',409);
-                }
-                if ($existing) { Store::update('registrations',['status'=>'accepted'],['id'=>(int)$existing['id']]); }
-                else { Store::insert('registrations',['event_id'=>$id,'user_id'=>$user,'status'=>'accepted','created_at'=>current_time('mysql',true)]); }
-                return;
-            }
-
-            if ($existing) { Store::update('registrations',['status'=>$status],['id'=>(int)$existing['id']]); }
-            else { Store::insert('registrations',['event_id'=>$id,'user_id'=>$user,'status'=>$status,'created_at'=>current_time('mysql',true)]); }
-
-            // Cancelling a confirmed seat or rejecting a reserved offer releases it to the oldest waiter.
-            if (in_array($before,['accepted','offered'],true) && in_array($status,['declined','cancelled'],true)) {
-                self::fillAvailableSlots($id,$meta);
-            }
-        });
+        $post=Content::get($id);Access::require($post->post_type==='ascla_event'&&$post->post_status==='publish','Evento no disponible.',400);$user=get_current_user_id();
+        Store::lock('event:'.$id,static fn()=>self::registerLocked($id,$status,$user));
         Audit::record('event_registration',$id,$status);
         return self::detail($id);
     }
+
 }

@@ -1,7 +1,7 @@
 /* Reviewed imports are processed in resumable server batches; no user data changes on upload. */
 (() => {
   'use strict';
-  window.ASCLAInterestImports=({root,api,E,T,modal,closeModal,toast,date})=>{
+  globalThis.ASCLAInterestImports=({root,api,E,T,modal,closeModal,toast,date})=>{
     let panel, csv='',filename='',mime='',inspected,record,running=false,historyPage=1,generation=0;
     const L=t=>E(T(t));const B=(text,key,attrs='',style='')=>`<button type="button" class="btn ${style}" data-import-action="${key}" ${attrs}>${L(text)}</button>`;
     const labels={processing:'Analizando',review:'Revisión pendiente',approved:'Aceptada',ignored:'Ignorada',applying:'Aplicando',complete:'Completada',cancelled:'Cancelada',pending:'Por analizar',updated:'Actualizada',unchanged:'Sin cambios',conflict:'Revisar conflicto'};

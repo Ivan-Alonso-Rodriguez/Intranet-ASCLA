@@ -13,7 +13,7 @@
     ally: { aspect: 1, width: 1000, height: 1000, label: '1:1', allowFull: true, defaultFull: true },
   };
 
-  const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+  const escapeHTML = (value) => String(value ?? '').replaceAll(/[&<>"']/g, (char) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   })[char]);
 
@@ -28,7 +28,7 @@
   function filenameBase(name) {
     const clean = String(name || 'imagen')
       .replace(/\.[^.]+$/, '')
-      .replace(/[^a-zA-Z0-9._-]+/g, '-');
+      .replaceAll(/[^a-zA-Z0-9._-]+/g, '-');
     return trimHyphens(clean) || 'imagen';
   }
 
@@ -94,6 +94,19 @@
     return blob;
   }
 
+
+  function preferredImageType(preferWebP, fileType) {
+    if (preferWebP) return 'image/webp';
+    if (fileType === 'image/png') return 'image/png';
+    return 'image/jpeg';
+  }
+
+  function imageExtension(type) {
+    if (type === 'image/webp') return 'webp';
+    if (type === 'image/png') return 'png';
+    return 'jpg';
+  }
+
   async function optimizedMaster(file, image) {
     const maxEdge = 2560;
     const naturalW = image.naturalWidth;
@@ -102,7 +115,7 @@
     let width = Math.max(1, Math.round(naturalW * scale));
     let height = Math.max(1, Math.round(naturalH * scale));
     const preferWebP = await webpSupported();
-    let type = preferWebP ? 'image/webp' : (file.type === 'image/png' ? 'image/png' : 'image/jpeg');
+    const type = preferredImageType(preferWebP, file.type);
     let canvas = drawCanvas(image, width, height);
     let blob = await encodeCanvas(canvas, type, .9, 2.35 * MB);
     // Very detailed images can still exceed the private-media cap. Downscale in controlled steps.
@@ -113,7 +126,7 @@
       canvas = drawCanvas(image, width, height);
       blob = await encodeCanvas(canvas, type, .86, 2.35 * MB);
     }
-    const extension = blob.type === 'image/webp' ? 'webp' : blob.type === 'image/png' ? 'png' : 'jpg';
+    const extension = imageExtension(blob.type);
     return fileFromBlob(blob, `${filenameBase(file.name)}-master.${extension}`);
   }
 
@@ -130,13 +143,13 @@
 
   async function outputFile(file, image, config, crop, full) {
     const preferWebP = await webpSupported();
-    const type = preferWebP ? 'image/webp' : (file.type === 'image/png' ? 'image/png' : 'image/jpeg');
+    const type = preferredImageType(preferWebP, file.type);
     const dims = outputDimensions(config, full ? image.naturalWidth : crop.sw, full ? image.naturalHeight : crop.sh, full);
     const canvas = full
       ? drawCanvas(image, dims.width, dims.height)
       : drawCanvas(image, dims.width, dims.height, crop.sx, crop.sy, crop.sw, crop.sh);
     const blob = await encodeCanvas(canvas, type, .87, 1.45 * MB);
-    const extension = blob.type === 'image/webp' ? 'webp' : blob.type === 'image/png' ? 'png' : 'jpg';
+    const extension = imageExtension(blob.type);
     return fileFromBlob(blob, `${filenameBase(file.name)}-${full ? 'optimizada' : 'recorte'}.${extension}`);
   }
 
@@ -160,7 +173,7 @@
         throw new Error(messages.tooLarge);
       }
       const context = options.context in contexts ? options.context : 'hub';
-      const config = { ...contexts[context], ...(options.config || {}) };
+      const config = { ...contexts[context], ...options.config };
       let loaded;
       try { loaded = await imageFromFile(file); } catch { throw new Error(messages.readError); }
       const { image, url } = loaded;
@@ -293,7 +306,7 @@
 
       function setMode(next) {
         mode = next === 'full' && config.allowFull ? 'full' : 'crop';
-        overlay.querySelectorAll('[data-image-mode]').forEach((button) => button.classList.toggle('primary', button.dataset.imageMode === mode));
+        for (const button of overlay.querySelectorAll('[data-image-mode]')) button.classList.toggle('primary', button.dataset.imageMode === mode);
         overlay.querySelector('.image-editor-zoom').hidden = mode === 'full';
         overlay.querySelector('.image-editor-ratio').textContent = mode === 'full' ? labels.full : labels.ratio;
         reset();
@@ -307,44 +320,45 @@
 
       function cleanup(value, error = null) {
         URL.revokeObjectURL(url);
-        window.removeEventListener('resize', layoutFrame);
+        globalThis.removeEventListener('resize', layoutFrame);
         overlay.remove();
         if (error) reject(error); else resolve(value);
       }
 
-      overlay.addEventListener('click', async (event) => {
-        const target = event.target.closest('button');
-        if (!target) return;
+      async function handleEditorAction(target) {
         if (target.matches('[data-image-cancel], .image-editor-close')) { cleanup(null); return; }
         if (target.dataset.imageMode) { setMode(target.dataset.imageMode); return; }
-        if (target.hasAttribute('data-image-reset')) { reset(); return; }
+        if (target.dataset.imageReset !== undefined) { reset(); return; }
         if (target.dataset.imageZoom === 'in') { setZoom(zoom + .1); return; }
         if (target.dataset.imageZoom === 'out') { setZoom(zoom - .1); return; }
-        if (target.hasAttribute('data-image-apply')) {
-          apply.disabled = true;
-          status.textContent = options.processingLabel || 'Optimizando imagen…';
-          try {
-            const master = await optimizedMaster(file, image);
-            const full = mode === 'full';
-            const output = full ? master : await outputFile(file, image, config, cropData(), false);
-            const total = full ? output.size : master.size + output.size;
-            cleanup({
-              masterFile: full ? null : master,
-              outputFile: output,
-              full,
-              context,
-              inputBytes: file.size,
-              storedBytes: total,
-              sourceWidth: image.naturalWidth,
-              sourceHeight: image.naturalHeight,
-              outputWidth: full ? Math.round(image.naturalWidth * Math.min(1, Math.min(1800, Math.max(config.width, config.height)) / Math.max(image.naturalWidth, image.naturalHeight))) : config.width,
-              outputHeight: full ? Math.round(image.naturalHeight * Math.min(1, Math.min(1800, Math.max(config.width, config.height)) / Math.max(image.naturalWidth, image.naturalHeight))) : config.height,
-            });
-          } catch (error) {
-            apply.disabled = false;
-            status.textContent = error.message || 'No se pudo procesar la imagen.';
-          }
+        if (target.dataset.imageApply === undefined) return;
+        apply.disabled = true;
+        status.textContent = options.processingLabel || 'Optimizando imagen…';
+        try {
+          const master = await optimizedMaster(file, image);
+          const full = mode === 'full';
+          const output = full ? master : await outputFile(file, image, config, cropData(), false);
+          const total = full ? output.size : master.size + output.size;
+          cleanup({
+            masterFile: full ? null : master,
+            outputFile: output,
+            full,
+            context,
+            inputBytes: file.size,
+            storedBytes: total,
+            sourceWidth: image.naturalWidth,
+            sourceHeight: image.naturalHeight,
+            outputWidth: full ? Math.round(image.naturalWidth * Math.min(1, Math.min(1800, Math.max(config.width, config.height)) / Math.max(image.naturalWidth, image.naturalHeight))) : config.width,
+            outputHeight: full ? Math.round(image.naturalHeight * Math.min(1, Math.min(1800, Math.max(config.width, config.height)) / Math.max(image.naturalWidth, image.naturalHeight))) : config.height,
+          });
+        } catch (error) {
+          apply.disabled = false;
+          status.textContent = error.message || 'No se pudo procesar la imagen.';
         }
+      }
+      overlay.addEventListener('click', async (event) => {
+        const target = event.target.closest('button');
+        if (target) await handleEditorAction(target);
       });
 
       slider.addEventListener('input', () => setZoom(Number(slider.value) / 100));
@@ -383,10 +397,10 @@
         else return;
         event.preventDefault(); clampOffsets(); renderImage();
       });
-      window.addEventListener('resize', layoutFrame);
+      globalThis.addEventListener('resize', layoutFrame);
       requestAnimationFrame(() => { layoutFrame(); setMode(mode); stage.focus(); });
     });
   }
 
-  window.ASCLAImageEditor = { edit, contexts };
+  globalThis.ASCLAImageEditor = { edit, contexts };
 })();

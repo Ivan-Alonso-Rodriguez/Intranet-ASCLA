@@ -120,12 +120,10 @@ final class Mailer
         $safeUrl=$url!==''?esc_url_raw($url):'';
         $profileUrl=\ASCLA\Core\Domain\Catalog::url('perfil');
         $body=EmailTemplate::render($subjects[$category],$name,$message,'Ver en ASCLA',$safeUrl,'Puedes gestionar estos correos desde Mi perfil > Notificaciones por correo: '.$profileUrl);
-        try {
-            return (bool)wp_mail($account->user_email,$subjects[$category],$body,[self::HTML_CONTENT_TYPE]);
-        } catch (\Throwable $error) {
-            self::record('failed');
-            return false;
-        }
+        $sent=false;
+        try { $sent=(bool)wp_mail($account->user_email,$subjects[$category],$body,[self::HTML_CONTENT_TYPE]); }
+        catch (\Throwable) { self::record('failed'); }
+        return $sent;
     }
 
     public static function birthday(int $user): bool

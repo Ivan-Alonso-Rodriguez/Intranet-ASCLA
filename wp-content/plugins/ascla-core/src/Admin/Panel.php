@@ -24,5 +24,6 @@ final class Panel
     }
     public static function render(): void {
         if(!\ASCLA\Core\Services\Access::member() || !current_user_can('ascla_admin_area')){wp_die('Acceso no autorizado.','ASCLA',['response'=>403]);}
-        echo '<div id="ascla-root" class="ascla-admin"><div class="loading">Cargando ASCLA…</div></div>'; }
+        echo '<div id="ascla-root" class="ascla-admin"><div class="loading">Cargando ASCLA…</div></div>';
+    }
 }

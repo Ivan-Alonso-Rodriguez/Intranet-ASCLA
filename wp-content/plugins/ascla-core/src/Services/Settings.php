@@ -14,36 +14,73 @@ final class Settings
         $settings['ai_mode']=$settings['ai_provider']==='mock'?'mock':'real';
         return $settings;
     }
-    public static function save(array $input): array
+    private static function applyFlags(array &$data,array $input): void
     {
-        $data=self::get();
-        foreach (['demo','moderation_required','moderate_comments','chatham_default','micro_enabled','micro_approval','turnstile_enabled','turnstile_login','turnstile_recovery','turnstile_public'] as $flag) { if (isset($input[$flag])) { $data[$flag]=rest_sanitize_boolean($input[$flag]); } }
-        if (isset($input['ai_provider'])) { Access::require(in_array($input['ai_provider'],['mock','gemini','openai'],true),'Proveedor de IA no válido.',400); $data['ai_provider']=$input['ai_provider']; }
-        elseif (isset($input['ai_mode'])) { Access::require(in_array($input['ai_mode'],['mock','real'],true),'Modo no válido.',400); $data['ai_provider']=$input['ai_mode']==='real'?'gemini':'mock'; }
+        foreach (['demo','moderation_required','moderate_comments','chatham_default','micro_enabled','micro_approval','turnstile_enabled','turnstile_login','turnstile_recovery','turnstile_public'] as $flag) {
+            if (isset($input[$flag])) { $data[$flag]=rest_sanitize_boolean($input[$flag]); }
+        }
+    }
+
+    private static function applyAiProvider(array &$data,array $input): void
+    {
+        if (isset($input['ai_provider'])) {
+            Access::require(in_array($input['ai_provider'],['mock','gemini','openai'],true),'Proveedor de IA no válido.',400);$data['ai_provider']=$input['ai_provider'];
+        } elseif (isset($input['ai_mode'])) {
+            Access::require(in_array($input['ai_mode'],['mock','real'],true),'Modo no válido.',400);$data['ai_provider']=$input['ai_mode']==='real'?'gemini':'mock';
+        }
         $data['ai_mode']=$data['ai_provider']==='mock'?'mock':'real';
-        if (isset($input['youtube_mode'])) { Access::require(in_array($input['youtube_mode'],['mock','real'],true),'Modo no válido.',400); $data['youtube_mode']=$input['youtube_mode']; }
-        foreach (['ai_model','openai_model','google_client_id','turnstile_site_key','copyright'] as $field) { if (isset($input[$field])) { $data[$field]=Access::text($input[$field],300); } }
+    }
+
+    private static function applyTextSettings(array &$data,array $input): void
+    {
+        if (isset($input['youtube_mode'])) { Access::require(in_array($input['youtube_mode'],['mock','real'],true),'Modo no válido.',400);$data['youtube_mode']=$input['youtube_mode']; }
+        foreach (['ai_model','openai_model','google_client_id','turnstile_site_key','copyright'] as $field) {
+            if (isset($input[$field])) { $data[$field]=Access::text($input[$field],300); }
+        }
         if (isset($input['ai_model']) && $data['ai_model']!=='') { $data['ai_model']=\ASCLA\Core\Integrations\RealAIProvider::model($data['ai_model']); }
         if (isset($input['openai_model']) && $data['openai_model']!=='') { $data['openai_model']=\ASCLA\Core\Integrations\OpenAIProvider::model($data['openai_model']); }
+    }
+
+    private static function applyMatching(array &$data,array $input): void
+    {
         if (isset($input['matching_min_affinity'])) { $data['matching_min_affinity']=max(0,min(100,(int)$input['matching_min_affinity'])); }
-        if (isset($input['matching_weights'])) {
-            $weights=[];
-            foreach (MatchScore::WEIGHTS as $key=>$default) { $weights[$key]=max(0,min(100,(int)($input['matching_weights'][$key]??$default))); }
-            Access::require(array_sum($weights)>0,'Los pesos deben sumar más de cero.',400); $data['matching_weights']=$weights;
-        }
-        $data=\ASCLA\Core\Integrations\Mailer::validate($input,$data);
+        if (!isset($input['matching_weights'])) { return; }
+        $weights=[];
+        foreach (MatchScore::WEIGHTS as $key=>$default) { $weights[$key]=max(0,min(100,(int)($input['matching_weights'][$key]??$default))); }
+        Access::require(array_sum($weights)>0,'Los pesos deben sumar más de cero.',400);$data['matching_weights']=$weights;
+    }
+
+    private static function saveSecrets(array $input): void
+    {
         foreach (['ai_key','openai_key','google_client_secret','turnstile_secret'] as $secret) {
             if (!empty($input[$secret])) { \ASCLA\Core\Integrations\Secrets::set($secret,Access::text($input[$secret],2000)); }
             if (!empty($input['clear_'.$secret])) { \ASCLA\Core\Integrations\Secrets::remove($secret); }
         }
         if (!empty($input['smtp_password'])) { \ASCLA\Core\Integrations\Secrets::set('smtp_password',$input['smtp_password']); }
         if (!empty($input['clear_smtp_password'])) { \ASCLA\Core\Integrations\Secrets::remove('smtp_password'); }
-        if (!empty($data['turnstile_enabled'])) {
-            Access::require(trim((string)$data['turnstile_site_key'])!=='','Ingresa la Site Key de Cloudflare Turnstile antes de activarlo.',400);
-            Access::require(\ASCLA\Core\Integrations\Secrets::get('turnstile_secret')!=='','Ingresa la Secret Key de Cloudflare Turnstile antes de activarlo.',400);
-        }
-        update_option('ascla_settings',$data,false); Audit::record('settings_updated'); return self::status();
     }
+
+    private static function validateTurnstile(array $data): void
+    {
+        if (empty($data['turnstile_enabled'])) { return; }
+        Access::require(trim((string)$data['turnstile_site_key'])!=='','Ingresa la Site Key de Cloudflare Turnstile antes de activarlo.',400);
+        Access::require(\ASCLA\Core\Integrations\Secrets::get('turnstile_secret')!=='','Ingresa la Secret Key de Cloudflare Turnstile antes de activarlo.',400);
+    }
+
+    public static function save(array $input): array
+    {
+        $data=self::get();
+        self::applyFlags($data,$input);
+        self::applyAiProvider($data,$input);
+        self::applyTextSettings($data,$input);
+        self::applyMatching($data,$input);
+        $data=\ASCLA\Core\Integrations\Mailer::validate($input,$data);
+        self::saveSecrets($input);
+        self::validateTurnstile($data);
+        update_option('ascla_settings',$data,false);Audit::record('settings_updated');
+        return self::status();
+    }
+
     public static function status(): array
     {
         $settings=self::get(); $settings['has_ai_key']=\ASCLA\Core\Integrations\Secrets::get('ai_key')!=='';

@@ -57,7 +57,7 @@ final class Installer
         $table=$wpdb->prefix.'ascla_notifications';
         if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'event_key'))) {
             $wpdb->query("ALTER TABLE $table ADD event_key varchar(96) DEFAULT NULL, ADD UNIQUE KEY delivery (user_id,event_key)");
-            if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'event_key'))) { throw new \RuntimeException('No se pudo actualizar el índice de notificaciones.'); }
+            if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'event_key'))) { throw new MigrationException('No se pudo actualizar el índice de notificaciones.'); }
         }
         $page=1;
         do {
@@ -178,10 +178,11 @@ final class Installer
         }
         $column=$wpdb->get_row("SHOW COLUMNS FROM $table LIKE 'post_id'",ARRAY_A);
         if(!$column){throw new MigrationException('No se encontró la referencia de archivos.');}
-        if(str_contains(strtolower($column['Type']),'unsigned')){
-            if($wpdb->query("ALTER TABLE $table MODIFY post_id bigint(20) NOT NULL DEFAULT 0")===false){
-                throw new MigrationException('No se pudo habilitar el almacenamiento temporal de archivos.');
-            }
+        if(
+            str_contains(strtolower($column['Type']),'unsigned')
+            && $wpdb->query("ALTER TABLE $table MODIFY post_id bigint(20) NOT NULL DEFAULT 0")===false
+        ){
+            throw new MigrationException('No se pudo habilitar el almacenamiento temporal de archivos.');
         }
         update_option('ascla_schema',11,false);
     }
@@ -245,46 +246,41 @@ final class Installer
         foreach ($tables as $name=>$schema) {
             dbDelta("CREATE TABLE {$p}{$name} (\n{$schema}\n) ENGINE=InnoDB {$collate};");
             if ($wpdb->get_var($wpdb->prepare(self::TABLE_EXISTS_SQL, $wpdb->esc_like($p.$name))) !== $p.$name) {
-                throw new \RuntimeException('No se pudo crear el esquema ASCLA. Revise permisos de base de datos.');
+                throw new MigrationException('No se pudo crear el esquema ASCLA. Revise permisos de base de datos.');
             }
         }
         update_option('ascla_schema',1,false);
     }
+    private static function ensureManagedPage(array $page): void
+    {
+        $option=$page['option'];$metaKey=$page['meta_key'];$metaValue=$page['meta_value'];
+        $slug=$page['slug'];$title=$page['title'];$content=$page['content'];
+        $canClaim=$page['can_claim'];$claim=$page['claim'];$error=$page['error'];
+        $id=(int)get_option($option,0);
+        if($id>0 && get_post_status($id) && get_post_status($id)!=='trash'){ return; }
+        $owned=get_posts(['post_type'=>'page','post_status'=>['publish','draft','private'],'meta_key'=>$metaKey,'meta_value'=>$metaValue,'numberposts'=>1]);
+        if($owned){ update_option($option,(int)$owned[0]->ID,false); return; }
+        $existing=get_page_by_path($slug,OBJECT,'page');
+        if($existing && get_post_status($existing->ID)!=='trash' && $canClaim($existing)){
+            $claim($existing);
+            update_option($option,(int)$existing->ID,false);
+            return;
+        }
+        $id=wp_insert_post(['post_type'=>'page','post_title'=>$title,'post_name'=>$slug,'post_status'=>'publish','post_content'=>$content],true);
+        if(is_wp_error($id)){ throw new MigrationException($error); }
+        update_post_meta($id,$metaKey,$metaValue);
+        update_option($option,(int)$id,false);
+    }
+
     private static function loginPage(): void
     {
-        $id=(int)get_option('ascla_login_page',0);
-        if($id>0 && get_post_status($id) && get_post_status($id)!=='trash'){ return; }
-
-        $owned=get_posts([
-            'post_type'=>'page',
-            'post_status'=>['publish','draft','private'],
-            'meta_key'=>'_ascla_login_page',
-            'meta_value'=>'1',
-            'numberposts'=>1,
+        self::ensureManagedPage([
+            'option'=>'ascla_login_page','meta_key'=>'_ascla_login_page','meta_value'=>'1',
+            'slug'=>'login','title'=>'Acceso ASCLA','content'=>'',
+            'can_claim'=>static fn($page): bool=>trim((string)$page->post_content)==='' && !get_post_meta($page->ID,'_ascla_page',true),
+            'claim'=>static function($page): void { update_post_meta($page->ID,'_ascla_login_page','1'); },
+            'error'=>'No se pudo crear la página de acceso ASCLA.',
         ]);
-        if($owned){ update_option('ascla_login_page',(int)$owned[0]->ID,false); return; }
-
-        $existing=get_page_by_path('login',OBJECT,'page');
-        if($existing && get_post_status($existing->ID)!=='trash'){
-            // Never overwrite an unrelated page. Reuse it only if it is empty and clearly safe to claim.
-            $content=trim((string)$existing->post_content);
-            if($content==='' && !get_post_meta($existing->ID,'_ascla_page',true)){
-                update_post_meta($existing->ID,'_ascla_login_page','1');
-                update_option('ascla_login_page',(int)$existing->ID,false);
-                return;
-            }
-        }
-
-        $id=wp_insert_post([
-            'post_type'=>'page',
-            'post_title'=>'Acceso ASCLA',
-            'post_name'=>'login',
-            'post_status'=>'publish',
-            'post_content'=>'',
-        ],true);
-        if(is_wp_error($id)){ throw new \RuntimeException('No se pudo crear la página de acceso ASCLA.'); }
-        update_post_meta($id,'_ascla_login_page','1');
-        update_option('ascla_login_page',(int)$id,false);
     }
 
     private static function pages(): void
@@ -295,46 +291,23 @@ final class Installer
             $owned=get_posts(['post_type'=>'page','post_status'=>['publish','draft','private'],'meta_key'=>'_ascla_page','meta_value'=>$slug,'numberposts'=>1]);
             if ($owned) { $ids[$slug]=$owned[0]->ID; continue; }
             $id=wp_insert_post(['post_type'=>'page','post_title'=>$title,'post_name'=>$slug,'post_status'=>'publish','post_content'=>'[ascla_app page="'.$slug.'"]'],true);
-            if (is_wp_error($id)) { throw new \RuntimeException('No se pudo crear la página '.$title); }
+            if (is_wp_error($id)) { throw new MigrationException('No se pudo crear la página '.$title); }
             update_post_meta($id,'_ascla_page',$slug); $ids[$slug]=$id;
         }
         update_option('ascla_pages',$ids,false);
     }
     private static function adminPage(): void
     {
-        $id=(int)get_option('ascla_admin_front_page',0);
-        if($id>0 && get_post_status($id) && get_post_status($id)!=='trash'){ return; }
-
-        $owned=get_posts([
-            'post_type'=>'page',
-            'post_status'=>['publish','draft','private'],
-            'meta_key'=>'_ascla_page',
-            'meta_value'=>'admin',
-            'numberposts'=>1,
+        self::ensureManagedPage([
+            'option'=>'ascla_admin_front_page','meta_key'=>'_ascla_page','meta_value'=>'admin',
+            'slug'=>'administracion','title'=>'Administración ASCLA','content'=>'[ascla_app page="admin"]',
+            'can_claim'=>static fn($page): bool=>(string)get_post_meta($page->ID,'_ascla_page',true)==='' && trim((string)$page->post_content)==='',
+            'claim'=>static function($page): void {
+                wp_update_post(['ID'=>$page->ID,'post_content'=>'[ascla_app page="admin"]']);
+                update_post_meta($page->ID,'_ascla_page','admin');
+            },
+            'error'=>'No se pudo crear la página de administración ASCLA.',
         ]);
-        if($owned){ update_option('ascla_admin_front_page',(int)$owned[0]->ID,false); return; }
-
-        $existing=get_page_by_path('administracion',OBJECT,'page');
-        if($existing && get_post_status($existing->ID)!=='trash'){
-            $current=(string)get_post_meta($existing->ID,'_ascla_page',true);
-            if($current==='' && trim((string)$existing->post_content)===''){
-                wp_update_post(['ID'=>$existing->ID,'post_content'=>'[ascla_app page="admin"]']);
-                update_post_meta($existing->ID,'_ascla_page','admin');
-                update_option('ascla_admin_front_page',(int)$existing->ID,false);
-                return;
-            }
-        }
-
-        $id=wp_insert_post([
-            'post_type'=>'page',
-            'post_title'=>'Administración ASCLA',
-            'post_name'=>'administracion',
-            'post_status'=>'publish',
-            'post_content'=>'[ascla_app page="admin"]',
-        ],true);
-        if(is_wp_error($id)){ throw new \RuntimeException('No se pudo crear la página de administración ASCLA.'); }
-        update_post_meta($id,'_ascla_page','admin');
-        update_option('ascla_admin_front_page',(int)$id,false);
     }
 
     private static function terms(): void

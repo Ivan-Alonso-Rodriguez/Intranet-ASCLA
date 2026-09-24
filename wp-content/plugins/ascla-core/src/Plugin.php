@@ -42,6 +42,7 @@ final class Plugin
             return $types;
         });
         add_filter('rest_post_dispatch', static function ($response, $server, $request) {
+            unset($server);
             if (str_starts_with($request->get_route(), '/ascla/v1/')) {
                 $response->header('Cache-Control', 'private, no-store, max-age=0');
                 $response->header('Vary', 'Cookie');
@@ -50,24 +51,32 @@ final class Plugin
         }, 10, 3);
         if (defined('WP_CLI') && WP_CLI) { self::cli(); }
     }
+    private static function seedCli(): void
+    {
+        $password=getenv('ASCLA_DEMO_PASSWORD');
+        if (!$password || strlen($password)<12) { \WP_CLI::error('Configure ASCLA_DEMO_PASSWORD (12 caracteres mínimo).'); }
+        $previous=get_current_user_id();
+        if (!$previous) {
+            $admins=get_users(['capability'=>'ascla_manage','number'=>1,'fields'=>'ID']);
+            if (!$admins) { \WP_CLI::error('No hay administrador ASCLA disponible.'); }
+            wp_set_current_user((int)$admins[0]);
+        }
+        try { Services\Demo::seed($password); }
+        catch (\Throwable $error) { \WP_CLI::error($error instanceof Rest\ApiException?$error->getMessage():'No se pudo crear la demo. Revise permisos y datos existentes.'); }
+        finally { wp_set_current_user($previous); }
+        \WP_CLI::success('Demo preparada: demo.asociado y demo.prueba. Contraseñas existentes conservadas.');
+    }
+    private static function demoUserCli(array $args,array $options): void
+    {
+        if (($args[0]??'')!=='profile') { \WP_CLI::error('Uso: wp ascla demo-user profile [--reset-password]'); }
+        $result=Services\DemoUser::sample(getenv('ASCLA_DEMO_PASSWORD')?:'',isset($options['reset-password']));
+        \WP_CLI::success('Usuario '.Services\DemoUser::EMAIL.' preparado. '.($result['password_reset']?'Contraseña actualizada desde ASCLA_PROFILE_DEMO_PASSWORD.':'El seed conserva la contraseña existente.'));
+    }
     private static function cli(): void
     {
-            \WP_CLI::add_command('ascla seed', static function () {
-                $password = getenv('ASCLA_DEMO_PASSWORD');
-                if (!$password || strlen($password) < 12) { \WP_CLI::error('Configure ASCLA_DEMO_PASSWORD (12 caracteres mínimo).'); }
-                $previous=get_current_user_id();
-                if(!$previous){$admins=get_users(['capability'=>'ascla_manage','number'=>1,'fields'=>'ID']);if(!$admins) {\WP_CLI::error('No hay administrador ASCLA disponible.'); }wp_set_current_user((int)$admins[0]);}
-                try{Services\Demo::seed($password);}
-                catch(\Throwable $error){\WP_CLI::error($error instanceof Rest\ApiException?$error->getMessage():'No se pudo crear la demo. Revise permisos y datos existentes.');}
-                finally{wp_set_current_user($previous);}
-                \WP_CLI::success('Demo preparada: demo.asociado y demo.prueba. Contraseñas existentes conservadas.');
-            });
-            \WP_CLI::add_command('ascla demo-user',static function($args,$options){
-                if(($args[0]??'')!=='profile'){\WP_CLI::error('Uso: wp ascla demo-user profile [--reset-password]');}
-                $result=Services\DemoUser::sample(getenv('ASCLA_DEMO_PASSWORD')?:'',isset($options['reset-password']));
-                \WP_CLI::success('Usuario '.Services\DemoUser::EMAIL.' preparado. '.($result['password_reset']?'Contraseña actualizada desde ASCLA_PROFILE_DEMO_PASSWORD.':'El seed conserva la contraseña existente.'));
-            });
-            \WP_CLI::add_command('ascla migrate', static function () { Database\Installer::activate(false); \WP_CLI::success('Migraciones aplicadas.'); });
-            \WP_CLI::add_command('ascla jobs', [Jobs\Queue::class, 'run']);
+        \WP_CLI::add_command('ascla seed',static fn()=>self::seedCli());
+        \WP_CLI::add_command('ascla demo-user',static fn($args,$options)=>self::demoUserCli((array)$args,(array)$options));
+        \WP_CLI::add_command('ascla migrate',static function () { Database\Installer::activate(false); \WP_CLI::success('Migraciones aplicadas.'); });
+        \WP_CLI::add_command('ascla jobs',[Jobs\Queue::class,'run']);
     }
 }

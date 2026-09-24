@@ -27,21 +27,46 @@ final class StatisticsQueries
         return "SELECT user_id id,SUM(registered) registered,SUM(present) attended,SUM(registered*complete) eligible,SUM(registered*complete*present) attended_registered,SUM(minutes) minutes,COUNT(minutes) duration_known,MAX(IF(present,ending,NULL)) last_attendance FROM ($facts) f WHERE registered=1 OR present=1 GROUP BY user_id";
     }
 
+    private static function cohortSummary(string $scope,string $facts,string $rank): array
+    {
+        global $wpdb;
+        $summary=$wpdb->get_row("SELECT COALESCE(SUM(registered),0) registrations,COUNT(DISTINCT IF(present,user_id,NULL)) attendees,COALESCE(SUM(present),0) attendances,COUNT(DISTINCT IF(recorded,event_id,NULL)) events_with_records,COALESCE(SUM(registered*complete),0) rate_registered,COALESCE(SUM(registered*complete*present),0) rate_attended,COALESCE(SUM(present*complete),0) complete_present,SUM(minutes) minutes,COUNT(minutes) duration_known FROM ($facts) f",ARRAY_A)?:[];
+        foreach ($summary as $key=>$value) { if ($value!==null) { $summary[$key]=(int)$value; } }
+        $events=$wpdb->get_row("SELECT COUNT(*) events,COALESCE(SUM(complete),0) complete_events FROM ($scope) e",ARRAY_A)?:['events'=>0,'complete_events'=>0];
+        $summary['events']=(int)$events['events'];$summary['complete_events']=(int)$events['complete_events'];
+        foreach (['registrations','attendees','attendances','events_with_records','rate_registered','rate_attended','minutes','duration_known'] as $key) { $summary[$key]=(int)($summary[$key]??0); }
+        $summary['rate']=$summary['rate_registered']?round(100*$summary['rate_attended']/$summary['rate_registered'],1):null;
+        $summary['average']=$summary['complete_events']?round(($summary['complete_present']??0)/$summary['complete_events'],1):null;
+        unset($summary['complete_present']);
+        $counts=$wpdb->get_row("SELECT COUNT(*) total,COALESCE(SUM(attended>=2),0) recurring FROM ($rank) r",ARRAY_A)?:['total'=>0,'recurring'=>0];
+        $summary['recurring']=(int)$counts['recurring'];
+        return [$summary,$counts];
+    }
+    private static function cohortRanking(string $rank,int $page): array
+    {
+        global $wpdb;
+        $items=$wpdb->get_results($rank.' ORDER BY attended DESC,registered DESC,id ASC LIMIT 20 OFFSET '.(($page-1)*20),ARRAY_A)?:[];
+        $users=array_map('intval',array_column($items,'id'));if($users) { cache_users($users); }
+        foreach ($items as &$row) {
+            foreach (['id','registered','attended','eligible','attended_registered','duration_known'] as $key) { $row[$key]=(int)$row[$key]; }
+            $row['minutes']=$row['minutes']===null?null:(int)$row['minutes'];$row['name']=Profiles::publicName($row['id']);
+            $row['rate']=$row['eligible']?round(100*$row['attended_registered']/$row['eligible'],1):null;$row['recurring']=$row['attended']>=2;
+        }
+        unset($row);return $items;
+    }
+    private static function cohortTopics(string $facts): array
+    {
+        global $wpdb;$topics=[];
+        foreach ($wpdb->get_results("SELECT t.term_id,SUM(f.registered) registrations,SUM(f.present) attendances,COUNT(DISTINCT IF(f.present,f.user_id,NULL)) attendees FROM ($facts) f JOIN {$wpdb->term_relationships} tr ON tr.object_id=f.event_id JOIN {$wpdb->term_taxonomy} t ON t.term_taxonomy_id=tr.term_taxonomy_id AND t.taxonomy='ascla_interest' GROUP BY t.term_id",ARRAY_A)?:[] as $row) {
+            $topics[(int)$row['term_id']]=array_map('intval',$row);
+        }
+        return $topics;
+    }
     public static function cohort(string $scope,int $page=1,bool $ranking=true): array
     {
-        global $wpdb;$facts=self::facts($scope);$rank=self::rankingSql($facts);$page=max(1,$page);
-        $s=$wpdb->get_row("SELECT COALESCE(SUM(registered),0) registrations,COUNT(DISTINCT IF(present,user_id,NULL)) attendees,COALESCE(SUM(present),0) attendances,COUNT(DISTINCT IF(recorded,event_id,NULL)) events_with_records,COALESCE(SUM(registered*complete),0) rate_registered,COALESCE(SUM(registered*complete*present),0) rate_attended,COALESCE(SUM(present*complete),0) complete_present,SUM(minutes) minutes,COUNT(minutes) duration_known FROM ($facts) f",ARRAY_A)?:[];
-        foreach($s as $key=>$value) {if($value!==null) {$s[$key]=(int)$value; } }
-        $eventSummary=$wpdb->get_row("SELECT COUNT(*) events,COALESCE(SUM(complete),0) complete_events FROM ($scope) e",ARRAY_A)?:['events'=>0,'complete_events'=>0];
-        $s['events']=(int)$eventSummary['events'];$s['complete_events']=(int)$eventSummary['complete_events'];
-        foreach(['registrations','attendees','attendances','events_with_records','rate_registered','rate_attended','minutes','duration_known'] as $key) {if(!isset($s[$key])) {$s[$key]=0; } }
-        $s['rate']=$s['rate_registered']?round(100*$s['rate_attended']/$s['rate_registered'],1):null;$s['average']=$s['complete_events']?round(($s['complete_present']??0)/$s['complete_events'],1):null;unset($s['complete_present']);
-        $counts=$wpdb->get_row("SELECT COUNT(*) total,COALESCE(SUM(attended>=2),0) recurring FROM ($rank) r",ARRAY_A)?:['total'=>0,'recurring'=>0];$s['recurring']=(int)$counts['recurring'];$items=[];
-        if($ranking){$items=$wpdb->get_results($rank.' ORDER BY attended DESC,registered DESC,id ASC LIMIT 20 OFFSET '.(($page-1)*20),ARRAY_A)?:[];$users=array_map('intval',array_column($items,'id'));if($users) {cache_users($users); }
-            foreach($items as &$r){foreach(['id','registered','attended','eligible','attended_registered','duration_known'] as $k) {$r[$k]=(int)$r[$k]; }$r['minutes']=$r['minutes']===null?null:(int)$r['minutes'];$r['name']=Profiles::publicName($r['id']);$r['rate']=$r['eligible']?round(100*$r['attended_registered']/$r['eligible'],1):null;$r['recurring']=$r['attended']>=2;}unset($r);
-        }
-        $topics=[];foreach($wpdb->get_results("SELECT t.term_id,SUM(f.registered) registrations,SUM(f.present) attendances,COUNT(DISTINCT IF(f.present,f.user_id,NULL)) attendees FROM ($facts) f JOIN {$wpdb->term_relationships} tr ON tr.object_id=f.event_id JOIN {$wpdb->term_taxonomy} t ON t.term_taxonomy_id=tr.term_taxonomy_id AND t.taxonomy='ascla_interest' GROUP BY t.term_id",ARRAY_A)?:[] as $r) {$topics[(int)$r['term_id']]=array_map('intval',$r); }
-        return ['summary'=>$s,'ranking'=>$items,'ranking_total'=>(int)$counts['total'],'ranking_page'=>$page,'topics'=>$topics];
+        $facts=self::facts($scope);$rank=self::rankingSql($facts);$page=max(1,$page);
+        [$summary,$counts]=self::cohortSummary($scope,$facts,$rank);
+        return ['summary'=>$summary,'ranking'=>$ranking?self::cohortRanking($rank,$page):[],'ranking_total'=>(int)$counts['total'],'ranking_page'=>$page,'topics'=>self::cohortTopics($facts)];
     }
 
     public static function eventTopicCounts(string $scope): array

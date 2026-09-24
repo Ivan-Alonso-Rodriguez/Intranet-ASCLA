@@ -4,35 +4,57 @@ use ASCLA\Core\Domain\Catalog;
 use ASCLA\Core\Services\Access;
 final class App
 {
+    private static function enqueuePageAssets(): void
+    {
+        $page=self::page();
+        if ($page) { self::assets($page); }
+    }
+
+    private static function shortcode(array $attrs): string
+    {
+        if (!Access::member()) { return '<p>Inicie sesión para acceder a la comunidad ASCLA.</p>'; }
+        self::assets(sanitize_key($attrs['page']??'intranet'));
+        return '<div id="ascla-root"></div>';
+    }
+
+    private static function redirectBackendUser(): void
+    {
+        if (!is_user_logged_in() || current_user_can('manage_options') || wp_doing_ajax() || basename($_SERVER['PHP_SELF']??'')==='admin-post.php') { return; }
+        $url=Login::url();
+        if (Access::member()) {
+            $url=current_user_can('ascla_admin_area')?self::adminUrl():Catalog::url('intranet');
+        }
+        wp_safe_redirect($url);exit;
+    }
+
+    private static function robots(array $robots): array
+    {
+        if (self::page()) { $robots['noindex']=true;$robots['nofollow']=true; }
+        return $robots;
+    }
+
+    private static function sitemapArgs(array $args,string $postType): array
+    {
+        if($postType!=='page'){return $args;}
+        $private=array_map('intval',array_values((array)get_option('ascla_pages',[])));$admin=(int)get_option('ascla_admin_front_page',0);
+        if($admin>0){$private[]=$admin;}
+        $args['post__not_in']=array_values(array_unique(array_merge((array)($args['post__not_in']??[]),$private)));
+        return $args;
+    }
+
     public static function boot(): void
     {
         add_action('template_redirect',[self::class,'protect']);
         add_filter('template_include',static fn($template)=>self::page()?ASCLA_PATH.'templates/app.php':$template,99);
-        add_action('wp_enqueue_scripts',static function () { if (self::page()) { self::assets(self::page()); } });
-        add_shortcode('ascla_app',static function ($attrs) {
-            if (!Access::member()) { return '<p>Inicie sesión para acceder a la comunidad ASCLA.</p>'; }
-            self::assets(sanitize_key($attrs['page']??'intranet')); return '<div id="ascla-root"></div>';
-        });
+        add_action('wp_enqueue_scripts',static fn()=>self::enqueuePageAssets());
+        add_shortcode('ascla_app',static fn($attrs)=>self::shortcode((array)$attrs));
         add_filter('show_admin_bar',static fn($show)=>self::page()?false:$show);
-        add_action('admin_init',static function () {
-            if (!is_user_logged_in() || current_user_can('manage_options') || wp_doing_ajax() || basename($_SERVER['PHP_SELF']??'')==='admin-post.php') { return; }
-            if (Access::member()) {
-                wp_safe_redirect(current_user_can('ascla_admin_area') ? self::adminUrl() : Catalog::url('intranet'));
-            } else {
-                wp_safe_redirect(Login::url());
-            }
-            exit;
-        });
+        add_action('admin_init',static fn()=>self::redirectBackendUser());
         Login::boot();
-        add_filter('wp_robots',static function ($robots) { if (self::page()) { $robots['noindex']=true; $robots['nofollow']=true; } return $robots; });
-        add_filter('wp_sitemaps_posts_query_args',static function(array $args,string $postType): array {
-            if($postType!=='page'){return $args;}
-            $private=array_map('intval',array_values((array)get_option('ascla_pages',[])));
-            $admin=(int)get_option('ascla_admin_front_page',0); if($admin>0){$private[]=$admin;}
-            $args['post__not_in']=array_values(array_unique(array_merge((array)($args['post__not_in']??[]),$private)));
-            return $args;
-        },10,2);
+        add_filter('wp_robots',static fn($robots)=>self::robots($robots));
+        add_filter('wp_sitemaps_posts_query_args',static fn(array $args,string $postType): array=>self::sitemapArgs($args,$postType),10,2);
     }
+
     public static function page(): string
     {
         if (!is_page()) { return ''; }
@@ -69,9 +91,11 @@ final class App
     public static function adminUrl(array $args=[]): string
     {
         $id=(int)get_option('ascla_admin_front_page',0);
-        $base=$id>0 && get_post_status($id) && get_post_status($id)!=='trash'
-            ? (get_permalink($id)?:home_url('/administracion/'))
-            : home_url('/administracion/');
+        $base=home_url('/administracion/');
+        if($id>0 && get_post_status($id) && get_post_status($id)!=='trash'){
+            $permalink=get_permalink($id);
+            if($permalink){$base=$permalink;}
+        }
         return add_query_arg($args,$base);
     }
 

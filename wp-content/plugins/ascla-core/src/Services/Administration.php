@@ -154,78 +154,52 @@ final class Administration
         ];
     }
 
+    private static function createUserLocked(array $account): array
+    {
+        Access::require(!username_exists($account['login']),'Ese nombre de usuario ya está registrado.',409);
+        Access::require(!email_exists($account['email']),self::EMAIL_IN_USE,409);
+        $id=wp_insert_user([
+            'user_login'=>$account['login'],
+            'user_email'=>$account['email'],
+            'user_pass'=>wp_generate_password(32,true,true),
+            'display_name'=>trim($account['first'].' '.$account['last'])?:$account['login'],
+            'first_name'=>$account['first'],
+            'last_name'=>$account['last'],
+            'role'=>$account['role'],
+        ]);
+        Access::require(!is_wp_error($id),is_wp_error($id)?$id->get_error_message():'No se pudo crear la cuenta.',400);$id=(int)$id;
+        update_user_meta($id,'_ascla_profile',[
+            'first_name'=>$account['first'],'last_name'=>$account['last'],'position'=>$account['position'],'company'=>$account['company'],'member_type'=>$account['member_type'],
+            'birth_date'=>$account['birth_date'],'phone'=>$account['phone'],'phone_visibility'=>$account['phone_visibility'],'directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[],'revision'=>1,
+        ]);
+        update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+        if($account['send_invite']) {
+            try { wp_new_user_notification($id,null,'user'); }
+            catch (\Throwable $error) { /* La cuenta no depende del transporte de correo. */ }
+        }
+        Audit::record('member_created',$id,'role='.$account['role'].'; invite='.($account['send_invite']?'requested':'disabled'));
+        Birthdays::celebrate($id);$user=self::user($id);$user['created']=true;$user['invite_requested']=$account['send_invite'];
+        $user['message']=$account['send_invite']?'Usuario creado. Se solicitó el correo para que configure su contraseña.':'Usuario creado. Puede usar “¿Olvidaste tu contraseña?” en /login/ para establecer su acceso.';
+        return $user;
+    }
+
     public static function createUser(array $input): array
     {
-        Access::require(current_user_can('ascla_manage')&&current_user_can('create_users'),'No puedes crear cuentas.',403);
-        Access::limit('admin_user_create',12,300);
-
-        $loginInput=trim(Access::text($input['login']??'',60));
-        $login=sanitize_user($loginInput,true);
+        Access::require(current_user_can('ascla_manage')&&current_user_can('create_users'),'No puedes crear cuentas.',403);Access::limit('admin_user_create',12,300);
+        $loginInput=trim(Access::text($input['login']??'',60));$login=sanitize_user($loginInput,true);
         Access::require($login!==''&&$login===$loginInput&&validate_username($login),'Use un nombre de usuario válido, sin espacios ni caracteres especiales no permitidos.',400);
         Access::require(!username_exists($login),'Ese nombre de usuario ya está registrado.',409);
-
         $email=sanitize_email(Access::text($input['email']??'',100));
-        Access::require($email!==''&&is_email($email),'Correo electrónico no válido.',400);
-        Access::require(!email_exists($email),self::EMAIL_IN_USE,409);
-
-        $role=Access::text($input['role']??'ascla_member',60);
-        Access::require(in_array($role,self::COMMUNITY_ROLES,true),'Rol no válido para la comunidad.',400);
-        $first=Access::text($input['first_name']??'',100);
-        $last=Access::text($input['last_name']??'',100);
-        Access::require(trim($first.$last)!=='','Indica al menos un nombre o apellido.',400);
-        $position=Access::text($input['position']??'',200);
-        $company=Access::text($input['company']??'',200);
-        $memberType=Access::text($input['member_type']??'',200);
-        $birthDate=Birthdays::normalize($input['birth_date']??'');
-        $phone=\ASCLA\Core\Domain\Phone::normalize($input['phone']??'');
-        $phoneVisibility=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']??'private');
-        $sendInvite=!array_key_exists('send_invite',$input)||rest_sanitize_boolean($input['send_invite']);
-
-        return Store::lock('admin-create-user:'.hash('sha256',$login.'|'.$email),static function()use($login,$email,$role,$first,$last,$position,$company,$memberType,$birthDate,$sendInvite,$phone,$phoneVisibility){
-            Access::require(!username_exists($login),'Ese nombre de usuario ya está registrado.',409);
-            Access::require(!email_exists($email),self::EMAIL_IN_USE,409);
-            $password=wp_generate_password(32,true,true);
-            $id=wp_insert_user([
-                'user_login'=>$login,
-                'user_email'=>$email,
-                'user_pass'=>$password,
-                'display_name'=>trim($first.' '.$last)?:$login,
-                'first_name'=>$first,
-                'last_name'=>$last,
-                'role'=>$role,
-            ]);
-            Access::require(!is_wp_error($id),is_wp_error($id)?$id->get_error_message():'No se pudo crear la cuenta.',400);
-            $id=(int)$id;
-            update_user_meta($id,'_ascla_profile',[
-                'first_name'=>$first,
-                'last_name'=>$last,
-                'position'=>$position,
-                'company'=>$company,
-                'member_type'=>$memberType,
-                'birth_date'=>$birthDate,
-                'phone'=>$phone,'phone_visibility'=>$phoneVisibility,
-                'directory'=>true,
-                'networking'=>true,
-                'microevents'=>true,
-                'hidden'=>[],
-                'revision'=>1,
-            ]);
-            update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
-
-            if($sendInvite) {
-                try { wp_new_user_notification($id,null,'user'); }
-                catch (\Throwable $error) { /* La cuenta no depende del transporte de correo. */ }
-            }
-            Audit::record('member_created',$id,'role='.$role.'; invite='.($sendInvite?'requested':'disabled'));
-            Birthdays::celebrate($id);
-            $user=self::user($id);
-            $user['created']=true;
-            $user['invite_requested']=$sendInvite;
-            $user['message']=$sendInvite
-                ?'Usuario creado. Se solicitó el correo para que configure su contraseña.'
-                :'Usuario creado. Puede usar “¿Olvidaste tu contraseña?” en /login/ para establecer su acceso.';
-            return $user;
-        });
+        Access::require($email!==''&&is_email($email),'Correo electrónico no válido.',400);Access::require(!email_exists($email),self::EMAIL_IN_USE,409);
+        $role=Access::text($input['role']??'ascla_member',60);Access::require(in_array($role,self::COMMUNITY_ROLES,true),'Rol no válido para la comunidad.',400);
+        $first=Access::text($input['first_name']??'',100);$last=Access::text($input['last_name']??'',100);Access::require(trim($first.$last)!=='','Indica al menos un nombre o apellido.',400);
+        $account=[
+            'login'=>$login,'email'=>$email,'role'=>$role,'first'=>$first,'last'=>$last,
+            'position'=>Access::text($input['position']??'',200),'company'=>Access::text($input['company']??'',200),'member_type'=>Access::text($input['member_type']??'',200),
+            'birth_date'=>Birthdays::normalize($input['birth_date']??''),'phone'=>\ASCLA\Core\Domain\Phone::normalize($input['phone']??''),'phone_visibility'=>\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']??'private'),
+            'send_invite'=>!array_key_exists('send_invite',$input)||rest_sanitize_boolean($input['send_invite']),
+        ];
+        return Store::lock('admin-create-user:'.hash('sha256',$login.'|'.$email),static fn()=>self::createUserLocked($account));
     }
 
     public static function user(int $id): array

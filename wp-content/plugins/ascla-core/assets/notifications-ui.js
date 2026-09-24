@@ -1,5 +1,5 @@
 /* Contextual activity inbox. All strings are escaped by the host application. */
-window.ASCLANotifications = ({ E, I, btn, T = (text) => text, locale = "es-PE" }) => {
+globalThis.ASCLANotifications = ({ E, I, btn, T = (text) => text, locale = "es-PE" }) => {
   const instant = (value) => {
     const date = new Date(String(value || '').replace(' ', 'T') + 'Z');
     return Number.isNaN(date.getTime()) ? new Date(0) : date;

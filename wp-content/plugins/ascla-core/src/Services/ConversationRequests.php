@@ -21,48 +21,53 @@ final class ConversationRequests
         return Store::rows('relations',$where,$args,'ORDER BY id DESC');
     }
 
+    private static function emptyStates(array $targets): array
+    {
+        $states=[];
+        foreach ($targets as $id) {
+            $states[$id]=['state'=>'none','request_id'=>0,'allowed_id'=>0,'blocked'=>false,'blocked_by_me'=>false,'can_request'=>false,'can_message'=>false];
+        }
+        return $states;
+    }
+    private static function applyRequestRows(array &$states,array $rows,int $me): void
+    {
+        foreach ($rows as $row) {
+            $outgoing=(int)$row['user_id']===$me;$id=(int)($outgoing?$row['target_id']:$row['user_id']);
+            if (!isset($states[$id])) { continue; }
+            $state=&$states[$id];
+            if ($row['kind']==='conversation_allowed') { $state['state']='allowed';$state['allowed_id']=(int)$row['id'];$state['request_id']=0; }
+            elseif ($state['state']!=='allowed' && ($state['state']==='none' || !$outgoing)) { $state['state']=$outgoing?'outgoing_pending':'incoming_pending';$state['request_id']=(int)$row['id']; }
+            unset($state);
+        }
+    }
+    private static function applyRequestPermissions(array &$states,int $me,array $mine): void
+    {
+        foreach ($states as $id=>&$state) {
+            $valid=$id!==$me && Access::member($me) && Access::member($id);
+            $blockRows=$valid?Store::rows('relations',"kind='block' AND ((user_id=%d AND target_id=%d) OR (user_id=%d AND target_id=%d))",[$me,$id,$id,$me],''):[];
+            $state['blocked']=(bool)$blockRows;
+            foreach ($blockRows as $block) { if ((int)$block['user_id']===$me) { $state['blocked_by_me']=true; } }
+            $connected=$valid && Connections::areConnected($me,$id);
+            $state['can_message']=$valid && !$state['blocked'] && ($connected || $state['state']==='allowed');
+            if (self::requestAvailable($valid,$connected,$state)) {
+                $other=Profiles::raw($id);$state['can_request']=!empty($mine['networking']) && !empty($other['networking']) && !empty($other['directory']);
+            }
+        }
+        unset($state);
+    }
+
+    private static function requestAvailable(bool $valid,bool $connected,array $state): bool
+    {
+        return $valid && !$connected && !$state['blocked'] && $state['state']==='none';
+    }
+
     public static function statesFor(int $me,array $targets,?array $rows=null): array
     {
         $targets=array_values(array_unique(array_filter(array_map('intval',$targets),static fn($id)=>$id>0)));
         if (!$targets) { return []; }
-        $states=[];
-        $mine=Access::member($me)?Profiles::raw($me):[];
-        foreach ($targets as $id) {
-            $states[$id]=[
-                'state'=>'none','request_id'=>0,'allowed_id'=>0,'blocked'=>false,'blocked_by_me'=>false,
-                'can_request'=>false,'can_message'=>false,
-            ];
-        }
-        foreach ($rows??self::rows($me,$targets) as $row) {
-            $outgoing=(int)$row['user_id']===$me;
-            $id=(int)($outgoing?$row['target_id']:$row['user_id']);
-            if (!isset($states[$id])) { continue; }
-            $state=&$states[$id];
-            if ($row['kind']==='conversation_allowed') {
-                $state['state']='allowed';
-                $state['allowed_id']=(int)$row['id'];
-                $state['request_id']=0;
-            } elseif ($state['state']!=='allowed' && ($state['state']==='none' || !$outgoing)) {
-                $state['state']=$outgoing?'outgoing_pending':'incoming_pending';
-                $state['request_id']=(int)$row['id'];
-            }
-            unset($state);
-        }
-        foreach ($states as $id=>&$state) {
-            $valid=$id!==$me && Access::member($me) && Access::member($id);
-            if ($valid) {
-                $blockRows=Store::rows('relations',"kind='block' AND ((user_id=%d AND target_id=%d) OR (user_id=%d AND target_id=%d))",[$me,$id,$id,$me],'');
-                $state['blocked']=(bool)$blockRows;
-                foreach ($blockRows as $block) { if ((int)$block['user_id']===$me) { $state['blocked_by_me']=true; } }
-            }
-            $connected=$valid && Connections::areConnected($me,$id);
-            $state['can_message']=$valid && !$state['blocked'] && ($connected || $state['state']==='allowed');
-            if ($valid && !$connected && !$state['blocked'] && $state['state']==='none') {
-                $other=Profiles::raw($id);
-                $state['can_request']=!empty($mine['networking']) && !empty($other['networking']) && !empty($other['directory']);
-            }
-        }
-        unset($state);
+        $states=self::emptyStates($targets);$mine=Access::member($me)?Profiles::raw($me):[];
+        self::applyRequestRows($states,$rows??self::rows($me,$targets),$me);
+        self::applyRequestPermissions($states,$me,$mine);
         return $states;
     }
 

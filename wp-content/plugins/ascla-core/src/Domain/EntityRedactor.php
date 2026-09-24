@@ -46,7 +46,7 @@ final class EntityRedactor
     {
         // A second pass catches an affiliation exposed when its person's name was removed.
         for($pass=0;$pass<2;$pass++){ $text=self::redactEntities($text,self::detectEntities($text,$known)); }
-        $text=preg_replace('/\[identidad reservada\]/iu','información reservada',$text);
+        $text=str_ireplace('[identidad reservada]','información reservada',$text);
         return preg_replace('/^\h*participante:\h*/mui','Participante: ',$text);
     }
     public static function tree(mixed $value,array $known=[]): mixed

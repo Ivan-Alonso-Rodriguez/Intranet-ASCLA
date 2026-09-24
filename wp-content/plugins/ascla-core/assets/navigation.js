@@ -1,5 +1,5 @@
 /* Small router: retain the authenticated WordPress shell; load only REST-backed views. */
-window.ASCLANavigation = ({ root, pages, prepare, load, error, beforeNavigate }) => {
+globalThis.ASCLANavigation = ({ root, pages, prepare, load, error, beforeNavigate }) => {
   const routes = Object.entries(pages).map(([key, page]) => ({ key, page, url: new URL(page.url, location.href) }));
   let sequence = 0;
   let activeUrl = location.href;
@@ -19,29 +19,34 @@ window.ASCLANavigation = ({ root, pages, prepare, load, error, beforeNavigate })
     if (crumb) crumb.textContent = 'ASCLA › ' + route.page.label;
     document.title = route.page.label + ' · ASCLA';
   }
+  function restoreActiveUrl() {
+    if (location.href === activeUrl) return;
+    history.pushState({ ascla: true, scroll: scrollY }, '', activeUrl);
+    const activeRoute = matches(activeUrl); if (activeRoute) activate(activeRoute);
+  }
+  function pushNavigation(url) {
+    history.replaceState({ ...history.state, ascla: true, scroll: scrollY }, '', location.href);
+    if (url.href !== location.href) history.pushState({ ascla: true, scroll: 0 }, '', url.href);
+  }
+  function focusTitle() {
+    const title = root.querySelector('#page-content h1');
+    if (title && !root.querySelector('.modal')) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
+  }
   async function navigate(value, { pop = false, state = null } = {}) {
     const route = matches(value); if (!route) return false;
     const url = new URL(value, location.href);
     if (beforeNavigate && !(await beforeNavigate({ url: url.href, pop }))) {
-      if (pop && location.href !== activeUrl) {
-        history.pushState({ ascla: true, scroll: scrollY }, '', activeUrl);
-        const activeRoute = matches(activeUrl); if (activeRoute) activate(activeRoute);
-      }
+      if (pop) restoreActiveUrl();
       return false;
     }
     const current = ++sequence;
-    if (!pop) {
-      history.replaceState({ ...history.state, ascla: true, scroll: scrollY }, '', location.href);
-      if (url.href !== location.href) history.pushState({ ascla: true, scroll: 0 }, '', url.href);
-    }
-    activeUrl = url.href;
-    activate(route); prepare(route.key); window.scrollTo(0, 0);
+    if (!pop) pushNavigation(url);
+    activeUrl = url.href;activate(route);prepare(route.key);globalThis.scrollTo(0, 0);
     try {
       await load();
       if (current !== sequence) return true;
-      if (pop) window.scrollTo(0, state?.scroll || 0);
-      const title = root.querySelector('#page-content h1');
-      if (title && !root.querySelector('.modal')) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
+      if (pop) globalThis.scrollTo(0, state?.scroll || 0);
+      focusTitle();
     } catch (error_) { if (current === sequence) error(error_); }
     return true;
   }
@@ -52,7 +57,7 @@ window.ASCLANavigation = ({ root, pages, prepare, load, error, beforeNavigate })
     if (!matches(a.href)) return;
     event.preventDefault(); void navigate(a.href);
   });
-  window.addEventListener('popstate', event => {
+  globalThis.addEventListener('popstate', event => {
     if (matches(location.href)) void navigate(location.href, { pop: true, state: event.state });
     else location.reload();
   });
