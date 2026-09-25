@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.10.3
+Stable tag: 1.10.4
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,18 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.10.4 =
+* Reorganiza Mi perfil en cuatro pestañas: Información, Intereses, Privacidad y avisos, y Cuenta y seguridad, reduciendo el desplazamiento vertical y conservando el guardado existente.
+* En móvil, Mensajería abre primero la lista de chats y muestra una sola conversación al seleccionar un chat, con acción para volver a la lista; en escritorio se mantiene la vista dividida.
+* RF-013 / CP-021: el Directorio incorpora paginación numérica siempre visible, Anterior/Siguiente, resumen de resultados y un límite fijo de 15 perfiles por página. Frontend y servidor usan el mismo límite; el conjunto demo de 18 perfiles se distribuye en dos páginas (15 + 3).
+* Mejora accesibilidad de las pestañas del perfil con roles ARIA, navegación por teclado y apertura automática de la pestaña que contiene un campo obligatorio inválido.
+* Refuerza la actualización de app.js/app.css usando versión + hash de contenido para evitar que una caché anterior oculte la interfaz nueva.
+* Corrige Google Calendar: al publicar con una cuenta conectada se crea/sincroniza el evento organizador; si el ID remoto dejó de existir, ASCLA recrea el evento.
+* Las invitaciones de eventos añaden los correos de los asociados como asistentes de Google Calendar y usan sendUpdates=all para que Google envíe el correo de invitación. Los cambios y cancelaciones del evento organizador también se sincronizan.
+* Añade DeepSeek como tercer proveedor de IA real configurable, con modelo independiente (por defecto deepseek-flash), API Key cifrada, eliminación explícita y prueba de conexión.
+* Protege los cambios sin guardar de Mi perfil al navegar: el modal ofrece Seguir editando, Descartar cambios y Guardar cambios y salir. La última opción guarda el perfil antes de continuar y cancela la salida si el guardado falla; al recargar o cerrar la pestaña se conserva el aviso nativo del navegador.
+* Mantiene el esquema 13 y todas las correcciones funcionales de 1.10.3; no agrega tablas ni modifica la jerarquía de roles.
 
 = 1.10.3 =
 * Bloquea la cuenta diez minutos tras cinco intentos fallidos, incluso con contraseña correcta, acceso por correo y Turnstile desactivado.

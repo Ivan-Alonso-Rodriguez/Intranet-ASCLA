@@ -202,6 +202,7 @@ final class Profiles
     public static function directory(array $filter=[]): array
     {
         $page=max(1,(int)($filter['page']??1));
+        $perPage=15;
         $query=mb_strtolower(Access::text($filter['q']??'',120));
         $results=[];$offset=0;
         do {
@@ -212,7 +213,9 @@ final class Profiles
                 if ($data!==null) { $results[]=$data; }
             }
         } while (count($users)===200);
-        return ['items'=>Connections::attach(array_slice($results,($page-1)*18,18)),'total'=>count($results),'page'=>$page,'pages'=>max(1,(int)ceil(count($results)/18))];
+        $pages=max(1,(int)ceil(count($results)/$perPage));
+        $page=min($page,$pages);
+        return ['items'=>Connections::attach(array_slice($results,($page-1)*$perPage,$perPage)),'total'=>count($results),'page'=>$page,'pages'=>$pages,'per_page'=>$perPage];
     }
 
     private static function directoryCandidate(\WP_User $user,array $filter,string $query): ?array

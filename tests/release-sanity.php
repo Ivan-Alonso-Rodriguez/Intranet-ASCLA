@@ -80,13 +80,13 @@ namespace {
     $plugin=$read('wp-content/plugins/ascla-core/ascla-core.php');
     $wpReadme=$read('wp-content/plugins/ascla-core/readme.txt');
     $installer=$read('wp-content/plugins/ascla-core/src/Database/Installer.php');
-    $assert((bool)preg_match('/Version:\s*1\.10\.3/',$plugin),'plugin header version');
-    $assert(str_contains($plugin,"define('ASCLA_VERSION', '1.10.3');"),'ASCLA_VERSION constant');
-    $assert((bool)preg_match('/Stable tag:\s*1\.10\.3/',$wpReadme),'WordPress stable tag');
-    $assert(str_contains($read('sonar-project.properties'),'sonar.projectVersion=1.10.3'),'Sonar version');
+    $assert((bool)preg_match('/Version:\s*1\.10\.4/',$plugin),'plugin header version');
+    $assert(str_contains($plugin,"define('ASCLA_VERSION', '1.10.4');"),'ASCLA_VERSION constant');
+    $assert((bool)preg_match('/Stable tag:\s*1\.10\.4/',$wpReadme),'WordPress stable tag');
+    $assert(str_contains($read('sonar-project.properties'),'sonar.projectVersion=1.10.4'),'Sonar version');
     $assert((bool)preg_match('/SCHEMA_VERSION\s*=\s*13/',$installer),'schema version 13');
-    $assert(str_contains($read('README.md'),'Versión actual: 1.10.3 · esquema 13'),'README version/schema');
-    $assert(str_contains($read('VERSION_HISTORY.md'),'**Versión actual:** `1.10.3`'),'history current version');
+    $assert(str_contains($read('README.md'),'Versión actual: 1.10.4 · esquema 13'),'README version/schema');
+    $assert(str_contains($read('VERSION_HISTORY.md'),'**Versión actual:** `1.10.4`'),'history current version');
 
     // Point 1: both server and admin UI contain the hard three-interest guard.
     $imports=$read('wp-content/plugins/ascla-core/src/Services/InterestImports.php');
@@ -104,7 +104,12 @@ namespace {
     $throws(fn()=>\ASCLA\Core\Services\InterestImports::validateAIResult(['intereses'=>[11],'confianza'=>'inventada'],$catalog),'Forms AI rejects invalid confidence');
     $router=$read('wp-content/plugins/ascla-core/src/Rest/Router.php');
     $assert(str_contains($router,"/admin/interest-imports/ai-test"),'Forms AI diagnostic REST route');
-    $assert(str_contains($importsJs,"Probar Gemini para Forms"),'Forms AI diagnostic admin control');
+    $deepseek=$read('wp-content/plugins/ascla-core/src/Integrations/DeepSeekProvider.php');
+    $settings=$read('wp-content/plugins/ascla-core/src/Services/Settings.php');
+    $assert(str_contains($deepseek,'https://api.deepseek.com/chat/completions') && str_contains($deepseek,"'response_format'=>['type'=>'json_object']"),'DeepSeek official API JSON transport');
+    $assert(str_contains($settings,"'deepseek_model'=>'deepseek-flash'") && str_contains($settings,"'deepseek_key'"),'DeepSeek independent model and secret');
+    $assert(str_contains($router,"'deepseek'=>\\ASCLA\\Core\\Integrations\\DeepSeekProvider::test()"),'DeepSeek connection probe route');
+    $assert(str_contains($importsJs,"Probar IA para Forms"),'Forms AI diagnostic admin control');
 
     // New administrative/profile UI must not fall back to Spanish in English mode.
     $translations=json_decode($read('wp-content/plugins/ascla-core/languages/en.json'),true);
@@ -121,6 +126,8 @@ namespace {
         $assert(isset($translations[$key]) && $translations[$key]!==$key,'dynamic translation key '.$key);
     }
     $appJs=$read('wp-content/plugins/ascla-core/assets/app.js');
+    $assert(str_contains($appJs,'Guard every same-tab link while Perfil or Configuración contains unsaved changes') && str_contains($appJs,'event.preventDefault();') && !str_contains($appJs,'event.returnValue'),'profile unsaved navigation and unload guard');
+    $assert(str_contains($appJs,'Guardar cambios y salir') && str_contains($appJs,'pendingUnsavedSaveForm') && str_contains($appJs,'if (saveAndLeave && S.pendingUnsavedResolver) resolveUnsavedExit(true);'),'profile unsaved modal supports save and leave');
     $assert(str_contains($appJs,"T('Incluye +, código de país y número; por ejemplo +51 987 654 321')"),'phone help title is localized');
     $assert(!str_contains($appJs,'btn("Crear tema", "editor"'),'forums do not expose duplicate Create topic action');
 

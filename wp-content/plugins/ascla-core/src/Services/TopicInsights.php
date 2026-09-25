@@ -17,7 +17,7 @@ final class TopicInsights
         if(!empty($meta['micro']) || !empty($meta['chatham'])) {return null; }
         $known=preg_split('/[\n,;]+/u',(string)($meta['identities']??''),-1,PREG_SPLIT_NO_EMPTY)?:[];
         $title=EntityRedactor::redact(wp_strip_all_tags($event['title']),$known);
-        $fingerprint=hash('sha256',wp_json_encode([$title,$context['terms'],$settings['ai_provider']??'mock',$settings['ai_model']??'',$settings['openai_model']??'',1]));
+        $fingerprint=hash('sha256',wp_json_encode([$title,$context['terms'],$settings['ai_provider']??'mock',$settings['ai_model']??'',$settings['openai_model']??'',$settings['deepseek_model']??'',1]));
         $saved=(array)get_post_meta($id,'_ascla_statistics_topic',true);
         $valid=($saved['fingerprint']??'')===$fingerprint && isset($saved['topic_id']) && ((int)$saved['topic_id']===0 || in_array((int)$saved['topic_id'],array_column($context['terms'],'id'),true));
         return ['id'=>$id,'title'=>Access::excerpt($title,200),'fingerprint'=>$fingerprint,'saved'=>$valid?$saved:null,'end'=>$event['end']];

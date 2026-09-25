@@ -104,6 +104,10 @@ final class Events
         $item['full']=$item['capacity']>0 && $item['reserved']>=$item['capacity'];
         $item['waitlist_count']=self::countStatus($id,'waitlisted');
         $item['waitlist_position']=$item['registered']==='waitlisted'?self::waitlistPosition($id,get_current_user_id()):0;
+        $googleOrganizer=absint(get_post_meta($id,'_ascla_google_organizer_user',true));
+        $googleOrganizerEvent=(string)get_post_meta($id,'_ascla_google_organizer_event',true);
+        $item['google_managed']=$googleOrganizer===get_current_user_id() && $googleOrganizerEvent!=='';
+        $item['google_synced']=$googleOrganizer>0 && $googleOrganizerEvent!=='';
         $item['google_url']='';
         if(!$item['is_past'] && !$item['cancelled']){
             $calendarDescription=!empty($meta['chatham'])?'Sesión bajo la Regla de Chatham House.':$post->post_content;
@@ -130,21 +134,31 @@ final class Events
         $users=array_values(array_unique(array_map('absint',$users)));
         Access::require(!empty($users) && count($users)<=50,'Seleccione entre 1 y 50 asociados.',400);
         foreach ($users as $uid) { Access::require(Access::member($uid),'Asociado no disponible.',400); }
-        $sent=Store::lock('event:'.$id,static function () use($id,$users) {
-            $sent=0;
+        $invited=Store::lock('event:'.$id,static function () use($id,$users) {
+            $invited=[];
             foreach ($users as $uid) {
                 if (Store::count('registrations',self::REGISTRATION,[$id,$uid])) { continue; }
                 Store::insert('registrations',['event_id'=>$id,'user_id'=>$uid,'status'=>'invited','created_at'=>current_time('mysql',true)]);
-                if (Notifications::once($uid,'event:'.$id,'event','Te invitaron a un evento de ASCLA.',\ASCLA\Core\Domain\Catalog::url('eventos',['item'=>$id]),['type'=>'post','id'=>$id])) { $sent++; }
+                Notifications::once($uid,'event:'.$id,'event','Te invitaron a un evento de ASCLA.',\ASCLA\Core\Domain\Catalog::url('eventos',['item'=>$id]),['type'=>'post','id'=>$id]);
+                $invited[]=$uid;
             }
-            return $sent;
+            return $invited;
         });
-        Audit::record('event_invited',$id,'sent_'.$sent);
-        return ['sent'=>$sent,'skipped'=>count($users)-$sent,'message'=>'Invitaciones internas enviadas. Los cupos se confirman al aceptar.'];
+        $calendar=['available'=>false,'sent'=>0];
+        if ($invited) {
+            try { $calendar=\ASCLA\Core\Integrations\GoogleOAuth::inviteEvent($id,$invited); }
+            catch (\Throwable $error) { $calendar=['available'=>false,'sent'=>0,'error'=>$error->getMessage()]; }
+        }
+        $sent=count($invited);
+        Audit::record('event_invited',$id,'sent_'.$sent.'_google_'.(int)($calendar['sent']??0));
+        $message='Invitaciones internas enviadas. Los cupos se confirman al aceptar.';
+        if (($calendar['sent']??0)>0) { $message.=' Google Calendar envió las invitaciones por correo a '.(int)$calendar['sent'].' asociado(s).'; }
+        elseif (!empty($calendar['error'])) { $message.=' Google Calendar no pudo enviar la invitación: '.$calendar['error']; }
+        elseif ($sent>0 && empty($calendar['available'])) { $message.=' Para enviar invitaciones de Google Calendar, conecta el calendario de la cuenta organizadora.'; }
+        return ['sent'=>$sent,'skipped'=>count($users)-$sent,'google_calendar'=>$calendar,'message'=>$message];
     }
 
-    /** Notify registered/invited associates only when operational event data changed materially. */
-    public static function notifyImportantChanges(int $id,array $before,array $after): int
+    private static function importantChanges(array $before,array $after): array
     {
         $fields=[
             '__title'=>'title',
@@ -161,6 +175,13 @@ final class Events
             $right=is_scalar($after[$key]??null)?trim((string)$after[$key]):'';
             if ($left!==$right) { $changed[]=$contextKey; }
         }
+        return $changed;
+    }
+
+    /** Notify registered/invited associates only when operational event data changed materially. */
+    public static function notifyImportantChanges(int $id,array $before,array $after): int
+    {
+        $changed=self::importantChanges($before,$after);
         if (!$changed) { return 0; }
         $post=get_post($id);
         if (!$post || $post->post_type!=='ascla_event' || $post->post_status!=='publish' || !empty($after['cancelled'])) { return 0; }
@@ -178,6 +199,8 @@ final class Events
                 ['type'=>'post','id'=>$id,'actor'=>get_current_user_id(),'changes'=>$changed]
             );
         }
+        try { \ASCLA\Core\Integrations\GoogleOAuth::syncOrganizerEvent($id,0,true); }
+        catch (\Throwable) { /* Google is complementary; the ASCLA update must remain saved. */ }
         return count($users);
     }
 
@@ -212,6 +235,8 @@ final class Events
                 ['type'=>'post','id'=>$id,'actor'=>get_current_user_id()]
             );
         }
+        try { \ASCLA\Core\Integrations\GoogleOAuth::cancelOrganizerEvent($id); }
+        catch (\Throwable) { /* Cancellation in ASCLA is authoritative even if Google is temporarily unavailable. */ }
         Audit::record('event_cancelled',$id,'notified_'.count($users));
         return self::detail($id);
     }
