@@ -126,7 +126,7 @@ namespace {
         $assert(isset($translations[$key]) && $translations[$key]!==$key,'dynamic translation key '.$key);
     }
     $appJs=$read('wp-content/plugins/ascla-core/assets/app.js');
-    $assert(str_contains($appJs,'Guard every same-tab link while Perfil or Configuración contains unsaved changes') && str_contains($appJs,'event.returnValue = "";'),'profile unsaved navigation and unload guard');
+    $assert(str_contains($appJs,'Guard every same-tab link while Perfil or Configuración contains unsaved changes') && str_contains($appJs,'event.preventDefault();') && !str_contains($appJs,'event.returnValue'),'profile unsaved navigation and unload guard');
     $assert(str_contains($appJs,'Guardar cambios y salir') && str_contains($appJs,'pendingUnsavedSaveForm') && str_contains($appJs,'if (saveAndLeave && S.pendingUnsavedResolver) resolveUnsavedExit(true);'),'profile unsaved modal supports save and leave');
     $assert(str_contains($appJs,"T('Incluye +, código de país y número; por ejemplo +51 987 654 321')"),'phone help title is localized');
     $assert(!str_contains($appJs,'btn("Crear tema", "editor"'),'forums do not expose duplicate Create topic action');

@@ -36,7 +36,7 @@ final class MigrationWpdb
     public function get_var(string $sql): mixed
     {
         if(preg_match("/SHOW TABLES LIKE '([^']+)'/i",$sql,$m))return isset($this->tables[$m[1]])?$m[1]:null;
-        if(preg_match("/SHOW COLUMNS FROM `?([^` ]+)`? LIKE '([^']+)'/i",$sql,$m))return isset($this->tables[$m[1]]['columns'][$m[2]])?$m[2]:null;
+        if(preg_match("/SHOW COLUMNS FROM `?([^` ]+)`? LIKE '([^']+)'/i",$sql,$m))return array_key_exists($m[2],$this->tables[$m[1]]['columns']??[])?$m[2]:null;
         return null;
     }
     public function query(string $sql): int|false
@@ -85,6 +85,7 @@ function wp_schedule_single_event(int $timestamp,string $hook): bool { $GLOBALS[
 function dbDelta(string $sql): void { $GLOBALS['wpdb']->dbDelta($sql); }
 
 require $root.'/wp-content/plugins/ascla-core/src/Database/MigrationException.php';
+require $root.'/wp-content/plugins/ascla-core/src/Database/MigrationSchema.php';
 require $root.'/wp-content/plugins/ascla-core/src/Database/Installer.php';
 
 $checks=0;
