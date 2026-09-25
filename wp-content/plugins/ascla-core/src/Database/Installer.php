@@ -15,13 +15,7 @@ final class Installer
         self::migrate();
         self::migrateIndexes();
         self::migrateDiscovery();
-        self::migrateNotificationContext();
-        self::migrateReportReasons();
-        self::migrateMediaMasters();
-        self::migrateReportReviewState();
-        self::migrateConversationGroups();
-        self::migrateConversationPhotos();
-        self::migrateConversationDescriptions();
+        self::migrateLegacyColumns();
         self::migrateTemporaryMedia();
         self::migrateAttendance();
         self::migrateImports();
@@ -55,10 +49,7 @@ final class Installer
         if ((int)get_option('ascla_schema',0)>=3) { return; }
         global $wpdb;
         $table=$wpdb->prefix.'ascla_notifications';
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'event_key'))) {
-            $wpdb->query("ALTER TABLE $table ADD event_key varchar(96) DEFAULT NULL, ADD UNIQUE KEY delivery (user_id,event_key)");
-            if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'event_key'))) { throw new MigrationException('No se pudo actualizar el índice de notificaciones.'); }
-        }
+        MigrationSchema::ensureColumn($table,'event_key','event_key varchar(96) DEFAULT NULL, ADD UNIQUE KEY delivery (user_id,event_key)','No se pudo actualizar el índice de notificaciones.');
         $page=1;
         do {
             $posts=get_posts(['post_type'=>'ascla_resource','post_status'=>['publish','draft','pending','ascla_hidden','ascla_rejected'],'numberposts'=>200,'paged'=>$page++]);
@@ -70,102 +61,62 @@ final class Installer
         } while (count($posts)===200);
         update_option('ascla_schema',3,false);
     }
-    private static function migrateNotificationContext(): void
+    private static function migrateLegacyColumns(): void
     {
-        if ((int)get_option('ascla_schema',0)>=4) { return; }
-        global $wpdb; $table=$wpdb->prefix.'ascla_notifications';
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'context'))) {
-            $wpdb->query("ALTER TABLE $table ADD context longtext DEFAULT NULL");
-            if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'context'))) { throw new MigrationException('No se pudo actualizar el contexto de notificaciones.'); }
-        }
-        update_option('ascla_schema',4,false);
-    }
-    private static function migrateReportReasons(): void
-    {
-        if ((int)get_option('ascla_schema',0)>=5) { return; }
-        global $wpdb; $table=$wpdb->prefix.'ascla_relations';
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'reason'))) {
-            $wpdb->query("ALTER TABLE $table ADD reason varchar(64) NOT NULL DEFAULT ''");
-        }
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'detail'))) {
-            $wpdb->query("ALTER TABLE $table ADD detail text NULL");
-        }
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'reason')) || !$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'detail'))) {
-            throw new MigrationException('No se pudo actualizar el registro de reportes.');
-        }
-        update_option('ascla_schema',5,false);
-    }
-    private static function migrateMediaMasters(): void
-    {
-        if ((int)get_option('ascla_schema',0)>=6) { return; }
-        global $wpdb; $table=$wpdb->prefix.'ascla_media';
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'original_id'))) {
-            $wpdb->query("ALTER TABLE $table ADD original_id bigint(20) unsigned NOT NULL DEFAULT 0, ADD KEY original_id (original_id)");
-        }
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'original_id'))) {
-            throw new MigrationException('No se pudo actualizar el almacenamiento de imágenes.');
-        }
-        update_option('ascla_schema',6,false);
-    }
-    private static function migrateReportReviewState(): void
-    {
-        if ((int)get_option('ascla_schema',0)>=7) { return; }
-        global $wpdb; $table=$wpdb->prefix.'ascla_relations';
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'reviewed_at'))) {
-            $wpdb->query("ALTER TABLE $table ADD reviewed_at datetime DEFAULT NULL, ADD reviewed_by bigint(20) unsigned NOT NULL DEFAULT 0");
-        }
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'reviewed_at')) || !$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'reviewed_by'))) {
-            throw new MigrationException('No se pudo actualizar el estado de revisión de reportes.');
-        }
-        update_option('ascla_schema',7,false);
-    }
-
-    private static function migrateConversationGroups(): void
-    {
-        if ((int)get_option('ascla_schema',0)>=8) { return; }
-        global $wpdb; $table=$wpdb->prefix.'ascla_conversations';
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'kind'))) {
-            $wpdb->query("ALTER TABLE $table ADD kind varchar(16) NOT NULL DEFAULT 'direct' AFTER pair_key");
-        }
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'title'))) {
-            $wpdb->query("ALTER TABLE $table ADD title varchar(160) NOT NULL DEFAULT '' AFTER kind");
-        }
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'created_by'))) {
-            $wpdb->query("ALTER TABLE $table ADD created_by bigint(20) unsigned NOT NULL DEFAULT 0 AFTER title");
-        }
-        foreach (['kind','title','created_by'] as $column) {
-            if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",$column))) {
-                throw new MigrationException('No se pudo actualizar el esquema de conversaciones.');
+        global $wpdb;
+        $migrations=[
+            4=>[
+                'table'=>'notifications',
+                'columns'=>['context'=>'context longtext DEFAULT NULL'],
+                'error'=>'No se pudo actualizar el contexto de notificaciones.',
+            ],
+            5=>[
+                'table'=>'relations',
+                'columns'=>['reason'=>"reason varchar(64) NOT NULL DEFAULT ''",'detail'=>'detail text NULL'],
+                'error'=>'No se pudo actualizar el registro de reportes.',
+            ],
+            6=>[
+                'table'=>'media',
+                'columns'=>['original_id'=>'original_id bigint(20) unsigned NOT NULL DEFAULT 0, ADD KEY original_id (original_id)'],
+                'error'=>'No se pudo actualizar el almacenamiento de imágenes.',
+            ],
+            7=>[
+                'table'=>'relations',
+                'columns'=>['reviewed_at'=>'reviewed_at datetime DEFAULT NULL','reviewed_by'=>'reviewed_by bigint(20) unsigned NOT NULL DEFAULT 0'],
+                'error'=>'No se pudo actualizar el estado de revisión de reportes.',
+            ],
+            8=>[
+                'table'=>'conversations',
+                'columns'=>[
+                    'kind'=>"kind varchar(16) NOT NULL DEFAULT 'direct' AFTER pair_key",
+                    'title'=>"title varchar(160) NOT NULL DEFAULT '' AFTER kind",
+                    'created_by'=>'created_by bigint(20) unsigned NOT NULL DEFAULT 0 AFTER title',
+                ],
+                'error'=>'No se pudo actualizar el esquema de conversaciones.',
+                'after'=>"SET kind='direct' WHERE kind='' OR kind IS NULL",
+            ],
+            9=>[
+                'table'=>'conversations',
+                'columns'=>['photo_id'=>'photo_id bigint(20) unsigned NOT NULL DEFAULT 0 AFTER created_by, ADD KEY photo_id (photo_id)'],
+                'error'=>'No se pudo añadir la fotografía de los grupos.',
+            ],
+            10=>[
+                'table'=>'conversations',
+                'columns'=>['description'=>"description varchar(240) NOT NULL DEFAULT '' AFTER title"],
+                'error'=>'No se pudo añadir la descripción de los grupos.',
+            ],
+        ];
+        $current=(int)get_option('ascla_schema',0);
+        foreach ($migrations as $version=>$migration) {
+            if ($current>=$version) { continue; }
+            $table=$wpdb->prefix.'ascla_'.$migration['table'];
+            foreach ($migration['columns'] as $column=>$definition) {
+                MigrationSchema::ensureColumn($table,$column,$definition,$migration['error']);
             }
+            if (!empty($migration['after'])) { $wpdb->query('UPDATE '.$table.' '.$migration['after']); }
+            update_option('ascla_schema',$version,false);
+            $current=$version;
         }
-        $wpdb->query("UPDATE $table SET kind='direct' WHERE kind='' OR kind IS NULL");
-        update_option('ascla_schema',8,false);
-    }
-
-    private static function migrateConversationPhotos(): void
-    {
-        if ((int)get_option('ascla_schema',0)>=9) { return; }
-        global $wpdb; $table=$wpdb->prefix.'ascla_conversations';
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'photo_id'))) {
-            $wpdb->query("ALTER TABLE $table ADD photo_id bigint(20) unsigned NOT NULL DEFAULT 0 AFTER created_by, ADD KEY photo_id (photo_id)");
-        }
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'photo_id'))) {
-            throw new MigrationException('No se pudo añadir la fotografía de los grupos.');
-        }
-        update_option('ascla_schema',9,false);
-    }
-
-    private static function migrateConversationDescriptions(): void
-    {
-        if ((int)get_option('ascla_schema',0)>=10) { return; }
-        global $wpdb; $table=$wpdb->prefix.'ascla_conversations';
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'description'))) {
-            $wpdb->query("ALTER TABLE $table ADD description varchar(240) NOT NULL DEFAULT '' AFTER title");
-        }
-        if (!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s",'description'))) {
-            throw new MigrationException('No se pudo añadir la descripción de los grupos.');
-        }
-        update_option('ascla_schema',10,false);
     }
 
     /** Preserve saved files while allowing the -1 marker used by uncommitted uploads. */
@@ -221,7 +172,7 @@ final class Installer
         ];
         foreach($schemas as $name=>$schema){dbDelta("CREATE TABLE {$p}{$name} (\n$schema\n) ENGINE=InnoDB $collate;");if($wpdb->get_var($wpdb->prepare(self::TABLE_EXISTS_SQL,$wpdb->esc_like($p.$name)))!==$p.$name) {throw new MigrationException('No se pudo crear el registro de importaciones.'); }}
         $columns=['seconds'=>'int unsigned DEFAULT NULL','sessions'=>'longtext DEFAULT NULL','review_reason'=>"varchar(255) NOT NULL DEFAULT ''"];
-        foreach($columns as $column=>$type) {if(!$wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM {$p}attendance LIKE %s",$column)) && $wpdb->query("ALTER TABLE {$p}attendance ADD $column $type")===false) {throw new MigrationException('No se pudo ampliar el registro de asistencia.'); } }
+        foreach($columns as $column=>$type) { MigrationSchema::ensureColumn($p.'attendance',$column,$column.' '.$type,'No se pudo ampliar el registro de asistencia.'); }
         update_option('ascla_schema',13,false);
         update_option('ascla_interest_index_cursor',0,false);
         if(!wp_next_scheduled('ascla_interest_index')) {wp_schedule_single_event(time()+1,'ascla_interest_index'); }

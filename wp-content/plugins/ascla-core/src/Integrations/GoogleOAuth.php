@@ -115,23 +115,30 @@ final class GoogleOAuth
             if ($operation==='cancel') { throw new IntegrationException('Este es el calendario organizador del evento. Para retirarlo de Google, cancela el evento desde ASCLA.'); }
             return self::syncOrganizerEvent($post->ID,$user,false);
         }
-        $key='_ascla_google_event_'.$post->ID; $remote=sanitize_text_field((string)get_user_meta($user,$key,true));
+        $key='_ascla_google_event_'.$post->ID;
+        $remote=sanitize_text_field((string)get_user_meta($user,$key,true));
         if ($operation==='cancel') {
-            if ($remote==='') { return ['ok'=>true]; }
-            self::request($user,$token,'DELETE',self::eventsUrl($remote),null,false,[200,204,404,410]);
-            delete_user_meta($user,$key); Audit::record('calendar_cancel',$post->ID);
-            return ['ok'=>true,'event_id'=>''];
+            return self::cancelPersonalCalendar($user,$token,$post->ID,$key,$remote);
         }
         $body=self::eventBody($post,$meta,[]); $data=[];
         if ($remote!=='') {
-            $data=self::request($user,$token,'PATCH',self::eventsUrl($remote),$body,false,[200,404,410]);
+            $data=self::request($token,'PATCH',self::eventsUrl($remote),$body,false,[200,404,410]);
             if (!empty($data['_missing'])) { $remote=''; delete_user_meta($user,$key); }
         }
-        if ($remote==='') { $data=self::request($user,$token,'POST',self::eventsUrl(),$body,false,[200,201]); }
+        if ($remote==='') { $data=self::request($token,'POST',self::eventsUrl(),$body,false,[200,201]); }
         $remoteId=sanitize_text_field((string)($data['id']??$remote));
         if ($remoteId==='') { throw new IntegrationException('Google Calendar no devolvió el identificador del evento creado.'); }
         update_user_meta($user,$key,$remoteId); Audit::record('calendar_save',$post->ID);
         return ['ok'=>true,'event_id'=>$remoteId];
+    }
+
+    private static function cancelPersonalCalendar(int $user,string $token,int $postId,string $key,string $remote): array
+    {
+        if ($remote==='') { return ['ok'=>true]; }
+        self::request($token,'DELETE',self::eventsUrl($remote),null,false,[200,204,404,410]);
+        delete_user_meta($user,$key);
+        Audit::record('calendar_cancel',$postId);
+        return ['ok'=>true,'event_id'=>''];
     }
 
     /**
@@ -157,7 +164,7 @@ final class GoogleOAuth
         $token=self::accessToken($organizer,'calendar');
         $existing=[];
         if ($remote!=='') {
-            $existing=self::request($organizer,$token,'GET',self::eventsUrl($remote),null,false,[200,404,410]);
+            $existing=self::request($token,'GET',self::eventsUrl($remote),null,false,[200,404,410]);
             if (!empty($existing['_missing'])) {
                 $remote=''; $existing=[];
                 delete_post_meta($id,self::ORGANIZER_EVENT_META);
@@ -167,7 +174,7 @@ final class GoogleOAuth
         $attendees=self::eventAttendees($id,$organizer,(array)($existing['attendees']??[]));
         $method=$remote!==''?'PATCH':'POST';
         $url=self::eventsUrl($remote);
-        $data=self::request($organizer,$token,$method,$url,self::eventBody($post,$meta,$attendees),$notifyGuests,[200,201]);
+        $data=self::request($token,$method,$url,self::eventBody($post,$meta,$attendees),$notifyGuests,[200,201]);
         $remoteId=sanitize_text_field((string)($data['id']??$remote));
         if ($remoteId==='') { throw new IntegrationException('Google Calendar no devolvió el identificador del evento creado.'); }
         update_post_meta($id,self::ORGANIZER_USER_META,$organizer);
@@ -180,12 +187,15 @@ final class GoogleOAuth
     public static function inviteEvent(int $id,array $users): array
     {
         $users=array_values(array_unique(array_filter(array_map('absint',$users))));
-        if (!$users) { return ['available'=>false,'sent'=>0]; }
         $post=get_post($id);
-        if (!$post || $post->post_type!=='ascla_event') { return ['available'=>false,'sent'=>0]; }
+        if (!$users || !$post || $post->post_type!=='ascla_event') {
+            return ['available'=>false,'sent'=>0];
+        }
         $stored=absint(get_post_meta($id,self::ORGANIZER_USER_META,true));
-        $author=(int)$post->post_author;
-        $preferred=self::connected($stored)?$stored:(self::connected($author)?$author:(self::connected(get_current_user_id())?get_current_user_id():0));
+        $preferred=0;
+        foreach ([$stored,(int)$post->post_author,get_current_user_id()] as $candidate) {
+            if ($candidate>0 && self::connected($candidate)) { $preferred=$candidate; break; }
+        }
         if (!$preferred) {
             return ['available'=>false,'sent'=>0,'message'=>'Google Calendar no está conectado en la cuenta organizadora.'];
         }
@@ -207,7 +217,7 @@ final class GoogleOAuth
         $remote=sanitize_text_field((string)get_post_meta($id,self::ORGANIZER_EVENT_META,true));
         if (!$organizer || $remote==='' || !self::connected($organizer)) { return ['ok'=>true,'available'=>false]; }
         $token=self::accessToken($organizer,'calendar');
-        self::request($organizer,$token,'DELETE',self::eventsUrl($remote),null,true,[200,204,404,410]);
+        self::request($token,'DELETE',self::eventsUrl($remote),null,true,[200,204,404,410]);
         delete_post_meta($id,self::ORGANIZER_EVENT_META);
         Audit::record('calendar_cancel',$id,'organizer_'.$organizer);
         return ['ok'=>true,'available'=>true];
@@ -217,16 +227,29 @@ final class GoogleOAuth
     {
         if ($stored>0 && self::connected($stored)) { return $stored; }
         if ($remoteExists && $stored>0) { return 0; }
+        $organizer=0;
         foreach (array_unique([$preferred,(int)$post->post_author,get_current_user_id()]) as $candidate) {
-            if ($candidate>0 && self::connected($candidate)) { return $candidate; }
+            if ($candidate>0 && self::connected($candidate)) { $organizer=$candidate; break; }
         }
-        return 0;
+        return $organizer;
     }
 
     private static function eventAttendees(int $id,int $organizer,array $existing): array
     {
         $organizerAccount=get_userdata($organizer);
         $organizerEmail=strtolower(trim((string)($organizerAccount->user_email??'')));
+        $byEmail=self::existingAttendeeMap($existing,$organizerEmail);
+        foreach (Store::rows('registrations',"event_id=%d AND status IN ('invited','accepted','offered')",[$id],'ORDER BY id ASC') as $row) {
+            $account=get_userdata(absint($row['user_id']??0));
+            $email=strtolower(trim((string)($account->user_email??'')));
+            if (!is_email($email) || $email===$organizerEmail) { continue; }
+            if (!isset($byEmail[$email])) { $byEmail[$email]=['email'=>$email]; }
+        }
+        return array_values($byEmail);
+    }
+
+    private static function existingAttendeeMap(array $existing,string $organizerEmail): array
+    {
         $byEmail=[];
         foreach ($existing as $attendee) {
             if (!is_array($attendee)) { continue; }
@@ -238,13 +261,7 @@ final class GoogleOAuth
             }
             $byEmail[$email]=$clean;
         }
-        foreach (Store::rows('registrations',"event_id=%d AND status IN ('invited','accepted','offered')",[$id],'ORDER BY id ASC') as $row) {
-            $account=get_userdata(absint($row['user_id']??0));
-            $email=strtolower(trim((string)($account->user_email??'')));
-            if (!is_email($email) || $email===$organizerEmail) { continue; }
-            if (!isset($byEmail[$email])) { $byEmail[$email]=['email'=>$email]; }
-        }
-        return array_values($byEmail);
+        return $byEmail;
     }
 
     private static function eventBody(\WP_Post $post,array $meta,array $attendees): array
@@ -272,7 +289,7 @@ final class GoogleOAuth
         return 'https://www.googleapis.com/calendar/v3/calendars/primary/events'.($eventId!==''?'/'.rawurlencode($eventId):'');
     }
 
-    private static function request(int $user,string $token,string $method,string $url,?array $body,bool $sendUpdates,array $allowed): array
+    private static function request(string $token,string $method,string $url,?array $body,bool $sendUpdates,array $allowed): array
     {
         if ($sendUpdates) { $url.=(str_contains($url,'?')?'&':'?').'sendUpdates=all'; }
         $args=[

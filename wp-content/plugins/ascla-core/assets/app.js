@@ -1012,7 +1012,13 @@
       numeric.push(btn(String(number), 'page', `data-page="${number}" ${number === page ? 'aria-current="page" disabled' : ''}`, `small pagination-number${number === page ? ' active' : ''}`));
       previous = number;
     }
-    const controls = `<nav class="pagination directory-pagination-numeric" aria-label="${E(T('Paginación del directorio'))}">${btn('Anterior','page',`data-page="${page - 1}" ${page <= 1 ? 'disabled' : ''}`,'small')}${numeric.join('')}${btn('Siguiente','page',`data-page="${page + 1}" ${page >= pages ? 'disabled' : ''}`,'small')}</nav>`;
+    const previousAttrs = `data-page="${page - 1}"` + (page <= 1 ? " disabled" : "");
+    const nextAttrs = `data-page="${page + 1}"` + (page >= pages ? " disabled" : "");
+    const controls = '<nav class="pagination directory-pagination-numeric" aria-label="' + E(T("Paginación del directorio")) + '">'
+      + btn("Anterior", "page", previousAttrs, "small")
+      + numeric.join("")
+      + btn("Siguiente", "page", nextAttrs, "small")
+      + "</nav>";
     return `<div class="directory-pagination"><div class="directory-pagination-summary"><span><strong>${perPage}</strong> ${E(T('por página'))} · ${E(T('Mostrando'))} ${startItem}–${endItem} ${E(T('de'))} ${total}</span></div>${controls}</div>`;
   }
   async function directory() {
@@ -1185,6 +1191,17 @@
     const maxDate = new Date().toISOString().slice(0, 10);
     return `<div class="birthday-profile-field">${field("birth_date", "Fecha de nacimiento", p.birth_date || "", "date", ("min=\"1900-01-01\" max=\"" + (maxDate) + "\""))}<div class="birthday-inline-note">${I("shield")}<span>${E(T("Dato privado. Solo se usa para felicitarte y avisar a la administración el día de tu cumpleaños."))}</span></div></div>`;
   }
+  function profileTabButton(tab, index) {
+    const [key, icon, title, description] = tab;
+    const selected = index === 0;
+    return '<button type="button" class="profile-tab" role="tab" id="profile-tab-' + key
+      + '" data-profile-tab="' + key + '" aria-controls="profile-panel-' + key
+      + '" aria-selected="' + (selected ? "true" : "false")
+      + '" tabindex="' + (selected ? "0" : "-1") + '">'
+      + '<span class="profile-tab-icon">' + I(icon) + '</span>'
+      + '<span class="profile-tab-copy"><strong>' + E(T(title)) + '</strong><small>' + E(T(description)) + '</small></span>'
+      + '</button>';
+  }
   function profileTabs() {
     const tabs = [
       ["info", "users", "Información", "Datos personales y profesionales"],
@@ -1192,7 +1209,9 @@
       ["privacy", "shield", "Privacidad y avisos", "Visibilidad y notificaciones"],
       ["account", "shield", "Cuenta y seguridad", "Contraseña e integraciones"],
     ];
-    return `<div class="profile-tabs" role="tablist" aria-label="${E(T("Secciones del perfil"))}">${tabs.map(([key, icon, title, description], index) => `<button type="button" class="profile-tab" role="tab" id="profile-tab-${key}" data-profile-tab="${key}" aria-controls="profile-panel-${key}" aria-selected="${index === 0 ? "true" : "false"}" tabindex="${index === 0 ? "0" : "-1"}"><span class="profile-tab-icon">${I(icon)}</span><span class="profile-tab-copy"><strong>${E(T(title))}</strong><small>${E(T(description))}</small></span></button>`).join("")}</div>`;
+    return '<div class="profile-tabs" role="tablist" aria-label="' + E(T("Secciones del perfil")) + '">'
+      + tabs.map((tab) => profileTabButton(tab)).join("")
+      + '</div>';
   }
   function setupProfileTabs() {
     const scope = content();
@@ -1200,9 +1219,9 @@
     const panels = [...scope.querySelectorAll("[data-profile-panel]")];
     const form = scope.querySelector('[data-form="profile"]');
     const accountPanel = scope.querySelector('[data-profile-panel="account"]');
-    const keys = tabs.map(tab => tab.dataset.profileTab);
+    const keys = new Set(tabs.map(tab => tab.dataset.profileTab));
     const activate = (key, focus = false) => {
-      if (!keys.includes(key)) key = "info";
+      if (!keys.has(key)) key = "info";
       S.profileTab = key;
       tabs.forEach(tab => {
         const selected = tab.dataset.profileTab === key;
@@ -1217,7 +1236,7 @@
     tabs.forEach((tab, index) => {
       tab.addEventListener("click", () => activate(tab.dataset.profileTab));
       tab.addEventListener("keydown", event => {
-        let next = index;
+        let next;
         if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
         else if (event.key === "ArrowLeft") next = (index - 1 + tabs.length) % tabs.length;
         else if (event.key === "Home") next = 0;
@@ -1494,11 +1513,15 @@
     const googleCalendarAction = !d.is_past && !d.cancelled && d.google_url
       ? `<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">${E(T("Añadir a Google Calendar ↗"))}</a>`
       : "";
-    const googleConnectedActions = !d.is_past && !d.cancelled && S.boot.google_connected
-      ? (d.google_managed
-          ? `<span class="status accepted">${E(T("Sincronizado como organizador en Google Calendar"))}</span>`
-          : btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small") + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small"))
-      : "";
+    let googleConnectedActions = "";
+    if (!d.is_past && !d.cancelled && S.boot.google_connected) {
+      if (d.google_managed) {
+        googleConnectedActions = `<span class="status accepted">${E(T("Sincronizado como organizador en Google Calendar"))}</span>`;
+      } else {
+        googleConnectedActions = btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small")
+          + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small");
+      }
+    }
     const participantRows = d.participants ? d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("") : "";
     const participantsSection = d.participants
       ? `<details class="event-moderation-participants"><summary class="private-note">${E(T("Participantes y lista de espera (gestión de eventos)"))}</summary>${participantRows}</details>`
@@ -3289,41 +3312,54 @@ root.addEventListener("click", async (event) => {
       await files(1, data.q, S.files?.scope || "mine", Number(data.owner || 0));
     }
   }
-  async function handleSubmitActions03(action, form, data, _submit, _event) {
-    if (action === "event-invite") {
-      const r = await api("events/" + form.dataset.id + "/invite", { users: [...S.invite.selected] });
-      closeModal(); S.invite = null;
-      const googleSent = Number(r.google_calendar?.sent || 0);
-      const googleNote = googleSent
-        ? ` Google Calendar envió ${googleSent} invitación${googleSent === 1 ? "" : "es"} por correo.`
-        : (r.google_calendar?.error
-            ? ` Google Calendar: ${r.google_calendar.error}`
-            : (r.sent > 0 && !r.google_calendar?.available ? " Google Calendar no está conectado en la cuenta organizadora." : ""));
-      toast(`${r.sent} invitaciones enviadas; ${r.skipped} asociados ya tenían una inscripción o invitación.${googleNote}`);
-      await item(Number(form.dataset.id));
+  function googleInviteNote(result) {
+    const googleSent = Number(result.google_calendar?.sent || 0);
+    if (googleSent > 0) {
+      const suffix = googleSent === 1 ? "" : "es";
+      return ` Google Calendar envió ${googleSent} invitación${suffix} por correo.`;
     }
-    else if (action === "profile") {
-      await validateProfileLocations(form);
-      for (const key of Object.keys(profileTax))
-      data[key] = new FormData(form).getAll(key).map(Number);
-      data.hidden = new FormData(form).getAll("hidden");
-      for (const key of ["directory", "networking", "microevents"])
-      data[key] = form.elements[key].checked;
-      data.email_notifications = {};
-      for (const key of ["connections", "messages", "events", "support"]) {
+    if (result.google_calendar?.error) return ` Google Calendar: ${result.google_calendar.error}`;
+    if (result.sent > 0 && !result.google_calendar?.available) return " Google Calendar no está conectado en la cuenta organizadora.";
+    return "";
+  }
+  async function submitEventInvites(form) {
+    const result = await api("events/" + form.dataset.id + "/invite", { users: [...S.invite.selected] });
+    closeModal();
+    S.invite = null;
+    toast(`${result.sent} invitaciones enviadas; ${result.skipped} asociados ya tenían una inscripción o invitación.${googleInviteNote(result)}`);
+    await item(Number(form.dataset.id));
+  }
+  function collectProfileData(form, data) {
+    const formData = new FormData(form);
+    for (const key of Object.keys(profileTax)) data[key] = formData.getAll(key).map(Number);
+    data.hidden = formData.getAll("hidden");
+    for (const key of ["directory", "networking", "microevents"]) data[key] = form.elements[key].checked;
+    data.email_notifications = {};
+    for (const key of ["connections", "messages", "events", "support"]) {
       data.email_notifications[key] = !!form.elements[`email_${key}`]?.checked;
       delete data[`email_${key}`];
-      }
-      delete data.photo;
-      await api("profiles/me", data);
-      const savedPhotoInput = form.querySelector('[name="photo_id"]');
-      if (savedPhotoInput) delete savedPhotoInput.dataset.pendingMedia;
-      clearUnsavedGuard(form);
-      S.boot = await api("bootstrap");
-      const label = root.querySelector(".header-profile strong"); if (label) label.textContent = S.boot.me.name;
-      toast("Perfil actualizado.");
-      await profile();
     }
+    delete data.photo;
+    return data;
+  }
+  async function submitProfile(form, data) {
+    await validateProfileLocations(form);
+    await api("profiles/me", collectProfileData(form, data));
+    const savedPhotoInput = form.querySelector('[name="photo_id"]');
+    if (savedPhotoInput) delete savedPhotoInput.dataset.pendingMedia;
+    clearUnsavedGuard(form);
+    S.boot = await api("bootstrap");
+    const label = root.querySelector(".header-profile strong");
+    if (label) label.textContent = S.boot.me.name;
+    toast("Perfil actualizado.");
+    await profile();
+  }
+  async function handleSubmitActions03(action, form, data, _submit, _event) {
+    if (action === "event-invite") {
+      await submitEventInvites(form);
+      return;
+    }
+    if (action === "profile") await submitProfile(form, data);
   }
   async function handleSubmitActions04(action, form, data, _submit, _event) {
     if (action === "password-change") {
@@ -3767,7 +3803,6 @@ root.addEventListener("submit", async (event) => {
   globalThis.addEventListener("beforeunload", (event) => {
     if (!hasUnsavedChanges() && ![...document.querySelectorAll("form[data-guard-modal-unsaved]")].some(modalHasUnsavedChanges)) return;
     event.preventDefault();
-    event.returnValue = "";
   });
   globalThis.addEventListener("pagehide", (event) => {
     if (!event.persisted) discardPendingWithin(root, true);

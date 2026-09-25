@@ -158,8 +158,7 @@ final class Events
         return ['sent'=>$sent,'skipped'=>count($users)-$sent,'google_calendar'=>$calendar,'message'=>$message];
     }
 
-    /** Notify registered/invited associates only when operational event data changed materially. */
-    public static function notifyImportantChanges(int $id,array $before,array $after): int
+    private static function importantChanges(array $before,array $after): array
     {
         $fields=[
             '__title'=>'title',
@@ -176,6 +175,13 @@ final class Events
             $right=is_scalar($after[$key]??null)?trim((string)$after[$key]):'';
             if ($left!==$right) { $changed[]=$contextKey; }
         }
+        return $changed;
+    }
+
+    /** Notify registered/invited associates only when operational event data changed materially. */
+    public static function notifyImportantChanges(int $id,array $before,array $after): int
+    {
+        $changed=self::importantChanges($before,$after);
         if (!$changed) { return 0; }
         $post=get_post($id);
         if (!$post || $post->post_type!=='ascla_event' || $post->post_status!=='publish' || !empty($after['cancelled'])) { return 0; }
