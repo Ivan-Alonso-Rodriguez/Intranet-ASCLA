@@ -1,6 +1,6 @@
 <?php
 namespace ASCLA\Core\Services;
-use ASCLA\Core\Integrations\{AIProviderInterface,MockAIProvider,RealAIProvider,OpenAIProvider,MockVideoProvider,YouTubeVideoProvider};
+use ASCLA\Core\Integrations\{AIProviderInterface,MockAIProvider,RealAIProvider,OpenAIProvider,DeepSeekProvider,MockVideoProvider,YouTubeVideoProvider};
 use ASCLA\Core\Domain\{Anonymizer,EntityRedactor,Grounding};
 final class Knowledge
 {
@@ -20,6 +20,7 @@ final class Knowledge
         return match(Settings::get()['ai_provider']??'mock') {
             'gemini'=>new RealAIProvider(),
             'openai'=>new OpenAIProvider(),
+            'deepseek'=>new DeepSeekProvider(),
             default=>new MockAIProvider(),
         };
     }

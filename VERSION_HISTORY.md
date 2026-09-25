@@ -2,70 +2,19 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.10.3`
+> **Versión actual:** `1.10.4`
 > **Esquema de base de datos:** `13`
-> La versión `1.10.3` corrige los casos de aceptación 004, 008, 013 y 019 y habilita la preparación de microeventos para ejecutivos; conserva el esquema 13 y las funciones de 1.10.2.
+> La versión `1.10.4` reduce la carga visual de Perfil, adapta Mensajería a un flujo móvil lista → conversación, completa RF-013 / CP-021 con paginación numérica y límites de resultados en Directorio, corrige la sincronización de eventos e invitaciones con Google Calendar, añade DeepSeek como proveedor de IA y protege los cambios sin guardar del Perfil al navegar. Conserva el esquema 13 y las funciones de 1.10.3.
 
 ## Resumen de versiones
 
+> Ordenado de la versión más reciente a la más antigua. La versión vigente del proyecto es **1.10.4**.
+
 | Versión | Enfoque principal | Estado |
 |---|---|---|
-| 1.0.3 | Base funcional inicial recuperada del historial Git | Histórica |
-| 1.0.4 | Acceso e inicio de sesión ASCLA | Histórica |
-| 1.1.0 | Directorio, agenda, networking y filtros | Histórica |
-| 1.2.0 | Centro de notificaciones y actividad | Histórica |
-| 1.3.0 | Snapshot recuperado | Histórica |
-| 1.4.0 | Snapshot recuperado | Histórica |
-| 1.4.1 | Snapshot recuperado | Histórica |
-| 1.4.2 | Versión documentada, snapshot fuente no disponible | Histórica |
-| 1.5.0 | Snapshot recuperado | Histórica |
-| 1.6.0 | Snapshot recuperado | Histórica |
-| 1.7.0 | Último estado del historial recibido originalmente | Histórica |
-| 1.9.0 | Idiomas, seguridad de cuenta y sistema de reportes | Completada |
-| 1.9.1 | UX de contraseña y protección de cambios sin guardar | Completada |
-| 1.9.2 | Modo oscuro con detección automática | Completada |
-| 1.9.3 | Correcciones visuales y de contraste del modo oscuro | Completada |
-| 1.9.4 | Preferencias por defecto y reglas para eventos pasados | Completada |
-| 1.9.5 | Calendario, retiro de ICS y afinidad mínima | Completada |
-| 1.9.6 | Comentarios enriquecidos y menús contextuales | Completada |
-| 1.9.7 | Reportes de comentarios y notificaciones identificables | Completada |
-| 1.9.8 | Menús exclusivos y ampliación de traducciones ES/EN | Completada |
-| 1.9.9 | Asistente ASCLA conversacional con contexto vivo | Completada |
-| 1.9.10 | Edición, recorte y optimización de imágenes | Completada |
-| 1.9.11 | Permisos de archivos, OpenAI y seguimiento de reportes | Completada |
-| 1.9.12 | Filtro de archivos por usuario, mensajes sugeridos y guardia de cambios | Completada |
-| 1.9.13 | Cloudflare Turnstile adaptativo y protección de formularios públicos | Completada |
-| 1.9.14 | Acceso cerrado de asociados y ajuste de Turnstile | Completada |
-| 1.9.15 | Guardia de configuración y tarjetas proporcionales del directorio | Completada |
-| 1.9.16 | Pulido visual de login, Inicio y filtros | Completada |
-| 1.9.17 | Foros simplificados, completitud de perfil y ubicaciones normalizadas | Completada |
-| 1.9.18 | Autocompletado profesional de ubicación y nueva identidad visual | Completada |
-| 1.9.19 | Corrección de autofill y logos transparentes | Completada |
-| 1.9.20 | Renovación visual de Administración, idioma y branding | Completada |
-| 1.9.21 | Pulido del hero, Auditoría y Configuración administrativa | |
-| 1.9.22 | Proveedor IA exclusivo, configuración simplificada y auditoría explicativa | Completada |
-| 1.9.23 | Gestión de notificaciones y ciclo completo de conexiones | Completada |
-| 1.9.24 | Reparación de microeventos y estado visual de conexiones | Completada |
-| 1.9.25 | Publicación editorial directa, notas integradas y cápsulas coherentes | Completada |
-| 1.9.26 | Nota técnica en recurso original, duración automática y publicación por defecto | Completada |
-| 1.9.27 | Resumen editorial, duración verificada y estados visibles | Completada |
-| 1.9.28 | Recomendaciones de conocimiento reforzadas por palabras clave | Completada |
-| 1.9.29 | Temas automáticos, duración YouTube y transcripción segura | Completada |
-| 1.9.30 | Solicitudes de conversación, grupos y lectura | Completada |
-| 1.9.31 | Solicitudes con mensaje, foto y eliminación de grupos | Completada |
-| 1.9.32 | Bandeja de solicitudes y menú de información de grupos | Completada |
-| 1.9.33 | Pulido de perfiles y acciones de integrantes del grupo | Completada |
-| 1.9.34 | Edición de identidad del grupo y perfiles en modal | Completada |
-| 1.9.35 | Cierre por fondo y perfiles desde comentarios | Completada |
-| 1.9.36 | Guardado protegido y notificaciones opcionales por correo | Completada |
-| 1.9.37 | RF-033 y RF-038: notificaciones del ciclo de soporte | Completada |
-| 1.9.38 | RF-029 y RF-030: lista de espera y liberación de cupo | Completada |
-| 1.9.39 | RF-024 y RN-011: cancelación de eventos y correo controlado | Completada |
-| 1.9.40 | RF-025: imagen de portada del evento | Completada |
-| 1.9.41 | RF-031: participantes visibles después del RSVP | Completada |
-| 1.9.42 | RF-040 y RF-041: recomendaciones enriquecidas y explicables | Completada |
+| 1.10.4 | Perfil por pestañas, mensajería móvil, paginación, Google Calendar, DeepSeek y guardia de cambios | **Actual** |
+| 1.10.3 | Bloqueo de acceso, solicitudes profesionales, perfil obligatorio, directorio y microeventos ejecutivos | Anterior |
 | 1.10.2 | Forms, teléfono, correos HTML, Zoom por intervalos y analítica ampliada | Anterior |
-| 1.10.3 | Bloqueo de acceso, solicitudes profesionales, perfil obligatorio, directorio y microeventos ejecutivos | **Actual** |
 | 1.10.1 | Estadísticas, asistencia manual/Zoom y eliminación tras revisión o resolución | Completada |
 | 1.10 | Roles acumulativos, perfiles sin espera de IA y caché persistente | Completada |
 | 1.9.50 | Cargas temporales cancelables y notificaciones toast | Anterior |
@@ -76,8 +25,77 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.9.45 | `/login/` limpio con retorno interno seguro sin `redirect_to` visible | Completada |
 | 1.9.44 | Login de comunidad con diseño anterior + acceso nativo identificado como Administración ASCLA | Completada |
 | 1.9.43 | Acceso ASCLA separado en `/login/` y protección de `/intranet/` | Anterior |
+| 1.9.42 | RF-040 y RF-041: recomendaciones enriquecidas y explicables | Completada |
+| 1.9.41 | RF-031: participantes visibles después del RSVP | Completada |
+| 1.9.40 | RF-025: imagen de portada del evento | Completada |
+| 1.9.39 | RF-024 y RN-011: cancelación de eventos y correo controlado | Completada |
+| 1.9.38 | RF-029 y RF-030: lista de espera y liberación de cupo | Completada |
+| 1.9.37 | RF-033 y RF-038: notificaciones del ciclo de soporte | Completada |
+| 1.9.36 | Guardado protegido y notificaciones opcionales por correo | Completada |
+| 1.9.35 | Navegación contextual en conversaciones y modales | Completada |
+| 1.9.34 | Edición de identidad del grupo y perfiles en modal | Completada |
+| 1.9.33 | Pulido de perfiles y acciones de integrantes del grupo | Completada |
+| 1.9.32 | Bandeja de solicitudes y menú de información de grupos | Completada |
+| 1.9.31 | Solicitudes con mensaje, foto y eliminación de grupos | Completada |
+| 1.9.30 | Solicitudes de conversación, grupos y lectura | Completada |
+| 1.9.29 | Temas automáticos, duración YouTube y transcripción segura | Completada |
+| 1.9.28 | Recomendaciones de conocimiento reforzadas por palabras clave | Completada |
+| 1.9.27 | Resumen editorial, duración verificada y estados visibles | Completada |
+| 1.9.26 | Nota técnica en recurso original, duración automática y publicación por defecto | Completada |
+| 1.9.25 | Publicación editorial directa, notas integradas y cápsulas coherentes | Completada |
+| 1.9.24 | Reparación de microeventos y estado visual de conexiones | Completada |
+| 1.9.23 | Gestión de notificaciones y ciclo completo de conexiones | Completada |
+| 1.9.22 | Proveedor IA exclusivo, configuración simplificada y auditoría explicativa | Completada |
+| 1.9.21 | Pulido del hero, Auditoría y Configuración administrativa | Completada |
+| 1.9.20 | Renovación visual de Administración, idioma y branding | Completada |
+| 1.9.19 | Corrección de autofill y logos transparentes | Completada |
+| 1.9.18 | Autocompletado profesional de ubicación y nueva identidad visual | Completada |
+| 1.9.17 | Foros simplificados, completitud de perfil y ubicaciones normalizadas | Completada |
+| 1.9.16 | Pulido visual de login, Inicio y filtros | Completada |
+| 1.9.15 | Guardia de configuración y tarjetas proporcionales del directorio | Completada |
+| 1.9.14 | Acceso cerrado de asociados y ajuste de Turnstile | Completada |
+| 1.9.13 | Cloudflare Turnstile adaptativo y protección de formularios públicos | Completada |
+| 1.9.12 | Filtro de archivos por usuario, mensajes sugeridos y guardia de cambios | Completada |
+| 1.9.11 | Permisos de archivos, OpenAI y seguimiento de reportes | Completada |
+| 1.9.10 | Edición, recorte y optimización de imágenes | Completada |
+| 1.9.9 | Asistente ASCLA conversacional con contexto vivo | Completada |
+| 1.9.8 | Menús exclusivos y ampliación de traducciones ES/EN | Completada |
+| 1.9.7 | Reportes de comentarios y notificaciones identificables | Completada |
+| 1.9.6 | Comentarios enriquecidos y menús contextuales | Completada |
+| 1.9.5 | Calendario, retiro de ICS y afinidad mínima | Completada |
+| 1.9.4 | Preferencias por defecto y reglas para eventos pasados | Completada |
+| 1.9.3 | Correcciones visuales y de contraste del modo oscuro | Completada |
+| 1.9.2 | Modo oscuro con detección automática | Completada |
+| 1.9.1 | UX de contraseña y protección de cambios sin guardar | Completada |
+| 1.9.0 | Idiomas, seguridad de cuenta y sistema de reportes | Completada |
+| 1.7.0 | Último estado del historial recibido originalmente | Histórica |
+| 1.6.0 | Snapshot recuperado | Histórica |
+| 1.5.0 | Snapshot recuperado | Histórica |
+| 1.4.2 | Versión documentada, snapshot fuente no disponible | Histórica |
+| 1.4.1 | Snapshot recuperado | Histórica |
+| 1.4.0 | Snapshot recuperado | Histórica |
+| 1.3.0 | Snapshot recuperado | Histórica |
+| 1.2.0 | Centro de notificaciones y actividad | Histórica |
+| 1.1.0 | Directorio, agenda, networking y filtros | Histórica |
+| 1.0.4 | Acceso e inicio de sesión ASCLA | Histórica |
+| 1.0.3 | Base funcional inicial recuperada del historial Git | Histórica |
 
 ---
+
+## 1.10.4 — Perfil, Mensajería, Directorio, Google Calendar, DeepSeek y protección de cambios
+
+- **Mi perfil con menor carga visual:** el formulario se organiza en cuatro pestañas: **Información**, **Intereses**, **Privacidad y avisos** y **Cuenta y seguridad**. Información, Intereses y Privacidad conservan el guardado conjunto existente; Cuenta y seguridad agrupa contraseña, archivos e integración con Google Calendar.
+- **Accesibilidad del perfil:** las pestañas usan semántica `tablist`/`tab`/`tabpanel`, permiten navegación con teclado y recuerdan la sección activa durante la interacción. Si el navegador detecta un campo obligatorio inválido oculto en otra pestaña, esa sección se activa para mostrar el problema. En pantallas pequeñas la barra de pestañas admite desplazamiento horizontal.
+- **Mensajería en celular:** al entrar se muestra únicamente la lista de chats. Al seleccionar uno se abre únicamente la conversación, con **← Chats** para regresar. La sincronización automática no fuerza la apertura del primer chat en móvil. En escritorio se conserva la disposición de lista y conversación en paralelo.
+- **RF-013 / CP-021 — Directorio:** se agrega paginación numérica además de **Anterior/Siguiente**, indicador del rango visible y un límite fijo de **15 resultados por página**. `Profiles` aplica el mismo límite de 15 en servidor para mantener sincronizados frontend y backend. Con el conjunto demo de 18 perfiles se muestran dos páginas (15 + 3); la barra numérica también se renderiza si solo existe una página, dejando Anterior/Siguiente deshabilitados cuando corresponde.
+- **Carga sin caché obsoleta:** los assets del frontend usan `ASCLA_VERSION` más un hash de contenido. Si `app.js` o `app.css` cambia manteniendo la versión 1.10.4, su URL también cambia y el navegador/CDN solicita el archivo nuevo.
+- **Google Calendar — evento organizador:** al publicar un evento desde la interfaz con una cuenta Google conectada, ASCLA crea o sincroniza el evento en el calendario principal del organizador. Si el ID remoto guardado ya no existe, se descarta y se recrea para evitar estados fantasma. Una copia personal previa puede adoptarse como evento organizador para evitar duplicados.
+- **Google Calendar — invitaciones reales:** al invitar asociados, ASCLA agrega los correos válidos como `attendees` y actualiza el evento organizador con `sendUpdates=all`. Google Calendar envía la invitación por correo; los invitados de Google la reciben también en Calendar según sus preferencias de invitaciones y, cuando corresponda, después de aceptar/confirmar asistencia. La lista de invitados se configura para no mostrar a cada invitado los demás correos.
+- **Google Calendar — cambios y cancelación:** los cambios operativos relevantes del evento sincronizan título, fechas, modalidad, ubicación y enlace con el evento organizador. Al cancelar desde ASCLA se elimina la copia organizadora mediante Google Calendar y se solicitan avisos de cancelación a los asistentes. El evento organizador no se puede quitar desde la acción de copia personal, evitando cancelaciones accidentales para todos.
+- **DeepSeek como proveedor real de IA:** Administración → Configuración permite seleccionar **DeepSeek**, guardar por separado su modelo y API Key cifrada, eliminar la clave y probar la conexión. El proveedor usa la API oficial de DeepSeek con salida JSON y recibe únicamente el mismo contexto autorizado que ASCLA ya prepara para los demás proveedores; no amplía permisos ni acceso a datos. El modelo predeterminado es `deepseek-flash`.
+- **Perfil — cambios sin guardar:** si el asociado modifica Información, Intereses o Privacidad y trata de navegar a otra página, abrir Administración, cerrar sesión, usar Atrás/Adelante o recargar/cerrar la pestaña, ASCLA protege los cambios. En navegación interna muestra el modal **Cambios sin guardar** con **Seguir editando**, **Descartar cambios** y **Guardar cambios y salir**. Esta última opción guarda el perfil y solo continúa hacia el destino si la operación termina correctamente; una validación o error de servidor mantiene al usuario en Perfil. Al cerrar o recargar el navegador se usa el aviso nativo permitido por el navegador. El aviso no aparece si el perfil no cambió o después de guardar correctamente.
+- **Compatibilidad:** versión pública **1.10.4**, esquema **13**, sin tablas nuevas, sin migraciones adicionales y sin cambios en la jerarquía de roles o en los datos existentes. Incluye íntegramente las correcciones funcionales de 1.10.3.
+- **Alcance de validación de esta actualización:** se verifica la coherencia de metadatos de versión, sintaxis de los archivos modificados y `release-sanity`; las pruebas históricas específicas de 1.10.3 permanecen identificadas con ese número porque documentan la entrega en la que fueron incorporadas.
 
 ## 1.10.3 — correcciones de acceso, perfiles y microeventos
 
@@ -998,13 +1016,13 @@ Versión histórica recuperada del repositorio Git original.
 
 # Criterio de versionado utilizado
 
-Durante la serie 1.9.x se adoptó un versionado incremental para reflejar cambios pequeños y verificables sin producir saltos innecesarios:
+El proyecto utiliza un versionado incremental para reflejar entregas funcionales verificables sin producir saltos innecesarios. La secuencia reciente queda documentada así:
 
 ```text
-1.9.0 → 1.9.1 → 1.9.2 → ... → 1.9.27
+1.9.0 → ... → 1.9.50 → 1.10 → 1.10.1 → 1.10.2 → 1.10.3 → 1.10.4
 ```
 
-Las modificaciones exclusivamente documentales, como la ampliación de este archivo, **no generan por sí solas una nueva versión del plugin**. La versión `1.9.27` se justifica por depurar la presentación editorial del conocimiento, verificar la duración directamente contra YouTube y visibilizar los estados editoriales; el esquema de datos permanece en 7.
+Las modificaciones exclusivamente documentales **no generan por sí solas una nueva versión del plugin**. Esta corrección de `README.md` y `VERSION_HISTORY.md` mantiene la versión pública **1.10.4** y el esquema de base de datos **13**; no implica cambios de código, tablas ni migraciones.
 
 # Notas de trazabilidad
 
@@ -1012,4 +1030,4 @@ Las modificaciones exclusivamente documentales, como la ampliación de este arch
 - Cuando existe un snapshot verificable se conserva como referencia histórica.
 - No se crean tags ficticios para versiones cuyo código fuente original no esté disponible.
 - La carpeta `docs/` se mantiene fuera del repositorio público según la configuración actual de `.gitignore`.
-- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.9.50**.
+- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.10.4** con esquema de base de datos **13**.

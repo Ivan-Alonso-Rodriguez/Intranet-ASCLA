@@ -99,17 +99,24 @@ final class App
         return add_query_arg($args,$base);
     }
 
+    private static function assetVersion(string $relative): string
+    {
+        $path=ASCLA_PATH.ltrim($relative,'/');
+        $hash=is_file($path)?substr((string)hash_file('sha256',$path),0,12):'missing';
+        return ASCLA_VERSION.'.'.$hash;
+    }
+
     public static function assets(string $page): void
     {
-        wp_enqueue_style('ascla-app',ASCLA_URL.'assets/app.css',[],ASCLA_VERSION);
-        wp_enqueue_script('ascla-image-editor',ASCLA_URL.'assets/image-editor.js',[],ASCLA_VERSION,true);
-        wp_enqueue_script('ascla-content',ASCLA_URL.'assets/content-ui.js',[],ASCLA_VERSION,true);
-        wp_enqueue_script('ascla-notifications',ASCLA_URL.'assets/notifications-ui.js',[],ASCLA_VERSION,true);
-        wp_enqueue_script('ascla-live-toasts',ASCLA_URL.'assets/live-toasts.js',[],ASCLA_VERSION,true);
-        wp_enqueue_script('ascla-navigation',ASCLA_URL.'assets/navigation.js',[],ASCLA_VERSION,true);
-        wp_enqueue_script('ascla-imports',ASCLA_URL.'assets/interest-imports.js',[],ASCLA_VERSION,true);
-        wp_enqueue_script('ascla-statistics',ASCLA_URL.'assets/admin-statistics.js',[],ASCLA_VERSION,true);
-        wp_enqueue_script('ascla-app',ASCLA_URL.'assets/app.js',['ascla-imports','ascla-statistics','ascla-image-editor','ascla-content','ascla-notifications','ascla-live-toasts','ascla-navigation'],ASCLA_VERSION,true);
+        wp_enqueue_style('ascla-app',ASCLA_URL.'assets/app.css',[],self::assetVersion('assets/app.css'));
+        wp_enqueue_script('ascla-image-editor',ASCLA_URL.'assets/image-editor.js',[],self::assetVersion('assets/image-editor.js'),true);
+        wp_enqueue_script('ascla-content',ASCLA_URL.'assets/content-ui.js',[],self::assetVersion('assets/content-ui.js'),true);
+        wp_enqueue_script('ascla-notifications',ASCLA_URL.'assets/notifications-ui.js',[],self::assetVersion('assets/notifications-ui.js'),true);
+        wp_enqueue_script('ascla-live-toasts',ASCLA_URL.'assets/live-toasts.js',[],self::assetVersion('assets/live-toasts.js'),true);
+        wp_enqueue_script('ascla-navigation',ASCLA_URL.'assets/navigation.js',[],self::assetVersion('assets/navigation.js'),true);
+        wp_enqueue_script('ascla-imports',ASCLA_URL.'assets/interest-imports.js',[],self::assetVersion('assets/interest-imports.js'),true);
+        wp_enqueue_script('ascla-statistics',ASCLA_URL.'assets/admin-statistics.js',[],self::assetVersion('assets/admin-statistics.js'),true);
+        wp_enqueue_script('ascla-app',ASCLA_URL.'assets/app.js',['ascla-imports','ascla-statistics','ascla-image-editor','ascla-content','ascla-notifications','ascla-live-toasts','ascla-navigation'],self::assetVersion('assets/app.js'),true);
         $pages=[]; foreach (Catalog::PAGES as $slug=>$label) { $pages[$slug]=['label'=>Language::label($label),'url'=>Catalog::url($slug)]; }
         $logo=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo.png');
         $logoWhite=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo-white.png');
