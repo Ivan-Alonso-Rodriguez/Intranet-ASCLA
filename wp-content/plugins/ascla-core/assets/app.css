@@ -3727,3 +3727,183 @@ html[data-ascla-theme="dark"] #ascla-root .live-toast-close:hover,html[data-ascl
 @media(max-width:480px){#ascla-root .ascla-header .header-brand{display:none}#ascla-root .ascla-header{gap:8px;padding-left:12px;padding-right:12px}#ascla-root .header-right{gap:8px;min-width:0}}
 
 #ascla-root .import-progress{margin-bottom:20px}#ascla-root .import-progress progress{display:block;width:100%;height:18px;margin-top:10px}#ascla-root .import-rows{display:grid;gap:16px}#ascla-root .import-row dl{display:grid;grid-template-columns:180px minmax(0,1fr);gap:10px;font-size:13px}#ascla-root .import-row dd{margin:0;overflow-wrap:anywhere;white-space:pre-wrap}#ascla-root .import-row select[multiple]{min-height:145px;width:100%}#ascla-root .import-warnings{border-left:3px solid #b4770f;padding:12px 12px 12px 30px;background:var(--bg)}#ascla-root .admin-panel .import-row .table-wrap{overflow-x:auto}@media(max-width:680px){#ascla-root .import-row dl{grid-template-columns:1fr}}
+
+/* RF-013 / CP-021: numeric directory pagination and visible result limit */
+.directory-pagination {
+  margin: 24px 0 6px;
+}
+.directory-pagination-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 12px;
+}
+.directory-pagination-summary label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.directory-pagination-summary select {
+  min-width: 66px;
+  padding: 7px 28px 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+}
+.directory-pagination-numeric {
+  gap: 7px;
+  flex-wrap: wrap;
+  margin: 16px 0 0;
+}
+.directory-pagination-numeric .pagination-number {
+  min-width: 36px;
+  justify-content: center;
+}
+.directory-pagination-numeric .pagination-number.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+  opacity: 1;
+}
+.pagination-ellipsis {
+  padding: 0 2px;
+}
+html[data-ascla-theme="dark"] #ascla-root .directory-pagination-summary select {
+  background: #152733;
+  color: var(--ink);
+}
+
+/* Mobile messaging: list first, then one conversation at a time. */
+.chat-mobile-back { display: none; }
+@media (max-width: 760px) {
+  .chat-layout.conversation-list-open .chat-conversation { display: none; }
+  .chat-layout.conversation-list-open .chat-sidebar {
+    display: block;
+    max-height: none;
+    overflow: visible;
+    border-bottom: 0;
+  }
+  .chat-layout.conversation-open .chat-sidebar { display: none; }
+  .chat-layout.conversation-open .chat-conversation {
+    display: flex;
+    min-height: 500px;
+  }
+  .chat-mobile-back {
+    display: inline-flex;
+    flex: 0 0 auto;
+  }
+  .chat-title {
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .chat-title > .chat-profile,
+  .chat-title > .group-info-trigger {
+    flex: 1 1 180px;
+    min-width: 0;
+  }
+  .directory-pagination-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+
+/* Profile tabs: split the editing experience into focused, shorter sections. */
+#ascla-root .profile-tabs{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  margin:0 0 14px;
+  padding:7px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:16px;
+  box-shadow:0 5px 18px rgba(16,47,80,.04);
+}
+#ascla-root .profile-tab{
+  appearance:none;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+  min-height:66px;
+  padding:11px 12px;
+  border:1px solid transparent;
+  border-radius:12px;
+  background:transparent;
+  color:var(--muted);
+  text-align:left;
+  transition:background .16s,border-color .16s,color .16s,box-shadow .16s;
+}
+#ascla-root .profile-tab:hover{background:var(--bg);color:var(--ink)}
+#ascla-root .profile-tab[aria-selected="true"]{
+  background:var(--blue-soft);
+  border-color:color-mix(in srgb,var(--blue) 28%,var(--line));
+  color:var(--blue);
+  box-shadow:0 2px 8px rgba(16,47,80,.05);
+}
+#ascla-root .profile-tab:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 45%,transparent);outline-offset:2px}
+#ascla-root .profile-tab-icon{
+  display:grid;
+  place-items:center;
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+  border-radius:10px;
+  background:var(--bg);
+  color:inherit;
+}
+#ascla-root .profile-tab[aria-selected="true"] .profile-tab-icon{background:var(--surface)}
+#ascla-root .profile-tab-icon svg{width:17px;height:17px}
+#ascla-root .profile-tab-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
+#ascla-root .profile-tab-copy strong{font-size:13px;line-height:1.35;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ascla-root .profile-tab-copy small{font-size:10px;line-height:1.35;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ascla-root .profile-tab-form{margin-top:0}
+#ascla-root .profile-tab-panel[hidden],
+#ascla-root .profile-tab-form[hidden]{display:none!important}
+#ascla-root .profile-tab-panel>.profile-preferences:first-child{margin-top:0;padding-top:0;border-top:0}
+#ascla-root .profile-tab-savebar{
+  margin-top:30px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+}
+#ascla-root .profile-save-copy{font-size:11px;color:var(--muted);line-height:1.55;max-width:560px}
+#ascla-root .profile-account-panel{margin-top:0}
+#ascla-root .profile-account-heading{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+#ascla-root .profile-account-heading h2{margin-bottom:4px}
+#ascla-root .profile-account-heading p{font-size:12px;color:var(--muted);line-height:1.6}
+#ascla-root .profile-account-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:20px;align-items:start}
+#ascla-root .profile-account-section{min-width:0;padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+#ascla-root .profile-account-section .form-section{margin-top:0}
+#ascla-root .profile-account-divider{height:1px;background:var(--line);margin:24px 0}
+
+@media(max-width:1050px){
+  #ascla-root .profile-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #ascla-root .profile-account-grid{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  #ascla-root .profile-tabs{
+    display:flex;
+    overflow-x:auto;
+    overscroll-behavior-inline:contain;
+    scrollbar-width:thin;
+    padding:6px;
+    margin-left:-2px;
+    margin-right:-2px;
+  }
+  #ascla-root .profile-tab{flex:0 0 auto;min-width:150px;min-height:54px;padding:9px 10px}
+  #ascla-root .profile-tab-icon{width:30px;height:30px;flex-basis:30px}
+  #ascla-root .profile-tab-copy small{display:none}
+  #ascla-root .profile-tab-copy strong{font-size:12px}
+  #ascla-root .profile-tab-savebar{align-items:stretch;flex-direction:column}
+  #ascla-root .profile-tab-savebar .btn{width:100%;justify-content:center}
+  #ascla-root .profile-account-section{padding:16px}
+}
+@media(prefers-reduced-motion:reduce){#ascla-root .profile-tab{transition:none}}

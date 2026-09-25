@@ -101,7 +101,7 @@ final class InterestImports
     {
         self::authorize();Access::limit('forms_ai',15,300);
         return Store::lock('interest-import:'.$id,static function()use($id,$rowId,$provider){
-            $row=self::editable($id,$rowId);$p=$row['payload'];Access::require(trim($p['free'])!=='','Esta fila no tiene respuesta abierta.',400);$terms=InterestCatalog::terms();$text=EntityRedactor::redact($p['free']);$settings=Settings::get();$hash=hash('sha256',wp_json_encode([$text,$terms,$settings['ai_provider']??'mock',$settings['ai_model']??'',$settings['openai_model']??'']));
+            $row=self::editable($id,$rowId);$p=$row['payload'];Access::require(trim($p['free'])!=='','Esta fila no tiene respuesta abierta.',400);$terms=InterestCatalog::terms();$text=EntityRedactor::redact($p['free']);$settings=Settings::get();$hash=hash('sha256',wp_json_encode([$text,$terms,$settings['ai_provider']??'mock',$settings['ai_model']??'',$settings['openai_model']??'',$settings['deepseek_model']??'']));
             if(($p['ai_hash']??'')!==$hash){$provider??=Knowledge::provider();$result=self::validateAIResult($provider->generate('form_interests',['text'=>$text,'catalog'=>$terms]),$terms);
                 $p['ai_topics']=$result['intereses'];$p['ai_hash']=$hash;$p['ai_confidence']=$result['confianza'];$p['ai_provider']=$provider->mode();
             }
@@ -121,13 +121,13 @@ final class InterestImports
     public static function diagnoseAI(?AIProviderInterface $provider=null): array
     {
         self::authorize();Access::limit('forms_ai_test',3,60);$settings=Settings::get();
-        if($provider===null){Access::require(($settings['ai_provider']??'mock')==='gemini','Selecciona Google Gemini y guarda su API Key antes de probar Forms.',400);$provider=Knowledge::provider();}
+        if($provider===null){Access::require(($settings['ai_provider']??'mock')!=='mock','Selecciona un proveedor de IA real y guarda su API Key antes de probar Forms.',400);$provider=Knowledge::provider();}
         $terms=InterestCatalog::terms();Access::require(!empty($terms),'Prepara primero el catálogo de intereses.',400);
         $sample=array_slice($terms,0,min(2,count($terms)));$text='Me interesan '.implode(' y ',array_column($sample,'name')).'.';
         $result=self::validateAIResult($provider->generate('form_interests',['text'=>$text,'catalog'=>$terms]),$terms);
-        Access::require(!empty($result['intereses']),'Gemini respondió, pero no clasificó la muestra sintética de Forms.',502);
+        Access::require(!empty($result['intereses']),'El proveedor de IA respondió, pero no clasificó la muestra sintética de Forms.',502);
         $byId=[];foreach($terms as $term) {$byId[(int)$term['id']]=$term['name']; }$topics=[];foreach($result['intereses'] as $id) {$topics[]=['id'=>$id,'name'=>$byId[$id]]; }
-        return ['ok'=>true,'provider'=>$provider->mode(),'model'=>$settings['ai_model']??'','confidence'=>$result['confianza'],'selected_count'=>count($topics),'topics'=>$topics,'message'=>'Gemini respondió con el formato de Forms, confianza válida e IDs existentes del catálogo.'];
+        return ['ok'=>true,'provider'=>$provider->mode(),'model'=>match($settings['ai_provider']??'mock'){'openai'=>$settings['openai_model']??'','deepseek'=>$settings['deepseek_model']??'',default=>$settings['ai_model']??''},'confidence'=>$result['confianza'],'selected_count'=>count($topics),'topics'=>$topics,'message'=>'El proveedor respondió con el formato de Forms, confianza válida e IDs existentes del catálogo.'];
     }
     public static function confirm(int $id): array
     {

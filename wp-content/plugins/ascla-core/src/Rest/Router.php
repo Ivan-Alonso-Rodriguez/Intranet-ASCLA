@@ -128,8 +128,12 @@ final class RouterRoutes
         },'ascla_admin_area');
         Router::route('/ai/test','POST',static function(){
             $provider=Settings::get()['ai_provider']??'mock';
-            Access::require($provider!=='mock','Selecciona Google Gemini u OpenAI antes de probar la conexión.',400);
-            return $provider==='openai'?\ASCLA\Core\Integrations\OpenAIProvider::test():\ASCLA\Core\Integrations\RealAIProvider::test();
+            Access::require($provider!=='mock','Selecciona Google Gemini, OpenAI o DeepSeek antes de probar la conexión.',400);
+            return match($provider){
+                'openai'=>\ASCLA\Core\Integrations\OpenAIProvider::test(),
+                'deepseek'=>\ASCLA\Core\Integrations\DeepSeekProvider::test(),
+                default=>\ASCLA\Core\Integrations\RealAIProvider::test(),
+            };
         },'ascla_manage');
         Router::route('/admin/users','GET',static fn($r)=>\ASCLA\Core\Services\Administration::users($r->get_params()),'ascla_manage');
         Router::route('/admin/users','POST',static fn($r)=>\ASCLA\Core\Services\Administration::createUser($r->get_json_params()?:[]),'ascla_manage');

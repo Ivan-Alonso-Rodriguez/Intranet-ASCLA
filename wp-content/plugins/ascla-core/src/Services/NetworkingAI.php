@@ -10,9 +10,9 @@ final class NetworkingAI
     private static function providerState(array $settings): array
     {
         $selected=$settings['ai_provider']??'mock';
-        $configured=match($selected){'gemini'=>Secrets::get('ai_key')!==''&&!empty($settings['ai_model']),'openai'=>Secrets::get('openai_key')!==''&&!empty($settings['openai_model']),default=>true};
+        $configured=match($selected){'gemini'=>Secrets::get('ai_key')!==''&&!empty($settings['ai_model']),'openai'=>Secrets::get('openai_key')!==''&&!empty($settings['openai_model']),'deepseek'=>Secrets::get('deepseek_key')!==''&&!empty($settings['deepseek_model']),default=>true};
         $fallback=$selected!=='mock'&&!$configured;$provider=$fallback?new MockAIProvider():Knowledge::provider();
-        $model=$selected==='openai'?($settings['openai_model']??''):($settings['ai_model']??'');
+        $model=match($selected){'openai'=>$settings['openai_model']??'','deepseek'=>$settings['deepseek_model']??'',default=>$settings['ai_model']??''};
         return [$selected,$configured,$fallback,$provider,$model];
     }
     private static function cachedResult(bool $persistent,array $pair,string $task,string $key,bool $fresh=false): ?array
