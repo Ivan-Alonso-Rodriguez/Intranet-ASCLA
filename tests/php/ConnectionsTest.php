@@ -12,7 +12,7 @@ final class ConnectionsTest extends TestCase
         $this->schema=(int)get_option('ascla_schema');
         foreach(['Alba','Bruno','Celia'] as $name) {
             $id=wp_insert_user(['user_login'=>'conn_'.bin2hex(random_bytes(6)),'user_pass'=>wp_generate_password(32),'role'=>'ascla_member','display_name'=>$name]);
-            $this->users[]=$id; wp_set_current_user($id); Profiles::save(['first_name'=>$name,'last_name'=>'Prueba','networking'=>true,'directory'=>true]);
+            $this->users[]=$id; wp_set_current_user($id); Profiles::save(['first_name'=>$name,'last_name'=>'Prueba','position'=>$name.' Cargo','company'=>$name.' Organización','networking'=>true,'directory'=>true]);
         }
         wp_set_current_user($this->users[0]);
     }
@@ -42,10 +42,15 @@ final class ConnectionsTest extends TestCase
         wp_set_current_user($b);
         self::assertSame('incoming_pending',Connections::profile($a)['connection']['state']); self::assertCount(1,Connections::listing()['incoming']);
         self::assertSame(409,$this->api('POST','relations',['target'=>$a,'kind'=>'connect','active'=>true])->get_status());
+        Store::update('relations',['created_at'=>'2001-01-01 00:00:00'],['id'=>$id]);
         self::assertSame(200,$this->api('POST','connections/'.$id.'/respond',['decision'=>'accept'])->get_status());
         self::assertTrue(Connections::areConnected($a,$b)); self::assertTrue(Connections::areConnected($b,$a));
         self::assertSame(1,Store::count('relations',"user_id=%d AND target_id=%d AND kind='connected'",[$a,$b]));
-        self::assertCount(0,Connections::listing()['incoming']); self::assertSame('connected',Connections::profile($a)['connection']['state']);
+        Store::update('relations',['created_at'=>'2001-01-01 00:00:00'],['id'=>$id]);
+        $listing=Connections::listing(); $connected=$listing['connected'][0];
+        self::assertCount(0,$listing['incoming']); self::assertSame('connected',Connections::profile($a)['connection']['state']);
+        self::assertSame('Alba Cargo',$connected['position']); self::assertSame('Alba Organización',$connected['company']);
+        self::assertNotEmpty($connected['connection']['connected_at']); self::assertNotSame('2001-01-01 00:00:00',$connected['connection']['connected_at']);
         self::assertSame(404,$this->api('POST','connections/'.$id.'/respond',['decision'=>'accept'])->get_status());
         self::assertFalse(Connections::between($a,$b)['can_request']);
         foreach(Notifications::list() as $notice) self::assertStringNotContainsString('quiere conectar',$notice['title']);

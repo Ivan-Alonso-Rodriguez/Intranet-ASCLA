@@ -856,7 +856,11 @@
   }
   function connectionRow(p) {
     const preview = p.conversation?.initial_message ? `<div class="conversation-request-preview"><span>${E(T('Mensaje'))}</span><p>${E(p.conversation.initial_message)}</p></div>` : '';
-    return `<article class="connection-row"><div class="connection-person">${avatar(p)}<div><strong>${E(p.name)}</strong>${p.profile_url ? ("<button type=\"button\" class=\"profile-inline-link\" data-action=\"member\" data-id=\"" + (Number(p.id)) + "\">" + (E(T('Ver perfil'))) + "</button>") : ("<small>" + (E(T('Perfil no disponible'))) + "</small>")}${preview}</div></div>${connectionActions(p)}</article>`;
+    const confirmed = p.connection?.state === 'connected' && p.connection.connected_at
+      ? `<span class="connection-confirmed-date">${I('calendar')}<span>${E(T('Conexión confirmada el'))} <time datetime="${E(p.connection.connected_at)}">${E(date(p.connection.connected_at,{day:'numeric',month:'long',year:'numeric'}))}</time></span></span>`
+      : '';
+    const professional = `<div class="connection-professional"><span><small>${E(T('Cargo'))}</small><span class="connection-position">${E(p.position || T('Cargo no visible'))}</span></span><span><small>${E(T('Organización'))}</small><span class="connection-company">${E(p.company || T('Organización no visible'))}</span></span></div>`;
+    return `<article class="connection-row"><div class="connection-person">${avatar(p)}<div class="connection-person-copy"><strong>${E(p.name)}</strong>${professional}${confirmed}${p.profile_url ? ("<button type=\"button\" class=\"profile-inline-link\" data-action=\"member\" data-id=\"" + (Number(p.id)) + "\">" + (E(T('Ver perfil'))) + "</button>") : ("<small>" + (E(T('Perfil no disponible'))) + "</small>")}${preview}</div></div>${connectionActions(p)}</article>`;
   }
   async function refreshConnectionsPanel() {
     const panel = document.getElementById('connections-panel'); if (!panel) return;

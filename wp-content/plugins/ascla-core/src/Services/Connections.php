@@ -18,7 +18,21 @@ final class Connections
             $in=implode(',',array_fill(0,count($targets),'%d'));
             $where.=" AND (user_id IN ($in) OR target_id IN ($in))"; $args=array_merge($args,$targets,$targets);
         }
-        return Store::rows('relations',$where,$args,'ORDER BY id DESC');
+        $rows=Store::rows('relations',$where,$args,'ORDER BY id DESC');
+        $connectedIds=array_values(array_unique(array_map('intval',array_column(array_filter($rows,static fn($row)=>$row['kind']==='connected'),'id'))));
+        if ($connectedIds) {
+            $in=implode(',',array_fill(0,count($connectedIds),'%d'));
+            $accepted=[];
+            foreach (Store::rows('audit',"action='connection_accepted' AND object_id IN ($in)",$connectedIds,'ORDER BY id DESC') as $entry) {
+                $id=(int)$entry['object_id'];
+                if (!isset($accepted[$id])) { $accepted[$id]=(string)$entry['created_at']; }
+            }
+            foreach ($rows as &$row) {
+                if ($row['kind']==='connected' && isset($accepted[(int)$row['id']])) { $row['connected_at']=$accepted[(int)$row['id']]; }
+            }
+            unset($row);
+        }
+        return $rows;
     }
     public static function statesFor(int $me,array $targets,?array $rows=null): array
     {
@@ -34,7 +48,7 @@ final class Connections
     {
         $states=[];
         foreach ($targets as $id) {
-            $states[$id]=['state'=>'none','request_id'=>0,'connection_id'=>0,'blocked'=>false,'blocked_by_me'=>false,'can_message'=>false,'can_read_messages'=>false,'can_request'=>false];
+            $states[$id]=['state'=>'none','request_id'=>0,'connection_id'=>0,'connected_at'=>'','blocked'=>false,'blocked_by_me'=>false,'can_message'=>false,'can_read_messages'=>false,'can_request'=>false];
         }
         return $states;
     }
@@ -49,7 +63,7 @@ final class Connections
             $state['blocked']=true;
             if ($outgoing) { $state['blocked_by_me']=true; }
         } elseif ($row['kind']==='connected') {
-            $state['state']='connected';$state['connection_id']=(int)$row['id'];$state['request_id']=0;
+            $state['state']='connected';$state['connection_id']=(int)$row['id'];$state['request_id']=0;$state['connected_at']=(string)($row['connected_at']??$row['created_at']??'');
         } elseif ($state['state']!=='connected' && ($state['state']==='none' || !$outgoing)) {
             $state['state']=$outgoing?'outgoing_pending':'incoming_pending';$state['request_id']=(int)$row['id'];
         }
@@ -135,7 +149,7 @@ final class Connections
         Access::require($row && $row['kind']==='connect' && (int)$row['target_id']===$me,'Esta solicitud ya fue resuelta.',409);
         if ($decision==='accept') {
             Access::require($sender!==$me && Access::member($sender) && !self::between($me,$sender)['blocked'],'No se puede confirmar esta conexión.',403);
-            if (!self::areConnected($me,$sender)) { Store::update('relations',['kind'=>'connected'],['id'=>$id]); }
+            if (!self::areConnected($me,$sender)) { Store::update('relations',['kind'=>'connected','created_at'=>current_time('mysql',true)],['id'=>$id]); }
         }
         foreach (self::rows($me,[$sender]) as $pending) {
             if ($pending['kind']==='connect') { Store::delete('relations',['id'=>(int)$pending['id']]); }

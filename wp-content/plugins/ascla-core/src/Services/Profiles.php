@@ -84,8 +84,13 @@ final class Profiles
     }
     public static function card(int $id): array
     {
-        $card=['id'=>$id,'name'=>self::publicName($id),'photo_url'=>'','profile_url'=>Catalog::url('perfil',['member'=>$id])];
-        try { $profile=self::visible($id); $card['photo_url']=$profile['photo_url']; }
+        $card=['id'=>$id,'name'=>self::publicName($id),'photo_url'=>'','position'=>'','company'=>'','profile_url'=>Catalog::url('perfil',['member'=>$id])];
+        try {
+            $profile=self::visible($id);
+            $card['photo_url']=$profile['photo_url'];
+            $card['position']=$profile['position']??'';
+            $card['company']=$profile['company']??'';
+        }
         catch (\ASCLA\Core\Rest\ApiException $e) { $card['profile_url']=''; }
         return $card;
     }
