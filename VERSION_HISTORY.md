@@ -2,17 +2,18 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.10.4`
+> **Versión actual:** `1.10.5`
 > **Esquema de base de datos:** `13`
-> La versión `1.10.4` reduce la carga visual de Perfil, adapta Mensajería a un flujo móvil lista → conversación, completa RF-013 / CP-021 con paginación numérica y límites de resultados en Directorio, corrige la sincronización de eventos e invitaciones con Google Calendar, añade DeepSeek como proveedor de IA y protege los cambios sin guardar del Perfil al navegar. Conserva el esquema 13 y las funciones de 1.10.3.
+> La versión `1.10.5` completa CU009 dentro del panel de Inicio con lotes semanales persistentes, elegibilidad y consentimiento, explicación de afinidad, contenidos relevantes, descarte reversible y carruseles adaptativos. Conserva el esquema 13 y las funciones de 1.10.4.
 
 ## Resumen de versiones
 
-> Ordenado de la versión más reciente a la más antigua. La versión vigente del proyecto es **1.10.4**.
+> Ordenado de la versión más reciente a la más antigua. La versión vigente del proyecto es **1.10.5**.
 
 | Versión | Enfoque principal | Estado |
 |---|---|---|
-| 1.10.4 | Perfil por pestañas, mensajería móvil, paginación, Google Calendar, DeepSeek y guardia de cambios | **Actual** |
+| 1.10.5 | CU009 en Inicio: recomendaciones semanales, explicables y reversibles | **Actual** |
+| 1.10.4 | Perfil por pestañas, mensajería móvil, paginación, Google Calendar, DeepSeek y guardia de cambios | Anterior |
 | 1.10.3 | Bloqueo de acceso, solicitudes profesionales, perfil obligatorio, directorio y microeventos ejecutivos | Anterior |
 | 1.10.2 | Forms, teléfono, correos HTML, Zoom por intervalos y analítica ampliada | Anterior |
 | 1.10.1 | Estadísticas, asistencia manual/Zoom y eliminación tras revisión o resolución | Completada |
@@ -81,6 +82,17 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.0.3 | Base funcional inicial recuperada del historial Git | Histórica |
 
 ---
+
+## 1.10.5 — CU009: Recomendaciones automáticas, explicables y reversibles
+
+- **Inicio como punto de descubrimiento:** el panel principal reúne hasta cinco perfiles afines y materiales autorizados en carruseles horizontales responsivos. No añade una opción independiente al menú; el asociado encuentra sus recomendaciones inmediatamente después del saludo inicial.
+- **RN-011 / RF-036, RF-037 y RF-132:** solo participan cuentas activas con consentimiento, datos profesionales mínimos y al menos 70 % de completitud. Cada candidato comparte interés, sector u objetivo de networking y se prioriza la complementariedad.
+- **RN-012 / RF-038:** las tarjetas exponen criterios compartidos y una explicación comprensible. La integración de IA conserva caché, filtrado de datos autorizados y fallback local.
+- **RN-013 / RF-124 a RF-128:** el lote se persiste y sustituye automáticamente cada siete días, admite hasta cinco perfiles, se recalcula al modificar el perfil y muestra un aviso cuando hay menos coincidencias. No se ofrece actualización manual.
+- **RN-014 / RF-040 y RF-041:** los contenidos recomendados permanecen limitados a recursos publicados y autorizados, ordenados por relevancia temática con señales visibles.
+- **RN-030 / RF-039, RF-129 y RF-130:** No me interesa queda registrado de manera privada, evita repeticiones y puede revertirse desde Perfil → Privacidad y avisos.
+- **Configuración y operación:** Administración puede ajustar afinidad mínima y tamaño del lote dentro del máximo de cinco. WP-Cron incorpora el proceso semanal, lo registra como trabajo `recommendations` en `wp_ascla_jobs` para conservar estado y reintentos, y limpia el evento al desactivar o desinstalar el plugin.
+- **Compatibilidad:** versión pública **1.10.5**, esquema **13**, sin tablas nuevas. Se conservan los endpoints anteriores de matching y las funciones de 1.10.4.
 
 ## 1.10.4 — Perfil, Mensajería, Directorio, Google Calendar, DeepSeek y protección de cambios
 
@@ -1020,10 +1032,10 @@ Versión histórica recuperada del repositorio Git original.
 El proyecto utiliza un versionado incremental para reflejar entregas funcionales verificables sin producir saltos innecesarios. La secuencia reciente queda documentada así:
 
 ```text
-1.9.0 → ... → 1.9.50 → 1.10 → 1.10.1 → 1.10.2 → 1.10.3 → 1.10.4
+1.9.0 → ... → 1.9.50 → 1.10 → 1.10.1 → 1.10.2 → 1.10.3 → 1.10.4 → 1.10.5
 ```
 
-Las modificaciones exclusivamente documentales **no generan por sí solas una nueva versión del plugin**. Esta corrección de `README.md` y `VERSION_HISTORY.md` mantiene la versión pública **1.10.4** y el esquema de base de datos **13**; no implica cambios de código, tablas ni migraciones.
+Las modificaciones exclusivamente documentales **no generan por sí solas una nueva versión del plugin**. La versión funcional actual es **1.10.5** y conserva el esquema de base de datos **13**.
 
 # Notas de trazabilidad
 
@@ -1031,4 +1043,4 @@ Las modificaciones exclusivamente documentales **no generan por sí solas una nu
 - Cuando existe un snapshot verificable se conserva como referencia histórica.
 - No se crean tags ficticios para versiones cuyo código fuente original no esté disponible.
 - La carpeta `docs/` se mantiene fuera del repositorio público según la configuración actual de `.gitignore`.
-- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.10.4** con esquema de base de datos **13**.
+- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.10.5** con esquema de base de datos **13**.

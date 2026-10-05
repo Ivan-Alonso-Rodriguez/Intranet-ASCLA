@@ -1,14 +1,14 @@
 <?php
 namespace ASCLA\Core\Jobs;
 use ASCLA\Core\Repositories\Store;
-use ASCLA\Core\Services\{Access,Audit,Knowledge,MicroEvents,Notifications,Content,Discovery,Birthdays};
+use ASCLA\Core\Services\{Access,Audit,Knowledge,MicroEvents,Notifications,Content,Discovery,Birthdays,Matching};
 final class Queue
 {
     private const DEMO_MODE='DEMO MODE';
-    public static function boot(): void { add_action('ascla_jobs',[self::class,'run']); add_action('ascla_jobs',[Birthdays::class,'maybeProcess'],20); add_action('ascla_jobs_continue',[self::class,'run']); add_action('ascla_monthly',[MicroEvents::class,'monthly']); add_action('ascla_discovery',static fn()=>self::enqueue('discovery',[],0)); }
+    public static function boot(): void { add_action('ascla_jobs',[self::class,'run']); add_action('ascla_jobs',[Birthdays::class,'maybeProcess'],20); add_action('ascla_jobs_continue',[self::class,'run']); add_action('ascla_monthly',[MicroEvents::class,'monthly']); add_action('ascla_discovery',static fn()=>self::enqueue('discovery',[],0)); add_action('ascla_recommendations',static fn()=>self::enqueue('recommendations',[],0)); }
     public static function enqueue(string $kind,array $payload,int $user=-1): array
     {
-        Access::require(in_array($kind,['multimedia','answer','microevents','social','resource_notifications','discovery','video_metadata'],true),'Trabajo no válido.',400);
+        Access::require(in_array($kind,['multimedia','answer','microevents','social','resource_notifications','discovery','recommendations','video_metadata'],true),'Trabajo no válido.',400);
         $id=Store::insert('jobs',['kind'=>$kind,'user_id'=>$user<0?get_current_user_id():$user,'payload'=>wp_json_encode($payload),'status'=>'pending','created_at'=>current_time('mysql',true)]);
         self::wake(); return ['id'=>$id,'status'=>'pending'];
     }
@@ -74,7 +74,7 @@ final class Queue
     private static function authorizeJob(array $row): void
     {
         $kind=(string)$row['kind'];$user=(int)$row['user_id'];
-        if (!in_array($kind,['microevents','resource_notifications','discovery'],true) || $user!==0) { Access::require(Access::member(),'La cuenta ya no tiene acceso.'); }
+        if (!in_array($kind,['microevents','resource_notifications','discovery','recommendations'],true) || $user!==0) { Access::require(Access::member(),'La cuenta ya no tiene acceso.'); }
         if ($kind==='microevents' && $user!==0) { Access::require(Access::canPublish(),'Permiso de publicación revocado.'); }
         if ($kind==='social') { Access::require(current_user_can('ascla_moderate'),'Permiso de moderación revocado.'); }
         if (in_array($kind,['multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Permiso de publicación revocado.'); }
@@ -89,6 +89,7 @@ final class Queue
             'social'=>self::social(),
             'resource_notifications'=>Discovery::resource((int)($payload['resource_id']??0)),
             'discovery'=>Discovery::networking(),
+            'recommendations'=>Matching::refreshAll(),
             'video_metadata'=>Knowledge::videoMetadata((int)($payload['resource_id']??0)),
         };
     }

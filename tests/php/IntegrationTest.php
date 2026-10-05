@@ -97,9 +97,10 @@ final class IntegrationTest extends TestCase
 
     public function testRecommendationsRespectMinimumAffinity(): void
     {
-        $interests=Profiles::catalogs()['interest'];self::assertGreaterThanOrEqual(2,count($interests));$one=(int)$interests[0]['id'];$two=(int)$interests[1]['id'];
-        $this->user(1);Profiles::save(['networking'=>true,'directory'=>true,'interests'=>[$one],'areas'=>[],'industries'=>[],'goals'=>[],'languages'=>[]]);
-        $this->user(2);Profiles::save(['networking'=>true,'directory'=>true,'interests'=>[$one],'areas'=>[],'industries'=>[],'goals'=>[],'languages'=>[]]);
+        $catalogs=Profiles::catalogs();$interests=$catalogs['interest'];self::assertGreaterThanOrEqual(2,count($interests));$one=(int)$interests[0]['id'];$two=(int)$interests[1]['id'];
+        $eligible=['first_name'=>'Ana','last_name'=>'Prueba','position'=>'Secretaria corporativa','company'=>'Empresa Demo','country'=>'Perú','city'=>'Lima','bio'=>'Perfil completo para probar recomendaciones.','experience'=>'Experiencia profesional en gobierno corporativo.','networking'=>true,'directory'=>true,'interests'=>[$one],'areas'=>[],'industries'=>[(int)$catalogs['industry'][0]['id']],'goals'=>[(int)$catalogs['goal'][0]['id']],'languages'=>[]];
+        $this->user(1);Profiles::save($eligible);
+        $this->user(2);Profiles::save(array_merge($eligible,['first_name'=>'Beatriz']));
         $this->user(1);Settings::save(['matching_weights'=>['interests'=>100,'areas'=>0,'industries'=>0,'goals'=>0,'languages'=>0],'matching_min_affinity'=>100]);
         $recommended=Matching::recommendations();self::assertNotEmpty($recommended);self::assertSame(100,(int)$recommended[0]['affinity']['score']);
         Profiles::save(['interests'=>[$two]],$this->users[2]);
@@ -382,6 +383,8 @@ Compañía Privada"]]);
         Settings::save(['matching_min_affinity'=>67]);self::assertSame(67,Settings::get()['matching_min_affinity']);
         Settings::save(['matching_min_affinity'=>999]);self::assertSame(100,Settings::get()['matching_min_affinity']);
         Settings::save(['matching_min_affinity'=>-10]);self::assertSame(0,Settings::get()['matching_min_affinity']);
+        Settings::save(['matching_max_suggestions'=>99]);self::assertSame(5,Settings::get()['matching_max_suggestions']);
+        Settings::save(['matching_max_suggestions'=>0]);self::assertSame(1,Settings::get()['matching_max_suggestions']);
 
     }
 
@@ -422,4 +425,3 @@ Compañía Privada"]]);
     }
 
 }
-

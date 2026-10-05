@@ -26,6 +26,7 @@ final class Installer
         if (!wp_next_scheduled('ascla_jobs')) { wp_schedule_event(time()+60, 'hourly', 'ascla_jobs'); }
         if (!wp_next_scheduled('ascla_monthly')) { wp_schedule_event(time()+120, 'daily', 'ascla_monthly'); }
         if (!wp_next_scheduled('ascla_discovery')) { wp_schedule_event(time()+300,'daily','ascla_discovery'); }
+        if (!wp_next_scheduled('ascla_recommendations')) { wp_schedule_event(time()+420,'ascla_weekly','ascla_recommendations'); }
         update_option('ascla_version', ASCLA_VERSION, false);
         flush_rewrite_rules();
     }

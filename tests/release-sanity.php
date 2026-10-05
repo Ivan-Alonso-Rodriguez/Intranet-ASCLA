@@ -80,13 +80,13 @@ namespace {
     $plugin=$read('wp-content/plugins/ascla-core/ascla-core.php');
     $wpReadme=$read('wp-content/plugins/ascla-core/readme.txt');
     $installer=$read('wp-content/plugins/ascla-core/src/Database/Installer.php');
-    $assert((bool)preg_match('/Version:\s*1\.10\.4/',$plugin),'plugin header version');
-    $assert(str_contains($plugin,"define('ASCLA_VERSION', '1.10.4');"),'ASCLA_VERSION constant');
-    $assert((bool)preg_match('/Stable tag:\s*1\.10\.4/',$wpReadme),'WordPress stable tag');
-    $assert(str_contains($read('sonar-project.properties'),'sonar.projectVersion=1.10.4'),'Sonar version');
+    $assert((bool)preg_match('/Version:\s*1\.10\.5/',$plugin),'plugin header version');
+    $assert(str_contains($plugin,"define('ASCLA_VERSION', '1.10.5');"),'ASCLA_VERSION constant');
+    $assert((bool)preg_match('/Stable tag:\s*1\.10\.5/',$wpReadme),'WordPress stable tag');
+    $assert(str_contains($read('sonar-project.properties'),'sonar.projectVersion=1.10.5'),'Sonar version');
     $assert((bool)preg_match('/SCHEMA_VERSION\s*=\s*13/',$installer),'schema version 13');
-    $assert(str_contains($read('README.md'),'Versión actual: 1.10.4 · esquema 13'),'README version/schema');
-    $assert(str_contains($read('VERSION_HISTORY.md'),'**Versión actual:** `1.10.4`'),'history current version');
+    $assert(str_contains($read('README.md'),'Versión actual: 1.10.5 · esquema 13'),'README version/schema');
+    $assert(str_contains($read('VERSION_HISTORY.md'),'**Versión actual:** `1.10.5`'),'history current version');
 
     // Point 1: both server and admin UI contain the hard three-interest guard.
     $imports=$read('wp-content/plugins/ascla-core/src/Services/InterestImports.php');

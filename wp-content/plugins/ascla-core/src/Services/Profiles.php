@@ -120,7 +120,9 @@ final class Profiles
     public static function save(array $input,int $id=0): array
     {
         $id=$id?:get_current_user_id();
-        return \ASCLA\Core\Repositories\Store::lock('profile-interests:'.$id,static fn()=>self::saveUnlocked($input,$id));
+        $profile=\ASCLA\Core\Repositories\Store::lock('profile-interests:'.$id,static fn()=>self::saveUnlocked($input,$id));
+        Matching::refreshBatch($id);
+        return $profile;
     }
     private static function saveUnlocked(array $input,int $id): array
     {

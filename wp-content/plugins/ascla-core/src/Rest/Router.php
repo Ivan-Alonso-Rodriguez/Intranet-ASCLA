@@ -60,6 +60,11 @@ final class RouterRoutes
         Router::route('/account/password-reset','POST',static fn()=>Account::sendPasswordReset(),'ascla_write');
         Router::route('/profiles/(?P<id>\d+)','GET',static fn($r)=>\ASCLA\Core\Services\Connections::profile((int)$r['id']));
         Router::route('/matching','GET',static fn()=>Matching::recommendations());
+        Router::route('/recommendations','GET',static fn()=>Matching::overview());
+        Router::route('/recommendations/dismissed','GET',static fn()=>Matching::dismissed());
+        Router::route('/recommendations/(?P<id>\d+)/dismiss','POST',static fn($r)=>Matching::dismiss((int)$r['id']),'ascla_write');
+        Router::route('/recommendations/(?P<id>\d+)/restore','POST',static fn($r)=>Matching::restore((int)$r['id']),'ascla_write');
+        Router::route('/recommendations/(?P<id>\d+)/view','POST',static fn($r)=>Matching::select((int)$r['id']),'ascla_write');
         Router::route('/matching/(?P<id>\d+)','GET',static fn($r)=>Matching::between(get_current_user_id(),(int)$r['id'],$r->has_param('explain')?rest_sanitize_boolean($r['explain']):true));
         Router::route('/matching/(?P<id>\d+)/intro','GET',static fn($r)=>Matching::intro((int)$r['id']));
         Router::route('/connections','GET',static fn()=>\ASCLA\Core\Services\Connections::listing());
@@ -319,4 +324,3 @@ final class RouterAdmin
         return $audit;
     }
 }
-

@@ -5,6 +5,10 @@ final class Plugin
 {
     public static function boot(): void
     {
+        add_filter('cron_schedules',static function(array $schedules): array {
+            $schedules['ascla_weekly']=['interval'=>7*DAY_IN_SECONDS,'display'=>'Cada siete días (ASCLA)'];
+            return $schedules;
+        });
         add_action('init', [Domain\Catalog::class, 'register']);
         add_action('init', [Database\Installer::class, 'upgrade'], 20);
         add_filter('posts_search',[Repositories\ContentQuery::class,'search'],10,2);

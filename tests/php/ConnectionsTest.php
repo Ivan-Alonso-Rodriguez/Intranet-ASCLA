@@ -122,6 +122,19 @@ final class ConnectionsTest extends TestCase
         wp_set_current_user(0);
         foreach([['GET','connections'],['POST','connections/1/respond'],['POST','conversations'],['GET','conversations/1/messages']] as [$method,$route]) self::assertSame(401,$this->api($method,$route,['decision'=>'accept'])->get_status());
     }
+    public function testPreventiveBlockingDoesNotRequireConnectionOrConversation(): void
+    {
+        [$a,$b]=$this->users;
+        self::assertSame('none',Connections::between($a,$b)['state']);
+        self::assertSame(0,Store::count('participants','user_id=%d',[$a]));
+        self::assertTrue(Messaging::relation($b,'block',true)['active']);
+        $blocked=Connections::profile($b)['connection'];
+        self::assertTrue($blocked['blocked']); self::assertTrue($blocked['blocked_by_me']); self::assertFalse($blocked['can_request']);
+        self::assertSame(1,Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',[$a,$b,'block']));
+        self::assertFalse(Messaging::relation($b,'block',false)['active']);
+        $restored=Connections::profile($b)['connection'];
+        self::assertFalse($restored['blocked']); self::assertFalse($restored['blocked_by_me']); self::assertTrue($restored['can_request']);
+    }
     public function testBlockingAndRevocationAreEnforcedForExistingConversation(): void
     {
         [$a,$b]=$this->users;$this->accept();$id=(int)Messaging::start($b)['id'];$this->conversations[]=$id;

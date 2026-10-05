@@ -260,6 +260,28 @@ async function goto(page, route) {
       const target = (await request(p, "profiles?q=Tomás")).body.items[0];
       const me = (await request(p, "bootstrap")).body.me.id;
       if (ephemeralCI) {
+        await test("RF-034 allows preventive blocking from directory cards and the public profile", async () => {
+          await goto(p, "directorio");
+          await p.locator('.directory-filters [name="q"]').fill(target.name);
+          await p.locator('.directory-filters').getByRole('button', { name: 'Buscar', exact: true }).click();
+          const card = p.locator('.member-card').filter({ hasText: target.name }).first();
+          await card.waitFor();
+          await card.getByRole('button', { name: 'Bloquear', exact: true }).waitFor();
+          await card.locator('[data-action="member"]').click();
+          const profile = p.locator('.modal');
+          await profile.getByRole('button', { name: 'Bloquear', exact: true }).waitFor();
+          await profile.getByRole('button', { name: 'Cerrar', exact: true }).click();
+          await card.getByRole('button', { name: 'Bloquear', exact: true }).click();
+          await card.getByRole('button', { name: 'Desbloquear', exact: true }).waitFor();
+          await card.locator('[data-action="member"]').click();
+          await profile.getByRole('button', { name: 'Desbloquear', exact: true }).waitFor();
+          await profile.locator('[data-profile-affinity]').waitFor({ state: 'detached' });
+          assert.equal(await profile.locator('[data-profile-affinity]').count(), 0);
+          await profile.getByRole('button', { name: 'Desbloquear', exact: true }).click();
+          await profile.getByRole('button', { name: 'Bloquear', exact: true }).waitFor();
+          await card.getByRole('button', { name: 'Bloquear', exact: true }).waitFor();
+          await profile.getByRole('button', { name: 'Cerrar', exact: true }).click();
+        });
         const current = (await request(p, `profiles/${target.id}`)).body.connection;
         assert.equal(current.blocked, false, "The E2E messaging pair must not be blocked.");
         if (current.state !== "connected") {

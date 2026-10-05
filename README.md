@@ -4,11 +4,20 @@ Plugin WordPress portable para una comunidad profesional privada. Incluye perfil
 
 Toda la funcionalidad propia está en `wp-content/plugins/ascla-core/`. Elementor es opcional. No se modifica WordPress Core ni se necesita un tema específico. El plugin conserva sus datos al desactivarse o desinstalarse.
 
-## Versión actual: 1.10.4 · esquema 13
+## Versión actual: 1.10.5 · esquema 13
 
-La versión **1.10.4** mejora la experiencia de uso sin cambiar el esquema de datos: en móvil, Mensajería presenta primero la lista de chats y abre la conversación seleccionada como una vista independiente; el Directorio completa **RF-013 / CP-021** con paginación numérica y un límite fijo de 15 resultados por página; **Mi perfil** se reorganiza en pestañas y protege la navegación con la opción **Guardar cambios y salir**; la integración con **Google Calendar** crea/sincroniza el evento organizador y añade a los asociados invitados como asistentes para que Google envíe la invitación por correo; y **DeepSeek** se incorpora como proveedor de IA configurable junto con los proveedores existentes. Se conservan las correcciones de acceso, validación de perfil, directorio y microeventos de 1.10.3. Consulta el detalle en [VERSION_HISTORY.md](VERSION_HISTORY.md).
+La versión **1.10.5** completa **CU009 – Consultar recomendaciones** sin cambiar el esquema de datos: convierte Inicio en el punto principal de descubrimiento con carruseles responsivos de hasta cinco perfiles y materiales afines, lotes automáticos cada siete días, elegibilidad por perfil mínimo y consentimiento, explicaciones de afinidad, aviso de baja coincidencia y descarte privado reversible desde Perfil. La configuración permite ajustar el umbral y la cuota (máximo cinco), mientras OpenAI y los demás proveedores conservan la degradación segura existente. Consulta el detalle en [VERSION_HISTORY.md](VERSION_HISTORY.md).
 
-**Estado documental:** `1.10.4` es la versión vigente; `1.10.3` es la versión inmediatamente anterior. El historial se presenta de forma descendente (más reciente → más antigua) para conservar una lectura cronológica clara.
+**Estado documental:** `1.10.5` es la versión vigente; `1.10.4` es la versión inmediatamente anterior. El historial se presenta de forma descendente (más reciente → más antigua) para conservar una lectura cronológica clara.
+
+### Cambios principales de 1.10.5
+
+- **CU009 completo en Inicio:** el primer panel del asociado reúne hasta cinco perfiles y materiales afines mediante desplazamiento horizontal, con criterios compartidos, complementariedad y acciones Ver perfil, Conectar o No me interesa.
+- **Lote automático:** WP-Cron sustituye el lote cada siete días; los cambios relevantes del perfil recalculan de inmediato la lista propia y no existe actualización manual.
+- **Elegibilidad y privacidad:** exige participación habilitada, membresía activa, perfil mínimo obligatorio y al menos 70 % de completitud; excluye bloqueos, perfiles ocultos y descartes.
+- **Descarte reversible:** No me interesa se registra de forma privada, evita repeticiones y puede revertirse en Perfil → Privacidad y avisos.
+- **Contenido relevante:** solo recomienda recursos publicados y autorizados, ordenados por relación temática con señales explicables.
+- **Compatibilidad:** conserva el esquema 13, los endpoints de matching existentes y todas las funciones de 1.10.4.
 
 ### Cambios principales de 1.10.4
 
@@ -199,7 +208,7 @@ Se añadieron pruebas de migración desde una columna sin signo, conservación d
 
 El entorno Docker incluye un servicio `cron` que ejecuta los eventos pendientes cada diez segundos. Se desactivan las actualizaciones automáticas sólo en los contenedores de pruebas para conservar una versión reproducible; mantén el sitio real actualizado mediante su procedimiento de operación.
 
-Jobs: WordPress cron ejecuta `ascla_jobs`, continúa la cola pendiente con `ascla_jobs_continue`, revisa el mes y ejecuta `ascla_discovery` cada día. Las sugerencias de networking se notifican como máximo una vez por semana y asociado. Con WP-CLI puede usarse `wp ascla jobs` o `wp cron event run --due-now`. Los errores se ven en **ASCLA → IA y trabajos** y admiten reintento. Una solicitud HTTP no ejecuta el procesamiento multimedia directamente.
+Jobs: WordPress cron ejecuta `ascla_jobs`, continúa la cola pendiente con `ascla_jobs_continue`, revisa el mes y ejecuta `ascla_discovery` cada día. El evento semanal `ascla_recommendations` registra el recálculo de lotes como trabajo `recommendations` en `wp_ascla_jobs`, por lo que su estado y sus errores quedan auditables junto con el resto de la cola. Las sugerencias de networking se notifican como máximo una vez por semana y asociado. Con WP-CLI puede usarse `wp ascla jobs` o `wp cron event run --due-now`. Los errores se ven en **ASCLA → IA y trabajos** y admiten reintento. Una solicitud HTTP no ejecuta el procesamiento multimedia directamente.
 
 Si faltan páginas, reactiva el plugin o ejecuta `wp ascla migrate`. Si aparecen respuestas antiguas o sesiones mezcladas, excluye todas las páginas ASCLA y `/wp-json/ascla/v1/` del caché y purga la caché. Si falla una integración, comprueba modo, permisos, expiración y conectividad; nunca pegues tokens en logs o capturas. Si la demo ya existe, cambiar el password del formulario no reinicia contraseñas: usa la recuperación de WordPress.
 
