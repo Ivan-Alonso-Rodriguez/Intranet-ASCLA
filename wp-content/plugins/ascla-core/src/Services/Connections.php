@@ -48,7 +48,7 @@ final class Connections
     {
         $states=[];
         foreach ($targets as $id) {
-            $states[$id]=['state'=>'none','request_id'=>0,'connection_id'=>0,'connected_at'=>'','blocked'=>false,'blocked_by_me'=>false,'can_message'=>false,'can_read_messages'=>false,'can_request'=>false];
+            $states[$id]=['state'=>'none','request_id'=>0,'connection_id'=>0,'connected_at'=>'','blocked'=>false,'blocked_by_me'=>false,'can_message'=>false,'can_read_messages'=>false,'can_request'=>false,'networking_available'=>false,'initial_message'=>''];
         }
         return $states;
     }
@@ -65,7 +65,7 @@ final class Connections
         } elseif ($row['kind']==='connected') {
             $state['state']='connected';$state['connection_id']=(int)$row['id'];$state['request_id']=0;$state['connected_at']=(string)($row['connected_at']??$row['created_at']??'');
         } elseif ($state['state']!=='connected' && ($state['state']==='none' || !$outgoing)) {
-            $state['state']=$outgoing?'outgoing_pending':'incoming_pending';$state['request_id']=(int)$row['id'];
+            $state['state']=$outgoing?'outgoing_pending':'incoming_pending';$state['request_id']=(int)$row['id'];$state['initial_message']=(string)($row['detail']??'');
         }
         unset($state);
     }
@@ -80,11 +80,14 @@ final class Connections
         $mine=Access::member($me)?Profiles::raw($me):[];
         foreach ($states as $id=>&$state) {
             $valid=$id>0 && $id!==$me && Access::member($me) && Access::member($id);
-            $state['can_read_messages']=$valid && $state['state']==='connected';
+            $state['can_read_messages']=$valid && !$state['blocked'] && $state['state']==='connected';
+            $retry=ConnectionPolicy::retryAt($me,$id);
+            $state['retry_at']=ConnectionPolicy::visibleRetryAt($me,$id);
             $state['can_message']=$state['can_read_messages'] && !$state['blocked'];
             if ($valid && !$state['blocked'] && $state['state']==='none') {
                 $other=Profiles::raw($id);
-                $state['can_request']=!empty($mine['networking']) && !empty($other['networking']) && !empty($other['directory']);
+                $state['networking_available']=!empty($mine['networking']) && !empty($other['networking']) && !empty($other['directory']);
+                $state['can_request']=$state['networking_available'] && $retry<=time();
             }
         }
         unset($state);
@@ -107,10 +110,11 @@ final class Connections
     {
         $me=get_current_user_id(); $rows=self::rows($me); $ids=[];
         foreach($rows as $row) { $ids[]=(int)((int)$row['user_id']===$me?$row['target_id']:$row['user_id']); }
-        $out=['incoming'=>[],'outgoing'=>[],'connected'=>[]];
+        $out=['incoming'=>[],'outgoing'=>[],'connected'=>[],'blocked'=>[]];
         $conversationStates=ConversationRequests::statesFor($me,$ids);
         foreach(self::statesFor($me,$ids,$rows) as $id=>$state) {
-            if (!Access::member($id) || $state['state']==='none') { continue; }
+            if ($state['blocked_by_me'] && Access::member($id)) { $out['blocked'][]=Profiles::card($id)+['connection'=>$state]; }
+            if (!Access::member($id) || $state['state']==='none' || $state['blocked']) { continue; }
             $key=['incoming_pending'=>'incoming','outgoing_pending'=>'outgoing','connected'=>'connected'][$state['state']];
             $out[$key][]=Profiles::card($id)+['connection'=>$state,'conversation'=>$conversationStates[$id]??ConversationRequests::between($me,$id)];
         }
@@ -120,15 +124,18 @@ final class Connections
     {
         Access::require(Access::member() && current_user_can('ascla_write')); return get_current_user_id();
     }
-    public static function request(int $target): array
+    public static function request(int $target,string $message=''): array
     {
         $me=self::writer(); Access::require($target>0 && $target!==$me && Access::member($target),'Asociado no válido.',400);
-        return self::lockPair($me,$target,static function () use($me,$target) {
+        Access::require(mb_strlen($message)<=1000,'El mensaje de presentación admite hasta 1000 caracteres.',400);
+        $message=trim(Access::text($message,1000));
+        return self::lockPair($me,$target,static function () use($me,$target,$message) {
             $state=self::between($me,$target);
             Access::require($state['state']==='none','Ya existe una solicitud o conexión entre estos asociados.',409);
             Access::require(!$state['blocked'],'No se puede solicitar esta conexión.',403);
+            Access::require(ConnectionPolicy::retryAt($me,$target)<=time(),'No es posible enviar la solicitud en este momento.',409);
             Matching::between($me,$target,false);
-            $id=Store::insert('relations',['user_id'=>$me,'target_id'=>$target,'kind'=>'connect','created_at'=>current_time('mysql',true)]);
+            $id=Store::insert('relations',['user_id'=>$me,'target_id'=>$target,'kind'=>'connect','detail'=>$message,'created_at'=>current_time('mysql',true)]);
             Notifications::send($target,'connection',Profiles::publicName($me).' quiere conectar contigo.',Catalog::url('perfil',['member'=>$me]),['type'=>'profile','id'=>$me]);
             Audit::record('connection_requested',$id); return self::between($me,$target);
         });
@@ -154,6 +161,7 @@ final class Connections
         foreach (self::rows($me,[$sender]) as $pending) {
             if ($pending['kind']==='connect') { Store::delete('relations',['id'=>(int)$pending['id']]); }
         }
+        if ($decision==='reject') { ConnectionPolicy::cooldown($sender,$me); }
         self::readRequests($me,$sender);
         Audit::record($decision==='accept'?'connection_accepted':'connection_rejected',$id);
         if ($decision==='accept') {
@@ -184,6 +192,7 @@ final class Connections
                 foreach (self::rows($me,[$target]) as $row) {
                     if ($row['kind']==='connected') { Store::delete('relations',['id'=>(int)$row['id']]); }
                 }
+                ConnectionPolicy::disconnected($me,$target);
                 Audit::record('connection_removed',$connectionId,'profile-'.$target);
             }
             return self::between($me,$target);

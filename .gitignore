@@ -10,15 +10,15 @@ bloc.txt
 /coverage/
 /test-results/
 /playwright-report/
+.phpunit.result.cache
+.phpunit.cache/
 *.log
 .DS_Store
+Thumbs.db
 .idea/
 .vscode/
 wp-content/uploads/
 wp-content/plugins/ascla-core.zip
-docs/reference/*.png
-docs/reference/*.pdf
-docs/reference/*.docx
 secrets/
 /.scannerwork/
 

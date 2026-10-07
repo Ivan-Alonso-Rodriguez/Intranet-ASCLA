@@ -49,13 +49,14 @@ final class Profiles
     {
         $data=self::raw($id);
         $own=$id===get_current_user_id();
-        Access::require($own||current_user_can('ascla_moderate')||!empty($data['directory']),'Perfil no disponible.',404);
+        Access::require($own||current_user_can('ascla_manage')||!empty($data['directory']),'Perfil no disponible.',404);
         $data=self::applyVisibility($data,$id,$own);
         unset($data['revision']);
         $data['photo_url']=!empty($data['photo_id'])?Media::profilePhotoUrl((int)$data['photo_id'],$id):'';
         if ($own) {
             $data['email']=wp_get_current_user()->user_email;
             $data['email_notifications']=Notifications::emailPreferences($id);
+            $data['publication_missing']=ProfileRequirements::missing(self::raw($id));
         }
         $data['terms']=self::labels($data);
         $data['position_label']=$data['position']??'';
@@ -65,9 +66,8 @@ final class Profiles
 
     private static function applyVisibility(array $data,int $id,bool $own): array
     {
-        $moderate=current_user_can('ascla_moderate');
         $manage=current_user_can('ascla_manage');
-        if (!$own && !$moderate) {
+        if (!$own && !$manage) {
             foreach ((array)($data['hidden']??[]) as $field) { unset($data[$field]); }
             unset($data['learn'],$data['help'],$data['goals'],$data['connect_topics'],$data['microevents']);
         }
@@ -76,9 +76,7 @@ final class Profiles
             $data['name']=self::publicName($id);
         }
         if (!$own && !$manage) {
-            $phoneVisibility=$data['phone_visibility']??'private';
-            unset($data['birth_date'],$data['phone_visibility']);
-            if ($phoneVisibility!=='members' || !Access::member()) { unset($data['phone']); }
+            unset($data['birth_date'],$data['phone_visibility'],$data['phone']);
         }
         return $data;
     }
@@ -105,21 +103,7 @@ final class Profiles
     }
     public static function completion(int $id): array
     {
-        $data=self::raw($id);
-        $checks=[
-            'name'=>trim((string)($data['first_name']??''))!=='' && trim((string)($data['last_name']??''))!=='',
-            'position'=>trim((string)($data['position']??''))!=='',
-            'company'=>trim((string)($data['company']??''))!=='',
-            'location'=>trim((string)($data['country']??''))!=='' && trim((string)($data['city']??''))!=='',
-            'bio'=>trim((string)($data['bio']??''))!=='',
-            'experience'=>trim((string)($data['experience']??''))!=='',
-            'photo'=>!empty($data['photo_id']),
-            'interests'=>!empty($data['interests']),
-            'areas'=>!empty($data['areas']),
-            'industries'=>!empty($data['industries']),
-        ];
-        $completed=count(array_filter($checks));
-        return ['percent'=>$completed*10,'completed'=>$completed,'total'=>10,'minimum'=>40,'checks'=>$checks];
+        return ProfileRequirements::completion(self::raw($id));
     }
 
     public static function save(array $input,int $id=0): array
@@ -137,6 +121,8 @@ final class Profiles
         $data=self::savePhoneFields($data,$input,$id);
         if (array_key_exists('birth_date',$input)) { $data['birth_date']=Birthdays::normalize($input['birth_date']); }
         $data=self::saveTermFields($data,$input);
+        $missing=ProfileRequirements::missing($data);
+        Access::require(!$missing,'Completa los campos obligatorios: '.implode(', ',$missing).'.',400);
         $data=self::savePreferenceFields($data,$input,$id);
         $data['revision']=(int)($old['revision']??0)+1;
         unset($data['email'],$data['terms'],$data['photo_url']);
@@ -144,6 +130,7 @@ final class Profiles
         if (!empty($data['photo_id'])) { Media::commit((int)$data['photo_id'],$id); }
         wp_update_user(['ID'=>$id,'first_name'=>$data['first_name'],'last_name'=>$data['last_name'],'display_name'=>trim($data['first_name'].' '.$data['last_name'])?:$data['name']]);
         update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+        if ($id===get_current_user_id()) { ProfileReview::confirmed($id); }
         Birthdays::celebrate($id);
         return self::visible($id);
     }
@@ -208,35 +195,7 @@ final class Profiles
 
     public static function directory(array $filter=[]): array
     {
-        $page=max(1,(int)($filter['page']??1));
-        $perPage=15;
-        $query=mb_strtolower(Access::text($filter['q']??'',120));
-        $results=[];$offset=0;
-        do {
-            $users=get_users(['number'=>200,'offset'=>$offset,'orderby'=>'display_name','order'=>'ASC','capability'=>'ascla_access']);
-            $offset+=200;
-            foreach ($users as $user) {
-                $data=self::directoryCandidate($user,$filter,$query);
-                if ($data!==null) { $results[]=$data; }
-            }
-        } while (count($users)===200);
-        $pages=max(1,(int)ceil(count($results)/$perPage));
-        $page=min($page,$pages);
-        return ['items'=>Connections::attach(array_slice($results,($page-1)*$perPage,$perPage)),'total'=>count($results),'page'=>$page,'pages'=>$pages,'per_page'=>$perPage];
-    }
-
-    private static function directoryCandidate(\WP_User $user,array $filter,string $query): ?array
-    {
-        if (!Access::member($user->ID)) { return null; }
-        $raw=self::raw($user->ID);
-        if (empty($raw['directory']) && $user->ID!==get_current_user_id()) { return null; }
-        $data=self::visible($user->ID);
-        $haystack=mb_strtolower(implode(' ',array_map(static fn($value)=>is_scalar($value)?(string)$value:'',$data)).' '.wp_json_encode($data['terms'],JSON_UNESCAPED_UNICODE));
-        $matches=!($query && !str_contains($haystack,$query)) && (empty($filter['country']) || ($data['country']??'')===$filter['country']);
-        foreach (['industries','interests','areas'] as $key) {
-            if (!empty($filter[$key]) && !in_array((int)$filter[$key],$data[$key]??[],true)) { $matches=false;break; }
-        }
-        return $matches?$data:null;
+        return ProfileDirectory::search($filter);
     }
     public static function catalogs(): array
     {

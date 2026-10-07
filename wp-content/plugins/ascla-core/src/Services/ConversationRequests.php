@@ -147,7 +147,6 @@ final class ConversationRequests
             } else {
                 Notifications::removeConversationRequestNotices($me,$sender);
                 Store::delete('relations',['id'=>$id]);
-                Messaging::discardPendingRequest($sender,$me,(string)$row['created_at']);
             }
             if ($decision==='accept') { self::readRequests($me,$sender); }
             Audit::record($decision==='accept'?'conversation_request_accepted':'conversation_request_rejected',$id);
@@ -176,7 +175,6 @@ final class ConversationRequests
             $id=(int)$state['request_id'];
             $row=Store::one('relations',$id);
             Store::delete('relations',['id'=>$id,'user_id'=>$me,'target_id'=>$target,'kind'=>'conversation_request']);
-            if ($row) { Messaging::discardPendingRequest($me,$target,(string)$row['created_at']); }
             Notifications::removeProfileNotices($target,['conversation_request'],$me);
             Notifications::removeConversationRequestNotices($target,$me);
             Audit::record('conversation_request_cancelled',$id,'profile-'.$target);

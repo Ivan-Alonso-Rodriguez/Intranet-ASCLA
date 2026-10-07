@@ -56,7 +56,7 @@ final class RecommendationsTest extends TestCase
     public function testIncompleteProfilesCannotEnterRecommendationBatches(): void
     {
         $candidate=$this->users[1];wp_set_current_user($candidate);
-        Profiles::save(['bio'=>'','goals'=>[]]);
+        $legacy=Profiles::raw($candidate);$legacy['bio']='';$legacy['goals']=[];update_user_meta($candidate,'_ascla_profile',$legacy);
         wp_set_current_user($this->users[0]);Matching::refreshBatch($this->users[0]);
         self::assertNotContains($candidate,array_column(Matching::overview()['people'],'id'));
     }

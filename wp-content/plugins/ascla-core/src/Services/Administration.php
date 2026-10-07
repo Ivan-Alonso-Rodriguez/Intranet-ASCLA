@@ -7,73 +7,9 @@ final class Administration
 {
     private const EMAIL_IN_USE='Ese correo ya pertenece a otra cuenta.';
     private const INVALID_STATUS='Estado no válido.';
-    private const REQUEST_STATES=['open','progress','closed'];
-    private static function requestStateLabel(string $state): string
-    {
-        return ['open'=>'Recibida','progress'=>'En atención','closed'=>'Resuelta'][$state]??$state;
-    }
-    private static function contactArgs(string $state,string $q): array
-    {
-        $args=['post_type'=>'ascla_contact','post_status'=>'private','s'=>$q,'orderby'=>['date'=>'DESC','ID'=>'DESC'],'posts_per_page'=>20];
-        if($state==='open') { $args['meta_query']=[['relation'=>'OR',['key'=>'_ascla_request_status','compare'=>'NOT EXISTS'],['key'=>'_ascla_request_status','value'=>'open']]]; }
-        elseif(in_array($state,self::REQUEST_STATES,true)) { $args['meta_query']=[['key'=>'_ascla_request_status','value'=>$state]]; }
-        return $args;
-    }
-    public static function contacts(array $filter): array
-    {
-        Access::require(current_user_can('ascla_moderate'));
-        // Backfill only the search index of older contact metadata; no schema migration.
-        if(!get_option('ascla_contacts_indexed_v1')) {
-            foreach(get_posts(['post_type'=>'ascla_contact','post_status'=>'private','numberposts'=>-1,'fields'=>'ids']) as $id) { $meta=(array)get_post_meta($id,'_ascla',true);update_post_meta($id,'_ascla_request_status',$meta['request_status']??'open'); }
-            update_option('ascla_contacts_indexed_v1',true,false);
-        }
-        $state=Access::text($filter['state']??'',20);Access::require($state===''||in_array($state,self::REQUEST_STATES,true),self::INVALID_STATUS,400);
-        $q=Access::text($filter['q']??'',120);$page=max(1,min(10000,(int)($filter['page']??1)));
-        $query=new \WP_Query(self::contactArgs($state,$q)+['paged'=>$page]);$counts=[];
-        foreach(self::REQUEST_STATES as $key) {$args=self::contactArgs($key,'');$args['posts_per_page']=1;$args['fields']='ids';$counts[$key]=(int)(new \WP_Query($args))->found_posts;}
-        return ['items'=>array_map([Content::class,'serialize'],$query->posts),'page'=>$page,'pages'=>(int)$query->max_num_pages,'total'=>(int)$query->found_posts,'counts'=>$counts];
-    }
-    public static function contactStatus(int $id,string $status): array
-    {
-        Access::require(current_user_can('ascla_moderate'));$post=Content::get($id);
-        Access::require($post->post_type==='ascla_contact','Solicitud no válida.',400);
-        Access::require(in_array($status,self::REQUEST_STATES,true),self::INVALID_STATUS,400);
-        return Store::lock('contact:'.$id,static function()use($id,$status,$post){
-            clean_post_cache($id);$post=Content::get($id); // Recheck after acquiring the same lock used by deletion.
-            $meta=(array)get_post_meta($id,'_ascla',true);$previous=$meta['request_status']??'open';
-            if($previous!==$status) {
-                $meta['request_status']=$status;$meta['request_updated_at']=gmdate('c');
-                $history=(array)($meta['request_history']??[]);$history[]=['from'=>$previous,'to'=>$status,'at'=>$meta['request_updated_at'],'actor'=>Profiles::publicName(get_current_user_id())];
-                $meta['request_history']=array_slice($history,-20);update_post_meta($id,'_ascla',$meta);
-                Audit::record('contact_status',$id,$status);
-                $author=(int)$post->post_author;
-                if($author>0 && Access::member($author)) {
-                    Notifications::send(
-                        $author,
-                        'support_update',
-                        'Tu solicitud #'.$id.' ahora está '.self::requestStateLabel($status).'.',
-                        \ASCLA\Core\Domain\Catalog::url('contacto'),
-                        ['type'=>'post','id'=>$id,'actor'=>get_current_user_id()]
-                    );
-                }
-            }
-            update_post_meta($id,'_ascla_request_status',$status);
-            return Content::serialize($post);
-        });
-    }
-    public static function deleteContact(int $id): array
-    {
-        Access::require(Access::member() && current_user_can('ascla_moderate'));
-        return Store::lock('contact:'.$id,static function()use($id){
-            $post=Content::get($id);
-            Access::require($post->post_type==='ascla_contact','Solicitud no válida.',400);
-            $meta=(array)get_post_meta($id,'_ascla',true);
-            Access::require(($meta['request_status']??'open')==='closed','Resuelve la solicitud antes de eliminarla.',409);
-            Access::require((bool)wp_trash_post($id),'No se pudo eliminar la solicitud.',500);
-            Audit::record('contact_deleted',$id,'closed');
-            return ['id'=>$id,'deleted'=>true,'message'=>'Solicitud enviada a la papelera.'];
-        });
-    }
+    public static function contacts(array $filter): array { return SupportRequests::listing($filter); }
+    public static function contactStatus(int $id,string $status,string $response=''): array { return SupportRequests::change($id,$status,$response); }
+    public static function deleteContact(int $id): array { return SupportRequests::archive($id); }
     private const COMMUNITY_ROLES=['ascla_member','ascla_executive','ascla_moderator'];
 
     private static function roleLabel(string $role): string
@@ -115,12 +51,11 @@ final class Administration
         Access::require(current_user_can('ascla_manage'));
         $q=Access::text($filter['q']??'',100);$role=Access::text($filter['role']??'',60);$state=Access::text($filter['state']??'',20);
         Access::require($role===''||isset(wp_roles()->roles[$role]),'Rol no válido.',400);
-        Access::require(in_array($state,['','active','suspended'],true),self::INVALID_STATUS,400);
+        Access::require(in_array($state,['','active','suspended','expired'],true),self::INVALID_STATUS,400);
         $page=max(1,min(10000,(int)($filter['page']??1)));$args=['number'=>20,'paged'=>$page,'orderby'=>'display_name','order'=>'ASC'];
         if($q!=='') {$args['search']='*'.str_replace('*','',$q).'*';$args['search_columns']=['user_login','user_email','display_name'];}
         if($role!=='') {$args['role']=$role; }
-        if($state==='suspended') {$args['meta_query']=[['key'=>'_ascla_suspended','value'=>'1']]; }
-        elseif($state==='active') {$args['meta_query']=[['relation'=>'OR',['key'=>'_ascla_suspended','compare'=>'NOT EXISTS'],['key'=>'_ascla_suspended','value'=>'1','compare'=>'!=']]]; }
+        if($state!=='') { $args['meta_query']=Membership::filter($state); }
         $query=new \WP_User_Query($args);$items=[];
         foreach($query->get_results() as $user) {
             $id=(int)$user->ID;$card=Profiles::card($id);
@@ -134,6 +69,7 @@ final class Administration
                 'roles'=>array_values($user->roles),
                 'registered'=>$user->user_registered,
                 'suspended'=>(bool)get_user_meta($id,'_ascla_suspended',true),
+            ...Membership::view($id),
                 'photo_url'=>$card['photo_url'],
                 'profile_url'=>$card['profile_url'],
                 'technical_admin'=>$technical,
@@ -173,6 +109,8 @@ final class Administration
             'birth_date'=>$account['birth_date'],'phone'=>$account['phone'],'phone_visibility'=>$account['phone_visibility'],'directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[],'revision'=>1,
         ]);
         update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+        Membership::apply($id,$account['membership']);
+        Audit::changes('member_created',$id,[],['roles'=>[$account['role']]]);
         if($account['send_invite']) {
             try { wp_new_user_notification($id,null,'user'); }
             catch (\Throwable $error) { /* La cuenta no depende del transporte de correo. */ }
@@ -197,6 +135,7 @@ final class Administration
             'login'=>$login,'email'=>$email,'role'=>$role,'first'=>$first,'last'=>$last,
             'position'=>Access::text($input['position']??'',200),'company'=>Access::text($input['company']??'',200),'member_type'=>Access::text($input['member_type']??'',200),
             'birth_date'=>Birthdays::normalize($input['birth_date']??''),'phone'=>\ASCLA\Core\Domain\Phone::normalize($input['phone']??''),'phone_visibility'=>\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']??'private'),
+            'membership'=>Membership::validate($input),
             'send_invite'=>!array_key_exists('send_invite',$input)||rest_sanitize_boolean($input['send_invite']),
         ];
         return Store::lock('admin-create-user:'.hash('sha256',$login.'|'.$email),static fn()=>self::createUserLocked($account));
@@ -225,6 +164,7 @@ final class Administration
             'phone'=>$profile['phone']??'','phone_visibility'=>$profile['phone_visibility']??'private',
             'photo_url'=>Profiles::card($id)['photo_url'],
             'suspended'=>(bool)get_user_meta($id,'_ascla_suspended',true),
+            ...Membership::view($id),
         ];
     }
 
@@ -246,6 +186,7 @@ final class Administration
         $first=Access::text($input['first_name']??'',100);
         $last=Access::text($input['last_name']??'',100);
         Access::require(trim($first.$last)!=='','Indica al menos un nombre o apellido.',400);
+        $membership=Membership::validate($input,$id);
         $previousProfile=(array)get_user_meta($id,'_ascla_profile',true);
         $phone=\ASCLA\Core\Domain\Phone::normalize($input['phone']??($previousProfile['phone']??''));
         $phoneVisibility=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']??($previousProfile['phone_visibility']??'private'));
@@ -263,11 +204,13 @@ final class Administration
         $profile['member_type']=Access::text($input['member_type']??($previousProfile['member_type']??''),200);
         $profile['birth_date']=Birthdays::normalize($input['birth_date']??($previousProfile['birth_date']??''));
         $profile['revision']=(int)($profile['revision']??0)+1;
-        $save=static function()use($id,$user,$email,$first,$last,$role,$profile): void {
+        $save=static function()use($id,$user,$email,$first,$last,$role,$profile,$membership): void {
             $display=trim($first.' '.$last)?:$user->display_name;
             $result=wp_update_user(['ID'=>$id,'user_email'=>$email,'first_name'=>$first,'last_name'=>$last,'display_name'=>$display]);
             Access::require(!is_wp_error($result),is_wp_error($result)?$result->get_error_message():'No se pudo actualizar la cuenta.',400);
-            $user->set_role($role);
+            $previousRoles=$user->roles;$user->set_role($role);
+            Membership::apply($id,$membership);
+            Audit::changes('member_roles_updated',$id,['roles'=>$previousRoles],['roles'=>[$role]]);
             update_user_meta($id,'_ascla_profile',$profile);
             update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
             Audit::record('member_updated',$id,'role='.$role);
@@ -305,7 +248,8 @@ final class Administration
     {
         Access::require(current_user_can('ascla_manage'));
         Access::require($id>0 && $id!==get_current_user_id()&&!user_can($id,'manage_options')&&user_can($id,'ascla_access'),'Cuenta no disponible.',400);
-        update_user_meta($id,'_ascla_suspended',$suspended);Audit::record($suspended?'member_suspended':'member_reactivated',$id);
+        $input=['membership_status'=>$suspended?'suspended':'active'];
+        Membership::apply($id,Membership::validate($input,$id));
         return ['id'=>$id,'suspended'=>$suspended];
     }
 }

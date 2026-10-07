@@ -1,0 +1,2433 @@
+{
+  "review_date": "2026-10-06",
+  "baseline_commit": "8588392",
+  "plugin_version": "1.10.6",
+  "source_name": "DOCUMENTO DE ANALISIS Y DISEÑO ASCLA .pdf",
+  "source_sha256": "ac78f208de1c9ef07ec09cd9cfacb8993524ad2926e26c6f51d082a230c5c14a",
+  "scope": "Implementación y pruebas locales sobre el PDF; no certificación integral ni resultado de SonarQube remoto.",
+  "requirements": {
+    "RN": [
+      {
+        "id": "RN-001",
+        "page": 12,
+        "requirement": "Edición del perfil El asociado administrará su fotografía, información personal autorizada, información profesional, biografía, experiencia, enlaces profesionales, temas de interés, áreas de conocimiento, industrias, idiomas, objetivos de networking y preferencias de aprendizaje. El Administrador gestionará únicamente el estado de membresía, rol, permisos y demás campos administrativos; no modificará la información profesional, salvo cuando atienda una solicitud registrada mediante Contáctanos.",
+        "status": "Parcial",
+        "evidence": "RF-001, RF-133, RF-134",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-002",
+        "page": 12,
+        "requirement": "Privacidad del perfil El asociado podrá configurar individualmente la visibilidad de su fotografía, cargo o profesión, empresa u organización, país, ciudad, biografía, experiencia profesional, enlaces profesionales, temas de interés, áreas de conocimiento e industrias. El correo personal, teléfono, fecha de nacimiento y dirección exacta permanecerán ocultos por defecto y no serán visibles para otros asociados.",
+        "status": "Código revisado",
+        "evidence": "RF-005, RF-006",
+        "note": "Ver RF-005 y RF-006; preferencias antiguas no exponen teléfono y la moderación no elude ocultamientos."
+      },
+      {
+        "id": "RN-003",
+        "page": 12,
+        "requirement": "Participación en el Directorio Todo miembro con cuenta autorizada y membresía activa aparecerá por defecto en el Directorio. El miembro podrá ocultar su perfil cuando lo desee; al hacerlo dejará de aparecer en búsquedas y recomendaciones sin perder conexiones ni historial de mensajes.",
+        "status": "Parcial",
+        "evidence": "RF-007, RF-131",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-004",
+        "page": 12,
+        "requirement": "Participación voluntaria El asociado podrá habilitar o deshabilitar de manera independiente la recepción de recomendaciones de conexiones y su inclusión como miembro recomendado para microeventos. Aunque no habilite esta última opción, podrá inscribirse en los microeventos publicados para todos los miembros activos.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RN-005",
+        "page": 12,
+        "requirement": "Actualización periódica El sistema solicitará periódicamente revisar el perfil, según la frecuencia configurada por el Administrador. El asociado podrá confirmar que la información sigue vigente, actualizarla o posponer el recordatorio.",
+        "status": "Código revisado",
+        "evidence": "Services/ProfileReview.php; Settings; Router; assets/app.js",
+        "note": "Revisión periódica configurable, confirmación o posposición persistidas por usuario. Guardar el propio perfil completo confirma vigencia. Suite PHP final pendiente."
+      },
+      {
+        "id": "RN-006",
+        "page": 12,
+        "requirement": "Información visible Las búsquedas, tarjetas y fichas mostrarán únicamente perfiles activos y campos autorizados. Los resultados se ordenarán por coincidencia exacta de nombre, relevancia de los filtros y, en caso de empate, orden alfabético.",
+        "status": "Código revisado",
+        "evidence": "Services/ProfileDirectory.php; Profiles; assets/app.js",
+        "note": "Campos visibles, filtros múltiples, tamaño configurable y orden por coincidencia textual, coincidencias de filtros, afinidad y nombre. El directorio no busca campos ocultos aunque lo consulte administración."
+      },
+      {
+        "id": "RN-007",
+        "page": 12,
+        "requirement": "Solicitud de conexión Una conexión solo se establecerá cuando el destinatario acepte una solicitud. El emisor podrá incorporar opcionalmente un mensaje breve de presentación. La solicitud permanecerá pendiente sin vencimiento automático hasta que sea aceptada, rechazada o cancelada por el emisor.",
+        "status": "Parcial",
+        "evidence": "RF-017, RF-018, RF-019",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-008",
+        "page": 12,
+        "requirement": "Unicidad de la relación No puede existir más de una solicitud pendiente ni más de una conexión activa entre el mismo par de asociados.",
+        "status": "Parcial",
+        "evidence": "RF-017, RF-018",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-009",
+        "page": 12,
+        "requirement": "Protocolo de habilitación, privacidad y condiciones de la mensajería directa La comunicación mediante mensajería directa dentro de la Intranet ASCLA está reservada a miembros con membresía activa y requiere de forma predeterminada la existencia de una conexión profesional aceptada. Aquellos asociados que no mantengan una conexión activa podrán solicitar la apertura del chat mediante una solicitud de conversación, la cual podrá incorporar opcionalmente un mensaje breve de presentación. El canal de mensajería permanecerá bloqueado hasta que el destinatario acepte expresamente la solicitud; en caso de rechazo, la petición quedará cerrada sin habilitar la comunicación y sin aplicar periodos de enfriamiento de reintento, salvo que medie un bloqueo unilateral formal (RN-010). Las conversaciones directas son de carácter estrictamente privado entre los dos participantes, quedando prohibido el acceso a terceros o administradores, salvo diligencias de auditoría asociadas a una solicitud formal de soporte.",
+        "status": "Código revisado",
+        "evidence": "RF-029, RF-094, RF-095",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-010",
+        "page": 13,
+        "requirement": "Bloqueo e Interacción Restringida Cualquier asociado activo podrá aplicar un bloqueo unilateral sobre otro miembro de la comunidad. La activación del bloqueo produce de forma automática: 1. La suspensión y ocultamiento recíproco de cualquier canal de mensajería directa previo. 2. La disolución de la conexión existente en caso de haberla. 3. La exclusión mutua permanente en recomendaciones algorítmicas y directorios de búsqueda. 4. La imposibilidad de enviar nuevas solicitudes de conexión o interacción mientras persista el bloqueo. En caso de desbloqueo, el sistema retirará las restricciones de búsqueda, pero no restablecerá la conexión anterior ni recuperará las conversaciones previas de manera automática",
+        "status": "Código revisado",
+        "evidence": "RF-034, RF-035",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-011",
+        "page": 13,
+        "requirement": "Cálculo y factores de recomendación de asociados El sistema calculará la compatibilidad entre asociados evaluando la coincidencia directa en intereses, sectores y objetivos de networking, priorizando aquellos perfiles con conocimientos y experiencia complementarios. Solo participarán perfiles activos con al menos 70% de completitud que hayan autorizado su inclusión",
+        "status": "Código revisado",
+        "evidence": "RF-036, RF-037, RF-132",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-012",
+        "page": 13,
+        "requirement": "Explicabilidad de la afinidad Cada recomendación de asociado deberá acompañarse de un texto que justifique de forma comprensible los factores específicos de coincidencia y complementariedad detectados entre ambos perfiles",
+        "status": "Código revisado",
+        "evidence": "RF-038",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-013",
+        "page": 13,
+        "requirement": "Periodicidad de recálculo de recomendaciones Las recomendaciones de networking se recalcularán automáticamente cada siete días y de manera inmediata cuando el asociado modifique sus intereses, sectores, objetivos o áreas de conocimiento. No existirá un mecanismo de refresco o cálculo manual forzado por el usuario. La plataforma desplegará un lote estándar de hasta 5 sugerencias activas por semana, permitiendo al Administrador modificar dicho tope. Si la comunidad no cuenta con candidatos afines suficientes, se presentarán los perfiles disponibles junto con un aviso explicativo de baja coincidencia.",
+        "status": "Código revisado",
+        "evidence": "RF-124, RF-125, RF-126, RF-127",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-014",
+        "page": 13,
+        "requirement": "Disponibilidad y autorización de El motor de recomendaciones seleccionará únicamente contenidos que se encuentren en estado Publicado, activos y contenidos recomendables vigentes en la plataforma. Queda excluido del catálogo de recomendaciones cualquier recurso en estado Borrador, Pendiente de revisión, programado con fecha futura, retirado o eliminado. Asimismo, el contenido sugerido deberá ser accesible para el asociado según los permisos y restricciones correspondientes a su rol y membresía",
+        "status": "Código revisado",
+        "evidence": "RF-040, RF-041",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-015",
+        "page": 14,
+        "requirement": "Propuestas automáticas de microeventos El sistema generará semanalmente hasta cuatro propuestas de microeventos basadas en interés. Cada propuesta corresponderá a un único microevento, tendrá cupo configurable y permanecerá pendiente de revisión hasta que el Administrador la edite, apruebe o deniegue. Los miembros recomendados tendrán un periodo de inscripción prioritaria configurable; después, los cupos restantes estarán disponibles para todos los miembros activos. Una propuesta se cancelará automáticamente si no alcanza la cantidad mínima configurable de asociados candidatos elegibles.",
+        "status": "Parcial",
+        "evidence": "Services/MicroPlanning.php; MicroEvents.php; MicroLifecycle.php; MicroEventsTest",
+        "note": "Generación semanal idempotente y máximo cuatro configurables, mínimo/cupo y prioridad. No crea propuestas bajo el mínimo; falta cancelación automática de una propuesta pendiente si pierde candidatos, y periodicidad distinta de semanal."
+      },
+      {
+        "id": "RN-016",
+        "page": 14,
+        "requirement": "Ciclo de vida, administración y clasificación de eventos La creación, edición, reprogramación y cancelación de eventos institucionales corresponde a los roles Ejecutivo y Administrador. Los eventos se clasificarán automáticamente como Próximos mientras su fecha y hora de fin no hayan concluido, y como Anteriores una vez finalizados. La reprogramación de fecha, horario o modalidad invalidará las confirmaciones previas y exigirá una reconfirmación expresa de los participantes inscritos. La cancelación de un evento cerrará las inscripciones y notificará inmediatamente a los asociados confirmados conservando el motivo registrado",
+        "status": "Parcial",
+        "evidence": "RF-047, RF-050",
+        "note": "Eventos institucionales: reprogramación con reconfirmación, cancelación con motivo e historial y cierre de RSVP. Ver brechas de microeventos en RN-026."
+      },
+      {
+        "id": "RN-017",
+        "page": 14,
+        "requirement": "Inscripción, control de aforo y listas de espera La asistencia a cualquier evento requerirá la confirmación voluntaria del asociado mediante RSVP. Las solicitudes se procesarán en orden de llegada hasta completar el aforo máximo configurado. Una vez alcanzada la capacidad máxima, el sistema suspenderá la confirmación directa y ofrecerá al asociado el ingreso a la lista de espera correspondiente",
+        "status": "Código revisado",
+        "evidence": "RF-055, RF-057, RF-059",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-018",
+        "page": 14,
+        "requirement": "Las solicitudes a eventos con aforo completo se ordenarán secuencialmente por fecha y hora de registro. Al liberarse un cupo, se notificará al primer miembro en espera, quien dispondrá de un plazo configurable para confirmar su asistencia; transcurrido dicho plazo sin confirmación, la oferta caducará y se transferirá al siguiente en turno. El ingreso nunca será automático.",
+        "status": "Parcial",
+        "evidence": "RF-060, RF-061, RF-062",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-019",
+        "page": 14,
+        "requirement": "Visibilidad de la nómina de participantes La lista de inscritos a un evento permanecerá oculta para cualquier asociado que no cuente con una confirmación formal de asistencia (RSVP). Una vez confirmado el RSVP, el asociado solo podrá visualizar los perfiles de los asistentes que hayan autorizado su visibilidad. El Administrador tendrá acceso a la nómina completa sin restricciones",
+        "status": "Código revisado",
+        "evidence": "RF-063, RF-064, RF-065",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-020",
+        "page": 14,
+        "requirement": "Generación y ciclo de vida de notificaciones internas Toda interacción de la comunidad (conexiones, mensajes, eventos, cupos liberados y soporte) generará un aviso interno en la plataforma. Las notificaciones permanecerán disponibles en el panel del usuario hasta que este las descarte o elimine.",
+        "status": "Código revisado",
+        "evidence": "RF-069, RF-070, RF-071, RF-072",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-021",
+        "page": 14,
+        "requirement": "Independencia y preferencias del canal de correo El envío de alertas por correo electrónico operará de forma desacoplada y no sustituirá la notificación interna. El asociado podrá habilitar o deshabilitar individualmente los avisos por correo según su categoría temática, manteniéndose todas habilitadas por defecto.",
+        "status": "Código revisado",
+        "evidence": "RF-073, RF-074, RF-075",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-022",
+        "page": 15,
+        "requirement": "IA como apoyo El sistema utilizará OpenAI API como apoyo para generar recomendaciones de asociados y contenidos, proponer microeventos y responder consultas del Asistente IA utilizando información autorizada de la Intranet. La IA no establecerá conexiones, enviará mensajes, publicará propuestas ni confirmará participaciones en nombre del asociado. Las propuestas sujetas a moderación requerirán revisión administrativa antes de publicarse.",
+        "status": "Parcial",
+        "evidence": "RF-100, RF-166",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-023",
+        "page": 15,
+        "requirement": "Vigencia de membresía y acceso a la plataforma El acceso a la Intranet ASCLA estará condicionado estrictamente al estado activo de la membresía del usuario. Si la membresía vence o es suspendida, el sistema bloqueará el inicio de sesión y la navegación en la plataforma de manera total, impidiendo el acceso a cualquier sección o contenido. Esta restricción no implicará la eliminación de los datos del asociado: su perfil, red de conexiones, historial de mensajes y registros previos se conservarán íntegros en el sistema. Una vez que la administración registre la reactivación de la membresía, el acceso completo a la plataforma y a la información histórica se restaurará automáticamente.",
+        "status": "Código revisado",
+        "evidence": "Services/Membership.php; Services/SessionPolicy.php; Administration; MembershipTest; tests/admin-compliance.cjs",
+        "note": "Estado y vigencia administrables; denegación y revocación, incluso sin cron; reactivación con nuevo acceso conserva perfil, conexiones, mensajes y participaciones."
+      },
+      {
+        "id": "RN-024",
+        "page": 15,
+        "requirement": "Disolución de conexiones activas Cualquiera de los dos asociados podrá dar de baja una conexión activa. La eliminación deshabilitará inmediatamente el envío de nuevos mensajes directos entre ambos, conservando el historial previo de la conversación. Tras la disolución, se aplicará un periodo de espera recíproco de 30 días calendario que impedirá el envío de nuevas solicitudes de conexión entre ambos usuarios.",
+        "status": "Código revisado",
+        "evidence": "Services/ConnectionPolicy.php; Connections; tests/bugs-ui.cjs",
+        "note": "Espera de 30 días, direccional al rechazar y bilateral al desconectar. Rechazo silencioso en la interfaz, aviso genérico y validación en servidor."
+      },
+      {
+        "id": "RN-025",
+        "page": 15,
+        "requirement": "Estructura, estados y trazabilidad de microeventos Cada propuesta generada automáticamente contendrá: tema, objetivo, fecha, hora, modalidad, enlace/ubicación, cupos (mínimo y máximo), agenda y lista de miembros sugeridos. Las propuestas transicionarán por los estados: Pendiente de revisión , Aprobada , Publicada , Inscripciones insuficientes , Denegada , Cancelada o Finalizada . Las propuestas denegadas exigirán el registro de un motivo y no se eliminarán, conservando su historial para evitar recurrencias algorítmicas innecesarias.",
+        "status": "Parcial",
+        "evidence": "Services/MicroLifecycle.php; Content.php; MicroEventsTest",
+        "note": "Aprobación administrativa obligatoria, publicación inmediata y estados con historial. Pendiente programar publicación futura separada de la aprobación."
+      },
+      {
+        "id": "RN-026",
+        "page": 15,
+        "requirement": "Contingencia y modificaciones sobre microeventos Si al concluir el plazo de inscripción un microevento no alcanza el cupo mínimo configurado, pasará al estado Inscripciones insuficientes . El Administrador podrá: ampliar el plazo, reducir el aforo mínimo, reprogramar fecha/horario/modalidad o cancelar la actividad. Toda cancelación o reprogramación registrará el motivo obligatorio y notificará a los inscritos. Cualquier cambio en fecha, horario o modalidad invalidará las confirmaciones previas y requerirá que los participantes reconfirmen su asistencia.",
+        "status": "Código revisado",
+        "evidence": "MicroLifecycle; EventParticipation; Events; EventReminders; MicroEventsTest; EventParticipationTest",
+        "note": "Inscripciones insuficientes al vencer el plazo; ampliar/reducir mínimo, reprogramar con motivo e invalidar RSVP, cancelar conservando datos; recordatorios fijados antes de publicar, internos y correo según preferencias."
+      },
+      {
+        "id": "RN-027",
+        "page": 15,
+        "requirement": "Recordatorios programados de Los participantes confirmados recibirán recordatorios automáticos tanto en la plataforma como por correo microeventos electrónico según los plazos de anticipación establecidos por el Administrador. Esta programación deberá quedar fijada antes de publicar el microevento.",
+        "status": "Código revisado",
+        "evidence": "MicroLifecycle; EventParticipation; Events; EventReminders; MicroEventsTest; EventParticipationTest",
+        "note": "Inscripciones insuficientes al vencer el plazo; ampliar/reducir mínimo, reprogramar con motivo e invalidar RSVP, cancelar conservando datos; recordatorios fijados antes de publicar, internos y correo según preferencias."
+      },
+      {
+        "id": "RN-028",
+        "page": 16,
+        "requirement": "Integridad, Inmutabilidad y Trazabilidad de la Mensajería Los mensajes de texto enviados dentro de la plataforma adquieren carácter inmutable una vez registrados: no podrán ser editados ni eliminados por los participantes. Cada mensaje conservará de manera permanente su remitente, contenido textual, fecha y hora de emisión. La marca de lectura solo se actualizará cuando el destinatario abra activamente el hilo de conversación correspondiente en la interfaz.",
+        "status": "Código revisado",
+        "evidence": "Messaging; ConnectionPolicy; ConversationVisibility; tests/bugs-ui.cjs",
+        "note": "Mensajes enviados inmutables; historial de desconexión en solo lectura, ocultamiento personal y reaparición con nuevo mensaje. Bloquear revoca acceso. Cancelar solicitudes o intentar borrar grupos no elimina mensajes. Pruebas PHP antiguas de eliminación pendientes de adecuación."
+      },
+      {
+        "id": "RN-029",
+        "page": 16,
+        "requirement": "Ciclo y confidencialidad de solicitudes de soporte Los problemas técnicos, situaciones con otros miembros y consultas generales se registrarán mediante el módulo Contáctanos. Toda solicitud transicionará ordenadamente entre los estados: Pendiente, En revisión, Resuelta y Cerrada. Su contenido e historial serán estrictamente confidenciales, accesibles únicamente por el asociado emisor y por los usuarios con rol Administrador o Ejecutivo asignados para su atención.",
+        "status": "Código revisado",
+        "evidence": "Services/SupportRequests.php; SupportRequestsTest; tests/admin-compliance.cjs; tests/statistics.cjs",
+        "note": "Acceso del emisor y responsable activo asignado. Pendiente → En revisión → Resuelta → Cerrada, respuesta, reasignación y archivo sin borrar historial; moderador sin acceso. Legado Resuelta se conserva como resolved."
+      },
+      {
+        "id": "RN-030",
+        "page": 16,
+        "requirement": "Exclusión silenciosa y reversibilidad de recomendaciones El descarte de un perfil recomendado mediante la opción No me interesa será estrictamente confidencial y no emitirá aviso alguno al miembro descartado. Dicho usuario quedará excluido de futuras sugerencias calculadas para el asociado emisor. El usuario podrá consultar la nómina de perfiles descartados desde su panel de preferencias y restituir su elegibilidad cuando lo considere conveniente.",
+        "status": "Código revisado",
+        "evidence": "RF-129, RF-130",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-031",
+        "page": 16,
+        "requirement": "Umbral de datos profesionales mínimos obligatorios Para habilitar la indexación en el Directorio y la participación en el cálculo de compatibilidad, el perfil del miembro deberá registrar obligatoriamente: nombres y apellidos completos, cargo o profesión, empresa u organización actual, sector profesional, ubicación general (ciudad o país), descripción profesional resumida, al menos un área de interés y al menos un objetivo de networking declarado.",
+        "status": "Parcial",
+        "evidence": "RF-004, RF-131, RF-132",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-032",
+        "page": 16,
+        "requirement": "Custodia de perfiles y trazabilidad de acciones administrativas Los usuarios con rol Administrador gestionarán únicamente las credenciales, estados de membresía, roles y permisos técnicos de los asociados. Queda prohibida la edición administrativa directa sobre los datos profesionales, laborales o biográficos de un usuario, salvo que medie una solicitud formal de asistencia registrada en Contáctanos. Toda modificación administrativa sobre membresía o permisos generará una entrada obligatoria en la bitácora de auditoría.",
+        "status": "Parcial",
+        "evidence": "RF-133, RF-134, RF-135",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-033",
+        "page": 16,
+        "requirement": "Presentación del Directorio El Directorio permitirá combinar filtros por nombre, cargo o profesión, organización, sector, ciudad general, intereses y conocimientos. Los resultados se mostrarán paginados. Cada tarjeta incluirá foto, nombre, cargo o profesión, organización, sector, intereses principales y estado de conexión, con acciones disponibles según la relación entre los miembros.",
+        "status": "Parcial",
+        "evidence": "RF-011, RF-012, RF-013, RF-014, RF-015",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-034",
+        "page": 16,
+        "requirement": "Gestión del Catálogo Conexiones Activas La sección de gestión de contactos directos mostrará exclusivamente las conexiones bilaterales en estado aceptado y vigente. Toda tarjeta de contacto desplegará la fotografía visible, nombre completo, cargo profesional, empresa u organización actual y la fecha exacta en la cual se consolidó la conexión.",
+        "status": "Código revisado",
+        "evidence": "RF-022, RF-023, RF-024",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-035",
+        "page": 17,
+        "requirement": "Gestión y publicación de organizaciones aliadas La administración de convenios y organizaciones aliadas corresponde exclusivamente al Administrador. Los asociados solo podrán consultar aquellos aliados que se encuentren en estado activo y publicados por ASCLA.",
+        "status": "Parcial",
+        "evidence": "RF-076, RF-077, RF-078, RF-079, RF-080, RF-081",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-036",
+        "page": 17,
+        "requirement": "Segregación de funciones y control de acceso basado en roles (RBAC) La plataforma aplicará el principio de mínimo privilegio bajo cuatro roles institucionales: Administrador (gestión técnica, gobernanza de cuentas y auditoría), Ejecutivo (publicación editorial, eventos y analítica), Moderador (auditoría de interacciones y contenido reportado) y Asociado (networking, mensajería y consumo de recursos). Ningún usuario podrá ejecutar acciones ni consultar interfaces fuera del perfil asignado. Un usuario podrá acumular más de un rol únicamente mediante autorización expresa de la Junta Directiva de ASCLA registrada en el sistema.",
+        "status": "Parcial",
+        "evidence": "RF-136, RF-137, RF-138",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-037",
+        "page": 17,
+        "requirement": "Aprovisionamiento cerrado de cuentas y exclusión de autorregistro La Intranet ASCLA es un entorno privado y exclusivo. Queda prohibido el registro público, el autorregistro voluntario y la autoactivación de membresías. Las cuentas de usuario solo podrán ser dadas de alta por un Administrador autorizado tras la validación de la membresía en los registros institucionales de ASCLA. Toda cuenta creada deberá iniciar con un rol asignado y un estado de membresía formal (Activa o Suspendida).",
+        "status": "Parcial",
+        "evidence": "RF-138, RF-139",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-038",
+        "page": 17,
+        "requirement": "Política lingüística e invariabilidad del contenido de usuario La interfaz de la plataforma estará disponible en español (idioma base institucional) e inglés. La selección idiomática afectará exclusivamente a los elementos estáticos generados por el sistema (etiquetas, menús, botones de acción, mensajes de error y notificaciones predeterminadas). La preferencia lingüística no alterará, traducirá ni modificará la información escrita por los usuarios (perfiles, publicaciones, foros o mensajes directos).",
+        "status": "Código revisado",
+        "evidence": "RF-140, RF-141, RF-142",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-039",
+        "page": 17,
+        "requirement": "Umbral de completitud de perfil e incentivo de completado El perfil profesional alcanzará el 100 % cuando registre todos los campos definidos por ASCLA para el cálculo de completitud. Los campos estrictamente opcionales no impedirán alcanzar dicho porcentaje.",
+        "status": "Parcial",
+        "evidence": "RF-143",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-040",
+        "page": 17,
+        "requirement": "Composición y contexto del panel de Inicio El panel de Inicio servirá como centro de control contextual adaptado al rol del usuario autenticado. Desplegará resúmenes de actividad reciente, accesos directos autorizados y contadores de interacción sin exponer datos restringidos a terceros. Toda recomendación y contenido sugerido en esta pantalla respetará estrictamente las preferencias de privacidad y los permisos de acceso del asociado.",
+        "status": "Código revisado",
+        "evidence": "RF-146, RF-147, RF-148, RF-149, RF-150",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-041",
+        "page": 17,
+        "requirement": "Tratamiento de la fecha de nacimiento La fecha de nacimiento será un dato privado y no será visible para otros asociados. El sistema podrá utilizarla únicamente para mostrar un saludo de cumpleaños al asociado y generar una notificación para los usuarios administrativos autorizados.",
+        "status": "Código revisado",
+        "evidence": "RF-154, RF-155, RF-156",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-042",
+        "page": 17,
+        "requirement": "Consulta mediante asistente El Asistente IA utilizará únicamente información de la Intranet que el usuario tenga permiso para consultar. Cuando no pueda verificar una respuesta con la información disponible, deberá indicarlo. El historial será privado para el usuario propietario y no permitirá que la IA ejecute acciones en su nombre.",
+        "status": "Código revisado",
+        "evidence": "RF-166, RF-167, RF-168",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-043",
+        "page": 18,
+        "requirement": "Publicaciones de comunidad Los miembros activos podrán consultar y crear publicaciones en el Hub. Cada miembro podrá administrar únicamente sus propias publicaciones. El Moderador podrá retirar contenido que incumpla las normas de la comunidad, dejando registro de la acción.",
+        "status": "Parcial",
+        "evidence": "RF-169, RF-170, RF-171, RF-172, RF-173",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-044",
+        "page": 18,
+        "requirement": "Participación en foros Los miembros activos podrán crear temas de foro, consultar conversaciones y publicar comentarios. El autor podrá administrar su contenido dentro de las condiciones permitidas y el Moderador podrá retirar contenido que incumpla las normas.",
+        "status": "Parcial",
+        "evidence": "RF-174, RF-175, RF-176, RF-177, RF-178, RF-179, RF-180",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-045",
+        "page": 18,
+        "requirement": "Publicación de galerías Los miembros activos podrán consultar las galerías publicadas. La creación, modificación y retiro de galerías estará limitada a los roles autorizados por ASCLA.",
+        "status": "Código revisado",
+        "evidence": "RF-181, RF-182, RF-183",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-046",
+        "page": 18,
+        "requirement": "Contenidos de conocimiento Solo se mostrarán contenidos publicados y autorizados para el asociado. La publicación y administración de videos, notas técnicas y recursos corresponderá a los roles autorizados.",
+        "status": "Código revisado",
+        "evidence": "RF-184, RF-185, RF-186",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-047",
+        "page": 18,
+        "requirement": "Gestión de contenidos institucionales La creación, edición, publicación y retiro de galerías, eventos y contenidos del Centro de Conocimiento corresponderá al Ejecutivo o al Administrador autorizado.",
+        "status": "Código revisado",
+        "evidence": "RF-047, RF-187, RF-191",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-048",
+        "page": 18,
+        "requirement": "Moderación de la comunidad El Ejecutivo, el Moderador y el Administrador podrán revisar contenido o comentarios reportados, mantenerlos disponibles, retirarlos o marcarlos como revisados según las normas de la comunidad. Toda decisión deberá conservar el responsable, fecha, estado y motivo cuando corresponda.",
+        "status": "Fuera de alcance",
+        "evidence": "RF-195, RF-196, RF-197",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-049",
+        "page": 18,
+        "requirement": "Publicación directa en foros Las publicaciones y comentarios de los foros se mostrarán directamente. La moderación se realizará posteriormente cuando el contenido sea reportado o identificado para revisión.",
+        "status": "Parcial",
+        "evidence": "RF-174, RF-178",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-050",
+        "page": 18,
+        "requirement": "Acceso y privacidad de estadísticas de comportamiento El acceso a analíticas de los usuarios estará restringido exclusivamente a los roles Administrador o Ejecutivo. Las métricas de interacción (tales como asistencia a eventos, frecuencia de conexiones, participación en foros y uso del directorio) deberán presentarse de forma agregada o disociada. En ningún caso el panel expondrá contenido de conversaciones privadas, mensajes directos ni datos personales sensibles de los asociados.",
+        "status": "Código revisado",
+        "evidence": "RF-198",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-051",
+        "page": 18,
+        "requirement": "Control de caducidad y tiempo límite de sesión Toda sesión activa de un usuario expirará automáticamente tras un periodo continuo de inactividad de 30 minutos. Cumplido este tiempo, el sistema debe revocar los permisos de navegación y exigir una reautenticación obligatoria con credenciales válidas para reanudar el acceso a las funciones de la Intranet.",
+        "status": "Código revisado",
+        "evidence": "RF-199, RF-200; SessionPolicyTest; tests/session-policy.cjs",
+        "note": "Caducidad de navegador, aviso no bloqueante y extensión explícita implementados."
+      },
+      {
+        "id": "RN-052",
+        "page": 19,
+        "requirement": "Estados del ciclo de vida editorial de contenidos Todo contenido institucional o recurso gestionado admitirá cuatro estados editoriales: Borrador, Pendiente de revisión, Publicado y Oculto.",
+        "status": "Código revisado",
+        "evidence": "RF-189, RF-193",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-053",
+        "page": 19,
+        "requirement": "Programación temporal de publicación La divulgación de contenidos institucionales podrá ser diferida asignando una fecha y hora futura. El contenido programado permanecerá en estado Oculto hasta cumplirse la marca temporal, momento en el que transicionará automáticamente al estado Publicado.",
+        "status": "Parcial",
+        "evidence": "RF-202, RF-203, RF-204",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-054",
+        "page": 19,
+        "requirement": "Cancelación y rechazo de solicitudes de conexión El emisor podrá cancelar una solicitud pendiente en cualquier momento antes de recibir respuesta. Si el destinatario rechaza la solicitud, esta cambiará al estado Rechazada y se activará un periodo de espera de 30 días calendario, durante el cual el sistema impedirá al emisor enviar una nueva solicitud al mismo destinatario. La cancelación por parte del emisor no aplicará periodo de espera.",
+        "status": "Código revisado",
+        "evidence": "Services/ConnectionPolicy.php; Connections; tests/bugs-ui.cjs",
+        "note": "Espera de 30 días, direccional al rechazar y bilateral al desconectar. Rechazo silencioso en la interfaz, aviso genérico y validación en servidor."
+      },
+      {
+        "id": "RN-055",
+        "page": 19,
+        "requirement": "Estándares de complejidad y seguridad de credenciales Las contraseñas de acceso al sistema deberán cumplir con políticas estrictas de complejidad institucional. Exigirán una longitud mínima configurable, la combinación obligatoria de caracteres alfabéticos (mayúsculas y minúsculas), numéricos y símbolos especiales, quedando prohibido el uso de secuencias predecibles o datos personales del asociado.",
+        "status": "Parcial",
+        "evidence": "RF-157, RF-205",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-056",
+        "page": 19,
+        "requirement": "Protocolo de recuperación de cuenta y restablecimiento de contraseña Si un usuario extravía sus credenciales, podrá solicitar un proceso de recuperación introduciendo su dirección de correo electrónico registrada. El sistema generará un enlace único, cifrado y dotado de un tiempo de expiración limitado, el cual será remitido exclusivamente por correo electrónico para permitir el acceso a un formulario seguro de restablecimiento. Por motivos de privacidad, el sistema no confirmará públicamente si un correo electrónico corresponde a una cuenta activa.",
+        "status": "Parcial",
+        "evidence": "RF-158, RF-206, RF-207",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-057",
+        "page": 19,
+        "requirement": "Mitigación de ataques de fuerza bruta, validación automatizada y bloqueos temporales Para proteger el acceso a la plataforma frente a accesos automatizados o intentos no autorizados, el sistema monitoreará los fallos de autenticación consecutivos. Al alcanzar el umbral mínimo configurable de intentos fallidos, el sistema activará obligatoriamente un mecanismo de validación automatizada (tipo captcha de Cloudflare). Si los fallos persisten hasta alcanzar el límite máximo configurable por el Administrador, se aplicará un bloqueo temporal de acceso a la cuenta por un periodo estipulado de 15 minutos (configurable), tras el cual el sistema restituirá automáticamente la posibilidad de reintentar el acceso.",
+        "status": "Parcial",
+        "evidence": "RF-208, RF-209",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-058",
+        "page": 19,
+        "requirement": "Persistencia de sesión y permanencia de acceso La plataforma permitirá a los usuarios mantener su sesión activa de forma prolongada mediante una opción de permanencia en el inicio de sesión. Si el usuario activa esta opción voluntariamente, el sistema prorrogará la validez de la sesión autenticada durante el periodo configurable establecido por la institución, evitando solicitudes de credenciales reiteradas hasta que se ejecute un cierre de sesión manual o venza el plazo establecido.",
+        "status": "Parcial",
+        "evidence": "RF-210, RF-211",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-059",
+        "page": 19,
+        "requirement": "Estructura y persistencia de la barra lateral de navegación La interfaz de la Intranet contará con una barra lateral fija de navegación y selección de módulos que centralizará los accesos autorizados según el rol del usuario, manteniéndose disponible durante toda la navegación dentro de las secciones protegidas.",
+        "status": "Código revisado",
+        "evidence": "RF-212",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-060",
+        "page": 20,
+        "requirement": "Cierre explícito de sesión y revocación de credenciales La barra lateral de navegación incorporará de manera visible y permanente una opción institucional para el cierre de sesión voluntario. Dicha acción invalidará de inmediato los tokens y cookies de autenticación activos, denegando el acceso posterior a vistas protegidas y redirigiendo al usuario a la pantalla de acceso.",
+        "status": "Parcial",
+        "evidence": "RF-093, RF-213",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-061",
+        "page": 20,
+        "requirement": "Gestión de fotografía de perfil El asociado podrá cargar, reemplazar o eliminar su fotografía de perfil. La imagen deberá cumplir los formatos y el tamaño máximo configurados por la institución. Antes de almacenarla, el sistema permitirá ajustar su encuadre. Cuando el asociado no registre una fotografía, se mostrará el avatar institucional predeterminado. La visibilidad de la imagen respetará las preferencias de privacidad establecidas por el asociado.",
+        "status": "Código revisado",
+        "evidence": "RF-151, RF-152, RF-153",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      },
+      {
+        "id": "RN-062",
+        "page": 20,
+        "requirement": "Gobernanza y transparencia en conversaciones grupales Las conversaciones grupales podrán ser creadas exclusivamente por asociados con membresía activa, quienes deberán asignar de manera obligatoria un título identificador que describa la temática o propósito profesional del grupo. La incorporación de miembros operará únicamente mediante invitación directa emitida por el creador del grupo hacia otros miembros activos, quedando prohibida la autoincorporación pública o el acceso mediante enlaces sin confirmación. Con el fin de asegurar la transparencia y la confianza comunitaria, la nómina de participantes será visible y consultable en todo momento por cualquiera de los integrantes activos del grupo, quedando estrictamente prohibida la figura de participantes ocultos, observadores no declarados o miembros con visibilidad restringida. Los miembros ajenos al grupo no podrán consultar la nómina de integrantes ni acceder al contenido de los mensajes. 7. ANÁLISIS DE REQUERIMIENTOS FUNCIONAL 7.1. ACTORES A continuación, se describen los roles que interactúan con la Intranet ASCLA: ● Administrador: Usuario encargado de la administración de la Intranet ASCLA. Puede gestionar cuentas de asociados, perfiles administrativos, eventos, notificaciones, aliados, reportes de soporte y demás configuraciones necesarias para el funcionamiento de la plataforma. Ejecutivo: Usuario interno autorizado para publicar y gestionar eventos, subir grabaciones de ponencias y publicar notas técnicas o recursos. En el alcance actual participa principalmente en la gestión de eventos; los módulos de contenido preexistentes no serán rediseñados. Moderador: Usuario interno encargado de auditar hilos de discusión y comentarios, aprobar su permanencia o retirar contenido que incumpla las normas. Estas funciones",
+        "status": "Fuera de alcance",
+        "evidence": "RF-163, RF-164, RF-165",
+        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+      }
+    ],
+    "RF": [
+      {
+        "id": "RF-001",
+        "page": 47,
+        "requirement": "El sistema debe permitir al asociado consultar su perfil profesional con todos los datos registrados.",
+        "status": "Parcial",
+        "evidence": "Services/Profiles.php; Services/ProfileValidation.php",
+        "note": "Edición y preferencias presentes; todo guardado exige todos los mínimos, según decisión explícita del usuario."
+      },
+      {
+        "id": "RF-002",
+        "page": 47,
+        "requirement": "El sistema debe permitir al asociado editar sus datos laborales (cargo, organización, industria y biografía).",
+        "status": "Parcial",
+        "evidence": "Services/Profiles.php; Services/ProfileValidation.php",
+        "note": "Edición y preferencias presentes; todo guardado exige todos los mínimos, según decisión explícita del usuario."
+      },
+      {
+        "id": "RF-003",
+        "page": 47,
+        "requirement": "El sistema debe permitir al asociado actualizar sus preferencias temáticas (intereses y áreas de especialidad).",
+        "status": "Parcial",
+        "evidence": "Services/Profiles.php; Services/ProfileValidation.php",
+        "note": "Edición y preferencias presentes; todo guardado exige todos los mínimos, según decisión explícita del usuario."
+      },
+      {
+        "id": "RF-004",
+        "page": 47,
+        "requirement": "El sistema debe validar que los campos obligatorios del perfil no se guarden con valores vacíos o incompletos",
+        "status": "Código revisado",
+        "evidence": "Services/ProfileRequirements.php; Services/Profiles.php; assets/app.js; AnalysisComplianceTest",
+        "note": "Decisión del usuario: rechazar cualquier guardado de un perfil incompleto, también antiguo. Validación de todos los mínimos en cliente y servidor antes de persistir."
+      },
+      {
+        "id": "RF-005",
+        "page": 47,
+        "requirement": "El sistema debe proveer controles individuales para activar o desactivar la visibilidad pública de cada campo opcional del perfil.",
+        "status": "Código revisado",
+        "evidence": "Services/Profiles.php; ReleaseCompletionTest",
+        "note": "Los campos ocultos se respetan ante asociados, ejecutivos y moderadores; solo propietario y administrador conservan acceso administrativo."
+      },
+      {
+        "id": "RF-006",
+        "page": 47,
+        "requirement": "El sistema debe ocultar permanentemente a otros asociados el teléfono, correo electrónico, fecha de nacimiento y dirección del usuario.",
+        "status": "Código revisado",
+        "evidence": "Services/Profiles.php; Domain/Phone.php; ReleaseCompletionTest",
+        "note": "Teléfono, nacimiento y correo personal no se exponen a otros asociados, incluso ante preferencias antiguas phone_visibility=members."
+      },
+      {
+        "id": "RF-007",
+        "page": 47,
+        "requirement": "El sistema debe permitir al asociado activar o desactivar la inclusión de su perfil en el Directorio Comunitario.",
+        "status": "Parcial",
+        "evidence": "Services/Profiles.php; Services/Matching.php",
+        "note": "Flags independientes de directorio y networking; revisar el caso de un receptor que opta por salir del directorio."
+      },
+      {
+        "id": "RF-008",
+        "page": 48,
+        "requirement": "El sistema debe excluir de los resultados de búsqueda globales a aquellos asociados que tengan deshabilitada la opción de inclusión en el directorio.",
+        "status": "Parcial",
+        "evidence": "Services/Profiles.php; Services/Matching.php",
+        "note": "Flags independientes de directorio y networking; revisar el caso de un receptor que opta por salir del directorio."
+      },
+      {
+        "id": "RF-009",
+        "page": 48,
+        "requirement": "El sistema debe permitir al asociado habilitar o deshabilitar, mediante controles independientes, las recomendaciones de conexiones y su inclusión entre los miembros recomendados para microeventos.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-010",
+        "page": 48,
+        "requirement": "El sistema debe solicitar periódicamente al asociado confirmar, actualizar o posponer la revisión de su perfil, según la frecuencia configurada por el Administrador.",
+        "status": "Código revisado",
+        "evidence": "Services/ProfileReview.php; Settings; Router; assets/app.js",
+        "note": "Revisión periódica configurable, confirmación o posposición persistidas por usuario. Guardar el propio perfil completo confirma vigencia. Suite PHP final pendiente."
+      },
+      {
+        "id": "RF-011",
+        "page": 48,
+        "requirement": "El sistema debe permitir la búsqueda de asociados por coincidencia textual sobre los campos de nombre y cargo profesional.",
+        "status": "Código revisado",
+        "evidence": "Services/ProfileDirectory.php; Profiles; assets/app.js",
+        "note": "Campos visibles, filtros múltiples, tamaño configurable y orden por coincidencia textual, coincidencias de filtros, afinidad y nombre. El directorio no busca campos ocultos aunque lo consulte administración."
+      },
+      {
+        "id": "RF-012",
+        "page": 48,
+        "requirement": "El sistema debe permitir filtrar el listado de asociados mediante la selección múltiple de áreas de conocimiento e industrias.",
+        "status": "Código revisado",
+        "evidence": "Services/ProfileDirectory.php; Profiles; assets/app.js",
+        "note": "Campos visibles, filtros múltiples, tamaño configurable y orden por coincidencia textual, coincidencias de filtros, afinidad y nombre. El directorio no busca campos ocultos aunque lo consulte administración."
+      },
+      {
+        "id": "RF-013",
+        "page": 48,
+        "requirement": "El sistema debe mostrar los resultados de búsqueda en el directorio estructurados en bloques paginados de tamaño configurable.",
+        "status": "Código revisado",
+        "evidence": "Services/ProfileDirectory.php; Profiles; assets/app.js",
+        "note": "Campos visibles, filtros múltiples, tamaño configurable y orden por coincidencia textual, coincidencias de filtros, afinidad y nombre. El directorio no busca campos ocultos aunque lo consulte administración."
+      },
+      {
+        "id": "RF-014",
+        "page": 48,
+        "requirement": "El sistema debe mostrar los resultados del directorio ordenados jerárquicamente por coincidencia de texto, afinidad y orden alfabético.",
+        "status": "Código revisado",
+        "evidence": "Services/ProfileDirectory.php; Profiles; assets/app.js",
+        "note": "Campos visibles, filtros múltiples, tamaño configurable y orden por coincidencia textual, coincidencias de filtros, afinidad y nombre. El directorio no busca campos ocultos aunque lo consulte administración."
+      },
+      {
+        "id": "RF-015",
+        "page": 48,
+        "requirement": "El sistema debe mostrar en los resultados del directorio únicamente los atributos profesionales que cada asociado haya autorizado como visibles.",
+        "status": "Código revisado",
+        "evidence": "Services/ProfileDirectory.php; Profiles; assets/app.js",
+        "note": "Campos visibles, filtros múltiples, tamaño configurable y orden por coincidencia textual, coincidencias de filtros, afinidad y nombre. El directorio no busca campos ocultos aunque lo consulte administración."
+      },
+      {
+        "id": "RF-016",
+        "page": 48,
+        "requirement": "El sistema debe habilitar en cada asociado listado las opciones de interacción correspondientes al estado de la relación existente entre ambos usuarios.",
+        "status": "Código revisado",
+        "evidence": "Services/ProfileDirectory.php; Profiles; assets/app.js",
+        "note": "Campos visibles, filtros múltiples, tamaño configurable y orden por coincidencia textual, coincidencias de filtros, afinidad y nombre. El directorio no busca campos ocultos aunque lo consulte administración."
+      },
+      {
+        "id": "RF-017",
+        "page": 48,
+        "requirement": "El sistema debe permitir al asociado enviar una solicitud de conexión a otro miembro de la comunidad, incorporando opcionalmente un mensaje de presentación.",
+        "status": "Código revisado",
+        "evidence": "Services/Connections.php; assets/app.js; tests/bugs-ui.cjs",
+        "note": "Mensaje opcional asociado a la solicitud de conexión; búsqueda local por nombre en conexiones confirmadas. Ver BUGFIXES_QA.md."
+      },
+      {
+        "id": "RF-018",
+        "page": 48,
+        "requirement": "El sistema debe permitir al asociado destinatario aceptar una solicitud de conexión recibida en estado pendiente.",
+        "status": "Código revisado",
+        "evidence": "Services/Connections.php; Services/ConnectionPolicy.php",
+        "note": "Consentimiento, listados y acciones presentes. Nuevas regresiones de rechazo, desconexión y espera de 30 días."
+      },
+      {
+        "id": "RF-019",
+        "page": 48,
+        "requirement": "El sistema debe permitir al asociado destinatario rechazar una solicitud de conexión recibida en estado pendiente.",
+        "status": "Código revisado",
+        "evidence": "Services/Connections.php; Services/ConnectionPolicy.php",
+        "note": "Consentimiento, listados y acciones presentes. Nuevas regresiones de rechazo, desconexión y espera de 30 días."
+      },
+      {
+        "id": "RF-020",
+        "page": 48,
+        "requirement": "El sistema debe formalizar la relación de conexión bilateral activa entre ambos asociados inmediatamente tras la aceptación de la solicitud, habilitando los canales de comunicación directa.",
+        "status": "Código revisado",
+        "evidence": "Services/Connections.php; Services/ConnectionPolicy.php",
+        "note": "Consentimiento, listados y acciones presentes. Nuevas regresiones de rechazo, desconexión y espera de 30 días."
+      },
+      {
+        "id": "RF-021",
+        "page": 49,
+        "requirement": "El sistema debe permitir al asociado consultar el historial de solicitudes de conexión pendientes, diferenciando entre solicitudes enviadas y recibidas.",
+        "status": "Código revisado",
+        "evidence": "Services/Connections.php; Services/ConnectionPolicy.php",
+        "note": "Consentimiento, listados y acciones presentes. Nuevas regresiones de rechazo, desconexión y espera de 30 días."
+      },
+      {
+        "id": "RF-022",
+        "page": 49,
+        "requirement": "El sistema debe permitir al asociado consultar el listado de sus conexiones profesionales activas consolidadas.",
+        "status": "Código revisado",
+        "evidence": "Services/Connections.php; Services/ConnectionPolicy.php",
+        "note": "Consentimiento, listados y acciones presentes. Nuevas regresiones de rechazo, desconexión y espera de 30 días."
+      },
+      {
+        "id": "RF-023",
+        "page": 49,
+        "requirement": "El sistema debe permitir filtrar el catálogo de conexiones activas del usuario mediante coincidencias textuales sobre el nombre del asociado.",
+        "status": "Código revisado",
+        "evidence": "Services/Connections.php; assets/app.js; tests/bugs-ui.cjs",
+        "note": "Mensaje opcional asociado a la solicitud de conexión; búsqueda local por nombre en conexiones confirmadas. Ver BUGFIXES_QA.md."
+      },
+      {
+        "id": "RF-024",
+        "page": 49,
+        "requirement": "El sistema debe mostrar en cada registro de conexión activa la fotografía, nombre completo, cargo, organización y fecha de establecimiento del vínculo.",
+        "status": "Código revisado",
+        "evidence": "Services/Connections.php; Services/ConnectionPolicy.php",
+        "note": "Consentimiento, listados y acciones presentes. Nuevas regresiones de rechazo, desconexión y espera de 30 días."
+      },
+      {
+        "id": "RF-025",
+        "page": 49,
+        "requirement": "El sistema debe permitir al asociado acceder a la ficha de perfil público de un usuario desde su listado de conexiones activas.",
+        "status": "Código revisado",
+        "evidence": "Services/Connections.php; Services/ConnectionPolicy.php",
+        "note": "Consentimiento, listados y acciones presentes. Nuevas regresiones de rechazo, desconexión y espera de 30 días."
+      },
+      {
+        "id": "RF-026",
+        "page": 49,
+        "requirement": "El sistema debe permitir abrir una ventana de conversación directa con un asociado seleccionado desde el listado de conexiones activas.",
+        "status": "Código revisado",
+        "evidence": "Services/Connections.php; Services/ConnectionPolicy.php",
+        "note": "Consentimiento, listados y acciones presentes. Nuevas regresiones de rechazo, desconexión y espera de 30 días."
+      },
+      {
+        "id": "RF-027",
+        "page": 49,
+        "requirement": "El sistema debe permitir al asociado dar de baja una conexión activa previa confirmación explícita.",
+        "status": "Código revisado",
+        "evidence": "Services/Connections.php; Services/ConnectionPolicy.php",
+        "note": "Consentimiento, listados y acciones presentes. Nuevas regresiones de rechazo, desconexión y espera de 30 días."
+      },
+      {
+        "id": "RF-028",
+        "page": 49,
+        "requirement": "El sistema debe inhabilitar el envío de nuevas solicitudes de conexión hacia un usuario desvinculado durante el periodo de enfriamiento configurado.",
+        "status": "Código revisado",
+        "evidence": "Services/ConnectionPolicy.php; Connections; tests/bugs-ui.cjs",
+        "note": "Espera de 30 días, direccional al rechazar y bilateral al desconectar. Rechazo silencioso en la interfaz, aviso genérico y validación en servidor."
+      },
+      {
+        "id": "RF-029",
+        "page": 49,
+        "requirement": "El sistema debe permitir el envío de mensajes de texto en conversaciones individuales activas entre asociados con conexión aceptada.",
+        "status": "Código revisado",
+        "evidence": "Services/Messaging.php",
+        "note": "Envío autorizado y validado; restricciones de bloqueo y desconexión comprobadas en pruebas."
+      },
+      {
+        "id": "RF-030",
+        "page": 49,
+        "requirement": "El sistema debe permitir el envío de mensajes de texto en conversaciones grupales a aquellos asociados registrados como participantes del grupo.",
+        "status": "Fuera de alcance",
+        "evidence": "Services/Messaging.php",
+        "note": "RF marcado OUT OF SCOPE; funcionalidad grupal preexistente conservada."
+      },
+      {
+        "id": "RF-031",
+        "page": 49,
+        "requirement": "El sistema debe recuperar y presentar el historial de mensajes de una conversación ordenado cronológicamente por fecha de emisión.",
+        "status": "Código revisado",
+        "evidence": "Services/Messaging.php; Services/ConversationVisibility.php; Services/ConnectionPolicy.php",
+        "note": "Historial, remitente y fecha, lectura explícita, bloqueo confirmado y desbloqueo sin restaurar consentimiento."
+      },
+      {
+        "id": "RF-032",
+        "page": 49,
+        "requirement": "El sistema debe mostrar para cada mensaje enviado la identificación del remitente, la fecha y la hora exacta de registro.",
+        "status": "Código revisado",
+        "evidence": "Services/Messaging.php; Services/ConversationVisibility.php; Services/ConnectionPolicy.php",
+        "note": "Historial, remitente y fecha, lectura explícita, bloqueo confirmado y desbloqueo sin restaurar consentimiento."
+      },
+      {
+        "id": "RF-033",
+        "page": 50,
+        "requirement": "El sistema debe registrar y mostrar el indicador de estado de lectura en el mensaje cuando el destinatario visualice la conversación.",
+        "status": "Código revisado",
+        "evidence": "Messaging; ConnectionPolicy; ConversationVisibility; tests/bugs-ui.cjs",
+        "note": "Mensajes enviados inmutables; historial de desconexión en solo lectura, ocultamiento personal y reaparición con nuevo mensaje. Bloquear revoca acceso. Cancelar solicitudes o intentar borrar grupos no elimina mensajes. Pruebas PHP antiguas de eliminación pendientes de adecuación."
+      },
+      {
+        "id": "RF-034",
+        "page": 50,
+        "requirement": "El sistema debe permitir al asociado ejecutar el bloqueo de otro miembro de la comunidad previa confirmación de la acción.",
+        "status": "Código revisado",
+        "evidence": "Services/Messaging.php; Services/ConversationVisibility.php; Services/ConnectionPolicy.php",
+        "note": "Historial, remitente y fecha, lectura explícita, bloqueo confirmado y desbloqueo sin restaurar consentimiento."
+      },
+      {
+        "id": "RF-035",
+        "page": 50,
+        "requirement": "El sistema debe permitir al asociado retirar el bloqueo sobre un usuario registrado en su lista de miembros bloqueados.",
+        "status": "Código revisado",
+        "evidence": "Services/Messaging.php; Services/ConversationVisibility.php; Services/ConnectionPolicy.php",
+        "note": "Historial, remitente y fecha, lectura explícita, bloqueo confirmado y desbloqueo sin restaurar consentimiento."
+      },
+      {
+        "id": "RF-036",
+        "page": 50,
+        "requirement": "El sistema debe recomendar asociados que compartan al menos un interés, sector profesional u objetivo de networking común.",
+        "status": "Código revisado",
+        "evidence": "Services/Matching.php; Services/KnowledgeRecommendations.php",
+        "note": "Afinidad, señales autorizadas, explicación, descarte y contenido relevante. Un cambio de perfil invalida lotes dependientes."
+      },
+      {
+        "id": "RF-037",
+        "page": 50,
+        "requirement": "El sistema debe priorizar en el listado de recomendaciones a los asociados cuyos conocimientos y experiencia sean complementarios con los objetivos del usuario.",
+        "status": "Código revisado",
+        "evidence": "Services/Matching.php; Services/KnowledgeRecommendations.php",
+        "note": "Afinidad, señales autorizadas, explicación, descarte y contenido relevante. Un cambio de perfil invalida lotes dependientes."
+      },
+      {
+        "id": "RF-038",
+        "page": 50,
+        "requirement": "El sistema debe mostrar para cada asociado recomendado la justificación textual de afinidad y complementariedad calculada por el motor de IA.",
+        "status": "Código revisado",
+        "evidence": "Services/Matching.php; Services/KnowledgeRecommendations.php",
+        "note": "Afinidad, señales autorizadas, explicación, descarte y contenido relevante. Un cambio de perfil invalida lotes dependientes."
+      },
+      {
+        "id": "RF-039",
+        "page": 50,
+        "requirement": "El sistema debe permitir al asociado descartar un perfil sugerido mediante la opción \"No me interesa\", excluyéndolo de recomendaciones posteriores.",
+        "status": "Código revisado",
+        "evidence": "Services/Matching.php; Services/KnowledgeRecommendations.php",
+        "note": "Afinidad, señales autorizadas, explicación, descarte y contenido relevante. Un cambio de perfil invalida lotes dependientes."
+      },
+      {
+        "id": "RF-040",
+        "page": 50,
+        "requirement": "El sistema debe recomendar al asociado artículos, notas técnicas y recursos oficiales de ASCLA relacionados con sus temas de interés registrados.",
+        "status": "Código revisado",
+        "evidence": "Services/Matching.php; Services/KnowledgeRecommendations.php",
+        "note": "Afinidad, señales autorizadas, explicación, descarte y contenido relevante. Un cambio de perfil invalida lotes dependientes."
+      },
+      {
+        "id": "RF-041",
+        "page": 50,
+        "requirement": "El sistema debe ordenar las recomendaciones de contenidos de forma descendente según su nivel de relación temática con el perfil del asociado.",
+        "status": "Código revisado",
+        "evidence": "Services/Matching.php; Services/KnowledgeRecommendations.php",
+        "note": "Afinidad, señales autorizadas, explicación, descarte y contenido relevante. Un cambio de perfil invalida lotes dependientes."
+      },
+      {
+        "id": "RF-042",
+        "page": 50,
+        "requirement": "El sistema debe ejecutar un proceso programado, según la periodicidad configurada, para analizar los intereses de los asociados activos y formular propuestas de microeventos.",
+        "status": "Parcial",
+        "evidence": "Services/MicroPlanning.php; MicroEvents.php; MicroLifecycle.php; MicroEventsTest",
+        "note": "Generación semanal idempotente y máximo cuatro configurables, mínimo/cupo y prioridad. No crea propuestas bajo el mínimo; falta cancelación automática de una propuesta pendiente si pierde candidatos, y periodicidad distinta de semanal."
+      },
+      {
+        "id": "RF-043",
+        "page": 50,
+        "requirement": "El sistema debe generar propuestas automáticas de microeventos hasta alcanzar el límite máximo de volumen establecido por ejecución.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-044",
+        "page": 50,
+        "requirement": "El sistema debe suspender la generación de una propuesta de microevento cuando la cantidad de candidatos disponibles no alcance el cupo mínimo configurado.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-045",
+        "page": 50,
+        "requirement": "El sistema debe permitir al miembro recomendado confirmar su inscripción al microevento durante la ventana de tiempo de acceso prioritario.",
+        "status": "Código revisado",
+        "evidence": "Services/MicroLifecycle.php; Events; assets/app.js",
+        "note": "Confirmación o rechazo por recomendados en la ventana prioritaria; luego apertura a miembros activos."
+      },
+      {
+        "id": "RF-046",
+        "page": 51,
+        "requirement": "El sistema debe permitir al miembro recomendado rechazar la invitación al microevento durante la ventana de tiempo de acceso prioritario.",
+        "status": "Código revisado",
+        "evidence": "Services/MicroLifecycle.php; Events; assets/app.js",
+        "note": "Confirmación o rechazo por recomendados en la ventana prioritaria; luego apertura a miembros activos."
+      },
+      {
+        "id": "RF-047",
+        "page": 51,
+        "requirement": "El sistema debe permitir a los roles autorizados crear eventos registrando título, descripción, temática, fecha, horario, modalidad, ubicación física o enlace virtual y capacidad máxima de participantes .",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Services/Events.php",
+        "note": "CRUD y publicación con permisos de Ejecutivo/Administrador."
+      },
+      {
+        "id": "RF-048",
+        "page": 51,
+        "requirement": "El sistema debe permitir a los roles autorizados modificar los datos de un evento mientras este se encuentre en estado borrador o publicado.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Services/Events.php",
+        "note": "CRUD y publicación con permisos de Ejecutivo/Administrador."
+      },
+      {
+        "id": "RF-049",
+        "page": 51,
+        "requirement": "El sistema debe permitir a los roles autorizados publicar un evento para ponerlo a disposición de la comunidad de asociados .",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Services/Events.php",
+        "note": "CRUD y publicación con permisos de Ejecutivo/Administrador."
+      },
+      {
+        "id": "RF-050",
+        "page": 51,
+        "requirement": "El sistema debe permitir a los roles autorizados reprogramar fecha, horario o modalidad de un evento publicado, actualizando el estado de los inscritos a pendiente de reconfirmación .",
+        "status": "Código revisado",
+        "evidence": "Services/EventParticipation.php; Services/Events.php; EventParticipationTest",
+        "note": "Cambiar fecha, horario o modalidad de un evento publicado invalida RSVP, conserva historial y solicita reconfirmación expresa."
+      },
+      {
+        "id": "RF-051",
+        "page": 51,
+        "requirement": "El sistema debe listar los eventos publicados clasificándolos automáticamente en secciones diferenciadas de eventos próximos y eventos anteriores según su fecha de término.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php; Repositories/ContentQuery.php",
+        "note": "Consulta, fin de evento, filtros, capacidad y ofrecimiento de lista de espera presentes; validar todos los filtros contra aceptación."
+      },
+      {
+        "id": "RF-052",
+        "page": 51,
+        "requirement": "El sistema debe permitir buscar eventos publicados mediante coincidencias textuales sobre el título y descripción de la actividad.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php; Repositories/ContentQuery.php",
+        "note": "Consulta, fin de evento, filtros, capacidad y ofrecimiento de lista de espera presentes; validar todos los filtros contra aceptación."
+      },
+      {
+        "id": "RF-053",
+        "page": 51,
+        "requirement": "El sistema debe permitir filtrar los eventos publicados por modalidad (presencial, virtual, híbrida) y rangos de fecha.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php; Repositories/ContentQuery.php",
+        "note": "Consulta, fin de evento, filtros, capacidad y ofrecimiento de lista de espera presentes; validar todos los filtros contra aceptación."
+      },
+      {
+        "id": "RF-054",
+        "page": 51,
+        "requirement": "El sistema debe mostrar en cada resultado de evento el título, descripción resumida, fecha, horario, modalidad, enlace/ubicación, disponibilidad de cupos y estado de inscripción individual del asociado.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php; Repositories/ContentQuery.php",
+        "note": "Consulta, fin de evento, filtros, capacidad y ofrecimiento de lista de espera presentes; validar todos los filtros contra aceptación."
+      },
+      {
+        "id": "RF-055",
+        "page": 51,
+        "requirement": "El sistema debe permitir al asociado confirmar su asistencia a un evento publicado mediante el registro de RSVP.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php; Repositories/ContentQuery.php",
+        "note": "Consulta, fin de evento, filtros, capacidad y ofrecimiento de lista de espera presentes; validar todos los filtros contra aceptación."
+      },
+      {
+        "id": "RF-056",
+        "page": 51,
+        "requirement": "El sistema debe permitir al asociado cancelar su asistencia previamente confirmada a un evento.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php; Repositories/ContentQuery.php",
+        "note": "Consulta, fin de evento, filtros, capacidad y ofrecimiento de lista de espera presentes; validar todos los filtros contra aceptación."
+      },
+      {
+        "id": "RF-057",
+        "page": 51,
+        "requirement": "El sistema debe validar la existencia de cupos libres antes de procesar una solicitud de RSVP, registrando la inscripción únicamente cuando el número de inscritos sea menor al aforo máximo configurado.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php; Repositories/ContentQuery.php",
+        "note": "Consulta, fin de evento, filtros, capacidad y ofrecimiento de lista de espera presentes; validar todos los filtros contra aceptación."
+      },
+      {
+        "id": "RF-058",
+        "page": 52,
+        "requirement": "El sistema debe bloquear la confirmación directa de RSVP y ofrecer el ingreso a la lista de espera cuando el evento alcance su capacidad máxima.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php; Repositories/ContentQuery.php",
+        "note": "Consulta, fin de evento, filtros, capacidad y ofrecimiento de lista de espera presentes; validar todos los filtros contra aceptación."
+      },
+      {
+        "id": "RF-059",
+        "page": 52,
+        "requirement": "El sistema debe permitir al asociado solicitar su registro en la lista de espera cuando un evento haya alcanzado el aforo máximo configurado.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php",
+        "note": "Lista voluntaria y oferta FIFO; no asigna asistencia automática."
+      },
+      {
+        "id": "RF-060",
+        "page": 52,
+        "requirement": "El sistema debe registrar las incorporaciones a la lista de espera asignando un número de turno ordenado estrictamente por marca de fecha y hora.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php",
+        "note": "Lista voluntaria y oferta FIFO; no asigna asistencia automática."
+      },
+      {
+        "id": "RF-061",
+        "page": 52,
+        "requirement": "El sistema debe notificar internamente al primer asociado de la lista de espera al momento en que se libere un cupo en el evento.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php",
+        "note": "Lista voluntaria y oferta FIFO; no asigna asistencia automática."
+      },
+      {
+        "id": "RF-062",
+        "page": 52,
+        "requirement": "El sistema debe conceder una ventana de tiempo límite para que el asociado notificado en lista de espera confirme su participación.",
+        "status": "Código revisado",
+        "evidence": "Services/EventParticipation.php; Jobs/Queue.php; EventParticipationTest",
+        "note": "Ofertas de cupo con vencimiento configurable por evento, 24 horas predeterminadas (1–168). Al vencer se libera el cupo y se ofrece al siguiente en FIFO; requiere worker de cron operativo."
+      },
+      {
+        "id": "RF-063",
+        "page": 52,
+        "requirement": "El sistema debe ocultar la lista de participantes de un evento a cualquier asociado que no cuente con un registro RSVP confirmado.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php; Services/Notifications.php",
+        "note": "Asistentes tras confirmar, privacidad, roster de gestores y notificaciones de conexión."
+      },
+      {
+        "id": "RF-064",
+        "page": 52,
+        "requirement": "El sistema debe mostrar la lista de participantes visibles al asociado únicamente después de que este confirme su asistencia mediante RSVP.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php; Services/Notifications.php",
+        "note": "Asistentes tras confirmar, privacidad, roster de gestores y notificaciones de conexión."
+      },
+      {
+        "id": "RF-065",
+        "page": 52,
+        "requirement": "El sistema debe permitir al Administrador y Ejecutivo consultar la nómina completa de participantes inscritos y en lista de espera de cualquier evento.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php; Services/Notifications.php",
+        "note": "Asistentes tras confirmar, privacidad, roster de gestores y notificaciones de conexión."
+      },
+      {
+        "id": "RF-066",
+        "page": 52,
+        "requirement": "El sistema debe generar una notificación interna en la plataforma al asociado destinatario ante la recepción de una nueva solicitud de conexión o la formalización de un vínculo aceptado.",
+        "status": "Código revisado",
+        "evidence": "Services/Events.php; Services/Notifications.php",
+        "note": "Asistentes tras confirmar, privacidad, roster de gestores y notificaciones de conexión."
+      },
+      {
+        "id": "RF-067",
+        "page": 52,
+        "requirement": "El sistema debe emitir recordatorios automáticos en la plataforma a los asociados confirmados a un evento, utilizando los plazos de anticipación configurados para dicha actividad.",
+        "status": "Código revisado",
+        "evidence": "Services/EventReminders.php; ContentMeta; assets/app.js",
+        "note": "Administración configura de uno a cinco recordatorios por evento. WP-Cron avisa solo a confirmados activos y evita duplicados; microeventos fijan anticipación antes de publicar. Suite PHP final pendiente."
+      },
+      {
+        "id": "RF-068",
+        "page": 52,
+        "requirement": "El sistema debe permitir al Administrador configurar la frecuencia y anticipación de los recordatorios automáticos para cada evento.",
+        "status": "Código revisado",
+        "evidence": "Services/EventReminders.php; ContentMeta; assets/app.js",
+        "note": "Administración configura de uno a cinco recordatorios por evento. WP-Cron avisa solo a confirmados activos y evita duplicados; microeventos fijan anticipación antes de publicar. Suite PHP final pendiente."
+      },
+      {
+        "id": "RF-069",
+        "page": 52,
+        "requirement": "El sistema debe listar las notificaciones internas del usuario indicando su estado de lectura y fecha de recepción.",
+        "status": "Código revisado",
+        "evidence": "Services/Notifications.php; Services/NotificationTarget.php",
+        "note": "Feed, lectura, destinos, borrado y preferencias; validar entrega SMTP en el servidor."
+      },
+      {
+        "id": "RF-070",
+        "page": 53,
+        "requirement": "El sistema debe permitir al usuario marcar notificaciones individuales o todo su catálogo de notificaciones como leídas.",
+        "status": "Código revisado",
+        "evidence": "Services/Notifications.php; Services/NotificationTarget.php",
+        "note": "Feed, lectura, destinos, borrado y preferencias; validar entrega SMTP en el servidor."
+      },
+      {
+        "id": "RF-071",
+        "page": 53,
+        "requirement": "El sistema debe redirigir al usuario hacia la sección o contenido relacionado al interactuar con una notificación.",
+        "status": "Código revisado",
+        "evidence": "Services/Notifications.php; Services/NotificationTarget.php",
+        "note": "Feed, lectura, destinos, borrado y preferencias; validar entrega SMTP en el servidor."
+      },
+      {
+        "id": "RF-072",
+        "page": 53,
+        "requirement": "El sistema debe permitir al usuario eliminar notificaciones de su panel personal de forma individual.",
+        "status": "Código revisado",
+        "evidence": "Services/Notifications.php; Services/NotificationTarget.php",
+        "note": "Feed, lectura, destinos, borrado y preferencias; validar entrega SMTP en el servidor."
+      },
+      {
+        "id": "RF-073",
+        "page": 53,
+        "requirement": "El sistema debe enviar avisos por correo electrónico a la dirección del usuario ante eventos ocurridos en las categorías temáticas que este mantenga activas.",
+        "status": "Código revisado",
+        "evidence": "Services/Notifications.php; Services/NotificationTarget.php",
+        "note": "Feed, lectura, destinos, borrado y preferencias; validar entrega SMTP en el servidor."
+      },
+      {
+        "id": "RF-074",
+        "page": 53,
+        "requirement": "El sistema debe permitir al asociado habilitar o deshabilitar de forma independiente la recepción de avisos por correo electrónico para cada categoría temática disponible.",
+        "status": "Código revisado",
+        "evidence": "Services/Notifications.php; Services/NotificationTarget.php",
+        "note": "Feed, lectura, destinos, borrado y preferencias; validar entrega SMTP en el servidor."
+      },
+      {
+        "id": "RF-075",
+        "page": 53,
+        "requirement": "El sistema debe preservar la notificación interna en la plataforma independientemente del éxito, fallo o preferencia de envío del correo electrónico.",
+        "status": "Código revisado",
+        "evidence": "Services/Notifications.php; Services/NotificationTarget.php",
+        "note": "Feed, lectura, destinos, borrado y preferencias; validar entrega SMTP en el servidor."
+      },
+      {
+        "id": "RF-076",
+        "page": 53,
+        "requirement": "El sistema debe mostrar el catálogo de aliados institucionales publicados, presentando su nombre, logotipo y descripción de beneficios para asociado",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Catálogo y detalles de aliados; confirmar filtro de tipo en aceptación."
+      },
+      {
+        "id": "RF-077",
+        "page": 53,
+        "requirement": "El sistema debe permitir buscar aliados publicados mediante texto por nombre o tipo de convenio.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Catálogo y detalles de aliados; confirmar filtro de tipo en aceptación."
+      },
+      {
+        "id": "RF-078",
+        "page": 53,
+        "requirement": "El sistema debe permitir al asociado acceder a la vista de detalle de un aliado para consultar sus canales de contacto y condiciones del beneficio.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Catálogo y detalles de aliados; confirmar filtro de tipo en aceptación."
+      },
+      {
+        "id": "RF-079",
+        "page": 53,
+        "requirement": "El sistema debe permitir al Administrador registrar nuevos aliados ingresando nombre, descripción, beneficios, sitio web, contacto y logotipo.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; ReleaseCompletionTest",
+        "note": "Creación, edición, moderación, lectura de no publicados y eliminación de aliados reservadas a administración, incluso ante autor ejecutivo legado."
+      },
+      {
+        "id": "RF-080",
+        "page": 53,
+        "requirement": "El sistema debe permitir al Administrador actualizar la información registrada de un aliado institucional existente.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; assets/app.js",
+        "note": "Solo administración gestiona aliados; Oculto permite retirarlos sin borrar su registro."
+      },
+      {
+        "id": "RF-081",
+        "page": 53,
+        "requirement": "El sistema debe permitir al Administrador retirar un aliado del catálogo público cambiando su estado a inactivo sin eliminar su registro histórico.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; assets/app.js",
+        "note": "Solo administración gestiona aliados; Oculto permite retirarlos sin borrar su registro."
+      },
+      {
+        "id": "RF-082",
+        "page": 53,
+        "requirement": "El sistema debe permitir al asociado registrar solicitudes de soporte ingresando asunto, descripción detallada y seleccionando una de las categorías institucionales vigentes.",
+        "status": "Parcial",
+        "evidence": "Services/Administration.php; Services/Content.php",
+        "note": "Contacto privado al autor/equipo moderador actual: falta asignación admin/ejecutivo y cuatro estados, incluido Resuelta distinto de Cerrada."
+      },
+      {
+        "id": "RF-083",
+        "page": 54,
+        "requirement": "El sistema debe restringir el acceso a la consulta y detalle de cada solicitud de soporte exclusivamente al asociado creador y al personal asignado con rol Administrador o Ejecutivo.",
+        "status": "Código revisado",
+        "evidence": "Services/SupportRequests.php; SupportRequestsTest; tests/admin-compliance.cjs; tests/statistics.cjs",
+        "note": "Acceso del emisor y responsable activo asignado. Pendiente → En revisión → Resuelta → Cerrada, respuesta, reasignación y archivo sin borrar historial; moderador sin acceso. Legado Resuelta se conserva como resolved."
+      },
+      {
+        "id": "RF-084",
+        "page": 54,
+        "requirement": "El sistema debe permitir al asociado consultar el historial de sus solicitudes de soporte enviadas, visualizando el estado actual en su ciclo de vida.",
+        "status": "Código revisado",
+        "evidence": "Services/SupportRequests.php; SupportRequestsTest; tests/admin-compliance.cjs; tests/statistics.cjs",
+        "note": "Acceso del emisor y responsable activo asignado. Pendiente → En revisión → Resuelta → Cerrada, respuesta, reasignación y archivo sin borrar historial; moderador sin acceso. Legado Resuelta se conserva como resolved."
+      },
+      {
+        "id": "RF-085",
+        "page": 54,
+        "requirement": "El sistema debe permitir al Administrador o Ejecutivo asignado realizar transiciones en el estado de una solicitud, respetando los estados operativos configurados.",
+        "status": "Código revisado",
+        "evidence": "Services/SupportRequests.php; SupportRequestsTest; tests/admin-compliance.cjs; tests/statistics.cjs",
+        "note": "Acceso del emisor y responsable activo asignado. Pendiente → En revisión → Resuelta → Cerrada, respuesta, reasignación y archivo sin borrar historial; moderador sin acceso. Legado Resuelta se conserva como resolved."
+      },
+      {
+        "id": "RF-086",
+        "page": 54,
+        "requirement": "El sistema debe permitir al Administrador o Ejecutivo asignado registrar y almacenar la respuesta o dictamen resolutivo sobre la solicitud de soporte.",
+        "status": "Código revisado",
+        "evidence": "Services/SupportRequests.php; SupportRequestsTest; tests/admin-compliance.cjs; tests/statistics.cjs",
+        "note": "Acceso del emisor y responsable activo asignado. Pendiente → En revisión → Resuelta → Cerrada, respuesta, reasignación y archivo sin borrar historial; moderador sin acceso. Legado Resuelta se conserva como resolved."
+      },
+      {
+        "id": "RF-087",
+        "page": 54,
+        "requirement": "El sistema debe notificar al asociado cuando su solicitud de soporte cambie de estado o reciba una respuesta administrativa.",
+        "status": "Código revisado",
+        "evidence": "Services/SupportRequests.php; SupportRequestsTest; tests/admin-compliance.cjs; tests/statistics.cjs",
+        "note": "Acceso del emisor y responsable activo asignado. Pendiente → En revisión → Resuelta → Cerrada, respuesta, reasignación y archivo sin borrar historial; moderador sin acceso. Legado Resuelta se conserva como resolved."
+      },
+      {
+        "id": "RF-088",
+        "page": 54,
+        "requirement": "El sistema debe validar el estado activo de la membresía del asociado durante la autenticación, denegando el ingreso a la plataforma si se encuentra vencida o suspendida.",
+        "status": "Código revisado",
+        "evidence": "Services/Membership.php; Services/SessionPolicy.php; Administration; MembershipTest; tests/admin-compliance.cjs",
+        "note": "Estado y vigencia administrables; denegación y revocación, incluso sin cron; reactivación con nuevo acceso conserva perfil, conexiones, mensajes y participaciones."
+      },
+      {
+        "id": "RF-089",
+        "page": 54,
+        "requirement": "El sistema debe revocar la sesión activa e impedir la navegación en la plataforma cuando el estado de la membresía del usuario cambie a vencida o suspendida.",
+        "status": "Código revisado",
+        "evidence": "Services/Membership.php; Services/SessionPolicy.php; Administration; MembershipTest; tests/admin-compliance.cjs",
+        "note": "Estado y vigencia administrables; denegación y revocación, incluso sin cron; reactivación con nuevo acceso conserva perfil, conexiones, mensajes y participaciones."
+      },
+      {
+        "id": "RF-090",
+        "page": 54,
+        "requirement": "El sistema debe conservar en la base de datos el perfil, las conexiones, el historial de mensajería y las participaciones del usuario cuya membresía haya sido suspendida o vencida.",
+        "status": "Código revisado",
+        "evidence": "Services/Membership.php; Services/SessionPolicy.php; Administration; MembershipTest; tests/admin-compliance.cjs",
+        "note": "Estado y vigencia administrables; denegación y revocación, incluso sin cron; reactivación con nuevo acceso conserva perfil, conexiones, mensajes y participaciones."
+      },
+      {
+        "id": "RF-091",
+        "page": 54,
+        "requirement": "El sistema debe restablecer automáticamente el acceso completo a la plataforma y a los datos históricos del asociado inmediatamente después de que el Administrador reactive su membresía",
+        "status": "Código revisado",
+        "evidence": "Services/Membership.php; Services/SessionPolicy.php; Administration; MembershipTest; tests/admin-compliance.cjs",
+        "note": "Estado y vigencia administrables; denegación y revocación, incluso sin cron; reactivación con nuevo acceso conserva perfil, conexiones, mensajes y participaciones."
+      },
+      {
+        "id": "RF-092",
+        "page": 54,
+        "requirement": "El sistema debe permitir al asociado emisor cancelar una solicitud de conexión enviada que se encuentre en estado pendiente.",
+        "status": "Parcial",
+        "evidence": "Services/Access.php; Services/Administration.php; Frontend/Login.php",
+        "note": "Suspensión controla acceso y logout usa WordPress; no vencimiento de membresía ni revocación/cancelación completa de sesiones y solicitudes al suspender."
+      },
+      {
+        "id": "RF-093",
+        "page": 54,
+        "requirement": "El sistema debe revocar de manera inmediata los tokens y credenciales de autenticación activos al activar la opción de cierre de sesión, redirigiendo al usuario a la pantalla de acceso",
+        "status": "Parcial",
+        "evidence": "Services/Access.php; Services/Administration.php; Frontend/Login.php",
+        "note": "Suspensión controla acceso y logout usa WordPress; no vencimiento de membresía ni revocación/cancelación completa de sesiones y solicitudes al suspender."
+      },
+      {
+        "id": "RF-094",
+        "page": 55,
+        "requirement": "El sistema debe inhabilitar el envío de nuevos mensajes directos entre dos asociados tras la disolución de su conexión activa.",
+        "status": "Código revisado",
+        "evidence": "Messaging; ConnectionPolicy; ConversationVisibility; tests/bugs-ui.cjs",
+        "note": "Mensajes enviados inmutables; historial de desconexión en solo lectura, ocultamiento personal y reaparición con nuevo mensaje. Bloquear revoca acceso. Cancelar solicitudes o intentar borrar grupos no elimina mensajes. Pruebas PHP antiguas de eliminación pendientes de adecuación."
+      },
+      {
+        "id": "RF-095",
+        "page": 55,
+        "requirement": "El sistema debe preservar íntegro y accesible el historial de mensajes previamente intercambiados tras la disolución de una conexión activa.",
+        "status": "Código revisado",
+        "evidence": "Messaging; ConnectionPolicy; ConversationVisibility; tests/bugs-ui.cjs",
+        "note": "Mensajes enviados inmutables; historial de desconexión en solo lectura, ocultamiento personal y reaparición con nuevo mensaje. Bloquear revoca acceso. Cancelar solicitudes o intentar borrar grupos no elimina mensajes. Pruebas PHP antiguas de eliminación pendientes de adecuación."
+      },
+      {
+        "id": "RF-096",
+        "page": 55,
+        "requirement": "El sistema debe bloquear el envío de nuevas solicitudes de conexión por parte del emisor hacia el destinatario durante el periodo de enfriamiento configurado posterior al rechazo de una solicitud previa.",
+        "status": "Código revisado",
+        "evidence": "Services/ConnectionPolicy.php; Connections; tests/bugs-ui.cjs",
+        "note": "Espera de 30 días, direccional al rechazar y bilateral al desconectar. Rechazo silencioso en la interfaz, aviso genérico y validación en servidor."
+      },
+      {
+        "id": "RF-097",
+        "page": 55,
+        "requirement": "El sistema debe bloquear el envío recíproco de nuevas solicitudes de conexión entre ambos asociados durante el periodo de enfriamiento configurado posterior a la disolución de su conexión activa.",
+        "status": "Código revisado",
+        "evidence": "Services/ConnectionPolicy.php; Connections; tests/bugs-ui.cjs",
+        "note": "Espera de 30 días, direccional al rechazar y bilateral al desconectar. Rechazo silencioso en la interfaz, aviso genérico y validación en servidor."
+      },
+      {
+        "id": "RF-098",
+        "page": 55,
+        "requirement": "El sistema debe registrar las propuestas semanales de microeventos en estado Pendiente de revisión.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-099",
+        "page": 55,
+        "requirement": "El sistema debe permitir al Administrador modificar los datos propuestos de un microevento en estado Pendiente de revisión.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-100",
+        "page": 55,
+        "requirement": "El sistema debe permitir al Administrador aprobar una propuesta de microevento, habilitando su programación de publicación.",
+        "status": "Parcial",
+        "evidence": "Services/MicroLifecycle.php; Content.php; MicroEventsTest",
+        "note": "Aprobación administrativa obligatoria, publicación inmediata y estados con historial. Pendiente programar publicación futura separada de la aprobación."
+      },
+      {
+        "id": "RF-101",
+        "page": 55,
+        "requirement": "El sistema debe permitir al Administrador denegar una propuesta de microevento exigiendo el ingreso de una justificación textual.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-102",
+        "page": 55,
+        "requirement": "El sistema debe restringir la inscripción al microevento exclusivamente a los miembros recomendados durante el periodo prioritario configurado.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-103",
+        "page": 55,
+        "requirement": "El sistema debe habilitar los cupos remanentes del microevento a todos los asociados activos una vez finalizado el periodo de inscripción prioritaria.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-104",
+        "page": 55,
+        "requirement": "El sistema debe estructurar cada propuesta automática de microevento con título, objetivo, fecha, horario, modalidad, ubicación/enlace, aforo mínimo, aforo máximo, agenda sugerida y lista de miembros convocados.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-105",
+        "page": 55,
+        "requirement": "El sistema debe registrar en una bitácora de auditoría los cambios de estado, fecha, responsable y motivo de denegación o cancelación de cada microevento.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-106",
+        "page": 56,
+        "requirement": "El sistema debe permitir al Administrador consultar el historial de microeventos denegados, cancelados y finalizados junto con sus motivos registrados.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-107",
+        "page": 56,
+        "requirement": "El sistema debe clasificar automáticamente en estado \"Inscripciones insuficientes\" a los microeventos cuya cantidad de inscritos confirmados sea inferior al aforo mínimo al expirar el plazo de convocatoria.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-108",
+        "page": 56,
+        "requirement": "El sistema debe permitir al Administrador ampliar la fecha y hora límite de inscripción de un microevento con inscripciones insuficientes.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-109",
+        "page": 56,
+        "requirement": "El sistema debe permitir al Administrador reducir el valor del aforo mínimo requerido de un microevento con inscripciones insuficientes.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-110",
+        "page": 56,
+        "requirement": "El sistema debe permitir al Administrador registrar la cancelación definitiva de un microevento, exigiendo el ingreso de una justificación textual.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-111",
+        "page": 56,
+        "requirement": "El sistema debe notificar internamente y por correo electrónico a los participantes inscritos cuando un microevento sea reprogramado o cancelado.",
+        "status": "Código revisado",
+        "evidence": "MicroLifecycle; EventParticipation; Events; EventReminders; MicroEventsTest; EventParticipationTest",
+        "note": "Inscripciones insuficientes al vencer el plazo; ampliar/reducir mínimo, reprogramar con motivo e invalidar RSVP, cancelar conservando datos; recordatorios fijados antes de publicar, internos y correo según preferencias."
+      },
+      {
+        "id": "RF-112",
+        "page": 56,
+        "requirement": "El sistema debe actualizar el estado de los participantes inscritos a \"Pendiente de reconfirmación\" cuando se modifique la fecha, horario o modalidad del microevento.",
+        "status": "Código revisado",
+        "evidence": "MicroLifecycle; EventParticipation; Events; EventReminders; MicroEventsTest; EventParticipationTest",
+        "note": "Inscripciones insuficientes al vencer el plazo; ampliar/reducir mínimo, reprogramar con motivo e invalidar RSVP, cancelar conservando datos; recordatorios fijados antes de publicar, internos y correo según preferencias."
+      },
+      {
+        "id": "RF-113",
+        "page": 56,
+        "requirement": "El sistema debe publicar el motivo de la reprogramación o cancelación en la ficha descriptiva del microevento.",
+        "status": "Código revisado",
+        "evidence": "MicroLifecycle; EventParticipation; Events; EventReminders; MicroEventsTest; EventParticipationTest",
+        "note": "Inscripciones insuficientes al vencer el plazo; ampliar/reducir mínimo, reprogramar con motivo e invalidar RSVP, cancelar conservando datos; recordatorios fijados antes de publicar, internos y correo según preferencias."
+      },
+      {
+        "id": "RF-114",
+        "page": 56,
+        "requirement": "El sistema debe permitir al asociado cancelar voluntariamente su inscripción confirmada en un microevento.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-115",
+        "page": 56,
+        "requirement": "El sistema debe notificar la disponibilidad de cupo al primer asociado de la lista de espera inmediatamente después de que un participante cancele su asistencia.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-116",
+        "page": 56,
+        "requirement": "El sistema debe despachar recordatorios automáticos (internos y por correo) sobre el microevento exclusivamente a los participantes con estado confirmado.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-117",
+        "page": 56,
+        "requirement": "El sistema debe permitir al Administrador configurar la anticipación de los recordatorios automáticos previo a la publicación del microevento.",
+        "status": "Código revisado",
+        "evidence": "MicroPlanning; MicroEvents; MicroLifecycle; EventReminders; Content; Events; MicroEventsTest",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado."
+      },
+      {
+        "id": "RF-118",
+        "page": 57,
+        "requirement": "El sistema debe bloquear la edición y la eliminación de cualquier mensaje de texto una vez que haya sido transmitido y registrado en la base de datos.",
+        "status": "Código revisado",
+        "evidence": "Messaging; ConnectionPolicy; ConversationVisibility; tests/bugs-ui.cjs",
+        "note": "Mensajes enviados inmutables; historial de desconexión en solo lectura, ocultamiento personal y reaparición con nuevo mensaje. Bloquear revoca acceso. Cancelar solicitudes o intentar borrar grupos no elimina mensajes. Pruebas PHP antiguas de eliminación pendientes de adecuación."
+      },
+      {
+        "id": "RF-119",
+        "page": 57,
+        "requirement": "El sistema debe permitir al asociado ocultar una conversación de su bandeja personal sin alterar la bandeja del receptor ni suprimir el historial de mensajes.",
+        "status": "Código revisado",
+        "evidence": "Messaging; ConnectionPolicy; ConversationVisibility; tests/bugs-ui.cjs",
+        "note": "Mensajes enviados inmutables; historial de desconexión en solo lectura, ocultamiento personal y reaparición con nuevo mensaje. Bloquear revoca acceso. Cancelar solicitudes o intentar borrar grupos no elimina mensajes. Pruebas PHP antiguas de eliminación pendientes de adecuación."
+      },
+      {
+        "id": "RF-120",
+        "page": 57,
+        "requirement": "El sistema debe restablecer automáticamente la visibilidad de una conversación oculta en la bandeja del asociado en el momento en que se reciba un nuevo mensaje en dicha conversación.",
+        "status": "Código revisado",
+        "evidence": "Messaging; ConnectionPolicy; ConversationVisibility; tests/bugs-ui.cjs",
+        "note": "Mensajes enviados inmutables; historial de desconexión en solo lectura, ocultamiento personal y reaparición con nuevo mensaje. Bloquear revoca acceso. Cancelar solicitudes o intentar borrar grupos no elimina mensajes. Pruebas PHP antiguas de eliminación pendientes de adecuación."
+      },
+      {
+        "id": "RF-121",
+        "page": 57,
+        "requirement": "El sistema debe generar una notificación interna en la plataforma cuando un asociado reciba un nuevo mensaje directo.",
+        "status": "Código revisado",
+        "evidence": "Services/Messaging.php; Services/ConversationVisibility.php; Services/Notifications.php",
+        "note": "Mensajes directos inmutables, ocultamiento personal, reaparición con mensaje entrante, lectura explícita y avisos. Grupos y solicitudes de conversación adicionales no se certifican."
+      },
+      {
+        "id": "RF-122",
+        "page": 57,
+        "requirement": "El sistema debe incrementar en tiempo real el contador de mensajes no leídos del usuario receptor ante la recepción de un nuevo mensaje.",
+        "status": "Código revisado",
+        "evidence": "Services/Messaging.php; Services/ConversationVisibility.php; Services/Notifications.php",
+        "note": "Mensajes directos inmutables, ocultamiento personal, reaparición con mensaje entrante, lectura explícita y avisos. Grupos y solicitudes de conversación adicionales no se certifican."
+      },
+      {
+        "id": "RF-123",
+        "page": 57,
+        "requirement": "El sistema debe despachar una alerta por correo electrónico ante la recepción de un mensaje, siempre que el usuario destinatario mantenga habilitada dicha categoría en sus preferencias.",
+        "status": "Código revisado",
+        "evidence": "Services/Messaging.php; Services/ConversationVisibility.php; Services/Notifications.php",
+        "note": "Mensajes directos inmutables, ocultamiento personal, reaparición con mensaje entrante, lectura explícita y avisos. Grupos y solicitudes de conversación adicionales no se certifican."
+      },
+      {
+        "id": "RF-124",
+        "page": 57,
+        "requirement": "El sistema debe ejecutar un proceso programado periódico para recalcular y actualizar automáticamente los lotes de asociados recomendados.",
+        "status": "Código revisado",
+        "evidence": "Services/Matching.php; Jobs/Queue.php",
+        "note": "Lotes semanales, cinco sugerencias configurables, cambios de perfil, umbral y descartes reversibles sin actualización manual."
+      },
+      {
+        "id": "RF-125",
+        "page": 57,
+        "requirement": "El sistema debe desplegar un lote de perfiles recomendados activos por periodo de cálculo, acotado a la cantidad máxima de sugerencias establecida.",
+        "status": "Código revisado",
+        "evidence": "Services/Matching.php; Jobs/Queue.php",
+        "note": "Lotes semanales, cinco sugerencias configurables, cambios de perfil, umbral y descartes reversibles sin actualización manual."
+      },
+      {
+        "id": "RF-126",
+        "page": 57,
+        "requirement": "El sistema debe recalcular automáticamente la lista de perfiles recomendados de un asociado inmediatamente después de que este actualice sus intereses, sectores, conocimientos u objetivos de networking",
+        "status": "Código revisado",
+        "evidence": "Services/Matching.php; Jobs/Queue.php",
+        "note": "Lotes semanales, cinco sugerencias configurables, cambios de perfil, umbral y descartes reversibles sin actualización manual."
+      },
+      {
+        "id": "RF-127",
+        "page": 57,
+        "requirement": "El sistema debe permitir al Administrador configurar la cantidad máxima de perfiles afines que se presentarán semanalmente al asociado.",
+        "status": "Código revisado",
+        "evidence": "Services/Matching.php; Jobs/Queue.php",
+        "note": "Lotes semanales, cinco sugerencias configurables, cambios de perfil, umbral y descartes reversibles sin actualización manual."
+      },
+      {
+        "id": "RF-128",
+        "page": 57,
+        "requirement": "El sistema debe mostrar un aviso informativo de baja coincidencia cuando la cantidad de candidatos elegibles sea menor a la cuota máxima configurada.",
+        "status": "Código revisado",
+        "evidence": "Services/Matching.php; Jobs/Queue.php",
+        "note": "Lotes semanales, cinco sugerencias configurables, cambios de perfil, umbral y descartes reversibles sin actualización manual."
+      },
+      {
+        "id": "RF-129",
+        "page": 57,
+        "requirement": "El sistema debe permitir al asociado marcar un perfil sugerido con la opción «No me interesa», excluyéndolo de forma permanente de futuras recomendaciones.",
+        "status": "Código revisado",
+        "evidence": "Services/Matching.php; Jobs/Queue.php",
+        "note": "Lotes semanales, cinco sugerencias configurables, cambios de perfil, umbral y descartes reversibles sin actualización manual."
+      },
+      {
+        "id": "RF-130",
+        "page": 58,
+        "requirement": "El sistema debe permitir al asociado consultar y restituir la elegibilidad de los perfiles que haya descartado previamente mediante la opción «No me interesa».",
+        "status": "Código revisado",
+        "evidence": "Services/Matching.php; Jobs/Queue.php",
+        "note": "Lotes semanales, cinco sugerencias configurables, cambios de perfil, umbral y descartes reversibles sin actualización manual."
+      },
+      {
+        "id": "RF-131",
+        "page": 58,
+        "requirement": "El sistema debe verificar que el asociado cuente con todos los campos obligatorios del perfil registrados antes de habilitar su aparición pública en el Directorio.",
+        "status": "Código revisado",
+        "evidence": "Services/ProfileRequirements.php; Services/Profiles.php; Services/Matching.php",
+        "note": "Mínimo unificado: nombre/apellidos, cargo, empresa, sector, ciudad o país, bio, interés y objetivo. Directorio excluye incompletos."
+      },
+      {
+        "id": "RF-132",
+        "page": 58,
+        "requirement": "El sistema debe impedir la inclusión de un asociado en los lotes de recomendaciones calculados para otros miembros mientras su perfil no registre la información mínima obligatoria.",
+        "status": "Código revisado",
+        "evidence": "Services/ProfileRequirements.php; Services/Profiles.php; Services/Matching.php",
+        "note": "Mínimo unificado: nombre/apellidos, cargo, empresa, sector, ciudad o país, bio, interés y objetivo. Directorio excluye incompletos."
+      },
+      {
+        "id": "RF-133",
+        "page": 58,
+        "requirement": "El sistema debe permitir al Administrador actualizar el estado de membresía, el rol asignado y los permisos de acceso de cualquier cuenta de usuario.",
+        "status": "Parcial",
+        "evidence": "Services/Administration.php; Membership.php; Audit.php; Database/AuditMigration.php; MembershipTest",
+        "note": "Formulario registra diferencias de membresía y rol con actor y fecha; LONGTEXT conserva detalles. Pendiente cobertura de cambios por panel nativo/terceros y gobierno de permisos individuales."
+      },
+      {
+        "id": "RF-134",
+        "page": 58,
+        "requirement": "El sistema debe bloquear la edición directa de los campos profesionales del perfil del asociado en el panel de administración, habilitándola únicamente si se asocia a un identificador válido de solicitud de soporte.",
+        "status": "Parcial",
+        "evidence": "Services/ProfessionalChanges.php; SupportRequests.php",
+        "note": "Cargo/Empresa requieren una solicitud activa asignada al administrador y se consume una vez. Ampliar el control sobre todos los datos personales/profesionales administrables."
+      },
+      {
+        "id": "RF-135",
+        "page": 58,
+        "requirement": "El sistema debe registrar automáticamente en la bitácora de auditoría el identificador del administrador, fecha, hora, usuario afectado, campo modificado, valor previo y nuevo valor ante cualquier cambio de membresía, rol o permisos. ",
+        "status": "Parcial",
+        "evidence": "Services/Administration.php; Membership.php; Audit.php; Database/AuditMigration.php; MembershipTest",
+        "note": "Formulario registra diferencias de membresía y rol con actor y fecha; LONGTEXT conserva detalles. Pendiente cobertura de cambios por panel nativo/terceros y gobierno de permisos individuales."
+      },
+      {
+        "id": "RF-136",
+        "page": 58,
+        "requirement": "El sistema debe habilitar las vistas, menús y funcionalidades del sistema correspondientes al rol asignado al usuario (Administrador, Ejecutivo, Moderador o Asociado).",
+        "status": "Parcial",
+        "evidence": "Domain/Roles.php; Services/Administration.php",
+        "note": "Controles en UI/servidor y alta administrativa. Revisar privilegios heredados y estado inicial configurable."
+      },
+      {
+        "id": "RF-137",
+        "page": 58,
+        "requirement": "El sistema debe interceptar y rechazar cualquier petición u operación sobre recursos para los cuales el rol del usuario no cuente con autorización explícita.",
+        "status": "Parcial",
+        "evidence": "Domain/Roles.php; Services/Administration.php",
+        "note": "Controles en UI/servidor y alta administrativa. Revisar privilegios heredados y estado inicial configurable."
+      },
+      {
+        "id": "RF-138",
+        "page": 58,
+        "requirement": "El sistema debe permitir al Administrador crear nuevas cuentas de miembro registrando datos básicos, asignando rol y estableciendo el estado inicial de la membresía.",
+        "status": "Código revisado",
+        "evidence": "Services/Membership.php; Services/SessionPolicy.php; Administration; MembershipTest; tests/admin-compliance.cjs",
+        "note": "Estado y vigencia administrables; denegación y revocación, incluso sin cron; reactivación con nuevo acceso conserva perfil, conexiones, mensajes y participaciones."
+      },
+      {
+        "id": "RF-139",
+        "page": 58,
+        "requirement": "El sistema debe inhabilitar de forma permanente cualquier mecanismo público de autorregistro o creación autónoma de cuentas de usuario.",
+        "status": "Parcial",
+        "evidence": "Domain/Roles.php; Services/Administration.php",
+        "note": "Controles en UI/servidor y alta administrativa. Revisar privilegios heredados y estado inicial configurable."
+      },
+      {
+        "id": "RF-140",
+        "page": 58,
+        "requirement": "El sistema debe permitir al usuario seleccionar el idioma de navegación de la interfaz entre español e inglés.",
+        "status": "Código revisado",
+        "evidence": "Frontend/Language.php; assets/app.js; languages/en.json",
+        "note": "Idioma ES/EN persistente; catálogo propio, no MO/PO de RNF-017."
+      },
+      {
+        "id": "RF-141",
+        "page": 59,
+        "requirement": "El sistema debe renderizar las etiquetas del sistema, formularios, mensajes de confirmación y advertencias en el idioma seleccionado por el usuario.",
+        "status": "Código revisado",
+        "evidence": "Frontend/Language.php; assets/app.js; languages/en.json",
+        "note": "Idioma ES/EN persistente; catálogo propio, no MO/PO de RNF-017."
+      },
+      {
+        "id": "RF-142",
+        "page": 59,
+        "requirement": "El sistema debe almacenar la preferencia de idioma del usuario autenticado para aplicarla automáticamente en las sesiones posteriores.",
+        "status": "Código revisado",
+        "evidence": "Frontend/Language.php; assets/app.js; languages/en.json",
+        "note": "Idioma ES/EN persistente; catálogo propio, no MO/PO de RNF-017."
+      },
+      {
+        "id": "RF-143",
+        "page": 59,
+        "requirement": "El sistema debe calcular el porcentaje de completitud del perfil del asociado tras la autenticación, evaluando los campos completados frente al total configurable.",
+        "status": "Parcial",
+        "evidence": "Services/ProfileRequirements.php; assets/app.js",
+        "note": "Completitud sin penalizar campos opcionales y aviso de faltantes; no lista configurable por administrador ni posposición persistente periódica."
+      },
+      {
+        "id": "RF-144",
+        "page": 59,
+        "requirement": "El sistema debe mostrar un aviso de completitud no bloqueante con acceso directo a la edición de datos cuando el perfil del asociado registre un avance inferior al umbral mínimo establecido.",
+        "status": "Parcial",
+        "evidence": "Services/ProfileRequirements.php; assets/app.js",
+        "note": "Completitud sin penalizar campos opcionales y aviso de faltantes; no lista configurable por administrador ni posposición persistente periódica."
+      },
+      {
+        "id": "RF-145",
+        "page": 59,
+        "requirement": "El sistema debe permitir al asociado posponer el aviso de completitud de perfil para continuar su navegación habitual en la plataforma.",
+        "status": "Código revisado",
+        "evidence": "Services/ProfileReview.php; Settings; Router; assets/app.js",
+        "note": "Revisión periódica configurable, confirmación o posposición persistidas por usuario. Guardar el propio perfil completo confirma vigencia. Suite PHP final pendiente."
+      },
+      {
+        "id": "RF-146",
+        "page": 59,
+        "requirement": "El sistema debe mostrar en el panel de Inicio el nombre del usuario autenticado y los accesos rápidos a los módulos autorizados para su rol.",
+        "status": "Código revisado",
+        "evidence": "Rest/Router.php; assets/app.js",
+        "note": "Inicio, accesos, conteos, recomendaciones, agenda y actividad. Revisar conteo solo de perfiles elegibles."
+      },
+      {
+        "id": "RF-147",
+        "page": 59,
+        "requirement": "El sistema debe desplegar en el panel de Inicio indicadores métricos consolidados sobre asociados visibles, próximos eventos, recursos publicados y notificaciones no leídas.",
+        "status": "Código revisado",
+        "evidence": "Rest/Router.php; assets/app.js",
+        "note": "Inicio, accesos, conteos, recomendaciones, agenda y actividad. Revisar conteo solo de perfiles elegibles."
+      },
+      {
+        "id": "RF-148",
+        "page": 59,
+        "requirement": "El sistema debe presentar en el panel de Inicio del asociado el bloque de recomendaciones vigentes de conexiones y contenidos afines.",
+        "status": "Código revisado",
+        "evidence": "Rest/Router.php; assets/app.js",
+        "note": "Inicio, accesos, conteos, recomendaciones, agenda y actividad. Revisar conteo solo de perfiles elegibles."
+      },
+      {
+        "id": "RF-149",
+        "page": 59,
+        "requirement": "El sistema debe mostrar en el panel de Inicio la cartelera de eventos institucionales próximos que se encuentren publicados.",
+        "status": "Código revisado",
+        "evidence": "Rest/Router.php; assets/app.js",
+        "note": "Inicio, accesos, conteos, recomendaciones, agenda y actividad. Revisar conteo solo de perfiles elegibles."
+      },
+      {
+        "id": "RF-150",
+        "page": 59,
+        "requirement": "El sistema debe desplegar en el panel de Inicio un resumen de las publicaciones comunitarias recientes y conversaciones activas habilitadas para el asociado.",
+        "status": "Código revisado",
+        "evidence": "Rest/Router.php; assets/app.js",
+        "note": "Inicio, accesos, conteos, recomendaciones, agenda y actividad. Revisar conteo solo de perfiles elegibles."
+      },
+      {
+        "id": "RF-151",
+        "page": 59,
+        "requirement": "El sistema debe permitir al asociado cargar o reemplazar su fotografía de perfil, admitiendo los formatos y límites de tamaño configurados.",
+        "status": "Código revisado",
+        "evidence": "Services/Media.php; Services/Birthdays.php; assets/image-editor.js",
+        "note": "Foto, recorte, eliminación, cumpleaños y saludo; verificar visibilidad y destinatarios administrativos en despliegue."
+      },
+      {
+        "id": "RF-152",
+        "page": 59,
+        "requirement": "El sistema debe proveer una herramienta interactiva para que el asociado recorte su fotografía antes de guardarla.",
+        "status": "Código revisado",
+        "evidence": "Services/Media.php; Services/Birthdays.php; assets/image-editor.js",
+        "note": "Foto, recorte, eliminación, cumpleaños y saludo; verificar visibilidad y destinatarios administrativos en despliegue."
+      },
+      {
+        "id": "RF-153",
+        "page": 60,
+        "requirement": "El sistema debe permitir al asociado eliminar su fotografía de perfil actual, restableciendo el avatar institucional por defecto.",
+        "status": "Código revisado",
+        "evidence": "Services/Media.php; Services/Birthdays.php; assets/image-editor.js",
+        "note": "Foto, recorte, eliminación, cumpleaños y saludo; verificar visibilidad y destinatarios administrativos en despliegue."
+      },
+      {
+        "id": "RF-154",
+        "page": 60,
+        "requirement": "El sistema debe permitir al asociado registrar o actualizar su fecha de nacimiento desde la edición de su perfil.",
+        "status": "Código revisado",
+        "evidence": "Services/Media.php; Services/Birthdays.php; assets/image-editor.js",
+        "note": "Foto, recorte, eliminación, cumpleaños y saludo; verificar visibilidad y destinatarios administrativos en despliegue."
+      },
+      {
+        "id": "RF-155",
+        "page": 60,
+        "requirement": "El sistema debe mostrar un saludo conmemorativo en el panel de Inicio al asociado durante el día de su cumpleaños.",
+        "status": "Código revisado",
+        "evidence": "Services/Media.php; Services/Birthdays.php; assets/image-editor.js",
+        "note": "Foto, recorte, eliminación, cumpleaños y saludo; verificar visibilidad y destinatarios administrativos en despliegue."
+      },
+      {
+        "id": "RF-156",
+        "page": 60,
+        "requirement": "El sistema debe emitir una notificación interna a los administradores autorizados informando sobre el cumpleaños de un asociado.",
+        "status": "Código revisado",
+        "evidence": "Services/Media.php; Services/Birthdays.php; assets/image-editor.js",
+        "note": "Foto, recorte, eliminación, cumpleaños y saludo; verificar visibilidad y destinatarios administrativos en despliegue."
+      },
+      {
+        "id": "RF-157",
+        "page": 60,
+        "requirement": "El sistema debe permitir al usuario autenticado cambiar su contraseña, exigiendo la confirmación de la contraseña vigente y validando las políticas de complejidad establecidas.",
+        "status": "Código revisado",
+        "evidence": "Services/CredentialPolicy.php; AccountRecovery; Account; Turnstile",
+        "note": "Complejidad, datos personales, secuencias, vigencia de recuperación, Recordarme y umbrales configurables. Recuperación pública genérica sin omitir captcha; contar intentos de direcciones inexistentes evita diferencia en el desafío. Integración con plugins externos pendiente."
+      },
+      {
+        "id": "RF-158",
+        "page": 60,
+        "requirement": "El sistema debe permitir al usuario solicitar la recuperación de su cuenta ingresando su dirección de correo electrónico, mostrando una respuesta genérica que no revele si dicha dirección se encuentra registrada.",
+        "status": "Código revisado",
+        "evidence": "Services/CredentialPolicy.php; AccountRecovery; Account; Turnstile",
+        "note": "Complejidad, datos personales, secuencias, vigencia de recuperación, Recordarme y umbrales configurables. Recuperación pública genérica sin omitir captcha; contar intentos de direcciones inexistentes evita diferencia en el desafío. Integración con plugins externos pendiente."
+      },
+      {
+        "id": "RF-159",
+        "page": 60,
+        "requirement": "El sistema debe establecer en estado habilitado, de forma predeterminada, la recepción de avisos por correo electrónico para la totalidad de categorías temáticas al momento de dar de alta una nueva cuenta de miembro.",
+        "status": "Parcial",
+        "evidence": "Services/Account.php; Frontend/Login.php",
+        "note": "Cambio con contraseña actual y recuperación. Falta política completa configurable de complejidad/datos personales y comprobar respuesta genérica en todas las rutas WP."
+      },
+      {
+        "id": "RF-160",
+        "page": 60,
+        "requirement": "El sistema debe permitir al asociado enviar una solicitud de conversación directa a un miembro con quien no mantenga una conexión activa.",
+        "status": "Fuera de alcance",
+        "evidence": "Services/ConversationRequests.php; Services/Messaging.php",
+        "note": "Solicitudes de conversación y grupos OUT OF SCOPE; se conservan funciones existentes."
+      },
+      {
+        "id": "RF-161",
+        "page": 60,
+        "requirement": "El sistema debe permitir al asociado destinatario aceptar una solicitud de conversación recibida, habilitando el canal de chat bilateral.",
+        "status": "Fuera de alcance",
+        "evidence": "Services/ConversationRequests.php; Services/Messaging.php",
+        "note": "Solicitudes de conversación y grupos OUT OF SCOPE; se conservan funciones existentes."
+      },
+      {
+        "id": "RF-162",
+        "page": 60,
+        "requirement": "El sistema debe permitir al asociado destinatario rechazar una solicitud de conversación recibida, cerrando la petición sin habilitar el chat.",
+        "status": "Fuera de alcance",
+        "evidence": "Services/ConversationRequests.php; Services/Messaging.php",
+        "note": "Solicitudes de conversación y grupos OUT OF SCOPE; se conservan funciones existentes."
+      },
+      {
+        "id": "RF-163",
+        "page": 60,
+        "requirement": "El sistema debe permitir al asociado crear una conversación grupal asignándole un título identificador.",
+        "status": "Fuera de alcance",
+        "evidence": "Services/ConversationRequests.php; Services/Messaging.php",
+        "note": "Solicitudes de conversación y grupos OUT OF SCOPE; se conservan funciones existentes."
+      },
+      {
+        "id": "RF-164",
+        "page": 60,
+        "requirement": "El sistema debe permitir al creador de una conversación grupal invitar e incorporar a otros miembros con cuenta activa.",
+        "status": "Fuera de alcance",
+        "evidence": "Services/ConversationRequests.php; Services/Messaging.php",
+        "note": "Solicitudes de conversación y grupos OUT OF SCOPE; se conservan funciones existentes."
+      },
+      {
+        "id": "RF-165",
+        "page": 60,
+        "requirement": "El sistema debe permitir a los integrantes de una conversación grupal consultar la nómina de participantes miembros del grupo.",
+        "status": "Fuera de alcance",
+        "evidence": "Services/ConversationRequests.php; Services/Messaging.php",
+        "note": "Solicitudes de conversación y grupos OUT OF SCOPE; se conservan funciones existentes."
+      },
+      {
+        "id": "RF-166",
+        "page": 61,
+        "requirement": "El sistema debe procesar consultas en lenguaje natural dirigidas al Asistente IA, generando respuestas fundamentadas exclusivamente en la información autorizada y publicada de la Intranet.",
+        "status": "Código revisado",
+        "evidence": "Jobs/Queue.php; Services/Knowledge.php; Integrations/OpenAIProvider.php",
+        "note": "Asistente, fuentes autorizadas e historial por usuario; verificar credenciales y proveedor real en despliegue."
+      },
+      {
+        "id": "RF-167",
+        "page": 61,
+        "requirement": "El sistema debe permitir al asociado iniciar una nueva sesión de conversación con el Asistente IA, restableciendo el contexto de diálogo.",
+        "status": "Código revisado",
+        "evidence": "Jobs/Queue.php; Services/Knowledge.php; Integrations/OpenAIProvider.php",
+        "note": "Asistente, fuentes autorizadas e historial por usuario; verificar credenciales y proveedor real en despliegue."
+      },
+      {
+        "id": "RF-168",
+        "page": 61,
+        "requirement": "El sistema debe permitir al asociado consultar su historial cronológico de sesiones y mensajes intercambiados con el Asistente IA.",
+        "status": "Código revisado",
+        "evidence": "Jobs/Queue.php; Services/Knowledge.php; Integrations/OpenAIProvider.php",
+        "note": "Asistente, fuentes autorizadas e historial por usuario; verificar credenciales y proveedor real en despliegue."
+      },
+      {
+        "id": "RF-169",
+        "page": 61,
+        "requirement": "El sistema debe permitir al asociado redactar y publicar contenidos en el Hub comunitario ingresando título y cuerpo del mensaje.",
+        "status": "Parcial",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Hub, filtros e historial presentes; revisar publicación inmediata frente a ajustes de premoderación."
+      },
+      {
+        "id": "RF-170",
+        "page": 61,
+        "requirement": "El sistema debe listar las publicaciones vigentes de la comunidad en el Hub en orden cronológico inverso.",
+        "status": "Parcial",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Hub, filtros e historial presentes; revisar publicación inmediata frente a ajustes de premoderación."
+      },
+      {
+        "id": "RF-171",
+        "page": 61,
+        "requirement": "El sistema debe permitir buscar publicaciones en el Hub mediante coincidencias de texto en el título, contenido o autor.",
+        "status": "Parcial",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Hub, filtros e historial presentes; revisar publicación inmediata frente a ajustes de premoderación."
+      },
+      {
+        "id": "RF-172",
+        "page": 61,
+        "requirement": "El sistema debe permitir filtrar las publicaciones del Hub por rango de fechas y categorías temáticas.",
+        "status": "Parcial",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Hub, filtros e historial presentes; revisar publicación inmediata frente a ajustes de premoderación."
+      },
+      {
+        "id": "RF-173",
+        "page": 61,
+        "requirement": "El sistema debe permitir al asociado consultar de forma diferenciada el listado histórico de sus propias publicaciones creadas en el Hub.",
+        "status": "Parcial",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Hub, filtros e historial presentes; revisar publicación inmediata frente a ajustes de premoderación."
+      },
+      {
+        "id": "RF-174",
+        "page": 61,
+        "requirement": "El sistema debe permitir al asociado crear temas de discusión en los foros habilitados, registrando título, contenido y categoría temática.",
+        "status": "Parcial",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Foros, comentarios, búsqueda e historial; reacción de comentario limitada a like y verificar todas las reacciones predefinidas exigidas."
+      },
+      {
+        "id": "RF-175",
+        "page": 61,
+        "requirement": "El sistema debe listar los temas de discusión publicados en los foros ordenados por actividad reciente o fecha de publicación.",
+        "status": "Parcial",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Foros, comentarios, búsqueda e historial; reacción de comentario limitada a like y verificar todas las reacciones predefinidas exigidas."
+      },
+      {
+        "id": "RF-176",
+        "page": 61,
+        "requirement": "El sistema debe permitir buscar temas en los foros mediante coincidencias textuales en el título o en el cuerpo de la publicación.",
+        "status": "Parcial",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Foros, comentarios, búsqueda e historial; reacción de comentario limitada a like y verificar todas las reacciones predefinidas exigidas."
+      },
+      {
+        "id": "RF-177",
+        "page": 61,
+        "requirement": "El sistema debe permitir filtrar los temas de los foros por categoría temática y rango de fechas.",
+        "status": "Parcial",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Foros, comentarios, búsqueda e historial; reacción de comentario limitada a like y verificar todas las reacciones predefinidas exigidas."
+      },
+      {
+        "id": "RF-178",
+        "page": 61,
+        "requirement": "El sistema debe permitir al asociado publicar comentarios en las discusiones abiertas de los foros.",
+        "status": "Parcial",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Foros, comentarios, búsqueda e historial; reacción de comentario limitada a like y verificar todas las reacciones predefinidas exigidas."
+      },
+      {
+        "id": "RF-179",
+        "page": 61,
+        "requirement": "El sistema debe permitir al asociado registrar reacciones predefinidas sobre temas y comentarios publicados en los foros",
+        "status": "Parcial",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Foros, comentarios, búsqueda e historial; reacción de comentario limitada a like y verificar todas las reacciones predefinidas exigidas."
+      },
+      {
+        "id": "RF-180",
+        "page": 62,
+        "requirement": "El sistema debe permitir al asociado consultar el historial diferenciado de los temas y comentarios creados por su propia cuenta",
+        "status": "Parcial",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
+        "note": "Foros, comentarios, búsqueda e historial; reacción de comentario limitada a like y verificar todas las reacciones predefinidas exigidas."
+      },
+      {
+        "id": "RF-181",
+        "page": 62,
+        "requirement": "El sistema debe mostrar el catálogo de galerías publicadas presentando su imagen de portada, título descriptivo y fecha del evento",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php; Services/Media.php",
+        "note": "Catálogos, filtros, galerías y reproducción privada existentes. Validar disponibilidad de enlaces externos aparte."
+      },
+      {
+        "id": "RF-182",
+        "page": 62,
+        "requirement": "El sistema debe permitir buscar y filtrar galerías publicadas mediante coincidencia de texto en el título o por rango de fechas.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php; Services/Media.php",
+        "note": "Catálogos, filtros, galerías y reproducción privada existentes. Validar disponibilidad de enlaces externos aparte."
+      },
+      {
+        "id": "RF-183",
+        "page": 62,
+        "requirement": "El sistema debe permitir al asociado abrir una galería seleccionada y visualizar su colección de fotografías autorizadas.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php; Services/Media.php",
+        "note": "Catálogos, filtros, galerías y reproducción privada existentes. Validar disponibilidad de enlaces externos aparte."
+      },
+      {
+        "id": "RF-184",
+        "page": 62,
+        "requirement": "El sistema debe mostrar los recursos del Centro de Conocimiento que se encuentren en estado Publicado, identificando título, tipo de recurso, autor y fecha.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php; Services/Media.php",
+        "note": "Catálogos, filtros, galerías y reproducción privada existentes. Validar disponibilidad de enlaces externos aparte."
+      },
+      {
+        "id": "RF-185",
+        "page": 62,
+        "requirement": "El sistema debe permitir buscar y filtrar recursos del Centro de Conocimiento por texto libre, temática técnica y formato del recurso.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php; Services/Media.php",
+        "note": "Catálogos, filtros, galerías y reproducción privada existentes. Validar disponibilidad de enlaces externos aparte."
+      },
+      {
+        "id": "RF-186",
+        "page": 62,
+        "requirement": "El sistema debe permitir reproducir videos o acceder a los enlaces de documentos externos vinculados a cada recurso publicado.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Repositories/ContentQuery.php; Services/Media.php",
+        "note": "Catálogos, filtros, galerías y reproducción privada existentes. Validar disponibilidad de enlaces externos aparte."
+      },
+      {
+        "id": "RF-187",
+        "page": 62,
+        "requirement": "El sistema debe permitir a los roles autorizados crear galerías registrando título, descripción, fecha, imagen de portada y archivos visuales asociados.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Services/ContentMeta.php",
+        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+      },
+      {
+        "id": "RF-188",
+        "page": 62,
+        "requirement": "El sistema debe permitir a los roles autorizados modificar los metadatos o el contenido visual de una galería existente.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Services/ContentMeta.php",
+        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+      },
+      {
+        "id": "RF-189",
+        "page": 62,
+        "requirement": "El sistema debe permitir transicionar el estado editorial de una galería entre Borrador, Pendiente de revisión y Publicado.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Services/ContentMeta.php",
+        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+      },
+      {
+        "id": "RF-190",
+        "page": 62,
+        "requirement": "El sistema debe permitir a los roles autorizados retirar del acceso público una galería publicada, cambiando su estado a Oculto sin eliminar el registro histórico.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Services/ContentMeta.php",
+        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+      },
+      {
+        "id": "RF-191",
+        "page": 62,
+        "requirement": "El sistema debe permitir a los roles autorizados registrar recursos de conocimiento ingresando título, descripción, tipo de material, autor, fecha y enlace o archivo",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Services/ContentMeta.php",
+        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+      },
+      {
+        "id": "RF-192",
+        "page": 62,
+        "requirement": "El sistema debe permitir a los roles autorizados modificar los datos y contenido de un recurso del Centro de Conocimiento existente",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Services/ContentMeta.php",
+        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+      },
+      {
+        "id": "RF-193",
+        "page": 63,
+        "requirement": "El sistema debe permitir transicionar el estado editorial de un recurso de conocimiento entre Borrador, Pendiente de revisión y Publicado",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Services/ContentMeta.php",
+        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+      },
+      {
+        "id": "RF-194",
+        "page": 63,
+        "requirement": "El sistema debe permitir a los roles autorizados retirar del catálogo público un recurso de conocimiento, cambiando su estado a Oculto sin eliminar su registro histórico.",
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; Services/ContentMeta.php",
+        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+      },
+      {
+        "id": "RF-195",
+        "page": 63,
+        "requirement": "El sistema debe permitir al Ejecutivo, Moderador y Administrador consultar la bandeja de publicaciones y comentarios reportados, visualizando el contenido, autor, denunciante y motivo.",
+        "status": "Fuera de alcance",
+        "evidence": "Services/Content.php",
+        "note": "Reportes y moderación marcados OUT OF SCOPE, se mantienen sus capacidades existentes."
+      },
+      {
+        "id": "RF-196",
+        "page": 63,
+        "requirement": "El sistema debe permitir al Ejecutivo, Moderador y Administrador dictaminar la resolución de un reporte, decidiendo la permanencia del contenido en la comunidad o su retiro definitivo.",
+        "status": "Fuera de alcance",
+        "evidence": "Services/Content.php",
+        "note": "Reportes y moderación marcados OUT OF SCOPE, se mantienen sus capacidades existentes."
+      },
+      {
+        "id": "RF-197",
+        "page": 63,
+        "requirement": "El sistema debe registrar obligatoriamente en la bitácora de moderación el identificador de la autoridad responsable, marca temporal y justificación al resolver un reporte.",
+        "status": "Fuera de alcance",
+        "evidence": "Services/Content.php",
+        "note": "Reportes y moderación marcados OUT OF SCOPE, se mantienen sus capacidades existentes."
+      },
+      {
+        "id": "RF-198",
+        "page": 63,
+        "requirement": "El sistema debe presentar a Ejecutivos y Administradores un panel con métricas agregadas y disociadas sobre interacción comunitaria, asistencia a eventos y volumen de conexiones.",
+        "status": "Código revisado",
+        "evidence": "Services/Statistics.php",
+        "note": "Analítica agregada con pruebas de paginación; rendimiento requiere carga y hardware del despliegue."
+      },
+      {
+        "id": "RF-199",
+        "page": 63,
+        "requirement": "El sistema debe mostrar un aviso de advertencia no bloqueante cuando la inactividad del usuario se aproxime al límite configurado, permitiendo extender la sesión activa.",
+        "status": "Código revisado",
+        "evidence": "assets/session.js; tests/session-policy.cjs",
+        "note": "Aviso no bloqueante en los dos últimos minutos, con extensión explícita. Polling y una pestaña oculta no renuevan actividad."
+      },
+      {
+        "id": "RF-200",
+        "page": 63,
+        "requirement": "El sistema debe revocar la sesión y redirigir a la pantalla de acceso cuando el usuario alcance el tiempo límite de inactividad establecido",
+        "status": "Código revisado",
+        "evidence": "Services/SessionPolicy.php; assets/session.js; SessionPolicyTest",
+        "note": "Backend invalida token tras 30 minutos; la interfaz redirige al acceso ante sesión expirada. Recordarme no evita el timeout."
+      },
+      {
+        "id": "RF-201",
+        "page": 63,
+        "requirement": "El sistema debe autenticar al usuario validando sus credenciales y el estado activo de su membresía, concediendo acceso a la plataforma según el rol correspondiente",
+        "status": "Código revisado",
+        "evidence": "Services/Membership.php; Services/SessionPolicy.php; Administration; MembershipTest; tests/admin-compliance.cjs",
+        "note": "Estado y vigencia administrables; denegación y revocación, incluso sin cron; reactivación con nuevo acceso conserva perfil, conexiones, mensajes y participaciones."
+      },
+      {
+        "id": "RF-202",
+        "page": 63,
+        "requirement": "El sistema debe permitir al Ejecutivo y al Administrador asignar una fecha y hora futura para diferir la divulgación de un contenido institucional.",
+        "status": "Pendiente",
+        "evidence": "Services/Content.php; Services/ContentMeta.php",
+        "note": "Estados editoriales presentes, pero falta completar agenda futura de publicación y su flujo UI/API."
+      },
+      {
+        "id": "RF-203",
+        "page": 63,
+        "requirement": "El sistema debe clasificar y conservar en estado Oculto el contenido institucional programado hasta que se alcance la fecha y hora establecida.",
+        "status": "Pendiente",
+        "evidence": "Services/Content.php; Services/ContentMeta.php",
+        "note": "Estados editoriales presentes, pero falta completar agenda futura de publicación y su flujo UI/API."
+      },
+      {
+        "id": "RF-204",
+        "page": 64,
+        "requirement": "El sistema debe transicionar automáticamente al estado Publicado el contenido institucional programado al cumplirse la fecha y hora configurada.",
+        "status": "Pendiente",
+        "evidence": "Services/Content.php; Services/ContentMeta.php",
+        "note": "Estados editoriales presentes, pero falta completar agenda futura de publicación y su flujo UI/API."
+      },
+      {
+        "id": "RF-205",
+        "page": 64,
+        "requirement": "El sistema debe validar que las contraseñas ingresadas durante el registro, cambio o restablecimiento cumplan con los parámetros configurados de longitud y combinación obligatoria de tipos de caracteres.",
+        "status": "Pendiente",
+        "evidence": "Services/Account.php; Services/Settings.php",
+        "note": "Mínimo fijo de 12 caracteres; no complejidad completa ni expiración de reset configurables."
+      },
+      {
+        "id": "RF-206",
+        "page": 64,
+        "requirement": "El sistema debe generar un enlace de recuperación único, cifrado y con tiempo de expiración configurable, y enviarlo exclusivamente al correo electrónico registrado de la cuenta correspondiente.",
+        "status": "Pendiente",
+        "evidence": "Services/Account.php; Services/Settings.php",
+        "note": "Mínimo fijo de 12 caracteres; no complejidad completa ni expiración de reset configurables."
+      },
+      {
+        "id": "RF-207",
+        "page": 64,
+        "requirement": "El sistema debe permitir al usuario establecer una nueva contraseña mediante el enlace de recuperación recibido, verificando previamente que sea válido, no haya expirado y no haya sido utilizado, y validando la nueva contraseña conforme a las políticas de complejidad establecidas.",
+        "status": "Código revisado",
+        "evidence": "Frontend/Login.php; WordPress core",
+        "note": "Reset delegado a claves temporales de WordPress; requiere recorrido de correo/enlace real."
+      },
+      {
+        "id": "RF-208",
+        "page": 64,
+        "requirement": "El sistema debe activar e integrar un mecanismo de validación automatizada (captcha de Cloudflare) en la interfaz de acceso cuando los intentos fallidos alcancen el umbral mínimo configurado.",
+        "status": "Parcial",
+        "evidence": "Services/Turnstile.php",
+        "note": "Captcha tras tres fallos configurable en activación, bloqueo cuenta/IP presente. Umbrales fijos; bloqueo cuenta de 10 minutos frente a 15 del PDF."
+      },
+      {
+        "id": "RF-209",
+        "page": 64,
+        "requirement": "El sistema debe aplicar un bloqueo temporal de acceso a la cuenta por el tiempo parametrizado cuando los intentos fallidos superen el límite máximo configurado, denegando temporalmente las peticiones de autenticación subsecuentes.",
+        "status": "Código revisado",
+        "evidence": "Services/CredentialPolicy.php; AccountRecovery; Account; Turnstile",
+        "note": "Complejidad, datos personales, secuencias, vigencia de recuperación, Recordarme y umbrales configurables. Recuperación pública genérica sin omitir captcha; contar intentos de direcciones inexistentes evita diferencia en el desafío. Integración con plugins externos pendiente."
+      },
+      {
+        "id": "RF-210",
+        "page": 64,
+        "requirement": "El sistema debe mostrar un control de selección opcional («Recordarme») en la interfaz de autenticación para prolongar la permanencia de la sesión activa del usuario.",
+        "status": "Código revisado",
+        "evidence": "Frontend/Login.php",
+        "note": "Checkbox Recordarme disponible."
+      },
+      {
+        "id": "RF-211",
+        "page": 64,
+        "requirement": "El sistema debe prorrogar la validez de la sesión autenticada durante el periodo configurable establecido cuando el usuario active la opción de permanencia al iniciar sesión",
+        "status": "Pendiente",
+        "evidence": "Frontend/LoginRequest.php; Services/Settings.php",
+        "note": "Recordarme usa duración absoluta de WordPress, pero caduca por 30 minutos de inactividad. Falta parametrizar la duración máxima."
+      },
+      {
+        "id": "RF-212",
+        "page": 65,
+        "requirement": "El sistema debe incorporar una barra lateral de navegación persistente que despliegue los accesos directos a los módulos autorizados según el rol institucional del usuario",
+        "status": "Código revisado",
+        "evidence": "templates/shell.php; Frontend/App.php",
+        "note": "Navegación por rol y cierre de sesión WordPress."
+      },
+      {
+        "id": "RF-213",
+        "page": 65,
+        "requirement": "El sistema debe mostrar un control de cierre de sesión («Cerrar sesión») en la sección inferior de la barra lateral de navegación para todos los usuarios autenticados",
+        "status": "Código revisado",
+        "evidence": "templates/shell.php; Frontend/App.php",
+        "note": "Navegación por rol y cierre de sesión WordPress."
+      }
+    ],
+    "RNF": [
+      {
+        "id": "RNF-001",
+        "page": 65,
+        "requirement": "Seguridad y Control de Acceso Centralizado (RBAC en WordPress): La plataforma debe centralizar el control de acceso basado en roles mediante la arquitectura de capacidades de WordPress (current_user_can), validando en el servidor que el usuario posea cuenta activa, membresía vigente y el rol correspondiente (Administrador, Ejecutivo, Moderador o Asociado) antes de renderizar vistas o procesar cualquier endpoint de la API REST de ASCLA Core.",
+        "status": "Parcial",
+        "evidence": "Domain/Roles.php; Services/Access.php",
+        "note": "RBAC existe; afinar Contacto/aliados y caducidad de membresía."
+      },
+      {
+        "id": "RNF-002",
+        "page": 65,
+        "requirement": "Prevención de Fuerza Bruta y WAF (Wordfence + Cloudflare Turnstile): El subsistema de seguridad debe interceptar intentos repetidos de autenticación fallida mediante el cortafuegos de Wordfence. Si se detectan 3 intentos fallidos consecutivos, el sistema debe desplegar un desafío anti-bot automatizado (Cloudflare Turnstile); de acumularse fallos hasta el límite configurado por el Administrador, el sistema debe aplicar un bloqueo temporal de acceso por 15 minutos sobre la IP y cuenta afectada.",
+        "status": "Parcial",
+        "evidence": "Services/Turnstile.php",
+        "note": "Bloqueo de cuenta de 15 minutos confirmado e implementado. Falta parametrizar umbrales y verificar Wordfence en el servidor."
+      },
+      {
+        "id": "RNF-003",
+        "page": 65,
+        "requirement": "Cifrado en Tránsito (HTTPS/TLS): Toda la comunicación y transmisión de datos entre el navegador web del usuario y el servidor web (Apache/Nginx) que hospeda la plataforma WordPress debe realizarse obligatoriamente bajo el protocolo HTTPS, forzando cifrado TLS 1.2 o superior para mitigar intercepciones y ataques de tipo Man-in-the-Middle. Transversal (Crítico en: )",
+        "status": "Externo",
+        "evidence": "Proxy/TLS del despliegue",
+        "note": "Verificar HTTPS y TLS >=1.2 en QA/UAT/producción; Docker local HTTP no demuestra cumplimiento."
+      },
+      {
+        "id": "RNF-004",
+        "page": 65,
+        "requirement": "Almacenamiento Criptográfico de Credenciales: Todas las contraseñas de las cuentas de usuario deben persistir en la tabla wp_users de MariaDB mediante derivación criptográfica robusta unidireccional con sal ( hashing mediante el esquema nativo de WordPress basado en bcrypt/phpass), impidiendo su almacenamiento, visualización o recuperación en texto plano bajo cualquier circunstancia.",
+        "status": "Código revisado",
+        "evidence": "WordPress wp_set_password/wp_check_password",
+        "note": "Hash y verificación delegados a WordPress; no contraseñas en texto plano."
+      },
+      {
+        "id": "RNF-005",
+        "page": 66,
+        "requirement": "Destrucción Segura de Sesiones y Expiración en Servidor: El proceso de cierre de sesión explícito y el temporizador de caducidad por inactividad continua (30 minutos) deben forzarse en el backend mediante la destrucción inmediata de las cookies de autenticación de WordPress ( auth_cookie ) y la revocación de tokens de sesión en el servidor, retornando código HTTP 401 Unauthorized ante peticiones subsecuentes.",
+        "status": "Código revisado",
+        "evidence": "Services/SessionPolicy.php; SessionPolicyTest; tests/session-policy.cjs",
+        "note": "Timeout de navegador validado en servidor a 30 minutos, destrucción del token, respuesta 401 y extensión explícita; logout nativo conserva revocación WordPress."
+      },
+      {
+        "id": "RNF-006",
+        "page": 66,
+        "requirement": "Privacidad y Restricción de Acceso a Recursos (Acceso Protegido): La plataforma no debe exponer perfiles, catálogos del directorio, conversaciones privadas, nóminas de eventos ni recursos del Centro de Conocimiento a visitantes no autenticados o usuarios con membresía inactiva, bloqueando el consumo no autorizado incluso a través de enlaces directos, descargas forzadas o endpoints REST.",
+        "status": "Parcial",
+        "evidence": "Services/Access.php; Services/Media.php; Services/Content.php",
+        "note": "Hay protección de rutas y descargas. Corregir excepciones de privacidad de roles."
+      },
+      {
+        "id": "RNF-007",
+        "page": 66,
+        "requirement": "Aislamiento y Custodia de Secretos de Integración: Las credenciales y claves de autenticación externas (API Key de OpenAI) deben administrarse como constantes protegidas en variables de entorno del servidor o en el archivo de configuración base ( wp-config.php ), quedando terminantemente prohibido su registro en código fuente, repositorios Git, base de datos pública o respuestas enviadas al navegador.",
+        "status": "Parcial",
+        "evidence": "Integrations/Secrets.php",
+        "note": "Secretos cifrados en opciones WP; el PDF pide entorno/wp-config, revisar almacenamiento y migración."
+      },
+      {
+        "id": "RNF-008",
+        "page": 66,
+        "requirement": "Latencia del Servidor en Navegación Interactiva: El tiempo de respuesta del servidor web y procesamiento en PHP para solicitudes HTTP y consultas de navegación general no debe superar los 2.0 segundos bajo condiciones normales de carga concurrente de hasta 50 asociados simultáneos.",
+        "status": "Externo",
+        "evidence": "tests/e2e.cjs",
+        "note": "Medir <2 segundos con 50 usuarios simultáneos, hardware objetivo. No inferirlo de pruebas funcionales."
+      },
+      {
+        "id": "RNF-009",
+        "page": 66,
+        "requirement": "Latencia de Mensajería y Notificaciones Asíncronas: Las operaciones interactivas que consumen la API REST de ASCLA Core (como la emisión/recepción de mensajes directos, despacho de alertas internas y actualización de contadores numéricos en la interfaz) no deben superar los 1.5 segundos de latencia de red bajo condiciones estables de conexión.",
+        "status": "Externo",
+        "evidence": "Services/Messaging.php; Services/Notifications.php",
+        "note": "Medir <1.5 segundos de mensajes/notificaciones bajo carga."
+      },
+      {
+        "id": "RNF-010",
+        "page": 66,
+        "requirement": "Rendimiento y Mitigación de Sobrecarga en Estadísticas: Las consultas analíticas de métricas de interacción para Ejecutivos y Administradores no deben penalizar la operatividad transaccional de la plataforma, debiendo procesarse y renderizarse en un tiempo inferior a 3.0 segundos mediante el uso de tablas agregadas en MariaDB o la API de Transients de WordPress.",
+        "status": "Externo",
+        "evidence": "Services/Statistics.php",
+        "note": "Medir <3 segundos, caché y consultas agregadas bajo carga."
+      },
+      {
+        "id": "RNF-011",
+        "page": 66,
+        "requirement": "Integridad Transaccional y Atomicidad (MariaDB InnoDB): Toda operación crítica multivariable que afecte varias tablas (como la reserva de cupos RSVP con aforo concurrente, disolución de conexiones o cambios de estado) debe procesarse bajo transacciones atómicas (ACID) en MariaDB mediante el motor de almacenamiento InnoDB, garantizando reversión total ( rollback ) ante excepciones.",
+        "status": "Pendiente",
+        "evidence": "Repositories/Store.php",
+        "note": "Advisory locks serializan operaciones; faltan transacciones SQL y rollback en escrituras múltiples."
+      },
+      {
+        "id": "RNF-012",
+        "page": 67,
+        "requirement": "Degradación Elegante y Tolerancia a Fallos Externos: La indisponibilidad, falla de red o agotamiento de cuota de servicios externos (OpenAI API o servicio SMTP de correo saliente) no debe interrumpir el funcionamiento ni provocar caídas en las funciones esenciales de la Intranet (perfil, directorio, mensajería y eventos).",
+        "status": "Parcial",
+        "evidence": "Integrations; Jobs/Queue.php",
+        "note": "Fallback AI/SMTP y pruebas existentes; simular fallos reales de todos los servicios."
+      },
+      {
+        "id": "RNF-013",
+        "page": 67,
+        "requirement": "Validación Rigurosa de Formularios e Integridad de Entrada: Todos los formularios de entrada de datos deben validar tipos, formatos, longitudes y atributos obligatorios tanto en la interfaz (frontend) como forzosamente del lado del servidor en PHP antes de realizar operaciones de persistencia en MariaDB, sanitizando caracteres para evitar inyecciones SQL o XSS.",
+        "status": "Parcial",
+        "evidence": "Services/ProfileValidation.php; Services/ContentMeta.php; assets/app.js",
+        "note": "Validación amplia; cerrar brechas del perfil mínimo, estados y políticas."
+      },
+      {
+        "id": "RNF-014",
+        "page": 67,
+        "requirement": "Trazabilidad e Inmutabilidad de Bitácoras (Audit Log): Todas las acciones críticas (cambios de membresía, asignación de roles, denegación de microeventos y resoluciones de moderación) deben quedar registradas de forma permanente e inalterable en la tabla wp_ascla_audit , almacenando el ID del actor, marca temporal UTC, acción y detalle de cambios ( diff antes/después).",
+        "status": "Parcial",
+        "evidence": "Services/Audit.php",
+        "note": "Auditoría con actor/fecha/acción, pero detalle limitado y no diff antes/después completo e inmutable."
+      },
+      {
+        "id": "RNF-015",
+        "page": 67,
+        "requirement": "Diseño Web Adaptativo (Responsive Web Design): La interfaz web desarrollada debe adaptarse fluidamente a dispositivos móviles (ancho mínimo 360px), tabletas (768px a 1023px) y computadoras de escritorio (desde 1024px), garantizando la completa disponibilidad de los módulos de networking sin pérdida de funciones. Transversal (Crítico en: )",
+        "status": "Validación pendiente",
+        "evidence": "assets/app.css; tests/e2e.cjs",
+        "note": "Hay responsive; comprobar rutas completas a 360,768,1024px."
+      },
+      {
+        "id": "RNF-016",
+        "page": 67,
+        "requirement": "Accesibilidad Web (Estándar WCAG 2.1 AA): La interfaz visual de la Intranet debe satisfacer las pautas de accesibilidad web WCAG 2.1 en nivel AA, garantizando un ratio de contraste cromático mínimo de 4.5:1 en elementos de texto, soporte de navegación mediante teclado y etiquetado semántico en formularios. Transversal (Crítico en: )",
+        "status": "Validación pendiente",
+        "evidence": "templates; assets/app.js; assets/app.css",
+        "note": "No se certifica WCAG 2.1 AA sin auditoría de teclado, etiquetas y contraste de todas las vistas."
+      },
+      {
+        "id": "RNF-017",
+        "page": 67,
+        "requirement": "Consistencia Lingüística e Internacionalización (i18n): Todo componente desarrollado dentro de la plataforma debe soportar internacionalización mediante la infraestructura estándar de localización de WordPress ( gettext / archivos .mo y .po ), garantizando que los elementos estáticos de la UI se muestren de forma homogénea en español institucional o inglés sin mezclas idiomáticas.",
+        "status": "Parcial",
+        "evidence": "Frontend/Language.php; languages/en.json",
+        "note": "Traducción propia JSON; falta integración gettext MO/PO requerida."
+      },
+      {
+        "id": "RNF-018",
+        "page": 67,
+        "requirement": "Compatibilidad con el Ecosistema WordPress: El desarrollo funcional centralizado en ASCLA Core debe apegarse a los estándares de desarrollo de WordPress (PHP 8.x, WP Coding Standards), garantizando interoperabilidad con los plugins transversales instalados (Wordfence Security y Akismet) sin sobrescribir tablas nativas de MariaDB ni alterar hooks esenciales del núcleo. Transversal ( al )",
+        "status": "Externo",
+        "evidence": "compose.yaml; WordPress destino",
+        "note": "PHP 8.3/WordPress local; compatibilidad Wordfence/Akismet requiere instalación real de destino."
+      },
+      {
+        "id": "RNF-019",
+        "page": 68,
+        "requirement": "Compatibilidad Multi-navegador: La plataforma web debe garantizar funcionalidad y fidelidad visual completa en las últimas dos versiones estables de los principales motores y navegadores del mercado: Google Chrome, Mozilla Firefox, Apple Safari y Microsoft Edge. Transversal ( al )",
+        "status": "Externo",
+        "evidence": "tests/e2e.cjs",
+        "note": "Suite Chromium; faltan dos últimas versiones Chrome/Firefox/Safari/Edge reales."
+      },
+      {
+        "id": "RNF-020",
+        "page": 68,
+        "requirement": "Integración Bidireccional con Google Calendar: Se descarta la sincronización directa y en tiempo real de eventos con Google Calendar en esta entrega debido a que exige autorizaciones OAuth2 individuales y configuración de infraestructura adicional",
+        "status": "Fuera de alcance",
+        "evidence": "Integrations/GoogleOAuth.php",
+        "note": "Calendar está fuera del mínimo; se conserva integración existente autorizada."
+      },
+      {
+        "id": "RNF-021",
+        "page": 68,
+        "requirement": "Transferencia de Archivos Adjuntos en Mensajería: Se descarta el intercambio y subida de archivos adjuntos (documentos, imágenes o binarios) en el módulo de mensajería interna, limitando la comunicación de forma estricta a texto plano para preservar espacio y prevenir vectores de malware.",
+        "status": "Fuera de alcance",
+        "evidence": "Services/Messaging.php",
+        "note": "Adjuntos de chat no requeridos."
+      },
+      {
+        "id": "RNF-022",
+        "page": 68,
+        "requirement": "Aplicación Móvil Nativa (iOS / Android): Se descarta el desarrollo y publicación de aplicaciones móviles nativas independientes en tiendas de distribución (App Store o Play Store), resolviendo la accesibilidad móvil mediante diseño responsivo en navegadores. Transversal",
+        "status": "Fuera de alcance",
+        "evidence": "Web responsive",
+        "note": "Aplicaciones móviles nativas no requeridas."
+      },
+      {
+        "id": "RNF-023",
+        "page": 68,
+        "requirement": "Autorregistro Público y Autoactivación: Se descarta cualquier pasarela o formulario público de autorregistro abierto en la plataforma web, asegurando el aprovisionamiento estrictamente cerrado mediante altas manuales por Administradores autorizados.",
+        "status": "Fuera de alcance",
+        "evidence": "Frontend/Login.php",
+        "note": "Registro público excluido; no habilitarlo."
+      },
+      {
+        "id": "RNF-024",
+        "page": 68,
+        "requirement": "Autonomía Operativa de Inteligencia Artificial: Se descarta que el motor de IA (OpenAI API) ejecute acciones de forma autónoma o decida sobre la plataforma (como enviar mensajes directos, confirmar conexiones o publicar microeventos sin revisión humana previa).",
+        "status": "Fuera de alcance",
+        "evidence": "Integrations; Jobs/Queue.php",
+        "note": "Autonomía decisoria IA excluida; no autorizar publicación automática sin revisión."
+      },
+      {
+        "id": "RNF-025",
+        "page": 68,
+        "requirement": "Respaldo y recuperación: La plataforma debe generar copias de seguridad automáticas de la base de datos y de los archivos esenciales de WordPress al menos una vez al día. Los respaldos deben conservarse durante un mínimo de siete días y permitir la restauración del servicio ante pérdida o corrupción de información.",
+        "status": "Externo",
+        "evidence": "Operación y respaldos",
+        "note": "Faltan evidencia diaria, retención >=7 días y ensayo de restauración en destino."
+      },
+      {
+        "id": "RNF-026",
+        "page": 68,
+        "requirement": "Disponibilidad del servicio: La plataforma debe mantener disponibles las funciones esenciales de autenticación, perfiles, directorio, mensajería y eventos durante su horario de operación, exceptuando mantenimientos programados previamente comunicados.",
+        "status": "Externo",
+        "evidence": "Monitoreo de operación",
+        "note": "Disponibilidad requiere historial y monitoreo del servicio; no se prueba por inspección del repositorio."
+      },
+      {
+        "id": "RNF-027",
+        "page": 69,
+        "requirement": "Registro y monitoreo de errores técnicos: La plataforma debe registrar los errores críticos de aplicación, base de datos e integraciones externas, almacenando fecha y hora, módulo afectado, nivel de gravedad y descripción técnica, sin guardar contraseñas, tokens ni claves de API.",
+        "status": "Parcial",
+        "evidence": "Services/Audit.php; Jobs/Queue.php",
+        "note": "Errores registrados parcialmente; unificar módulo/severidad/UTC y sanitización sin secretos."
+      }
+    ]
+  },
+  "extraction_note": "Filas identificadas por encabezado de ID, conservando continuaciones entre páginas; RF-93 del original se normaliza a RF-093. Referencias internas no se interpretan como nuevas filas."
+}

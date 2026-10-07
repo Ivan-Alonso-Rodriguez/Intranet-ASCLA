@@ -8,7 +8,7 @@ final class MicroEvents
     public static function create(array $onlyIds=[]): array
     {
         sort($onlyIds);
-        $month=($onlyIds?'demo-'.substr(hash('sha256',wp_json_encode($onlyIds)),0,12).'-':'').wp_date('Y-m');
+        $month=($onlyIds?'demo-'.substr(hash('sha256',wp_json_encode($onlyIds)),0,12).'-':'').MicroPlanning::period();
         return Store::lock('micro:'.$month,static function () use($month,$onlyIds) {
             $existing=get_option('ascla_micro_'.$month);
             if (is_array($existing)) {
@@ -23,11 +23,11 @@ final class MicroEvents
             $profiles=self::eligible($onlyIds);
             $history=get_option('ascla_group_history',[]);
             $blocked=self::blockedPairs($profiles);
-            $plan=GroupPlanner::plan($profiles,$history,(int)wp_date('n'),$blocked);
+            $plan=MicroPlanning::plan($profiles,$history,$blocked);
             $ids=[];
             foreach ($plan['groups'] as $group) {
-                $ids[]=self::proposal($group,(bool)$onlyIds);
-                $history=self::recordPairs($group,$history);
+                $ids[]=self::proposal($group['members'],(bool)$onlyIds,$group['topic']);
+                $history=self::recordPairs($group['members'],$history);
             }
             $result=['events'=>$ids,'waiting'=>$plan['waiting'],'month'=>$month];
             if ($ids) { update_option('ascla_micro_'.$month,$result,false); update_option('ascla_group_history',$history,false); }
@@ -75,7 +75,7 @@ final class MicroEvents
         foreach (get_users(['capability'=>'ascla_access','fields'=>'ID']) as $id) {
             if (($onlyIds&&!in_array((int)$id,$onlyIds,true)) || !Access::member((int)$id)) { continue; }
             $p=Profiles::raw((int)$id);
-            if (!empty($p['microevents'])&&!empty($p['networking'])&&!empty($p['directory'])) { $profiles[]=Profiles::matchingProfile((int)$id); }
+            if (!empty($p['microevents']) && !ProfileRequirements::missing($p)) { $profiles[]=Profiles::matchingProfile((int)$id); }
         }
         return $profiles;
     }
@@ -98,15 +98,17 @@ final class MicroEvents
         }
         return $history;
     }
-    private static function proposal(array $group,bool $demo): int
+    private static function proposal(array $group,bool $demo,int $topic): int
     {
                 $proposal=NetworkingAI::agenda($group,$demo);
                 $start=(new \DateTimeImmutable('+14 days 16:00',wp_timezone()))->setTimezone(new \DateTimeZone('UTC'));
-                $meta=['micro'=>true,'invitees'=>$group,'start'=>$start->format('c'),'end'=>$start->modify('+'.$proposal['duration_minutes'].' minutes')->format('c'),'capacity'=>count($group),'chatham'=>true,'modality'=>'Virtual','location'=>'Por confirmar','agenda'=>implode("\n",array_map(static fn($item)=>$item['minutes'].' min · '.$item['topic'],$proposal['agenda'])),'agenda_ai'=>$proposal,'invited'=>false];
+                $meta=['micro'=>true,'invitees'=>$group,'start'=>$start->format('c'),'end'=>$start->modify('+'.$proposal['duration_minutes'].' minutes')->format('c'),'capacity'=>Settings::get()['micro_capacity'],'chatham'=>true,'modality'=>'Virtual','location'=>'Por confirmar','agenda'=>implode("\n",array_map(static fn($item)=>$item['minutes'].' min · '.$item['topic'],$proposal['agenda'])),'agenda_ai'=>$proposal,'invited'=>false];
                 $id=wp_insert_post(wp_slash(['post_type'=>'ascla_event','post_title'=>$proposal['title'],'post_content'=>$proposal['objective'],'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
                 if (is_wp_error($id)) { throw new ServiceException('No se pudo crear el microevento.'); }
-                update_post_meta($id,'_ascla',$meta);
-                wp_update_post(['ID'=>$id,'post_status'=>Settings::get()['micro_approval']?'pending':'publish']);
+                update_post_meta($id,'_ascla',MicroLifecycle::defaults($meta+['topic_id'=>$topic]));
+                wp_set_object_terms($id,[$topic],'ascla_interest');
+                MicroLifecycle::history($id,'pending');
+                wp_update_post(['ID'=>$id,'post_status'=>'pending']);
 
         return $id;
     }
@@ -125,10 +127,10 @@ final class MicroEvents
     }
     public static function validateInvitees(array $meta): void
     {
-        $group=array_map('intval',$meta['invitees']??[]);
-        Access::require(count($group)>=4&&count($group)<=6,'Revise el tamaño del grupo antes de aprobar.',400);
+        $group=array_values(array_unique(array_map('intval',$meta['invitees']??[])));
+        Access::require(count($group)>=(int)($meta['micro_min']??Settings::get()['micro_min']) && count($group)<=(int)($meta['capacity']??Settings::get()['micro_capacity']),'Revise el tamaño del grupo antes de aprobar.',400);
         foreach($group as $a){
-            $p=Profiles::raw($a);Access::require(!empty($p['microevents'])&&!empty($p['networking'])&&!empty($p['directory']),'Un participante ya no acepta microeventos.',400);
+            Access::require(Access::member($a),'Un participante ya no tiene membresía activa.',400);$p=Profiles::raw($a);Access::require(Access::member($a) && !empty($p['microevents']) && !ProfileRequirements::missing($p),'Un participante ya no acepta microeventos.',400);
             foreach($group as $b){if($a<$b){ Access::require(!Messaging::blocked($a,$b),'El grupo contiene un bloqueo entre participantes. Cree otra propuesta.',400); }}
         }
     }

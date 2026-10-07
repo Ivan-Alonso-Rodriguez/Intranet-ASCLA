@@ -191,7 +191,7 @@ final class NotificationEmail
     private const KINDS=[
         'connection'=>'connections','connection_accepted'=>'connections',
         'conversation_request'=>'messages','conversation_accepted'=>'messages','conversation_group'=>'messages','message'=>'messages',
-        'event'=>'events','event_waitlist_available'=>'events','event_cancelled'=>'events','event_updated'=>'events','microevent'=>'events',
+        'event'=>'events','event_reminder'=>'events','event_waitlist_available'=>'events','event_cancelled'=>'events','event_updated'=>'events','microevent'=>'events',
         'support_received'=>'support','support_request'=>'support','support_update'=>'support',
     ];
 
@@ -222,6 +222,7 @@ final class NotificationEmail
             'event_waitlist_available'=>'Se liberó un cupo para ti en un evento de ASCLA. Entra para confirmar tu asistencia.',
             'event_cancelled'=>'Un evento en el que participabas o estabas en espera fue cancelado. Revisa los detalles en ASCLA.',
             'event_updated'=>'Un evento relacionado contigo cambió información importante. Revisa los detalles actualizados en ASCLA.',
+            'event_reminder'=>'Se acerca un encuentro en el que confirmaste tu participación. Revisa el horario y los detalles en ASCLA.',
             'microevent'=>'Tienes una nueva invitación a un círculo ASCLA.',
             'support_received','support_request','support_update'=>'Hay una actualización de una solicitud en ASCLA. Ingresa para consultar sus detalles.',
             default=>Access::excerpt($fallback,255),

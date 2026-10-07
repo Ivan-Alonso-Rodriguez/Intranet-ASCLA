@@ -4,6 +4,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 mkdir -p coverage test-results
+rm -f coverage/source-revision
+SOURCE_REVISION="$(git rev-parse HEAD)"
+SOURCE_CLEAN="$(git status --porcelain)"
 
 # Each build has its own database, volumes and DNS alias on proxy_net.
 SAFE_BRANCH="$(printf '%s' "${BRANCH_NAME:-ci}" | tr -cs '[:alnum:]_-' '-')"
@@ -45,7 +48,7 @@ ASCLA_SEED_DATA=true
 EOF_ENV
 
 echo 'Levantando WordPress desechable para pruebas...'
-dc up -d db mailpit wordpress cron
+dc up -d db mailpit wordpress
 
 echo 'Esperando e inicializando WordPress/ASCLA...'
 INSTALADO=no
@@ -107,6 +110,8 @@ sed -i 's#/opt/ascla-tests/#tests/#g' coverage/junit.xml
 
 printf '%s' '{"action":"setup"}' | dc exec -T wordpress php /opt/ascla-tests/statistics-fixture.php > test-results/statistics-fixture.json
 
+dc up -d cron
+
 echo 'Ejecutando pruebas E2E y cobertura JavaScript para SonarQube...'
 PLAYWRIGHT_IMAGE="${PLAYWRIGHT_IMAGE:-mcr.microsoft.com/playwright:v1.62.1-noble}"
 docker run --rm --ipc=host \
@@ -128,6 +133,7 @@ docker run --rm --ipc=host \
     corepack pnpm install --frozen-lockfile --ignore-scripts
     cd /work
     export NODE_PATH=/tmp/ascla-node/node_modules
+    node tests/manual-workflow.cjs
     node tests/e2e.cjs
     node scripts/verify-coverage.cjs
   '
@@ -135,6 +141,10 @@ docker run --rm --ipc=host \
 if [ ! -s coverage/lcov.info ] || ! grep -q '^SF:' coverage/lcov.info; then
   echo 'ERROR: no se genero un coverage/lcov.info valido.'
   exit 1
+fi
+
+if [ -z "$SOURCE_CLEAN" ] && [ -z "$(git status --porcelain)" ] && [ "$(git rev-parse HEAD)" = "$SOURCE_REVISION" ]; then
+  printf '%s\n' "$SOURCE_REVISION" > coverage/source-revision
 fi
 
 echo 'Pruebas finalizadas. Reportes PHP y JavaScript disponibles en coverage/.'

@@ -177,17 +177,17 @@ final class NotificationsTest extends TestCase
         self::assertFalse(Notifications::list()[0]['available']);
         Notifications::send($this->users[2],'connection','Conexión','',['type'=>'profile','id'=>$this->users[0]]);
         self::assertStringContainsString('member='.$this->users[0],Notifications::list()[0]['url']);
-        wp_set_current_user($this->users[0]); Profiles::save(['directory'=>false]);
+        wp_set_current_user($this->users[0]); Profiles::save(ascla_test_profile(['directory'=>false]));
         wp_set_current_user($this->users[2]); self::assertFalse(Notifications::list()[0]['available']);
     }
 
-    public function testSupportRequestsNotifyModerationAndStatusChangesNotifyRequester(): void
+    public function testAssignedSupportStaffAndRequesterReceiveStatusNotifications(): void
     {
         $moderator=wp_insert_user([
             'user_login'=>'notice_mod_'.bin2hex(random_bytes(6)),
             'user_pass'=>wp_generate_password(30),
             'display_name'=>'Moderador Prueba',
-            'role'=>'ascla_moderator',
+            'role'=>'administrator',
         ]);
         self::assertIsInt($moderator); $this->users[]=$moderator;
 
@@ -198,6 +198,7 @@ final class NotificationsTest extends TestCase
             'meta'=>['description'=>'Soporte técnico'],
         ]);
         $this->posts[]=(int)$support['id'];
+        ascla_test_support_state((int)$support['id'],$moderator);wp_set_current_user($this->users[0]);
 
         $mine=Notifications::feed([])['items'][0];
         self::assertSame('support_received',$mine['kind']);
@@ -214,7 +215,7 @@ final class NotificationsTest extends TestCase
         wp_set_current_user($this->users[0]);
         $updated=Notifications::feed([])['items'][0];
         self::assertSame('support_update',$updated['kind']);
-        self::assertStringContainsString('En atención',$updated['title']);
+        self::assertStringContainsString('En revisión',$updated['title']);
         $before=Store::count('notifications','user_id=%d AND kind=%s',[$this->users[0],'support_update']);
 
         wp_set_current_user($moderator);
@@ -223,7 +224,7 @@ final class NotificationsTest extends TestCase
         self::assertSame($before,Store::count('notifications','user_id=%d AND kind=%s',[$this->users[0],'support_update']));
 
         wp_set_current_user($moderator);
-        Administration::contactStatus((int)$support['id'],'closed');
+        Administration::contactStatus((int)$support['id'],'resolved','Respuesta registrada.');
         wp_set_current_user($this->users[0]);
         $resolved=Notifications::feed([])['items'][0];
         self::assertSame('support_update',$resolved['kind']);

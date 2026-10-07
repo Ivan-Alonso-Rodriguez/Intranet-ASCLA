@@ -40,7 +40,7 @@ final class CapabilityHierarchyTest extends TestCase
             self::assertSame($moderate,$data['moderator']);self::assertSame($publish,$data['executive']);self::assertSame($manage,$data['admin']);self::assertSame($moderate,$data['admin_area']);
             foreach(['forum','topic','hub','contact'] as $type){self::assertTrue($data['can_create'][$type]);}
             foreach(['event','gallery','resource'] as $type){self::assertSame($publish,$data['can_create'][$type]);}
-            foreach(['admin'=>$moderate,'admin/contacts'=>$moderate,'admin/users'=>$manage,'settings'=>$manage] as $route=>$allowed){
+            foreach(['admin'=>$moderate,'admin/contacts'=>$publish,'admin/users'=>$manage,'settings'=>$manage] as $route=>$allowed){
                 self::assertSame($allowed?200:403,$this->api($route)->get_status(),$role.' '.$route);
             }
         }

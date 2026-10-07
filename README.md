@@ -4,11 +4,23 @@ Plugin WordPress portable para una comunidad profesional privada. Incluye perfil
 
 Toda la funcionalidad propia está en `wp-content/plugins/ascla-core/`. Elementor es opcional. No se modifica WordPress Core ni se necesita un tema específico. El plugin conserva sus datos al desactivarse o desinstalarse.
 
-## Versión actual: 1.10.5 · esquema 13
+## Versión actual: 1.10.6 · esquema 14
 
-La versión **1.10.5** completa **CU009 – Consultar recomendaciones** sin cambiar el esquema de datos: convierte Inicio en el punto principal de descubrimiento con carruseles responsivos de hasta cinco perfiles y materiales afines, lotes automáticos cada siete días, elegibilidad por perfil mínimo y consentimiento, explicaciones de afinidad, aviso de baja coincidencia y descarte privado reversible desde Perfil. La configuración permite ajustar el umbral y la cuota (máximo cinco), mientras OpenAI y los demás proveedores conservan la degradación segura existente. Consulta el detalle en [VERSION_HISTORY.md](VERSION_HISTORY.md).
+La versión **1.10.6** consolida la adecuación de ASCLA al Documento de Análisis y Diseño y el cierre de los casos QA 024–058. Refuerza sesiones y credenciales, membresías, privacidad y revisión de perfiles, Directorio, Contacto, conexiones y mensajería, además del ciclo de vida de eventos y microeventos. También incorpora la migración de auditoría del **esquema 14** y sincroniza el paquete instalable, SonarQube, pruebas de cierre y documentación. Consulta el detalle en [VERSION_HISTORY.md](VERSION_HISTORY.md).
 
-**Estado documental:** `1.10.5` es la versión vigente; `1.10.4` es la versión inmediatamente anterior. El historial se presenta de forma descendente (más reciente → más antigua) para conservar una lectura cronológica clara.
+**Estado documental:** `1.10.6` es la versión vigente; `1.10.5` es la versión inmediatamente anterior. El historial se presenta de forma descendente (más reciente → más antigua) para conservar una lectura cronológica clara.
+
+La adecuación local al documento y los [fixes de QA 024–058](BUGFIXES_QA.md) forman parte de esta versión. Estado y pendientes: [COMPLIANCE.md](COMPLIANCE.md).
+
+### Cambios principales de 1.10.6
+
+- **Seguridad y sesiones:** inactividad de 30 minutos, recuperación de cuenta, políticas configurables de contraseña, captcha y bloqueo temporal, sin exponer credenciales ni secretos.
+- **Membresías y perfiles:** estados activo/suspendido/vencido, requisitos mínimos de perfil, revisión configurable, privacidad reforzada y exclusión de perfiles no elegibles del Directorio y recomendaciones.
+- **Conexiones y mensajería:** presentación opcional, rechazo silencioso, esperas de reconexión, bloqueo que disuelve el vínculo y conservación del historial permitido sin edición ni borrado de mensajes enviados.
+- **Contacto y administración:** flujo Pendiente → En revisión → Resuelta → Cerrada, asignación, respuesta e historial; cambios profesionales administrativos vinculados a solicitudes autorizadas.
+- **Eventos y microeventos:** reconfirmación por reprogramación, recordatorios, lista de espera FIFO con ofertas persistentes y vencimiento, y ciclo de propuestas de microeventos con aprobación humana.
+- **Auditoría y compatibilidad:** esquema **14** para ampliar el detalle de auditoría conservando datos existentes; se mantienen las funciones publicadas de 1.10.5.
+- **Entrega:** metadatos, SonarQube, pruebas de cierre, documentación y `dist/ascla-core.zip` quedan alineados con **1.10.6**.
 
 ### Cambios principales de 1.10.5
 
@@ -214,12 +226,8 @@ Si faltan páginas, reactiva el plugin o ejecuta `wp ascla migrate`. Si aparecen
 
 La documentación interna de desarrollo se conserva localmente en `docs/`, pero esa carpeta está excluida deliberadamente del repositorio de GitHub.
 
-## Jenkins + SonarQube del curso
+## Validación manual de QA y UAT
 
-El repositorio incluye un `Jenkinsfile` con el mismo flujo general del proyecto de referencia del curso: `development` despliega; `qa` y `uat` ejecutan pruebas PHP con cobertura, SonarQube, Quality Gate y luego despliegan; `main` permanece protegida sin despliegue automático.
+El flujo activo usa Git, Docker y SonarQube sin Jenkins. Consulta [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md) para promover ramas, generar cobertura y analizar ASCLA-QA / ASCLA-UAT esperando el Quality Gate. El Jenkinsfile es opcional.
 
-En Jenkins deben existir las credenciales de tipo **Secret file** `ASCLA_DEV`, `ASCLA_QA` y `ASCLA_UAT`. Cada archivo debe definir sus propios puertos (`ASCLA_HTTP_PORT`, `ASCLA_MAILPIT_PORT`) y la URL del entorno (`ASCLA_SITE_URL`) para evitar colisiones. También deben estar configurados globalmente `SonarScanner` y `SonarQube-Server`.
-
-Antes de activar el job hay que confirmar con el TA el `sonar.projectKey` definitivo y que el webhook de SonarQube hacia Jenkins esté configurado para que `waitForQualityGate` pueda recibir el resultado. Las credenciales de SonarQube no se guardan en Git.
-
-La cobertura PHP se genera en `coverage/clover.xml` y los resultados PHPUnit en `coverage/junit.xml`. La cobertura JavaScript (`coverage/lcov.info`) queda pendiente de integrar al CI; por eso su propiedad está comentada en `sonar-project.properties`.
+La revisión de requisitos y las brechas restantes se documentan en [COMPLIANCE.md](COMPLIANCE.md). Un Quality Gate aprobado no acredita por sí solo todos los requisitos funcionales.

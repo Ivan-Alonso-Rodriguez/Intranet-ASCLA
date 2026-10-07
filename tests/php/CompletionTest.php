@@ -15,8 +15,8 @@ final class CompletionTest extends TestCase
             self::assertIsInt($id); $this->users[]=$id;
         }
         wp_set_current_user($this->users[0]); Settings::save(['ai_mode'=>'mock','youtube_mode'=>'mock']);
-        foreach (['interest','category','area'] as $tax) { $term=wp_insert_term('Cierre '.bin2hex(random_bytes(4)),'ascla_'.$tax); $this->terms[$tax]=(int)$term['term_id']; }
-        foreach (array_slice($this->users,1) as $id) { wp_set_current_user($id); Profiles::save(['networking'=>true,'interests'=>[$this->terms['interest']],'areas'=>[$this->terms['area']]]); }
+        foreach (['interest','category','area','industry','goal'] as $tax) { $term=wp_insert_term('Cierre '.bin2hex(random_bytes(4)),'ascla_'.$tax); $this->terms[$tax]=(int)$term['term_id']; }
+        foreach (array_slice($this->users,1) as $id) { wp_set_current_user($id); Profiles::save(['first_name'=>'Persona','last_name'=>'Completa','position'=>'Analista','company'=>'Pruebas','city'=>'Lima','bio'=>'Perfil completo de prueba','industries'=>[$this->terms['industry']],'goals'=>[$this->terms['goal']],'networking'=>true,'interests'=>[$this->terms['interest']],'areas'=>[$this->terms['area']]]); }
         wp_set_current_user($this->users[0]);
     }
     protected function tearDown(): void

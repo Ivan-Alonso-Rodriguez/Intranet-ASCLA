@@ -12,7 +12,7 @@ final class ConnectionsTest extends TestCase
         $this->schema=(int)get_option('ascla_schema');
         foreach(['Alba','Bruno','Celia'] as $name) {
             $id=wp_insert_user(['user_login'=>'conn_'.bin2hex(random_bytes(6)),'user_pass'=>wp_generate_password(32),'role'=>'ascla_member','display_name'=>$name]);
-            $this->users[]=$id; wp_set_current_user($id); Profiles::save(['first_name'=>$name,'last_name'=>'Prueba','position'=>$name.' Cargo','company'=>$name.' Organización','networking'=>true,'directory'=>true]);
+            $this->users[]=$id; wp_set_current_user($id); Profiles::save(ascla_test_profile(['first_name'=>$name,'last_name'=>'Prueba','position'=>$name.' Cargo','company'=>$name.' Organización','networking'=>true,'directory'=>true]));
         }
         wp_set_current_user($this->users[0]);
     }
@@ -55,12 +55,12 @@ final class ConnectionsTest extends TestCase
         self::assertFalse(Connections::between($a,$b)['can_request']);
         foreach(Notifications::list() as $notice) self::assertStringNotContainsString('quiere conectar',$notice['title']);
     }
-    public function testRejectDoesNotConnectAndAllowsNewRequest(): void
+    public function testRejectDoesNotConnectAndPreventsImmediateNewRequest(): void
     {
         [$a,$b]=$this->users; $id=Connections::request($b)['request_id']; wp_set_current_user($b);
         self::assertSame('none',Connections::respond($id,'reject')['state']); self::assertNull(Store::one('relations',$id));
         self::assertFalse(Connections::areConnected($a,$b)); self::assertCount(0,Connections::listing()['incoming']);
-        wp_set_current_user($a); self::assertGreaterThan($id,Connections::request($b)['request_id']);
+        wp_set_current_user($a); self::assertSame(409,$this->api('POST','relations',['target'=>$b,'kind'=>'connect','active'=>true])->get_status());
     }
     public function testSenderCanCancelPendingRequestAndRecipientNotificationDisappears(): void
     {
@@ -85,8 +85,9 @@ final class ConnectionsTest extends TestCase
         $after=Connections::remove($b);
         self::assertSame('none',$after['state']); self::assertFalse($after['can_message']);
         self::assertSame(1,Store::count('messages','conversation_id=%d',[$id]));
-        self::assertSame(404,$this->api('GET','conversations/'.$id)->get_status());
-        self::assertSame([],Messaging::conversations());
+        self::assertSame(200,$this->api('GET','conversations/'.$id)->get_status());
+        self::assertCount(1,Messaging::conversations());
+        self::assertFalse(Messaging::conversation($id)['can_message']);
     }
 
     public function testRN010ProtectsLegacyConversationsBeforeAcceptanceAndAllowsBothSendersAfterwards(): void
@@ -145,12 +146,12 @@ final class ConnectionsTest extends TestCase
         [$a,$b]=$this->users;$this->accept();$id=(int)Messaging::start($b)['id'];$this->conversations[]=$id;
         Messaging::send($id,'Before change'); wp_set_current_user($b); Messaging::relation($a,'block',true);
         self::assertFalse(Connections::between($a,$b)['can_message']);
-        wp_set_current_user($a);self::assertSame(403,$this->api('POST','conversations/'.$id.'/messages',['body'=>'Blocked'])->get_status());
-        wp_set_current_user($b);Messaging::relation($a,'block',false); Messaging::send($id,'After unblock');
-        $connection=Connections::between($a,$b)['connection_id']; Store::delete('relations',['id'=>$connection]);
+        wp_set_current_user($a);self::assertSame(404,$this->api('POST','conversations/'.$id.'/messages',['body'=>'Blocked'])->get_status());
+        wp_set_current_user($b);Messaging::relation($a,'block',false);
+        self::assertFalse(Connections::areConnected($a,$b));
         self::assertSame(404,$this->api('GET','conversations/'.$id)->get_status());self::assertSame([],Messaging::conversations());
         self::assertSame(404,$this->api('POST','conversations/'.$id.'/messages',['body'=>'Revoked'])->get_status());
-        self::assertSame(2,Store::count('messages','conversation_id=%d',[$id]));
+        self::assertSame(1,Store::count('messages','conversation_id=%d',[$id]));
     }
     public function testLegacyReciprocalRequestsRequireExplicitConsentAndAreNormalizedOnDecision(): void
     {
@@ -222,6 +223,7 @@ final class ConnectionsTest extends TestCase
         $message=Messaging::send($id,'Mensaje grupal'); $mid=(int)$message['id'];
         $mine=Messaging::messages($id); self::assertSame(0,(int)$mine['items'][0]['read_count']); self::assertSame(2,(int)$mine['items'][0]['read_total']);
         wp_set_current_user($b); self::assertCount(1,Messaging::messages($id)['items']);
+        ASCLA\Core\Services\ConversationVisibility::read($id,$mid);
         self::assertFalse(Connections::areConnected($b,$c));
         self::assertSame($b,(int)Messaging::send($id,'Respuesta grupal')['sender_id']);
         wp_set_current_user($a); $poll=Messaging::messages($id,0,$mid);

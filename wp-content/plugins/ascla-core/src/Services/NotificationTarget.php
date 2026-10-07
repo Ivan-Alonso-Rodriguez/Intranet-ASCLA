@@ -28,6 +28,7 @@ final class NotificationTarget
         'event_waitlist_available'=>['Eventos','calendar','eventos','Confirmar cupo'],
         'event_cancelled'=>['Eventos','calendar','eventos','Ver evento cancelado'],
         'event_updated'=>['Eventos','calendar','eventos','Ver cambios del evento'],
+        'event_reminder'=>['Eventos','calendar','eventos','Ver eventos'],
         'microevent'=>['Eventos','calendar','eventos','Ver eventos'],
         'resource'=>['Conocimiento','book','centro-conocimiento','Explorar recursos'],
         'networking'=>[self::NETWORK_LABEL,'users','directorio','Explorar directorio'],
@@ -114,8 +115,8 @@ final class NotificationTarget
     {
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
         $state=(string)($meta['request_status']??'open');
-        $stateEs=['open'=>'Recibida','progress'=>'En atención','closed'=>'Resuelta'][$state]??'Recibida';
-        $stateEn=['open'=>'Received','progress'=>'In progress','closed'=>'Resolved'][$state]??'Received';
+        $stateEs=SupportRequests::STATES[$state]??'Pendiente';
+        $stateEn=['open'=>'Pending','progress'=>'In review','resolved'=>'Resolved','closed'=>'Closed'][$state]??'Pending';
         $stateLabel=Language::english()?$stateEn:$stateEs;
         $number='#'.$post->ID;
         if ($view['kind']==='support_request') {

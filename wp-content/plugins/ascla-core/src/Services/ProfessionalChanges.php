@@ -8,9 +8,10 @@ final class ProfessionalChanges
 {
     private static function eligible(\WP_Post $post,int $member): bool
     {
+        SupportRequests::initialize($post->ID);
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
         return $post->post_type==='ascla_contact' && $post->post_status==='private'
-            && (int)$post->post_author===$member
+            && (int)$post->post_author===$member && SupportRequests::canHandle($post->ID)
             && in_array($meta['request_status']??'open',['open','progress'],true)
             && !get_post_meta($post->ID,'_ascla_professional_change',true);
     }

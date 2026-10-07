@@ -97,7 +97,7 @@ final class AdminUserManagementTest extends TestCase
     {
         wp_set_current_user($this->member);
         $request=\ASCLA\Core\Services\Content::save('contact',['title'=>'Cambio profesional','body'=>'Solicito actualizar Cargo y Empresa.']);
-        $this->posts[]=$request['id'];
+        $this->posts[]=$request['id'];ascla_test_support_state($request['id'],$this->admin);
         wp_set_current_user($this->admin);
         $detail=$this->api('GET','admin/users/'.$this->member);
         self::assertSame(200,$detail->get_status());

@@ -47,6 +47,7 @@ final class ContentQuery
             if (!empty($filter[$key])) { $args['tax_query'][] = ['taxonomy' => 'ascla_' . $taxonomy, 'field' => 'term_id', 'terms' => absint($filter[$key])]; }
         }
         if ($type !== 'event') { return $args; }
+        if (!empty($filter['micro'])) { $args['meta_query'][]=['key'=>'_ascla_micro','value'=>'1']; }
         $args['meta_key'] = '_ascla_start';
         $direction = rest_sanitize_boolean($filter['past'] ?? false) ? 'DESC' : 'ASC';
         $args['orderby'] = ['meta_value' => $direction, 'ID' => $direction];

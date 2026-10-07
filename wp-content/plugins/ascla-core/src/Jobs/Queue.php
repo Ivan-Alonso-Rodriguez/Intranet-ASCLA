@@ -5,7 +5,7 @@ use ASCLA\Core\Services\{Access,Audit,Knowledge,MicroEvents,Notifications,Conten
 final class Queue
 {
     private const DEMO_MODE='DEMO MODE';
-    public static function boot(): void { add_action('ascla_jobs',[self::class,'run']); add_action('ascla_jobs',[Birthdays::class,'maybeProcess'],20); add_action('ascla_jobs_continue',[self::class,'run']); add_action('ascla_monthly',[MicroEvents::class,'monthly']); add_action('ascla_discovery',static fn()=>self::enqueue('discovery',[],0)); add_action('ascla_recommendations',static fn()=>self::enqueue('recommendations',[],0)); }
+    public static function boot(): void { add_action('ascla_event_offers',[\ASCLA\Core\Services\Events::class,'refreshWaitlist']); add_action('ascla_jobs',[self::class,'run']); add_action('ascla_jobs',[Birthdays::class,'maybeProcess'],20); add_action('ascla_jobs_continue',[self::class,'run']); add_action('ascla_microevents',[MicroEvents::class,'monthly']); add_action('ascla_micro_tick',[\ASCLA\Core\Services\MicroLifecycle::class,'tick']); add_action('ascla_event_reminder',[\ASCLA\Core\Services\EventReminders::class,'send'],10,2); add_action('ascla_discovery',static fn()=>self::enqueue('discovery',[],0)); add_action('ascla_recommendations',static fn()=>self::enqueue('recommendations',[],0)); }
     public static function enqueue(string $kind,array $payload,int $user=-1): array
     {
         Access::require(in_array($kind,['multimedia','answer','microevents','social','resource_notifications','discovery','recommendations','video_metadata'],true),'Trabajo no válido.',400);

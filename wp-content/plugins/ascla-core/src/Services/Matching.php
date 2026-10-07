@@ -102,15 +102,7 @@ final class Matching
         try { $profile=Profiles::raw($id); }
         catch (\ASCLA\Core\Rest\ApiException) { return ['eligible'=>false,'reason'=>'membership','missing'=>[],'completion'=>0]; }
         $completion=Profiles::completion($id);
-        $missing=[];
-        if (trim((string)($profile['first_name']??''))==='' || trim((string)($profile['last_name']??''))==='') { $missing[]='Nombres y apellidos'; }
-        if (trim((string)($profile['position']??''))==='') { $missing[]='Cargo o profesión'; }
-        if (trim((string)($profile['company']??''))==='') { $missing[]='Empresa u organización'; }
-        if (empty($profile['industries'])) { $missing[]='Sector profesional'; }
-        if (trim((string)($profile['country']??''))==='' && trim((string)($profile['city']??''))==='') { $missing[]='Ciudad o país'; }
-        if (trim((string)($profile['bio']??''))==='') { $missing[]='Descripción profesional'; }
-        if (empty($profile['interests'])) { $missing[]='Al menos un interés'; }
-        if (empty($profile['goals'])) { $missing[]='Al menos un objetivo de networking'; }
+        $missing=ProfileRequirements::missing($profile);
         $reason='';
         if (!Access::member($id)) { $reason='membership'; }
         elseif (empty($profile['networking'])) { $reason='disabled'; }
@@ -127,7 +119,7 @@ final class Matching
     private static function batchSignature(int $userId): string
     {
         $settings=Settings::get();$profile=Profiles::raw($userId);
-        return hash('sha256',wp_json_encode([$profile['revision']??0,$settings['matching_min_affinity']??30,$settings['matching_max_suggestions']??5,$settings['matching_weights']??[]]));
+        return hash('sha256',wp_json_encode([$profile['revision']??0,(int)get_option('ascla_profile_revision',0),$settings['matching_min_affinity']??30,$settings['matching_max_suggestions']??5,$settings['matching_weights']??[]]));
     }
 
     private static function batch(int $userId): array

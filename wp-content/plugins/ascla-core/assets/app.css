@@ -4034,3 +4034,12 @@ html[data-ascla-theme="dark"] #ascla-root .recommendation-low-match p{color:#d8c
   #ascla-root .dismissed-recommendation-row{grid-template-columns:auto minmax(0,1fr)}
   #ascla-root .dismissed-recommendation-row>.btn{grid-column:1/-1;width:100%;justify-content:center}
 }
+
+.ascla-session-warning{position:fixed;right:20px;bottom:20px;z-index:10000;margin:0;max-width:min(440px,calc(100vw - 40px));padding:1.5rem;border:1px solid CanvasText;border-radius:12px;color:CanvasText;background:Canvas;box-shadow:0 12px 40px #0005}
+
+.directory-filters .directory-multiple{flex:1 1 180px;min-width:0}
+.directory-filters .directory-multiple select{width:100%;max-width:100%;min-height:90px}
+.directory-filters #directory-multiple-help{flex-basis:100%}
+
+.connection-row[hidden]{display:none}
+.connections-search{max-width:460px;margin:16px 0}

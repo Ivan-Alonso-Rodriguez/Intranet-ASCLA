@@ -31,7 +31,7 @@ final class ContentLifecycleTest extends TestCase
         foreach(array_keys(ASCLA\Core\Domain\Catalog::TYPES) as $type){
             $meta=$type==='event'?['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000)]:[];
             $p=$this->post($type,['meta'=>$meta]);
-            if($type==='contact')$p=ASCLA\Core\Services\Administration::contactStatus($p['id'],'closed');
+            if($type==='contact') { ascla_test_support_state($p['id'],$this->users[0],'closed');self::assertSame(200,$this->api('DELETE','items/'.$p['id'])->get_status());self::assertSame('private',get_post_status($p['id']));continue; }
             self::assertTrue($p['can_delete']);
             self::assertSame(200,$this->api('DELETE','items/'.$p['id'])->get_status());self::assertSame('trash',get_post_status($p['id']));
             self::assertSame(404,$this->api('GET','items/'.$p['id'])->get_status());self::assertSame(404,$this->api('DELETE','items/'.$p['id'])->get_status());
@@ -86,7 +86,7 @@ final class ContentLifecycleTest extends TestCase
     public function testFileDeletionRemovesPostAndProfileReferencesButPreservesOtherFiles():void
     {
         wp_set_current_user($this->users[2]);$id=Store::insert('media',['user_id'=>$this->users[2],'post_id'=>0,'name'=>'lifecycle-private.png','mime'=>'image/png','bytes'=>'fixture','created_at'=>current_time('mysql',true)]);$this->media[]=$id;
-        Profiles::save(['photo_id'=>$id]);$post=$this->post('hub',['meta'=>['media_ids'=>[$id]]]);self::assertTrue($post['media'][0]['can_delete']);
+        Profiles::save(ascla_test_profile(['photo_id'=>$id]));$post=$this->post('hub',['meta'=>['media_ids'=>[$id]]]);self::assertTrue($post['media'][0]['can_delete']);
         wp_set_current_user($this->users[3]);self::assertNotContains($id,array_column(Media::listing()['items'],'id'));self::assertSame(403,$this->api('DELETE','media/'.$id)->get_status());
         wp_set_current_user($this->users[1]);self::assertSame(403,$this->api('DELETE','media/'.$id)->get_status());
         wp_set_current_user($this->users[0]);self::assertContains($id,array_column(Media::listing(['q'=>'lifecycle-private','scope'=>'all'])['items'],'id'));self::assertSame(200,$this->api('DELETE','media/'.$id)->get_status());

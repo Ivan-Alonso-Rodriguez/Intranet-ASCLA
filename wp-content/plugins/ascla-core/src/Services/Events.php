@@ -32,12 +32,12 @@ final class Events
         return 0;
     }
 
-    private static function notifyAvailable(int $id,int $user): void
+    private static function notifyAvailable(int $id,int $user,int $registration): void
     {
         Notifications::send(
             $user,
             'event_waitlist_available',
-            'Se liberó un cupo para un evento de ASCLA. Confirma tu asistencia para reservarlo.',
+            'Se liberó un cupo para un evento de ASCLA. Confirma antes del '.wp_date('d/m/Y H:i',strtotime(EventParticipation::deadline($id,$registration))).'.',
             \ASCLA\Core\Domain\Catalog::url('eventos',['item'=>$id]),
             ['type'=>'post','id'=>$id]
         );
@@ -53,7 +53,7 @@ final class Events
             $profile=Profiles::raw($uid);
             $own=$uid===$viewer;
             // Leaving the directory is also a request not to be exposed in attendee discovery views.
-            if (!$own && empty($profile['directory'])) { $hidden++; continue; }
+            if (!$own && (empty($profile['directory']) || Messaging::blocked($viewer,$uid))) { $hidden++; continue; }
             $hiddenFields=(array)($profile['hidden']??[]);
             foreach ($hiddenFields as $field) { unset($profile[$field]); }
             $name=$own?(string)($profile['name']??Profiles::publicName($uid)):Profiles::publicName($uid);
@@ -76,27 +76,42 @@ final class Events
     /** Reserve every currently free seat for the oldest people waiting. */
     private static function fillAvailableSlots(int $id,array $meta): int
     {
+        EventParticipation::expire($id,$meta);
         $capacity=self::capacity($meta);
         if ($capacity<=0) { return 0; }
         $offered=0;
+        if (!empty($meta['micro']) && strtotime($meta['registration_deadline']??$meta['start'])<=time()) { return 0; }
         while (self::reserved($id)<$capacity) {
             $next=Store::rows('registrations',"event_id=%d AND status='waitlisted'",[$id],'ORDER BY id ASC LIMIT 1')[0]??null;
             if (!$next) { break; }
             Store::update('registrations',['status'=>'offered'],['id'=>(int)$next['id']]);
-            self::notifyAvailable($id,(int)$next['user_id']);
+            EventParticipation::offer($id,(int)$next['id'],$meta);
+            self::notifyAvailable($id,(int)$next['user_id'],(int)$next['id']);
             $offered++;
         }
         return $offered;
     }
 
+    public static function refreshWaitlist(int $id): void
+    {
+        Store::lock('event:'.$id,static function()use($id){
+            $meta=(array)get_post_meta($id,'_ascla',true);
+            if (get_post_status($id)==='publish' && empty($meta['cancelled']) && strtotime($meta['end']??'')>time()) { self::fillAvailableSlots($id,$meta); }
+        });
+    }
+
     public static function detail(int $id): array
     {
         $post=Content::get($id); Access::require($post->post_type==='ascla_event','Evento no encontrado.',404);
+        MicroLifecycle::tick($id);
+        self::refreshWaitlist($id);
         $meta=(array)get_post_meta($id,'_ascla',true); $item=Content::serialize($post);
         $item['cancelled']=!empty($meta['cancelled']);
+        $item['registration_closed']=$post->post_status!=='publish' || !empty($meta['micro']) && (strtotime($meta['registration_deadline']??$meta['start'])<=time() || !MicroLifecycle::canRegister($meta,get_current_user_id()));
         $end=strtotime((string)($meta['end']??'')); $item['is_past']=$end!==false && $end<=time();
         $registration=Store::rows('registrations',self::REGISTRATION,[$id,get_current_user_id()],'LIMIT 1')[0]??null;
         $item['registered']=$registration['status']??'none';
+        $item['offer_expires_at']=$item['registered']==='offered'?EventParticipation::deadline($id,(int)$registration['id']):null;
         $item['attending']=self::countStatus($id,'accepted');
         $item['capacity']=self::capacity($meta);
         $item['reserved']=$item['attending']+self::countStatus($id,'offered');
@@ -185,8 +200,9 @@ final class Events
         if (!$changed) { return 0; }
         $post=get_post($id);
         if (!$post || $post->post_type!=='ascla_event' || $post->post_status!=='publish' || !empty($after['cancelled'])) { return 0; }
+        EventParticipation::reconfirm($id,$before,$after);
         $users=[];
-        foreach (Store::rows('registrations',"event_id=%d AND status IN ('accepted','offered','waitlisted','invited')",[$id],self::ORDER_BY_ID_ASC) as $row) {
+        foreach (Store::rows('registrations',"event_id=%d AND status IN ('accepted','offered','waitlisted','invited','reconfirm')",[$id],self::ORDER_BY_ID_ASC) as $row) {
             $uid=absint($row['user_id']??0);
             if ($uid>0 && $uid!==get_current_user_id() && Access::member($uid)) { $users[$uid]=true; }
         }
@@ -194,7 +210,7 @@ final class Events
             Notifications::send(
                 $uid,
                 'event_updated',
-                'Se actualizaron datos importantes del evento “'.$post->post_title.'”.',
+                'Se actualizaron datos importantes del evento “'.$post->post_title.'”.'.(EventParticipation::changedSchedule($before,$after)?' Revisa el nuevo horario y confirma nuevamente tu asistencia.':''),
                 \ASCLA\Core\Domain\Catalog::url('eventos',['item'=>$id]),
                 ['type'=>'post','id'=>$id,'actor'=>get_current_user_id(),'changes'=>$changed]
             );
@@ -205,21 +221,27 @@ final class Events
     }
 
     /** RF-024: cancel an event without deleting its history, and notify affected associates. */
-    public static function cancel(int $id): array
+    public static function cancel(int $id,string $reason=''): array
     {
         Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador puede cancelar eventos.',403);
         $post=Content::get($id);
         Access::require($post->post_type==='ascla_event' && $post->post_status==='publish','Evento no disponible.',400);
-        $users=Store::lock('event:'.$id,static function () use($id) {
+        $reason=trim(Access::text($reason,1000));
+        Access::require($reason!=='','Indica el motivo de cancelación.',400);
+        $users=Store::lock('event:'.$id,static function () use($id,$reason) {
             $meta=(array)get_post_meta($id,'_ascla',true);
+            Access::require(empty($meta['micro']) || current_user_can('ascla_manage'),'Solo administración puede cancelar microeventos.',403);
             Access::require(empty($meta['cancelled']),'El evento ya fue cancelado.',409);
             Access::require(strtotime((string)($meta['end']??''))>time(),self::EVENT_FINISHED,400);
             $meta['cancelled']=true;
+            $meta['cancellation_reason']=$reason;
+            wp_clear_scheduled_hook('ascla_event_offers',[$id]);
             $meta['cancelled_at']=current_time('mysql',true);
             $meta['cancelled_by']=get_current_user_id();
+            if (!empty($meta['micro'])) { MicroLifecycle::history($id,'cancelled',$reason);EventReminders::schedule($id,$meta); }
             update_post_meta($id,'_ascla',$meta);
             $users=[];
-            foreach (Store::rows('registrations',"event_id=%d AND status IN ('accepted','offered','waitlisted','invited')",[$id],self::ORDER_BY_ID_ASC) as $row) {
+            foreach (Store::rows('registrations',"event_id=%d AND status IN ('accepted','offered','waitlisted','invited','reconfirm')",[$id],self::ORDER_BY_ID_ASC) as $row) {
                 $uid=absint($row['user_id']??0);
                 if ($uid>0) { $users[$uid]=true; }
             }
@@ -230,7 +252,7 @@ final class Events
                 $uid,
                 'event_cancelled:'.$id,
                 'event_cancelled',
-                'El evento “'.$post->post_title.'” fue cancelado.',
+                'El evento “'.$post->post_title.'” fue cancelado. Motivo: '.$reason,
                 \ASCLA\Core\Domain\Catalog::url('eventos',['item'=>$id]),
                 ['type'=>'post','id'=>$id,'actor'=>get_current_user_id()]
             );
@@ -295,8 +317,11 @@ final class Events
     private static function registerLocked(int $id,string $status,int $user): void
     {
         $meta=(array)get_post_meta($id,'_ascla',true);
+        Access::require(get_post_status($id)==='publish','Evento no disponible.',409);
+        MicroLifecycle::registration($id,$meta,$user,$status);
         Access::require(empty($meta['cancelled']),'El evento fue cancelado y ya no admite inscripciones.',409);
         Access::require(strtotime((string)($meta['end']??''))>time(),self::EVENT_FINISHED,400);
+        self::fillAvailableSlots($id,$meta);
         $existing=Store::rows('registrations',self::REGISTRATION,[$id,$user],'LIMIT 1')[0]??null;$before=(string)($existing['status']??'none');$capacity=self::capacity($meta);
         if ($status==='waitlisted') { self::registerWaitlisted($id,$user,$meta,$existing,$before,$capacity);return; }
         if ($status==='accepted') { self::registerAccepted($id,$user,$meta,$existing,$before,$capacity);return; }

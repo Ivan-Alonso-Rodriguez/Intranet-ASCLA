@@ -46,7 +46,7 @@ final class SprintCoreTest extends TestCase
         }
     }
     public function testHiddenNamesAreAliasedInProfilesSearchContentCommentsAndMessages(): void {
-        $uid=$this->users[1];wp_set_current_user($uid);Profiles::save(['first_name'=>'NombreReservado','last_name'=>'ApellidoReservado','hidden'=>['first_name'],'networking'=>true]);
+        $uid=$this->users[1];wp_set_current_user($uid);Profiles::save(ascla_test_profile(['first_name'=>'NombreReservado','last_name'=>'ApellidoReservado','hidden'=>['first_name'],'networking'=>true]));
         wp_set_current_user($this->users[0]);$post=$this->post('resource');wp_set_current_user($uid);Content::comment($post,'Opinión del asociado');
         wp_set_current_user($this->users[2]);$profile=Profiles::visible($uid);
         self::assertArrayNotHasKey('first_name',$profile);self::assertArrayNotHasKey('last_name',$profile);self::assertSame('Asociado ASCLA '.$uid,$profile['name']);

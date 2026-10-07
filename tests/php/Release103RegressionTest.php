@@ -22,7 +22,7 @@ final class Release103RegressionTest extends TestCase
             $login='release103_'.bin2hex(random_bytes(6));
             $id=wp_insert_user(['user_login'=>$login,'user_email'=>$login.'@example.invalid','user_pass'=>$this->password,'role'=>$role,'first_name'=>'Ana','last_name'=>'Prueba']);
             $this->users[]=$id;
-            update_user_meta($id,'_ascla_profile',['first_name'=>'Ana','last_name'=>'Prueba','position'=>'Analista','company'=>'ASCLA','directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[]]);
+            update_user_meta($id,'_ascla_profile',ascla_test_profile(['first_name'=>'Ana','last_name'=>'Prueba','position'=>'Analista','company'=>'ASCLA','directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[]]));
         }
         [$this->admin,$this->member,$this->executive,$this->moderator,$this->viewer]=$this->users;
         wp_set_current_user($this->admin);
@@ -80,7 +80,7 @@ final class Release103RegressionTest extends TestCase
         }
         $state=TurnstileState::state('login',$user->user_login);
         self::assertSame(5,$state['count']);
-        self::assertEqualsWithDelta(time()+600,$state['lock_until'],2);
+        self::assertEqualsWithDelta(time()+900,$state['lock_until'],2);
         $_SERVER['REMOTE_ADDR']='2001:db8:'.bin2hex(random_bytes(2)).'::2';
         $blocked=wp_signon(['user_login'=>strtoupper($user->user_email),'user_password'=>$this->password],false);
         self::assertInstanceOf(WP_Error::class,$blocked);
@@ -138,7 +138,7 @@ final class Release103RegressionTest extends TestCase
         wp_set_current_user($author);
         $request=Content::save('contact',['title'=>'Actualizar mis datos profesionales','body'=>'Solicito cambiar mi cargo a Gerente y mi empresa a ASCLA Perú.','status'=>'publish']);
         $id=(int)$request['id'];$this->posts[]=$id;
-        if ($state!=='open') { wp_set_current_user($this->admin);Administration::contactStatus($id,$state); }
+        ascla_test_support_state($id,$this->admin,$state);
         wp_set_current_user($this->admin);
         return $id;
     }
@@ -207,6 +207,8 @@ final class Release103RegressionTest extends TestCase
 
     public function testDirectorySearchMatchesTheVisibleFallbackWithoutLeakingHiddenPositions(): void
     {
+        $catalog=Profiles::catalogs();
+        $raw=Profiles::raw($this->member);$raw+=['city'=>'Lima','bio'=>'Perfil mínimo de prueba','interests'=>[(int)$catalog['interest'][0]['id']],'industries'=>[(int)$catalog['industry'][0]['id']],'goals'=>[(int)$catalog['goal'][0]['id']]];update_user_meta($this->member,'_ascla_profile',$raw);
         $hidden=Profiles::raw($this->member);$hidden['hidden']=['position'];$hidden['position']='SecretPosition103';
         update_user_meta($this->member,'_ascla_profile',$hidden);
         $empty=Profiles::raw($this->executive);$empty['position']='';update_user_meta($this->executive,'_ascla_profile',$empty);
@@ -214,7 +216,7 @@ final class Release103RegressionTest extends TestCase
         $results=Profiles::directory(['q'=>'MIEMBRO ASCLA']);
         $ids=array_column($results['items'],'id');
         self::assertContains($this->member,$ids);
-        self::assertContains($this->executive,$ids);
+        self::assertNotContains($this->executive,$ids,'An empty required position excludes the profile; a hidden completed position keeps its visible fallback.');
         self::assertNotContains($this->moderator,$ids);
         self::assertSame(0,Profiles::directory(['q'=>'SecretPosition103'])['total']);
         self::assertArrayNotHasKey('position',Profiles::visible($this->member));
@@ -224,15 +226,16 @@ final class Release103RegressionTest extends TestCase
         self::assertContains($this->member,array_column(Profiles::directory(['q'=>'ASCLA member'])['items'],'id'));
         wp_set_current_user($this->admin);
         self::assertSame('SecretPosition103',Profiles::visible($this->member)['position_label']);
-        self::assertNotContains($this->member,array_column(Profiles::directory(['q'=>'Miembro ASCLA'])['items'],'id'));
+        self::assertContains($this->member,array_column(Profiles::directory(['q'=>'Miembro ASCLA'])['items'],'id'));
+        self::assertSame(0,Profiles::directory(['q'=>'SecretPosition103'])['total'],'Directory searches respect visibility even for administrators.');
     }
 
     public function testExecutiveCreatesMicroeventsThroughRouteAndWorkerWithoutPublishing(): void
     {
-        $monthKey='ascla_micro_'.wp_date('Y-m');
+        $monthKey='ascla_micro_'.\ASCLA\Core\Services\MicroPlanning::period();
         $savedMonth=get_option($monthKey);$history=get_option('ascla_group_history',[]);
         $ids=$this->users;sort($ids);
-        $demoKey='ascla_micro_demo-'.substr(hash('sha256',wp_json_encode($ids)),0,12).'-'.wp_date('Y-m');
+        $demoKey='ascla_micro_demo-'.substr(hash('sha256',wp_json_encode($ids)),0,12).'-'.\ASCLA\Core\Services\MicroPlanning::period();
         try {
             wp_set_current_user($this->executive);
             $proposals=MicroEvents::create($ids);
