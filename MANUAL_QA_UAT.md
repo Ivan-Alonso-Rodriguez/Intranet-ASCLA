@@ -2,7 +2,7 @@
 
 El flujo activo usa Git, Docker y SonarQube. No requiere Jenkins; el Jenkinsfile es opcional e inactivo mientras no se configure un job.
 
-Usa **el mismo checkout** para desarrollar y probar. Este es `C:/Users/USER/Downloads/Intranet-ASCLA`, equivalente a `/mnt/c/Users/USER/Downloads/Intranet-ASCLA` en WSL. La ruta que incluye `CARPETA` puede apuntar a otro repositorio.
+Usa **el mismo checkout** para desarrollar y probar.
 
 ## Guardar desarrollo
 
@@ -32,7 +32,7 @@ git push origin qa
 En WSL y sobre el mismo checkout:
 
 ```bash
-cd /mnt/c/Users/USER/Downloads/Intranet-ASCLA
+cd DONDE_ESTE_UBICADO
 git switch qa
 git pull --ff-only origin qa
 docker network inspect proxy_net >/dev/null 2>&1 || docker network create proxy_net
