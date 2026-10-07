@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.10.4
+Stable tag: 1.10.6
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,24 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.10.6 =
+* Consolida la adecuación al Documento de Análisis y Diseño ASCLA y las correcciones QA 024–058.
+* Refuerza sesiones, recuperación de cuenta, política de credenciales y control de membresía activa, suspendida o vencida.
+* Endurece el guardado y revisión de perfiles, privacidad y exclusión de perfiles no elegibles del Directorio y las recomendaciones.
+* Amplía Contacto, microeventos, recordatorios, reconfirmación de eventos y lista de espera con ofertas persistentes y vencimiento.
+* Conserva mensajes transmitidos, aplica esperas de reconexión y bloqueo, y mejora la visibilidad de conversaciones según la relación.
+* Incorpora auditoría ampliada mediante el esquema 14, conservando los datos existentes.
+* Sincroniza metadatos de versión, SonarQube, pruebas de cierre, documentación y paquete instalable con 1.10.6.
+
+= 1.10.5 =
+* Completa CU009 directamente en Inicio mediante carruseles accesibles y responsivos de personas y materiales recomendados.
+* Genera lotes automáticos cada siete días de hasta cinco perfiles elegibles, sin actualización manual.
+* Registra el recálculo semanal como trabajo recommendations en wp_ascla_jobs para conservar estado, auditoría y reintentos.
+* Exige membresía activa, consentimiento y perfil mínimo con 70% de completitud; respeta privacidad y bloqueos.
+* Explica afinidad y complementariedad, muestra baja coincidencia y ordena recursos publicados por relevancia.
+* Registra No me interesa de forma privada y permite restituir perfiles desde Perfil > Privacidad y avisos.
+* Mantiene el esquema 13 y los contratos anteriores de matching.
 
 = 1.10.4 =
 * Reorganiza Mi perfil en cuatro pestañas: Información, Intereses, Privacidad y avisos, y Cuenta y seguridad, reduciendo el desplazamiento vertical y conservando el guardado existente.

@@ -16,7 +16,12 @@ final class ContentMeta
         if ($editorial && isset($input['chatham'])) { $data['chatham']=rest_sanitize_boolean($input['chatham']); }
         elseif (!isset($data['chatham'])) { $data['chatham']=Settings::get()['chatham_default']; }
         self::media($data,$input,$id);
-        if ($type==='event') { self::event($data,$input); }
+        if ($type==='event') {
+            self::event($data,$input);
+            MicroLifecycle::sanitize($data,$input,$id);
+            EventReminders::sanitize($data,$input,$id);
+            EventParticipation::validateChange($id,$id?(array)get_post_meta($id,'_ascla',true):[],$data,$input);
+        }
         self::eventReference($data,$input);
         self::duration($data,$input);
         $data['thumbnail_url']=\ASCLA\Core\Integrations\YouTubeVideoProvider::thumbnail($data['video_id']??'');
@@ -82,10 +87,11 @@ final class ContentMeta
             $data[$key]=self::eventDate($input[$key]??$data[$key]??'');
         }
         Access::require(strtotime($data['end'])>strtotime($data['start']),'El fin debe ser posterior al inicio.',400);
+        $data['offer_hours']=max(1,min(168,(int)($input['offer_hours']??$data['offer_hours']??24)));
         $data['capacity']=max(0,min(100000,absint($input['capacity']??$data['capacity']??0)));
     }
 
-    private static function eventDate(mixed $value): string
+    public static function eventDate(mixed $value): string
     {
         Access::require(is_string($value)&&preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,6})?)?(Z|[+-]\d{2}:\d{2})$/',$value),'Fechas de evento deben incluir zona horaria.',400);
         try { $dt=new \DateTimeImmutable($value); } catch (\Exception) { throw new \ASCLA\Core\Rest\ApiException('Fecha inválida.',400); }

@@ -42,6 +42,7 @@ final class DemoUser
         return ['position'=>'Profesional / Miembro ASCLA Demo','company'=>'ASCLA Demo','country'=>'Perú','city'=>'Lima','member_type'=>'Asociado demo','bio'=>'Perfil ficticio para pruebas de navegación, afinidad y mensajería. Los datos no describen una trayectoria profesional real.','directory'=>true,'networking'=>true,'microevents'=>true,
             'interests'=>self::terms('interest',['Inteligencia artificial','Gobierno corporativo','Transformación digital','Gestión de riesgos']),
             'areas'=>self::terms('area',['Gobierno de IA','Estrategia','Tecnología']),
+            'industries'=>self::terms('industry',['Consultoría']),
             'goals'=>self::terms('goal',['Conectar con profesionales afines','Aprender sobre gobierno de IA','Participar en microeventos'])];
     }
     private static function terms(string $taxonomy,array $names): array

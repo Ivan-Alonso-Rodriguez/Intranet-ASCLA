@@ -7,4 +7,5 @@ wp_clear_scheduled_hook('ascla_jobs');
 wp_clear_scheduled_hook('ascla_monthly');
 
 wp_clear_scheduled_hook('ascla_discovery');
+wp_clear_scheduled_hook('ascla_recommendations');
 wp_clear_scheduled_hook('ascla_interest_index');

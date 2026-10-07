@@ -8,3 +8,6 @@ if (wp_get_environment_type()!=='local') { throw new RuntimeException('Tests onl
 require_once ABSPATH.'wp-admin/includes/user.php';
 require_once ABSPATH.'wp-admin/includes/plugin.php';
 ASCLA\Core\Database\Installer::activate(false);
+
+require_once __DIR__.'/profile-fixture.php';
+require_once __DIR__.'/support-fixture.php';

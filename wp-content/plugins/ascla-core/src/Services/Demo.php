@@ -74,10 +74,18 @@ final class DemoSeed
 
     private static function post(array $users,string $key,string $type,string $title,string $body,array $meta=[],int $author=0): int
     {
-        $existing=get_posts(['post_type'=>'ascla_'.$type,'post_status'=>'any','meta_key'=>'_ascla_demo_key','meta_value'=>$key,'numberposts'=>1]);
-        if ($existing) { return (int)$existing[0]->ID; }
-        $defaultAuthor=in_array($type,['event','resource','gallery'],true)?get_current_user_id():$users[0];
+        $resourceAuthor=$users[abs(crc32($key))%count($users)];
+        $defaultAuthor=$users[0];
+        if ($type==='resource') { $defaultAuthor=$resourceAuthor; }
+        elseif (in_array($type,['event','gallery'],true)) { $defaultAuthor=get_current_user_id(); }
         $postAuthor=$author?:$defaultAuthor;
+        $existing=get_posts(['post_type'=>'ascla_'.$type,'post_status'=>'any','meta_key'=>'_ascla_demo_key','meta_value'=>$key,'numberposts'=>1]);
+        if ($existing) {
+            // Demo resources belong to fictional members so an administrator can also
+            // exercise RF-041; the recommender intentionally excludes authored content.
+            if ($type==='resource' && (int)$existing[0]->post_author!==$postAuthor) { wp_update_post(['ID'=>$existing[0]->ID,'post_author'=>$postAuthor]); }
+            return (int)$existing[0]->ID;
+        }
         $id=wp_insert_post(wp_slash(['post_type'=>'ascla_'.$type,'post_title'=>$title,'post_content'=>$body,'post_status'=>'draft','post_author'=>$postAuthor,'comment_status'=>'open']));
         update_post_meta($id,'_ascla_demo_key',$key);
         update_post_meta($id,'_ascla',array_merge(['demo'=>true,'chatham'=>true],$meta));
@@ -138,4 +146,3 @@ final class DemoSeed
         update_option('ascla_demo_messages',true,false);
     }
 }
-

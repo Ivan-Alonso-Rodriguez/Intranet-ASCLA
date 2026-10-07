@@ -56,6 +56,7 @@ final class Messaging
             ConversationRequests::requireAuthorized($me,$target);
             Access::require(!self::blocked($me,$target),self::CANNOT_MESSAGE,403);
             $conversation=self::ensureDirect($me,$target,$me);
+            ConversationVisibility::show((int)$conversation['id']);
             Audit::record('conversation_started',(int)$conversation['id'],'direct');
             return $conversation;
         });
@@ -72,28 +73,6 @@ final class Messaging
         $mid=Store::insert('messages',['conversation_id'=>$id,'sender_id'=>$requester,'body'=>$body,'created_at'=>current_time('mysql',true)]);
         Store::update('conversations',['updated_at'=>current_time('mysql',true)],['id'=>$id]);
         return ['conversation_id'=>$id,'message'=>Store::one('messages',$mid)];
-    }
-
-    /** Removes only the message(s) created for a still-pending request, preserving older history. */
-    public static function discardPendingRequest(int $requester,int $target,string $createdAt): void
-    {
-        $pair=self::pairKey($requester,$target);
-        $rows=Store::rows('conversations',self::PAIR_FILTER,[$pair],self::SINGLE_ROW);
-        if (!$rows || ($rows[0]['kind']??'direct')!=='direct') { return; }
-        $conversationId=(int)$rows[0]['id'];
-        global $wpdb;
-        $messages=Store::table('messages');
-        $wpdb->query($wpdb->prepare(
-            "DELETE FROM $messages WHERE conversation_id=%d AND sender_id=%d AND created_at>=%s",
-            $conversationId,$requester,$createdAt
-        ));
-        $last=Store::rows('messages',self::CONVERSATION_FILTER,[$conversationId],self::LATEST_ROW)[0]??null;
-        if ($last) {
-            Store::update('conversations',['updated_at'=>(string)$last['created_at']],['id'=>$conversationId]);
-        } else {
-            Store::delete('participants',['conversation_id'=>$conversationId]);
-            Store::delete('conversations',['id'=>$conversationId]);
-        }
     }
 
     public static function requestSummary(int $a,int $b): array
@@ -166,7 +145,7 @@ final class Messaging
         $other=(int)$others[0]['user_id'];
         $permission=ConversationRequests::between($me,$other);
         $connected=Connections::areConnected($me,$other);
-        Access::require($connected || in_array($permission['state'],['allowed','incoming_pending','outgoing_pending'],true),self::NOT_FOUND,404);
+        Access::require(!self::blocked($me,$other) && ($connected || ConnectionPolicy::canReadHistory($me,$other) || in_array($permission['state'],['allowed','incoming_pending','outgoing_pending'],true)),self::NOT_FOUND,404);
         return $rows[0]+['conversation'=>$conversation,'members'=>$members,'kind'=>'direct','other_id'=>$other,'permission'=>$permission];
     }
 
@@ -179,6 +158,7 @@ final class Messaging
         ),ARRAY_A) ?: [];
         $out=[];
         foreach ($rows as $row) {
+            if (ConversationVisibility::hidden((int)$row['id'],get_current_user_id())) { continue; }
             $decorated=self::decorate($row);
             if (!$decorated) { continue; }
             $haystack=$decorated['kind']==='group'
@@ -219,7 +199,7 @@ final class Messaging
     {
         foreach ($rows as &$message) {
             $message['sender_id']=(int)$message['sender_id'];
-            $message['can_delete']=$message['sender_id']===$me;
+            $message['can_delete']=false;
             $message['sender']=Profiles::card($message['sender_id']);
             if ($message['sender_id']===$me) {
                 $read=0;
@@ -243,13 +223,6 @@ final class Messaging
         $more=count($rows)>60; $rows=array_slice($rows,0,60);
         if ($after===null) { $rows=array_reverse($rows); }
         $last=$rows?(int)end($rows)['id']:($after??0);
-        if (!$before && $rows) {
-            global $wpdb; $table=Store::table('participants');
-            $wpdb->query($wpdb->prepare(
-                "UPDATE $table SET last_read=GREATEST(last_read,%d) WHERE conversation_id=%d AND user_id=%d",
-                $last,$id,get_current_user_id()
-            ));
-        }
         $me=get_current_user_id();
         $readState=self::readState($id,$me);
         $rows=self::decorateMessages($rows,$readState,$me);
@@ -291,12 +264,7 @@ final class Messaging
         self::participant($conversationId);
         $message=Store::one('messages',$messageId);
         Access::require($message && (int)$message['conversation_id']===$conversationId,'Mensaje no encontrado.',404);
-        Access::require((int)$message['sender_id']===get_current_user_id(),'Solo puedes eliminar tus propios mensajes.',403);
-        Store::delete('messages',['id'=>$messageId,'conversation_id'=>$conversationId,'sender_id'=>get_current_user_id()]);
-        $last=Store::rows('messages',self::CONVERSATION_FILTER,[$conversationId],self::LATEST_ROW)[0]??null;
-        Store::update('conversations',['updated_at'=>$last?(string)$last['created_at']:current_time('mysql',true)],['id'=>$conversationId]);
-        Audit::record('message_deleted',$messageId,'conversation:'.$conversationId);
-        return ['id'=>$messageId,'deleted'=>true];
+        throw new \ASCLA\Core\Rest\ApiException('Los mensajes enviados no se pueden editar ni eliminar.',403);
     }
 
     public static function updateGroup(int $conversationId,string $title,string $description='',int $photoId=0): array
@@ -333,23 +301,19 @@ final class Messaging
             Access::require($conversation && ($conversation['kind']??'direct')==='group',self::NOT_FOUND,404);
             Access::require((int)$conversation['created_by']===$me,'Solo quien creó el grupo puede eliminarlo.',403);
             Access::require(Store::count('participants',self::PARTICIPANT_FILTER,[$conversationId,$me])>0,self::NOT_FOUND,404);
-            Notifications::removeConversationNotices($conversationId);
-            Store::delete('messages',['conversation_id'=>$conversationId]);
-            Store::delete('participants',['conversation_id'=>$conversationId]);
-            Store::delete('conversations',['id'=>$conversationId]);
-            Audit::record('group_conversation_deleted',$conversationId,'creator:'.$me);
-            return ['id'=>$conversationId,'deleted'=>true];
+            throw new \ASCLA\Core\Rest\ApiException('El historial del grupo no se puede eliminar. Puedes ocultarlo de tu bandeja.',403);
         });
     }
 
-    public static function relation(int $target,string $kind,bool $active): array
+    public static function relation(int $target,string $kind,bool $active,string $message=''): array
     {
         Access::require(in_array($kind,['block','connect'],true)&&$target>0&&$target!==get_current_user_id()&&Access::member($target),'Acción no válida.',400);
-        if ($kind==='connect') { return $active?Connections::request($target):Connections::remove($target); }
+        if ($kind==='connect') { return $active?Connections::request($target,$message):Connections::remove($target); }
         $me=get_current_user_id();
         return Connections::lockPair($me,$target,static function () use($me,$target,$active) {
             $where=['user_id'=>$me,'target_id'=>$target,'kind'=>'block'];
             if ($active) {
+                ConnectionPolicy::blocked($me,$target);
                 if (!Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where))) { Store::insert('relations',$where+['created_at'=>current_time('mysql',true)]); }
             } else { Store::delete('relations',$where); }
             return ['active'=>$active];
@@ -378,7 +342,7 @@ final class MessagingDecorator
         $value['member_count']=count($value['members']);$value['title']=$value['title']!==''?$value['title']:'Grupo ASCLA';
         $media=$value['photo_id']?Store::one('media',$value['photo_id']):null;
         $value['photo_url']=$media && str_starts_with((string)$media['mime'],'image/')?Media::url($value['photo_id']):'';
-        $value['can_delete_group']=$value['created_by']===$current;$value['blocked']=false;$value['blocked_by_me']=false;
+        $value['can_edit_group']=$value['created_by']===$current;$value['can_delete_group']=false;$value['blocked']=false;$value['blocked_by_me']=false;
         $value['can_message']=true;$value['connection']=null;$value['conversation_request']=null;
         return $value;
     }
@@ -389,7 +353,7 @@ final class MessagingDecorator
         $other=count($others)===1?(int)$others[0]['user_id']:0;
         if (!$other || !Access::member($other)) { return null; }
         $connection=Connections::between($current,$other);$permission=ConversationRequests::between($current,$other);
-        if ($connection['state']!=='connected' && !in_array($permission['state'],['allowed','incoming_pending','outgoing_pending'],true)) { return null; }
+        if ($connection['blocked'] || ($connection['state']!=='connected' && !ConnectionPolicy::canReadHistory($current,$other) && !in_array($permission['state'],['allowed','incoming_pending','outgoing_pending'],true))) { return null; }
         $value['other']=Profiles::card($other);$value['connection']=$connection;$value['conversation_request']=$permission;
         $value['blocked']=$connection['blocked'];$value['blocked_by_me']=$connection['blocked_by_me'];$value['can_message']=$permission['can_message'];
         return $value;

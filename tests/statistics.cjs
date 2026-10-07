@@ -70,10 +70,10 @@ async function runStatistics(){let f,browser,page;const coverage=[];
      await page.locator(`[data-action="report-reviewed"][data-id="${f.report}"]`).click();await page.locator(`[data-action="admin-delete"][data-kind="report"][data-id="${f.report}"]`).click();await page.locator('[data-action="admin-delete-confirm"]').click();await page.locator('.modal-backdrop').waitFor({state:'detached'});
      assert.equal((await api(page,'items/'+f.hub)).status,200);assert.equal((await api(page,'admin/reports/'+f.report,'DELETE',{})).status,404);
     });
-    await test('Solicitudes: resolver antes de eliminar',async()=>{
+    await test('Solicitudes: archivar conserva el contenido y el historial',async()=>{
      await page.locator('.admin-tabs [data-tab="solicitudes"]').click();await page.locator(`[data-contact="${f.closed}"]`).waitFor();assert.equal(await page.locator(`[data-contact="${f.open}"] [data-action="admin-delete"]`).count(),0);
      await page.locator(`[data-contact="${f.closed}"] [data-action="admin-delete"]`).click();await page.locator('[data-action="admin-delete-confirm"]').click();await page.locator('.modal-backdrop').waitFor({state:'detached'});
-     assert.equal((await api(page,'items/'+f.closed)).status,404);assert.equal((await api(page,'items/'+f.open,'DELETE',{})).status,409);
+     assert.equal((await api(page,'items/'+f.closed)).status,200);assert.equal((await api(page,'admin/contact/'+f.open,'DELETE',{})).status,409);
     });
     await test('Estadísticas en wp-admin y adaptación móvil',async()=>{
      await page.goto(base+'/wp-admin/admin.php?page=ascla-estadisticas');await page.locator('.stats-tabs').waitFor();assert.equal(await page.locator('#toplevel_page_ascla a[href="admin.php?page=ascla-estadisticas"]').count(),1);

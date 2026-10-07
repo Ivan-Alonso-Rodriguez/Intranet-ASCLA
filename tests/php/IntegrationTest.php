@@ -72,7 +72,7 @@ final class IntegrationTest extends TestCase
 
         $this->user(1);$profile=Profiles::raw($this->users[1]);self::assertTrue($profile['networking']);self::assertTrue($profile['microevents']);
 
-        Profiles::save(['networking'=>false,'microevents'=>false]);$profile=Profiles::raw($this->users[1]);self::assertFalse($profile['networking']);self::assertFalse($profile['microevents']);
+        Profiles::save(ascla_test_profile(['networking'=>false,'microevents'=>false]));$profile=Profiles::raw($this->users[1]);self::assertFalse($profile['networking']);self::assertFalse($profile['microevents']);
 
     }
 
@@ -97,9 +97,10 @@ final class IntegrationTest extends TestCase
 
     public function testRecommendationsRespectMinimumAffinity(): void
     {
-        $interests=Profiles::catalogs()['interest'];self::assertGreaterThanOrEqual(2,count($interests));$one=(int)$interests[0]['id'];$two=(int)$interests[1]['id'];
-        $this->user(1);Profiles::save(['networking'=>true,'directory'=>true,'interests'=>[$one],'areas'=>[],'industries'=>[],'goals'=>[],'languages'=>[]]);
-        $this->user(2);Profiles::save(['networking'=>true,'directory'=>true,'interests'=>[$one],'areas'=>[],'industries'=>[],'goals'=>[],'languages'=>[]]);
+        $catalogs=Profiles::catalogs();$interests=$catalogs['interest'];self::assertGreaterThanOrEqual(2,count($interests));$one=(int)$interests[0]['id'];$two=(int)$interests[1]['id'];
+        $eligible=['first_name'=>'Ana','last_name'=>'Prueba','position'=>'Secretaria corporativa','company'=>'Empresa Demo','country'=>'Perú','city'=>'Lima','bio'=>'Perfil completo para probar recomendaciones.','experience'=>'Experiencia profesional en gobierno corporativo.','networking'=>true,'directory'=>true,'interests'=>[$one],'areas'=>[],'industries'=>[(int)$catalogs['industry'][0]['id']],'goals'=>[(int)$catalogs['goal'][0]['id']],'languages'=>[]];
+        $this->user(1);Profiles::save($eligible);
+        $this->user(2);Profiles::save(array_merge($eligible,['first_name'=>'Beatriz']));
         $this->user(1);Settings::save(['matching_weights'=>['interests'=>100,'areas'=>0,'industries'=>0,'goals'=>0,'languages'=>0],'matching_min_affinity'=>100]);
         $recommended=Matching::recommendations();self::assertNotEmpty($recommended);self::assertSame(100,(int)$recommended[0]['affinity']['score']);
         Profiles::save(['interests'=>[$two]],$this->users[2]);
@@ -140,11 +141,11 @@ final class IntegrationTest extends TestCase
 
     {
 
-        $this->user(1);$tax=Profiles::catalogs();$profile=Profiles::save(['first_name'=>'Ficticia','last_name'=>'Prueba','company'=>'Empresa Secreta QXYZ','networking'=>true,'interests'=>[$tax['interest'][0]['id']],'hidden'=>['company']]);self::assertSame('Empresa Secreta QXYZ',$profile['company']);
+        $this->user(1);$tax=Profiles::catalogs();$profile=Profiles::save(ascla_test_profile(['first_name'=>'Ficticia','last_name'=>'Prueba','company'=>'Empresa Secreta QXYZ','networking'=>true,'interests'=>[$tax['interest'][0]['id']],'hidden'=>['company']]));self::assertSame('Empresa Secreta QXYZ',$profile['company']);
 
-        $this->user(2);Profiles::save(['networking'=>true,'interests'=>[$tax['interest'][0]['id']]]);self::assertArrayNotHasKey('company',Profiles::visible($this->users[1]));self::assertSame(0,Profiles::directory(['q'=>'QXYZ'])['total']);self::assertSame(30,Matching::between($this->users[2],$this->users[1])['score']);
+        $this->user(2);Profiles::save(ascla_test_profile(['networking'=>true,'interests'=>[$tax['interest'][0]['id']]]));self::assertArrayNotHasKey('company',Profiles::visible($this->users[1]));self::assertSame(0,Profiles::directory(['q'=>'QXYZ'])['total']);self::assertSame(65,Matching::between($this->users[2],$this->users[1])['score']);
 
-        $this->user(1);Profiles::save(['directory'=>false]);$this->user(2);self::assertSame(404,$this->api('GET','/profiles/'.$this->users[1])->get_status());
+        $this->user(1);Profiles::save(ascla_test_profile(['directory'=>false]));$this->user(2);self::assertSame(404,$this->api('GET','/profiles/'.$this->users[1])->get_status());
 
     }
 
@@ -159,7 +160,7 @@ final class IntegrationTest extends TestCase
     public function testProfileCompletionAndCountryNormalization(): void
     {
         $this->user(1);$before=Profiles::completion($this->users[1]);self::assertLessThan(40,$before['percent']);
-        Profiles::save(['first_name'=>'Ana','last_name'=>'Asociada','position'=>'Secretaria corporativa','company'=>'Empresa Demo','country'=>'Peru','city'=>'Lima']);
+        Profiles::save(ascla_test_profile(['first_name'=>'Ana','last_name'=>'Asociada','position'=>'Secretaria corporativa','company'=>'Empresa Demo','country'=>'Peru','city'=>'Lima']));
         $profile=Profiles::raw($this->users[1]);self::assertSame('Perú',$profile['country']);self::assertGreaterThanOrEqual(40,Profiles::completion($this->users[1])['percent']);
         self::assertSame(400,$this->api('POST','/profiles/me',['country'=>'Pais Inventado QXYZ'])->get_status());
     }
@@ -219,9 +220,9 @@ final class IntegrationTest extends TestCase
 
         $this->user(3);self::assertSame(404,$this->api('GET','/conversations/'.$c['id'].'/messages')->get_status());self::assertSame(404,$this->api('POST','/conversations/'.$c['id'].'/messages',['body'=>'Intrusión'])->get_status());
 
-        $this->user(2);self::assertGreaterThan(0,Messaging::conversations()[0]['unread']);self::assertCount(1,Messaging::messages((int)$c['id'])['items']);self::assertSame(0,Messaging::conversations()[0]['unread']);Messaging::relation($this->users[1],'block',true);
+        $this->user(2);self::assertGreaterThan(0,Messaging::conversations()[0]['unread']);$messages=Messaging::messages((int)$c['id'])['items'];self::assertCount(1,$messages);ASCLA\Core\Services\ConversationVisibility::read((int)$c['id'],(int)$messages[0]['id']);self::assertSame(0,Messaging::conversations()[0]['unread']);Messaging::relation($this->users[1],'block',true);
 
-        $this->user(1);self::assertSame(403,$this->api('POST','/conversations/'.$c['id'].'/messages',['body'=>'Bloqueado'])->get_status());$this->user(2);Messaging::relation($this->users[1],'block',false);Messaging::send((int)$c['id'],'Respuesta autorizada.');Store::delete('conversations',['id'=>$c['id']]);
+        $this->user(1);self::assertSame(404,$this->api('POST','/conversations/'.$c['id'].'/messages',['body'=>'Bloqueado'])->get_status());$this->user(2);Messaging::relation($this->users[1],'block',false);self::assertSame(404,$this->api('POST','/conversations/'.$c['id'].'/messages',['body'=>'Sigue sin consentimiento'])->get_status());Store::delete('conversations',['id'=>$c['id']]);
 
     }
 
@@ -238,9 +239,9 @@ final class IntegrationTest extends TestCase
     public function testConfirmedAttendeesCanSeeOnlyPrivacySafeParticipantProfiles(): void
     {
         $p=$this->make('event',['meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>3,'modality'=>'Presencial']]);
-        $this->user(1); Profiles::save(['directory'=>true]); Events::register($p['id'],'accepted');
-        $this->user(2); Profiles::save(['directory'=>true,'position'=>'Cargo reservado','company'=>'Empresa visible','hidden'=>['position']]); Events::register($p['id'],'accepted');
-        $this->user(3); Profiles::save(['directory'=>false,'company'=>'Empresa privada']); Events::register($p['id'],'accepted');
+        $this->user(1); Profiles::save(ascla_test_profile(['directory'=>true])); Events::register($p['id'],'accepted');
+        $this->user(2); Profiles::save(ascla_test_profile(['directory'=>true,'position'=>'Cargo reservado','company'=>'Empresa visible','hidden'=>['position']])); Events::register($p['id'],'accepted');
+        $this->user(3); Profiles::save(ascla_test_profile(['directory'=>false,'company'=>'Empresa privada'])); Events::register($p['id'],'accepted');
 
         $this->user(1); $detail=Events::detail($p['id']);
         self::assertSame('accepted',$detail['registered']);
@@ -266,7 +267,7 @@ final class IntegrationTest extends TestCase
         $p=$this->make('event',['meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>2,'modality'=>'Virtual']]);
         $this->user(1); Events::register($p['id'],'accepted');
         $this->user(2); Events::register($p['id'],'accepted');
-        $this->user(0); $cancelled=Events::cancel($p['id']);
+        $this->user(0); $cancelled=Events::cancel($p['id'],'Cambio institucional');
         self::assertTrue($cancelled['cancelled']);
         self::assertSame('publish',get_post_status($p['id']));
         self::assertSame('',Events::detail($p['id'])['google_url']);
@@ -281,7 +282,7 @@ final class IntegrationTest extends TestCase
 
     {
 
-        $this->user(1);$p=$this->make('contact');self::assertSame('private',$p['status']);self::assertSame(1,Content::listing('contact',['mine'=>1])['total']);$this->user(2);self::assertSame(0,Content::listing('contact',['author'=>$this->users[1]])['total']);self::assertSame(404,$this->api('GET','/items/'.$p['id'])->get_status());$this->user(0);self::assertSame(200,$this->api('POST','/admin/contact/'.$p['id'],['status'=>'closed'])->get_status());
+        $this->user(1);$p=$this->make('contact');self::assertSame('private',$p['status']);self::assertSame(1,Content::listing('contact',['mine'=>1])['total']);$this->user(2);self::assertSame(0,Content::listing('contact',['author'=>$this->users[1]])['total']);self::assertSame(404,$this->api('GET','/items/'.$p['id'])->get_status());$this->user(0);ascla_test_support_state($p['id'],$this->users[0],'resolved');self::assertSame(200,$this->api('POST','/admin/contact/'.$p['id'],['status'=>'closed'])->get_status());
 
     }
 
@@ -382,6 +383,8 @@ Compañía Privada"]]);
         Settings::save(['matching_min_affinity'=>67]);self::assertSame(67,Settings::get()['matching_min_affinity']);
         Settings::save(['matching_min_affinity'=>999]);self::assertSame(100,Settings::get()['matching_min_affinity']);
         Settings::save(['matching_min_affinity'=>-10]);self::assertSame(0,Settings::get()['matching_min_affinity']);
+        Settings::save(['matching_max_suggestions'=>99]);self::assertSame(5,Settings::get()['matching_max_suggestions']);
+        Settings::save(['matching_max_suggestions'=>0]);self::assertSame(1,Settings::get()['matching_max_suggestions']);
 
     }
 
@@ -422,4 +425,3 @@ Compañía Privada"]]);
     }
 
 }
-

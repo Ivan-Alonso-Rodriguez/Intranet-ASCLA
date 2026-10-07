@@ -6,7 +6,7 @@ final class Installer
 {
     private const UPGRADE_INCLUDE='wp-admin/includes/upgrade.php';
     private const TABLE_EXISTS_SQL='SHOW TABLES LIKE %s';
-    public const SCHEMA_VERSION=13;
+    public const SCHEMA_VERSION=14;
     public static function activate(bool $networkWide=false): void
     {
         if ($networkWide) { wp_die('Active ASCLA Core individualmente en cada sitio; no se admite activación de red.'); }
@@ -19,13 +19,15 @@ final class Installer
         self::migrateTemporaryMedia();
         self::migrateAttendance();
         self::migrateImports();
+        AuditMigration::run();
         self::loginPage();
         self::pages();
         self::adminPage();
         self::terms();
         if (!wp_next_scheduled('ascla_jobs')) { wp_schedule_event(time()+60, 'hourly', 'ascla_jobs'); }
-        if (!wp_next_scheduled('ascla_monthly')) { wp_schedule_event(time()+120, 'daily', 'ascla_monthly'); }
+        \ASCLA\Core\Services\MicroPlanning::schedule();
         if (!wp_next_scheduled('ascla_discovery')) { wp_schedule_event(time()+300,'daily','ascla_discovery'); }
+        if (!wp_next_scheduled('ascla_recommendations')) { wp_schedule_event(time()+420,'ascla_weekly','ascla_recommendations'); }
         update_option('ascla_version', ASCLA_VERSION, false);
         flush_rewrite_rules();
     }

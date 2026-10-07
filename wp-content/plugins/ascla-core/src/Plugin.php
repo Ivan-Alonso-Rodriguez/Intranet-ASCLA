@@ -3,20 +3,35 @@ namespace ASCLA\Core;
 
 final class Plugin
 {
+    private static bool $booted=false;
+
     public static function boot(): void
     {
+        if (self::$booted) { return; }
+        self::$booted=true;
+        add_filter('cron_schedules',static function(array $schedules): array {
+            $schedules['ascla_weekly']=['interval'=>7*DAY_IN_SECONDS,'display'=>'Cada siete días (ASCLA)'];
+            return $schedules;
+        });
         add_action('init', [Domain\Catalog::class, 'register']);
         add_action('init', [Database\Installer::class, 'upgrade'], 20);
         add_filter('posts_search',[Repositories\ContentQuery::class,'search'],10,2);
         add_filter('posts_where',[Repositories\ContentQuery::class,'draftVisibility'],10,2);
         Frontend\App::boot();
         Services\Turnstile::boot();
+        Services\Membership::boot();
+        Services\CredentialPolicy::boot();
+        Services\AccountRecovery::boot();
+        add_action('init',[Services\MicroPlanning::class,'schedule'],21);
+        Services\SessionPolicy::boot();
         Admin\Panel::boot();
         Rest\Router::boot();
         Jobs\Queue::boot();
         Services\Media::boot();
         Services\InterestIndex::boot();
         add_action('deleted_user',static fn($id)=>Repositories\Store::delete('attendance',['user_id'=>(int)$id]));
+        add_action('before_delete_post',[Services\EventReminders::class,'cancel']);
+        add_action('wp_trash_post',[Services\EventReminders::class,'cancel']);
         add_action('before_delete_post',static fn($id)=>Repositories\Store::delete('attendance',['event_id'=>(int)$id]));
         add_action('added_post_meta',[Services\Content::class,'indexMeta'],10,4);
         add_action('updated_post_meta',[Services\Content::class,'indexMeta'],10,4);

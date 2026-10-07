@@ -92,6 +92,7 @@ async function goto(page, route) {
       a = admin.page;
     p.on("pageerror", (e) => errors.push(e.message));
     a.on("pageerror", (e) => errors.push(e.message));
+    await require("./session-policy.cjs")({browser, root, base, test, coverage});
     await require("./image-editor.cjs")({page: a, test, root});
     await require("./video-metadata.cjs")({test, admin: a, request, base, fixtures});
     await test("Anonymous routes, REST nonce and cache isolation", async () => {
@@ -143,6 +144,7 @@ async function goto(page, route) {
         .locator("[name=bio]")
         .fill("E2E Perfil de prueba para verificar persistencia.");
       await p.locator("[name=company]").fill("E2E_EMPRESA_PRIVADA_457");
+      await p.locator("[data-profile-tab=privacy]").click();
       await p.locator("[name=hidden][value=company]").check();
       await p.getByRole("button", { name: "Guardar perfil" }).click();
       await p
@@ -260,6 +262,29 @@ async function goto(page, route) {
       const target = (await request(p, "profiles?q=Tomás")).body.items[0];
       const me = (await request(p, "bootstrap")).body.me.id;
       if (ephemeralCI) {
+        await test("RF-034 allows preventive blocking from directory cards and the public profile", async () => {
+          await goto(p, "directorio");
+          await p.locator('.directory-filters [name="q"]').fill(target.name);
+          await p.locator('.directory-filters').getByRole('button', { name: 'Buscar', exact: true }).click();
+          const card = p.locator('.member-card').filter({ hasText: target.name }).first();
+          await card.waitFor();
+          await card.getByRole('button', { name: 'Bloquear', exact: true }).waitFor();
+          await card.locator('[data-action="member"]').click();
+          const profile = p.locator('.modal');
+          await profile.getByRole('button', { name: 'Bloquear', exact: true }).waitFor();
+          await profile.getByRole('button', { name: 'Cerrar', exact: true }).click();
+          await card.getByRole('button', { name: 'Bloquear', exact: true }).click();
+          await p.getByRole('button', {name:'Confirmar bloqueo',exact:true}).click();
+          await card.getByRole('button', { name: 'Desbloquear', exact: true }).waitFor();
+          await card.locator('[data-action="member"]').click();
+          await profile.getByRole('button', { name: 'Desbloquear', exact: true }).waitFor();
+          await profile.locator('[data-profile-affinity]').waitFor({ state: 'detached' });
+          assert.equal(await profile.locator('[data-profile-affinity]').count(), 0);
+          await profile.getByRole('button', { name: 'Desbloquear', exact: true }).click();
+          await profile.getByRole('button', { name: 'Bloquear', exact: true }).waitFor();
+          await card.getByRole('button', { name: 'Bloquear', exact: true }).waitFor();
+          await profile.getByRole('button', { name: 'Cerrar', exact: true }).click();
+        });
         const current = (await request(p, `profiles/${target.id}`)).body.connection;
         assert.equal(current.blocked, false, "The E2E messaging pair must not be blocked.");
         if (current.state !== "connected") {
@@ -302,10 +327,11 @@ async function goto(page, route) {
         const after = (await request(p, "conversations/" + conversation.id + "/messages")).body;
         assert.deepEqual(after, before);
       });
+      const messageBody = "E2E Mensaje privado " + Date.now() + ".";
       await p.goto(base + "/mensajeria/?conversation=" + conversation.id);
       await p
         .locator(".chat-compose textarea")
-        .fill("E2E Mensaje privado 457.");
+        .fill(messageBody);
       const response = p.waitForResponse(
         (r) => r.url().includes("/messages") && r.request().method() === "POST",
       );
@@ -313,26 +339,29 @@ async function goto(page, route) {
       messageIds.push((await (await response).json()).id);
       await p
         .locator(".bubble")
-        .filter({ hasText: "E2E Mensaje privado 457." })
+        .filter({ hasText: messageBody })
         .waitFor();
       const forbidden = await request(
         a,
         "conversations/" + conversation.id + "/messages",
       );
       assert.equal(forbidden.status, 404);
+      assert.equal(await p.locator('[data-action="delete-message"]').count(),0);
+      assert.equal((await request(p, "conversations/" + conversation.id + "/messages/" + messageIds.at(-1),undefined,"DELETE")).status,403);
+      await p.getByRole("button", { name: "Ocultar conversación", exact: true }).click();
+      await p.locator('.chat-person[data-id="' + conversation.id + '"]').waitFor({state:'detached'});
+      assert.ok(!(await request(p,'conversations')).body.some(c=>Number(c.id)===Number(conversation.id)));
+      await request(p,'conversations',{target:target.id});
+      await p.goto(base + "/mensajeria/?conversation=" + conversation.id);
       await p.getByRole("button", { name: "Bloquear", exact: true }).click();
-      await p
-        .getByRole("button", { name: "Desbloquear", exact: true })
-        .waitFor();
-      assert.equal(
-        (
-          await request(p, "conversations/" + conversation.id + "/messages", {
-            body: "Blocked",
-          })
-        ).status,
-        403,
-      );
-      await p.getByRole("button", { name: "Desbloquear", exact: true }).click();
+      await p.getByRole("button", { name: "Confirmar bloqueo", exact: true }).click();
+      await p.locator('.chat-person[data-id="' + conversation.id + '"]').waitFor({state:'detached'});
+      assert.equal((await request(p,"conversations/" + conversation.id + "/messages",{body:"Blocked"})).status,404);
+      await goto(p,'directorio');
+      await p.locator('.blocked-connections summary').click();
+      await p.locator('.blocked-connections').getByRole('button',{name:'Desbloquear',exact:true}).click();
+      assert.equal((await request(p,"profiles/" + target.id)).body.connection.state,'none');
+      assert.equal((await request(p,"conversations/" + conversation.id + "/messages")).status,404);
     });
     let event;
     await test("Event registration and calendar controls", async () => {
@@ -355,8 +384,21 @@ async function goto(page, route) {
       await p.getByRole("button", { name: "Cancelar inscripción", exact: true }).waitFor();
       assert.equal(await p.getByRole("button", { name: "ICS", exact: true }).count(), 0);
       assert.equal(await p.getByRole("link", { name: /Añadir a Google Calendar/ }).count(), 1);
+      const changed = await request(a, "content/event/" + event.id, {title:event.title, body:event.body, status:"publish", meta:{modality:"Presencial"}});
+      assert.equal(changed.status, 200);
+      await p.reload();
+      await p.getByRole("button", {name:"Reconfirmar asistencia", exact:true}).click();
+      await p.getByRole("button", { name: "Cancelar inscripción", exact: true }).waitFor();
       await p.getByRole("button", { name: "Cancelar inscripción", exact: true }).click();
       await p.getByRole("button", { name: "Registrarme", exact: true }).waitFor();
+      await a.goto(base + "/eventos/?item=" + event.id);
+      await a.getByRole("button", {name:"Cancelar evento", exact:true}).click();
+      await a.locator('[name="cancellation_reason"]').fill("Prueba de cancelación documentada");
+      await a.locator('[data-action="event-cancel-confirm"]').click();
+      await a.locator(".modal").getByText("Prueba de cancelación documentada", {exact:true}).waitFor();
+      await p.reload();
+      await p.locator(".modal").getByText("Prueba de cancelación documentada", {exact:true}).waitFor();
+      assert.equal(await p.getByRole("button", {name:"Registrarme", exact:true}).count(), 0);
     });
     await test("Authorized upload stays private before publication", async () => {
       await a.goto(base + "/galeria/"); await a.locator("#page-content h1").waitFor();
@@ -472,7 +514,7 @@ async function goto(page, route) {
     });
     await test("Contact request is private and admin can resolve it", async () => {
       await goto(p, "contacto");
-      await p.locator("[name=title]").fill("E2E Solicitud de soporte");
+      await p.locator("[name=title]").fill("E2E Solicitud de soporte " + Date.now());
       await p
         .locator("[name=body]")
         .fill("E2E Consulta ficticia para verificar atención.");
@@ -485,10 +527,20 @@ async function goto(page, route) {
       const contact = await (await response).json();
       fixtures.push(contact.id);
       assert.equal(contact.status, "private");
-      await request(a, "admin/contact/" + contact.id, { status: "closed" });
+      assert.equal((await request(a, "admin/contact/" + contact.id + "/assign", {assignee: (await request(a,'bootstrap')).body.me.id})).status,200);
+      await a.goto(base + "/administracion/");
+      await a.locator('.admin-tabs [data-tab="solicitudes"]').click();
+      for (const state of ["progress","resolved"]) {
+        const form=a.locator('[data-form="contact-update"][data-id="'+contact.id+'"]');
+        await form.locator('[name="status"]').selectOption(state);
+        if(state==="resolved") await form.locator('[name="response"]').fill("Tu consulta ya fue atendida.");
+        await form.locator('button').click();
+        await a.locator('[data-contact="'+contact.id+'"][data-state="'+state+'"]').waitFor();
+      }
       await p.reload();
-      await p.getByText("Resuelta", { exact: true }).waitFor();
+      await p.locator(".notification-row").filter({hasText:contact.title}).locator(".tag").filter({hasText:/^Resuelta$/}).waitFor();
     });
+    await require("./admin-compliance.cjs")({browser,admin:a,member:p,base,request,test,login,coverage,root});
     await test("Admin configuration saves without returning secrets", async () => {
       await a.goto(base + "/wp-admin/admin.php?page=ascla-configuracion");
       await a.locator("[data-form=settings]").waitFor();

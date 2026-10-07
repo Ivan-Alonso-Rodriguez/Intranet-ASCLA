@@ -2,7 +2,7 @@
 namespace ASCLA\Core\Services;
 final class Access
 {
-    public static function member(int $id=0): bool { return user_can($id?:get_current_user_id(),'ascla_access') && !get_user_meta($id?:get_current_user_id(),'_ascla_suspended',true); }
+    public static function member(int $id=0): bool { return user_can($id?:get_current_user_id(),'ascla_access') && Membership::status($id?:get_current_user_id())==='active'; }
     /** Ejecutivo (ascla_publish) or Administrator (ascla_manage): the two roles allowed to publish and manage events, session recordings and technical resources. */
     public static function canPublish(): bool { return current_user_can('ascla_manage') || current_user_can('ascla_publish'); }
     public static function require(bool $condition,string $message='Acceso no autorizado.',int $code=403): void

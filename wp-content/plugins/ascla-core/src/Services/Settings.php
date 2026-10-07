@@ -6,12 +6,13 @@ final class Settings
     public static function get(): array
     {
         $stored=(array)get_option('ascla_settings',[]);
-        $settings=array_merge(['mail_mode'=>'wordpress','smtp_host'=>'','smtp_port'=>587,'smtp_security'=>'tls','smtp_user'=>'','smtp_from'=>'','smtp_name'=>'ASCLA','demo'=>true,'moderation_required'=>true,'moderate_comments'=>false,'chatham_default'=>true,'micro_enabled'=>false,'micro_approval'=>true,'ai_mode'=>'mock','ai_provider'=>'mock','ai_model'=>'','openai_model'=>'gpt-5.6-luna','deepseek_model'=>'deepseek-flash','matching_weights'=>MatchScore::WEIGHTS,'matching_min_affinity'=>30,'google_client_id'=>'','youtube_mode'=>'mock','social_mode'=>'mock','turnstile_enabled'=>false,'turnstile_site_key'=>'','turnstile_login'=>true,'turnstile_recovery'=>true,'turnstile_public'=>true,'copyright'=>'© ASCLA – Asociación de Secretarios Corporativos de América Latina'],$stored);
+        $settings=array_merge(['mail_mode'=>'wordpress','smtp_host'=>'','smtp_port'=>587,'smtp_security'=>'tls','smtp_user'=>'','smtp_from'=>'','smtp_name'=>'ASCLA','demo'=>true,'moderation_required'=>true,'moderate_comments'=>false,'chatham_default'=>true,'micro_enabled'=>false,'micro_approval'=>true,'micro_min'=>4,'micro_capacity'=>6,'micro_limit'=>4,'micro_priority_hours'=>48,'ai_mode'=>'mock','ai_provider'=>'mock','ai_model'=>'','openai_model'=>'gpt-5.6-luna','deepseek_model'=>'deepseek-flash','matching_weights'=>MatchScore::WEIGHTS,'matching_min_affinity'=>30,'matching_max_suggestions'=>5,'google_client_id'=>'','youtube_mode'=>'mock','social_mode'=>'mock','turnstile_enabled'=>false,'turnstile_site_key'=>'','turnstile_login'=>true,'turnstile_recovery'=>true,'turnstile_public'=>true,'copyright'=>'© ASCLA – Asociación de Secretarios Corporativos de América Latina'],CredentialPolicy::DEFAULTS,ProfileReview::DEFAULTS,$stored);
         // Public self-registration is intentionally unsupported in ASCLA. Remove any legacy 1.9.13 flag.
         unset($settings['turnstile_register']);
         // Backward compatibility with installations that only stored ai_mode before 1.9.11.
         if (!array_key_exists('ai_provider',$stored)) { $settings['ai_provider']=($settings['ai_mode']??'mock')==='real'?'gemini':'mock'; }
         $settings['ai_mode']=$settings['ai_provider']==='mock'?'mock':'real';
+        $settings['micro_approval']=true;
         return $settings;
     }
     private static function applyFlags(array &$data,array $input): void
@@ -45,6 +46,7 @@ final class Settings
     private static function applyMatching(array &$data,array $input): void
     {
         if (isset($input['matching_min_affinity'])) { $data['matching_min_affinity']=max(0,min(100,(int)$input['matching_min_affinity'])); }
+        if (isset($input['matching_max_suggestions'])) { $data['matching_max_suggestions']=max(1,min(5,(int)$input['matching_max_suggestions'])); }
         if (!isset($input['matching_weights'])) { return; }
         $weights=[];
         foreach (MatchScore::WEIGHTS as $key=>$default) { $weights[$key]=max(0,min(100,(int)($input['matching_weights'][$key]??$default))); }
@@ -75,6 +77,9 @@ final class Settings
         self::applyAiProvider($data,$input);
         self::applyTextSettings($data,$input);
         self::applyMatching($data,$input);
+        MicroPlanning::settings($data,$input);
+        CredentialPolicy::settings($data,$input);
+        ProfileReview::settings($data,$input);
         $data=\ASCLA\Core\Integrations\Mailer::validate($input,$data);
         self::saveSecrets($input);
         self::validateTurnstile($data);

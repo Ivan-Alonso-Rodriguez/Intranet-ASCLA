@@ -2,21 +2,21 @@
 namespace ASCLA\Core\Domain;
 final class GroupPlanner
 {
-    /** Deterministic grouping, minimum 4 and maximum 6. Remaining <4 wait next month. */
-    public static function plan(array $profiles,array $history=[],int $rotation=0,array $blocked=[]): array
+    /** Deterministic grouping, configurable minimum and capacity; leftovers wait for another batch. */
+    public static function plan(array $profiles,array $history=[],int $rotation=0,array $blocked=[],int $minimum=4,int $maximum=6,int $limit=PHP_INT_MAX): array
     {
         usort($profiles,static fn($a,$b)=>$a['id']<=>$b['id']);
         if ($profiles) { $shift=$rotation%count($profiles); $profiles=array_merge(array_slice($profiles,$shift),array_slice($profiles,0,$shift)); }
         $groups=[]; $waiting=[];
-        while (count($profiles)>=4) {
-            $count=count($profiles); $size=($count>=8 && $count<=11)?intdiv($count,2):min(6,$count);
+        while (count($profiles)>=$minimum && count($groups)<$limit) {
+            $count=count($profiles); $size=($count>=2*$minimum && $count<2*$maximum)?intdiv($count,2):min($maximum,$count);
             $group=[array_shift($profiles)];
             while (count($group)<$size) {
                 $bestKey=self::bestCandidate($profiles,$group,$history,$blocked);
                 if($bestKey===null){ break; }
                 $group[]=$profiles[$bestKey]; array_splice($profiles,$bestKey,1);
             }
-            if(count($group)>=4){ $groups[]=array_column($group,'id'); }
+            if(count($group)>=$minimum){ $groups[]=array_column($group,'id'); }
             else { $waiting=array_merge($waiting,array_column($group,'id')); }
         }
         return ['groups'=>$groups,'waiting'=>array_merge($waiting,array_column($profiles,'id'))];

@@ -1682,6 +1682,19 @@
     margin-left: 0;
   }
 }
+@media (min-width: 761px) and (max-width: 900px) {
+  .ascla-sidebar {
+    width: 238px;
+    transform: translateX(-100%);
+    transition: transform .2s;
+    box-shadow: 10px 0 30px #12334d26;
+  }
+  .ascla-sidebar.open { transform: translateX(0); }
+  .ascla-main { margin-left: 0; }
+  .mobile-menu { display: block; }
+  .header-profile > span:not(.avatar) { display: none; }
+  .header-profile { gap: 5px; padding-left: 9px; }
+}
 @media (max-width: 760px) {
   
   .ascla-sidebar.open {
@@ -1888,15 +1901,27 @@
 .generated-section summary { cursor:pointer; font-weight:600; }
 .generated-section ul { padding-left:20px; margin:10px 0; }
 .generated-results > .btn { margin-top:16px; }
-.resource-thumbnail { width:100%; height:190px; object-fit:cover; display:block; }
+.resource-thumbnail { width:100%; height:190px; object-fit:cover; display:block; background:var(--navy); color:transparent; font-size:0; }
 .video-metadata { display:flex; align-items:center; gap:10px; margin:12px 0; flex-wrap:wrap; }
 .invite-options { display:grid; gap:10px; max-height:330px; overflow:auto; padding:12px 0; }
 @media(max-width:600px) { #ascla-root .feed-images img { height:160px; } .filter-control { min-width:130px; } }
+@media(max-width:560px){
+  #ascla-root .cards,
+  #ascla-root .cards.directory{grid-template-columns:minmax(0,1fr)}
+  #ascla-root .cards>.card{min-width:0}
+  #ascla-root .content-list-filters,
+  #ascla-root .directory-filters{display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch}
+  #ascla-root .content-list-filters>*,
+  #ascla-root .directory-filters>*{width:100%;max-width:none!important;min-width:0!important}
+  #ascla-root .feed-actions{flex-wrap:wrap;gap:8px 12px}
+}
 
 #ascla-root .calendar-day { border:0; background:transparent; color:inherit; font:inherit; cursor:pointer; width:100%; height:100%; border-radius:50%; }
 #ascla-root .calendar-day:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
 
-.resource-video-cover { display:block; position:relative; background:var(--navy); }
+.resource-video-cover { display:block; position:relative; height:190px; background:var(--navy); overflow:hidden; }
+.resource-video-cover .resource-thumbnail { height:100%; }
+.resource-video-cover .resource-thumbnail[hidden] { display:none; }
 .resource-video-cover > span { position:absolute; bottom:10px; right:10px; background:#102f50e6; color:white; border-radius:6px; padding:5px 9px; font-size:12px; }
 
 /* ASCLA activity inbox */
@@ -2022,15 +2047,21 @@ output.view-loading{display:block}
 .connections-panel details { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 16px; }
 .connections-panel summary { cursor: pointer; font-weight: 600; }
 .connection-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0; border-top: 1px solid var(--line); }
-.connection-row .connection-controls { width: auto; margin: 0; }
-.connection-person { display: flex; align-items: center; gap: 12px; }
+.connection-row .connection-controls { flex: 0 1 auto; width: auto; margin: 0; }
+.connection-person { display: flex; flex: 1 1 420px; align-items: flex-start; gap: 12px; min-width: 0; }
+.connection-person-copy { display: grid; gap: 4px; min-width: 0; }
 .connection-person a, .connection-person small { display: block; margin-top: 4px; font-size: 12px; }
+.connection-professional { display: flex; flex-wrap: wrap; gap: 7px 22px; margin-top: 3px; font-size: 12px; }
+.connection-professional > span { display: grid; gap: 2px; min-width: 130px; color: var(--text); }
+.connection-professional small { margin: 0; color: var(--muted); font-size: 9px; font-weight: 600; letter-spacing: .08em; line-height: 1.3; text-transform: uppercase; }
+.connection-confirmed-date { display: flex; align-items: center; gap: 6px; margin-top: 5px; color: var(--muted); font-size: 11px; }
+.connection-confirmed-date svg { width: 14px; height: 14px; flex: none; color: var(--blue); }
 .chat-profile { display: flex; gap: 12px; align-items: center; color: inherit; min-width: 0; text-decoration: none; }
 .chat-profile > span { min-width: 0; }
 .chat-profile strong { overflow-wrap: anywhere; }
 .chat-profile small { display: block; font-size: 11px; color: var(--blue); margin-top: 3px; }
 .chat-profile:hover strong { text-decoration: underline; }
-@media (max-width: 760px) { .connection-row { flex-direction: column; align-items: stretch; gap: 12px; } .chat-title { gap: 10px; } .member-card { min-height: 0; } .member-card .connection-controls, .member-card .member-own-actions, .member-card .member-action-placeholder { min-height: 0; } }
+@media (max-width: 760px) { .connection-row { flex-direction: column; align-items: stretch; gap: 12px; } .connection-person { flex-basis: auto; width: 100%; } .connection-row .connection-controls { width: 100%; } .chat-title { gap: 10px; } .member-card { min-height: 0; } .member-card .connection-controls, .member-card .member-own-actions, .member-card .member-action-placeholder { min-height: 0; } }
 
 /* Administration workspace: clear task states, user access and responsive controls. */
 
@@ -3060,9 +3091,9 @@ html[data-ascla-theme="dark"] #ascla-root .admin-feature-card .admin-feature-ico
 #ascla-root .audit-privacy svg{width:14px;height:14px}
 #ascla-root .audit-table td{vertical-align:middle}
 #ascla-root .audit-time{display:inline-block;min-width:112px;color:#536d7d;font-size:11px;font-variant-numeric:tabular-nums}
-#ascla-root .audit-action{display:inline-flex;align-items:center;min-height:26px;padding:4px 8px;border-radius:8px;background:#edf5f9;color:#235e79;font-size:10px;font-weight:750;word-break:break-word}
+#ascla-root .audit-action{display:inline-flex;align-items:center;min-height:26px;padding:4px 8px;border-radius:8px;background:#edf5f9;color:#235e79;font-size:10px;font-weight:750;overflow-wrap:anywhere}
 #ascla-root .audit-actor,#ascla-root .audit-object{display:inline-flex;padding:4px 7px;border:1px solid #dfe8ed;border-radius:7px;background:#fff;color:#526a78;font-size:10px;font-weight:650;white-space:nowrap}
-#ascla-root .audit-detail{max-width:520px;color:#455e6e;font-size:11px;line-height:1.45;word-break:break-word}
+#ascla-root .audit-detail{max-width:520px;color:#455e6e;font-size:11px;line-height:1.45;overflow-wrap:anywhere}
 #ascla-root .audit-empty{padding:24px;color:#738795;text-align:center}
 
 #ascla-root .admin-config-status{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid #cfe4ed;border-radius:999px;background:#f1f9fc;color:#216d8c;font-size:10px;font-weight:800;white-space:nowrap}
@@ -3725,6 +3756,11 @@ html[data-ascla-theme="dark"] #ascla-root .live-toast-close:hover,html[data-ascl
 
 #ascla-root .admin-panel .stats-section .table-wrap,#ascla-root .stats-roster .table-wrap{max-width:100%;overflow-x:auto}
 @media(max-width:480px){#ascla-root .ascla-header .header-brand{display:none}#ascla-root .ascla-header{gap:8px;padding-left:12px;padding-right:12px}#ascla-root .header-right{gap:8px;min-width:0}}
+@media(max-width:380px){
+  #ascla-root .ascla-header{gap:6px;padding-left:8px;padding-right:8px}
+  #ascla-root .header-right{gap:6px}
+  #ascla-root .header-language select{min-width:70px;max-width:80px}
+}
 
 #ascla-root .import-progress{margin-bottom:20px}#ascla-root .import-progress progress{display:block;width:100%;height:18px;margin-top:10px}#ascla-root .import-rows{display:grid;gap:16px}#ascla-root .import-row dl{display:grid;grid-template-columns:180px minmax(0,1fr);gap:10px;font-size:13px}#ascla-root .import-row dd{margin:0;overflow-wrap:anywhere;white-space:pre-wrap}#ascla-root .import-row select[multiple]{min-height:145px;width:100%}#ascla-root .import-warnings{border-left:3px solid #b4770f;padding:12px 12px 12px 30px;background:var(--bg)}#ascla-root .admin-panel .import-row .table-wrap{overflow-x:auto}@media(max-width:680px){#ascla-root .import-row dl{grid-template-columns:1fr}}
 
@@ -3907,3 +3943,101 @@ html[data-ascla-theme="dark"] #ascla-root .directory-pagination-summary select {
   #ascla-root .profile-account-section{padding:16px}
 }
 @media(prefers-reduced-motion:reduce){#ascla-root .profile-tab{transition:none}}
+
+/* CU009 keeps the original Inicio visual language: open sections and existing card surfaces. */
+#ascla-root .dashboard-recommendations-layout{display:grid;grid-template-columns:minmax(0,1fr) 292px;align-items:start;gap:24px;min-width:0}
+#ascla-root .dashboard-recommendations-layout>div{min-width:0}
+#ascla-root .dashboard-recommendations-layout>.dashboard-aside{margin-top:42px;min-width:0}
+#ascla-root .dashboard-recommendations-layout .home-recommendations-heading{align-items:flex-start;flex-direction:column;gap:12px}
+#ascla-root .dashboard-recommendations-layout .recommendations-heading-actions{flex-wrap:wrap;width:100%;min-width:0;justify-content:space-between}
+#ascla-root .dashboard-recommendations-layout .recommendation-cycle{max-width:100%;min-width:0}
+#ascla-root .dashboard-recommendations-layout .recommendation-cycle span{min-width:0}
+#ascla-root .dashboard-activity{min-width:0;margin-top:6px}
+#ascla-root .home-recommendations{margin:42px 0 36px;min-width:0}
+#ascla-root .home-recommendations-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:18px}
+#ascla-root .home-recommendations-heading h2{margin:4px 0 5px;font-size:22px}
+#ascla-root .home-recommendations-heading p{max-width:720px;color:var(--muted);font-size:12px}
+#ascla-root .recommendations-heading-actions{display:flex;align-items:center;gap:13px}
+#ascla-root .home-recommendations .recommendation-cycle{flex:0 0 auto;margin-top:0;border-color:var(--line);background:var(--surface);color:var(--muted)}
+#ascla-root .home-recommendations .recommendation-cycle strong{color:var(--ink)}
+#ascla-root .home-recommendation-group{margin-top:34px;padding-top:28px;border-top:1px solid var(--line)}
+#ascla-root .home-recommendation-group>.section-top{align-items:end;margin-bottom:14px}
+#ascla-root .home-recommendation-group>.section-top h3{margin:3px 0 4px;font-size:21px}
+#ascla-root .home-recommendation-group>.section-top p{color:var(--muted);font-size:12px}
+#ascla-root .recommendation-strip{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 32px)/3);gap:16px;overflow-x:auto;overscroll-behavior-inline:contain;padding:2px 2px 14px;scroll-snap-type:inline mandatory;scrollbar-color:var(--blue) var(--line);scrollbar-width:thin}
+#ascla-root .recommendation-strip>*{scroll-snap-align:start}
+#ascla-root .recommendation-strip:focus-visible{outline:3px solid rgba(30,132,190,.28);outline-offset:4px;border-radius:12px}
+#ascla-root .recommendation-content-strip{grid-auto-columns:calc((100% - 32px)/3)}
+#ascla-root .recommendation-content-strip .resource-card{height:100%}
+#ascla-root .recommendation-cycle{display:inline-flex;align-items:center;gap:10px;margin-top:24px;padding:10px 14px;border:1px solid rgba(255,255,255,.28);border-radius:12px;background:rgba(5,34,65,.24);font-size:11px;color:#dcf4ff}
+#ascla-root .recommendation-cycle span{display:flex;flex-direction:column}
+#ascla-root .recommendation-cycle strong{font-size:12px;color:#fff}
+#ascla-root .recommendation-person-card{display:flex;flex-direction:column;min-width:0;min-height:400px;padding:25px 22px;border-color:var(--line);box-shadow:none}
+#ascla-root .recommendation-person-top{display:flex;align-items:center;flex-direction:column;gap:9px;min-width:0;text-align:center}
+#ascla-root .recommendation-person-top>div:last-child{min-width:0}
+#ascla-root .recommendation-person-top h3{margin:4px 0 2px;font-size:18px}
+#ascla-root .recommendation-person-top p{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ascla-root .recommendation-avatar{position:relative;flex:0 0 auto}
+#ascla-root .recommendation-avatar .match-score{position:absolute;right:-8px;bottom:-5px;padding:3px 7px;border:2px solid var(--surface);border-radius:20px;background:var(--green);color:#fff;font-size:10px;font-weight:750}
+#ascla-root .recommendation-kicker{display:inline-flex;align-items:center;gap:5px;color:var(--blue);font-size:10px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
+#ascla-root .recommendation-kicker svg{width:14px;height:14px}
+#ascla-root .recommendation-reason{margin:18px 0 14px;padding:16px 0 0;border-top:1px solid var(--line)}
+#ascla-root .recommendation-reason strong{font-size:11px;color:var(--blue);text-transform:uppercase;letter-spacing:.06em}
+#ascla-root .recommendation-reason p{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.55;text-align:center}
+#ascla-root .recommendation-shared{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:11px}
+#ascla-root .recommendation-shared span{padding:4px 8px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--blue);font-size:10px}
+#ascla-root .recommendation-person-actions{display:flex;align-items:stretch;flex-direction:column;gap:8px;margin-top:auto;padding-top:2px}
+#ascla-root .recommendation-person-actions>.connection-controls{display:contents}
+#ascla-root .recommendation-person-actions .connection-actions{display:flex;flex-direction:column;gap:8px}
+#ascla-root .recommendation-person-actions>.btn,#ascla-root .recommendation-person-actions .connection-actions>.btn{width:100%;justify-content:center}
+#ascla-root .recommendation-person-actions .conversation-request-actions,#ascla-root .recommendation-person-actions .private-note{display:none}
+#ascla-root .recommendation-low-match{display:flex;align-items:flex-start;gap:13px;margin-top:20px;padding:15px 17px;border:1px solid #f0d9a8;border-radius:14px;background:#fff9e9;color:#735919}
+#ascla-root .recommendation-low-match svg{margin-top:2px;color:#b78215}
+#ascla-root .recommendation-low-match p{margin-top:3px;font-size:12px;color:#806a35}
+#ascla-root .recommendations-gate{display:grid;grid-template-columns:auto minmax(0,680px);justify-content:center;gap:24px;margin:34px auto;padding:38px;max-width:900px}
+#ascla-root .recommendations-gate-icon{display:grid;place-items:center;width:64px;height:64px;border-radius:18px;background:var(--blue-soft);color:var(--blue)}
+#ascla-root .recommendations-gate-icon svg{width:29px;height:29px}
+#ascla-root .recommendations-gate h2,#ascla-root .recommendations-gate h3{margin:5px 0 7px;font-size:24px}
+#ascla-root .recommendations-gate p,#ascla-root .recommendations-gate li{color:var(--muted);font-size:12px}
+#ascla-root .recommendations-gate ul{columns:2;margin:13px 0;padding-left:19px}
+#ascla-root .recommendations-gate-progress{display:flex;align-items:center;gap:10px;margin:17px 0}
+#ascla-root .recommendations-gate-progress>span{overflow:hidden;width:min(360px,80%);height:7px;border-radius:999px;background:var(--line)}
+#ascla-root .recommendations-gate-progress i{display:block;height:100%;border-radius:inherit;background:var(--blue)}
+#ascla-root .dismissed-recommendations-list{display:grid;gap:8px;margin-top:16px}
+#ascla-root .dismissed-recommendation-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+#ascla-root .dismissed-recommendation-row>div{display:flex;flex-direction:column;min-width:0}
+#ascla-root .dismissed-recommendation-row span{color:var(--muted);font-size:11px}
+html[data-ascla-theme="dark"] #ascla-root .recommendation-low-match{border-color:#675522;background:#2d291b;color:#f3d88d}
+html[data-ascla-theme="dark"] #ascla-root .recommendation-low-match p{color:#d8c37e}
+@media(max-width:980px){
+  #ascla-root .dashboard-recommendations-layout{grid-template-columns:minmax(0,1fr)}
+  #ascla-root .dashboard-recommendations-layout>.dashboard-aside{margin-top:0}
+  #ascla-root .home-recommendations-heading{align-items:flex-start;flex-direction:column}
+  #ascla-root .recommendations-heading-actions{width:100%;justify-content:space-between}
+  #ascla-root .recommendation-strip{grid-auto-columns:minmax(320px,74%)}
+  #ascla-root .recommendation-content-strip{grid-auto-columns:minmax(290px,55%)}
+}
+@media(max-width:720px){
+  #ascla-root .home-recommendations{margin:30px 0}
+  #ascla-root .home-recommendations-heading h2{font-size:22px}
+  #ascla-root .home-recommendations-heading .recommendation-cycle{margin-top:0}
+  #ascla-root .recommendations-heading-actions{align-items:stretch;flex-direction:column}
+  #ascla-root .recommendations-heading-actions>.btn{align-self:flex-start}
+  #ascla-root .home-recommendation-group>.section-top{align-items:flex-start;flex-direction:column}
+  #ascla-root .recommendation-strip,#ascla-root .recommendation-content-strip{grid-auto-columns:minmax(278px,88%)}
+  #ascla-root .recommendation-cycle{align-items:flex-start;width:100%}
+  #ascla-root .recommendations-gate{grid-template-columns:1fr;padding:24px}
+  #ascla-root .recommendations-gate ul{columns:1}
+  #ascla-root .recommendation-person-actions>.btn,#ascla-root .recommendation-person-actions .connection-actions,#ascla-root .recommendation-person-actions .connection-actions>.btn{width:100%;justify-content:center}
+  #ascla-root .dismissed-recommendation-row{grid-template-columns:auto minmax(0,1fr)}
+  #ascla-root .dismissed-recommendation-row>.btn{grid-column:1/-1;width:100%;justify-content:center}
+}
+
+.ascla-session-warning{position:fixed;right:20px;bottom:20px;z-index:10000;margin:0;max-width:min(440px,calc(100vw - 40px));padding:1.5rem;border:1px solid CanvasText;border-radius:12px;color:CanvasText;background:Canvas;box-shadow:0 12px 40px #0005}
+
+.directory-filters .directory-multiple{flex:1 1 180px;min-width:0}
+.directory-filters .directory-multiple select{width:100%;max-width:100%;min-height:90px}
+.directory-filters #directory-multiple-help{flex-basis:100%}
+
+.connection-row[hidden]{display:none}
+.connections-search{max-width:460px;margin:16px 0}

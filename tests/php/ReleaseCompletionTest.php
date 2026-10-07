@@ -35,9 +35,12 @@ final class ReleaseCompletionTest extends TestCase
     private function topicName(int $n=0):string{return get_term($this->terms[$n],'ascla_interest')->name;}
     public function testPhonePrivacyEditClearAndNoAiExposure():void
     {
-        $uid=$this->users[1];wp_set_current_user($uid);Profiles::save(['phone'=>'+51 999 123 456']);self::assertSame('+51999123456',Profiles::visible($uid)['phone']);self::assertArrayNotHasKey('phone',Profiles::matchingProfile($uid));self::assertStringNotContainsString('999',wp_json_encode(Profiles::networkingContext($uid)));
+        $uid=$this->users[1];wp_set_current_user($uid);Profiles::save(ascla_test_profile(['phone'=>'+51 999 123 456']));self::assertSame('+51999123456',Profiles::visible($uid)['phone']);self::assertArrayNotHasKey('phone',Profiles::matchingProfile($uid));self::assertStringNotContainsString('999',wp_json_encode(Profiles::networkingContext($uid)));
         foreach([2,3] as $i){wp_set_current_user($this->users[$i]);self::assertArrayNotHasKey('phone',Profiles::visible($uid));$this->rejected(403,fn()=>Profiles::save(['phone'=>'+51 900 000 000'],$uid));}
-        wp_set_current_user($uid);Profiles::save(['phone_visibility'=>'members']);wp_set_current_user($this->users[2]);self::assertSame('+51999123456',Profiles::visible($uid)['phone']);
+        wp_set_current_user($uid);Profiles::save(['phone_visibility'=>'members']);self::assertSame('private',Profiles::raw($uid)['phone_visibility']);
+        $legacy=Profiles::raw($uid);$legacy['phone_visibility']='members';$legacy['hidden']=['company','position'];update_user_meta($uid,'_ascla_profile',$legacy);
+        foreach([2,3] as $i){wp_set_current_user($this->users[$i]);$visible=Profiles::visible($uid);foreach(['phone','company','position'] as $field)self::assertArrayNotHasKey($field,$visible);self::assertFalse(ASCLA\Core\Services\Content::canCreate('ally'));}
+        wp_set_current_user($uid);Profiles::save(['directory'=>false]);foreach([2,3] as $i){wp_set_current_user($this->users[$i]);$this->rejected(404,fn()=>Profiles::visible($uid));}
         wp_set_current_user($this->users[0]);Profiles::save(['phone'=>'','phone_visibility'=>'private'],$uid);self::assertSame('',Profiles::visible($uid)['phone']);
         foreach([51999123456,'999123456','0051999123456','+0123456789','+1234567','+1234567890123456','<script>1234567</script>',[]] as $value)$this->rejected(400,fn()=>Profiles::save(['phone'=>$value],$uid));
     }
@@ -76,7 +79,7 @@ final class ReleaseCompletionTest extends TestCase
     public function testEmptyReplacementKeepsInterestsAndConcurrentEditsRequireReview():void
     {
         update_user_meta($this->users[1],'_ascla_profile',['interests'=>[$this->terms[0]],'bio'=>'Before']);$i=$this->start([[$this->email(),'','','']],'replace');$i=InterestImports::process((int)$i['id']);InterestImports::review((int)$i['id'],$i['rows'][0]['id'],['decision'=>'accept','topics'=>[]]);InterestImports::confirm((int)$i['id']);$i=InterestImports::apply((int)$i['id']);self::assertSame(1,$i['counts']['unchanged']);self::assertSame([$this->terms[0]],get_user_meta($this->users[1],'_ascla_profile',true)['interests']);
-        $i=$this->start([[$this->email(),'',$this->topicName(),'']]);$i=InterestImports::process((int)$i['id']);InterestImports::review((int)$i['id'],$i['rows'][0]['id'],['decision'=>'accept','topics'=>[$this->terms[0]]]);InterestImports::confirm((int)$i['id']);Profiles::save(['interests'=>[]],$this->users[1]);$i=InterestImports::apply((int)$i['id']);self::assertSame('review',$i['status']);self::assertSame(1,$i['counts']['conflict']);self::assertSame([],get_user_meta($this->users[1],'_ascla_profile',true)['interests']);
+        $i=$this->start([[$this->email(),'',$this->topicName(),'']]);$i=InterestImports::process((int)$i['id']);InterestImports::review((int)$i['id'],$i['rows'][0]['id'],['decision'=>'accept','topics'=>[$this->terms[0]]]);InterestImports::confirm((int)$i['id']);$term=wp_insert_term('Cambio concurrente '.bin2hex(random_bytes(4)),'ascla_interest');$this->terms[]=(int)$term['term_id'];Profiles::save(ascla_test_profile(['interests'=>[$this->terms[1]]]),$this->users[1]);$i=InterestImports::apply((int)$i['id']);self::assertSame('review',$i['status']);self::assertSame(1,$i['counts']['conflict']);self::assertSame([$this->terms[1]],get_user_meta($this->users[1],'_ascla_profile',true)['interests']);
     }
     public function testUniqueCodePrecedenceAndAmbiguousIdentitiesNeverUseNames():void
     {
@@ -114,13 +117,13 @@ final class ReleaseCompletionTest extends TestCase
         $sonar=file_get_contents($root.'/sonar-project.properties');
         $docs=file_get_contents($root.'/README.md');
         $history=file_get_contents($root.'/VERSION_HISTORY.md');
-        self::assertMatchesRegularExpression('/Version:\s*1\.10\.4/', $plugin);
-        self::assertStringContainsString("define('ASCLA_VERSION', '1.10.4');", $plugin);
-        self::assertMatchesRegularExpression('/Stable tag:\s*1\.10\.4/', $readme);
-        self::assertStringContainsString('sonar.projectVersion=1.10.4', $sonar);
-        self::assertStringContainsString('Versión actual: 1.10.4 · esquema 13', $docs);
-        self::assertStringContainsString('**Versión actual:** `1.10.4`', $history);
-        self::assertSame(13, \ASCLA\Core\Database\Installer::SCHEMA_VERSION);
+        self::assertMatchesRegularExpression('/Version:\s*1\.10\.6/', $plugin);
+        self::assertStringContainsString("define('ASCLA_VERSION', '1.10.6');", $plugin);
+        self::assertMatchesRegularExpression('/Stable tag:\s*1\.10\.6/', $readme);
+        self::assertStringContainsString('sonar.projectVersion=1.10.6', $sonar);
+        self::assertStringContainsString('Versión actual: 1.10.6 · esquema 14', $docs);
+        self::assertStringContainsString('**Versión actual:** `1.10.6`', $history);
+        self::assertSame(14, \ASCLA\Core\Database\Installer::SCHEMA_VERSION);
     }
     public function testSqlRankingAndRosterReturnPagesWithoutLosingTotals():void
     {

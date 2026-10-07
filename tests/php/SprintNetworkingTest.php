@@ -9,7 +9,7 @@ final class SprintNetworkingTest extends TestCase
     private array $users=[],$posts=[],$settings=[];private string $secret='';private $http;
     protected function setUp(): void {
         $this->settings=Settings::get();$this->secret=Secrets::get('ai_key');
-        foreach(range(1,6) as $i){$id=wp_insert_user(['user_login'=>'network_'.bin2hex(random_bytes(6)),'user_pass'=>wp_generate_password(30),'role'=>$i===1?'administrator':'ascla_member']);$this->users[]=$id;wp_set_current_user($id);Profiles::save(['first_name'=>'NombreSecreto','last_name'=>'ApellidoPrivado','hidden'=>['first_name','position'],'position'=>'CARGO_RESERVADO','networking'=>true,'microevents'=>true,'interests'=>[Profiles::catalogs()['interest'][0]['id']]]);}
+        foreach(range(1,6) as $i){$id=wp_insert_user(['user_login'=>'network_'.bin2hex(random_bytes(6)),'user_pass'=>wp_generate_password(30),'role'=>$i===1?'administrator':'ascla_member']);$this->users[]=$id;wp_set_current_user($id);Profiles::save(ascla_test_profile(['first_name'=>'NombreSecreto','last_name'=>'ApellidoPrivado','hidden'=>['first_name','position'],'position'=>'CARGO_RESERVADO','networking'=>true,'microevents'=>true,'interests'=>[Profiles::catalogs()['interest'][0]['id']]]));}
         wp_set_current_user($this->users[0]);Settings::save(['ai_mode'=>'real','ai_model'=>'gemini-transport-sprint-'.bin2hex(random_bytes(5)),'ai_key'=>'fake-key-for-http-tests']);
     }
     protected function tearDown(): void {

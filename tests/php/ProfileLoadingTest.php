@@ -19,7 +19,7 @@ final class ProfileLoadingTest extends TestCase
         foreach(['administrator','ascla_member'] as $i=>$role){
             $id=wp_insert_user(['user_login'=>'profile_loading_'.bin2hex(random_bytes(6)),'user_pass'=>wp_generate_password(30),'role'=>$role]);
             self::assertIsInt($id);$this->users[]=$id;wp_set_current_user($id);
-            Profiles::save(['first_name'=>'Prueba','last_name'=>'Perfil '.$i,'position'=>'Directora','bio'=>'Biografía original','experience'=>'Experiencia original','networking'=>true,'directory'=>true,'hidden'=>[]]);
+            Profiles::save(ascla_test_profile(['first_name'=>'Prueba','last_name'=>'Perfil '.$i,'position'=>'Directora','bio'=>'Biografía original','experience'=>'Experiencia original','networking'=>true,'directory'=>true,'hidden'=>[]]));
         }
         wp_set_current_user($this->users[0]);
         Settings::save(['ai_provider'=>'gemini','ai_model'=>'gemini-cache-'.bin2hex(random_bytes(5)),'ai_key'=>'fake-local-test-key']);
@@ -71,7 +71,7 @@ final class ProfileLoadingTest extends TestCase
         $this->match();
         $this->edit(['birth_date'=>'1980-02-03','email_notifications'=>['events'=>false]]);
         $this->match();self::assertSame(1,$this->calls,'Birthday and email choices do not affect matching prose.');
-        foreach([['bio'=>'Otra biografía'],['experience'=>'Otra experiencia'],['position'=>'Consultora'],['hidden'=>['position']],['interests'=>[Profiles::catalogs()['interest'][0]['id']]]] as $input){
+        foreach([['bio'=>'Otra biografía'],['experience'=>'Otra experiencia'],['position'=>'Consultora'],['hidden'=>['position']],['interests'=>[Profiles::catalogs()['interest'][1]['id']]]] as $input){
             $before=$this->calls;$this->edit($input);$this->match();self::assertSame($before+1,$this->calls);
         }
         $before=$this->calls;Settings::save(['ai_model'=>'gemini-another-test-model']);$this->match();self::assertSame($before+1,$this->calls);

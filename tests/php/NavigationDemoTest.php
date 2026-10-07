@@ -19,8 +19,8 @@ final class NavigationDemoTest extends TestCase
     public function testDemoUpsertDoesNotDuplicateEmailOrTakeOverOtherAccounts():void
     {
         $method=new ReflectionMethod(DemoUser::class,'upsert');$suffix=bin2hex(random_bytes(5));$login='navdemo_'.$suffix;$email=$login.'@example.invalid';$password=wp_generate_password(24);
-        $r=$method->invoke(null,$login,$email,'Prueba','Demo',['company'=>'Demo'],$password);$this->users[]=$r['id'];self::assertTrue($r['created']);
-        $same=$method->invoke(null,$login.'other',$email,'Prueba','Demo',['company'=>'Demo'],$password);self::assertSame($r['id'],$same['id']);self::assertFalse($same['created']);
+        $r=$method->invoke(null,$login,$email,'Prueba','Demo',ascla_test_profile(['company'=>'Demo']),$password);$this->users[]=$r['id'];self::assertTrue($r['created']);
+        $same=$method->invoke(null,$login.'other',$email,'Prueba','Demo',ascla_test_profile(['company'=>'Demo']),$password);self::assertSame($r['id'],$same['id']);self::assertFalse($same['created']);
         try{$method->invoke(null,$login,'different@example.invalid','Prueba','Demo',[],$password);self::fail('Should reject a conflicting identity');}catch(ASCLA\Core\Rest\ApiException $error){self::assertSame(409,$error->getCode());}
         $user=get_userdata($r['id']);$user->set_role('administrator');
         try{$method->invoke(null,$login,$email,'Prueba','Demo',[],$password);self::fail('Should preserve the existing role');}catch(ASCLA\Core\Rest\ApiException $error){self::assertSame(409,$error->getCode());}

@@ -4,11 +4,32 @@ Plugin WordPress portable para una comunidad profesional privada. Incluye perfil
 
 Toda la funcionalidad propia está en `wp-content/plugins/ascla-core/`. Elementor es opcional. No se modifica WordPress Core ni se necesita un tema específico. El plugin conserva sus datos al desactivarse o desinstalarse.
 
-## Versión actual: 1.10.4 · esquema 13
+## Versión actual: 1.10.6 · esquema 14
 
-La versión **1.10.4** mejora la experiencia de uso sin cambiar el esquema de datos: en móvil, Mensajería presenta primero la lista de chats y abre la conversación seleccionada como una vista independiente; el Directorio completa **RF-013 / CP-021** con paginación numérica y un límite fijo de 15 resultados por página; **Mi perfil** se reorganiza en pestañas y protege la navegación con la opción **Guardar cambios y salir**; la integración con **Google Calendar** crea/sincroniza el evento organizador y añade a los asociados invitados como asistentes para que Google envíe la invitación por correo; y **DeepSeek** se incorpora como proveedor de IA configurable junto con los proveedores existentes. Se conservan las correcciones de acceso, validación de perfil, directorio y microeventos de 1.10.3. Consulta el detalle en [VERSION_HISTORY.md](VERSION_HISTORY.md).
+La versión **1.10.6** consolida la adecuación de ASCLA al Documento de Análisis y Diseño y el cierre de los casos QA 024–058. Refuerza sesiones y credenciales, membresías, privacidad y revisión de perfiles, Directorio, Contacto, conexiones y mensajería, además del ciclo de vida de eventos y microeventos. También incorpora la migración de auditoría del **esquema 14** y sincroniza el paquete instalable, SonarQube, pruebas de cierre y documentación. Consulta el detalle en [VERSION_HISTORY.md](VERSION_HISTORY.md).
 
-**Estado documental:** `1.10.4` es la versión vigente; `1.10.3` es la versión inmediatamente anterior. El historial se presenta de forma descendente (más reciente → más antigua) para conservar una lectura cronológica clara.
+**Estado documental:** `1.10.6` es la versión vigente; `1.10.5` es la versión inmediatamente anterior. El historial se presenta de forma descendente (más reciente → más antigua) para conservar una lectura cronológica clara.
+
+La adecuación local al documento y los [fixes de QA 024–058](BUGFIXES_QA.md) forman parte de esta versión. Estado y pendientes: [COMPLIANCE.md](COMPLIANCE.md).
+
+### Cambios principales de 1.10.6
+
+- **Seguridad y sesiones:** inactividad de 30 minutos, recuperación de cuenta, políticas configurables de contraseña, captcha y bloqueo temporal, sin exponer credenciales ni secretos.
+- **Membresías y perfiles:** estados activo/suspendido/vencido, requisitos mínimos de perfil, revisión configurable, privacidad reforzada y exclusión de perfiles no elegibles del Directorio y recomendaciones.
+- **Conexiones y mensajería:** presentación opcional, rechazo silencioso, esperas de reconexión, bloqueo que disuelve el vínculo y conservación del historial permitido sin edición ni borrado de mensajes enviados.
+- **Contacto y administración:** flujo Pendiente → En revisión → Resuelta → Cerrada, asignación, respuesta e historial; cambios profesionales administrativos vinculados a solicitudes autorizadas.
+- **Eventos y microeventos:** reconfirmación por reprogramación, recordatorios, lista de espera FIFO con ofertas persistentes y vencimiento, y ciclo de propuestas de microeventos con aprobación humana.
+- **Auditoría y compatibilidad:** esquema **14** para ampliar el detalle de auditoría conservando datos existentes; se mantienen las funciones publicadas de 1.10.5.
+- **Entrega:** metadatos, SonarQube, pruebas de cierre, documentación y `dist/ascla-core.zip` quedan alineados con **1.10.6**.
+
+### Cambios principales de 1.10.5
+
+- **CU009 completo en Inicio:** el primer panel del asociado reúne hasta cinco perfiles y materiales afines mediante desplazamiento horizontal, con criterios compartidos, complementariedad y acciones Ver perfil, Conectar o No me interesa.
+- **Lote automático:** WP-Cron sustituye el lote cada siete días; los cambios relevantes del perfil recalculan de inmediato la lista propia y no existe actualización manual.
+- **Elegibilidad y privacidad:** exige participación habilitada, membresía activa, perfil mínimo obligatorio y al menos 70 % de completitud; excluye bloqueos, perfiles ocultos y descartes.
+- **Descarte reversible:** No me interesa se registra de forma privada, evita repeticiones y puede revertirse en Perfil → Privacidad y avisos.
+- **Contenido relevante:** solo recomienda recursos publicados y autorizados, ordenados por relación temática con señales explicables.
+- **Compatibilidad:** conserva el esquema 13, los endpoints de matching existentes y todas las funciones de 1.10.4.
 
 ### Cambios principales de 1.10.4
 
@@ -199,18 +220,14 @@ Se añadieron pruebas de migración desde una columna sin signo, conservación d
 
 El entorno Docker incluye un servicio `cron` que ejecuta los eventos pendientes cada diez segundos. Se desactivan las actualizaciones automáticas sólo en los contenedores de pruebas para conservar una versión reproducible; mantén el sitio real actualizado mediante su procedimiento de operación.
 
-Jobs: WordPress cron ejecuta `ascla_jobs`, continúa la cola pendiente con `ascla_jobs_continue`, revisa el mes y ejecuta `ascla_discovery` cada día. Las sugerencias de networking se notifican como máximo una vez por semana y asociado. Con WP-CLI puede usarse `wp ascla jobs` o `wp cron event run --due-now`. Los errores se ven en **ASCLA → IA y trabajos** y admiten reintento. Una solicitud HTTP no ejecuta el procesamiento multimedia directamente.
+Jobs: WordPress cron ejecuta `ascla_jobs`, continúa la cola pendiente con `ascla_jobs_continue`, revisa el mes y ejecuta `ascla_discovery` cada día. El evento semanal `ascla_recommendations` registra el recálculo de lotes como trabajo `recommendations` en `wp_ascla_jobs`, por lo que su estado y sus errores quedan auditables junto con el resto de la cola. Las sugerencias de networking se notifican como máximo una vez por semana y asociado. Con WP-CLI puede usarse `wp ascla jobs` o `wp cron event run --due-now`. Los errores se ven en **ASCLA → IA y trabajos** y admiten reintento. Una solicitud HTTP no ejecuta el procesamiento multimedia directamente.
 
 Si faltan páginas, reactiva el plugin o ejecuta `wp ascla migrate`. Si aparecen respuestas antiguas o sesiones mezcladas, excluye todas las páginas ASCLA y `/wp-json/ascla/v1/` del caché y purga la caché. Si falla una integración, comprueba modo, permisos, expiración y conectividad; nunca pegues tokens en logs o capturas. Si la demo ya existe, cambiar el password del formulario no reinicia contraseñas: usa la recuperación de WordPress.
 
 La documentación interna de desarrollo se conserva localmente en `docs/`, pero esa carpeta está excluida deliberadamente del repositorio de GitHub.
 
-## Jenkins + SonarQube del curso
+## Validación manual de QA y UAT
 
-El repositorio incluye un `Jenkinsfile` con el mismo flujo general del proyecto de referencia del curso: `development` despliega; `qa` y `uat` ejecutan pruebas PHP con cobertura, SonarQube, Quality Gate y luego despliegan; `main` permanece protegida sin despliegue automático.
+El flujo activo usa Git, Docker y SonarQube sin Jenkins. Consulta [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md) para promover ramas, generar cobertura y analizar ASCLA-QA / ASCLA-UAT esperando el Quality Gate. El Jenkinsfile es opcional.
 
-En Jenkins deben existir las credenciales de tipo **Secret file** `ASCLA_DEV`, `ASCLA_QA` y `ASCLA_UAT`. Cada archivo debe definir sus propios puertos (`ASCLA_HTTP_PORT`, `ASCLA_MAILPIT_PORT`) y la URL del entorno (`ASCLA_SITE_URL`) para evitar colisiones. También deben estar configurados globalmente `SonarScanner` y `SonarQube-Server`.
-
-Antes de activar el job hay que confirmar con el TA el `sonar.projectKey` definitivo y que el webhook de SonarQube hacia Jenkins esté configurado para que `waitForQualityGate` pueda recibir el resultado. Las credenciales de SonarQube no se guardan en Git.
-
-La cobertura PHP se genera en `coverage/clover.xml` y los resultados PHPUnit en `coverage/junit.xml`. La cobertura JavaScript (`coverage/lcov.info`) queda pendiente de integrar al CI; por eso su propiedad está comentada en `sonar-project.properties`.
+La revisión de requisitos y las brechas restantes se documentan en [COMPLIANCE.md](COMPLIANCE.md). Un Quality Gate aprobado no acredita por sí solo todos los requisitos funcionales.

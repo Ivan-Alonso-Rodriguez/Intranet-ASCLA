@@ -36,11 +36,15 @@ final class MessagingMailTest extends TestCase
         $first=Messaging::messages($this->conversation,0,0);
         self::assertCount(60,$first['items']); self::assertTrue($first['has_more']);
         self::assertSame(array_slice($ids,0,60),array_map('intval',array_column($first['items'],'id')));
+        self::assertSame(135,Messaging::conversation($this->conversation)['unread']);
+        ASCLA\Core\Services\ConversationVisibility::read($this->conversation,(int)$first['after']);
         self::assertSame(75,Messaging::conversation($this->conversation)['unread']);
         $next=Messaging::messages($this->conversation,0,$first['after']);
         self::assertCount(60,$next['items']);self::assertTrue($next['has_more']);
         $last=Messaging::messages($this->conversation,0,$next['after']);
         self::assertCount(15,$last['items']);self::assertFalse($last['has_more']);
+        ASCLA\Core\Services\ConversationVisibility::read($this->conversation,(int)$last['after']);
+        ASCLA\Core\Services\ConversationVisibility::read($this->conversation,(int)$first['after']);
         self::assertSame(0,Messaging::conversation($this->conversation)['unread']);
         Messaging::messages($this->conversation,0,0);
         self::assertSame(0,Messaging::conversation($this->conversation)['unread']);
