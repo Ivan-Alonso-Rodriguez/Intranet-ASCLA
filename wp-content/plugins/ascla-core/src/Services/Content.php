@@ -163,8 +163,6 @@ final class Content
 
 final class ContentPublishing
 {
-    private const EDITORIAL_TYPES=['gallery','resource','event'];
-
     public static function serialize(\WP_Post $post): array
     {
         $meta=self::serializedMeta($post);

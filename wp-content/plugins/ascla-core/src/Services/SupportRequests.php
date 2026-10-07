@@ -165,8 +165,8 @@ final class SupportRequests
     {
         self::initialize($post->ID);
         $handle=self::canHandle($post->ID);
-        if (!$admin && !$handle) { return null; }
-        if (!$includeArchived && get_post_meta($post->ID,'_ascla_request_archived',true)) { return null; }
+        $archived=(bool)get_post_meta($post->ID,'_ascla_request_archived',true);
+        if ((!$admin && !$handle) || (!$includeArchived && $archived)) { return null; }
         // Searching private bodies must never disclose matches in unassigned cases.
         if ($query!=='' && (!$handle || mb_stripos($post->post_title.' '.$post->post_content,$query)===false)) { return null; }
         $meta=(array)get_post_meta($post->ID,'_ascla',true);

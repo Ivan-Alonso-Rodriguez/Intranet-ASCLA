@@ -9,6 +9,7 @@ final class EventDetailBuilder
 {
     private const ORDER_BY_ID_ASC='ORDER BY id ASC';
     private const REGISTRATION='event_id=%d AND user_id=%d';
+    private const REGISTRATION_STATUS='event_id=%d AND status=%s';
 
     public static function apply(array &$item,int $id,\WP_Post $post,array $meta): void
     {
@@ -22,12 +23,12 @@ final class EventDetailBuilder
         $registration=Store::rows('registrations',self::REGISTRATION,[$id,get_current_user_id()],'LIMIT 1')[0]??null;
         $item['registered']=$registration['status']??'none';
         $item['offer_expires_at']=$item['registered']==='offered'?EventParticipation::deadline($id,(int)$registration['id']):null;
-        $item['attending']=Store::count('registrations','event_id=%d AND status=%s',[$id,'accepted']);
+        $item['attending']=Store::count('registrations',self::REGISTRATION_STATUS,[$id,'accepted']);
         $item['capacity']=max(0,(int)($meta['capacity']??0));
-        $item['reserved']=$item['attending']+Store::count('registrations','event_id=%d AND status=%s',[$id,'offered']);
+        $item['reserved']=$item['attending']+Store::count('registrations',self::REGISTRATION_STATUS,[$id,'offered']);
         $item['remaining']=$item['capacity']>0?max(0,$item['capacity']-$item['reserved']):null;
         $item['full']=$item['capacity']>0 && $item['reserved']>=$item['capacity'];
-        $item['waitlist_count']=Store::count('registrations','event_id=%d AND status=%s',[$id,'waitlisted']);
+        $item['waitlist_count']=Store::count('registrations',self::REGISTRATION_STATUS,[$id,'waitlisted']);
         $item['waitlist_position']=$item['registered']==='waitlisted'?self::waitlistPosition($id,get_current_user_id()):0;
     }
 
