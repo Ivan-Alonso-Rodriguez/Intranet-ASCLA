@@ -4,6 +4,7 @@ namespace ASCLA\Core\Services;
 /** Membership expiry revokes credentials without deleting profiles, relations or messages. */
 final class Membership
 {
+    private const NOT_EXISTS='NOT EXISTS';
     public static function boot(): void
     {
         add_filter('authenticate',[self::class,'authenticate'],110,3);
@@ -24,6 +25,7 @@ final class Membership
     }
     public static function authenticate(mixed $user,string $username='',string $password=''): mixed
     {
+        unset($username,$password); // WordPress authenticate filter passes all three values.
         if ($user instanceof \WP_User && user_can($user,'ascla_access') && self::status((int)$user->ID)!=='active') {
             self::revoke((int)$user->ID);
             return new \WP_Error('ascla_membership_inactive','Tu membresía está vencida o suspendida. Contacta con ASCLA.');
@@ -63,6 +65,7 @@ final class Membership
     }
     public static function changed(int $metaId,int $id,string $key,mixed $value): void
     {
+        unset($metaId,$value); // WordPress metadata hooks include these values.
         if (!in_array($key,['_ascla_suspended','_ascla_membership_status','_ascla_membership_until'],true)) { return; }
         wp_clear_scheduled_hook('ascla_membership_expired',[$id]);
         $until=(int)get_user_meta($id,'_ascla_membership_until',true);
@@ -75,12 +78,12 @@ final class Membership
     }
     public static function filter(string $state): array
     {
-        $notSuspended=['relation'=>'OR',['key'=>'_ascla_suspended','compare'=>'NOT EXISTS'],['key'=>'_ascla_suspended','value'=>'1','compare'=>'!=']];
+        $notSuspended=['relation'=>'OR',['key'=>'_ascla_suspended','compare'=>self::NOT_EXISTS],['key'=>'_ascla_suspended','value'=>'1','compare'=>'!=']];
         $expired=['relation'=>'OR',['key'=>'_ascla_membership_status','value'=>'expired'],['relation'=>'AND',['key'=>'_ascla_membership_until','value'=>0,'compare'=>'>','type'=>'NUMERIC'],['key'=>'_ascla_membership_until','value'=>time(),'compare'=>'<=','type'=>'NUMERIC']]];
         if ($state==='suspended') { return [['key'=>'_ascla_suspended','value'=>'1']]; }
         if ($state==='expired') { return ['relation'=>'AND',$notSuspended,$expired]; }
         return ['relation'=>'AND',$notSuspended,
-            ['relation'=>'OR',['key'=>'_ascla_membership_status','compare'=>'NOT EXISTS'],['key'=>'_ascla_membership_status','value'=>'expired','compare'=>'!=']],
-            ['relation'=>'OR',['key'=>'_ascla_membership_until','compare'=>'NOT EXISTS'],['key'=>'_ascla_membership_until','value'=>0,'type'=>'NUMERIC'],['key'=>'_ascla_membership_until','value'=>time(),'compare'=>'>','type'=>'NUMERIC']]];
+            ['relation'=>'OR',['key'=>'_ascla_membership_status','compare'=>self::NOT_EXISTS],['key'=>'_ascla_membership_status','value'=>'expired','compare'=>'!=']],
+            ['relation'=>'OR',['key'=>'_ascla_membership_until','compare'=>self::NOT_EXISTS],['key'=>'_ascla_membership_until','value'=>0,'type'=>'NUMERIC'],['key'=>'_ascla_membership_until','value'=>time(),'compare'=>'>','type'=>'NUMERIC']]];
     }
 }

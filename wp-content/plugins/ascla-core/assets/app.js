@@ -941,7 +941,11 @@
   function recommendationMemberCard(p) {
     const shared=(p.affinity?.shared || []).slice(0, 4);
     const relationship=connectionActions(p, true, true);
-    return `<article class="card recommendation-person-card"><div class="recommendation-person-top"><div class="recommendation-avatar">${avatar(p, "lg")}<span class="match-score">${Number(p.affinity?.score || 0)}%</span></div><div><span class="recommendation-kicker">${I("spark")} ${E(T("Conexión recomendada"))}</span><h3>${E(p.name)}</h3><p>${E(p.position || T("Miembro ASCLA"))}${p.company ? ` · ${E(p.company)}` : ""}</p></div></div><div class="recommendation-reason"><strong>${E(T("Por qué podrían conectar"))}</strong><p>${E(p.affinity?.explanation || T("Encontramos señales de afinidad entre sus perfiles profesionales."))}</p>${shared.length ? `<div class="recommendation-shared">${shared.map(value => `<span>${E(value)}</span>`).join("")}</div>` : ""}</div><div class="recommendation-person-actions">${btn(T("Ver perfil") + " " + I("arrow"), "recommendation-open", `data-id="${Number(p.id)}"`, "small")}${relationship}${btn(T("No me interesa"), "recommendation-dismiss", `data-id="${Number(p.id)}"`, "ghost small")}</div></article>`;
+    const company=p.company ? " · " + E(p.company) : "";
+    const sharedItems=shared.map(value => "<span>" + E(value) + "</span>").join("");
+    const sharedBlock=shared.length ? '<div class="recommendation-shared">' + sharedItems + '</div>' : "";
+    const profileData='data-id="' + Number(p.id) + '"';
+    return `<article class="card recommendation-person-card"><div class="recommendation-person-top"><div class="recommendation-avatar">${avatar(p, "lg")}<span class="match-score">${Number(p.affinity?.score || 0)}%</span></div><div><span class="recommendation-kicker">${I("spark")} ${E(T("Conexión recomendada"))}</span><h3>${E(p.name)}</h3><p>${E(p.position || T("Miembro ASCLA"))}${company}</p></div></div><div class="recommendation-reason"><strong>${E(T("Por qué podrían conectar"))}</strong><p>${E(p.affinity?.explanation || T("Encontramos señales de afinidad entre sus perfiles profesionales."))}</p>${sharedBlock}</div><div class="recommendation-person-actions">${btn(T("Ver perfil") + " " + I("arrow"), "recommendation-open", profileData, "small")}${relationship}${btn(T("No me interesa"), "recommendation-dismiss", profileData, "ghost small")}</div></article>`;
   }
   function resourceRecommendation(recommendation) {
     if (!recommendation) return "";
@@ -970,7 +974,8 @@
         ? "La participación está desactivada. Puedes habilitarla desde Privacidad y participación."
         : "Para cuidar la calidad y privacidad de las coincidencias, necesitamos un perfil profesional mínimo y al menos 70% de completitud.";
       const missing=(result.missing || []).map(value => `<li>${E(T(value))}</li>`).join("");
-      return `<section class="home-recommendations" id="recomendaciones" aria-labelledby="home-recommendations-title"><div class="home-recommendations-heading"><div><span class="eyebrow">${E(T("RECOMENDACIONES PARA TI"))}</span><h2 id="home-recommendations-title">${E(T("Conexiones que suman"))}</h2><p>${E(T("Personas y conocimiento según los datos que autorizaste."))}</p></div></div><div class="recommendations-gate card"><span class="recommendations-gate-icon">${I(disabled ? "shield" : "spark")}</span><div><span class="eyebrow">${E(T("TU PRIVACIDAD PRIMERO"))}</span><h3>${E(T(title))}</h3><p>${E(T(description))}</p>${missing ? `<ul>${missing}</ul>` : ""}<div class="recommendations-gate-progress"><span><i style="width:${Math.max(0,Math.min(100,Number(result.completion || 0)))}%"></i></span><strong>${Number(result.completion || 0)}%</strong></div>${link("perfil", T("Revisar mis preferencias") + " " + I("arrow"), "primary")}</div></div></section>`;
+      const missingList=missing ? "<ul>" + missing + "</ul>" : "";
+      return `<section class="home-recommendations" id="recomendaciones" aria-labelledby="home-recommendations-title"><div class="home-recommendations-heading"><div><span class="eyebrow">${E(T("RECOMENDACIONES PARA TI"))}</span><h2 id="home-recommendations-title">${E(T("Conexiones que suman"))}</h2><p>${E(T("Personas y conocimiento según los datos que autorizaste."))}</p></div></div><div class="recommendations-gate card"><span class="recommendations-gate-icon">${I(disabled ? "shield" : "spark")}</span><div><span class="eyebrow">${E(T("TU PRIVACIDAD PRIMERO"))}</span><h3>${E(T(title))}</h3><p>${E(T(description))}</p>${missingList}<div class="recommendations-gate-progress"><span><i style="width:${Math.max(0,Math.min(100,Number(result.completion || 0)))}%"></i></span><strong>${Number(result.completion || 0)}%</strong></div>${link("perfil", T("Revisar mis preferencias") + " " + I("arrow"), "primary")}</div></div></section>`;
     }
     const updated=result.generated_at ? date(result.generated_at,{day:"numeric",month:"long",year:"numeric"}) : T("esta semana");
     const lowMatchCopy=T("Encontramos {count} de hasta {limit} perfiles que cumplen los criterios. Te mostraremos nuevas opciones en la siguiente actualización automática.").replace("{count}",String(result.people.length)).replace("{limit}",String(result.limit));
@@ -1093,8 +1098,9 @@
     return query;
   }
   function directoryTermFilter(name, label, terms) {
-    const selected = [].concat(S.filter[name] || []).map(String);
-    return '<div class="field directory-multiple"><label for="directory-'+name+'">'+E(T(label))+'</label><select multiple name="'+name+'" id="directory-'+name+'" aria-describedby="directory-multiple-help" size="3">'+terms.map(term=>'<option value="'+term.id+'" '+(selected.includes(String(term.id))?'selected':'')+'>'+E(term.name)+'</option>').join('')+'</select></div>';
+    const rawSelected=S.filter[name];
+    const selected=new Set((Array.isArray(rawSelected) ? rawSelected : [rawSelected]).filter(value => value != null).map(String));
+    return '<div class="field directory-multiple"><label for="directory-'+name+'">'+E(T(label))+'</label><select multiple name="'+name+'" id="directory-'+name+'" aria-describedby="directory-multiple-help" size="3">'+terms.map(term=>'<option value="'+term.id+'" '+(selected.has(String(term.id))?'selected':'')+'>'+E(term.name)+'</option>').join('')+'</select></div>';
   }
   async function directory() {
     const list = await api("profiles?" + directoryQuery());
@@ -1248,8 +1254,12 @@
     return `<section class="profile-preferences email-notification-preferences" aria-labelledby="profile-email-title"><div class="preference-heading"><span class="preference-emblem">${I("mail")}</span><div><h2 id="profile-email-title">${E(T("Notificaciones por correo"))}</h2><p>${E(T("Elige qué avisos opcionales quieres recibir también en tu correo. Por defecto están activados."))}</p></div></div><div class="email-notification-panel">${options}<p class="profile-save-hint">${E(T("Las notificaciones internas de ASCLA seguirán disponibles aunque desactives estos correos."))}</p></div></section>`;
   }
   function dismissedRecommendations(list) {
-    const items=(list.items || []).map(person => `<article class="dismissed-recommendation-row">${avatar(person)}<div><strong>${E(person.name)}</strong><span>${E(person.profile_url ? T("Puede volver a aparecer en próximas recomendaciones.") : T("Perfil no disponible actualmente."))}</span></div>${btn(T("Restituir"),"recommendation-restore",`data-id="${Number(person.id)}"`,"small")}</article>`).join("");
-    return `<section class="profile-preferences dismissed-recommendations" aria-labelledby="dismissed-recommendations-title"><div class="preference-heading"><span class="preference-emblem">${I("users")}</span><div><h2 id="dismissed-recommendations-title">${E(T("Perfiles descartados"))}</h2><p>${E(T("“No me interesa” es privado. Puedes restituir aquí la elegibilidad de cualquier perfil."))}</p></div></div><div class="dismissed-recommendations-list">${items || `<p class="profile-save-hint">${E(T("No has descartado recomendaciones."))}</p>`}</div></section>`;
+    const items=(list.items || []).map(person => {
+      const restoreData='data-id="' + Number(person.id) + '"';
+      return `<article class="dismissed-recommendation-row">${avatar(person)}<div><strong>${E(person.name)}</strong><span>${E(person.profile_url ? T("Puede volver a aparecer en próximas recomendaciones.") : T("Perfil no disponible actualmente."))}</span></div>${btn(T("Restituir"),"recommendation-restore",restoreData,"small")}</article>`;
+    }).join("");
+    const emptyState='<p class="profile-save-hint">' + E(T("No has descartado recomendaciones.")) + '</p>';
+    return `<section class="profile-preferences dismissed-recommendations" aria-labelledby="dismissed-recommendations-title"><div class="preference-heading"><span class="preference-emblem">${I("users")}</span><div><h2 id="dismissed-recommendations-title">${E(T("Perfiles descartados"))}</h2><p>${E(T("“No me interesa” es privado. Puedes restituir aquí la elegibilidad de cualquier perfil."))}</p></div></div><div class="dismissed-recommendations-list">${items || emptyState}</div></section>`;
   }
 
   function updateProfilePreference(input) {
@@ -1483,9 +1493,6 @@
   function allyCard(p) {
     return `<article class="card">${UI.images(p).length ? ("<img class=\"ally-logo\" src=\"" + (E(UI.images(p)[0].url)) + "\" alt=\"" + (E(T("Logo de"))) + " " + (E(p.title)) + "\" loading=\"lazy\">") : ("<div class=\"stat-icon\" style=\"margin-bottom:17px\">" + (I("ally")) + "</div>")}<span class="tag">${E(T(p.meta.alliance_type || "Alianza"))}</span><h3 style="margin-top:12px">${E(p.title)}</h3><p class="detail-body" style="font-size:12px">${E(p.body)}</p>${btn("Conoce más " + I("arrow"), "item", ("data-id=\"" + (p.id) + "\""), "ghost")}</article>`;
   }
-  function overflowDelete(action, id, extra = "", label = "Eliminar") {
-    return `<details class="overflow-menu"><summary aria-label="${E(T("Más opciones"))}" title="${E(T("Más opciones"))}">${I("more")}</summary><div class="overflow-popover"><button type="button" class="overflow-item danger-text" data-action="${action}" data-id="${Number(id)}" ${extra}>${E(T(label))}</button></div></details>`;
-  }
   function commentOverflow(c, postId) {
     const items = [];
     if (c.can_report) items.push(`<button type="button" class="overflow-item" data-action="report-comment" data-id="${Number(c.id)}" data-post="${Number(postId)}">${E(T("Reportar comentario"))}</button>`);
@@ -1548,27 +1555,43 @@
   function eventRegistrationPresentation(d, id) {
     let registrationActions = "";
     let waitlistNotice = "";
-    if (d.cancelled) {
-      waitlistNotice = `<div class="alert" style="margin-top:16px">${I("calendar")} <strong>${E(T("Evento cancelado"))}</strong>. ${E(T("Este encuentro ya no admite inscripciones ni confirmaciones de cupo."))}<p>${E(d.meta.cancellation_reason || "")}</p></div>`;
-      registrationActions = `<span class="tag">${E(T("Cancelado"))}</span>`;
-    } else if (d.is_past) {
-      registrationActions = `<span class="tag">${E(T("Evento finalizado"))}</span>`;
-    } else if (d.registered === "accepted") {
-      registrationActions = btn("Cancelar inscripción", "register", `data-id="${id}" data-status="cancelled"`);
-    } else if (d.registration_closed) {
-      waitlistNotice = `<div class="alert">${E(T("Inscripción cerrada o reservada a los miembros recomendados."))}</div>`;
-      registrationActions = d.registered === "none" ? "" : btn("Cancelar inscripción","register",`data-id="${id}" data-status="cancelled"`);
-    } else if (d.registered === "waitlisted") {
-      const position = Number(d.waitlist_position || 0);
-      waitlistNotice = `<div class="alert" style="margin-top:16px">${I("clock")} <strong>${E(T("Estás en la lista de espera"))}</strong>${position ? (" · " + (E(T("posición"))) + " " + (position) + "") : ""}. ${E(T("Te avisaremos cuando se libere un cupo."))}</div>`;
-      registrationActions = btn("Salir de la lista de espera", "register", `data-id="${id}" data-status="cancelled"`, "ghost");
-    } else if (d.registered === "offered") {
-      waitlistNotice = `<div class="alert success" style="margin-top:16px">${I("check")} <strong>${E(T("Se liberó un cupo para ti"))}</strong>. ${E(T("Confirma tu asistencia para ocuparlo."))}<p>${E(T("Vence"))}: <time datetime="${E(d.offer_expires_at)}">${date(d.offer_expires_at)} ${time(d.offer_expires_at)}</time></p></div>`;
-      registrationActions = btn("Confirmar asistencia", "register", `data-id="${id}" data-status="accepted"`, "primary") + btn("Rechazar cupo", "register", `data-id="${id}" data-status="declined"`, "ghost");
-    } else if (d.full) {
-      registrationActions = btn("Unirme a la lista de espera", "register", `data-id="${id}" data-status="waitlisted"`, "primary") + (d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : "");
-    } else {
-      registrationActions = btn(d.registered === "reconfirm" ? "Reconfirmar asistencia" : d.registered === "invited" ? "Aceptar invitación" : "Registrarme", "register", `data-id="${id}" data-status="accepted"`, "primary") + (d.registered === "invited" ? btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`) : "");
+    switch (true) {
+      case d.cancelled:
+        waitlistNotice = `<div class="alert" style="margin-top:16px">${I("calendar")} <strong>${E(T("Evento cancelado"))}</strong>. ${E(T("Este encuentro ya no admite inscripciones ni confirmaciones de cupo."))}<p>${E(d.meta.cancellation_reason || "")}</p></div>`;
+        registrationActions = `<span class="tag">${E(T("Cancelado"))}</span>`;
+        break;
+      case d.is_past:
+        registrationActions = `<span class="tag">${E(T("Evento finalizado"))}</span>`;
+        break;
+      case d.registered === "accepted":
+        registrationActions = btn("Cancelar inscripción", "register", `data-id="${id}" data-status="cancelled"`);
+        break;
+      case d.registration_closed:
+        waitlistNotice = `<div class="alert">${E(T("Inscripción cerrada o reservada a los miembros recomendados."))}</div>`;
+        if (d.registered !== "none") registrationActions = btn("Cancelar inscripción","register",`data-id="${id}" data-status="cancelled"`);
+        break;
+      case d.registered === "waitlisted": {
+        const position = Number(d.waitlist_position || 0);
+        const positionLabel=position ? " · " + E(T("posición")) + " " + position : "";
+        waitlistNotice = `<div class="alert" style="margin-top:16px">${I("clock")} <strong>${E(T("Estás en la lista de espera"))}</strong>${positionLabel}. ${E(T("Te avisaremos cuando se libere un cupo."))}</div>`;
+        registrationActions = btn("Salir de la lista de espera", "register", `data-id="${id}" data-status="cancelled"`, "ghost");
+        break;
+      }
+      case d.registered === "offered":
+        waitlistNotice = `<div class="alert success" style="margin-top:16px">${I("check")} <strong>${E(T("Se liberó un cupo para ti"))}</strong>. ${E(T("Confirma tu asistencia para ocuparlo."))}<p>${E(T("Vence"))}: <time datetime="${E(d.offer_expires_at)}">${date(d.offer_expires_at)} ${time(d.offer_expires_at)}</time></p></div>`;
+        registrationActions = btn("Confirmar asistencia", "register", `data-id="${id}" data-status="accepted"`, "primary") + btn("Rechazar cupo", "register", `data-id="${id}" data-status="declined"`, "ghost");
+        break;
+      case d.full:
+        registrationActions = btn("Unirme a la lista de espera", "register", `data-id="${id}" data-status="waitlisted"`, "primary");
+        if (d.registered === "invited") registrationActions += btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`);
+        break;
+      default: {
+        let label="Registrarme";
+        if (d.registered === "reconfirm") label="Reconfirmar asistencia";
+        else if (d.registered === "invited") label="Aceptar invitación";
+        registrationActions = btn(label, "register", `data-id="${id}" data-status="accepted"`, "primary");
+        if (d.registered === "invited") registrationActions += btn("Rechazar invitación", "register", `data-id="${id}" data-status="declined"`);
+      }
     }
     if (d.registered === "reconfirm" && !d.cancelled && !d.is_past) waitlistNotice = `<div class="alert">${E(T("El evento cambió de fecha, horario o modalidad. Revisa los cambios y confirma nuevamente tu asistencia."))}</div>`;
     return { registrationActions, waitlistNotice };
@@ -1592,6 +1615,34 @@
     if (d.is_past) return ` · ${E(T("Finalizado"))}`;
     return ` · ${status(d.registered)}`;
   }
+  function eventGoogleActions(d, id) {
+    const calendarAction = !d.is_past && !d.cancelled && d.google_url
+      ? `<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">${E(T("Añadir a Google Calendar ↗"))}</a>`
+      : "";
+    let connectedActions = "";
+    if (!d.is_past && !d.cancelled && S.boot.google_connected) {
+      if (d.google_managed) connectedActions = `<span class="status accepted">${E(T("Sincronizado como organizador en Google Calendar"))}</span>`;
+      else connectedActions = btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small")
+        + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small");
+    }
+    return { calendarAction, connectedActions };
+  }
+  function eventParticipantsSection(d) {
+    if (!d.participants) return "";
+    const rows=d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("");
+    return `<details class="event-moderation-participants"><summary class="private-note">${E(T("Participantes y lista de espera (gestión de eventos)"))}</summary>${rows}</details>`;
+  }
+  function eventChangeReason(p) {
+    if (!p.meta.change_reason) return "";
+    return '<p class="detail-body">' + E(T("Motivo de reprogramación")) + ': ' + E(p.meta.change_reason) + '</p>';
+  }
+  function eventMicroSchedule(d, p) {
+    if (!p.meta.micro) return "";
+    let publicAt=E(T("Al publicar"));
+    if (d.meta.public_at) publicAt=date(Number(d.meta.public_at)*1000) + " " + time(Number(d.meta.public_at)*1000);
+    return '<p>' + E(T("Cierre de inscripciones")) + ': ' + date(d.meta.registration_deadline) + ' ' + time(d.meta.registration_deadline)
+      + ' · ' + E(T("Apertura a la comunidad")) + ': ' + publicAt + '</p>';
+  }
   async function eventItemExtra(p, id) {
     const d = await api("events/" + id);
     S.event = d;
@@ -1601,23 +1652,11 @@
     const waitlistSummary = waitlistCount ? ` · ${waitlistCount} ${E(T(waitlistLabel))}` : "";
     const attendeeSection = eventAttendees(d);
     const agendaSection = p.meta.agenda ? `<p class="detail-body">${E(p.meta.agenda).replaceAll("\n", "<br>")}</p>` : "";
-    const googleCalendarAction = !d.is_past && !d.cancelled && d.google_url
-      ? `<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">${E(T("Añadir a Google Calendar ↗"))}</a>`
-      : "";
-    let googleConnectedActions = "";
-    if (!d.is_past && !d.cancelled && S.boot.google_connected) {
-      if (d.google_managed) {
-        googleConnectedActions = `<span class="status accepted">${E(T("Sincronizado como organizador en Google Calendar"))}</span>`;
-      } else {
-        googleConnectedActions = btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small")
-          + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small");
-      }
-    }
-    const participantRows = d.participants ? d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("") : "";
-    const participantsSection = d.participants
-      ? `<details class="event-moderation-participants"><summary class="private-note">${E(T("Participantes y lista de espera (gestión de eventos)"))}</summary>${participantRows}</details>`
-      : "";
-    return `<div class="card" style="background:var(--bg);margin:20px 0"><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span><span>${I("clock")} ${time(p.meta.start)} – ${time(p.meta.end)}</span><span>${I("pin")} ${E(p.meta.location || T("Por confirmar"))}</span></div><p class="private-note">${d.attending} ${E(T("inscritos"))}${eventCapacitySummary(p, d)}${waitlistSummary}${eventStateSummary(d)}</p>${waitlistNotice}${p.meta.change_reason ? `<p class="detail-body">${E(T("Motivo de reprogramación"))}: ${E(p.meta.change_reason)}</p>` : ""}${microEventHistory(d.meta)}${p.meta.micro ? `<p>${E(T("Cierre de inscripciones"))}: ${date(d.meta.registration_deadline)} ${time(d.meta.registration_deadline)} · ${E(T("Apertura a la comunidad"))}: ${d.meta.public_at ? date(Number(d.meta.public_at)*1000)+" "+time(Number(d.meta.public_at)*1000) : E(T("Al publicar"))}</p>` : ""}${agendaSection}<div class="form-actions">${registrationActions}${googleCalendarAction}${googleConnectedActions}</div>${attendeeSection}${participantsSection}</div>`;
+    const { calendarAction, connectedActions }=eventGoogleActions(d,id);
+    const participantsSection = eventParticipantsSection(d);
+    const changeReason=eventChangeReason(p);
+    const microSchedule=eventMicroSchedule(d,p);
+    return `<div class="card" style="background:var(--bg);margin:20px 0"><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span><span>${I("clock")} ${time(p.meta.start)} – ${time(p.meta.end)}</span><span>${I("pin")} ${E(p.meta.location || T("Por confirmar"))}</span></div><p class="private-note">${d.attending} ${E(T("inscritos"))}${eventCapacitySummary(p, d)}${waitlistSummary}${eventStateSummary(d)}</p>${waitlistNotice}${changeReason}${microEventHistory(d.meta)}${microSchedule}${agendaSection}<div class="form-actions">${registrationActions}${calendarAction}${connectedActions}</div>${attendeeSection}${participantsSection}</div>`;
   }
   function itemGeneratedNotice(p, reviewedLabel) {
     if (!p.meta.generated && !p.meta.ai_enriched && !p.meta.generated_sections) return "";
@@ -1757,7 +1796,12 @@
     return new Date(dateValue - dateValue.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   }
   async function editorExtra(type, p, m) {
-    if (type === "event") return `<div class="form-grid">${field("start", "Inicio (tu zona horaria)", editorDateValue(m.start), "datetime-local", "required")}${field("end", "Fin (tu zona horaria)", editorDateValue(m.end), "datetime-local", "required")}${field("capacity", "Cupos (0 = ilimitado)", m.capacity || 0, "number", 'min="0" max="100000"')}${field("offer_hours", "Horas para confirmar un cupo liberado", m.offer_hours || 24, "number", 'min="1" max="168"')}${select("modality", "Modalidad", ["Virtual", "Presencial", "Híbrido"], m.modality || "Virtual")}${field("location", "Ubicación", m.location || "")}${field("url", "Enlace del encuentro", m.url || "", "url")}</div>${microEventFields(m)}${S.boot.admin ? field("reminder_hours","Recordatorios: horas antes del inicio",(m.reminder_hours || [24,1]).join(", "),"text",m.micro && (m.invited || p.status === "publish") ? "readonly" : "required") : ""}${field("agenda", "Agenda", m.agenda || "", "textarea")}${p.id ? field("change_reason", "Motivo de reprogramación (obligatorio para microeventos)", "", "textarea", 'maxlength="1000"') : ""}`;
+    if (type === "event") {
+      const reminderMode=m.micro && (m.invited || p.status === "publish") ? "readonly" : "required";
+      const reminderField=S.boot.admin ? field("reminder_hours","Recordatorios: horas antes del inicio",(m.reminder_hours || [24,1]).join(", "),"text",reminderMode) : "";
+      const changeReasonField=p.id ? field("change_reason", "Motivo de reprogramación (obligatorio para microeventos)", "", "textarea", 'maxlength="1000"') : "";
+      return `<div class="form-grid">${field("start", "Inicio (tu zona horaria)", editorDateValue(m.start), "datetime-local", "required")}${field("end", "Fin (tu zona horaria)", editorDateValue(m.end), "datetime-local", "required")}${field("capacity", "Cupos (0 = ilimitado)", m.capacity || 0, "number", 'min="0" max="100000"')}${field("offer_hours", "Horas para confirmar un cupo liberado", m.offer_hours || 24, "number", 'min="1" max="168"')}${select("modality", "Modalidad", ["Virtual", "Presencial", "Híbrido"], m.modality || "Virtual")}${field("location", "Ubicación", m.location || "")}${field("url", "Enlace del encuentro", m.url || "", "url")}</div>${microEventFields(m)}${reminderField}${field("agenda", "Agenda", m.agenda || "", "textarea")}${changeReasonField}`;
+    }
     if (type === "resource") return resourceEditorExtra(m);
     if (type === "ally") return select("alliance_type", "Tipo de alianza", ["Socio estratégico", "Convenio", "Otro"], m.alliance_type) + field("url", "Sitio del aliado", m.url || "", "url") + field("benefits", "Beneficios", m.benefits || "", "textarea") + field("initiatives", "Iniciativas y recursos", m.initiatives || "", "textarea");
     if (type === "topic") {
@@ -1986,7 +2030,9 @@
     }
     action += btn(T('Ocultar conversación'), 'chat-hide', `data-id="${Number(current.id)}"`, 'ghost small');
     if (!group && !current.can_message && !current.blocked && !['incoming_pending','outgoing_pending'].includes(request.state)) requestBanner = `<div class="chat-request-banner">${E(T('Conexión eliminada: puedes consultar el historial, pero no enviar mensajes.'))}</div>`;
-    document.querySelector('.chat-conversation').innerHTML = `<div class="chat-title">${btn('← Chats','chat-back','aria-label="Volver a la lista de chats"','ghost small chat-mobile-back')}${title}<div class="chat-title-actions">${action}</div></div>${requestBanner}<div class="chat-messages" id="chat-messages" role="log" aria-label="Mensajes de la conversación" aria-live="polite" aria-relevant="additions"></div><form class="chat-compose" data-form="message" data-id="${chat.id}"><textarea name="body" aria-label="Escribir mensaje" placeholder="${!current.can_message ? E(T(['incoming_pending','outgoing_pending'].includes(request.state) ? 'Acepta la solicitud para continuar la conversación' : 'Historial de solo lectura')) : E(T('Escribe un mensaje…'))}" required maxlength="5000"></textarea><button class="btn primary">${I("contact")} Enviar</button></form>`;
+    let messagePlaceholder='Escribe un mensaje…';
+    if (!current.can_message) messagePlaceholder=['incoming_pending','outgoing_pending'].includes(request.state) ? 'Acepta la solicitud para continuar la conversación' : 'Historial de solo lectura';
+    document.querySelector('.chat-conversation').innerHTML = `<div class="chat-title">${btn('← Chats','chat-back','aria-label="Volver a la lista de chats"','ghost small chat-mobile-back')}${title}<div class="chat-title-actions">${action}</div></div>${requestBanner}<div class="chat-messages" id="chat-messages" role="log" aria-label="Mensajes de la conversación" aria-live="polite" aria-relevant="additions"></div><form class="chat-compose" data-form="message" data-id="${chat.id}"><textarea name="body" aria-label="Escribir mensaje" placeholder="${E(T(messagePlaceholder))}" required maxlength="5000"></textarea><button class="btn primary">${I("contact")} Enviar</button></form>`;
     document.querySelector('.chat-compose textarea').value = chatDrafts.get(chat.id) || '';
     chatControls(current); chatSidebar();
   }
@@ -3062,43 +3108,54 @@
       const destination = new URL(C.pages.mensajeria.url); destination.searchParams.set("conversation", c.id); await navigateTo(destination.href);
     }
   }
-  async function handleClickActions30(a, b, id, _event) {
-    if (a === "conversation") {
-      S.conversation = id;
-      S.messagesLoaded = false;
-      await messages();
+  async function openConversationAction(id) {
+    S.conversation = id;
+    S.messagesLoaded = false;
+    await messages();
+  }
+  async function backToChatList() {
+    const draft = document.querySelector('.chat-compose');
+    if (draft) chatDrafts.set(Number(draft.dataset.id), draft.elements.body.value);
+    S.conversation = 0;
+    const url = new URL(location.href);
+    url.searchParams.delete('conversation');
+    history.replaceState(history.state, '', url);
+    await messages();
+  }
+  function blockConfirmation(id) {
+    const confirmData='data-id="' + id + '" data-active="true" data-confirmed="true"';
+    const actions=btn(T('Cancelar'),'close') + btn(T('Confirmar bloqueo'),'block',confirmData,'danger primary');
+    return '<p>' + E(T('Se eliminará la conexión y se ocultará la conversación para ambos. Desbloquear no restablece la conexión.')) + '</p><div class="form-actions">' + actions + '</div>';
+  }
+  async function toggleBlockAction(b, id) {
+    const active = b.dataset.active === "true";
+    if (active && b.dataset.confirmed !== 'true') {
+      modal(T('Bloquear asociado'), blockConfirmation(id));
+      return;
     }
-    else if (a === "chat-back") {
-      const draft = document.querySelector('.chat-compose');
-      if (draft) chatDrafts.set(Number(draft.dataset.id), draft.elements.body.value);
-      S.conversation = 0;
-      const url = new URL(location.href);
+    if (active) closeModal();
+    await api("relations", { target: id, kind: "block", active });
+    if (S.page === 'mensajeria') {
+      S.conversation=0;
+      const url=new URL(location.href);
       url.searchParams.delete('conversation');
-      history.replaceState(history.state, '', url);
+      history.replaceState(history.state,'',url);
       await messages();
-    }
-    else if (a === "block") {
-      const active = b.dataset.active === "true";
-      if (active && b.dataset.confirmed !== 'true') {
-        modal(T('Bloquear asociado'), `<p>${E(T('Se eliminará la conexión y se ocultará la conversación para ambos. Desbloquear no restablece la conexión.'))}</p><div class="form-actions">${btn(T('Cancelar'),'close')}${btn(T('Confirmar bloqueo'),'block',`data-id="${id}" data-active="true" data-confirmed="true"`,'danger primary')}</div>`);
-        return;
-      }
-      if (active) closeModal();
-      await api("relations", {
-      target: id,
-      kind: "block",
-      active,
-      });
-      if (S.page === 'mensajeria') { S.conversation=0; const url=new URL(location.href); url.searchParams.delete('conversation'); history.replaceState(history.state,'',url); await messages(); }
-      else {
-      const p = await api('profiles/' + id); updateRelationshipState(p); await refreshConnectionsPanel();
+    } else {
+      const profile = await api('profiles/' + id);
+      updateRelationshipState(profile);
+      await refreshConnectionsPanel();
       if (active) {
-      root.querySelector('.modal [data-profile-affinity]')?.remove();
-      root.querySelector('.modal [data-profile-affinity-score]')?.replaceChildren();
+        root.querySelector('.modal [data-profile-affinity]')?.remove();
+        root.querySelector('.modal [data-profile-affinity-score]')?.replaceChildren();
       }
-      }
-      toast(T(active ? 'Asociado bloqueado.' : 'Asociado desbloqueado.'));
     }
+    toast(T(active ? 'Asociado bloqueado.' : 'Asociado desbloqueado.'));
+  }
+  async function handleClickActions30(a, b, id, _event) {
+    if (a === "conversation") { await openConversationAction(id);return; }
+    if (a === "chat-back") { await backToChatList();return; }
+    if (a === "block") await toggleBlockAction(b,id);
   }
   async function handleClickActions31(a, b, id, _event) {
     if (a === "older-messages") {

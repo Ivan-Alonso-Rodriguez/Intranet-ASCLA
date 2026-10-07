@@ -14,6 +14,7 @@ final class NotificationTarget
     private const NETWORK_LABEL='Tu red';
     private const REVIEW_REQUEST_LABEL='Revisar solicitud';
     private const HUB_ACTION='Ver el Hub';
+    private const VIEW_EVENTS='Ver eventos';
     private const TYPES = [
         'message'=>['Mensajes','mail','mensajeria','Abrir mensajería'],
         'conversation_group'=>['Mensajes','mail','mensajeria','Abrir grupo'],
@@ -24,12 +25,12 @@ final class NotificationTarget
         'reaction'=>['Comunidad','heart','hub',self::HUB_ACTION],
         'mention'=>['Comunidad','hub','hub',self::HUB_ACTION],
         'moderation'=>['Publicaciones','shield','hub','Ver mis publicaciones'],
-        'event'=>['Eventos','calendar','eventos','Ver eventos'],
+        'event'=>['Eventos','calendar','eventos',self::VIEW_EVENTS],
         'event_waitlist_available'=>['Eventos','calendar','eventos','Confirmar cupo'],
         'event_cancelled'=>['Eventos','calendar','eventos','Ver evento cancelado'],
         'event_updated'=>['Eventos','calendar','eventos','Ver cambios del evento'],
-        'event_reminder'=>['Eventos','calendar','eventos','Ver eventos'],
-        'microevent'=>['Eventos','calendar','eventos','Ver eventos'],
+        'event_reminder'=>['Eventos','calendar','eventos',self::VIEW_EVENTS],
+        'microevent'=>['Eventos','calendar','eventos',self::VIEW_EVENTS],
         'resource'=>['Conocimiento','book','centro-conocimiento','Explorar recursos'],
         'networking'=>[self::NETWORK_LABEL,'users','directorio','Explorar directorio'],
         'connection_accepted'=>[self::NETWORK_LABEL,'users','directorio','Ver conexión'],

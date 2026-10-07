@@ -25,8 +25,7 @@ final class SessionPolicy
         }
         $token=wp_get_session_token();
         // CLI/internal jobs and application-password authentication have no browser cookie.
-        if ($token==='') { return $userId; }
-        return self::validateToken($id,$token)?$userId:0;
+        return $token==='' || self::validateToken($id,$token)?$userId:0;
     }
 
     public static function validateToken(int $userId,string $token): bool

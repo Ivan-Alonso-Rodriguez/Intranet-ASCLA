@@ -62,21 +62,35 @@ final class App
     }
     public static function protect(): void
     {
-        if (!self::page()) { return; }
-        if (!is_user_logged_in()) {
-            $target=get_permalink(get_queried_object_id())?:Catalog::url(self::page());
-            $query=[];
-            foreach((array)$_GET as $key=>$value){
-                if(is_scalar($value)){$query[sanitize_key((string)$key)]=sanitize_text_field(wp_unslash((string)$value));}
-            }
-            if($query){$target=add_query_arg($query,$target);}
-            Login::rememberTarget($target);
-            wp_safe_redirect(Login::url());
-            exit;
+        $page=self::page();
+        if (!$page) { return; }
+        if (!is_user_logged_in()) { self::redirectGuest($page);return; }
+        self::requirePageAccess($page);
+        self::disablePageCaching();
+    }
+
+    private static function redirectGuest(string $page): void
+    {
+        $target=get_permalink(get_queried_object_id())?:Catalog::url($page);
+        $query=[];
+        foreach((array)$_GET as $key=>$value){
+            if(is_scalar($value)){$query[sanitize_key((string)$key)]=sanitize_text_field(wp_unslash((string)$value));}
         }
+        if($query){$target=add_query_arg($query,$target);}
+        Login::rememberTarget($target);
+        wp_safe_redirect(Login::url());
+        exit;
+    }
+
+    private static function requirePageAccess(string $page): void
+    {
         if (!Access::member()) { wp_die('Esta cuenta no tiene acceso a la comunidad ASCLA. Contacte al administrador.','ASCLA',['response'=>403]); }
-        if (self::page()==='recomendaciones') { wp_safe_redirect(Catalog::url('intranet').'#recomendaciones',301);exit; }
-        if (self::page()==='admin' && !current_user_can('ascla_admin_area')) { wp_die('Esta cuenta no tiene permisos de administración ASCLA.','ASCLA',['response'=>403]); }
+        if ($page==='recomendaciones') { wp_safe_redirect(Catalog::url('intranet').'#recomendaciones',301);exit; }
+        if ($page==='admin' && !current_user_can('ascla_admin_area')) { wp_die('Esta cuenta no tiene permisos de administración ASCLA.','ASCLA',['response'=>403]); }
+    }
+
+    private static function disablePageCaching(): void
+    {
         if (!defined('DONOTCACHEPAGE')) { define('DONOTCACHEPAGE',true); }
         nocache_headers(); header('X-Robots-Tag: noindex, nofollow'); header('X-Content-Type-Options: nosniff'); header('Referrer-Policy: same-origin');
     }

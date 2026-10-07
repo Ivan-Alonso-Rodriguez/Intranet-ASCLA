@@ -7,6 +7,7 @@ use ASCLA\Core\Repositories\Store;
 final class ConnectionPolicy
 {
     private const PAIR="((user_id=%d AND target_id=%d) OR (user_id=%d AND target_id=%d))";
+    private const HISTORY_REVOKED="kind='history_revoked' AND ";
 
     public static function retryAt(int $sender,int $target): int
     {
@@ -30,8 +31,8 @@ final class ConnectionPolicy
 
     public static function canReadHistory(int $a,int $b): bool
     {
-        if (!Access::member($a) || !Access::member($b) || Messaging::blocked($a,$b)) { return false; }
-        if (Store::count('relations',"kind='history_revoked' AND ".self::PAIR,[$a,$b,$b,$a])) { return false; }
+        if (!Access::member($a) || !Access::member($b) || Messaging::blocked($a,$b)
+            || Store::count('relations',self::HISTORY_REVOKED.self::PAIR,[$a,$b,$b,$a])) { return false; }
         if (Store::count('relations',"kind='connection_history' AND ".self::PAIR,[$a,$b,$b,$a])) { return true; }
         // Previous releases recorded the disconnection in audit but did not retain a relation marker.
         return Store::count('audit',"action='connection_removed' AND ((actor_id=%d AND detail=%s) OR (actor_id=%d AND detail=%s))",[$a,'profile-'.$b,$b,'profile-'.$a])>0;
@@ -39,7 +40,7 @@ final class ConnectionPolicy
 
     public static function disconnected(int $a,int $b): void
     {
-        foreach (Store::rows('relations',"kind='history_revoked' AND ".self::PAIR,[$a,$b,$b,$a],'') as $row) { Store::delete('relations',['id'=>(int)$row['id']]); }
+        foreach (Store::rows('relations',self::HISTORY_REVOKED.self::PAIR,[$a,$b,$b,$a],'') as $row) { Store::delete('relations',['id'=>(int)$row['id']]); }
         self::cooldown($a,$b,'disconnected');
         self::cooldown($b,$a,'disconnected');
         self::forgetPermissions($a,$b);
@@ -53,7 +54,7 @@ final class ConnectionPolicy
         $rows=Store::rows('relations',"kind IN ('connect','connected','connection_history') AND ".self::PAIR,[$a,$b,$b,$a],'');
         foreach ($rows as $row) { Store::delete('relations',['id'=>(int)$row['id']]); }
         self::forgetPermissions($a,$b);
-        if (!Store::count('relations',"kind='history_revoked' AND ".self::PAIR,[$a,$b,$b,$a])) { Store::insert('relations',['user_id'=>$a,'target_id'=>$b,'kind'=>'history_revoked','created_at'=>current_time('mysql',true)]); }
+        if (!Store::count('relations',self::HISTORY_REVOKED.self::PAIR,[$a,$b,$b,$a])) { Store::insert('relations',['user_id'=>$a,'target_id'=>$b,'kind'=>'history_revoked','created_at'=>current_time('mysql',true)]); }
         Notifications::removeProfileNotices($a,['connection'],$b);
         Notifications::removeProfileNotices($b,['connection'],$a);
         Audit::record('member_blocked',$b);

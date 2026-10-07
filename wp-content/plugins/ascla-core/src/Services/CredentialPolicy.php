@@ -26,18 +26,39 @@ final class CredentialPolicy
     public static function error(string $password,object $user): string
     {
         $minimum=Settings::get()['password_min_length'];
-        if (strlen($password)>4096 || mb_strlen($password)<$minimum) { return 'La nueva contraseña debe tener al menos '.$minimum.' caracteres y como máximo 4096 bytes.'; }
-        foreach (['/\p{Lu}/u','/\p{Ll}/u','/\p{N}/u','/[^\p{L}\p{N}\s]/u'] as $pattern) {
-            if (!preg_match($pattern,$password)) { return 'Combina mayúsculas, minúsculas, números y símbolos.'; }
+        $error='';
+        if (strlen($password)>4096 || mb_strlen($password)<$minimum) {
+            $error='La nueva contraseña debe tener al menos '.$minimum.' caracteres y como máximo 4096 bytes.';
+        } elseif (!self::hasRequiredCharacters($password)) {
+            $error='Combina mayúsculas, minúsculas, números y símbolos.';
+        } else {
+            $normalized=mb_strtolower(remove_accents($password));
+            if (preg_match('/(.)\1{3}/u',$normalized) || self::sequence($normalized)) {
+                $error='Evita secuencias predecibles y caracteres repetidos.';
+            } elseif (self::containsPersonalData($normalized,$user)) {
+                $error='La contraseña no debe contener tu nombre, usuario ni correo.';
+            }
         }
-        $normalized=mb_strtolower(remove_accents($password));
-        if (preg_match('/(.)\1{3}/u',$normalized) || self::sequence($normalized)) { return 'Evita secuencias predecibles y caracteres repetidos.'; }
+        return $error;
+    }
+
+    private static function hasRequiredCharacters(string $password): bool
+    {
+        foreach (['/\p{Lu}/u','/\p{Ll}/u','/\p{N}/u','/[^\p{L}\p{N}\s]/u'] as $pattern) {
+            if (!preg_match($pattern,$password)) { return false; }
+        }
+        return true;
+    }
+
+    private static function containsPersonalData(string $normalized,object $user): bool
+    {
         $personal=implode(' ',[(string)($user->user_login??''),explode('@',(string)($user->user_email??''))[0],(string)($user->first_name??''),(string)($user->last_name??'')]);
         foreach (preg_split('/[^\p{L}\p{N}]+/u',mb_strtolower(remove_accents($personal)))?:[] as $token) {
-            if (mb_strlen($token)>=3 && str_contains($normalized,$token)) { return 'La contraseña no debe contener tu nombre, usuario ni correo.'; }
+            if (mb_strlen($token)>=3 && str_contains($normalized,$token)) { return true; }
         }
-        return '';
+        return false;
     }
+
     private static function sequence(string $password): bool
     {
         foreach (['0123456789','abcdefghijklmnopqrstuvwxyz','qwertyuiop','asdfghjkl','zxcvbnm'] as $sequence) {
@@ -56,6 +77,7 @@ final class CredentialPolicy
     }
     public static function profileValidation(\WP_Error $errors,bool $update,object $user): void
     {
+        unset($update); // WordPress callback signature includes this argument.
         if (empty($user->user_pass)) { return; }
         $error=self::error((string)$user->user_pass,$user);
         if ($error!=='') { $errors->add('ascla_password_policy',$error); }

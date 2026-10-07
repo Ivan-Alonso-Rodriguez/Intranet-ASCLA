@@ -25,24 +25,37 @@ final class SupportRequests
         if (get_post_type($id)!=='ascla_contact') { return; }
         $meta=(array)(get_post_meta($id,'_ascla',true)?:[]);
         if (($meta['request_version']??0)>=2) { return; }
-        Store::lock('contact:'.$id,static function()use($id){
-            $meta=(array)(get_post_meta($id,'_ascla',true)?:[]);
-            if (($meta['request_version']??0)>=2) { return; }
-            $meta['request_status']=$meta['request_status']??'open';
-            // In older releases closed meant "Resuelta"; preserve that meaning.
-            if ($meta['request_status']==='closed') { $meta['request_status']='resolved'; }
-            $history=(array)($meta['request_history']??[]);
-            foreach ($history as &$entry) {
-                foreach (['from','to'] as $key) { if (($entry[$key]??'')==='closed') { $entry[$key]='resolved'; } }
+        Store::lock('contact:'.$id,static fn()=>self::migrateRequest($id));
+    }
+
+    private static function migrateRequest(int $id): void
+    {
+        $meta=(array)(get_post_meta($id,'_ascla',true)?:[]);
+        if (($meta['request_version']??0)>=2) { return; }
+        $meta['request_status']=$meta['request_status']??'open';
+        // In older releases closed meant "Resuelta"; preserve that meaning.
+        if ($meta['request_status']==='closed') { $meta['request_status']='resolved'; }
+        $meta['request_history']=self::normalizeHistory((array)($meta['request_history']??[]));
+        $meta['request_version']=2;
+        update_post_meta($id,'_ascla',$meta);
+        if (!metadata_exists('post',$id,self::META)) { update_post_meta($id,self::META,self::defaultAssignee()); }
+    }
+
+    private static function normalizeHistory(array $history): array
+    {
+        foreach ($history as &$entry) {
+            foreach (['from','to'] as $key) {
+                if (($entry[$key]??'')==='closed') { $entry[$key]='resolved'; }
             }
-            unset($entry);$meta['request_history']=$history;
-            $meta['request_version']=2;
-            update_post_meta($id,'_ascla',$meta);
-            if (!metadata_exists('post',$id,self::META)) {
-                $admins=array_values(array_filter(self::staff(),static fn($staff)=>$staff['admin']));
-                update_post_meta($id,self::META,(int)($admins[0]['id']??0));
-            }
-        });
+        }
+        unset($entry);
+        return $history;
+    }
+
+    private static function defaultAssignee(): int
+    {
+        $admins=array_values(array_filter(self::staff(),static fn($staff)=>$staff['admin']));
+        return (int)($admins[0]['id']??0);
     }
 
     public static function assignee(int $id): int
@@ -137,20 +150,27 @@ final class SupportRequests
         $state=Access::text($filter['state']??'',20);$q=trim(Access::text($filter['q']??'',120));
         Access::require($state==='' || isset(self::STATES[$state]),'Estado no válido.',400);
         $page=max(1,(int)($filter['page']??1));$items=[];$counts=array_fill_keys(array_keys(self::STATES),0);
-        $admin=current_user_can('ascla_manage');
+        $admin=current_user_can('ascla_manage');$includeArchived=!empty($filter['archived']);
         foreach (get_posts(['post_type'=>'ascla_contact','post_status'=>'private','numberposts'=>-1,'orderby'=>'ID','order'=>'DESC']) as $post) {
-            self::initialize($post->ID);
-            $handle=self::canHandle($post->ID);
-            if (!$admin && !$handle) { continue; }
-            if (empty($filter['archived']) && get_post_meta($post->ID,'_ascla_request_archived',true)) { continue; }
-            // Searching private bodies must never disclose matches in unassigned cases.
-            if ($q!=='' && (!$handle || mb_stripos($post->post_title.' '.$post->post_content,$q)===false)) { continue; }
-            $meta=(array)get_post_meta($post->ID,'_ascla',true);$current=$meta['request_status']??'open';
-            $counts[$current]++;
-            if ($state!=='' && $state!==$current) { continue; }
-            $items[]=self::summary($post);
+            $entry=self::listingEntry($post,$admin,$includeArchived,$q);
+            if ($entry===null) { continue; }
+            $counts[$entry['state']]++;
+            if ($state==='' || $state===$entry['state']) { $items[]=$entry['item']; }
         }
         $total=count($items);
         return ['items'=>array_slice($items,($page-1)*20,20),'page'=>$page,'pages'=>max(1,(int)ceil($total/20)),'total'=>$total,'counts'=>$counts,'staff'=>$admin?self::staff():[]];
     }
+
+    private static function listingEntry(\WP_Post $post,bool $admin,bool $includeArchived,string $query): ?array
+    {
+        self::initialize($post->ID);
+        $handle=self::canHandle($post->ID);
+        if (!$admin && !$handle) { return null; }
+        if (!$includeArchived && get_post_meta($post->ID,'_ascla_request_archived',true)) { return null; }
+        // Searching private bodies must never disclose matches in unassigned cases.
+        if ($query!=='' && (!$handle || mb_stripos($post->post_title.' '.$post->post_content,$query)===false)) { return null; }
+        $meta=(array)get_post_meta($post->ID,'_ascla',true);
+        return ['state'=>$meta['request_status']??'open','item'=>self::summary($post)];
+    }
+
 }

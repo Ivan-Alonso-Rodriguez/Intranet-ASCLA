@@ -75,7 +75,9 @@ final class DemoSeed
     private static function post(array $users,string $key,string $type,string $title,string $body,array $meta=[],int $author=0): int
     {
         $resourceAuthor=$users[abs(crc32($key))%count($users)];
-        $defaultAuthor=$type==='resource'?$resourceAuthor:(in_array($type,['event','gallery'],true)?get_current_user_id():$users[0]);
+        $defaultAuthor=$users[0];
+        if ($type==='resource') { $defaultAuthor=$resourceAuthor; }
+        elseif (in_array($type,['event','gallery'],true)) { $defaultAuthor=get_current_user_id(); }
         $postAuthor=$author?:$defaultAuthor;
         $existing=get_posts(['post_type'=>'ascla_'.$type,'post_status'=>'any','meta_key'=>'_ascla_demo_key','meta_value'=>$key,'numberposts'=>1]);
         if ($existing) {

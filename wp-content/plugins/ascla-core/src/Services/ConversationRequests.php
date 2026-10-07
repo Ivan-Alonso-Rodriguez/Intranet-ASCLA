@@ -139,7 +139,6 @@ final class ConversationRequests
         Access::require($request && $request['kind']==='conversation_request' && (int)$request['target_id']===$me,'Solicitud de conversación pendiente no encontrada.',404);
         $sender=(int)$request['user_id'];
         return Connections::lockPair($me,$sender,static function () use($id,$me,$sender,$decision) {
-            $row=Store::one('relations',$id);
             Access::require($row && $row['kind']==='conversation_request' && (int)$row['target_id']===$me,'Esta solicitud ya fue resuelta.',409);
             if ($decision==='accept') {
                 Access::require($sender!==$me && Access::member($sender) && !Messaging::blocked($me,$sender),'No se puede autorizar esta conversación.',403);
@@ -173,7 +172,6 @@ final class ConversationRequests
             $state=self::between($me,$target);
             Access::require($state['state']==='outgoing_pending','No hay una solicitud de conversación enviada que puedas cancelar.',409);
             $id=(int)$state['request_id'];
-            $row=Store::one('relations',$id);
             Store::delete('relations',['id'=>$id,'user_id'=>$me,'target_id'=>$target,'kind'=>'conversation_request']);
             Notifications::removeProfileNotices($target,['conversation_request'],$me);
             Notifications::removeConversationRequestNotices($target,$me);

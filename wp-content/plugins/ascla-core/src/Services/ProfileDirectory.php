@@ -28,9 +28,24 @@ final class ProfileDirectory
     }
     private static function candidate(int $id,array $filter,string $query): ?array
     {
-        if (!Access::member($id) || Messaging::blocked(get_current_user_id(),$id)) { return null; }
+        if (!self::eligibleCandidate($id)) { return null; }
+        $data=self::candidateData($id);
+        $rank=self::candidateRank($id,$data,$filter,$query);
+        if ($rank===null) { return null; }
+        $data['_rank']=$rank;
+        return $data;
+    }
+
+    private static function eligibleCandidate(int $id): bool
+    {
+        if (!Access::member($id) || Messaging::blocked(get_current_user_id(),$id)) { return false; }
         $raw=Profiles::raw($id);
-        if (empty($raw['directory']) || ProfileRequirements::missing($raw)) { return null; }
+        return !empty($raw['directory']) && !ProfileRequirements::missing($raw);
+    }
+
+    private static function candidateData(int $id): array
+    {
+        $raw=Profiles::raw($id);
         $data=Profiles::visible($id);
         // Administrators can inspect private data on the individual administrative form,
         // but a directory search must not infer it from membership in a result set.
@@ -39,22 +54,39 @@ final class ProfileDirectory
         unset($data['phone'],$data['birth_date'],$data['email'],$data['phone_visibility']);
         $data['name']=Profiles::publicName($id);$data['terms']=Profiles::labels($data);
         $data['position_label']=($data['position']??'')?:\ASCLA\Core\Frontend\Language::label('Miembro ASCLA');
+        return $data;
+    }
+
+    private static function candidateRank(int $id,array $data,array $filter,string $query): ?array
+    {
         $haystack=self::normalize(implode(' ',array_map(static fn($v)=>is_scalar($v)?(string)$v:'',$data)).' '.wp_json_encode($data['terms'],JSON_UNESCAPED_UNICODE));
-        if (($query!=='' && !str_contains($haystack,$query)) || (!empty($filter['country']) && self::normalize($data['country']??'')!==self::normalize((string)$filter['country']))) { return null; }
+        $countryMatches=empty($filter['country']) || self::normalize($data['country']??'')===self::normalize((string)$filter['country']);
+        if (($query!=='' && !str_contains($haystack,$query)) || !$countryMatches) { return null; }
+        $relevance=self::filterRelevance($data,$filter);
+        if ($relevance===null) { return null; }
+        return ['text'=>self::textRank($data,$query),'filters'=>$relevance,'affinity'=>self::affinity($id)];
+    }
+
+    private static function filterRelevance(array $data,array $filter): ?int
+    {
         $relevance=0;
         foreach (['industries','interests','areas'] as $key) {
             $selected=array_values(array_unique(array_filter(array_map('absint',(array)($filter[$key]??[])))));
             if (!$selected) { continue; }
-            $matches=count(array_intersect($selected,$data[$key]??[]));if (!$matches) { return null; }$relevance+=$matches;
+            $matches=count(array_intersect($selected,$data[$key]??[]));
+            if (!$matches) { return null; }
+            $relevance+=$matches;
         }
-        $affinity=0;
-        if (get_current_user_id()!==$id) {
-            try { $affinity=Matching::between(get_current_user_id(),$id,false,false)['score']; }
-            catch (\ASCLA\Core\Rest\ApiException) { /* No affinity without both members' consent. */ }
-        }
-        $data['_rank']=['text'=>self::textRank($data,$query),'filters'=>$relevance,'affinity'=>$affinity];
-        return $data;
+        return $relevance;
     }
+
+    private static function affinity(int $id): int
+    {
+        if (get_current_user_id()===$id) { return 0; }
+        try { return (int)Matching::between(get_current_user_id(),$id,false,false)['score']; }
+        catch (\ASCLA\Core\Rest\ApiException) { return 0; }
+    }
+
     private static function textRank(array $data,string $query): int
     {
         if ($query==='') { return 0; }

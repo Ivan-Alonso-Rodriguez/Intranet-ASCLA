@@ -143,6 +143,11 @@ if [ ! -s coverage/lcov.info ] || ! grep -q '^SF:' coverage/lcov.info; then
   exit 1
 fi
 
+# Re-enter the workspace after containerized E2E. On WSL/Docker bind mounts,
+# the shell can occasionally retain a stale working-directory handle.
+cd /
+cd "$ROOT"
+
 if [ -z "$SOURCE_CLEAN" ] && [ -z "$(git status --porcelain)" ] && [ "$(git rev-parse HEAD)" = "$SOURCE_REVISION" ]; then
   printf '%s\n' "$SOURCE_REVISION" > coverage/source-revision
 fi

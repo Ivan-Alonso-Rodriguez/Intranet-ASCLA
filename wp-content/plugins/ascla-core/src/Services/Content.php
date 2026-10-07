@@ -25,9 +25,11 @@ final class Content
     public static function canCreate(string $type): bool
     {
         if(!Access::member() || !current_user_can('ascla_write') || !isset(Catalog::TYPES[$type])){return false;}
-        if($type==='ally'){return current_user_can('ascla_manage');}
-        if(in_array($type,self::EDITORIAL_TYPES,true)){return Access::canPublish();}
-        return current_user_can('ascla_moderate') || in_array($type,array_merge(self::COMMUNITY_TYPES,['contact']),true);
+        return match (true) {
+            $type==='ally'=>current_user_can('ascla_manage'),
+            in_array($type,self::EDITORIAL_TYPES,true)=>Access::canPublish(),
+            default=>current_user_can('ascla_moderate') || in_array($type,array_merge(self::COMMUNITY_TYPES,['contact']),true),
+        };
     }
     public static function canEdit(\WP_Post $post): bool
     {
@@ -42,12 +44,13 @@ final class Content
     public static function canModerate(\WP_Post $post): bool
     {
         if(!self::canRead($post) || $post->post_type==='ascla_contact'){return false;}
-        if($post->post_type==='ascla_ally'){return current_user_can('ascla_manage');}
-        if(in_array(substr($post->post_type,6),self::EDITORIAL_TYPES,true)){
-            $meta=(array)get_post_meta($post->ID,'_ascla',true);
-            return self::canEdit($post) && (empty($meta['micro']) || current_user_can('ascla_manage'));
-        }
-        return current_user_can('ascla_moderate');
+        $type=substr($post->post_type,6);
+        $meta=in_array($type,self::EDITORIAL_TYPES,true)?(array)get_post_meta($post->ID,'_ascla',true):[];
+        return match (true) {
+            $post->post_type==='ascla_ally'=>current_user_can('ascla_manage'),
+            in_array($type,self::EDITORIAL_TYPES,true)=>self::canEdit($post) && (empty($meta['micro']) || current_user_can('ascla_manage')),
+            default=>current_user_can('ascla_moderate'),
+        };
     }
     public static function canDeleteComment(\WP_Comment $comment): bool
     {
@@ -60,12 +63,14 @@ final class Content
         $type=str_starts_with($post->post_type,'ascla_')?substr($post->post_type,6):'';
         $valid=Access::member() && $post->post_status!=='trash' && $type!=='' && isset(Catalog::TYPES[$type]);
         if (!$valid) { return false; }
-        if ($type==='contact') { return SupportRequests::canRead($post); }
-        if ($type==='ally' && !current_user_can('ascla_manage')) { return $post->post_status==='publish'; }
         $author=(int)$post->post_author;
         $me=get_current_user_id();
-        if ($post->post_status==='draft') { return self::canReadDraft($type,$author,$me); }
-        return self::canReadPublished($post,$type,$author,$me);
+        return match (true) {
+            $type==='contact'=>SupportRequests::canRead($post),
+            $type==='ally' && !current_user_can('ascla_manage')=>$post->post_status==='publish',
+            $post->post_status==='draft'=>self::canReadDraft($type,$author,$me),
+            default=>self::canReadPublished($post,$type,$author,$me),
+        };
     }
 
     private static function canReadDraft(string $type,int $author,int $me): bool
@@ -225,11 +230,7 @@ final class ContentPublishing
 
     private static function serializedPayload(\WP_Post $post,array $meta,mixed $title,mixed $body): array
     {
-        if (in_array(substr($post->post_type,6),self::EDITORIAL_TYPES,true) && !Content::canEdit($post)) {
-            $view=\ASCLA\Core\Domain\EditorialPrivacy::reader($title,$body,$meta);
-            $title=$post->post_type==='ascla_event'?\ASCLA\Core\Domain\EntityRedactor::redactEntities($title,array_values(array_filter(array_map('trim',preg_split('/[\r\n,;]+/u',(string)($meta['identities']??''))?:[])))):$view['title'];
-            $body=$view['body'];$meta=$view['meta'];
-        }
+        [$title,$body,$meta]=EditorialPayload::reader($post,$meta,$title,$body);
         if (!current_user_can('ascla_moderate') && !Access::canPublish()) {
             unset($meta['transcript'],$meta['identities'],$meta['invitees'],$meta['moderation'],$meta['transcript_error'],$meta['transcript_mode'],$meta['transcript_checked_at']);
         }
@@ -243,7 +244,6 @@ final class ContentPublishing
         $terms=wp_get_object_terms($post->ID,['ascla_interest','ascla_category','ascla_tag']);
         return ['id'=>$post->ID,'can_delete'=>self::canDelete($post),'can_edit'=>Content::canEdit($post),'can_moderate'=>Content::canModerate($post),'type'=>substr($post->post_type,6),'title'=>$title,'body'=>$body,'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?Profiles::publicName((int)$author->ID):'ASCLA'],'date'=>$date,'parent'=>(int)$post->post_parent,'meta'=>$meta,'media'=>Media::metadata($post->ID,(array)($meta['media_ids']??[])),'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name,'taxonomy'=>$t->taxonomy],$terms),'reactions'=>Store::count('relations',"target_id=%d AND kind='like'",[$post->ID]),'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='like'",[$post->ID,get_current_user_id()])>0,'following'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='follow'",[$post->ID,get_current_user_id()])>0,'comments'=>(int)$post->comment_count,'url'=>Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$post->ID])];
     }
-
 
 
     private static function recommendedListing(array $args,int $page,array $filter): array
@@ -368,15 +368,16 @@ final class ContentPublishing
 
     public static function canDelete(\WP_Post $post): bool
     {
-        if($post->post_type==='ascla_contact') {
-            $meta=(array)get_post_meta($post->ID,'_ascla',true);
-            return SupportRequests::canHandle($post->ID) && $post->post_status==='private' && ($meta['request_status']??'open')==='closed' && !get_post_meta($post->ID,'_ascla_request_archived',true);
-        }
-        if ($post->post_type==='ascla_event' && !empty(get_post_meta($post->ID,'_ascla',true)['micro'])) { return false; }
-        if ($post->post_type==='ascla_ally') { return Access::member() && current_user_can('ascla_manage') && $post->post_status!=='trash'; }
-        return Access::member() && str_starts_with($post->post_type,'ascla_') && isset(Catalog::TYPES[substr($post->post_type,6)]) && $post->post_status!=='trash'
-            && (current_user_can('ascla_manage') || (int)$post->post_author===get_current_user_id()
-                || (current_user_can('ascla_moderate') && in_array(substr($post->post_type,6),['hub','forum','topic'],true)));
+        $meta=(array)get_post_meta($post->ID,'_ascla',true);
+        $type=str_starts_with($post->post_type,'ascla_')?substr($post->post_type,6):'';
+        return match (true) {
+            $post->post_type==='ascla_contact'=>SupportRequests::canHandle($post->ID) && $post->post_status==='private' && ($meta['request_status']??'open')==='closed' && !get_post_meta($post->ID,'_ascla_request_archived',true),
+            $post->post_type==='ascla_event' && !empty($meta['micro'])=>false,
+            $post->post_type==='ascla_ally'=>Access::member() && current_user_can('ascla_manage') && $post->post_status!=='trash',
+            default=>Access::member() && $type!=='' && isset(Catalog::TYPES[$type]) && $post->post_status!=='trash'
+                && (current_user_can('ascla_manage') || (int)$post->post_author===get_current_user_id()
+                    || (current_user_can('ascla_moderate') && in_array($type,['hub','forum','topic'],true))),
+        };
     }
 
     public static function remove(int $id): array

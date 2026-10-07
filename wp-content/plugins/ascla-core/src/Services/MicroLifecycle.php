@@ -37,6 +37,7 @@ final class MicroLifecycle
     }
     public static function registration(int $id,array $meta,int $user,string $status): void
     {
+        unset($id); // Kept for the event lifecycle callback contract.
         if (empty($meta['micro']) || in_array($status,['declined','cancelled'],true)) { return; }
         Access::require(self::canRegister($meta,$user),'La inscripción está reservada temporalmente a los miembros recomendados.',403);
         $deadline=strtotime($meta['registration_deadline']??$meta['start']);

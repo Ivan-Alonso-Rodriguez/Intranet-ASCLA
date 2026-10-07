@@ -8,7 +8,7 @@ final class AuditMigration
         global $wpdb;
         $table=\ASCLA\Core\Repositories\Store::table('audit');
         if ($wpdb->query("ALTER TABLE $table MODIFY detail LONGTEXT NOT NULL")===false) {
-            throw new \RuntimeException('No se pudo ampliar el historial de auditoría.');
+            throw new MigrationException('No se pudo ampliar el historial de auditoría.');
         }
         update_option('ascla_schema',14,false);
     }

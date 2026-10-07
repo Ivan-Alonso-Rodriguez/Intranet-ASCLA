@@ -17,6 +17,11 @@ final class AccountRecovery
         }
         $result=retrieve_password($identifier);
         if (!is_wp_error($result)) { return true; }
+        return self::publicResult($result);
+    }
+
+    private static function publicResult(\WP_Error $result): true|\WP_Error
+    {
         // Captcha and third-party restrictions still prevent issuing a reset key.
         $accountErrors=['invalid_email','invalidcombo','retrieve_password_email_failure','no_password_reset','invalidcombo_email'];
         foreach ($result->get_error_codes() as $code) {
