@@ -515,9 +515,15 @@ final class ContentSaveState
         elseif ($type==='hub' && $requested==='publish' && empty($meta['generated'])) { $status='publish'; }
         elseif ($type==='event' && !empty($meta['micro']) && (empty($meta['micro_approved']) || !current_user_can('ascla_manage'))) { $status='pending'; }
         elseif ($autoEvent || in_array($type,['topic','forum'],true)) { $status='publish'; }
-        elseif (($editor || ($publisher && in_array($type,['gallery','resource'],true))) && $requested==='publish' && (empty($meta['generated']) || $direct)) { $status='publish'; }
+        elseif (self::canPublishRequested($type,$requested,$meta,$editor,$publisher,$direct)) { $status='publish'; }
         elseif (!$editor && !Settings::get()['moderation_required'] && $type==='hub') { $status='publish'; }
         return $status;
+    }
+
+    private static function canPublishRequested(string $type,string $requested,array $meta,bool $editor,bool $publisher,bool $direct): bool
+    {
+        $allowedPublisher=$editor || ($publisher && in_array($type,['gallery','resource'],true));
+        return $allowedPublisher && $requested==='publish' && (empty($meta['generated']) || $direct);
     }
 
     private static function parent(string $type,array $input): int

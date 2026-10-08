@@ -81,7 +81,21 @@ final class Events
         $users=array_values(array_unique(array_map('absint',$users)));
         Access::require(!empty($users) && count($users)<=50,'Seleccione entre 1 y 50 asociados.',400);
         foreach ($users as $uid) { Access::require(Access::member($uid),'Asociado no disponible.',400); }
-        $invited=Store::atomic('event:'.$id,static function () use($id,$users) {
+        $invited=self::storeInvitations($id,$users);
+        $calendar=['available'=>false,'sent'=>0];
+        if ($invited) {
+            Transaction::afterCommit(static function()use($id,$invited,&$calendar){
+                try { $calendar=\ASCLA\Core\Integrations\GoogleOAuth::inviteEvent($id,$invited); }
+                catch (\Throwable $error) { $calendar=['available'=>false,'sent'=>0,'error'=>$error->getMessage()]; }
+            });
+        }
+        $sent=count($invited);
+        return ['sent'=>$sent,'skipped'=>count($users)-$sent,'google_calendar'=>$calendar,'message'=>self::invitationMessage($sent,$calendar)];
+    }
+
+    private static function storeInvitations(int $id,array $users): array
+    {
+        return Store::atomic('event:'.$id,static function () use($id,$users) {
             clean_post_cache($id);
             $post=Content::get($id);$meta=(array)get_post_meta($id,'_ascla',true);
             Access::require($post->post_status==='publish' && empty($meta['micro']) && empty($meta['cancelled']) && strtotime($meta['end']??'')>time(),self::EVENT_UNAVAILABLE,409);
@@ -95,19 +109,19 @@ final class Events
             Audit::record('event_invited',$id,'sent_'.count($invited));
             return $invited;
         });
-        $calendar=['available'=>false,'sent'=>0];
-        if ($invited) {
-            Transaction::afterCommit(static function()use($id,$invited,&$calendar){
-                try { $calendar=\ASCLA\Core\Integrations\GoogleOAuth::inviteEvent($id,$invited); }
-                catch (\Throwable $error) { $calendar=['available'=>false,'sent'=>0,'error'=>$error->getMessage()]; }
-            });
-        }
-        $sent=count($invited);
+    }
+
+    private static function invitationMessage(int $sent,array $calendar): string
+    {
         $message='Invitaciones internas enviadas. Los cupos se confirman al aceptar.';
-        if (($calendar['sent']??0)>0) { $message.=' Google Calendar envió las invitaciones por correo a '.(int)$calendar['sent'].' asociado(s).'; }
-        elseif (!empty($calendar['error'])) { $message.=' Google Calendar no pudo enviar la invitación: '.$calendar['error']; }
-        elseif ($sent>0 && empty($calendar['available'])) { $message.=' Para enviar invitaciones de Google Calendar, conecta el calendario de la cuenta organizadora.'; }
-        return ['sent'=>$sent,'skipped'=>count($users)-$sent,'google_calendar'=>$calendar,'message'=>$message];
+        if (($calendar['sent']??0)>0) {
+            $message.=' Google Calendar envió las invitaciones por correo a '.(int)$calendar['sent'].' asociado(s).';
+        } elseif (!empty($calendar['error'])) {
+            $message.=' Google Calendar no pudo enviar la invitación: '.$calendar['error'];
+        } elseif ($sent>0 && empty($calendar['available'])) {
+            $message.=' Para enviar invitaciones de Google Calendar, conecta el calendario de la cuenta organizadora.';
+        }
+        return $message;
     }
 
     private static function importantChanges(array $before,array $after): array
@@ -187,14 +201,16 @@ final class Events
                 $uid=absint($row['user_id']??0);
                 if ($uid>0) { $users[$uid]=true; }
             }
-            foreach (array_keys($users) as $uid) { Notifications::once(
-                $uid,
-                'event_cancelled:'.$id,
-                'event_cancelled',
-                'El evento “'.$post->post_title.'” fue cancelado. Motivo: '.$reason,
-                \ASCLA\Core\Domain\Catalog::url('eventos',['item'=>$id]),
-                ['type'=>'post','id'=>$id,'actor'=>get_current_user_id()]
-            ); }
+            foreach (array_keys($users) as $uid) {
+                Notifications::once(
+                    $uid,
+                    'event_cancelled:'.$id,
+                    'event_cancelled',
+                    'El evento “'.$post->post_title.'” fue cancelado. Motivo: '.$reason,
+                    \ASCLA\Core\Domain\Catalog::url('eventos',['item'=>$id]),
+                    ['type'=>'post','id'=>$id,'actor'=>get_current_user_id()]
+                );
+            }
             Audit::record('event_cancelled',$id,'notified_'.count($users));
         });
         Transaction::afterCommit(static function()use($id){

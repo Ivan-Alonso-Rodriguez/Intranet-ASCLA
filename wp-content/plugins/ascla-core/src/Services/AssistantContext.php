@@ -16,19 +16,7 @@ final class AssistantContext
     public static function build(string $question): array
     {
         $plain=mb_strtolower(remove_accents($question));
-        $intents=[
-            'events'=>(bool)preg_match('/\b(evento|eventos|reunion|reuniones|encuentro|encuentros|capacitacion|capacitaciones|agenda|calendario|proximo|proximos|pronto|semana|mes|inscrito|inscripcion)\b/u',$plain),
-            'recent'=>(bool)preg_match('/\b(reciente|recientes|nuevo|nuevos|nueva|nuevas|publicado|publicados|publicacion|publicaciones|novedad|novedades)\b/u',$plain)
-                || (bool)preg_match('/\b(contenido|contenidos|recurso|recursos|articulo|articulos|hub|conocimiento|ultimo|ultimos)\b/u',$plain),
-            'people'=>(bool)preg_match('/\b(recomiend|recomendad|conectar|conexion|conexiones|persona|personas|asociado|asociados|networking|afinidad|contactar|conocer)\w*/u',$plain),
-            'notifications'=>(bool)preg_match('/\b(notificacion|notificaciones|aviso|avisos|pendiente|pendientes|sin leer)\b/u',$plain),
-        ];
-        // English UI questions are supported too.
-        $intents['events']=$intents['events']||(bool)preg_match('/\b(event|events|meeting|meetings|training|calendar|upcoming|soon|week|month|registered)\b/u',$plain);
-        $intents['recent']=$intents['recent']||(bool)preg_match('/\b(recent|new|latest|published|posts|content|resources|knowledge)\b/u',$plain);
-        $intents['people']=$intents['people']||(bool)preg_match('/\b(recommend|recommended|connect|connection|connections|people|member|members|networking|affinity|meet)\w*/u',$plain);
-        $intents['notifications']=$intents['notifications']||(bool)preg_match('/\b(notification|notifications|unread|alerts?)\b/u',$plain);
-
+        $intents=self::intents($plain);
         $live=[
             'current_datetime'=>current_datetime()->format(DATE_ATOM),
             'timezone'=>wp_timezone_string()?:'UTC',
@@ -37,15 +25,29 @@ final class AssistantContext
             'intents'=>$intents,
         ];
         $sources=[];
+        self::appendIntentContext($live,$sources,$intents);
+        [$safe,$protected,$identities]=self::safeSources($sources);
+        return ['live'=>$live,'sources'=>array_slice($safe,0,8),'answerable'=>in_array(true,$intents,true),'protected'=>$protected,'identities'=>$identities];
+    }
 
+    private static function intents(string $plain): array
+    {
+        return [
+            'events'=>(bool)preg_match('/\b(evento|eventos|reunion|reuniones|encuentro|encuentros|capacitacion|capacitaciones|agenda|calendario|proximo|proximos|pronto|semana|mes|inscrito|inscripcion|event|events|meeting|meetings|training|calendar|upcoming|soon|week|month|registered)\b/u',$plain),
+            'recent'=>(bool)preg_match('/\b(reciente|recientes|nuevo|nuevos|nueva|nuevas|publicado|publicados|publicacion|publicaciones|novedad|novedades|contenido|contenidos|recurso|recursos|articulo|articulos|hub|conocimiento|ultimo|ultimos|recent|new|latest|published|posts|content|resources|knowledge)\b/u',$plain),
+            'people'=>(bool)preg_match('/\b(recomiend|recomendad|conectar|conexion|conexiones|persona|personas|asociado|asociados|networking|afinidad|contactar|conocer|recommend|recommended|connect|connection|connections|people|member|members|affinity|meet)\w*/u',$plain),
+            'notifications'=>(bool)preg_match('/\b(notificacion|notificaciones|aviso|avisos|pendiente|pendientes|sin leer|notification|notifications|unread|alerts?)\b/u',$plain),
+        ];
+    }
+
+    private static function appendIntentContext(array &$live,array &$sources,array $intents): void
+    {
         if($intents['events']){
-            [$events,$eventSources]=self::events();
-            $live['upcoming_events']=$events;
+            [$live['upcoming_events'],$eventSources]=self::events();
             $sources=array_merge($sources,$eventSources);
         }
         if($intents['recent']){
-            [$recent,$recentSources]=self::recent();
-            $live['recent_content']=$recent;
+            [$live['recent_content'],$recentSources]=self::recent();
             $sources=array_merge($sources,$recentSources);
         }
         if($intents['people']){
@@ -61,7 +63,10 @@ final class AssistantContext
                 'url'=>$item['url']??'',
             ],array_slice($feed['items']??[],0,5));
         }
+    }
 
+    private static function safeSources(array $sources): array
+    {
         $seen=[];$safe=[];$protected=false;$identities=[];
         foreach($sources as $source){
             $id=(int)($source['id']??0);
@@ -73,7 +78,7 @@ final class AssistantContext
                 $identities=array_merge($identities,preg_split(self::IDENTITIES_SEPARATOR,(string)($meta['identities']??''))?:[]);
             }
         }
-        return ['live'=>$live,'sources'=>array_slice($safe,0,8),'answerable'=>in_array(true,$intents,true),'protected'=>$protected,'identities'=>array_values(array_unique($identities))];
+        return [$safe,$protected,array_values(array_unique($identities))];
     }
 
     private static function events(): array

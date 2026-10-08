@@ -1857,6 +1857,14 @@
     }
     return "";
   }
+  function editorStatusSelection(m, canSchedule, statusOptions, initialStatus) {
+    if (m.publish_at && canSchedule) return "scheduled";
+    if (statusOptions.some((option) => option[0] === initialStatus)) return initialStatus;
+    return "draft";
+  }
+  function editorFormMarkup({type, id, p, m, extra, eventCoverEditor, statusOptions, statusValue, canSchedule, directResourcePublisher}) {
+    return `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => ("<label class=\"chip-check\"><input type=\"checkbox\" name=\"interest\" value=\"" + (t.id) + "\" " + (p.tags.some((x) => x.id === t.id) ? "checked" : "") + ">" + (E(t.name)) + "</label>")).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? ("<label class=\"btn small\">" + (I("plus")) + " " + (E(T("Adjuntar imagen o PDF"))) + "<input type=\"file\" data-upload=\"content\" accept=\"image/jpeg,image/png,image/webp,application/pdf\" hidden></label><div id=\"attachments\">" + ((m.media_ids || []).map((mid) => ("<span class=\"attached-file\" data-media=\"" + (mid) + "\">Archivo #" + (mid) + "" + (btn("Quitar", "detach-media", ("data-id=\"" + (mid) + "\""), "ghost small")) + "</span>")).join("")) + "</div><p class=\"private-note\">" + (E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))) + "</p>") : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${select("status", "Guardar como", statusOptions, statusValue)}${canSchedule ? publicationFields(m.publish_at, statusValue === "scheduled") : ""}${m.generated && directResourcePublisher ? ("<p class=\"private-note\">" + (E(T("Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."))) + "</p>") : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar ${typeLabel[type]}</button></div></form>`;
+  }
   async function editor(type, id = 0) {
     const p = id
       ? await api("items/" + id)
@@ -1871,14 +1879,11 @@
     const canSchedule = (S.boot.admin || S.boot.executive) && ['event','gallery','resource','hub','ally'].includes(type);
     if (canSchedule) statusOptions.push(['scheduled','Programar publicación']);
     const initialStatus = editorStatusValue(type, id, p, m, directResourcePublisher, directContentPublisher);
-    const statusValue = m.publish_at && canSchedule ? 'scheduled' : (statusOptions.some(option=>option[0]===initialStatus) ? initialStatus : 'draft');
+    const statusValue = editorStatusSelection(m, canSchedule, statusOptions, initialStatus);
     const eventCoverFile = type === "event" ? (p.media || []).find(file => file.mime?.startsWith("image/")) : null;
     const eventCoverEditor = eventCoverEditorMarkup(type, eventCoverFile);
-    modal(
-      (id ? "Editar " : "Crear ") + typeLabel[type],
-      `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => ("<label class=\"chip-check\"><input type=\"checkbox\" name=\"interest\" value=\"" + (t.id) + "\" " + (p.tags.some((x) => x.id === t.id) ? "checked" : "") + ">" + (E(t.name)) + "</label>")).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? ("<label class=\"btn small\">" + (I("plus")) + " " + (E(T("Adjuntar imagen o PDF"))) + "<input type=\"file\" data-upload=\"content\" accept=\"image/jpeg,image/png,image/webp,application/pdf\" hidden></label><div id=\"attachments\">" + ((m.media_ids || []).map((mid) => ("<span class=\"attached-file\" data-media=\"" + (mid) + "\">Archivo #" + (mid) + "" + (btn("Quitar", "detach-media", ("data-id=\"" + (mid) + "\""), "ghost small")) + "</span>")).join("")) + "</div><p class=\"private-note\">" + (E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))) + "</p>") : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${select("status", "Guardar como", statusOptions, statusValue)}${canSchedule ? publicationFields(m.publish_at, statusValue === "scheduled") : ""}${m.generated && directResourcePublisher ? ("<p class=\"private-note\">" + (E(T("Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."))) + "</p>") : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar ${typeLabel[type]}</button></div></form>`,
-      true,
-    );
+    const formMarkup = editorFormMarkup({type, id, p, m, extra, eventCoverEditor, statusOptions, statusValue, canSchedule, directResourcePublisher});
+    modal((id ? "Editar " : "Crear ") + typeLabel[type], formMarkup, true);
   }
   async function files(page = 1, q = "", scope = S.files?.scope || "mine", owner = S.files?.owner || 0) {
     const previousScope = S.files?.scope || "";
@@ -3389,7 +3394,9 @@
   }
   function reviewDecisionForm(kind, id, decision) {
     const title = kind === 'report' ? 'Revisar reporte' : 'Revisar comentario';
-    const label = kind === 'report' ? 'Marcar como revisado' : (decision === 'approve' ? 'Aprobar' : 'Mantener oculto');
+    let label = 'Mantener oculto';
+    if (kind === 'report') label = 'Marcar como revisado';
+    else if (decision === 'approve') label = 'Aprobar';
     modal(T(title), `<p>${E(T(label))}</p><form data-form="review-decision" data-kind="${kind}" data-id="${id}" data-decision="${decision}">${field('reason', 'Motivo de la decisión', '', 'textarea', 'required maxlength="1000"')}<div class="form-actions">${btn('Cancelar', 'close')}<button class="btn primary">${E(T('Guardar decisión'))}</button></div></form>`);
   }
   async function handleClickActions46(a, _b, id, _event) {

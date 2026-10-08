@@ -64,8 +64,9 @@ final class ContentSchedule
     {
         self::cancel($id);
         $post=get_post($id);$meta=(array)get_post_meta($id,'_ascla',true);
-        if (!$post || $post->post_status!=='ascla_hidden' || empty($meta['publish_at']) || !empty($meta['schedule_error'])) { return; }
-        if (!empty($meta['micro']) && empty($meta['micro_approved'])) { return; }
+        $cannotSchedule=!$post || $post->post_status!=='ascla_hidden' || empty($meta['publish_at']) || !empty($meta['schedule_error'])
+            || (!empty($meta['micro']) && empty($meta['micro_approved']));
+        if ($cannotSchedule) { return; }
         $at=strtotime($meta['publish_at']);
         if (!$at) { return; }
         $result=wp_schedule_single_event(max(time()+1,$at),self::HOOK,[$id,$at],true);
