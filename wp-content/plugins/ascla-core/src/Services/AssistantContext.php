@@ -33,11 +33,32 @@ final class AssistantContext
     private static function intents(string $plain): array
     {
         return [
-            'events'=>(bool)preg_match('/\b(evento|eventos|reunion|reuniones|encuentro|encuentros|capacitacion|capacitaciones|agenda|calendario|proximo|proximos|pronto|semana|mes|inscrito|inscripcion|event|events|meeting|meetings|training|calendar|upcoming|soon|week|month|registered)\b/u',$plain),
-            'recent'=>(bool)preg_match('/\b(reciente|recientes|nuevo|nuevos|nueva|nuevas|publicado|publicados|publicacion|publicaciones|novedad|novedades|contenido|contenidos|recurso|recursos|articulo|articulos|hub|conocimiento|ultimo|ultimos|recent|new|latest|published|posts|content|resources|knowledge)\b/u',$plain),
-            'people'=>(bool)preg_match('/\b(recomiend|recomendad|conectar|conexion|conexiones|persona|personas|asociado|asociados|networking|afinidad|contactar|conocer|recommend|recommended|connect|connection|connections|people|member|members|affinity|meet)\w*/u',$plain),
-            'notifications'=>(bool)preg_match('/\b(notificacion|notificaciones|aviso|avisos|pendiente|pendientes|sin leer|notification|notifications|unread|alerts?)\b/u',$plain),
+            'events'=>self::matchesAny($plain,[
+                '/\b(evento|eventos|reunion|reuniones|encuentro|encuentros|capacitacion|capacitaciones|agenda|calendario|proximo|proximos|pronto|semana|mes|inscrito|inscripcion)\b/u',
+                '/\b(event|events|meeting|meetings|training|calendar|upcoming|soon|week|month|registered)\b/u',
+            ]),
+            'recent'=>self::matchesAny($plain,[
+                '/\b(reciente|recientes|nuevo|nuevos|nueva|nuevas|publicado|publicados|publicacion|publicaciones|novedad|novedades)\b/u',
+                '/\b(contenido|contenidos|recurso|recursos|articulo|articulos|hub|conocimiento|ultimo|ultimos)\b/u',
+                '/\b(recent|new|latest|published|posts|content|resources|knowledge)\b/u',
+            ]),
+            'people'=>self::matchesAny($plain,[
+                '/\b(recomiend|recomendad|conectar|conexion|conexiones|persona|personas|asociado|asociados|networking|afinidad|contactar|conocer)\w*/u',
+                '/\b(recommend|recommended|connect|connection|connections|people|member|members|networking|affinity|meet)\w*/u',
+            ]),
+            'notifications'=>self::matchesAny($plain,[
+                '/\b(notificacion|notificaciones|aviso|avisos|pendiente|pendientes|sin leer)\b/u',
+                '/\b(notification|notifications|unread|alerts?)\b/u',
+            ]),
         ];
+    }
+
+    private static function matchesAny(string $plain,array $patterns): bool
+    {
+        foreach($patterns as $pattern){
+            if(preg_match($pattern,$plain)) {return true; }
+        }
+        return false;
     }
 
     private static function appendIntentContext(array &$live,array &$sources,array $intents): void
