@@ -1310,7 +1310,7 @@
       ["account", "shield", "Cuenta y seguridad", "Contraseña e integraciones"],
     ];
     return '<div class="profile-tabs" role="tablist" aria-label="' + E(T("Secciones del perfil")) + '">'
-      + tabs.map((tab) => profileTabButton(tab)).join("")
+      + tabs.map((tab, index) => profileTabButton(tab, index)).join("")
       + '</div>';
   }
   function setupProfileTabs() {
@@ -1384,8 +1384,8 @@
       </section>`;
     const profileForm = content().querySelector('[data-form="profile"]');
     registerUnsavedForm(profileForm);
-    await setupProfileLocations(profileForm);
     setupProfileTabs();
+    await setupProfileLocations(profileForm);
   }
 
   const typeByPage = {
