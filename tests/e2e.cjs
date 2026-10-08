@@ -144,8 +144,23 @@ async function goto(page, route) {
         .locator("[name=bio]")
         .fill("E2E Perfil de prueba para verificar persistencia.");
       await p.locator("[name=company]").fill("E2E_EMPRESA_PRIVADA_457");
-      await p.locator("[data-profile-tab=privacy]").click();
-      await p.locator("[name=hidden][value=company]").check();
+      await p.locator('[data-profile-tab="privacy"]').click();
+      const privacyPanel = p.locator('[data-profile-panel="privacy"]');
+      await privacyPanel.waitFor({ state: "visible" });
+
+      const companyPrivacy = privacyPanel
+        .locator(".visibility-option")
+        .filter({ hasText: "Empresa" });
+
+      await companyPrivacy.click();
+
+      assert.equal(
+        await companyPrivacy
+          .locator('input[name="hidden"][value="company"]')
+          .isChecked(),
+        true,
+      );
+      
       await p.getByRole("button", { name: "Guardar perfil" }).click();
       await p
         .getByRole("status")
