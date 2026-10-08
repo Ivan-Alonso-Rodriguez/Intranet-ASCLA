@@ -1,6 +1,7 @@
 <?php
 namespace ASCLA\Core\Services;
 use ASCLA\Core\Repositories\Store;
+use ASCLA\Core\Repositories\WordPressWrites;
 
 /** Review, priority registration and a retained state history for microevents. */
 final class MicroLifecycle
@@ -49,26 +50,26 @@ final class MicroLifecycle
         $last=$rows?end($rows):null;
         if ($last && $last['state']===$state && $reason==='') { return; }
         $rows[]=['state'=>$state,'reason'=>$reason,'actor'=>get_current_user_id(),'at'=>gmdate('c')];
-        update_post_meta($id,'_ascla_micro_history',$rows);
-        update_post_meta($id,'_ascla_micro_state',$state);
-        Audit::record('microevent_state',$id,$state);
+        WordPressWrites::meta('post',$id,'_ascla_micro_history',$rows);
+        WordPressWrites::meta('post',$id,'_ascla_micro_state',$state);
+        Audit::changes('microevent_state',$id,['state'=>$last['state']??null,'reason'=>$last['reason']??''],['state'=>$state,'reason'=>$reason]);
     }
     public static function review(int $id,string $decision,string $reason,array &$meta): void
     {
         Access::require(current_user_can('ascla_manage'),'La revisión del microevento requiere administración.',403);
         if ($decision==='approve') {
+            Access::require(empty($meta['cancelled']),'Una propuesta cancelada conserva su historial y no puede aprobarse.',409);
             $meta=self::defaults($meta);
             MicroEvents::validateInvitees($meta);
             Access::require(strtotime($meta['registration_deadline'])>time(),'Amplía el plazo de inscripción antes de aprobar.',400);
-            if (empty($meta['invited'])) { $meta['public_at']=min(strtotime($meta['registration_deadline']),time()+(int)$meta['priority_hours']*HOUR_IN_SECONDS); }
             $meta['micro_approved']=true;self::history($id,'approved',$reason);
         } else { $meta['micro_approved']=false;self::history($id,$decision==='reject'?'denied':'cancelled',$reason); }
     }
     public static function publish(int $id): void
     {
         $meta=self::defaults((array)get_post_meta($id,'_ascla',true));
-        if (empty($meta['public_at'])) { $meta['public_at']=min(strtotime($meta['registration_deadline']),time()+(int)$meta['priority_hours']*HOUR_IN_SECONDS); }
-        update_post_meta($id,'_ascla',$meta);
+        if (empty($meta['invited'])) { $meta['public_at']=min(strtotime($meta['registration_deadline']),time()+(int)$meta['priority_hours']*HOUR_IN_SECONDS); }
+        WordPressWrites::meta('post',$id,'_ascla',$meta);
         self::history($id,'published');self::schedule($id,$meta);
     }
     public static function schedule(int $id,array $meta): void
@@ -82,7 +83,7 @@ final class MicroLifecycle
     }
     public static function tick(int $id): void
     {
-        Store::lock('event:'.$id,static function()use($id){
+        Store::atomic('event:'.$id,static function()use($id){
             $post=get_post($id);$meta=(array)get_post_meta($id,'_ascla',true);
             if (!$post || $post->post_status!=='publish' || empty($meta['micro']) || !empty($meta['cancelled'])) { return; }
             $state='published';

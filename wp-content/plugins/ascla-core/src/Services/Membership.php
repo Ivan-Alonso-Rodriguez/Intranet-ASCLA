@@ -1,5 +1,6 @@
 <?php
 namespace ASCLA\Core\Services;
+use ASCLA\Core\Repositories\WordPressWrites;
 
 /** Membership expiry revokes credentials without deleting profiles, relations or messages. */
 final class Membership
@@ -54,9 +55,9 @@ final class Membership
         Access::require(current_user_can('ascla_manage') && current_user_can('edit_user',$id));
         Access::require($id!==get_current_user_id() && !user_can($id,'manage_options'),'Cuenta no disponible.',400);
         $before=self::view($id);
-        update_user_meta($id,'_ascla_membership_until',$value['until']);
-        update_user_meta($id,'_ascla_membership_status',$value['status']);
-        update_user_meta($id,'_ascla_suspended',$value['status']==='suspended');
+        WordPressWrites::meta('user',$id,'_ascla_membership_until',$value['until']);
+        WordPressWrites::meta('user',$id,'_ascla_membership_status',$value['status']);
+        WordPressWrites::meta('user',$id,'_ascla_suspended',$value['status']==='suspended');
         Audit::changes('membership_updated',$id,$before,self::view($id));
     }
     public static function revoke(int $id): void

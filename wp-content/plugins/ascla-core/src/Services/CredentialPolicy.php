@@ -13,6 +13,7 @@ final class CredentialPolicy
         add_action('validate_password_reset',[self::class,'resetValidation'],10,2);
         add_action('user_profile_update_errors',[self::class,'profileValidation'],10,3);
         add_filter('rest_pre_insert_user',[self::class,'restValidation'],10,2);
+        add_filter('rest_request_before_callbacks',[NativeAccountPolicy::class,'validate'],10,3);
     }
     public static function settings(array &$data,array $input): void
     {

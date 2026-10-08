@@ -2,17 +2,18 @@
 
 Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
 
-> **Versión actual:** `1.10.6`
+> **Versión actual:** `1.10.7`
 > **Esquema de base de datos:** `14`
-> La versión `1.10.6` consolida la adecuación al Documento de Análisis y Diseño ASCLA, los casos QA 024–058 y la migración de auditoría al esquema 14. Conserva las funciones publicadas de 1.10.5 y sincroniza la entrega técnica completa.
+> La versión `1.10.7` continúa la adecuación al PDF: Directorio, programación editorial, microeventos, autorización por Contacto, reacciones, gettext y atomicidad de conexiones, RSVP y moderación. Mantiene el esquema 14.
 
 ## Resumen de versiones
 
-> Ordenado de la versión más reciente a la más antigua. La versión vigente del proyecto es **1.10.6**.
+> Ordenado de la versión más reciente a la más antigua. La versión vigente del proyecto es **1.10.7**.
 
 | Versión | Enfoque principal | Estado |
 |---|---|---|
-| 1.10.6 | Adecuación al análisis ASCLA, cierre QA, seguridad, membresías y auditoría esquema 14 | **Actual** |
+| 1.10.7 | Directorio, programación editorial, microeventos, Contacto, reacciones, gettext y transacciones | **Actual** |
+| 1.10.6 | Adecuación al análisis ASCLA, cierre QA, seguridad, membresías y auditoría esquema 14 | Anterior |
 | 1.10.5 | CU009 en Inicio: recomendaciones semanales, explicables y reversibles | Anterior |
 | 1.10.4 | Perfil por pestañas, mensajería móvil, paginación, Google Calendar, DeepSeek y guardia de cambios | Anterior |
 | 1.10.3 | Bloqueo de acceso, solicitudes profesionales, perfil obligatorio, directorio y microeventos ejecutivos | Anterior |
@@ -83,6 +84,19 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 | 1.0.3 | Base funcional inicial recuperada del historial Git | Histórica |
 
 ---
+
+## 1.10.7 — Directorio y continuidad del Documento de Análisis y Diseño
+
+- **Directorio:** búsqueda prioritaria, filtros con casillas, conexiones plegables y diseño adaptable. Perfiles incompletos visibles por decisión expresa del usuario; se mantienen privacidad, membresía y bloqueos.
+- **Publicaciones:** fecha futura, estado Oculto y cron de publicación; cancelación y revisión de permisos. Hub permite publicación manual explícita, borrador o envío a revisión sin alterar la opción administrativa heredada.
+- **Microeventos:** aprobación separada de divulgación, prioridad desde publicación, periodicidad configurable y revalidación de candidatos con cancelación motivada.
+- **Contacto / perfiles:** categorías institucionales, solicitud asignada de uso único para datos personales/profesionales y protección de REST nativo.
+- **Reacciones:** Me gusta, Útil y Celebrar; una reacción por persona, cambio/retiro, compatibilidad con registros anteriores y controles accesibles.
+- **Idiomas:** gettext WordPress con 1.367 mensajes por idioma, catálogos PO/MO y proyección del catálogo al JavaScript. Inglés/español por cuenta.
+- **Integridad:** transacciones InnoDB y savepoints para conexiones, mensajería directa, eventos, moderación, publicaciones, cuentas y Contacto. Correos nativos/ASCLA y Calendar diferidos al commit; rollback verificado ante fallos de auditoría y metadatos, incluyendo sesión y autorización de Contacto. Se conserva contenido ajeno al eliminar cuentas con identificadores coincidentes.
+- **Auditoría:** diferencias de roles nativos y estados/motivos de moderación. Continúa pendiente la cobertura integral descrita en COMPLIANCE.md.
+- **Entrega:** versión 1.10.7, esquema 14. PHPUnit y cobertura final diferidos por solicitud del usuario.
+- **Moderación:** motivo obligatorio en comentarios y resolución de reportes; auditoría antes/después con actor y UTC, conservada al eliminar reportes revisados. Rollback comprobado ante un fallo de auditoría.
 
 ## 1.10.6 — Adecuación al análisis ASCLA, cierre QA y auditoría
 
@@ -1044,10 +1058,10 @@ Versión histórica recuperada del repositorio Git original.
 El proyecto utiliza un versionado incremental para reflejar entregas funcionales verificables sin producir saltos innecesarios. La secuencia reciente queda documentada así:
 
 ```text
-1.9.0 → ... → 1.9.50 → 1.10 → 1.10.1 → 1.10.2 → 1.10.3 → 1.10.4 → 1.10.5 → 1.10.6
+1.9.0 → ... → 1.9.50 → 1.10 → 1.10.1 → 1.10.2 → 1.10.3 → 1.10.4 → 1.10.5 → 1.10.6 → 1.10.7
 ```
 
-Las modificaciones exclusivamente documentales **no generan por sí solas una nueva versión del plugin**. La versión funcional actual es **1.10.6** y utiliza el esquema de base de datos **14**.
+Las modificaciones exclusivamente documentales **no generan por sí solas una nueva versión del plugin**. La versión funcional actual es **1.10.7** y utiliza el esquema de base de datos **14**.
 
 # Notas de trazabilidad
 
@@ -1055,4 +1069,4 @@ Las modificaciones exclusivamente documentales **no generan por sí solas una nu
 - Cuando existe un snapshot verificable se conserva como referencia histórica.
 - No se crean tags ficticios para versiones cuyo código fuente original no esté disponible.
 - La carpeta `docs/` se mantiene fuera del repositorio público según la configuración actual de `.gitignore`.
-- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.10.6** con esquema de base de datos **14**.
+- El estado funcional vigente del código fuente corresponde a **ASCLA Core 1.10.7** con esquema de base de datos **14**.

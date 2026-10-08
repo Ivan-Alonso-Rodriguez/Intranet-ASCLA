@@ -59,7 +59,7 @@ final class Notifications
     {
         if ($user && Access::member($user)) {
             Store::insert('notifications',self::data($user,$kind,$label,$url,$context));
-            NotificationEmail::send($user,$kind,$label,$url,$context);
+            \ASCLA\Core\Repositories\Transaction::afterCommit(static fn()=>NotificationEmail::send($user,$kind,$label,$url,$context));
         }
     }
     public static function once(int $user,string $key,string $kind,string $label,string $url='',array $context=[]): bool
@@ -69,7 +69,7 @@ final class Notifications
         return Store::lock('notice:'.$user.':'.$key,static function () use($user,$key,$kind,$label,$url,$context) {
             if (Store::count('notifications','user_id=%d AND event_key=%s',[$user,$key])) { return false; }
             Store::insert('notifications',self::data($user,$kind,$label,$url,$context)+['event_key'=>$key]);
-            NotificationEmail::send($user,$kind,$label,$url,$context);
+            \ASCLA\Core\Repositories\Transaction::afterCommit(static fn()=>NotificationEmail::send($user,$kind,$label,$url,$context));
             return true;
         });
     }

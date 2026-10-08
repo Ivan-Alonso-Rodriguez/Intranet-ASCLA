@@ -4,23 +4,25 @@ Plugin WordPress portable para una comunidad profesional privada. Incluye perfil
 
 Toda la funcionalidad propia está en `wp-content/plugins/ascla-core/`. Elementor es opcional. No se modifica WordPress Core ni se necesita un tema específico. El plugin conserva sus datos al desactivarse o desinstalarse.
 
-## Versión actual: 1.10.6 · esquema 14
+## Versión actual: 1.10.7 · esquema 14
 
-La versión **1.10.6** consolida la adecuación de ASCLA al Documento de Análisis y Diseño y el cierre de los casos QA 024–058. Refuerza sesiones y credenciales, membresías, privacidad y revisión de perfiles, Directorio, Contacto, conexiones y mensajería, además del ciclo de vida de eventos y microeventos. También incorpora la migración de auditoría del **esquema 14** y sincroniza el paquete instalable, SonarQube, pruebas de cierre y documentación. Consulta el detalle en [VERSION_HISTORY.md](VERSION_HISTORY.md).
+La versión **1.10.7** consolida la adecuación de ASCLA al Documento de Análisis y Diseño y el cierre de los casos QA 024–058. Refuerza sesiones y credenciales, membresías, privacidad y revisión de perfiles, Directorio, Contacto, conexiones y mensajería, además del ciclo de vida de eventos y microeventos. También incorpora la migración de auditoría del **esquema 14** y sincroniza el paquete instalable, SonarQube, pruebas de cierre y documentación. Consulta el detalle en [VERSION_HISTORY.md](VERSION_HISTORY.md).
 
-**Estado documental:** `1.10.6` es la versión vigente; `1.10.5` es la versión inmediatamente anterior. El historial se presenta de forma descendente (más reciente → más antigua) para conservar una lectura cronológica clara.
+Novedades de 1.10.7 (7 de octubre): Directorio reorganizado y perfiles incompletos visibles por decisión del usuario, programación de publicaciones institucionales, aprobación de microeventos separada de publicación, revalidación de candidatos, categorías de Contacto, autorización de cambios personales y auditoría de roles nativos. [COMPLIANCE.md](COMPLIANCE.md) registra pruebas, excepciones y brechas pendientes del PDF. Se añaden publicación explícita del Hub, reacciones predefinidas, catálogos gettext y transacciones para conexiones, eventos, moderación, publicaciones, cuentas y Contacto. Resolver reportes y moderar comentarios exige motivo, con auditoría antes/después. La suite PHP final se mantiene diferida.
+
+**Estado documental:** `1.10.7` es la versión vigente; `1.10.6` es la versión inmediatamente anterior. El historial se presenta de forma descendente (más reciente → más antigua) para conservar una lectura cronológica clara.
 
 La adecuación local al documento y los [fixes de QA 024–058](BUGFIXES_QA.md) forman parte de esta versión. Estado y pendientes: [COMPLIANCE.md](COMPLIANCE.md).
 
-### Cambios principales de 1.10.6
+### Cambios principales de 1.10.7
 
 - **Seguridad y sesiones:** inactividad de 30 minutos, recuperación de cuenta, políticas configurables de contraseña, captcha y bloqueo temporal, sin exponer credenciales ni secretos.
-- **Membresías y perfiles:** estados activo/suspendido/vencido, requisitos mínimos de perfil, revisión configurable, privacidad reforzada y exclusión de perfiles no elegibles del Directorio y recomendaciones.
+- **Membresías y perfiles:** estados activo/suspendido/vencido, requisitos mínimos de perfil, revisión configurable, privacidad reforzada. El Directorio incluye perfiles incompletos activos con participación habilitada; las recomendaciones conservan los mínimos de completitud.
 - **Conexiones y mensajería:** presentación opcional, rechazo silencioso, esperas de reconexión, bloqueo que disuelve el vínculo y conservación del historial permitido sin edición ni borrado de mensajes enviados.
 - **Contacto y administración:** flujo Pendiente → En revisión → Resuelta → Cerrada, asignación, respuesta e historial; cambios profesionales administrativos vinculados a solicitudes autorizadas.
 - **Eventos y microeventos:** reconfirmación por reprogramación, recordatorios, lista de espera FIFO con ofertas persistentes y vencimiento, y ciclo de propuestas de microeventos con aprobación humana.
 - **Auditoría y compatibilidad:** esquema **14** para ampliar el detalle de auditoría conservando datos existentes; se mantienen las funciones publicadas de 1.10.5.
-- **Entrega:** metadatos, SonarQube, pruebas de cierre, documentación y `dist/ascla-core.zip` quedan alineados con **1.10.6**.
+- **Entrega:** metadatos, SonarQube, pruebas de cierre, documentación y `dist/ascla-core.zip` quedan alineados con **1.10.7**.
 
 ### Cambios principales de 1.10.5
 
@@ -34,7 +36,7 @@ La adecuación local al documento y los [fixes de QA 024–058](BUGFIXES_QA.md) 
 ### Cambios principales de 1.10.4
 
 - **Mensajería móvil:** la entrada muestra la lista de chats; tocar uno abre únicamente su conversación y **← Chats** regresa al listado. El polling respeta esta navegación y no selecciona automáticamente el primer chat en pantallas móviles. La vista dividida se conserva en escritorio.
-- **Directorio (RF-013 / CP-021):** incorpora botones numéricos de página, **Anterior/Siguiente**, el rango mostrado y un límite fijo de **15 perfiles por página**. El servicio de perfiles aplica el mismo límite en backend, por lo que el conjunto demo de 18 perfiles se distribuye en dos páginas (15 + 3).
+- **Directorio (RF-013 / CP-021):** incorpora botones numéricos de página, **Anterior/Siguiente**, el rango mostrado y tamaño configurable en Administración (15 por defecto). Backend y paginación usan el mismo valor. Los filtros permiten varias selecciones con casillas.
 - **Mi perfil:** divide el contenido en **Información**, **Intereses**, **Privacidad y avisos** y **Cuenta y seguridad**. Las pestañas admiten teclado/ARIA, son desplazables horizontalmente en móvil y abren la sección correcta cuando una validación de campos obligatorios requiere atención. Al intentar salir con cambios pendientes, el modal ofrece **Seguir editando**, **Descartar cambios** y **Guardar cambios y salir**; esta última opción persiste el perfil antes de continuar la navegación y cancela la salida si el guardado falla.
 - **Google Calendar:** al publicar un evento con una cuenta Google conectada, ASCLA crea o sincroniza el evento organizador. Las invitaciones agregan a los asociados como asistentes y solicitan a Google el envío de las invitaciones; las actualizaciones y cancelaciones relevantes también se sincronizan.
 - **DeepSeek:** se incorpora como proveedor real de IA configurable, con modelo y API Key independientes, prueba de conexión y el mismo alcance de datos autorizado que los demás proveedores.
@@ -231,3 +233,11 @@ La documentación interna de desarrollo se conserva localmente en `docs/`, pero 
 El flujo activo usa Git, Docker y SonarQube sin Jenkins. Consulta [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md) para promover ramas, generar cobertura y analizar ASCLA-QA / ASCLA-UAT esperando el Quality Gate. El Jenkinsfile es opcional.
 
 La revisión de requisitos y las brechas restantes se documentan en [COMPLIANCE.md](COMPLIANCE.md). Un Quality Gate aprobado no acredita por sí solo todos los requisitos funcionales.
+
+### Catálogos de idioma
+
+ASCLA carga gettext de WordPress con `languages/ascla-core-es_ES.po/.mo` y `ascla-core-en_US.po/.mo`. Un catálogo instalado en `wp-content/languages/plugins/` tiene prioridad. El catálogo resuelto también alimenta las traducciones JavaScript. Para añadir cadenas, actualizar `languages/en.json` y ejecutar `python scripts/translations.py`; conserva traducciones ya editadas en los PO. `python scripts/build.py` compila los PO vigentes, valida los MO con GNU gettext y los incluye en el ZIP.
+
+### Aceptación local de 1.10.7
+
+`tests/editorial107.cjs` recorre Hub, reacciones, formularios y permisos de moderación, auditoría e idioma en el navegador desechable. `node tests/run-atomic107.cjs` requiere los contenedores locales `ascla_audit-wordpress-1` y `ascla-audit-browser`; inyecta fallos de auditoría y metadatos limitados a usuarios temporales `atomic_*`, comprueba rollback, correos retenidos y ofertas concurrentes, y retira los triggers al finalizar. No ejecutar estas pruebas contra un despliegue compartido. La suite PHPUnit final sigue diferida.

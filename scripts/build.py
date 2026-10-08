@@ -2,13 +2,15 @@
 from pathlib import Path
 from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED
 import hashlib
+from translations import compile_catalogs
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'wp-content/plugins/ascla-core'
 DEST = ROOT / 'dist/ascla-core.zip'
-ALLOWED = {'.php', '.css', '.js', '.png', '.svg', '.webp', '.txt'}
+ALLOWED = {'.php', '.css', '.js', '.png', '.svg', '.webp', '.txt', '.po', '.mo'}
 
 def build():
+    compile_catalogs()
     DEST.parent.mkdir(exist_ok=True)
     files = sorted(p for p in SOURCE.rglob('*') if p.is_file() and not p.is_symlink())
     with ZipFile(DEST, 'w', ZIP_DEFLATED, compresslevel=9) as archive:

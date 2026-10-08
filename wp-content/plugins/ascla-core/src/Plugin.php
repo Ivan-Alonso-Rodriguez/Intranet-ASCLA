@@ -9,8 +9,10 @@ final class Plugin
     {
         if (self::$booted) { return; }
         self::$booted=true;
+        Repositories\Transaction::boot();
         add_filter('cron_schedules',static function(array $schedules): array {
             $schedules['ascla_weekly']=['interval'=>7*DAY_IN_SECONDS,'display'=>'Cada siete días (ASCLA)'];
+            $schedules['ascla_micro_period']=['interval'=>Services\MicroPlanning::interval()*DAY_IN_SECONDS,'display'=>'Periodicidad de microeventos (ASCLA)'];
             return $schedules;
         });
         add_action('init', [Domain\Catalog::class, 'register']);
@@ -22,6 +24,10 @@ final class Plugin
         Services\Membership::boot();
         Services\CredentialPolicy::boot();
         Services\AccountRecovery::boot();
+        Services\ContentSchedule::boot();
+        Services\MicroEligibility::boot();
+        Services\ProfessionalChanges::boot();
+        Services\AccountAudit::boot();
         add_action('init',[Services\MicroPlanning::class,'schedule'],21);
         Services\SessionPolicy::boot();
         Admin\Panel::boot();

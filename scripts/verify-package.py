@@ -10,6 +10,9 @@ with zipfile.ZipFile(root/'dist/ascla-core.zip') as archive:
     assert archive.testzip() is None
     names=archive.namelist()
     assert 'ascla-core/languages/en.json' in names
+    for locale in ('es_ES', 'en_US'):
+        for extension in ('po', 'mo'):
+            assert f'ascla-core/languages/ascla-core-{locale}.{extension}' in names
     assert all(n.startswith('ascla-core/') for n in names)
     assert not any(any(p in {'.git','.env','node_modules','coverage','tests','vendor'} for p in Path(n).parts) for n in names)
     hashes={n:hashlib.sha256(archive.read(n)).hexdigest() for n in names}

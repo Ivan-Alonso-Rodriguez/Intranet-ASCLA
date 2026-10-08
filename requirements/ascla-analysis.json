@@ -1,7 +1,7 @@
 {
-  "review_date": "2026-10-06",
-  "baseline_commit": "8588392",
-  "plugin_version": "1.10.6",
+  "review_date": "2026-10-07",
+  "baseline_commit": "22e2d64",
+  "plugin_version": "1.10.7",
   "source_name": "DOCUMENTO DE ANALISIS Y DISEÑO ASCLA .pdf",
   "source_sha256": "ac78f208de1c9ef07ec09cd9cfacb8993524ad2926e26c6f51d082a230c5c14a",
   "scope": "Implementación y pruebas locales sobre el PDF; no certificación integral ni resultado de SonarQube remoto.",
@@ -11,9 +11,9 @@
         "id": "RN-001",
         "page": 12,
         "requirement": "Edición del perfil El asociado administrará su fotografía, información personal autorizada, información profesional, biografía, experiencia, enlaces profesionales, temas de interés, áreas de conocimiento, industrias, idiomas, objetivos de networking y preferencias de aprendizaje. El Administrador gestionará únicamente el estado de membresía, rol, permisos y demás campos administrativos; no modificará la información profesional, salvo cuando atienda una solicitud registrada mediante Contáctanos.",
-        "status": "Parcial",
-        "evidence": "RF-001, RF-133, RF-134",
-        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+        "status": "Código revisado",
+        "evidence": "Services/ProfessionalChanges.php; NativeAccountPolicy.php; Administration.php; tests/workflows-ui.cjs",
+        "note": "Los campos personales y profesionales editables en ASCLA requieren solicitud activa del asociado, asignada al administrador y de uso único. La edición ajena desde wp-admin y REST nativo se rechaza; rol, credenciales y membresía siguen siendo administrativos. Comprobado con navegador/API; suite PHP final pendiente."
       },
       {
         "id": "RN-002",
@@ -27,9 +27,9 @@
         "id": "RN-003",
         "page": 12,
         "requirement": "Participación en el Directorio Todo miembro con cuenta autorizada y membresía activa aparecerá por defecto en el Directorio. El miembro podrá ocultar su perfil cuando lo desee; al hacerlo dejará de aparecer en búsquedas y recomendaciones sin perder conexiones ni historial de mensajes.",
-        "status": "Parcial",
-        "evidence": "RF-007, RF-131",
-        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+        "status": "Código revisado",
+        "evidence": "Services/ProfileDirectory.php; Profiles.php; tests/directory-publication.cjs",
+        "note": "Directorio incluye miembros activos con participación habilitada, aunque estén incompletos por decisión explícita del usuario. Ocultamientos por campo, exclusión voluntaria, bloqueo y membresía siguen vigentes; probado también al consultar como administrador."
       },
       {
         "id": "RN-004",
@@ -123,9 +123,9 @@
         "id": "RN-015",
         "page": 14,
         "requirement": "Propuestas automáticas de microeventos El sistema generará semanalmente hasta cuatro propuestas de microeventos basadas en interés. Cada propuesta corresponderá a un único microevento, tendrá cupo configurable y permanecerá pendiente de revisión hasta que el Administrador la edite, apruebe o deniegue. Los miembros recomendados tendrán un periodo de inscripción prioritaria configurable; después, los cupos restantes estarán disponibles para todos los miembros activos. Una propuesta se cancelará automáticamente si no alcanza la cantidad mínima configurable de asociados candidatos elegibles.",
-        "status": "Parcial",
-        "evidence": "Services/MicroPlanning.php; MicroEvents.php; MicroLifecycle.php; MicroEventsTest",
-        "note": "Generación semanal idempotente y máximo cuatro configurables, mínimo/cupo y prioridad. No crea propuestas bajo el mínimo; falta cancelación automática de una propuesta pendiente si pierde candidatos, y periodicidad distinta de semanal."
+        "status": "Código revisado",
+        "evidence": "Services/MicroPlanning.php; MicroEligibility.php; MicroEvents.php; tests/workflows-ui.cjs",
+        "note": "Periodicidad configurable de 7 a 90 días, semanal por defecto, y hasta cuatro propuestas por período. Revalida consentimiento, membresía, completitud y bloqueos antes de publicar; cancela con motivo si pierde el mínimo de candidatos, o exige nueva revisión si cambia el grupo. Cron real de cancelación comprobado localmente."
       },
       {
         "id": "RN-016",
@@ -259,9 +259,9 @@
         "id": "RN-032",
         "page": 16,
         "requirement": "Custodia de perfiles y trazabilidad de acciones administrativas Los usuarios con rol Administrador gestionarán únicamente las credenciales, estados de membresía, roles y permisos técnicos de los asociados. Queda prohibida la edición administrativa directa sobre los datos profesionales, laborales o biográficos de un usuario, salvo que medie una solicitud formal de asistencia registrada en Contáctanos. Toda modificación administrativa sobre membresía o permisos generará una entrada obligatoria en la bitácora de auditoría.",
-        "status": "Parcial",
-        "evidence": "RF-133, RF-134, RF-135",
-        "note": "Ver evidencia y brechas en los requisitos funcionales relacionados."
+        "status": "Código revisado",
+        "evidence": "Services/ProfessionalChanges.php; NativeAccountPolicy.php; Administration.php; tests/workflows-ui.cjs",
+        "note": "Los campos personales y profesionales editables en ASCLA requieren solicitud activa del asociado, asignada al administrador y de uso único. La edición ajena desde wp-admin y REST nativo se rechaza; rol, credenciales y membresía siguen siendo administrativos. Comprobado con navegador/API; suite PHP final pendiente."
       },
       {
         "id": "RN-033",
@@ -557,9 +557,9 @@
         "id": "RF-007",
         "page": 47,
         "requirement": "El sistema debe permitir al asociado activar o desactivar la inclusión de su perfil en el Directorio Comunitario.",
-        "status": "Parcial",
-        "evidence": "Services/Profiles.php; Services/Matching.php",
-        "note": "Flags independientes de directorio y networking; revisar el caso de un receptor que opta por salir del directorio."
+        "status": "Código revisado",
+        "evidence": "Services/ProfileDirectory.php; Profiles.php; tests/directory-publication.cjs",
+        "note": "Directorio incluye miembros activos con participación habilitada, aunque estén incompletos por decisión explícita del usuario. Ocultamientos por campo, exclusión voluntaria, bloqueo y membresía siguen vigentes; probado también al consultar como administrador."
       },
       {
         "id": "RF-008",
@@ -837,9 +837,9 @@
         "id": "RF-042",
         "page": 50,
         "requirement": "El sistema debe ejecutar un proceso programado, según la periodicidad configurada, para analizar los intereses de los asociados activos y formular propuestas de microeventos.",
-        "status": "Parcial",
-        "evidence": "Services/MicroPlanning.php; MicroEvents.php; MicroLifecycle.php; MicroEventsTest",
-        "note": "Generación semanal idempotente y máximo cuatro configurables, mínimo/cupo y prioridad. No crea propuestas bajo el mínimo; falta cancelación automática de una propuesta pendiente si pierde candidatos, y periodicidad distinta de semanal."
+        "status": "Código revisado",
+        "evidence": "Services/MicroPlanning.php; MicroEligibility.php; MicroEvents.php; tests/workflows-ui.cjs",
+        "note": "Periodicidad configurable de 7 a 90 días, semanal por defecto, y hasta cuatro propuestas por período. Revalida consentimiento, membresía, completitud y bloqueos antes de publicar; cancela con motivo si pierde el mínimo de candidatos, o exige nueva revisión si cambia el grupo. Cron real de cancelación comprobado localmente."
       },
       {
         "id": "RF-043",
@@ -1157,9 +1157,9 @@
         "id": "RF-082",
         "page": 53,
         "requirement": "El sistema debe permitir al asociado registrar solicitudes de soporte ingresando asunto, descripción detallada y seleccionando una de las categorías institucionales vigentes.",
-        "status": "Parcial",
-        "evidence": "Services/Administration.php; Services/Content.php",
-        "note": "Contacto privado al autor/equipo moderador actual: falta asignación admin/ejecutivo y cuatro estados, incluido Resuelta distinto de Cerrada."
+        "status": "Código revisado",
+        "evidence": "Services/SupportCategories.php; SupportRequests.php; ContentMeta.php; tests/workflows-ui.cjs",
+        "note": "Categorías vigentes configurables en Administración, mostradas en Contacto y validadas por API. Mantiene asignación, privacidad del autor/responsable, cuatro estados e historial existentes."
       },
       {
         "id": "RF-083",
@@ -1301,9 +1301,9 @@
         "id": "RF-100",
         "page": 55,
         "requirement": "El sistema debe permitir al Administrador aprobar una propuesta de microevento, habilitando su programación de publicación.",
-        "status": "Parcial",
-        "evidence": "Services/MicroLifecycle.php; Content.php; MicroEventsTest",
-        "note": "Aprobación administrativa obligatoria, publicación inmediata y estados con historial. Pendiente programar publicación futura separada de la aprobación."
+        "status": "Código revisado",
+        "evidence": "Services/ContentSchedule.php; MicroLifecycle.php; Content.php; tests/workflows-ui.cjs",
+        "note": "Aprobación administrativa separada de publicación. Ejecutivo puede preparar/programar una propuesta pendiente; solo tras aprobarla se agenda el cron. La prioridad y las invitaciones comienzan al publicar, no al aprobar. Flujo completo comprobado con cron real."
       },
       {
         "id": "RF-101",
@@ -1549,33 +1549,33 @@
         "id": "RF-131",
         "page": 58,
         "requirement": "El sistema debe verificar que el asociado cuente con todos los campos obligatorios del perfil registrados antes de habilitar su aparición pública en el Directorio.",
-        "status": "Código revisado",
-        "evidence": "Services/ProfileRequirements.php; Services/Profiles.php; Services/Matching.php",
-        "note": "Mínimo unificado: nombre/apellidos, cargo, empresa, sector, ciudad o país, bio, interés y objetivo. Directorio excluye incompletos."
+        "status": "Ajustado por decisión del usuario",
+        "evidence": "Services/ProfileDirectory.php; tests/directory-publication.cjs",
+        "note": "El usuario indicó mostrar también perfiles incompletos respetando privacidad y membresía. Esta decisión sustituye la exclusión que exige este requisito; no se declara cumplimiento literal. El guardado de perfil sigue exigiendo mínimos y las recomendaciones mantienen su validación de completitud."
       },
       {
         "id": "RF-132",
         "page": 58,
         "requirement": "El sistema debe impedir la inclusión de un asociado en los lotes de recomendaciones calculados para otros miembros mientras su perfil no registre la información mínima obligatoria.",
         "status": "Código revisado",
-        "evidence": "Services/ProfileRequirements.php; Services/Profiles.php; Services/Matching.php",
-        "note": "Mínimo unificado: nombre/apellidos, cargo, empresa, sector, ciudad o país, bio, interés y objetivo. Directorio excluye incompletos."
+        "evidence": "Services/ProfileRequirements.php; Profiles.php; Matching.php",
+        "note": "Se mantienen los mínimos para recomendaciones. Permitir perfiles incompletos en el Directorio no los habilita como candidatos de recomendaciones o microeventos."
       },
       {
         "id": "RF-133",
         "page": 58,
         "requirement": "El sistema debe permitir al Administrador actualizar el estado de membresía, el rol asignado y los permisos de acceso de cualquier cuenta de usuario.",
         "status": "Parcial",
-        "evidence": "Services/Administration.php; Membership.php; Audit.php; Database/AuditMigration.php; MembershipTest",
-        "note": "Formulario registra diferencias de membresía y rol con actor y fecha; LONGTEXT conserva detalles. Pendiente cobertura de cambios por panel nativo/terceros y gobierno de permisos individuales."
+        "evidence": "Services/Administration.php; Membership.php; AccountAudit.php; Audit.php; tests/workflows-ui.cjs",
+        "note": "Gestión de roles/membresía y auditoría antes/después. Observa cambios por API y hooks nativos de metadatos; validada asignación de rol desde REST WordPress. Pendiente gobierno de permisos individuales y validación final de integraciones de terceros."
       },
       {
         "id": "RF-134",
         "page": 58,
         "requirement": "El sistema debe bloquear la edición directa de los campos profesionales del perfil del asociado en el panel de administración, habilitándola únicamente si se asocia a un identificador válido de solicitud de soporte.",
-        "status": "Parcial",
-        "evidence": "Services/ProfessionalChanges.php; SupportRequests.php",
-        "note": "Cargo/Empresa requieren una solicitud activa asignada al administrador y se consume una vez. Ampliar el control sobre todos los datos personales/profesionales administrables."
+        "status": "Código revisado",
+        "evidence": "Services/ProfessionalChanges.php; NativeAccountPolicy.php; Administration.php; tests/workflows-ui.cjs",
+        "note": "Los campos personales y profesionales editables en ASCLA requieren solicitud activa del asociado, asignada al administrador y de uso único. La edición ajena desde wp-admin y REST nativo se rechaza; rol, credenciales y membresía siguen siendo administrativos. Comprobado con navegador/API; suite PHP final pendiente."
       },
       {
         "id": "RF-135",
@@ -1853,9 +1853,9 @@
         "id": "RF-169",
         "page": 61,
         "requirement": "El sistema debe permitir al asociado redactar y publicar contenidos en el Hub comunitario ingresando título y cuerpo del mensaje.",
-        "status": "Parcial",
-        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
-        "note": "Hub, filtros e historial presentes; revisar publicación inmediata frente a ajustes de premoderación."
+        "status": "Código revisado",
+        "evidence": "Services/Content.php; assets/app.js; tests/editorial107.cjs",
+        "note": "Publicación explícita de Hub manual inmediatamente visible; conserva borrador y envío voluntario a revisión. La opción heredada de premoderación se conserva para envíos sin estado explícito; la revisión de contenido generado permanece vigente."
       },
       {
         "id": "RF-170",
@@ -1863,7 +1863,7 @@
         "requirement": "El sistema debe listar las publicaciones vigentes de la comunidad en el Hub en orden cronológico inverso.",
         "status": "Parcial",
         "evidence": "Services/Content.php; Repositories/ContentQuery.php",
-        "note": "Hub, filtros e historial presentes; revisar publicación inmediata frente a ajustes de premoderación."
+        "note": "Hub, filtros e historial presentes; publicación explícita inmediata de contenido manual en 1.10.7. Falta validación exhaustiva de este filtro/orden."
       },
       {
         "id": "RF-171",
@@ -1871,7 +1871,7 @@
         "requirement": "El sistema debe permitir buscar publicaciones en el Hub mediante coincidencias de texto en el título, contenido o autor.",
         "status": "Parcial",
         "evidence": "Services/Content.php; Repositories/ContentQuery.php",
-        "note": "Hub, filtros e historial presentes; revisar publicación inmediata frente a ajustes de premoderación."
+        "note": "Hub, filtros e historial presentes; publicación explícita inmediata de contenido manual en 1.10.7. Falta validación exhaustiva de este filtro/orden."
       },
       {
         "id": "RF-172",
@@ -1879,15 +1879,15 @@
         "requirement": "El sistema debe permitir filtrar las publicaciones del Hub por rango de fechas y categorías temáticas.",
         "status": "Parcial",
         "evidence": "Services/Content.php; Repositories/ContentQuery.php",
-        "note": "Hub, filtros e historial presentes; revisar publicación inmediata frente a ajustes de premoderación."
+        "note": "Hub, filtros e historial presentes; publicación explícita inmediata de contenido manual en 1.10.7. Falta validación exhaustiva de este filtro/orden."
       },
       {
         "id": "RF-173",
         "page": 61,
         "requirement": "El sistema debe permitir al asociado consultar de forma diferenciada el listado histórico de sus propias publicaciones creadas en el Hub.",
-        "status": "Parcial",
-        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
-        "note": "Hub, filtros e historial presentes; revisar publicación inmediata frente a ajustes de premoderación."
+        "status": "Código revisado",
+        "evidence": "Repositories/ContentQuery.php; Services/Content.php; tests/editorial107.cjs",
+        "note": "Listado mine separado, con búsqueda y borradores propios privados. Comprobado mediante API y editor de Hub."
       },
       {
         "id": "RF-174",
@@ -1933,9 +1933,9 @@
         "id": "RF-179",
         "page": 61,
         "requirement": "El sistema debe permitir al asociado registrar reacciones predefinidas sobre temas y comentarios publicados en los foros",
-        "status": "Parcial",
-        "evidence": "Services/Content.php; Repositories/ContentQuery.php",
-        "note": "Foros, comentarios, búsqueda e historial; reacción de comentario limitada a like y verificar todas las reacciones predefinidas exigidas."
+        "status": "Código revisado",
+        "evidence": "Services/ContentReactions.php; Content.php; assets/app.js; tests/editorial107.cjs",
+        "note": "Me gusta, Útil y Celebrar en temas y comentarios publicados. Una reacción por asociado, cambio sin duplicados y retiro. Conserva Me gusta anteriores y valida permisos, visibilidad y tipo; navegador/API y concurrencia comprobados."
       },
       {
         "id": "RF-180",
@@ -1999,7 +1999,7 @@
         "requirement": "El sistema debe permitir a los roles autorizados crear galerías registrando título, descripción, fecha, imagen de portada y archivos visuales asociados.",
         "status": "Código revisado",
         "evidence": "Services/Content.php; Services/ContentMeta.php",
-        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204)."
       },
       {
         "id": "RF-188",
@@ -2007,7 +2007,7 @@
         "requirement": "El sistema debe permitir a los roles autorizados modificar los metadatos o el contenido visual de una galería existente.",
         "status": "Código revisado",
         "evidence": "Services/Content.php; Services/ContentMeta.php",
-        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204)."
       },
       {
         "id": "RF-189",
@@ -2015,7 +2015,7 @@
         "requirement": "El sistema debe permitir transicionar el estado editorial de una galería entre Borrador, Pendiente de revisión y Publicado.",
         "status": "Código revisado",
         "evidence": "Services/Content.php; Services/ContentMeta.php",
-        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204)."
       },
       {
         "id": "RF-190",
@@ -2023,7 +2023,7 @@
         "requirement": "El sistema debe permitir a los roles autorizados retirar del acceso público una galería publicada, cambiando su estado a Oculto sin eliminar el registro histórico.",
         "status": "Código revisado",
         "evidence": "Services/Content.php; Services/ContentMeta.php",
-        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204)."
       },
       {
         "id": "RF-191",
@@ -2031,7 +2031,7 @@
         "requirement": "El sistema debe permitir a los roles autorizados registrar recursos de conocimiento ingresando título, descripción, tipo de material, autor, fecha y enlace o archivo",
         "status": "Código revisado",
         "evidence": "Services/Content.php; Services/ContentMeta.php",
-        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204)."
       },
       {
         "id": "RF-192",
@@ -2039,7 +2039,7 @@
         "requirement": "El sistema debe permitir a los roles autorizados modificar los datos y contenido de un recurso del Centro de Conocimiento existente",
         "status": "Código revisado",
         "evidence": "Services/Content.php; Services/ContentMeta.php",
-        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204)."
       },
       {
         "id": "RF-193",
@@ -2047,7 +2047,7 @@
         "requirement": "El sistema debe permitir transicionar el estado editorial de un recurso de conocimiento entre Borrador, Pendiente de revisión y Publicado",
         "status": "Código revisado",
         "evidence": "Services/Content.php; Services/ContentMeta.php",
-        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204)."
       },
       {
         "id": "RF-194",
@@ -2055,7 +2055,7 @@
         "requirement": "El sistema debe permitir a los roles autorizados retirar del catálogo público un recurso de conocimiento, cambiando su estado a Oculto sin eliminar su registro histórico.",
         "status": "Código revisado",
         "evidence": "Services/Content.php; Services/ContentMeta.php",
-        "note": "Gestión editorial y estado ascla_hidden existentes; validar programación futura separadamente."
+        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204)."
       },
       {
         "id": "RF-195",
@@ -2078,8 +2078,8 @@
         "page": 63,
         "requirement": "El sistema debe registrar obligatoriamente en la bitácora de moderación el identificador de la autoridad responsable, marca temporal y justificación al resolver un reporte.",
         "status": "Fuera de alcance",
-        "evidence": "Services/Content.php",
-        "note": "Reportes y moderación marcados OUT OF SCOPE, se mantienen sus capacidades existentes."
+        "evidence": "Services/Reports.php; Audit.php; assets/app.js; tests/editorial107.cjs",
+        "note": "El PDF lo marca fuera de alcance. La capacidad existente se refuerza para la trazabilidad RNF-014: resolución con motivo obligatorio, actor, UTC y diferencias de estado, conservadas incluso al eliminar el reporte revisado. Validado en navegador/API y ante fallos de auditoría."
       },
       {
         "id": "RF-198",
@@ -2117,25 +2117,25 @@
         "id": "RF-202",
         "page": 63,
         "requirement": "El sistema debe permitir al Ejecutivo y al Administrador asignar una fecha y hora futura para diferir la divulgación de un contenido institucional.",
-        "status": "Pendiente",
-        "evidence": "Services/Content.php; Services/ContentMeta.php",
-        "note": "Estados editoriales presentes, pero falta completar agenda futura de publicación y su flujo UI/API."
+        "status": "Código revisado",
+        "evidence": "Services/ContentSchedule.php; Content.php; assets/app.js; tests/directory-publication.cjs; tests/workflows-ui.cjs",
+        "note": "Fecha futura desde editor/API para eventos, galerías, recursos, Hub y aliados según permisos. Conserva Oculto hasta publicación, revalida permisos y revisión, permite cancelar/reprogramar y registra errores. Cron real comprobado con evento y microevento; el despliegue debe mantener su disparador de WP-Cron."
       },
       {
         "id": "RF-203",
         "page": 63,
         "requirement": "El sistema debe clasificar y conservar en estado Oculto el contenido institucional programado hasta que se alcance la fecha y hora establecida.",
-        "status": "Pendiente",
-        "evidence": "Services/Content.php; Services/ContentMeta.php",
-        "note": "Estados editoriales presentes, pero falta completar agenda futura de publicación y su flujo UI/API."
+        "status": "Código revisado",
+        "evidence": "Services/ContentSchedule.php; Content.php; assets/app.js; tests/directory-publication.cjs; tests/workflows-ui.cjs",
+        "note": "Fecha futura desde editor/API para eventos, galerías, recursos, Hub y aliados según permisos. Conserva Oculto hasta publicación, revalida permisos y revisión, permite cancelar/reprogramar y registra errores. Cron real comprobado con evento y microevento; el despliegue debe mantener su disparador de WP-Cron."
       },
       {
         "id": "RF-204",
         "page": 64,
         "requirement": "El sistema debe transicionar automáticamente al estado Publicado el contenido institucional programado al cumplirse la fecha y hora configurada.",
-        "status": "Pendiente",
-        "evidence": "Services/Content.php; Services/ContentMeta.php",
-        "note": "Estados editoriales presentes, pero falta completar agenda futura de publicación y su flujo UI/API."
+        "status": "Código revisado",
+        "evidence": "Services/ContentSchedule.php; Content.php; assets/app.js; tests/directory-publication.cjs; tests/workflows-ui.cjs",
+        "note": "Fecha futura desde editor/API para eventos, galerías, recursos, Hub y aliados según permisos. Conserva Oculto hasta publicación, revalida permisos y revisión, permite cancelar/reprogramar y registra errores. Cron real comprobado con evento y microevento; el despliegue debe mantener su disparador de WP-Cron."
       },
       {
         "id": "RF-205",
@@ -2295,9 +2295,9 @@
         "id": "RNF-011",
         "page": 66,
         "requirement": "Integridad Transaccional y Atomicidad (MariaDB InnoDB): Toda operación crítica multivariable que afecte varias tablas (como la reserva de cupos RSVP con aforo concurrente, disolución de conexiones o cambios de estado) debe procesarse bajo transacciones atómicas (ACID) en MariaDB mediante el motor de almacenamiento InnoDB, garantizando reversión total ( rollback ) ante excepciones.",
-        "status": "Pendiente",
-        "evidence": "Repositories/Store.php",
-        "note": "Advisory locks serializan operaciones; faltan transacciones SQL y rollback en escrituras múltiples."
+        "status": "Parcial",
+        "evidence": "Repositories/Transaction.php; WordPressWrites.php; Store.php; Services/Content.php; Events.php; Administration.php; ProfessionalChanges.php; SupportRequests.php; ContentSchedule.php; MicroLifecycle.php; tests/run-atomic107.cjs",
+        "note": "Transacciones InnoDB y savepoints en conexiones, RSVP, moderación, publicaciones, cron, gestión administrativa de cuentas y Contacto. Detecta fallos de WordPress; difiere correo nativo/ASCLA, Calendar y video hasta commit. Fallos reales de auditoría/metadatos confirman rollback, incluida sesión y autorización de Contacto; se verificó ausencia de correo de cambios revertidos. Pendiente completar perfiles propios y grupos, revisar importaciones, caché persistente, hooks externos y entrega durable."
       },
       {
         "id": "RNF-012",
@@ -2320,8 +2320,8 @@
         "page": 67,
         "requirement": "Trazabilidad e Inmutabilidad de Bitácoras (Audit Log): Todas las acciones críticas (cambios de membresía, asignación de roles, denegación de microeventos y resoluciones de moderación) deben quedar registradas de forma permanente e inalterable en la tabla wp_ascla_audit , almacenando el ID del actor, marca temporal UTC, acción y detalle de cambios ( diff antes/después).",
         "status": "Parcial",
-        "evidence": "Services/Audit.php",
-        "note": "Auditoría con actor/fecha/acción, pero detalle limitado y no diff antes/después completo e inmutable."
+        "evidence": "Services/AccountAudit.php; Audit.php; MicroLifecycle.php; Database/AuditMigration.php; tests/workflows-ui.cjs; CommentModeration.php; Reports.php; tests/editorial107.cjs; tests/run-atomic107.cjs",
+        "note": "LONGTEXT conserva diferencias antes/después de rol, capacidades, membresía, microeventos y moderación de publicaciones/comentarios. Resolver reportes exige motivo, actor y UTC; su auditoría permanece al eliminar el reporte revisado. Captura escrituras mediante hooks WordPress. Navegador/API y rollback verificados; quedan accesos privilegiados a base de datos, terceros y retención en producción."
       },
       {
         "id": "RNF-015",
@@ -2344,8 +2344,8 @@
         "page": 67,
         "requirement": "Consistencia Lingüística e Internacionalización (i18n): Todo componente desarrollado dentro de la plataforma debe soportar internacionalización mediante la infraestructura estándar de localización de WordPress ( gettext / archivos .mo y .po ), garantizando que los elementos estáticos de la UI se muestren de forma homogénea en español institucional o inglés sin mezclas idiomáticas.",
         "status": "Parcial",
-        "evidence": "Frontend/Language.php; languages/en.json",
-        "note": "Traducción propia JSON; falta integración gettext MO/PO requerida."
+        "evidence": "Frontend/Translations.php; Language.php; languages/ascla-core-*.po/mo; scripts/translations.py; tests/editorial107.cjs",
+        "note": "Integración gettext estándar operativa con 1.367 mensajes por idioma, catálogo global de WordPress y proyección al JavaScript. Verificada carga real del MO y selección de idioma por cuenta. Pendiente revisión lingüística exhaustiva de todas las cadenas dinámicas y errores del sistema."
       },
       {
         "id": "RNF-018",

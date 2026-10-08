@@ -1,0 +1,4105 @@
+# ASCLA Core UI catalog. Source language: es_ES.
+
+msgid ""
+msgstr "Project-Id-Version: ASCLA Core 1.10.7\nLanguage: es_ES\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "ADMINISTRACIÓN ASCLA"
+msgstr "ADMINISTRACIÓN ASCLA"
+
+msgid "ADMINISTRACIÓN · SEGURIDAD · CONTROL"
+msgstr "ADMINISTRACIÓN · SEGURIDAD · CONTROL"
+
+msgid "ASCLA conserva una copia maestra sin recortar y optimizada, además de la versión preparada para mostrarse. El archivo de tu dispositivo no se modifica."
+msgstr "ASCLA conserva una copia maestra sin recortar y optimizada, además de la versión preparada para mostrarse. El archivo de tu dispositivo no se modifica."
+
+msgid "ASCLA inicio"
+msgstr "ASCLA inicio"
+
+msgid "ASCLA · Administración de WordPress"
+msgstr "ASCLA · Administración de WordPress"
+
+msgid "ASCLA · CENTRO DE CONOCIMIENTO"
+msgstr "ASCLA · CENTRO DE CONOCIMIENTO"
+
+msgid "ASCLA · CONOCIMIENTO"
+msgstr "ASCLA · CONOCIMIENTO"
+
+msgid "ASCLA · Comunidad profesional"
+msgstr "ASCLA · Comunidad profesional"
+
+msgid "ASCLA · ENCUENTROS"
+msgstr "ASCLA · ENCUENTROS"
+
+msgid "ASISTENTE ASCLA"
+msgstr "ASISTENTE ASCLA"
+
+msgid "Abrir archivo"
+msgstr "Abrir archivo"
+
+msgid "Abrir contenido"
+msgstr "Abrir contenido"
+
+msgid "Abrir enlace ↗"
+msgstr "Abrir enlace ↗"
+
+msgid "Abrir fuente ↗"
+msgstr "Abrir fuente ↗"
+
+msgid "Abrir información del grupo"
+msgstr "Abrir información del grupo"
+
+msgid "Abrir mensajería"
+msgstr "Abrir mensajería"
+
+msgid "Abrir navegación"
+msgstr "Abrir navegación"
+
+msgid "Abrir publicación actualizada"
+msgstr "Abrir publicación actualizada"
+
+msgid "Abrir recurso"
+msgstr "Abrir recurso"
+
+msgid "Abrir referencia en YouTube ↗"
+msgstr "Abrir referencia en YouTube ↗"
+
+msgid "Acceso a la comunidad ASCLA"
+msgstr "Acceso a la comunidad ASCLA"
+
+msgid "Acceso reservado para la administración técnica de ASCLA. Los asociados deben ingresar desde /login/."
+msgstr "Acceso reservado para la administración técnica de ASCLA. Los asociados deben ingresar desde /login/."
+
+msgid "Acceso reservado para la administración técnica de WordPress y la configuración general de la plataforma."
+msgstr "Acceso reservado para la administración técnica de WordPress y la configuración general de la plataforma."
+
+msgid "Acciones"
+msgstr "Acciones"
+
+msgid "Acción"
+msgstr "Acción"
+
+msgid "Acepta la solicitud para continuar la conversación"
+msgstr "Acepta la solicitud para continuar la conversación"
+
+msgid "Acepta o ignora todas las filas antes de confirmar."
+msgstr "Acepta o ignora todas las filas antes de confirmar."
+
+msgid "Aceptada"
+msgstr "Aceptada"
+
+msgid "Aceptar conexión"
+msgstr "Aceptar conexión"
+
+msgid "Aceptar fila"
+msgstr "Aceptar fila"
+
+msgid "Aceptar invitación"
+msgstr "Aceptar invitación"
+
+msgid "Acoso"
+msgstr "Acoso"
+
+msgid "Activa"
+msgstr "Activa"
+
+msgid "Activa tu networking"
+msgstr "Activa tu networking"
+
+msgid "Activa tus recomendaciones"
+msgstr "Activa tus recomendaciones"
+
+msgid "Actividad en temas similares"
+msgstr "Actividad en temas similares"
+
+msgid "Actual"
+msgstr "Actual"
+
+msgid "Actualización automática semanal"
+msgstr "Actualización automática semanal"
+
+msgid "Actualizada"
+msgstr "Actualizada"
+
+msgid "Actualizar"
+msgstr "Actualizar"
+
+msgid "Actualizar conexiones"
+msgstr "Actualizar conexiones"
+
+msgid "Actualizar datos de YouTube"
+msgstr "Actualizar datos de YouTube"
+
+msgid "Actualizar mi perfil"
+msgstr "Actualizar mi perfil"
+
+msgid "Adjuntar imagen o PDF"
+msgstr "Adjuntar imagen o PDF"
+
+msgid "Administra tu contraseña, tus archivos y las integraciones de tu cuenta."
+msgstr "Administra tu contraseña, tus archivos y las integraciones de tu cuenta."
+
+msgid "Administración"
+msgstr "Administración"
+
+msgid "Administración ASCLA"
+msgstr "Administración ASCLA"
+
+msgid "Administración del grupo"
+msgstr "Administración del grupo"
+
+msgid "Administrar archivos"
+msgstr "Administrar archivos"
+
+msgid "Administrar mis archivos"
+msgstr "Administrar mis archivos"
+
+msgid "Afinidad determinística"
+msgstr "Afinidad determinística"
+
+msgid "Afinidad mínima para recomendar (%)"
+msgstr "Afinidad mínima para recomendar (%)"
+
+msgid "Afinidades que pueden convertirse en oportunidades"
+msgstr "Afinidades que pueden convertirse en oportunidades"
+
+msgid "Agenda de conversación"
+msgstr "Agenda de conversación"
+
+msgid "Ahora"
+msgstr "Ahora"
+
+msgid "Ahora no"
+msgstr "Ahora no"
+
+msgid "Ajustar fotografía"
+msgstr "Ajustar fotografía"
+
+msgid "Ajustar imagen"
+msgstr "Ajustar imagen"
+
+msgid "Ajustar portada del evento"
+msgstr "Ajustar portada del evento"
+
+msgid "Al menos un interés"
+msgstr "Al menos un interés"
+
+msgid "Al menos un objetivo de networking"
+msgstr "Al menos un objetivo de networking"
+
+msgid "Al publicar"
+msgstr "Al publicar"
+
+msgid "Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."
+msgstr "Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."
+
+msgid "Aliados"
+msgstr "Aliados"
+
+msgid "Alianza"
+msgstr "Alianza"
+
+msgid "Altas en el período seleccionado."
+msgstr "Altas en el período seleccionado."
+
+msgid "Ambos asociados deben tener activado networking para conectar."
+msgstr "Ambos asociados deben tener activado networking para conectar."
+
+msgid "Amenazas o violencia"
+msgstr "Amenazas o violencia"
+
+msgid "América Latina"
+msgstr "América Latina"
+
+msgid "Analizando"
+msgstr "Analizando"
+
+msgid "Analizar columnas"
+msgstr "Analizar columnas"
+
+msgid "Anterior"
+msgstr "Anterior"
+
+msgid "Anteriores"
+msgstr "Anteriores"
+
+msgid "Aparecer en el directorio"
+msgstr "Aparecer en el directorio"
+
+msgid "Apariencia"
+msgstr "Apariencia"
+
+msgid "Apariencia actualizada."
+msgstr "Apariencia actualizada."
+
+msgid "Apellidos"
+msgstr "Apellidos"
+
+msgid "Apellidos: este campo es obligatorio."
+msgstr "Apellidos: este campo es obligatorio."
+
+msgid "Apertura a la comunidad"
+msgstr "Apertura a la comunidad"
+
+msgid "Aplicación"
+msgstr "Aplicación"
+
+msgid "Aplicando"
+msgstr "Aplicando"
+
+msgid "Aplicar Regla de Chatham House"
+msgstr "Aplicar Regla de Chatham House"
+
+msgid "Aplicar cambios"
+msgstr "Aplicar cambios"
+
+msgid "Aplicar filtros"
+msgstr "Aplicar filtros"
+
+msgid "Aprobada"
+msgstr "Aprobada"
+
+msgid "Aquí recibirás mensajes, invitaciones y respuestas del asistente."
+msgstr "Aquí recibirás mensajes, invitaciones y respuestas del asistente."
+
+msgid "Archivar"
+msgstr "Archivar"
+
+msgid "Archivar solicitud"
+msgstr "Archivar solicitud"
+
+msgid "Archivo CSV · UTF-8 · hasta 512 KB"
+msgstr "Archivo CSV · UTF-8 · hasta 512 KB"
+
+msgid "Archivo cargado."
+msgstr "Archivo cargado."
+
+msgid "Archivos"
+msgstr "Archivos"
+
+msgid "Archivos de la comunidad"
+msgstr "Archivos de la comunidad"
+
+msgid "Archivos e integraciones"
+msgstr "Archivos e integraciones"
+
+msgid "Arrastra la imagen para moverla y usa el zoom para elegir el encuadre antes de guardarla."
+msgstr "Arrastra la imagen para moverla y usa el zoom para elegir el encuadre antes de guardarla."
+
+msgid "Artículo"
+msgstr "Artículo"
+
+msgid "Asignar responsable"
+msgstr "Asignar responsable"
+
+msgid "Asistencia"
+msgstr "Asistencia"
+
+msgid "Asistencia guardada."
+msgstr "Asistencia guardada."
+
+msgid "Asistencia importada."
+msgstr "Asistencia importada."
+
+msgid "Asistencia parcial"
+msgstr "Asistencia parcial"
+
+msgid "Asistencia y duración"
+msgstr "Asistencia y duración"
+
+msgid "Asistencias"
+msgstr "Asistencias"
+
+msgid "Asistencias actuales"
+msgstr "Asistencias actuales"
+
+msgid "Asistencias anteriores"
+msgstr "Asistencias anteriores"
+
+msgid "Asistencias verificadas"
+msgstr "Asistencias verificadas"
+
+msgid "Asistente IA"
+msgstr "Asistente IA"
+
+msgid "Asistente y contenidos"
+msgstr "Asistente y contenidos"
+
+msgid "Asistentes por evento con registro completo."
+msgstr "Asistentes por evento con registro completo."
+
+msgid "Asistentes únicos"
+msgstr "Asistentes únicos"
+
+msgid "Asistió"
+msgstr "Asistió"
+
+msgid "Asociado ASCLA"
+msgstr "Asociado ASCLA"
+
+msgid "Asociado bloqueado."
+msgstr "Asociado bloqueado."
+
+msgid "Asociado desbloqueado."
+msgstr "Asociado desbloqueado."
+
+msgid "Asociados bloqueados"
+msgstr "Asociados bloqueados"
+
+msgid "Asociados de ASCLA"
+msgstr "Asociados de ASCLA"
+
+msgid "Asociados en la comunidad"
+msgstr "Asociados en la comunidad"
+
+msgid "Atención actualizada."
+msgstr "Atención actualizada."
+
+msgid "Auditoría"
+msgstr "Auditoría"
+
+msgid "Ausentes"
+msgstr "Ausentes"
+
+msgid "Autolesiones"
+msgstr "Autolesiones"
+
+msgid "Automático (sistema)"
+msgstr "Automático (sistema)"
+
+msgid "Autor"
+msgstr "Autor"
+
+msgid "Ayer"
+msgstr "Ayer"
+
+msgid "Añade contexto que ayude al equipo de moderación…"
+msgstr "Añade contexto que ayude al equipo de moderación…"
+
+msgid "Añadir a Google Calendar ↗"
+msgstr "Añadir a Google Calendar ↗"
+
+msgid "Añadir conservando intereses actuales"
+msgstr "Añadir conservando intereses actuales"
+
+msgid "Añadir tema"
+msgstr "Añadir tema"
+
+msgid "Aún no encontramos contenidos afines"
+msgstr "Aún no encontramos contenidos afines"
+
+msgid "Aún no has elegido opciones"
+msgstr "Aún no has elegido opciones"
+
+msgid "Aún no has seleccionado una portada."
+msgstr "Aún no has seleccionado una portada."
+
+msgid "Aún no hay coincidencias disponibles"
+msgstr "Aún no hay coincidencias disponibles"
+
+msgid "Aún no hay coincidencias suficientes"
+msgstr "Aún no hay coincidencias suficientes"
+
+msgid "Aún no hay contenido aquí"
+msgstr "Aún no hay contenido aquí"
+
+msgid "Aún no hay importaciones."
+msgstr "Aún no hay importaciones."
+
+msgid "Aún no tienes consultas"
+msgstr "Aún no tienes consultas"
+
+msgid "BIBLIOTECA PRIVADA"
+msgstr "BIBLIOTECA PRIVADA"
+
+msgid "Beneficios"
+msgstr "Beneficios"
+
+msgid "Biblioteca administrativa"
+msgstr "Biblioteca administrativa"
+
+msgid "Bienes y servicios restringidos"
+msgstr "Bienes y servicios restringidos"
+
+msgid "Biografía"
+msgstr "Biografía"
+
+msgid "Bloquear"
+msgstr "Bloquear"
+
+msgid "Bloquear asociado"
+msgstr "Bloquear asociado"
+
+msgid "Borrador"
+msgstr "Borrador"
+
+msgid "Borrador sugerido según intereses compartidos. Puedes editarlo libremente antes de enviarlo."
+msgstr "Borrador sugerido según intereses compartidos. Puedes editarlo libremente antes de enviarlo."
+
+msgid "Busca por archivo o propietario y revisa el material privado almacenado en ASCLA."
+msgstr "Busca por archivo o propietario y revisa el material privado almacenado en ASCLA."
+
+msgid "Busca un país o región"
+msgstr "Busca un país o región"
+
+msgid "Busca una ciudad"
+msgstr "Busca una ciudad"
+
+msgid "Buscar"
+msgstr "Buscar"
+
+msgid "Buscar archivos"
+msgstr "Buscar archivos"
+
+msgid "Buscar contenido"
+msgstr "Buscar contenido"
+
+msgid "Buscar en ASCLA"
+msgstr "Buscar en ASCLA"
+
+msgid "Buscar en el directorio"
+msgstr "Buscar en el directorio"
+
+msgid "Buscar en mis conexiones"
+msgstr "Buscar en mis conexiones"
+
+msgid "Buscar en tu comunidad…"
+msgstr "Buscar en tu comunidad…"
+
+msgid "Buscar evento"
+msgstr "Buscar evento"
+
+msgid "Buscar perfiles"
+msgstr "Buscar perfiles"
+
+msgid "Buscar personas"
+msgstr "Buscar personas"
+
+msgid "Buscar por nombre…"
+msgstr "Buscar por nombre…"
+
+msgid "Buscar solicitudes"
+msgstr "Buscar solicitudes"
+
+msgid "COMUNIDAD DE ASOCIADOS"
+msgstr "COMUNIDAD DE ASOCIADOS"
+
+msgid "CONECTA · COMPARTE · CRECE"
+msgstr "CONECTA · COMPARTE · CRECE"
+
+msgid "CONOCIMIENTO"
+msgstr "CONOCIMIENTO"
+
+msgid "CSV UTF-8 · hasta 512 KB y 5000 filas"
+msgstr "CSV UTF-8 · hasta 512 KB y 5000 filas"
+
+msgid "CSV no válido."
+msgstr "CSV no válido."
+
+msgid "Cabecera CSV no válida."
+msgstr "Cabecera CSV no válida."
+
+msgid "Cambiar"
+msgstr "Cambiar"
+
+msgid "Cambiar contraseña"
+msgstr "Cambiar contraseña"
+
+msgid "Cambiar foto"
+msgstr "Cambiar foto"
+
+msgid "Cambiar fotografía"
+msgstr "Cambiar fotografía"
+
+msgid "Cambiar idioma"
+msgstr "Cambiar idioma"
+
+msgid "Cambiar portada"
+msgstr "Cambiar portada"
+
+msgid "Cambio de datos del perfil"
+msgstr "Cambio de datos del perfil"
+
+msgid "Cambios sin guardar"
+msgstr "Cambios sin guardar"
+
+msgid "Cancelada"
+msgstr "Cancelada"
+
+msgid "Cancelado"
+msgstr "Cancelado"
+
+msgid "Cancelar"
+msgstr "Cancelar"
+
+msgid "Cancelar evento"
+msgstr "Cancelar evento"
+
+msgid "Cancelar importación"
+msgstr "Cancelar importación"
+
+msgid "Cancelar inscripción"
+msgstr "Cancelar inscripción"
+
+msgid "Cancelar solicitud"
+msgstr "Cancelar solicitud"
+
+msgid "Cancelar solicitud de conexión"
+msgstr "Cancelar solicitud de conexión"
+
+msgid "Cargando afinidad…"
+msgstr "Cargando afinidad…"
+
+msgid "Cargando ciudades…"
+msgstr "Cargando ciudades…"
+
+msgid "Cargando clasificación de temas…"
+msgstr "Cargando clasificación de temas…"
+
+msgid "Cargando comentarios…"
+msgstr "Cargando comentarios…"
+
+msgid "Cargando estadísticas…"
+msgstr "Cargando estadísticas…"
+
+msgid "Cargando perfil…"
+msgstr "Cargando perfil…"
+
+msgid "Cargando tu comunidad ASCLA…"
+msgstr "Cargando tu comunidad ASCLA…"
+
+msgid "Cargo"
+msgstr "Cargo"
+
+msgid "Cargo no visible"
+msgstr "Cargo no visible"
+
+msgid "Cargo o profesión"
+msgstr "Cargo o profesión"
+
+msgid "Cargo: este campo es obligatorio."
+msgstr "Cargo: este campo es obligatorio."
+
+msgid "Categoría"
+msgstr "Categoría"
+
+msgid "Categoría no válida."
+msgstr "Categoría no válida."
+
+msgid "Categorías de Contacto"
+msgstr "Categorías de Contacto"
+
+msgid "Categorías de Contacto (una por línea)"
+msgstr "Categorías de Contacto (una por línea)"
+
+msgid "Catálogo preparado."
+msgstr "Catálogo preparado."
+
+msgid "Catálogo y normalización"
+msgstr "Catálogo y normalización"
+
+msgid "Celebrar"
+msgstr "Celebrar"
+
+msgid "Centro de Conocimiento"
+msgstr "Centro de Conocimiento"
+
+msgid "Centro de Conocimiento ASCLA"
+msgstr "Centro de Conocimiento ASCLA"
+
+msgid "Cerrada"
+msgstr "Cerrada"
+
+msgid "Cerrar"
+msgstr "Cerrar"
+
+msgid "Cerrar notificación"
+msgstr "Cerrar notificación"
+
+msgid "Cerrar sesión"
+msgstr "Cerrar sesión"
+
+msgid "Chats"
+msgstr "Chats"
+
+msgid "Cierre de inscripciones"
+msgstr "Cierre de inscripciones"
+
+msgid "Ciudad"
+msgstr "Ciudad"
+
+msgid "Ciudad o país"
+msgstr "Ciudad o país"
+
+msgid "Claro"
+msgstr "Claro"
+
+msgid "Clasificación actualizada."
+msgstr "Clasificación actualizada."
+
+msgid "Clasificación de IA no válida; conserva la revisión manual."
+msgstr "Clasificación de IA no válida; conserva la revisión manual."
+
+msgid "Clasificación local por palabras clave · modo demostración"
+msgstr "Clasificación local por palabras clave · modo demostración"
+
+msgid "Clasificación semántica con el proveedor de IA configurado"
+msgstr "Clasificación semántica con el proveedor de IA configurado"
+
+msgid "Clasificando…"
+msgstr "Clasificando…"
+
+msgid "Clasificar siguientes 30 eventos"
+msgstr "Clasificar siguientes 30 eventos"
+
+msgid "Claves de la sesión"
+msgstr "Claves de la sesión"
+
+msgid "Coincide con tus intereses"
+msgstr "Coincide con tus intereses"
+
+msgid "Colaboraciones que impulsan el buen gobierno corporativo."
+msgstr "Colaboraciones que impulsan el buen gobierno corporativo."
+
+msgid "Columna no válida."
+msgstr "Columna no válida."
+
+msgid "Combina mayúsculas, minúsculas, números y símbolos. Evita secuencias y datos personales."
+msgstr "Combina mayúsculas, minúsculas, números y símbolos. Evita secuencias y datos personales."
+
+msgid "Combinamos intereses compartidos con experiencia complementaria. Tú decides con quién conectar y qué explorar."
+msgstr "Combinamos intereses compartidos con experiencia complementaria. Tú decides con quién conectar y qué explorar."
+
+msgid "Comentario reportado"
+msgstr "Comentario reportado"
+
+msgid "Comparte la primera idea"
+msgstr "Comparte la primera idea"
+
+msgid "Comparte tu opinión"
+msgstr "Comparte tu opinión"
+
+msgid "Comparte un aporte o vuelve pronto para ver novedades."
+msgstr "Comparte un aporte o vuelve pronto para ver novedades."
+
+msgid "Comparte una pregunta y construyamos respuestas juntos."
+msgstr "Comparte una pregunta y construyamos respuestas juntos."
+
+msgid "Comparten"
+msgstr "Comparten"
+
+msgid "Compartimos conocimiento con respeto, confidencialidad y bajo la Regla de Chatham House."
+msgstr "Compartimos conocimiento con respeto, confidencialidad y bajo la Regla de Chatham House."
+
+msgid "Completa la verificación de seguridad para continuar."
+msgstr "Completa la verificación de seguridad para continuar."
+
+msgid "Completa los campos obligatorios:"
+msgstr "Completa los campos obligatorios:"
+
+msgid "Completa todos los campos mínimos para aparecer en el directorio y recibir recomendaciones."
+msgstr "Completa todos los campos mínimos para aparecer en el directorio y recibir recomendaciones."
+
+msgid "Completa tu perfil"
+msgstr "Completa tu perfil"
+
+msgid "Completa tu perfil para descubrir afinidades"
+msgstr "Completa tu perfil para descubrir afinidades"
+
+msgid "Completa tus intereses en Perfil para descubrir conexiones."
+msgstr "Completa tus intereses en Perfil para descubrir conexiones."
+
+msgid "Completa tus intereses para ver recomendaciones"
+msgstr "Completa tus intereses para ver recomendaciones"
+
+msgid "Completada"
+msgstr "Completada"
+
+msgid "Completado"
+msgstr "Completado"
+
+msgid "Completar al menos el 40% ayuda a ASCLA a ofrecerte mejores recomendaciones, conexiones y experiencias dentro de la comunidad."
+msgstr "Completar al menos el 40% ayuda a ASCLA a ofrecerte mejores recomendaciones, conexiones y experiencias dentro de la comunidad."
+
+msgid "Completar al menos el 70% permite a ASCLA ofrecerte recomendaciones, conexiones y experiencias más relevantes."
+msgstr "Completar al menos el 70% permite a ASCLA ofrecerte recomendaciones, conexiones y experiencias más relevantes."
+
+msgid "Completar mi perfil"
+msgstr "Completar mi perfil"
+
+msgid "Completo"
+msgstr "Completo"
+
+msgid "Comunidad"
+msgstr "Comunidad"
+
+msgid "Comunidad ASCLA"
+msgstr "Comunidad ASCLA"
+
+msgid "Comunidad profesional"
+msgstr "Comunidad profesional"
+
+msgid "Conceptos importantes"
+msgstr "Conceptos importantes"
+
+msgid "Conclusiones"
+msgstr "Conclusiones"
+
+msgid "Conecta con quienes comparten tus retos, intereses y conocimientos."
+msgstr "Conecta con quienes comparten tus retos, intereses y conocimientos."
+
+msgid "Conectados"
+msgstr "Conectados"
+
+msgid "Conectamos conocimiento, fortalecemos la gobernanza."
+msgstr "Conectamos conocimiento, fortalecemos la gobernanza."
+
+msgid "Conectar Google Calendar"
+msgstr "Conectar Google Calendar"
+
+msgid "Conexiones"
+msgstr "Conexiones"
+
+msgid "Conexiones confirmadas"
+msgstr "Conexiones confirmadas"
+
+msgid "Conexiones que suman"
+msgstr "Conexiones que suman"
+
+msgid "Conexión ASCLA"
+msgstr "Conexión ASCLA"
+
+msgid "Conexión confirmada el"
+msgstr "Conexión confirmada el"
+
+msgid "Conexión correcta. DeepSeek respondió con el modelo guardado."
+msgstr "Conexión correcta. DeepSeek respondió con el modelo guardado."
+
+msgid "Conexión correcta. OpenAI respondió con el modelo guardado."
+msgstr "Conexión correcta. OpenAI respondió con el modelo guardado."
+
+msgid "Conexión eliminada."
+msgstr "Conexión eliminada."
+
+msgid "Conexión eliminada: puedes consultar el historial, pero no enviar mensajes."
+msgstr "Conexión eliminada: puedes consultar el historial, pero no enviar mensajes."
+
+msgid "Conexión recomendada"
+msgstr "Conexión recomendada"
+
+msgid "Conexión y contrato de clasificación correctos."
+msgstr "Conexión y contrato de clasificación correctos."
+
+msgid "Confianza devuelta"
+msgstr "Confianza devuelta"
+
+msgid "Configura una DeepSeek API Key."
+msgstr "Configura una DeepSeek API Key."
+
+msgid "Configura una OpenAI API Key."
+msgstr "Configura una OpenAI API Key."
+
+msgid "Configuración"
+msgstr "Configuración"
+
+msgid "Confirma que revisaste las advertencias de esta fila."
+msgstr "Confirma que revisaste las advertencias de esta fila."
+
+msgid "Confirma que tu información profesional sigue vigente o actualízala."
+msgstr "Confirma que tu información profesional sigue vigente o actualízala."
+
+msgid "Confirma tu asistencia para ocuparlo."
+msgstr "Confirma tu asistencia para ocuparlo."
+
+msgid "Confirmados"
+msgstr "Confirmados"
+
+msgid "Confirmar actualización de perfiles"
+msgstr "Confirmar actualización de perfiles"
+
+msgid "Confirmar asistencia"
+msgstr "Confirmar asistencia"
+
+msgid "Confirmar bloqueo"
+msgstr "Confirmar bloqueo"
+
+msgid "Confirmar eliminación"
+msgstr "Confirmar eliminación"
+
+msgid "Confirmar importación"
+msgstr "Confirmar importación"
+
+msgid "Confirmar nueva contraseña"
+msgstr "Confirmar nueva contraseña"
+
+msgid "Confirmar registro completo"
+msgstr "Confirmar registro completo"
+
+msgid "Confirmar y aplicar"
+msgstr "Confirmar y aplicar"
+
+msgid "Conoce más"
+msgstr "Conoce más"
+
+msgid "Conocimiento"
+msgstr "Conocimiento"
+
+msgid "Conocimiento e intereses"
+msgstr "Conocimiento e intereses"
+
+msgid "Conocimiento para tu día a día"
+msgstr "Conocimiento para tu día a día"
+
+msgid "Conocimiento reciente"
+msgstr "Conocimiento reciente"
+
+msgid "Conservar manual"
+msgstr "Conservar manual"
+
+msgid "Consulta la participación y registra la asistencia de los eventos finalizados."
+msgstr "Consulta la participación y registra la asistencia de los eventos finalizados."
+
+msgid "Consulta los archivos privados de todos los asociados y elimina los que corresponda."
+msgstr "Consulta los archivos privados de todos los asociados y elimina los que corresponda."
+
+msgid "Consulta tus archivos y elimina los que ya no necesitas. Los archivos eliminados también se retiran de las publicaciones y de tu fotografía de perfil."
+msgstr "Consulta tus archivos y elimina los que ya no necesitas. Los archivos eliminados también se retiran de las publicaciones y de tu fotografía de perfil."
+
+msgid "Consultando la intranet…"
+msgstr "Consultando la intranet…"
+
+msgid "Consultar al asistente"
+msgstr "Consultar al asistente"
+
+msgid "Consultar recurso de origen"
+msgstr "Consultar recurso de origen"
+
+msgid "Contacto"
+msgstr "Contacto"
+
+msgid "Contenido"
+msgstr "Contenido"
+
+msgid "Contenido alineado con tus intereses"
+msgstr "Contenido alineado con tus intereses"
+
+msgid "Contenido explícito"
+msgstr "Contenido explícito"
+
+msgid "Contenido generado"
+msgstr "Contenido generado"
+
+msgid "Contenido publicado"
+msgstr "Contenido publicado"
+
+msgid "Contenido reservado al asociado y al responsable asignado."
+msgstr "Contenido reservado al asociado y al responsable asignado."
+
+msgid "Contenido sexual"
+msgstr "Contenido sexual"
+
+msgid "Contenidos por revisar"
+msgstr "Contenidos por revisar"
+
+msgid "Continuar mi sesión"
+msgstr "Continuar mi sesión"
+
+msgid "Contraseña"
+msgstr "Contraseña"
+
+msgid "Contraseña actual"
+msgstr "Contraseña actual"
+
+msgid "Conversa con el asistente sobre eventos, publicaciones, recursos y conexiones. Primero consulta la información disponible en la propia intranet."
+msgstr "Conversa con el asistente sobre eventos, publicaciones, recursos y conexiones. Primero consulta la información disponible en la propia intranet."
+
+msgid "Conversaciones que quieres iniciar"
+msgstr "Conversaciones que quieres iniciar"
+
+msgid "Conversaciones solicitadas"
+msgstr "Conversaciones solicitadas"
+
+msgid "Conversaciones, encuentros y conocimiento en un solo lugar."
+msgstr "Conversaciones, encuentros y conocimiento en un solo lugar."
+
+msgid "Conversación"
+msgstr "Conversación"
+
+msgid "Conversación con ASCLA"
+msgstr "Conversación con ASCLA"
+
+msgid "Conversación general"
+msgstr "Conversación general"
+
+msgid "Convocatoria del microevento"
+msgstr "Convocatoria del microevento"
+
+msgid "Correo"
+msgstr "Correo"
+
+msgid "Correo ausente o no válido"
+msgstr "Correo ausente o no válido"
+
+msgid "Correo del usuario ASCLA"
+msgstr "Correo del usuario ASCLA"
+
+msgid "Correo para asignación manual"
+msgstr "Correo para asignación manual"
+
+msgid "Correo sin cuenta ASCLA"
+msgstr "Correo sin cuenta ASCLA"
+
+msgid "Creador"
+msgstr "Creador"
+
+msgid "Creador del grupo"
+msgstr "Creador del grupo"
+
+msgid "Crear foro"
+msgstr "Crear foro"
+
+msgid "Crear previsualización"
+msgstr "Crear previsualización"
+
+msgid "Cronología de la fuente"
+msgstr "Cronología de la fuente"
+
+msgid "Cuando se publiquen recursos vinculados con tus intereses aparecerán aquí."
+msgstr "Cuando se publiquen recursos vinculados con tus intereses aparecerán aquí."
+
+msgid "Cuenta falsa"
+msgstr "Cuenta falsa"
+
+msgid "Cuenta y seguridad"
+msgstr "Cuenta y seguridad"
+
+msgid "Cuentas actuales, incluidas las suspendidas."
+msgstr "Cuentas actuales, incluidas las suspendidas."
+
+msgid "Cupo disponible"
+msgstr "Cupo disponible"
+
+msgid "Cupos (0 = ilimitado)"
+msgstr "Cupos (0 = ilimitado)"
+
+msgid "Cupos por microevento"
+msgstr "Cupos por microevento"
+
+msgid "Cápsula sugerida"
+msgstr "Cápsula sugerida"
+
+msgid "Cápsulas sugeridas"
+msgstr "Cápsulas sugeridas"
+
+msgid "Código de asociado"
+msgstr "Código de asociado"
+
+msgid "Código no encontrado; coincidencia por correo."
+msgstr "Código no encontrado; coincidencia por correo."
+
+msgid "Código y correo ambiguos; revisión manual."
+msgstr "Código y correo ambiguos; revisión manual."
+
+msgid "DATOS DEMO"
+msgstr "DATOS DEMO"
+
+msgid "DESCUBRE TU PRÓXIMA CONEXIÓN"
+msgstr "DESCUBRE TU PRÓXIMA CONEXIÓN"
+
+msgid "Dato privado. Solo se usa para felicitarte y avisar a la administración el día de tu cumpleaños."
+msgstr "Dato privado. Solo se usa para felicitarte y avisar a la administración el día de tu cumpleaños."
+
+msgid "Datos ficticios de demostración"
+msgstr "Datos ficticios de demostración"
+
+msgid "Datos ficticios de demostración."
+msgstr "Datos ficticios de demostración."
+
+msgid "Datos profesionales actualizados"
+msgstr "Datos profesionales actualizados"
+
+msgid "Decisión no válida."
+msgstr "Decisión no válida."
+
+msgid "DeepSeek API Key"
+msgstr "DeepSeek API Key"
+
+msgid "DeepSeek API Key (guardada; vacío para conservar)"
+msgstr "DeepSeek API Key (guardada; vacío para conservar)"
+
+msgid "DeepSeek · API real"
+msgstr "DeepSeek · API real"
+
+msgid "Dejar de seguir"
+msgstr "Dejar de seguir"
+
+msgid "Dejarán de aparecer como conectados y la mensajería quedará deshabilitada. El historial de mensajes no se elimina."
+msgstr "Dejarán de aparecer como conectados y la mensajería quedará deshabilitada. El historial de mensajes no se elimina."
+
+msgid "Dejarán de aparecer como conectados y la mensajería quedará deshabilitada. Podrás consultar el historial. Para volver a conectar deberán transcurrir 30 días."
+msgstr "Dejarán de aparecer como conectados y la mensajería quedará deshabilitada. Podrás consultar el historial. Para volver a conectar deberán transcurrir 30 días."
+
+msgid "Demasiados intentos fallidos. Inténtalo nuevamente en %d minuto(s)."
+msgstr "Demasiados intentos fallidos. Inténtalo nuevamente en %d minuto(s)."
+
+msgid "Denegada"
+msgstr "Denegada"
+
+msgid "Denuncia esta publicación"
+msgstr "Denuncia esta publicación"
+
+msgid "Denuncia este comentario"
+msgstr "Denuncia este comentario"
+
+msgid "Desbloquear"
+msgstr "Desbloquear"
+
+msgid "Descargar infografía"
+msgstr "Descargar infografía"
+
+msgid "Descartar cambios"
+msgstr "Descartar cambios"
+
+msgid "Desconectar"
+msgstr "Desconectar"
+
+msgid "Describe brevemente el motivo del reporte."
+msgstr "Describe brevemente el motivo del reporte."
+
+msgid "Describe brevemente el motivo del reporte…"
+msgstr "Describe brevemente el motivo del reporte…"
+
+msgid "Descripción"
+msgstr "Descripción"
+
+msgid "Descripción breve"
+msgstr "Descripción breve"
+
+msgid "Descripción profesional"
+msgstr "Descripción profesional"
+
+msgid "Descubrir nuevas conexiones"
+msgstr "Descubrir nuevas conexiones"
+
+msgid "Desde"
+msgstr "Desde"
+
+msgid "Desde fecha"
+msgstr "Desde fecha"
+
+msgid "Detalle"
+msgstr "Detalle"
+
+msgid "Diagnóstico Gemini · Google Forms"
+msgstr "Diagnóstico Gemini · Google Forms"
+
+msgid "Diagnóstico IA · Google Forms"
+msgstr "Diagnóstico IA · Google Forms"
+
+msgid "Difusión de imágenes íntimas sin consentimiento"
+msgstr "Difusión de imágenes íntimas sin consentimiento"
+
+msgid "Directorio"
+msgstr "Directorio"
+
+msgid "Disponible porque confirmaste tu asistencia. Conoce a otros participantes antes del encuentro."
+msgstr "Disponible porque confirmaste tu asistencia. Conoce a otros participantes antes del encuentro."
+
+msgid "Documento"
+msgstr "Documento"
+
+msgid "Duración de Recordarme (días)"
+msgstr "Duración de Recordarme (días)"
+
+msgid "Duración del bloqueo (minutos)"
+msgstr "Duración del bloqueo (minutos)"
+
+msgid "Duración detectada automáticamente"
+msgstr "Duración detectada automáticamente"
+
+msgid "Duración en segundos (0 = por confirmar)"
+msgstr "Duración en segundos (0 = por confirmar)"
+
+msgid "Duración no válida"
+msgstr "Duración no válida"
+
+msgid "Duración no válida para este evento."
+msgstr "Duración no válida para este evento."
+
+msgid "Duración por confirmar"
+msgstr "Duración por confirmar"
+
+msgid "Duración verificada directamente desde el video"
+msgstr "Duración verificada directamente desde el video"
+
+msgid "Editar"
+msgstr "Editar"
+
+msgid "Editar cuenta"
+msgstr "Editar cuenta"
+
+msgid "Editar grupo"
+msgstr "Editar grupo"
+
+msgid "Editar mi perfil"
+msgstr "Editar mi perfil"
+
+msgid "Editar mis intereses"
+msgstr "Editar mis intereses"
+
+msgid "El CSV admite hasta 5000 filas de participantes."
+msgstr "El CSV admite hasta 5000 filas de participantes."
+
+msgid "El CSV admite hasta 5000 filas."
+msgstr "El CSV admite hasta 5000 filas."
+
+msgid "El CSV debe ocupar como máximo 512 KB."
+msgstr "El CSV debe ocupar como máximo 512 KB."
+
+msgid "El CSV no contiene filas."
+msgstr "El CSV no contiene filas."
+
+msgid "El CSV no contiene participantes."
+msgstr "El CSV no contiene participantes."
+
+msgid "El análisis y la aplicación avanzan en lotes de 50 filas. Puedes pausar y continuar desde el historial."
+msgstr "El análisis y la aplicación avanzan en lotes de 50 filas. Puedes pausar y continuar desde el historial."
+
+msgid "El archivo se eliminará permanentemente y se retirará de las publicaciones y de la foto de perfil que lo utilicen."
+msgstr "El archivo se eliminará permanentemente y se retirará de las publicaciones y de la foto de perfil que lo utilicen."
+
+msgid "El archivo se eliminará permanentemente, junto con su copia maestra si existe, y se retirará de las publicaciones y de la foto de perfil que lo utilicen."
+msgstr "El archivo se eliminará permanentemente, junto con su copia maestra si existe, y se retirará de las publicaciones y de la foto de perfil que lo utilicen."
+
+msgid "El asistente prioriza la información que tu cuenta puede consultar en ASCLA. Si un dato no puede verificarse dentro de la intranet, te lo indicará."
+msgstr "El asistente prioriza la información que tu cuenta puede consultar en ASCLA. Si un dato no puede verificarse dentro de la intranet, te lo indicará."
+
+msgid "El comentario dejará de mostrarse en la conversación."
+msgstr "El comentario dejará de mostrarse en la conversación."
+
+msgid "El conocimiento que puedes compartir"
+msgstr "El conocimiento que puedes compartir"
+
+msgid "El conocimiento, a una pregunta"
+msgstr "El conocimiento, a una pregunta"
+
+msgid "El conocimiento<br>nos conecta."
+msgstr "El conocimiento<br>nos conecta."
+
+msgid "El contenido de este aviso ya no está disponible. Puedes continuar en esta sección."
+msgstr "El contenido de este aviso ya no está disponible. Puedes continuar en esta sección."
+
+msgid "El contenido dejará de estar disponible en la comunidad."
+msgstr "El contenido dejará de estar disponible en la comunidad."
+
+msgid "El contenido y el historial solo son visibles para el asociado y el responsable asignado. Las búsquedas consultan tus solicitudes asignadas."
+msgstr "El contenido y el historial solo son visibles para el asociado y el responsable asignado. Las búsquedas consultan tus solicitudes asignadas."
+
+msgid "El editor de imágenes no está disponible. Recarga la página e inténtalo de nuevo."
+msgstr "El editor de imágenes no está disponible. Recarga la página e inténtalo de nuevo."
+
+msgid "El evento cambió de fecha, horario o modalidad. Revisa los cambios y confirma nuevamente tu asistencia."
+msgstr "El evento cambió de fecha, horario o modalidad. Revisa los cambios y confirma nuevamente tu asistencia."
+
+msgid "El evento no está disponible en este período."
+msgstr "El evento no está disponible en este período."
+
+msgid "El evento o el umbral cambió. Genera una nueva vista previa."
+msgstr "El evento o el umbral cambió. Genera una nueva vista previa."
+
+msgid "El evento se conservará como cancelado y se notificará a las personas inscritas, invitadas o en lista de espera. Esta acción no elimina el historial."
+msgstr "El evento se conservará como cancelado y se notificará a las personas inscritas, invitadas o en lista de espera. Esta acción no elimina el historial."
+
+msgid "El interés declarado es una foto actual del perfil: no se presenta como una tendencia histórica."
+msgstr "El interés declarado es una foto actual del perfil: no se presenta como una tendencia histórica."
+
+msgid "El mensaje se eliminará de esta conversación para ambos participantes."
+msgstr "El mensaje se eliminará de esta conversación para ambos participantes."
+
+msgid "El perfil cambió o ya no tienes permiso. Revisa la fila."
+msgstr "El perfil cambió o ya no tienes permiso. Revisa la fila."
+
+msgid "El perfil podrá volver a aparecer en próximas recomendaciones."
+msgstr "El perfil podrá volver a aparecer en próximas recomendaciones."
+
+msgid "El período actual incluye hoy y todavía puede cambiar."
+msgstr "El período actual incluye hoy y todavía puede cambiar."
+
+msgid "El proveedor de IA respondió, pero no clasificó la muestra sintética de Forms."
+msgstr "El proveedor de IA respondió, pero no clasificó la muestra sintética de Forms."
+
+msgid "El proveedor respondió con el formato de Forms, confianza válida e IDs existentes del catálogo."
+msgstr "El proveedor respondió con el formato de Forms, confianza válida e IDs existentes del catálogo."
+
+msgid "El registro cambió. Revisa nuevamente la vista previa del CSV."
+msgstr "El registro cambió. Revisa nuevamente la vista previa del CSV."
+
+msgid "El resultado supera los 20 intereses permitidos."
+msgstr "El resultado supera los 20 intereses permitidos."
+
+msgid "El teléfono debe ser texto."
+msgstr "El teléfono debe ser texto."
+
+msgid "El teléfono debe usar formato internacional: +, código de país y entre 8 y 15 dígitos en total."
+msgstr "El teléfono debe usar formato internacional: +, código de país y entre 8 y 15 dígitos en total."
+
+msgid "El umbral debe estar entre 1 y 100%."
+msgstr "El umbral debe estar entre 1 y 100%."
+
+msgid "El usuario/correo o la contraseña no son correctos."
+msgstr "El usuario/correo o la contraseña no son correctos."
+
+msgid "El índice de perfiles históricos se está actualizando. Los conteos declarados todavía son parciales."
+msgstr "El índice de perfiles históricos se está actualizando. Los conteos declarados todavía son parciales."
+
+msgid "Elegir imagen"
+msgstr "Elegir imagen"
+
+msgid "Elige cómo quieres ver la intranet. En Automático, ASCLA sigue la preferencia de tu dispositivo."
+msgstr "Elige cómo quieres ver la intranet. En Automático, ASCLA sigue la preferencia de tu dispositivo."
+
+msgid "Elige qué avisos opcionales quieres recibir también en tu correo. Por defecto están activados."
+msgstr "Elige qué avisos opcionales quieres recibir también en tu correo. Por defecto están activados."
+
+msgid "Elimina esta conversación y sus mensajes para todos los integrantes. Esta acción no se puede deshacer."
+msgstr "Elimina esta conversación y sus mensajes para todos los integrantes. Esta acción no se puede deshacer."
+
+msgid "Eliminado"
+msgstr "Eliminado"
+
+msgid "Eliminado correctamente."
+msgstr "Eliminado correctamente."
+
+msgid "Eliminar"
+msgstr "Eliminar"
+
+msgid "Eliminar DeepSeek API Key guardada"
+msgstr "Eliminar DeepSeek API Key guardada"
+
+msgid "Eliminar OpenAI API Key guardada"
+msgstr "Eliminar OpenAI API Key guardada"
+
+msgid "Eliminar archivo"
+msgstr "Eliminar archivo"
+
+msgid "Eliminar comentario"
+msgstr "Eliminar comentario"
+
+msgid "Eliminar conexión"
+msgstr "Eliminar conexión"
+
+msgid "Eliminar grupo"
+msgstr "Eliminar grupo"
+
+msgid "Eliminar mensaje"
+msgstr "Eliminar mensaje"
+
+msgid "Eliminar notificación"
+msgstr "Eliminar notificación"
+
+msgid "Eliminar reporte"
+msgstr "Eliminar reporte"
+
+msgid "Eliminar solicitud"
+msgstr "Eliminar solicitud"
+
+msgid "Empieza a escribir y elige una sugerencia para mantener tu ubicación normalizada."
+msgstr "Empieza a escribir y elige una sugerencia para mantener tu ubicación normalizada."
+
+msgid "Empresa"
+msgstr "Empresa"
+
+msgid "Empresa / organización: este campo es obligatorio."
+msgstr "Empresa / organización: este campo es obligatorio."
+
+msgid "Empresa u organización"
+msgstr "Empresa u organización"
+
+msgid "En lista de espera"
+msgstr "En lista de espera"
+
+msgid "Encontramos señales de afinidad entre sus perfiles profesionales."
+msgstr "Encontramos señales de afinidad entre sus perfiles profesionales."
+
+msgid "Encontramos {count} de hasta {limit} perfiles que cumplen los criterios. Te mostraremos nuevas opciones en la siguiente actualización automática."
+msgstr "Encontramos {count} de hasta {limit} perfiles que cumplen los criterios. Te mostraremos nuevas opciones en la siguiente actualización automática."
+
+msgid "Encuentra respuestas en los recursos de nuestra comunidad con el Asistente ASCLA."
+msgstr "Encuentra respuestas en los recursos de nuestra comunidad con el Asistente ASCLA."
+
+msgid "Encuentros para aprender, conversar y ampliar tu perspectiva."
+msgstr "Encuentros para aprender, conversar y ampliar tu perspectiva."
+
+msgid "Enlace del encuentro"
+msgstr "Enlace del encuentro"
+
+msgid "Entrar a la comunidad"
+msgstr "Entrar a la comunidad"
+
+msgid "Entrar a la comunidad · ASCLA"
+msgstr "Entrar a la comunidad · ASCLA"
+
+msgid "Enviado"
+msgstr "Enviado"
+
+msgid "Enviar"
+msgstr "Enviar"
+
+msgid "Enviar a revisión"
+msgstr "Enviar a revisión"
+
+msgid "Enviar enlace de recuperación"
+msgstr "Enviar enlace de recuperación"
+
+msgid "Enviar mensaje"
+msgstr "Enviar mensaje"
+
+msgid "Enviar pregunta"
+msgstr "Enviar pregunta"
+
+msgid "Enviar reporte"
+msgstr "Enviar reporte"
+
+msgid "Enviar solicitud"
+msgstr "Enviar solicitud"
+
+msgid "Enviar solicitud de conexión"
+msgstr "Enviar solicitud de conexión"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Escribe para ver sugerencias y selecciona una opción de la lista."
+msgstr "Escribe para ver sugerencias y selecciona una opción de la lista."
+
+msgid "Escribe tu contraseña."
+msgstr "Escribe tu contraseña."
+
+msgid "Escribe tu usuario o correo electrónico."
+msgstr "Escribe tu usuario o correo electrónico."
+
+msgid "Escribe un mensaje…"
+msgstr "Escribe un mensaje…"
+
+msgid "Escribe una pregunta sobre ASCLA…"
+msgstr "Escribe una pregunta sobre ASCLA…"
+
+msgid "Escribe una respuesta…"
+msgstr "Escribe una respuesta…"
+
+msgid "Esta cuenta no tiene acceso a la comunidad ASCLA. Contacta al administrador."
+msgstr "Esta cuenta no tiene acceso a la comunidad ASCLA. Contacta al administrador."
+
+msgid "Esta fila no tiene respuesta abierta."
+msgstr "Esta fila no tiene respuesta abierta."
+
+msgid "Esta fila ya fue aplicada."
+msgstr "Esta fila ya fue aplicada."
+
+msgid "Esta nota se elaboró a partir de un recurso del Centro de Conocimiento ASCLA."
+msgstr "Esta nota se elaboró a partir de un recurso del Centro de Conocimiento ASCLA."
+
+msgid "Esta notificación se eliminará de tu bandeja de actividad."
+msgstr "Esta notificación se eliminará de tu bandeja de actividad."
+
+msgid "Estado de asistencia no válido."
+msgstr "Estado de asistencia no válido."
+
+msgid "Estado de membresía"
+msgstr "Estado de membresía"
+
+msgid "Estadísticas"
+msgstr "Estadísticas"
+
+msgid "Estadísticas de la comunidad"
+msgstr "Estadísticas de la comunidad"
+
+msgid "Estadísticas de la sesión"
+msgstr "Estadísticas de la sesión"
+
+msgid "Este aviso corresponde a una tarea de administración."
+msgstr "Este aviso corresponde a una tarea de administración."
+
+msgid "Este encuentro ya no admite inscripciones ni confirmaciones de cupo."
+msgstr "Este encuentro ya no admite inscripciones ni confirmaciones de cupo."
+
+msgid "Este miembro aún no ha añadido su biografía."
+msgstr "Este miembro aún no ha añadido su biografía."
+
+msgid "Este primer mensaje llegará como una solicitud. Podrá leerlo y decidir si acepta la conversación."
+msgstr "Este primer mensaje llegará como una solicitud. Podrá leerlo y decidir si acepta la conversación."
+
+msgid "Estás al día"
+msgstr "Estás al día"
+
+msgid "Estás en la lista de espera"
+msgstr "Estás en la lista de espera"
+
+msgid "Etiqueta"
+msgstr "Etiqueta"
+
+msgid "Etiquetas (separadas por comas)"
+msgstr "Etiquetas (separadas por comas)"
+
+msgid "Evento"
+msgstr "Evento"
+
+msgid "Evento cancelado"
+msgstr "Evento cancelado"
+
+msgid "Evento finalizado"
+msgstr "Evento finalizado"
+
+msgid "Evento no disponible."
+msgstr "Evento no disponible."
+
+msgid "Eventos"
+msgstr "Eventos"
+
+msgid "Eventos actuales"
+msgstr "Eventos actuales"
+
+msgid "Eventos anteriores"
+msgstr "Eventos anteriores"
+
+msgid "Eventos asistidos"
+msgstr "Eventos asistidos"
+
+msgid "Eventos de la comunidad"
+msgstr "Eventos de la comunidad"
+
+msgid "Eventos finalizados"
+msgstr "Eventos finalizados"
+
+msgid "Eventos inscritos"
+msgstr "Eventos inscritos"
+
+msgid "Eventos publicados y no cancelados."
+msgstr "Eventos publicados y no cancelados."
+
+msgid "Eventos y Capacitaciones"
+msgstr "Eventos y Capacitaciones"
+
+msgid "Evidencia"
+msgstr "Evidencia"
+
+msgid "Evolución por tema"
+msgstr "Evolución por tema"
+
+msgid "Experiencia profesional"
+msgstr "Experiencia profesional"
+
+msgid "Experiencia relacionada"
+msgstr "Experiencia relacionada"
+
+msgid "Explicación"
+msgstr "Explicación"
+
+msgid "Explorar"
+msgstr "Explorar"
+
+msgid "Explorar directorio"
+msgstr "Explorar directorio"
+
+msgid "Explorar foros"
+msgstr "Explorar foros"
+
+msgid "Explorar la comunidad"
+msgstr "Explorar la comunidad"
+
+msgid "Explorar recursos"
+msgstr "Explorar recursos"
+
+msgid "Explotación infantil"
+msgstr "Explotación infantil"
+
+msgid "Exporta el archivo como CSV UTF-8."
+msgstr "Exporta el archivo como CSV UTF-8."
+
+msgid "Fallos antes de bloquear la IP"
+msgstr "Fallos antes de bloquear la IP"
+
+msgid "Fallos antes de bloquear la cuenta"
+msgstr "Fallos antes de bloquear la cuenta"
+
+msgid "Fallos antes de captcha"
+msgstr "Fallos antes de captcha"
+
+msgid "Falta evidencia de duración."
+msgstr "Falta evidencia de duración."
+
+msgid "Fecha de nacimiento"
+msgstr "Fecha de nacimiento"
+
+msgid "Fecha y hora de publicación"
+msgstr "Fecha y hora de publicación"
+
+msgid "Fila"
+msgstr "Fila"
+
+msgid "Fila no encontrada."
+msgstr "Fila no encontrada."
+
+msgid "Filas sin asociar"
+msgstr "Filas sin asociar"
+
+msgid "Filtrar las primeras 100 opciones"
+msgstr "Filtrar las primeras 100 opciones"
+
+msgid "Filtrar notificaciones"
+msgstr "Filtrar notificaciones"
+
+msgid "Fin (tu zona horaria)"
+msgstr "Fin (tu zona horaria)"
+
+msgid "Finalizada"
+msgstr "Finalizada"
+
+msgid "Finalizado"
+msgstr "Finalizado"
+
+msgid "Formato de fecha del CSV"
+msgstr "Formato de fecha del CSV"
+
+msgid "Formato de fecha no válido."
+msgstr "Formato de fecha no válido."
+
+msgid "Foro"
+msgstr "Foro"
+
+msgid "Foros"
+msgstr "Foros"
+
+msgid "Foros de la comunidad"
+msgstr "Foros de la comunidad"
+
+msgid "Foto del grupo"
+msgstr "Foto del grupo"
+
+msgid "Fotografía"
+msgstr "Fotografía"
+
+msgid "Fotografía cargada. Guarda el perfil para aplicar."
+msgstr "Fotografía cargada. Guarda el perfil para aplicar."
+
+msgid "Fotografía preparada"
+msgstr "Fotografía preparada"
+
+msgid "Fraude o estafa"
+msgstr "Fraude o estafa"
+
+msgid "Frecuencia de revisión y tamaño de los resultados."
+msgstr "Frecuencia de revisión y tamaño de los resultados."
+
+msgid "Fuente"
+msgstr "Fuente"
+
+msgid "Fuente / autoría"
+msgstr "Fuente / autoría"
+
+msgid "Fuente de esta nota"
+msgstr "Fuente de esta nota"
+
+msgid "Fuentes disponibles: perfiles, temas de eventos, inscripciones y asistencia. No hay respuestas de Google Forms conectadas a este panel."
+msgstr "Fuentes disponibles: perfiles, temas de eventos, inscripciones y asistencia. No hay respuestas de Google Forms conectadas a este panel."
+
+msgid "Fuentes: perfiles y Forms revisados (personas únicas, sin sumar duplicados), publicaciones por tema del período, inscripciones y asistencia verificada. Los filtros de evento y categoría afectan a participación, no al interés declarado ni al contenido publicado."
+msgstr "Fuentes: perfiles y Forms revisados (personas únicas, sin sumar duplicados), publicaciones por tema del período, inscripciones y asistencia verificada. Los filtros de evento y categoría afectan a participación, no al interés declarado ni al contenido publicado."
+
+msgid "GESTIÓN DE LA COMUNIDAD"
+msgstr "GESTIÓN DE LA COMUNIDAD"
+
+msgid "Galería"
+msgstr "Galería"
+
+msgid "Gemini respondió con el formato de Forms, confianza válida e IDs existentes del catálogo."
+msgstr "Gemini respondió con el formato de Forms, confianza válida e IDs existentes del catálogo."
+
+msgid "Gemini respondió, pero no clasificó la muestra sintética de Forms."
+msgstr "Gemini respondió, pero no clasificó la muestra sintética de Forms."
+
+msgid "Generar propuestas cada (días)"
+msgstr "Generar propuestas cada (días)"
+
+msgid "Generar resumen y nota"
+msgstr "Generar resumen y nota"
+
+msgid "Gestiona ASCLA<br>de forma segura."
+msgstr "Gestiona ASCLA<br>de forma segura."
+
+msgid "Grupo"
+msgstr "Grupo"
+
+msgid "Grupo ASCLA"
+msgstr "Grupo ASCLA"
+
+msgid "Grupos con intereses comunes y cupos configurables, con una agenda para conversar."
+msgstr "Grupos con intereses comunes y cupos configurables, con una agenda para conversar."
+
+msgid "Guarda el CSV con codificación UTF-8."
+msgstr "Guarda el CSV con codificación UTF-8."
+
+msgid "Guarda el perfil para aplicar."
+msgstr "Guarda el perfil para aplicar."
+
+msgid "Guardando imagen optimizada…"
+msgstr "Guardando imagen optimizada…"
+
+msgid "Guardar"
+msgstr "Guardar"
+
+msgid "Guardar asistencia"
+msgstr "Guardar asistencia"
+
+msgid "Guardar atención"
+msgstr "Guardar atención"
+
+msgid "Guardar cambios"
+msgstr "Guardar cambios"
+
+msgid "Guardar cambios y salir"
+msgstr "Guardar cambios y salir"
+
+msgid "Guardar como"
+msgstr "Guardar como"
+
+msgid "Guardar en Google conectado"
+msgstr "Guardar en Google conectado"
+
+msgid "Guardar evento"
+msgstr "Guardar evento"
+
+msgid "Guardar perfil"
+msgstr "Guardar perfil"
+
+msgid "Guardar tema"
+msgstr "Guardar tema"
+
+msgid "Guardar umbral"
+msgstr "Guardar umbral"
+
+msgid "HOY CELEBRAMOS CONTIGO"
+msgstr "HOY CELEBRAMOS CONTIGO"
+
+msgid "Hacer una pregunta"
+msgstr "Hacer una pregunta"
+
+msgid "Has cerrado sesión correctamente."
+msgstr "Has cerrado sesión correctamente."
+
+msgid "Has realizado cambios que todavía no se han guardado."
+msgstr "Has realizado cambios que todavía no se han guardado."
+
+msgid "Hasta"
+msgstr "Hasta"
+
+msgid "Hasta cinco perfiles vigentes, ordenados por afinidad y complementariedad."
+msgstr "Hasta cinco perfiles vigentes, ordenados por afinidad y complementariedad."
+
+msgid "Hasta cinco perfiles vigentes, ordenados por afinidad y complementariedad. Desliza para ver todas las sugerencias."
+msgstr "Hasta cinco perfiles vigentes, ordenados por afinidad y complementariedad. Desliza para ver todas las sugerencias."
+
+msgid "Hay categorías sin correspondencia en el catálogo."
+msgstr "Hay categorías sin correspondencia en el catálogo."
+
+msgid "Haz que tu perfil conecte con las personas y las ideas que te interesan."
+msgstr "Haz que tu perfil conecte con las personas y las ideas que te interesan."
+
+msgid "Haz tu primera pregunta al asistente para empezar."
+msgstr "Haz tu primera pregunta al asistente para empezar."
+
+msgid "He revisado las advertencias y confirmo esta selección."
+msgstr "He revisado las advertencias y confirmo esta selección."
+
+msgid "He verificado toda la lista. Los inscritos sin marcar se contarán como ausentes al calcular la tasa."
+msgstr "He verificado toda la lista. Los inscritos sin marcar se contarán como ausentes al calcular la tasa."
+
+msgid "Historial"
+msgstr "Historial"
+
+msgid "Historial de CSV"
+msgstr "Historial de CSV"
+
+msgid "Historial de atención"
+msgstr "Historial de atención"
+
+msgid "Historial de importaciones"
+msgstr "Historial de importaciones"
+
+msgid "Historial de microeventos"
+msgstr "Historial de microeventos"
+
+msgid "Historial de solo lectura"
+msgstr "Historial de solo lectura"
+
+msgid "Hola"
+msgstr "Hola"
+
+msgid "Hola. Puedo revisar lo que hay en ASCLA y ayudarte a encontrar eventos próximos, publicaciones recientes, recursos y conexiones recomendadas. ¿Qué quieres saber?"
+msgstr "Hola. Puedo revisar lo que hay en ASCLA y ayudarte a encontrar eventos próximos, publicaciones recientes, recursos y conexiones recomendadas. ¿Qué quieres saber?"
+
+msgid "Horario no válido o ambiguo; revisa el formato y la zona horaria."
+msgstr "Horario no válido o ambiguo; revisa el formato y la zona horaria."
+
+msgid "Horas de inscripción prioritaria"
+msgstr "Horas de inscripción prioritaria"
+
+msgid "Horas para confirmar un cupo liberado"
+msgstr "Horas para confirmar un cupo liberado"
+
+msgid "Hoy"
+msgstr "Hoy"
+
+msgid "Hoy celebramos contigo"
+msgstr "Hoy celebramos contigo"
+
+msgid "Hub ASCLA"
+msgstr "Hub ASCLA"
+
+msgid "Híbrido"
+msgstr "Híbrido"
+
+msgid "IA y tendencias"
+msgstr "IA y tendencias"
+
+msgid "IA y trabajos"
+msgstr "IA y trabajos"
+
+msgid "ID del modelo DeepSeek"
+msgstr "ID del modelo DeepSeek"
+
+msgid "ID del modelo OpenAI"
+msgstr "ID del modelo OpenAI"
+
+msgid "IDs válidos"
+msgstr "IDs válidos"
+
+msgid "INTERESES DE LA COMUNIDAD"
+msgstr "INTERESES DE LA COMUNIDAD"
+
+msgid "Ideas, experiencias y conversaciones que nos acercan."
+msgstr "Ideas, experiencias y conversaciones que nos acercan."
+
+msgid "Idioma"
+msgstr "Idioma"
+
+msgid "Idiomas"
+msgstr "Idiomas"
+
+msgid "Idiomas para conversar"
+msgstr "Idiomas para conversar"
+
+msgid "Ignorada"
+msgstr "Ignorada"
+
+msgid "Imagen del evento"
+msgstr "Imagen del evento"
+
+msgid "Imagen fuente"
+msgstr "Imagen fuente"
+
+msgid "Imagen preparada y cargada."
+msgstr "Imagen preparada y cargada."
+
+msgid "Importa respuestas de Google Forms o Sheets exportadas como CSV. Revisarás cada propuesta antes de actualizar perfiles."
+msgstr "Importa respuestas de Google Forms o Sheets exportadas como CSV. Revisarás cada propuesta antes de actualizar perfiles."
+
+msgid "Importa un CSV de Zoom o registra asistentes manualmente. Completa el registro cuando hayas verificado toda la lista."
+msgstr "Importa un CSV de Zoom o registra asistentes manualmente. Completa el registro cuando hayas verificado toda la lista."
+
+msgid "Importación no confirmada."
+msgstr "Importación no confirmada."
+
+msgid "Importación no disponible."
+msgstr "Importación no disponible."
+
+msgid "Importación no lista para confirmar."
+msgstr "Importación no lista para confirmar."
+
+msgid "Importar CSV de Zoom"
+msgstr "Importar CSV de Zoom"
+
+msgid "Importar intereses"
+msgstr "Importar intereses"
+
+msgid "Incitación al odio"
+msgstr "Incitación al odio"
+
+msgid "Incluir archivadas"
+msgstr "Incluir archivadas"
+
+msgid "Incluye +, código de país y número; por ejemplo +51 987 654 321"
+msgstr "Incluye +, código de país y número; por ejemplo +51 987 654 321"
+
+msgid "Indicador"
+msgstr "Indicador"
+
+msgid "Industria"
+msgstr "Industria"
+
+msgid "Industrias"
+msgstr "Industrias"
+
+msgid "Infografía"
+msgstr "Infografía"
+
+msgid "Información"
+msgstr "Información"
+
+msgid "Información adicional (obligatoria)"
+msgstr "Información adicional (obligatoria)"
+
+msgid "Información adicional (opcional)"
+msgstr "Información adicional (opcional)"
+
+msgid "Información del grupo"
+msgstr "Información del grupo"
+
+msgid "Información falsa"
+msgstr "Información falsa"
+
+msgid "Información personal y profesional"
+msgstr "Información personal y profesional"
+
+msgid "Información profesional"
+msgstr "Información profesional"
+
+msgid "Ingresa con tu cuenta para acceder a la comunidad."
+msgstr "Ingresa con tu cuenta para acceder a la comunidad."
+
+msgid "Iniciativas"
+msgstr "Iniciativas"
+
+msgid "Inicio"
+msgstr "Inicio"
+
+msgid "Inicio (tu zona horaria)"
+msgstr "Inicio (tu zona horaria)"
+
+msgid "Inicio de sesión · desafío adaptativo según el umbral configurado"
+msgstr "Inicio de sesión · desafío adaptativo según el umbral configurado"
+
+msgid "Inscripciones"
+msgstr "Inscripciones"
+
+msgid "Inscripciones confirmadas"
+msgstr "Inscripciones confirmadas"
+
+msgid "Inscripciones insuficientes"
+msgstr "Inscripciones insuficientes"
+
+msgid "Inscripción"
+msgstr "Inscripción"
+
+msgid "Inscripción cerrada o reservada a los miembros recomendados."
+msgstr "Inscripción cerrada o reservada a los miembros recomendados."
+
+msgid "Inscrito"
+msgstr "Inscrito"
+
+msgid "Inscritos que asistieron / inscritos de eventos con registro completo."
+msgstr "Inscritos que asistieron / inscritos de eventos con registro completo."
+
+msgid "Integración Google Calendar no configurada para tu cuenta. Puedes conectarlo para guardar próximos eventos."
+msgstr "Integración Google Calendar no configurada para tu cuenta. Puedes conectarlo para guardar próximos eventos."
+
+msgid "Integrante"
+msgstr "Integrante"
+
+msgid "Integrantes"
+msgstr "Integrantes"
+
+msgid "Intereses"
+msgstr "Intereses"
+
+msgid "Intereses propuestos · máximo 3"
+msgstr "Intereses propuestos · máximo 3"
+
+msgid "Interés"
+msgstr "Interés"
+
+msgid "Interés declarado · usuarios"
+msgstr "Interés declarado · usuarios"
+
+msgid "Interés declarado: selección actual en los perfiles, independiente del período. Participación real: asistencia verificada a eventos vinculados al tema."
+msgstr "Interés declarado: selección actual en los perfiles, independiente del período. Participación real: asistencia verificada a eventos vinculados al tema."
+
+msgid "Introduce un ID de modelo DeepSeek válido, por ejemplo deepseek-flash."
+msgstr "Introduce un ID de modelo DeepSeek válido, por ejemplo deepseek-flash."
+
+msgid "Introduce un ID de modelo OpenAI válido, por ejemplo gpt-5.6-luna."
+msgstr "Introduce un ID de modelo OpenAI válido, por ejemplo gpt-5.6-luna."
+
+msgid "Invitaciones a eventos y círculos de conversación."
+msgstr "Invitaciones a eventos y círculos de conversación."
+
+msgid "Invitado"
+msgstr "Invitado"
+
+msgid "Invitar asociados"
+msgstr "Invitar asociados"
+
+msgid "Ir al Hub"
+msgstr "Ir al Hub"
+
+msgid "Ir al inicio"
+msgstr "Ir al inicio"
+
+msgid "JPG, PNG o WebP. Máximo 3 MB."
+msgstr "JPG, PNG o WebP. Máximo 3 MB."
+
+msgid "JPG, PNG o WebP. Podrás mover, ampliar y recortar antes de guardar; ASCLA optimiza la imagen automáticamente."
+msgstr "JPG, PNG o WebP. Podrás mover, ampliar y recortar antes de guardar; ASCLA optimiza la imagen automáticamente."
+
+msgid "JPG, PNG o WebP. Proporción recomendada 16:9. La imagen se recorta y optimiza antes de guardarse."
+msgstr "JPG, PNG o WebP. Proporción recomendada 16:9. La imagen se recorta y optimiza antes de guardarse."
+
+msgid "La IA propuso un interés ajeno al catálogo."
+msgstr "La IA propuso un interés ajeno al catálogo."
+
+msgid "La IA recibe solo el texto libre depurado y el catálogo. Su propuesta siempre requiere tu revisión."
+msgstr "La IA recibe solo el texto libre depurado y el catálogo. Su propuesta siempre requiere tu revisión."
+
+msgid "La asistencia se registra en eventos finalizados y no cancelados."
+msgstr "La asistencia se registra en eventos finalizados y no cancelados."
+
+msgid "La clasificación es una propuesta y no cambia los temas publicados. Las cifras se calculan con los registros guardados, nunca con respuestas de IA."
+msgstr "La clasificación es una propuesta y no cambia los temas publicados. Las cifras se calculan con los registros guardados, nunca con respuestas de IA."
+
+msgid "La comparación refleja solo los eventos analizados. Continúa la clasificación para completar la cobertura."
+msgstr "La comparación refleja solo los eventos analizados. Continúa la clasificación para completar la cobertura."
+
+msgid "La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta."
+msgstr "La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta."
+
+msgid "La conversación en nuestra comunidad"
+msgstr "La conversación en nuestra comunidad"
+
+msgid "La conversación privada no está disponible para este integrante."
+msgstr "La conversación privada no está disponible para este integrante."
+
+msgid "La duración muestra solo los minutos disponibles. Estos datos no modifican roles ni permisos."
+msgstr "La duración muestra solo los minutos disponibles. Estos datos no modifican roles ni permisos."
+
+msgid "La eliminación es permanente y retira sus referencias."
+msgstr "La eliminación es permanente y retira sus referencias."
+
+msgid "La experiencia de nuestra comunidad, siempre a tu alcance."
+msgstr "La experiencia de nuestra comunidad, siempre a tu alcance."
+
+msgid "La explicación de IA no está disponible ahora. Puedes seguir usando el perfil."
+msgstr "La explicación de IA no está disponible ahora. Puedes seguir usando el perfil."
+
+msgid "La fila aprobada supera el máximo de 3 intereses provenientes del formulario."
+msgstr "La fila aprobada supera el máximo de 3 intereses provenientes del formulario."
+
+msgid "La imagen original supera 15 MB. Reduce su tamaño antes de continuar."
+msgstr "La imagen original supera 15 MB. Reduce su tamaño antes de continuar."
+
+msgid "La imagen supera el límite de 28 megapíxeles."
+msgstr "La imagen supera el límite de 28 megapíxeles."
+
+msgid "La importación no está confirmada."
+msgstr "La importación no está confirmada."
+
+msgid "La importación ya fue analizada."
+msgstr "La importación ya fue analizada."
+
+msgid "La mensajería está bloqueada entre estas cuentas."
+msgstr "La mensajería está bloqueada entre estas cuentas."
+
+msgid "La mensajería se habilita al aceptar la conexión."
+msgstr "La mensajería se habilita al aceptar la conexión."
+
+msgid "La otra persona ya recibió tu mensaje. Podrás seguir escribiendo cuando acepte."
+msgstr "La otra persona ya recibió tu mensaje. Podrás seguir escribiendo cuando acepte."
+
+msgid "La participación está desactivada. Puedes habilitarla desde Privacidad y participación."
+msgstr "La participación está desactivada. Puedes habilitarla desde Privacidad y participación."
+
+msgid "La prueba usa texto sintético y el catálogo actual; no envía respuestas, correos ni perfiles de asociados."
+msgstr "La prueba usa texto sintético y el catálogo actual; no envía respuestas, correos ni perfiles de asociados."
+
+msgid "La publicación programada necesita revisión."
+msgstr "La publicación programada necesita revisión."
+
+msgid "La recomendación se descartó de forma privada."
+msgstr "La recomendación se descartó de forma privada."
+
+msgid "La respuesta contiene más de tres opciones."
+msgstr "La respuesta contiene más de tres opciones."
+
+msgid "La sesión del formulario expiró. Recarga la página e inténtalo nuevamente."
+msgstr "La sesión del formulario expiró. Recarga la página e inténtalo nuevamente."
+
+msgid "La sesión se cierra tras 30 minutos sin actividad. Puedes extenderla para continuar."
+msgstr "La sesión se cierra tras 30 minutos sin actividad. Puedes extenderla para continuar."
+
+msgid "La solicitud cerrada se ocultará de la bandeja activa. El asociado conservará el contenido y el historial."
+msgstr "La solicitud cerrada se ocultará de la bandeja activa. El asociado conservará el contenido y el historial."
+
+msgid "La solicitud debe pertenecer al asociado, estar activa y no haber sido utilizada."
+msgstr "La solicitud debe pertenecer al asociado, estar activa y no haber sido utilizada."
+
+msgid "La solicitud resuelta se enviará a la papelera."
+msgstr "La solicitud resuelta se enviará a la papelera."
+
+msgid "La solicitud se cancelará y la otra persona dejará de ver la notificación asociada."
+msgstr "La solicitud se cancelará y la otra persona dejará de ver la notificación asociada."
+
+msgid "La transcripción disponible es insuficiente para generar contenido confiable."
+msgstr "La transcripción disponible es insuficiente para generar contenido confiable."
+
+msgid "La transcripción disponible es insuficiente para generar contenido confiable. ASCLA no generará información sin evidencia suficiente."
+msgstr "La transcripción disponible es insuficiente para generar contenido confiable. ASCLA no generará información sin evidencia suficiente."
+
+msgid "La verificación de seguridad falló o expiró. Inténtalo nuevamente."
+msgstr "La verificación de seguridad falló o expiró. Inténtalo nuevamente."
+
+msgid "La verificación de seguridad no corresponde a este formulario."
+msgstr "La verificación de seguridad no corresponde a este formulario."
+
+msgid "La verificación de seguridad no es válida. Inténtalo nuevamente."
+msgstr "La verificación de seguridad no es válida. Inténtalo nuevamente."
+
+msgid "La verificación de seguridad no está disponible temporalmente."
+msgstr "La verificación de seguridad no está disponible temporalmente."
+
+msgid "La verificación de seguridad pertenece a otro sitio."
+msgstr "La verificación de seguridad pertenece a otro sitio."
+
+msgid "Las conferencias completas permanecen en YouTube. La duración se consulta directamente desde los metadatos del video y nunca se estima a partir de la transcripción."
+msgstr "Las conferencias completas permanecen en YouTube. La duración se consulta directamente desde los metadatos del video y nunca se estima a partir de la transcripción."
+
+msgid "Las diferencias reflejan los registros disponibles; una cobertura incompleta puede cambiar la comparación."
+msgstr "Las diferencias reflejan los registros disponibles; una cobertura incompleta puede cambiar la comparación."
+
+msgid "Las filas sin asociar no crean cuentas ni asistencias. Puedes registrarlas manualmente cuando verifiques la identidad. La duración acumulada se limita a la duración del evento."
+msgstr "Las filas sin asociar no crean cuentas ni asistencias. Puedes registrarlas manualmente cuando verifiques la identidad. La duración acumulada se limita a la duración del evento."
+
+msgid "Las filas sin asociar no crean cuentas ni asistencias. Puedes registrarlas manualmente cuando verifiques la identidad. Se unen intervalos solapados dentro del evento. Las reconexiones sin horarios requieren revisión manual."
+msgstr "Las filas sin asociar no crean cuentas ni asistencias. Puedes registrarlas manualmente cuando verifiques la identidad. Se unen intervalos solapados dentro del evento. Las reconexiones sin horarios requieren revisión manual."
+
+msgid "Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."
+msgstr "Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."
+
+msgid "Las inscripciones no acreditan asistencia. Las tasas usan únicamente registros completos."
+msgstr "Las inscripciones no acreditan asistencia. Las tasas usan únicamente registros completos."
+
+msgid "Las notificaciones internas de ASCLA seguirán disponibles aunque desactives estos correos."
+msgstr "Las notificaciones internas de ASCLA seguirán disponibles aunque desactives estos correos."
+
+msgid "Las recomendaciones aparecen cuando alcanzan el mínimo de afinidad definido por la comunidad."
+msgstr "Las recomendaciones aparecen cuando alcanzan el mínimo de afinidad definido por la comunidad."
+
+msgid "Leído"
+msgstr "Leído"
+
+msgid "Leído por"
+msgstr "Leído por"
+
+msgid "Limpiar filtros"
+msgstr "Limpiar filtros"
+
+msgid "Lista generada"
+msgstr "Lista generada"
+
+msgid "Lo que buscas en la comunidad"
+msgstr "Lo que buscas en la comunidad"
+
+msgid "Lo que te gustaría aprender"
+msgstr "Lo que te gustaría aprender"
+
+msgid "Logo de"
+msgstr "Logo de"
+
+msgid "Longitud mínima de contraseña"
+msgstr "Longitud mínima de contraseña"
+
+msgid "Los cambios de Información, Intereses y Privacidad se guardan juntos."
+msgstr "Los cambios de Información, Intereses y Privacidad se guardan juntos."
+
+msgid "Los cambios reabren el registro para que puedas verificarlo antes de volver a completarlo."
+msgstr "Los cambios reabren el registro para que puedas verificarlo antes de volver a completarlo."
+
+msgid "Los cambios se aplican al guardar tu perfil."
+msgstr "Los cambios se aplican al guardar tu perfil."
+
+msgid "Los datos internos actuales tienen prioridad sobre el historial de la conversación."
+msgstr "Los datos internos actuales tienen prioridad sobre el historial de la conversación."
+
+msgid "Los indicadores de usuarios abarcan toda la comunidad. Los filtros de evento, tema y categoría se aplican a participación."
+msgstr "Los indicadores de usuarios abarcan toda la comunidad. Los filtros de evento, tema y categoría se aplican a participación."
+
+msgid "Los mensajes de personas aún no autorizadas aparecen aquí."
+msgstr "Los mensajes de personas aún no autorizadas aparecen aquí."
+
+msgid "Los momentos que construyen nuestra comunidad."
+msgstr "Los momentos que construyen nuestra comunidad."
+
+msgid "Los sectores que conoces"
+msgstr "Los sectores que conoces"
+
+msgid "Los temas de este foro se conservarán en la lista general."
+msgstr "Los temas de este foro se conservarán en la lista general."
+
+msgid "Los temas que te interesan"
+msgstr "Los temas que te interesan"
+
+msgid "Mantener conexión"
+msgstr "Mantener conexión"
+
+msgid "Mantener solicitud"
+msgstr "Mantener solicitud"
+
+msgid "Mantiene la interfaz clara en este navegador."
+msgstr "Mantiene la interfaz clara en este navegador."
+
+msgid "Mantiene la interfaz oscura en este navegador."
+msgstr "Mantiene la interfaz oscura en este navegador."
+
+msgid "Mantiene tu sesión durante más tiempo. Usa esta opción solo en tus dispositivos personales."
+msgstr "Mantiene tu sesión durante más tiempo. Usa esta opción solo en tus dispositivos personales."
+
+msgid "Manual"
+msgstr "Manual"
+
+msgid "Marcar como leída"
+msgstr "Marcar como leída"
+
+msgid "Marcar como revisado"
+msgstr "Marcar como revisado"
+
+msgid "Marcar todas como leídas"
+msgstr "Marcar todas como leídas"
+
+msgid "Marcos de trabajo"
+msgstr "Marcos de trabajo"
+
+msgid "Materiales recomendados"
+msgstr "Materiales recomendados"
+
+msgid "Materiales seleccionados para ti"
+msgstr "Materiales seleccionados para ti"
+
+msgid "Me gusta"
+msgstr "Me gusta"
+
+msgid "Membresía"
+msgstr "Membresía"
+
+msgid "Membresía vencida"
+msgstr "Membresía vencida"
+
+msgid "Mensaje"
+msgstr "Mensaje"
+
+msgid "Mensaje de presentación (opcional)"
+msgstr "Mensaje de presentación (opcional)"
+
+msgid "Mensaje enviado · Esperando aceptación"
+msgstr "Mensaje enviado · Esperando aceptación"
+
+msgid "Mensaje no deseado (spam)"
+msgstr "Mensaje no deseado (spam)"
+
+msgid "Mensaje privado"
+msgstr "Mensaje privado"
+
+msgid "Mensaje sugerido"
+msgstr "Mensaje sugerido"
+
+msgid "Mensajería"
+msgstr "Mensajería"
+
+msgid "Mensajes"
+msgstr "Mensajes"
+
+msgid "Mensajes privados, solicitudes de conversación e invitaciones a grupos."
+msgstr "Mensajes privados, solicitudes de conversación e invitaciones a grupos."
+
+msgid "Mes anterior"
+msgstr "Mes anterior"
+
+msgid "Mes siguiente"
+msgstr "Mes siguiente"
+
+msgid "Mi calendario"
+msgstr "Mi calendario"
+
+msgid "Mi información sigue vigente"
+msgstr "Mi información sigue vigente"
+
+msgid "Mi perfil"
+msgstr "Mi perfil"
+
+msgid "Microevento aprobado. Edita para publicar ahora o programar su publicación."
+msgstr "Microevento aprobado. Edita para publicar ahora o programar su publicación."
+
+msgid "Microeventos"
+msgstr "Microeventos"
+
+msgid "Miembro ASCLA"
+msgstr "Miembro ASCLA"
+
+msgid "Miembros"
+msgstr "Miembros"
+
+msgid "Miniatura de"
+msgstr "Miniatura de"
+
+msgid "Minutos"
+msgstr "Minutos"
+
+msgid "Minutos conectados · opcional"
+msgstr "Minutos conectados · opcional"
+
+msgid "Minutos registrados"
+msgstr "Minutos registrados"
+
+msgid "Mis archivos"
+msgstr "Mis archivos"
+
+msgid "Mis conexiones"
+msgstr "Mis conexiones"
+
+msgid "Mis consultas anteriores"
+msgstr "Mis consultas anteriores"
+
+msgid "Mis publicaciones"
+msgstr "Mis publicaciones"
+
+msgid "Modalidad"
+msgstr "Modalidad"
+
+msgid "Modelo"
+msgstr "Modelo"
+
+msgid "Modelo:"
+msgstr "Modelo:"
+
+msgid "Moderación"
+msgstr "Moderación"
+
+msgid "Moderar"
+msgstr "Moderar"
+
+msgid "Modo de importación no válido."
+msgstr "Modo de importación no válido."
+
+msgid "Mostramos como máximo cinco perfiles vigentes y explicamos las señales utilizadas."
+msgstr "Mostramos como máximo cinco perfiles vigentes y explicamos las señales utilizadas."
+
+msgid "Mostrando"
+msgstr "Mostrando"
+
+msgid "Mostrar"
+msgstr "Mostrar"
+
+msgid "Mostrar contraseña"
+msgstr "Mostrar contraseña"
+
+msgid "Motivo"
+msgstr "Motivo"
+
+msgid "Motivo de cancelación"
+msgstr "Motivo de cancelación"
+
+msgid "Motivo de reprogramación"
+msgstr "Motivo de reprogramación"
+
+msgid "Motivo de reprogramación (obligatorio para microeventos)"
+msgstr "Motivo de reprogramación (obligatorio para microeventos)"
+
+msgid "Más filtros"
+msgstr "Más filtros"
+
+msgid "Más opciones"
+msgstr "Más opciones"
+
+msgid "Máximo de propuestas por período"
+msgstr "Máximo de propuestas por período"
+
+msgid "Máximo de propuestas por semana"
+msgstr "Máximo de propuestas por semana"
+
+msgid "Método / confianza"
+msgstr "Método / confianza"
+
+msgid "Mínimo de participantes"
+msgstr "Mínimo de participantes"
+
+msgid "Navegación principal"
+msgstr "Navegación principal"
+
+msgid "Necesita aprobación administrativa antes de publicarse."
+msgstr "Necesita aprobación administrativa antes de publicarse."
+
+msgid "Necesita atención"
+msgstr "Necesita atención"
+
+msgid "No asistió"
+msgstr "No asistió"
+
+msgid "No encontramos asociados"
+msgstr "No encontramos asociados"
+
+msgid "No encontramos ciudades con ese nombre."
+msgstr "No encontramos ciudades con ese nombre."
+
+msgid "No encontramos países con ese nombre."
+msgstr "No encontramos países con ese nombre."
+
+msgid "No encontramos perfiles"
+msgstr "No encontramos perfiles"
+
+msgid "No encontramos usuarios"
+msgstr "No encontramos usuarios"
+
+msgid "No es posible enviar la solicitud en este momento."
+msgstr "No es posible enviar la solicitud en este momento."
+
+msgid "No has descartado recomendaciones."
+msgstr "No has descartado recomendaciones."
+
+msgid "No hay archivos"
+msgstr "No hay archivos"
+
+msgid "No hay asociados bloqueados."
+msgstr "No hay asociados bloqueados."
+
+msgid "No hay conexiones que coincidan con ese nombre."
+msgstr "No hay conexiones que coincidan con ese nombre."
+
+msgid "No hay conversaciones para mostrar. Puedes iniciar una desde el directorio o crear un grupo."
+msgstr "No hay conversaciones para mostrar. Puedes iniciar una desde el directorio o crear un grupo."
+
+msgid "No hay datos para este período."
+msgstr "No hay datos para este período."
+
+msgid "No hay opciones disponibles."
+msgstr "No hay opciones disponibles."
+
+msgid "No hay participantes nuevos o actualizables en este CSV."
+msgstr "No hay participantes nuevos o actualizables en este CSV."
+
+msgid "No hay reportes registrados."
+msgstr "No hay reportes registrados."
+
+msgid "No hay solicitudes de conversación enviadas."
+msgstr "No hay solicitudes de conversación enviadas."
+
+msgid "No hay solicitudes enviadas pendientes."
+msgstr "No hay solicitudes enviadas pendientes."
+
+msgid "No hay una transcripción guardada. ASCLA intentará obtener una transcripción autorizada de YouTube al generar el resumen. Si no puede obtenerla, la generación se detendrá para evitar inventar información."
+msgstr "No hay una transcripción guardada. ASCLA intentará obtener una transcripción autorizada de YouTube al generar el resumen. Si no puede obtenerla, la generación se detendrá para evitar inventar información."
+
+msgid "No me interesa"
+msgstr "No me interesa"
+
+msgid "No pude preparar una respuesta."
+msgstr "No pude preparar una respuesta."
+
+msgid "No puede editar este contenido."
+msgstr "No puede editar este contenido."
+
+msgid "No puedes iniciar una conversación privada con este integrante."
+msgstr "No puedes iniciar una conversación privada con este integrante."
+
+msgid "No se encontró la columna de correo del participante en el CSV."
+msgstr "No se encontró la columna de correo del participante en el CSV."
+
+msgid "No se encontró un usuario ASCLA con ese correo."
+msgstr "No se encontró un usuario ASCLA con ese correo."
+
+msgid "No se pudieron cargar las ciudades en este momento."
+msgstr "No se pudieron cargar las ciudades en este momento."
+
+msgid "No se pudieron cargar las sugerencias geográficas. Puedes conservar tu ubicación actual."
+msgstr "No se pudieron cargar las sugerencias geográficas. Puedes conservar tu ubicación actual."
+
+msgid "No se pudieron guardar las etiquetas."
+msgstr "No se pudieron guardar las etiquetas."
+
+msgid "No se pudieron guardar todos los cambios. Reinténtalo."
+msgstr "No se pudieron guardar todos los cambios. Reinténtalo."
+
+msgid "No se pudo actualizar el perfil."
+msgstr "No se pudo actualizar el perfil."
+
+msgid "No se pudo cargar el reproductor de YouTube."
+msgstr "No se pudo cargar el reproductor de YouTube."
+
+msgid "No se pudo completar la consulta."
+msgstr "No se pudo completar la consulta."
+
+msgid "No se pudo completar la solicitud."
+msgstr "No se pudo completar la solicitud."
+
+msgid "No se pudo comprobar la verificación de seguridad. Inténtalo de nuevo."
+msgstr "No se pudo comprobar la verificación de seguridad. Inténtalo de nuevo."
+
+msgid "No se pudo confirmar el lote."
+msgstr "No se pudo confirmar el lote."
+
+msgid "No se pudo guardar el rol de la cuenta."
+msgstr "No se pudo guardar el rol de la cuenta."
+
+msgid "No se pudo guardar la decisión."
+msgstr "No se pudo guardar la decisión."
+
+msgid "No se pudo guardar la fuente de intereses."
+msgstr "No se pudo guardar la fuente de intereses."
+
+msgid "No se pudo leer la imagen seleccionada."
+msgstr "No se pudo leer la imagen seleccionada."
+
+msgid "No se pudo obtener una transcripción autorizada desde YouTube. Puede que el video no tenga subtítulos accesibles para esta cuenta. Pega una transcripción manual antes de generar el resumen; ASCLA no inventará contenido."
+msgstr "No se pudo obtener una transcripción autorizada desde YouTube. Puede que el video no tenga subtítulos accesibles para esta cuenta. Pega una transcripción manual antes de generar el resumen; ASCLA no inventará contenido."
+
+msgid "No se pudo obtener una transcripción verificable para este video. ASCLA no generará resumen, nota ni temas hasta que agregues una transcripción autorizada o YouTube pueda entregar subtítulos accesibles."
+msgstr "No se pudo obtener una transcripción verificable para este video. ASCLA no generará resumen, nota ni temas hasta que agregues una transcripción autorizada o YouTube pueda entregar subtítulos accesibles."
+
+msgid "No se pudo obtener una transcripción verificable. Conecta YouTube OAuth o pega una transcripción autorizada. ASCLA no generará información sin una transcripción válida."
+msgstr "No se pudo obtener una transcripción verificable. Conecta YouTube OAuth o pega una transcripción autorizada. ASCLA no generará información sin una transcripción válida."
+
+msgid "No se pudo procesar la solicitud. Inténtalo nuevamente."
+msgstr "No se pudo procesar la solicitud. Inténtalo nuevamente."
+
+msgid "No se pudo publicar el contenido programado. Vuelve a guardar la fecha."
+msgstr "No se pudo publicar el contenido programado. Vuelve a guardar la fecha."
+
+msgid "No se pudo verificar la duración directamente desde YouTube. Conecta YouTube OAuth y vuelve a intentar; ASCLA no estimará la duración usando la transcripción."
+msgstr "No se pudo verificar la duración directamente desde YouTube. Conecta YouTube OAuth y vuelve a intentar; ASCLA no estimará la duración usando la transcripción."
+
+msgid "No se puede cancelar durante la aplicación."
+msgstr "No se puede cancelar durante la aplicación."
+
+msgid "No tienes avisos pendientes"
+msgstr "No tienes avisos pendientes"
+
+msgid "No tienes permisos para revisar reportes."
+msgstr "No tienes permisos para revisar reportes."
+
+msgid "No tienes solicitudes de conversación pendientes."
+msgstr "No tienes solicitudes de conversación pendientes."
+
+msgid "No tienes solicitudes pendientes."
+msgstr "No tienes solicitudes pendientes."
+
+msgid "No utilizar"
+msgstr "No utilizar"
+
+msgid "Nombre"
+msgstr "Nombre"
+
+msgid "Nombre del contacto"
+msgstr "Nombre del contacto"
+
+msgid "Nombre del tema"
+msgstr "Nombre del tema"
+
+msgid "Nombre, cargo, empresa o experiencia…"
+msgstr "Nombre, cargo, empresa o experiencia…"
+
+msgid "Nombres y apellidos"
+msgstr "Nombres y apellidos"
+
+msgid "Nombres: este campo es obligatorio."
+msgstr "Nombres: este campo es obligatorio."
+
+msgid "Normalización determinista"
+msgstr "Normalización determinista"
+
+msgid "Normas de la comunidad"
+msgstr "Normas de la comunidad"
+
+msgid "Normativas mencionadas"
+msgstr "Normativas mencionadas"
+
+msgid "Nota técnica"
+msgstr "Nota técnica"
+
+msgid "Notificaciones"
+msgstr "Notificaciones"
+
+msgid "Notificaciones por correo"
+msgstr "Notificaciones por correo"
+
+msgid "Notificación eliminada."
+msgstr "Notificación eliminada."
+
+msgid "Novedades de ASCLA"
+msgstr "Novedades de ASCLA"
+
+msgid "Nuestros aliados"
+msgstr "Nuestros aliados"
+
+msgid "Nueva"
+msgstr "Nueva"
+
+msgid "Nueva contraseña"
+msgstr "Nueva contraseña"
+
+msgid "Nueva conversación"
+msgstr "Nueva conversación"
+
+msgid "Nueva galería"
+msgstr "Nueva galería"
+
+msgid "Nueva notificación"
+msgstr "Nueva notificación"
+
+msgid "Nueva publicación"
+msgstr "Nueva publicación"
+
+msgid "Nuevas notificaciones"
+msgstr "Nuevas notificaciones"
+
+msgid "Nuevo evento"
+msgstr "Nuevo evento"
+
+msgid "Nuevo recurso"
+msgstr "Nuevo recurso"
+
+msgid "Nuevo tema"
+msgstr "Nuevo tema"
+
+msgid "Objetivos de networking"
+msgstr "Objetivos de networking"
+
+msgid "Ocasional"
+msgstr "Ocasional"
+
+msgid "Ocultar"
+msgstr "Ocultar"
+
+msgid "Ocultar contraseña"
+msgstr "Ocultar contraseña"
+
+msgid "Ocultar conversación"
+msgstr "Ocultar conversación"
+
+msgid "Oculto"
+msgstr "Oculto"
+
+msgid "Oferta vencida"
+msgstr "Oferta vencida"
+
+msgid "Opciones vigentes del formulario de solicitudes."
+msgstr "Opciones vigentes del formulario de solicitudes."
+
+msgid "OpenAI / ChatGPT · API real"
+msgstr "OpenAI / ChatGPT · API real"
+
+msgid "OpenAI API Key"
+msgstr "OpenAI API Key"
+
+msgid "OpenAI API Key (guardada; vacío para conservar)"
+msgstr "OpenAI API Key (guardada; vacío para conservar)"
+
+msgid "Operación"
+msgstr "Operación"
+
+msgid "Optimizando imagen…"
+msgstr "Optimizando imagen…"
+
+msgid "Ordenados por asistencias verificadas. La tasa usa sus inscripciones en eventos con registro completo; asistir sin inscripción no aumenta esa tasa."
+msgstr "Ordenados por asistencias verificadas. La tasa usa sus inscripciones en eventos con registro completo; asistir sin inscripción no aumenta esa tasa."
+
+msgid "Organizaciones extremistas o peligrosas"
+msgstr "Organizaciones extremistas o peligrosas"
+
+msgid "Organización"
+msgstr "Organización"
+
+msgid "Organización no visible"
+msgstr "Organización no visible"
+
+msgid "Origen de cada categoría"
+msgstr "Origen de cada categoría"
+
+msgid "Oscuro"
+msgstr "Oscuro"
+
+msgid "Otro motivo"
+msgstr "Otro motivo"
+
+msgid "PARTICIPACIÓN E INTERESES"
+msgstr "PARTICIPACIÓN E INTERESES"
+
+msgid "PERSONAS"
+msgstr "PERSONAS"
+
+msgid "Paginación del directorio"
+msgstr "Paginación del directorio"
+
+msgid "Palabras clave"
+msgstr "Palabras clave"
+
+msgid "Para aparecer en el directorio y recibir recomendaciones, completa:"
+msgstr "Para aparecer en el directorio y recibir recomendaciones, completa:"
+
+msgid "Para cambiar Cargo o Empresa, selecciona una solicitud activa del asociado que autorice ese cambio. Cada solicitud se puede utilizar una vez."
+msgstr "Para cambiar Cargo o Empresa, selecciona una solicitud activa del asociado que autorice ese cambio. Cada solicitud se puede utilizar una vez."
+
+msgid "Para cambiar datos personales o profesionales, selecciona una solicitud activa del asociado. Cada solicitud se puede utilizar una vez."
+msgstr "Para cambiar datos personales o profesionales, selecciona una solicitud activa del asociado. Cada solicitud se puede utilizar una vez."
+
+msgid "Para cambiarla desde la intranet, confirma primero tu contraseña actual."
+msgstr "Para cambiarla desde la intranet, confirma primero tu contraseña actual."
+
+msgid "Para cerrar"
+msgstr "Para cerrar"
+
+msgid "Para comenzar"
+msgstr "Para comenzar"
+
+msgid "Para cuidar la calidad y privacidad de las coincidencias, necesitamos un perfil profesional mínimo y al menos 70% de completitud."
+msgstr "Para cuidar la calidad y privacidad de las coincidencias, necesitamos un perfil profesional mínimo y al menos 70% de completitud."
+
+msgid "Parciales"
+msgstr "Parciales"
+
+msgid "Participación real · personas"
+msgstr "Participación real · personas"
+
+msgid "Participante"
+msgstr "Participante"
+
+msgid "Participantes (moderación)"
+msgstr "Participantes (moderación)"
+
+msgid "Participantes confirmados"
+msgstr "Participantes confirmados"
+
+msgid "Participantes e inscritos"
+msgstr "Participantes e inscritos"
+
+msgid "Participantes y lista de espera (gestión de eventos)"
+msgstr "Participantes y lista de espera (gestión de eventos)"
+
+msgid "Participar en microeventos"
+msgstr "Participar en microeventos"
+
+msgid "País"
+msgstr "País"
+
+msgid "País/región"
+msgstr "País/región"
+
+msgid "Pendiente"
+msgstr "Pendiente"
+
+msgid "Pendiente de reconfirmación"
+msgstr "Pendiente de reconfirmación"
+
+msgid "Pendiente de revisión"
+msgstr "Pendiente de revisión"
+
+msgid "Perfil"
+msgstr "Perfil"
+
+msgid "Perfil no disponible"
+msgstr "Perfil no disponible"
+
+msgid "Perfil no disponible actualmente."
+msgstr "Perfil no disponible actualmente."
+
+msgid "Perfiles descartados"
+msgstr "Perfiles descartados"
+
+msgid "Perfiles por página"
+msgstr "Perfiles por página"
+
+msgid "Perfiles recomendados"
+msgstr "Perfiles recomendados"
+
+msgid "Perfiles y directorio"
+msgstr "Perfiles y directorio"
+
+msgid "Periodicidad de propuestas (días)"
+msgstr "Periodicidad de propuestas (días)"
+
+msgid "Permanecerá oculto hasta esa fecha."
+msgstr "Permanecerá oculto hasta esa fecha."
+
+msgid "Permanencia mínima (%)"
+msgstr "Permanencia mínima (%)"
+
+msgid "Permite que otros asociados encuentren tu perfil."
+msgstr "Permite que otros asociados encuentren tu perfil."
+
+msgid "Personas con acciones en el registro de actividad."
+msgstr "Personas con acciones en el registro de actividad."
+
+msgid "Personas con al menos una asistencia."
+msgstr "Personas con al menos una asistencia."
+
+msgid "Personas que asistieron a dos o más eventos."
+msgstr "Personas que asistieron a dos o más eventos."
+
+msgid "Personas que asistirán"
+msgstr "Personas que asistirán"
+
+msgid "Personas y conocimiento según los datos que autorizaste."
+msgstr "Personas y conocimiento según los datos que autorizaste."
+
+msgid "Personas y conocimiento según tus intereses"
+msgstr "Personas y conocimiento según tus intereses"
+
+msgid "Personas, contenido y atención en un mismo lugar."
+msgstr "Personas, contenido y atención en un mismo lugar."
+
+msgid "Pocas coincidencias esta semana"
+msgstr "Pocas coincidencias esta semana"
+
+msgid "Podrás volver a solicitar la conexión a partir de"
+msgstr "Podrás volver a solicitar la conexión a partir de"
+
+msgid "Por analizar"
+msgstr "Por analizar"
+
+msgid "Por completar"
+msgstr "Por completar"
+
+msgid "Por confirmar"
+msgstr "Por confirmar"
+
+msgid "Por qué podrían conectar"
+msgstr "Por qué podrían conectar"
+
+msgid "Por qué te lo recomendamos"
+msgstr "Por qué te lo recomendamos"
+
+msgid "Portada del evento"
+msgstr "Portada del evento"
+
+msgid "Posponer avisos durante (días)"
+msgstr "Posponer avisos durante (días)"
+
+msgid "Pregunta a tu comunidad ASCLA"
+msgstr "Pregunta a tu comunidad ASCLA"
+
+msgid "Prepara las categorías estructuradas del formulario o añade un tema. Se reutilizan las categorías existentes y sus sinónimos."
+msgstr "Prepara las categorías estructuradas del formulario o añade un tema. Se reutilizan las categorías existentes y sus sinónimos."
+
+msgid "Prepara primero el catálogo de intereses."
+msgstr "Prepara primero el catálogo de intereses."
+
+msgid "Preparando explicación de IA…"
+msgstr "Preparando explicación de IA…"
+
+msgid "Preparando respuesta"
+msgstr "Preparando respuesta"
+
+msgid "Preparando respuesta…"
+msgstr "Preparando respuesta…"
+
+msgid "Preparar categorías de Forms"
+msgstr "Preparar categorías de Forms"
+
+msgid "Preparar los encuentros de la semana"
+msgstr "Preparar los encuentros de la semana"
+
+msgid "Preparar los próximos encuentros"
+msgstr "Preparar los próximos encuentros"
+
+msgid "Preparar microeventos semanalmente con WP-Cron"
+msgstr "Preparar microeventos semanalmente con WP-Cron"
+
+msgid "Preparar propuestas de la semana"
+msgstr "Preparar propuestas de la semana"
+
+msgid "Preparar propuestas del período"
+msgstr "Preparar propuestas del período"
+
+msgid "Presencial"
+msgstr "Presencial"
+
+msgid "Privacidad del teléfono no válida."
+msgstr "Privacidad del teléfono no válida."
+
+msgid "Privacidad y avisos"
+msgstr "Privacidad y avisos"
+
+msgid "Privacidad y participación"
+msgstr "Privacidad y participación"
+
+msgid "Probando el proveedor, el modelo y la clave guardados…"
+msgstr "Probando el proveedor, el modelo y la clave guardados…"
+
+msgid "Probar Gemini para Forms"
+msgstr "Probar Gemini para Forms"
+
+msgid "Probar IA para Forms"
+msgstr "Probar IA para Forms"
+
+msgid "Procesando"
+msgstr "Procesando"
+
+msgid "Programación guardada. Falta aprobación administrativa."
+msgstr "Programación guardada. Falta aprobación administrativa."
+
+msgid "Programar publicación"
+msgstr "Programar publicación"
+
+msgid "Progreso"
+msgstr "Progreso"
+
+msgid "Promedio por evento"
+msgstr "Promedio por evento"
+
+msgid "Propiedad intelectual"
+msgstr "Propiedad intelectual"
+
+msgid "Proponer con IA"
+msgstr "Proponer con IA"
+
+msgid "Proporción recomendada"
+msgstr "Proporción recomendada"
+
+msgid "Propuesta de"
+msgstr "Propuesta de"
+
+msgid "Proveedor"
+msgstr "Proveedor"
+
+msgid "Prueba con otro nombre, país o interés."
+msgstr "Prueba con otro nombre, país o interés."
+
+msgid "Prueba una búsqueda diferente."
+msgstr "Prueba una búsqueda diferente."
+
+msgid "Próximos encuentros"
+msgstr "Próximos encuentros"
+
+msgid "Próximos eventos"
+msgstr "Próximos eventos"
+
+msgid "Publicaciones"
+msgstr "Publicaciones"
+
+msgid "Publicación enriquecida con IA"
+msgstr "Publicación enriquecida con IA"
+
+msgid "Publicación programada para"
+msgstr "Publicación programada para"
+
+msgid "Publicación programada."
+msgstr "Publicación programada."
+
+msgid "Publicada"
+msgstr "Publicada"
+
+msgid "Publicado"
+msgstr "Publicado"
+
+msgid "Publicados recientemente"
+msgstr "Publicados recientemente"
+
+msgid "Publicar ahora"
+msgstr "Publicar ahora"
+
+msgid "Publicar ahora (revisado)"
+msgstr "Publicar ahora (revisado)"
+
+msgid "Publicar comentario"
+msgstr "Publicar comentario"
+
+msgid "Puede volver a aparecer en próximas recomendaciones."
+msgstr "Puede volver a aparecer en próximas recomendaciones."
+
+msgid "Puedes elegir varias opciones en cada filtro."
+msgstr "Puedes elegir varias opciones en cada filtro."
+
+msgid "Puedes elegir varias opciones."
+msgstr "Puedes elegir varias opciones."
+
+msgid "Puedes leer este mensaje antes de decidir. Acepta para poder responder."
+msgstr "Puedes leer este mensaje antes de decidir. Acepta para poder responder."
+
+msgid "Puedes presentarte antes de conectar. Máximo 1000 caracteres."
+msgstr "Puedes presentarte antes de conectar. Máximo 1000 caracteres."
+
+msgid "Puedes recibir un enlace seguro de recuperación en"
+msgstr "Puedes recibir un enlace seguro de recuperación en"
+
+msgid "Puedes seleccionar varias opciones. En computadora, usa Ctrl o Cmd para añadir o quitar selecciones."
+msgstr "Puedes seleccionar varias opciones. En computadora, usa Ctrl o Cmd para añadir o quitar selecciones."
+
+msgid "Pulsa un dato para cambiar entre visible y oculto. La moderación puede consultarlo."
+msgstr "Pulsa un dato para cambiar entre visible y oculto. La moderación puede consultarlo."
+
+msgid "Puntos clave"
+msgstr "Puntos clave"
+
+msgid "Página"
+msgstr "Página"
+
+msgid "Página personal"
+msgstr "Página personal"
+
+msgid "Quitar"
+msgstr "Quitar"
+
+msgid "Quitar Me gusta"
+msgstr "Quitar Me gusta"
+
+msgid "Quitar de Google"
+msgstr "Quitar de Google"
+
+msgid "Quitar foto"
+msgstr "Quitar foto"
+
+msgid "Quitar portada"
+msgstr "Quitar portada"
+
+msgid "Qué ven otros asociados"
+msgstr "Qué ven otros asociados"
+
+msgid "RECOMENDACIONES PARA TI"
+msgstr "RECOMENDACIONES PARA TI"
+
+msgid "Reabrir registro"
+msgstr "Reabrir registro"
+
+msgid "Reacciones"
+msgstr "Reacciones"
+
+msgid "Reactivar acceso"
+msgstr "Reactivar acceso"
+
+msgid "Rechazado"
+msgstr "Rechazado"
+
+msgid "Rechazar cupo"
+msgstr "Rechazar cupo"
+
+msgid "Rechazar invitación"
+msgstr "Rechazar invitación"
+
+msgid "Rechazar solicitud"
+msgstr "Rechazar solicitud"
+
+msgid "Recibe invitaciones prioritarias para conversar en grupos con intereses comunes."
+msgstr "Recibe invitaciones prioritarias para conversar en grupos con intereses comunes."
+
+msgid "Recibe propuestas para conversar en grupos de 4 a 6 personas."
+msgstr "Recibe propuestas para conversar en grupos de 4 a 6 personas."
+
+msgid "Recibe recomendaciones de personas afines a tus intereses."
+msgstr "Recibe recomendaciones de personas afines a tus intereses."
+
+msgid "Recomendaciones"
+msgstr "Recomendaciones"
+
+msgid "Recomendaciones pensadas para ti"
+msgstr "Recomendaciones pensadas para ti"
+
+msgid "Reconexiones sin horarios: no se pueden descartar intervalos solapados."
+msgstr "Reconexiones sin horarios: no se pueden descartar intervalos solapados."
+
+msgid "Reconfirmar asistencia"
+msgstr "Reconfirmar asistencia"
+
+msgid "Recordarme"
+msgstr "Recordarme"
+
+msgid "Recordarme no evita el cierre por 30 minutos de inactividad."
+msgstr "Recordarme no evita el cierre por 30 minutos de inactividad."
+
+msgid "Recordatorios: horas antes del inicio"
+msgstr "Recordatorios: horas antes del inicio"
+
+msgid "Recortar"
+msgstr "Recortar"
+
+msgid "Recuperar contraseña"
+msgstr "Recuperar contraseña"
+
+msgid "Recurrencia"
+msgstr "Recurrencia"
+
+msgid "Recurrente"
+msgstr "Recurrente"
+
+msgid "Recursos para aprender"
+msgstr "Recursos para aprender"
+
+msgid "Recursos publicados y autorizados, ordenados por su relación con tus intereses."
+msgstr "Recursos publicados y autorizados, ordenados por su relación con tus intereses."
+
+msgid "Referencia"
+msgstr "Referencia"
+
+msgid "Referencia temporal al video de origen. No existe un archivo recortado."
+msgstr "Referencia temporal al video de origen. No existe un archivo recortado."
+
+msgid "Referencias temporales al video de origen; no son archivos recortados."
+msgstr "Referencias temporales al video de origen; no son archivos recortados."
+
+msgid "Registrada"
+msgstr "Registrada"
+
+msgid "Registrar asistencia"
+msgstr "Registrar asistencia"
+
+msgid "Registrar manualmente"
+msgstr "Registrar manualmente"
+
+msgid "Registrarme"
+msgstr "Registrarme"
+
+msgid "Registro"
+msgstr "Registro"
+
+msgid "Registro completo"
+msgstr "Registro completo"
+
+msgid "Registro completo."
+msgstr "Registro completo."
+
+msgid "Registro de asistencia"
+msgstr "Registro de asistencia"
+
+msgid "Registro por completar"
+msgstr "Registro por completar"
+
+msgid "Registros completos: actual / anterior"
+msgstr "Registros completos: actual / anterior"
+
+msgid "Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones."
+msgstr "Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones."
+
+msgid "Regístrate en próximos eventos"
+msgstr "Regístrate en próximos eventos"
+
+msgid "Reintentar"
+msgstr "Reintentar"
+
+msgid "Relacionado con tu actividad reciente"
+msgstr "Relacionado con tu actividad reciente"
+
+msgid "Relacionado con tu perfil profesional"
+msgstr "Relacionado con tu perfil profesional"
+
+msgid "Relacionar columnas"
+msgstr "Relacionar columnas"
+
+msgid "Reportar"
+msgstr "Reportar"
+
+msgid "Reportar comentario"
+msgstr "Reportar comentario"
+
+msgid "Reporte marcado como revisado."
+msgstr "Reporte marcado como revisado."
+
+msgid "Reporte no encontrado."
+msgstr "Reporte no encontrado."
+
+msgid "Reportes por revisar"
+msgstr "Reportes por revisar"
+
+msgid "Requiere revisión de fuentes, anonimización y derechos."
+msgstr "Requiere revisión de fuentes, anonimización y derechos."
+
+msgid "Reservas aceptadas en los eventos del período."
+msgstr "Reservas aceptadas en los eventos del período."
+
+msgid "Responder"
+msgstr "Responder"
+
+msgid "Responder a"
+msgstr "Responder a"
+
+msgid "Responsable"
+msgstr "Responsable"
+
+msgid "Responsable actualizado"
+msgstr "Responsable actualizado"
+
+msgid "Respuesta abierta / Otros"
+msgstr "Respuesta abierta / Otros"
+
+msgid "Respuesta al asociado"
+msgstr "Respuesta al asociado"
+
+msgid "Respuesta estructurada original"
+msgstr "Respuesta estructurada original"
+
+msgid "Respuesta lista"
+msgstr "Respuesta lista"
+
+msgid "Restablecer"
+msgstr "Restablecer"
+
+msgid "Restituir"
+msgstr "Restituir"
+
+msgid "Resultados por página"
+msgstr "Resultados por página"
+
+msgid "Resultados y fuentes"
+msgstr "Resultados y fuentes"
+
+msgid "Resumen"
+msgstr "Resumen"
+
+msgid "Revisa tu perfil"
+msgstr "Revisa tu perfil"
+
+msgid "Revisado"
+msgstr "Revisado"
+
+msgid "Revisado por:"
+msgstr "Revisado por:"
+
+msgid "Revisar CSV"
+msgstr "Revisar CSV"
+
+msgid "Revisar cambios"
+msgstr "Revisar cambios"
+
+msgid "Revisar comentario"
+msgstr "Revisar comentario"
+
+msgid "Revisar conflicto"
+msgstr "Revisar conflicto"
+
+msgid "Revisar consulta"
+msgstr "Revisar consulta"
+
+msgid "Revisar el perfil cada (días)"
+msgstr "Revisar el perfil cada (días)"
+
+msgid "Revisar mis preferencias"
+msgstr "Revisar mis preferencias"
+
+msgid "Revisar reporte"
+msgstr "Revisar reporte"
+
+msgid "Revisión manual"
+msgstr "Revisión manual"
+
+msgid "Revisión pendiente"
+msgstr "Revisión pendiente"
+
+msgid "Salir de la lista de espera"
+msgstr "Salir de la lista de espera"
+
+msgid "Se añadirán los intereses aceptados conservando los actuales."
+msgstr "Se añadirán los intereses aceptados conservando los actuales."
+
+msgid "Se comparan períodos consecutivos de igual número de días. Sin una base previa positiva no se calcula un porcentaje de crecimiento."
+msgstr "Se comparan períodos consecutivos de igual número de días. Sin una base previa positiva no se calcula un porcentaje de crecimiento."
+
+msgid "Se eliminará el reporte revisado. El contenido reportado se conservará."
+msgstr "Se eliminará el reporte revisado. El contenido reportado se conservará."
+
+msgid "Se eliminará la conexión y se ocultará la conversación para ambos. Desbloquear no restablece la conexión."
+msgstr "Se eliminará la conexión y se ocultará la conversación para ambos. Desbloquear no restablece la conexión."
+
+msgid "Se envían únicamente títulos depurados y el catálogo de temas al proveedor configurado. Se excluyen microeventos privados y sesiones Chatham House. No se envían correos, perfiles ni listas de asistencia."
+msgstr "Se envían únicamente títulos depurados y el catálogo de temas al proveedor configurado. Se excluyen microeventos privados y sesiones Chatham House. No se envían correos, perfiles ni listas de asistencia."
+
+msgid "Se identifica por correo, se agrupan reconexiones y se conservan las correcciones manuales. Primero verás una vista previa."
+msgstr "Se identifica por correo, se agrupan reconexiones y se conservan las correcciones manuales. Primero verás una vista previa."
+
+msgid "Se identifica por código único o correo. Nunca por nombre. Una respuesta vacía no elimina intereses."
+msgstr "Se identifica por código único o correo. Nunca por nombre. Una respuesta vacía no elimina intereses."
+
+msgid "Se liberó un cupo para ti"
+msgstr "Se liberó un cupo para ti"
+
+msgid "Se muestran miembros activos que han elegido aparecer en el directorio."
+msgstr "Se muestran miembros activos que han elegido aparecer en el directorio."
+
+msgid "Se sustituirán los intereses de las respuestas no vacías aceptadas."
+msgstr "Se sustituirán los intereses de las respuestas no vacías aceptadas."
+
+msgid "Secciones de administración"
+msgstr "Secciones de administración"
+
+msgid "Secciones del perfil"
+msgstr "Secciones del perfil"
+
+msgid "Sector profesional"
+msgstr "Sector profesional"
+
+msgid "Seguir conversación"
+msgstr "Seguir conversación"
+
+msgid "Seguir editando"
+msgstr "Seguir editando"
+
+msgid "Seguridad de la cuenta"
+msgstr "Seguridad de la cuenta"
+
+msgid "Selecciona Google Gemini u OpenAI antes de probar la conexión."
+msgstr "Selecciona Google Gemini u OpenAI antes de probar la conexión."
+
+msgid "Selecciona Google Gemini y guarda su API Key antes de probar Forms."
+msgstr "Selecciona Google Gemini y guarda su API Key antes de probar Forms."
+
+msgid "Selecciona Google Gemini, OpenAI o DeepSeek antes de probar la conexión."
+msgstr "Selecciona Google Gemini, OpenAI o DeepSeek antes de probar la conexión."
+
+msgid "Selecciona como máximo 3 intereses provenientes del formulario."
+msgstr "Selecciona como máximo 3 intereses provenientes del formulario."
+
+msgid "Selecciona el motivo de la denuncia"
+msgstr "Selecciona el motivo de la denuncia"
+
+msgid "Selecciona el proveedor, guarda su modelo y su clave, y luego prueba la conexión. ASCLA envía al proveedor únicamente el contexto interno autorizado que prepara el asistente."
+msgstr "Selecciona el proveedor, guarda su modelo y su clave, y luego prueba la conexión. ASCLA envía al proveedor únicamente el contexto interno autorizado que prepara el asistente."
+
+msgid "Selecciona identidad y respuestas."
+msgstr "Selecciona identidad y respuestas."
+
+msgid "Selecciona las columnas."
+msgstr "Selecciona las columnas."
+
+msgid "Selecciona los intereses revisados."
+msgstr "Selecciona los intereses revisados."
+
+msgid "Selecciona primero un país"
+msgstr "Selecciona primero un país"
+
+msgid "Selecciona primero un país."
+msgstr "Selecciona primero un país."
+
+msgid "Selecciona un país de la lista de sugerencias."
+msgstr "Selecciona un país de la lista de sugerencias."
+
+msgid "Selecciona un proveedor de IA real y guarda su API Key antes de probar Forms."
+msgstr "Selecciona un proveedor de IA real y guarda su API Key antes de probar Forms."
+
+msgid "Selecciona un usuario ASCLA válido."
+msgstr "Selecciona un usuario ASCLA válido."
+
+msgid "Selecciona una ciudad real de las sugerencias para el país elegido."
+msgstr "Selecciona una ciudad real de las sugerencias para el país elegido."
+
+msgid "Selecciona una imagen JPG, PNG o WebP."
+msgstr "Selecciona una imagen JPG, PNG o WebP."
+
+msgid "Selecciona una reacción válida."
+msgstr "Selecciona una reacción válida."
+
+msgid "Selecciona una solicitud de Contacto"
+msgstr "Selecciona una solicitud de Contacto"
+
+msgid "Selecciona una solicitud del asociado en Contacto para cambiar Cargo o Empresa."
+msgstr "Selecciona una solicitud del asociado en Contacto para cambiar Cargo o Empresa."
+
+msgid "Seleccionado para ti"
+msgstr "Seleccionado para ti"
+
+msgid "Si YouTube no la expone públicamente, conecta YouTube OAuth y vuelve a intentar."
+msgstr "Si YouTube no la expone públicamente, conecta YouTube OAuth y vuelve a intentar."
+
+msgid "Si eliges Publicar ahora, confirmas que revisaste fuentes, anonimización y derechos antes de publicar."
+msgstr "Si eliges Publicar ahora, confirmas que revisaste fuentes, anonimización y derechos antes de publicar."
+
+msgid "Si existe una cuenta asociada, recibirás un enlace de recuperación. Revisa también la carpeta de spam."
+msgstr "Si existe una cuenta asociada, recibirás un enlace de recuperación. Revisa también la carpeta de spam."
+
+msgid "Si sales de esta pantalla ahora, esos cambios se perderán."
+msgstr "Si sales de esta pantalla ahora, esos cambios se perderán."
+
+msgid "Siguiente"
+msgstr "Siguiente"
+
+msgid "Sin base previa"
+msgstr "Sin base previa"
+
+msgid "Sin cambios"
+msgstr "Sin cambios"
+
+msgid "Sin categoría"
+msgstr "Sin categoría"
+
+msgid "Sin descripción del grupo."
+msgstr "Sin descripción del grupo."
+
+msgid "Sin fecha límite, la membresía permanece vigente hasta que se suspenda. El vencimiento conserva el perfil y el historial."
+msgstr "Sin fecha límite, la membresía permanece vigente hasta que se suspenda. El vencimiento conserva el perfil y el historial."
+
+msgid "Sin identificar"
+msgstr "Sin identificar"
+
+msgid "Sin inscripción"
+msgstr "Sin inscripción"
+
+msgid "Sin leer"
+msgstr "Sin leer"
+
+msgid "Sin límite de cupos"
+msgstr "Sin límite de cupos"
+
+msgid "Sin próximos eventos."
+msgstr "Sin próximos eventos."
+
+msgid "Sin responsable"
+msgstr "Sin responsable"
+
+msgid "Sin verificar"
+msgstr "Sin verificar"
+
+msgid "Sincronizado como organizador en Google Calendar"
+msgstr "Sincronizado como organizador en Google Calendar"
+
+msgid "Sitio personal"
+msgstr "Sitio personal"
+
+msgid "Solicitud"
+msgstr "Solicitud"
+
+msgid "Solicitud archivada"
+msgstr "Solicitud archivada"
+
+msgid "Solicitud de conexión cancelada."
+msgstr "Solicitud de conexión cancelada."
+
+msgid "Solicitud de conexión enviada."
+msgstr "Solicitud de conexión enviada."
+
+msgid "Solicitud de conversación"
+msgstr "Solicitud de conversación"
+
+msgid "Solicitud de conversación recibida"
+msgstr "Solicitud de conversación recibida"
+
+msgid "Solicitud enviada"
+msgstr "Solicitud enviada"
+
+msgid "Solicitud enviada · Pendiente"
+msgstr "Solicitud enviada · Pendiente"
+
+msgid "Solicitud privada"
+msgstr "Solicitud privada"
+
+msgid "Solicitud que autoriza el cambio de datos"
+msgstr "Solicitud que autoriza el cambio de datos"
+
+msgid "Solicitud que autoriza el cambio profesional"
+msgstr "Solicitud que autoriza el cambio profesional"
+
+msgid "Solicitudes"
+msgstr "Solicitudes"
+
+msgid "Solicitudes de conexión y avisos cuando una conexión sea aceptada."
+msgstr "Solicitudes de conexión y avisos cuando una conexión sea aceptada."
+
+msgid "Solicitudes de conversación"
+msgstr "Solicitudes de conversación"
+
+msgid "Solicitudes enviadas"
+msgstr "Solicitudes enviadas"
+
+msgid "Solicitudes recibidas"
+msgstr "Solicitudes recibidas"
+
+msgid "Solo aparecerán como personas recomendadas los perfiles que alcancen al menos este porcentaje de afinidad. Valor predeterminado: 30%."
+msgstr "Solo aparecerán como personas recomendadas los perfiles que alcancen al menos este porcentaje de afinidad. Valor predeterminado: 30%."
+
+msgid "Solo incluimos recursos publicados y autorizados, ordenados por relevancia temática."
+msgstr "Solo incluimos recursos publicados y autorizados, ordenados por relevancia temática."
+
+msgid "Solo quien creó el grupo puede eliminarlo. Esta acción elimina el chat para todos los integrantes."
+msgstr "Solo quien creó el grupo puede eliminarlo. Esta acción elimina el chat para todos los integrantes."
+
+msgid "Solo se muestra la información que cada asociado permite compartir con la comunidad."
+msgstr "Solo se muestra la información que cada asociado permite compartir con la comunidad."
+
+msgid "Solo se muestran perfiles elegibles que alcancen el umbral. El lote se recalcula cada siete días y nunca supera cinco personas."
+msgstr "Solo se muestran perfiles elegibles que alcancen el umbral. El lote se recalcula cada siete días y nunca supera cinco personas."
+
+msgid "Solo tú y la persona asignada de administración o del equipo ejecutivo pueden ver tu solicitud."
+msgstr "Solo tú y la persona asignada de administración o del equipo ejecutivo pueden ver tu solicitud."
+
+msgid "Solo tú y la persona asignada pueden leer esta solicitud."
+msgstr "Solo tú y la persona asignada pueden leer esta solicitud."
+
+msgid "Solo yo y administradores"
+msgstr "Solo yo y administradores"
+
+msgid "Soporte"
+msgstr "Soporte"
+
+msgid "Subiendo archivo privado…"
+msgstr "Subiendo archivo privado…"
+
+msgid "Suspender acceso"
+msgstr "Suspender acceso"
+
+msgid "Suspendida"
+msgstr "Suspendida"
+
+msgid "Sustituir intereses tras revisión"
+msgstr "Sustituir intereses tras revisión"
+
+msgid "Sé la primera persona en compartir una idea."
+msgstr "Sé la primera persona en compartir una idea."
+
+msgid "TU COMUNIDAD, AL DÍA"
+msgstr "TU COMUNIDAD, AL DÍA"
+
+msgid "TU COMUNIDAD, MÁS CERCA"
+msgstr "TU COMUNIDAD, MÁS CERCA"
+
+msgid "TU PRIVACIDAD PRIMERO"
+msgstr "TU PRIVACIDAD PRIMERO"
+
+msgid "Tampoco fue posible verificar la duración desde el reproductor."
+msgstr "Tampoco fue posible verificar la duración desde el reproductor."
+
+msgid "Tasa"
+msgstr "Tasa"
+
+msgid "Tasa de asistencia"
+msgstr "Tasa de asistencia"
+
+msgid "Te avisaremos cuando se libere un cupo."
+msgstr "Te avisaremos cuando se libere un cupo."
+
+msgid "Te damos la bienvenida"
+msgstr "Te damos la bienvenida"
+
+msgid "Teléfono"
+msgstr "Teléfono"
+
+msgid "Tema"
+msgstr "Tema"
+
+msgid "Tema no válido."
+msgstr "Tema no válido."
+
+msgid "Tema preparado."
+msgstr "Tema preparado."
+
+msgid "Tema sugerido"
+msgstr "Tema sugerido"
+
+msgid "Temas de interés"
+msgstr "Temas de interés"
+
+msgid "Temas de mayor interés"
+msgstr "Temas de mayor interés"
+
+msgid "Temas en los que puedes ayudar"
+msgstr "Temas en los que puedes ayudar"
+
+msgid "Temas que deseas aprender"
+msgstr "Temas que deseas aprender"
+
+msgid "Temas seleccionados (checkbox)"
+msgstr "Temas seleccionados (checkbox)"
+
+msgid "Temas sobre los que quieres conectar"
+msgstr "Temas sobre los que quieres conectar"
+
+msgid "Tendencias"
+msgstr "Tendencias"
+
+msgid "Termina el análisis o espera a que finalice la aplicación."
+msgstr "Termina el análisis o espera a que finalice la aplicación."
+
+msgid "Texto libre original"
+msgstr "Texto libre original"
+
+msgid "Texto libre pendiente de clasificación o revisión."
+msgstr "Texto libre pendiente de clasificación o revisión."
+
+msgid "Tienes cambios sin guardar. Si sales ahora, se perderán. ¿Quieres salir sin guardar?"
+msgstr "Tienes cambios sin guardar. Si sales ahora, se perderán. ¿Quieres salir sin guardar?"
+
+msgid "Tienes una nueva respuesta a tu comentario."
+msgstr "Tienes una nueva respuesta a tu comentario."
+
+msgid "Tipo de asociado"
+msgstr "Tipo de asociado"
+
+msgid "Tipo de recurso"
+msgstr "Tipo de recurso"
+
+msgid "Todas"
+msgstr "Todas"
+
+msgid "Todas las industrias"
+msgstr "Todas las industrias"
+
+msgid "Todas las propuestas requieren aprobación administrativa."
+msgstr "Todas las propuestas requieren aprobación administrativa."
+
+msgid "Todo ASCLA te desea un gran día y un nuevo año lleno de buenas conexiones, aprendizajes y proyectos."
+msgstr "Todo ASCLA te desea un gran día y un nuevo año lleno de buenas conexiones, aprendizajes y proyectos."
+
+msgid "Todos"
+msgstr "Todos"
+
+msgid "Todos los países"
+msgstr "Todos los países"
+
+msgid "Todos los tipos"
+msgstr "Todos los tipos"
+
+msgid "Todos los usuarios"
+msgstr "Todos los usuarios"
+
+msgid "Trabajos activos"
+msgstr "Trabajos activos"
+
+msgid "Transcripción manual"
+msgstr "Transcripción manual"
+
+msgid "Tu agenda ASCLA"
+msgstr "Tu agenda ASCLA"
+
+msgid "Tu biblioteca está por comenzar"
+msgstr "Tu biblioteca está por comenzar"
+
+msgid "Tu calendario Google está conectado."
+msgstr "Tu calendario Google está conectado."
+
+msgid "Tu comunidad empieza aquí"
+msgstr "Tu comunidad empieza aquí"
+
+msgid "Tu experiencia es el punto de partida de nuevas conexiones."
+msgstr "Tu experiencia es el punto de partida de nuevas conexiones."
+
+msgid "Tu experiencia y especialidad"
+msgstr "Tu experiencia y especialidad"
+
+msgid "Tu fecha de nacimiento es privada. ASCLA la usa únicamente para saludarte en tu cumpleaños y avisar a la administración ese día; no se muestra a otros asociados."
+msgstr "Tu fecha de nacimiento es privada. ASCLA la usa únicamente para saludarte en tu cumpleaños y avisar a la administración ese día; no se muestra a otros asociados."
+
+msgid "Tu lote se genera automáticamente con los datos que autorizaste. Desliza para conocer todas las sugerencias."
+msgstr "Tu lote se genera automáticamente con los datos que autorizaste. Desliza para conocer todas las sugerencias."
+
+msgid "Tu lugar en la comunidad"
+msgstr "Tu lugar en la comunidad"
+
+msgid "Tu perfil profesional"
+msgstr "Tu perfil profesional"
+
+msgid "Tu perfil todavía tiene información pendiente"
+msgstr "Tu perfil todavía tiene información pendiente"
+
+msgid "Tu pregunta"
+msgstr "Tu pregunta"
+
+msgid "Tu red"
+msgstr "Tu red"
+
+msgid "Tu red profesional"
+msgstr "Tu red profesional"
+
+msgid "Tu reporte será revisado por el equipo de moderación de ASCLA."
+msgstr "Tu reporte será revisado por el equipo de moderación de ASCLA."
+
+msgid "Tu sesión está por vencer"
+msgstr "Tu sesión está por vencer"
+
+msgid "Tus conexiones aparecerán aquí cuando acepten la solicitud."
+msgstr "Tus conexiones aparecerán aquí cuando acepten la solicitud."
+
+msgid "Tus descartes no volverán a aparecer. La próxima actualización buscará nuevas afinidades."
+msgstr "Tus descartes no volverán a aparecer. La próxima actualización buscará nuevas afinidades."
+
+msgid "Tus notificaciones"
+msgstr "Tus notificaciones"
+
+msgid "Tus objetivos y preferencias de aprendizaje se utilizan internamente para ayudarte a conectar."
+msgstr "Tus objetivos y preferencias de aprendizaje se utilizan internamente para ayudarte a conectar."
+
+msgid "Tus últimas 50 consultas, guardadas para volver a ellas cuando las necesites."
+msgstr "Tus últimas 50 consultas, guardadas para volver a ellas cuando las necesites."
+
+msgid "Título"
+msgstr "Título"
+
+msgid "Tú"
+msgstr "Tú"
+
+msgid "Tú eliges cómo participar y qué información compartir con la comunidad."
+msgstr "Tú eliges cómo participar y qué información compartir con la comunidad."
+
+msgid "Ubicación"
+msgstr "Ubicación"
+
+msgid "Un espacio de confianza"
+msgstr "Un espacio de confianza"
+
+msgid "Un espacio para compartir experiencias, fortalecer tu red y construir el futuro del gobierno corporativo."
+msgstr "Un espacio para compartir experiencias, fortalecer tu red y construir el futuro del gobierno corporativo."
+
+msgid "Un espacio para compartir experiencias, fortalecer vínculos y construir juntos el futuro de la secretaría corporativa."
+msgstr "Un espacio para compartir experiencias, fortalecer vínculos y construir juntos el futuro de la secretaría corporativa."
+
+msgid "Un evento cambió información importante"
+msgstr "Un evento cambió información importante"
+
+msgid "Una asistencia por persona y evento."
+msgstr "Una asistencia por persona y evento."
+
+msgid "Una categoría por línea"
+msgstr "Una categoría por línea"
+
+msgid "Una conversación puede ser el inicio de una gran colaboración."
+msgstr "Una conversación puede ser el inicio de una gran colaboración."
+
+msgid "Una persona puede interesarse en varios temas y un evento puede tener varios temas; las filas no se suman como personas únicas."
+msgstr "Una persona puede interesarse en varios temas y un evento puede tener varios temas; las filas no se suman como personas únicas."
+
+msgid "Una red que crece contigo"
+msgstr "Una red que crece contigo"
+
+msgid "Unirme a la lista de espera"
+msgstr "Unirme a la lista de espera"
+
+msgid "Usa el modo claro u oscuro configurado en tu dispositivo."
+msgstr "Usa el modo claro u oscuro configurado en tu dispositivo."
+
+msgid "Usa formato internacional con + y código de país. Ejemplo: +51 987 654 321."
+msgstr "Usa formato internacional con + y código de país. Ejemplo: +51 987 654 321."
+
+msgid "Usa la hora local de tu dispositivo. El contenido permanecerá oculto hasta esta fecha."
+msgstr "Usa la hora local de tu dispositivo. El contenido permanecerá oculto hasta esta fecha."
+
+msgid "Usa un teléfono internacional válido que empiece con + y el código de país, por ejemplo +51 999 123 456."
+msgstr "Usa un teléfono internacional válido que empiece con + y el código de país, por ejemplo +51 999 123 456."
+
+msgid "Usar imagen"
+msgstr "Usar imagen"
+
+msgid "Usar imagen completa"
+msgstr "Usar imagen completa"
+
+msgid "Usuario"
+msgstr "Usuario"
+
+msgid "Usuario no encontrado o sin permiso de edición."
+msgstr "Usuario no encontrado o sin permiso de edición."
+
+msgid "Usuario o correo electrónico"
+msgstr "Usuario o correo electrónico"
+
+msgid "Usuario propietario"
+msgstr "Usuario propietario"
+
+msgid "Usuarios"
+msgstr "Usuarios"
+
+msgid "Usuarios ASCLA"
+msgstr "Usuarios ASCLA"
+
+msgid "Usuarios con actividad registrada"
+msgstr "Usuarios con actividad registrada"
+
+msgid "Usuarios nuevos"
+msgstr "Usuarios nuevos"
+
+msgid "Usuarios que más asisten"
+msgstr "Usuarios que más asisten"
+
+msgid "Usuarios recurrentes"
+msgstr "Usuarios recurrentes"
+
+msgid "Variación"
+msgstr "Variación"
+
+msgid "Vence"
+msgstr "Vence"
+
+msgid "Vencida"
+msgstr "Vencida"
+
+msgid "Ver"
+msgstr "Ver"
+
+msgid "Ver Centro de Conocimiento"
+msgstr "Ver Centro de Conocimiento"
+
+msgid "Ver cambios del evento"
+msgstr "Ver cambios del evento"
+
+msgid "Ver conexión"
+msgstr "Ver conexión"
+
+msgid "Ver conversación"
+msgstr "Ver conversación"
+
+msgid "Ver detalle"
+msgstr "Ver detalle"
+
+msgid "Ver directorio"
+msgstr "Ver directorio"
+
+msgid "Ver el Hub"
+msgstr "Ver el Hub"
+
+msgid "Ver encuentro"
+msgstr "Ver encuentro"
+
+msgid "Ver encuentro e invitación"
+msgstr "Ver encuentro e invitación"
+
+msgid "Ver evento"
+msgstr "Ver evento"
+
+msgid "Ver eventos"
+msgstr "Ver eventos"
+
+msgid "Ver eventos del día"
+msgstr "Ver eventos del día"
+
+msgid "Ver galería"
+msgstr "Ver galería"
+
+msgid "Ver historial de consultas"
+msgstr "Ver historial de consultas"
+
+msgid "Ver integrantes"
+msgstr "Ver integrantes"
+
+msgid "Ver intranet"
+msgstr "Ver intranet"
+
+msgid "Ver mis consultas"
+msgstr "Ver mis consultas"
+
+msgid "Ver mis publicaciones"
+msgstr "Ver mis publicaciones"
+
+msgid "Ver perfil"
+msgstr "Ver perfil"
+
+msgid "Ver perfil de"
+msgstr "Ver perfil de"
+
+msgid "Ver publicación"
+msgstr "Ver publicación"
+
+msgid "Ver recomendaciones"
+msgstr "Ver recomendaciones"
+
+msgid "Ver todo"
+msgstr "Ver todo"
+
+msgid "Video de YouTube no válido."
+msgstr "Video de YouTube no válido."
+
+msgid "Video de origen"
+msgstr "Video de origen"
+
+msgid "Vigencia del enlace de recuperación (minutos)"
+msgstr "Vigencia del enlace de recuperación (minutos)"
+
+msgid "Vigente hasta"
+msgstr "Vigente hasta"
+
+msgid "Virtual"
+msgstr "Virtual"
+
+msgid "Visibilidad del teléfono"
+msgstr "Visibilidad del teléfono"
+
+msgid "Visible"
+msgstr "Visible"
+
+msgid "Vista previa de importación"
+msgstr "Vista previa de importación"
+
+msgid "Vistas de estadísticas"
+msgstr "Vistas de estadísticas"
+
+msgid "Volver"
+msgstr "Volver"
+
+msgid "Volver a ASCLA"
+msgstr "Volver a ASCLA"
+
+msgid "Volver al inicio de sesión"
+msgstr "Volver al inicio de sesión"
+
+msgid "Ya revisaste todos tus avisos. Las nuevas novedades aparecerán aquí."
+msgstr "Ya revisaste todos tus avisos. Las nuevas novedades aparecerán aquí."
+
+msgid "YouTube OAuth real · subtítulos autorizados"
+msgstr "YouTube OAuth real · subtítulos autorizados"
+
+msgid "YouTube no entregó la duración al reproductor."
+msgstr "YouTube no entregó la duración al reproductor."
+
+msgid "YouTube no expuso la duración al servidor. Intentando leerla directamente desde el reproductor…"
+msgstr "YouTube no expuso la duración al servidor. Intentando leerla directamente desde el reproductor…"
+
+msgid "YouTube no pudo abrir este video para leer su duración."
+msgstr "YouTube no pudo abrir este video para leer su duración."
+
+msgid "YouTube permite descargar subtítulos por API solo cuando la cuenta conectada tiene permisos suficientes sobre el video. Para otros videos, pega una transcripción autorizada manualmente."
+msgstr "YouTube permite descargar subtítulos por API solo cuando la cuenta conectada tiene permisos suficientes sobre el video. Para otros videos, pega una transcripción autorizada manualmente."
+
+msgid "YouTube tardó demasiado en responder."
+msgstr "YouTube tardó demasiado en responder."
+
+msgid "Zona horaria del CSV"
+msgstr "Zona horaria del CSV"
+
+msgid "Zona horaria no válida."
+msgstr "Zona horaria no válida."
+
+msgid "Zoom"
+msgstr "Zoom"
+
+msgid "actualizadas"
+msgstr "actualizadas"
+
+msgid "aforo completo"
+msgstr "aforo completo"
+
+msgid "alta"
+msgstr "alta"
+
+msgid "archivos"
+msgstr "archivos"
+
+msgid "aviso"
+msgstr "aviso"
+
+msgid "avisos"
+msgstr "avisos"
+
+msgid "baja"
+msgstr "baja"
+
+msgid "comentario"
+msgstr "comentario"
+
+msgid "comentarios"
+msgstr "comentarios"
+
+msgid "comparado con"
+msgstr "comparado con"
+
+msgid "con duración"
+msgstr "con duración"
+
+msgid "confirmadas"
+msgstr "confirmadas"
+
+msgid "confirmados"
+msgstr "confirmados"
+
+msgid "conflictos"
+msgstr "conflictos"
+
+msgid "cupos"
+msgstr "cupos"
+
+msgid "de"
+msgstr "de"
+
+msgid "de afinidad"
+msgstr "de afinidad"
+
+msgid "disponibles"
+msgstr "disponibles"
+
+msgid "encontradas"
+msgstr "encontradas"
+
+msgid "esta semana"
+msgstr "esta semana"
+
+msgid "este comentario"
+msgstr "este comentario"
+
+msgid "estás al día"
+msgstr "estás al día"
+
+msgid "eventos analizados"
+msgstr "eventos analizados"
+
+msgid "eventos con registro completo"
+msgstr "eventos con registro completo"
+
+msgid "excluidos por privacidad"
+msgstr "excluidos por privacidad"
+
+msgid "filas"
+msgstr "filas"
+
+msgid "filas aceptadas se aplicarán a los perfiles."
+msgstr "filas aceptadas se aplicarán a los perfiles."
+
+msgid "filas duplicadas omitidas"
+msgstr "filas duplicadas omitidas"
+
+msgid "filas sin asociar"
+msgstr "filas sin asociar"
+
+msgid "high"
+msgstr "high"
+
+msgid "incluye copia maestra optimizada"
+msgstr "incluye copia maestra optimizada"
+
+msgid "inscripciones con registro completo"
+msgstr "inscripciones con registro completo"
+
+msgid "inscritos"
+msgstr "inscritos"
+
+msgid "integrantes"
+msgstr "integrantes"
+
+msgid "low"
+msgstr "low"
+
+msgid "media"
+msgstr "media"
+
+msgid "medium"
+msgstr "medium"
+
+msgid "minutos. Revisa la agenda y la fecha antes de aprobar."
+msgstr "minutos. Revisa la agenda y la fecha antes de aprobar."
+
+msgid "novedad pendiente"
+msgstr "novedad pendiente"
+
+msgid "novedades pendientes"
+msgstr "novedades pendientes"
+
+msgid "participante no se muestra por sus preferencias de privacidad."
+msgstr "participante no se muestra por sus preferencias de privacidad."
+
+msgid "participantes no se muestran por sus preferencias de privacidad."
+msgstr "participantes no se muestran por sus preferencias de privacidad."
+
+msgid "pendientes"
+msgstr "pendientes"
+
+msgid "perfiles en la comunidad"
+msgstr "perfiles en la comunidad"
+
+msgid "persona en espera"
+msgstr "persona en espera"
+
+msgid "personas en espera"
+msgstr "personas en espera"
+
+msgid "por página"
+msgstr "por página"
+
+msgid "posición"
+msgstr "posición"
+
+msgid "registrados"
+msgstr "registrados"
+
+msgid "registros manuales conservados"
+msgstr "registros manuales conservados"
+
+msgid "resultados"
+msgstr "resultados"
+
+msgid "seleccionados"
+msgstr "seleccionados"
+
+msgid "sesiones"
+msgstr "sesiones"
+
+msgid "sigamos conectando ideas."
+msgstr "sigamos conectando ideas."
+
+msgid "sin actualización manual"
+msgstr "sin actualización manual"
+
+msgid "sin cambios"
+msgstr "sin cambios"
+
+msgid "sin identificar"
+msgstr "sin identificar"
+
+msgid "sin leer"
+msgstr "sin leer"
+
+msgid "sin tema sugerido"
+msgstr "sin tema sugerido"
+
+msgid "solicitudes recibidas"
+msgstr "solicitudes recibidas"
+
+msgid "tu correo registrado"
+msgstr "tu correo registrado"
+
+msgid "usuarios"
+msgstr "usuarios"
+
+msgid "usuarios por registrar"
+msgstr "usuarios por registrar"
+
+msgid "¡Feliz cumpleaños"
+msgstr "¡Feliz cumpleaños"
+
+msgid "¡Feliz cumpleaños! 🎉"
+msgstr "¡Feliz cumpleaños! 🎉"
+
+msgid "¡Gracias!"
+msgstr "¡Gracias!"
+
+msgid "¿A quién me recomiendas conocer?"
+msgstr "¿A quién me recomiendas conocer?"
+
+msgid "¿Aún no tienes una cuenta? Solicita tu acceso a la administración de ASCLA."
+msgstr "¿Aún no tienes una cuenta? Solicita tu acceso a la administración de ASCLA."
+
+msgid "¿Hay alguna reunión o evento pronto?"
+msgstr "¿Hay alguna reunión o evento pronto?"
+
+msgid "¿No recuerdas tu contraseña actual?"
+msgstr "¿No recuerdas tu contraseña actual?"
+
+msgid "¿Olvidaste tu contraseña?"
+msgstr "¿Olvidaste tu contraseña?"
+
+msgid "¿Quieres guardar los cambios antes de cerrar esta ventana?"
+msgstr "¿Quieres guardar los cambios antes de cerrar esta ventana?"
+
+msgid "¿Quieres guardar los cambios antes de salir?"
+msgstr "¿Quieres guardar los cambios antes de salir?"
+
+msgid "¿Qué recursos tenemos sobre gobierno corporativo?"
+msgstr "¿Qué recursos tenemos sobre gobierno corporativo?"
+
+msgid "¿Qué se publicó recientemente?"
+msgstr "¿Qué se publicó recientemente?"
+
+msgid "¿Seguro que deseas cancelar este evento?"
+msgstr "¿Seguro que deseas cancelar este evento?"
+
+msgid "¿Seguro que deseas eliminar este grupo? Se eliminarán sus mensajes para todos los participantes."
+msgstr "¿Seguro que deseas eliminar este grupo? Se eliminarán sus mensajes para todos los participantes."
+
+msgid "Área de conocimiento"
+msgstr "Área de conocimiento"
+
+msgid "Áreas de conocimiento"
+msgstr "Áreas de conocimiento"
+
+msgid "Última asistencia"
+msgstr "Última asistencia"
+
+msgid "Última clasificación"
+msgstr "Última clasificación"
+
+msgid "Útil"
+msgstr "Útil"
+
+msgid "“No me interesa” es privado. Puedes restituir aquí la elegibilidad de cualquier perfil."
+msgstr "“No me interesa” es privado. Puedes restituir aquí la elegibilidad de cualquier perfil."

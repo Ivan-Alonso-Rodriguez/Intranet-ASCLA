@@ -3,6 +3,7 @@ namespace ASCLA\Core\Services;
 use ASCLA\Core\Domain\Catalog;
 use ASCLA\Core\Frontend\App;
 use ASCLA\Core\Repositories\Store;
+use ASCLA\Core\Repositories\{Transaction,WordPressWrites};
 
 final class Content
 {
@@ -11,13 +12,13 @@ final class Content
     {
         unset($metaId);
         if ($key!=='_ascla' || !is_array($value)) { return; }
-        if(get_post_type($postId)==='ascla_contact') { update_post_meta($postId,'_ascla_request_status',$value['request_status']??'open'); }
-        foreach (['resource_type','start','end','source'] as $field) { update_post_meta($postId,'_ascla_'.$field,$value[$field]??''); }
-        update_post_meta($postId,'_ascla_micro',empty($value['micro'])?'0':'1');
-        update_post_meta($postId,'_ascla_micro_public_at',(int)($value['public_at']??0));
-        update_post_meta($postId,'_ascla_cancelled',empty($value['cancelled'])?'0':'1');
-        delete_post_meta($postId,'_ascla_invitee');
-        foreach (array_unique(array_map('absint',$value['invitees']??[])) as $uid) { add_post_meta($postId,'_ascla_invitee',$uid); }
+        if(get_post_type($postId)==='ascla_contact') { WordPressWrites::meta('post',$postId,'_ascla_request_status',$value['request_status']??'open'); }
+        foreach (['resource_type','start','end','source'] as $field) { WordPressWrites::meta('post',$postId,'_ascla_'.$field,$value[$field]??''); }
+        WordPressWrites::meta('post',$postId,'_ascla_micro',empty($value['micro'])?'0':'1');
+        WordPressWrites::meta('post',$postId,'_ascla_micro_public_at',(int)($value['public_at']??0));
+        WordPressWrites::meta('post',$postId,'_ascla_cancelled',empty($value['cancelled'])?'0':'1');
+        WordPressWrites::deleteMeta('post',$postId,'_ascla_invitee');
+        foreach (array_unique(array_map('absint',$value['invitees']??[])) as $uid) { WordPressWrites::addMeta('post',$postId,'_ascla_invitee',$uid); }
     }
     private const EDITORIAL_TYPES=['gallery','resource','event'];
     private const COMMUNITY_TYPES=['hub','forum','topic'];
@@ -180,11 +181,13 @@ final class ContentPublishing
 
     public static function save(string $type,array $input,int $id=0): array
     {
-        return Store::lock(($type==='event'?'event:':'content:').($id?:'new-'.get_current_user_id()),static fn()=>self::saveLocked($type,$input,$id));
+        $saved=Store::atomic(($type==='event'?'event:':'content:').($id?:'new-'.get_current_user_id()),static fn()=>self::saveLocked($type,$input,$id));
+        return self::serialize(get_post($saved));
     }
 
-    private static function saveLocked(string $type,array $input,int $id): array
+    private static function saveLocked(string $type,array $input,int $id): int
     {
+        if ($id) { clean_post_cache($id); }
         $context=self::saveBase($type,$input,$id);
         [$taxonomies,$tagNames]=self::saveTaxonomies($input);
         foreach ($context['meta']['media_ids']??[] as $media) {
@@ -195,7 +198,7 @@ final class ContentPublishing
         $context=array_merge($context,['type'=>$type,'input'=>$input,'id'=>$id,'taxonomies'=>$taxonomies,'tag_names'=>$tagNames,'status'=>$status,'direct_generated_publish'=>$directGeneratedPublish,'parent'=>$parent,'meta'=>$meta]);
         $saved=self::persist($context);
         self::afterSave($saved,$context);
-        return self::serialize(get_post($saved));
+        return $saved;
     }
 
     private static function legacyRedaction(mixed $value): mixed
@@ -240,7 +243,7 @@ final class ContentPublishing
         $date=$post->post_date_gmt;
         if (!$date || str_starts_with($date,'0000-')) { $date=get_gmt_from_date($post->post_date); }
         $terms=wp_get_object_terms($post->ID,['ascla_interest','ascla_category','ascla_tag']);
-        return ['id'=>$post->ID,'can_delete'=>self::canDelete($post),'can_edit'=>Content::canEdit($post),'can_moderate'=>Content::canModerate($post),'type'=>substr($post->post_type,6),'title'=>$title,'body'=>$body,'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?Profiles::publicName((int)$author->ID):'ASCLA'],'date'=>$date,'parent'=>(int)$post->post_parent,'meta'=>$meta,'media'=>Media::metadata($post->ID,(array)($meta['media_ids']??[])),'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name,'taxonomy'=>$t->taxonomy],$terms),'reactions'=>Store::count('relations',"target_id=%d AND kind='like'",[$post->ID]),'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='like'",[$post->ID,get_current_user_id()])>0,'following'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='follow'",[$post->ID,get_current_user_id()])>0,'comments'=>(int)$post->comment_count,'url'=>Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$post->ID])];
+        return ['id'=>$post->ID,'can_delete'=>self::canDelete($post),'can_edit'=>Content::canEdit($post),'can_moderate'=>Content::canModerate($post),'type'=>substr($post->post_type,6),'title'=>$title,'body'=>$body,'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?Profiles::publicName((int)$author->ID):'ASCLA'],'date'=>$date,'parent'=>(int)$post->post_parent,'meta'=>$meta,'media'=>Media::metadata($post->ID,(array)($meta['media_ids']??[])),'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name,'taxonomy'=>$t->taxonomy],$terms),...ContentReactions::summary($post->ID),'reactions'=>Store::count('relations',"target_id=%d AND kind='like'",[$post->ID]),'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='like'",[$post->ID,get_current_user_id()])>0,'following'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='follow'",[$post->ID,get_current_user_id()])>0,'comments'=>(int)$post->comment_count,'url'=>Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$post->ID])];
     }
 
 
@@ -311,25 +314,25 @@ final class ContentPublishing
     {
         $postData=['post_type'=>'ascla_'.$context['type'],'post_title'=>$context['title'],'post_content'=>$context['body'],'post_status'=>'draft','post_parent'=>$context['parent'],'comment_status'=>'open'];
         if ($context['id']) { $postData['ID']=$context['id']; } else { $postData['post_author']=get_current_user_id(); }
-        $saved=$context['id']?wp_update_post(wp_slash($postData),true):wp_insert_post(wp_slash($postData),true);
-        Access::require(!is_wp_error($saved),'No se pudo guardar el contenido.',500);
-        update_post_meta($saved,'_ascla',$context['meta']);
-        foreach ($context['taxonomies'] as $tax=>$ids) { wp_set_object_terms($saved,$ids,'ascla_'.$tax); }
+        $saved=WordPressWrites::post(wp_slash($postData));
+        WordPressWrites::meta('post',$saved,'_ascla',$context['meta']);
+        foreach ($context['taxonomies'] as $tax=>$ids) { WordPressWrites::terms($saved,$ids,'ascla_'.$tax); }
         if ($context['tag_names']) { self::tags($saved,$context['tag_names']); }
         foreach ($context['meta']['media_ids']??[] as $media) { Media::attach($media,$saved); }
-        wp_update_post(['ID'=>$saved,'post_status'=>$context['status']]);
+        WordPressWrites::post(['ID'=>$saved,'post_status'=>$context['status']]);
         return (int)$saved;
     }
 
     private static function afterSave(int $saved,array $context): void
     {
+        ContentSchedule::sync($saved);
         if ($context['type']==='event' && $context['id'] && $context['status']==='publish') {
             Events::notifyImportantChanges($saved,$context['old_meta']+['__title'=>$context['old_title']],$context['meta']+['__title'=>$context['title']]);
         }
         if ($context['type']==='event') { EventReminders::schedule($saved,$context['meta']); }
         if ($context['type']==='event' && !empty($context['meta']['micro']) && $context['status']==='publish') { MicroLifecycle::schedule($saved,$context['meta']);MicroLifecycle::tick($saved); }
         if ($context['type']==='contact' && !$context['id']) { self::notifySupportCreated($saved); }
-        if ($context['type']==='resource' && !empty($context['meta']['video_id'])) { Knowledge::autoVideoMetadata($saved); }
+        if ($context['type']==='resource' && !empty($context['meta']['video_id'])) { Transaction::afterCommit(static fn()=>Knowledge::autoVideoMetadata($saved)); }
         Audit::record('content_saved',$saved,$context['status']);
         if ($context['status']==='publish' && in_array($context['type'],['hub','topic','resource','gallery'],true)) {
             $savedPost=get_post($saved);
@@ -383,7 +386,10 @@ final class ContentPublishing
         $post=Content::get($id);
         if($post->post_type==='ascla_contact') { return Administration::deleteContact($id); }
         Access::require(self::canDelete($post),'No tienes permisos para eliminar este contenido.',403);
-        return Store::lock('content:'.$id,static function()use($id,$post){
+        return Store::atomic(($post->post_type==='ascla_event'?'event:':'content:').$id,static function()use($id){
+            clean_post_cache($id);
+            $post=Content::get($id);
+            Access::require(self::canDelete($post),'No tienes permisos para eliminar este contenido.',403);
             $meta=(array)get_post_meta($id,'_ascla',true);
             Access::require((bool)wp_trash_post($id),'No se pudo eliminar el contenido.',500);
             if($post->post_type==='ascla_event' && !empty($meta['micro'])) {
@@ -391,7 +397,7 @@ final class ContentPublishing
                 Store::delete('registrations',['event_id'=>$id]);
             }
             if($post->post_type==='ascla_forum') {
-                foreach(get_posts(['post_type'=>'ascla_topic','post_parent'=>$id,'post_status'=>['publish','pending','draft','ascla_hidden','ascla_rejected'],'numberposts'=>-1]) as $child) { wp_update_post(['ID'=>$child->ID,'post_parent'=>0]); }
+                foreach(get_posts(['post_type'=>'ascla_topic','post_parent'=>$id,'post_status'=>['publish','pending','draft','ascla_hidden','ascla_rejected'],'numberposts'=>-1]) as $child) { WordPressWrites::post(['ID'=>$child->ID,'post_parent'=>0]); }
             }
             foreach(['like','follow','report'] as $kind) { Store::delete('relations',['target_id'=>$id,'kind'=>$kind]); }
             Audit::record('content_trashed',$id,$post->post_type);
@@ -407,13 +413,15 @@ final class ContentPublishing
             $name=trim(Access::text($name,60)); if ($name==='') { continue; }
             $term=term_exists($name,'ascla_tag');
             if (!$term) { $term=wp_insert_term($name,'ascla_tag'); }
-            if (!is_wp_error($term)) { $ids[]=(int)(is_array($term)?$term['term_id']:$term); }
+            Access::require(!is_wp_error($term),'No se pudieron guardar las etiquetas.',500);
+            $ids[]=(int)(is_array($term)?$term['term_id']:$term);
         }
-        wp_set_object_terms($id,$ids,'ascla_tag');
+        WordPressWrites::terms($id,$ids,'ascla_tag');
     }
 
     public static function guardPublication(array $data,array $postarr): array
     {
+        if (ContentSchedule::publishing((int)($postarr['ID']??0))) { return $data; }
         if (($data['post_status']??'')==='publish' && in_array($data['post_type']??'',['ascla_gallery','ascla_resource','ascla_event'],true) && !Access::canPublish() && (empty($postarr['ID']) || get_post_status($postarr['ID'])!=='publish')) { $data['post_status']='pending'; }
         if (($data['post_status']??'')==='publish' && str_starts_with($data['post_type']??'','ascla_') && !empty($postarr['ID'])) {
             $meta=(array)get_post_meta($postarr['ID'],'_ascla',true);
@@ -488,12 +496,13 @@ final class ContentSaveState
         if (!empty($meta['generated']) && isset($input['tag_names'])) {
             $meta['tags']=array_map(static fn($name)=>Access::text($name,60),array_slice((array)$input['tag_names'],0,20));
         }
-        Access::require(in_array($requested,['draft','pending','publish'],true),'Estado no válido.',400);
+        Access::require(in_array($requested,['draft','pending','publish','scheduled'],true),'Estado no válido.',400);
         $direct=$type==='resource' && $context['publisher'] && $requested==='publish' && !empty($meta['generated']);
         $status=self::status($type,$requested,$meta,$context['editor'],$context['publisher'],$direct);
         $parent=self::parent($type,$input);
         if ($id && !empty($meta['generated']) && !$direct) { $meta['reviewed']=false; }
         if ($direct) { $meta['reviewed']=true; }
+        ContentSchedule::prepare($type,$input,$status,$meta);
         return [$status,$direct,$parent,$meta];
     }
 
@@ -503,6 +512,7 @@ final class ContentSaveState
         $autoEvent=$type==='event' && empty($meta['micro']) && empty($meta['generated']);
         if ($type==='contact') { $status='private'; }
         elseif ($requested==='draft') { $status='draft'; }
+        elseif ($type==='hub' && $requested==='publish' && empty($meta['generated'])) { $status='publish'; }
         elseif ($type==='event' && !empty($meta['micro']) && (empty($meta['micro_approved']) || !current_user_can('ascla_manage'))) { $status='pending'; }
         elseif ($autoEvent || in_array($type,['topic','forum'],true)) { $status='publish'; }
         elseif (($editor || ($publisher && in_array($type,['gallery','resource'],true))) && $requested==='publish' && (empty($meta['generated']) || $direct)) { $status='publish'; }
@@ -566,7 +576,7 @@ final class ContentInteractions
                 'author'=>$c->user_id?Profiles::publicName((int)$c->user_id):'Comunidad ASCLA',
                 'body'=>$c->comment_content,
                 'date'=>$c->comment_date_gmt,
-                'likes'=>Store::count('relations',"target_id=%d AND kind='comment_like'",[$cid]),
+                ...ContentReactions::summary($cid,true),'likes'=>Store::count('relations',"target_id=%d AND kind='comment_like'",[$cid]),
                 'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='comment_like'",[$cid,$me])>0,
             ];
         },$comments);
@@ -590,18 +600,9 @@ final class ContentInteractions
         return ['id'=>(int)$cid,'status'=>$approved?'publish':'pending'];
     }
 
-    public static function reactComment(int $id,bool $active): array
+    public static function reactComment(int $id,bool $active,string $reaction='like'): array
     {
-        $comment=get_comment($id);
-        Access::require($comment && (string)$comment->comment_approved==='1',self::COMMENT_NOT_FOUND,404);
-        Content::get((int)$comment->comment_post_ID);
-        $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>'comment_like'];
-        Store::lock('comment-reaction:'.get_current_user_id().':'.$id,static function()use($where,$active){
-            if ($active && !Store::count('relations',self::RELATION_FILTER,array_values($where))) {
-                Store::insert('relations',$where+['created_at'=>current_time('mysql',true)]);
-            } elseif (!$active) { Store::delete('relations',$where); }
-        });
-        return ['active'=>$active,'likes'=>Store::count('relations',"target_id=%d AND kind='comment_like'",[$id])];
+        return ContentReactions::set($id,$active,$reaction,true);
     }
 
     public static function commentTransition(string $new,string $old,\WP_Comment $comment): void
@@ -654,7 +655,7 @@ final class ContentInteractions
         $detail=trim(Access::text($detail,1000));
         Access::require($reason!=='other' || $detail!=='','Describe brevemente el motivo del reporte cuando selecciones “Otro motivo”.',400);
         $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>'comment_report'];
-        Store::lock('comment-report:'.implode(':',$where),static function () use($where,$reason,$detail,$comment) {
+        Store::atomic('comment-report:'.implode(':',$where),static function () use($where,$reason,$detail,$comment) {
             $existing=Store::rows('relations',self::RELATION_FILTER,array_values($where),'LIMIT 1')[0]??null;
             $data=['reason'=>$reason,'detail'=>$detail,'reviewed_at'=>null,'reviewed_by'=>0,'created_at'=>current_time('mysql',true)];
             if ($existing) { Store::update('relations',$data,['id'=>(int)$existing['id']]); }
@@ -664,9 +665,10 @@ final class ContentInteractions
         return ['reported'=>true,'reason'=>$reason,'reason_label'=>self::reportLabel($reason)];
     }
 
-    public static function react(int $id,string $kind,bool $active): array
+    public static function react(int $id,string $kind,bool $active,string $reaction='like'): array
     {
         Access::require(in_array($kind,['like','follow'],true),'Acción no válida.',400);
+        if ($kind==='like') { return ContentReactions::set($id,$active,$reaction); }
         $post=Content::get($id); Access::require($post->post_status==='publish',self::UNPUBLISHED_CONTENT,400);
         if ($kind==='follow' && $active && $post->post_type==='ascla_event') {
             $meta=(array)get_post_meta($id,'_ascla',true); $end=strtotime((string)($meta['end']??''));
@@ -674,10 +676,9 @@ final class ContentInteractions
             Access::require($end===false || $end>time(),'No puedes seguir un evento que ya finalizó.',400);
         }
         $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>$kind];
-        Store::lock('reaction:'.implode(':',$where),static function () use($where,$active,$post,$kind) {
+        Store::lock('reaction:'.implode(':',$where),static function () use($where,$active) {
             if ($active && !Store::count('relations',self::RELATION_FILTER,array_values($where))) {
                 Store::insert('relations',$where+['created_at'=>current_time('mysql',true)]);
-                if ($kind==='like') { Notifications::send((int)$post->post_author,'reaction','Tu publicación recibió una reacción.',Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$post->ID]),['type'=>'post','id'=>$post->ID,'actor'=>get_current_user_id()]); }
             } elseif (!$active) { Store::delete('relations',$where); }
         });
         KnowledgeRecommendations::invalidateActivity(get_current_user_id());
@@ -695,7 +696,7 @@ final class ContentInteractions
         $detail=trim(Access::text($detail,1000));
         Access::require($reason!=='other' || $detail!=='','Describe brevemente el motivo del reporte cuando selecciones “Otro motivo”.',400);
         $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>'report'];
-        Store::lock('report:'.implode(':',$where),static function () use($where,$reason,$detail,$post) {
+        Store::atomic('report:'.implode(':',$where),static function () use($where,$reason,$detail,$post) {
             $existing=Store::rows('relations',self::RELATION_FILTER,array_values($where),'LIMIT 1')[0]??null;
             $data=['reason'=>$reason,'detail'=>$detail,'reviewed_at'=>null,'reviewed_by'=>0,'created_at'=>current_time('mysql',true)];
             if ($existing) { Store::update('relations',$data,['id'=>(int)$existing['id']]); }
@@ -705,18 +706,19 @@ final class ContentInteractions
         return ['reported'=>true,'reason'=>$reason,'reason_label'=>self::reportLabel($reason)];
     }
 
-    public static function reviewReport(int $id): array
+    public static function reviewReport(int $id,string $reason=''): array
     {
-        return Reports::review($id);
+        return Reports::review($id,$reason);
     }
 
     public static function moderate(int $id,string $decision,string $reason,bool $reviewed=false): array
     {
-        return Store::lock((get_post_type($id)==='ascla_event'?'event:':'content:').$id,static fn()=>self::moderateLocked($id,$decision,$reason,$reviewed));
+        return Store::atomic((get_post_type($id)==='ascla_event'?'event:':'content:').$id,static fn()=>self::moderateLocked($id,$decision,$reason,$reviewed));
     }
 
     private static function moderateLocked(int $id,string $decision,string $reason,bool $reviewed): array
     {
+        clean_post_cache($id);
         $post=Content::get($id);
         Access::require(Content::canModerate($post),'No tienes permisos para moderar este contenido.',403);
         $statuses=['approve'=>'publish','reject'=>'ascla_rejected','hide'=>'ascla_hidden','suspend'=>'ascla_hidden'];
@@ -724,12 +726,18 @@ final class ContentInteractions
         Access::require(!in_array($post->post_type,['ascla_gallery','ascla_resource','ascla_event'],true)||Access::canPublish(),'Solo un Ejecutivo o un administrador pueden gestionar estas publicaciones.',403);
         $reason=Access::text($reason,1000); Access::require(trim($reason)!=='','Indique un motivo de moderación.',400);
         $meta=(array)get_post_meta($id,'_ascla',true);
+        $before=['state'=>$post->post_status,'reason'=>$meta['moderation']['reason']??''];
         Access::require($decision!=='approve'||empty($meta['generated'])||$reviewed,'Debe confirmar revisión de fuentes, identidades y derechos.',400);
+        $status=ContentSchedule::moderation($decision,$meta,$statuses[$decision]);
         if(!empty($meta['micro'])){ MicroLifecycle::review($id,$decision,$reason,$meta); }
         $meta['moderation']=['moderator'=>get_current_user_id(),'date'=>gmdate('c'),'decision'=>$decision,'reason'=>$reason];
         if ($reviewed) { $meta['reviewed']=true; }
-        update_post_meta($id,'_ascla',$meta); wp_update_post(['ID'=>$id,'post_status'=>$statuses[$decision]]);
-        Audit::record('moderation',$id,$decision);
+        update_post_meta($id,'_ascla',$meta);
+        Access::require(get_post_meta($id,'_ascla',true)===$meta,'No se pudo guardar la decisión.',500);
+        $saved=wp_update_post(['ID'=>$id,'post_status'=>$status],true);
+        Access::require(!is_wp_error($saved) && (int)$saved===$id,'No se pudo guardar la decisión.',500);
+        ContentSchedule::sync($id);
+        Audit::changes('moderation',$id,$before,['state'=>get_post_status($id),'reason'=>$reason]);
         Notifications::send((int)$post->post_author,'moderation','Tu publicación fue '.($decision==='approve'?'aprobada':'revisada').'.',Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$id]),['type'=>'post','id'=>$id,'actor'=>get_current_user_id()]);
         return Content::serialize(get_post($id));
     }

@@ -1,6 +1,6 @@
 # Correcciones de casos QA
 
-Revisión local: 6 de octubre de 2026. Plugin: ascla-core, versión vigente 1.10.6.
+Revisión local: 7 de octubre de 2026. Plugin: ascla-core, versión vigente 1.10.7.
 
 | Caso | Implementación |
 |---|---|
@@ -27,3 +27,11 @@ WP-Cron necesita el disparador del entorno. El proyecto ya dispone de contenedor
 Recorrido de navegador y API: tests/bugs-ui.cjs, exclusivamente sobre WordPress desechable con ASCLA_E2E_EPHEMERAL=1. 12 comprobaciones aprobadas y sin errores JavaScript no capturados. Resultado y capturas en test-results/bugs-ui.json, connections-filter.png, chat-readonly.png y connections-mobile.png.
 
 Por indicación del usuario, la suite PHP final queda para después. Las pruebas anteriores que esperaban borrar grupos o mensajes de solicitudes canceladas deben adaptarse a la inmutabilidad. No se declara aprobado el Quality Gate de SonarQube ni cumplimiento integral del PDF.
+
+## Directorio y continuidad del PDF
+
+El Directorio ahora muestra también perfiles incompletos activos que no hayan ocultado su participación, conforme a la autorización del usuario. Se conservaron privacidad por campo, bloqueo, membresía y paginación. El diseño aprovecha el ancho disponible, prioriza el buscador y reemplaza la multiselección nativa por casillas; Mis conexiones queda agrupado en un panel plegable.
+
+Pruebas adicionales: tests/directory-publication.cjs (9 comprobaciones) y tests/workflows-ui.cjs (5). Incluyen cron real de publicación y pérdida de candidatos, autorización por Contacto, categorías y auditoría nativa. Detalle del alcance y brechas en COMPLIANCE.md.
+
+En 1.10.7, tests/run-atomic107.cjs verifica además expiración simultánea con avance FIFO, rechazo de aceptación vencida y ausencia de sobreaforo. La reprogramación y cancelación se revierten completas ante fallos intermedios.
