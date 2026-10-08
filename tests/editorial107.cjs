@@ -25,20 +25,33 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  pass('Hub: publicación explícita inmediata, borrador privado, editor e historial propio');
  const topic=await ok(writer.page,'content/topic',{title:'Tema '+suffix,body:'Tema publicado para probar reacciones',status:'publish'});posts.push(topic.id);const comment=await ok(writer.page,'items/'+topic.id+'/comments',{body:'Comentario del foro'});
  const route='items/'+topic.id+'/reaction';
- let reaction=await ok(reader.page,route,{kind:'like',active:true});assert.equal(reaction.reaction,'like');assert.equal(reaction.reaction_total,1);
- reaction=await ok(reader.page,route,{kind:'like',reaction:'useful',active:true});assert.equal(reaction.reaction_counts.like,0);assert.equal(reaction.reaction_counts.useful,1);assert.equal(reaction.reaction_total,1);
- await Promise.all(Array.from({length:3},()=>ok(reader.page,route,{kind:'like',reaction:'celebrate',active:true})));
+ const reaction=await ok(reader.page,route,{kind:'like',active:true});assert.equal(reaction.reaction,'like');assert.equal(reaction.reaction_total,1);
+ assert.deepEqual(reaction.reaction_counts,{like:1});
+ for(const removed of ['useful','celebrate']){
+  assert.equal((await api(reader.page,route,{kind:'like',reaction:removed,active:true})).status,400);
+  assert.equal((await api(reader.page,'comments/'+comment.id+'/reaction',{reaction:removed,active:true})).status,400);
+ }
+ await Promise.all(Array.from({length:3},()=>ok(reader.page,route,{kind:'like',reaction:'like',active:true})));
  assert.equal((await ok(reader.page,'items/'+topic.id)).reaction_total,1);
  assert.equal((await api(reader.page,route,{kind:'like',reaction:'invalid',active:true})).status,400);
- await ok(writer.page,route,{kind:'like',reaction:'useful',active:true});assert.equal((await ok(reader.page,'items/'+topic.id)).reaction_total,2);
+ await ok(writer.page,route,{kind:'like',reaction:'like',active:true});assert.equal((await ok(reader.page,'items/'+topic.id)).reaction_total,2);
  await ok(reader.page,route,{kind:'like',active:false});assert.equal((await ok(reader.page,'items/'+topic.id)).reaction_total,1);
- pass('Reacciones: compatibilidad con Me gusta, cambio sin duplicados, concurrencia y retiro');
+ pass('Solo Me gusta: API rechaza las reacciones retiradas; concurrencia sin duplicados y retiro');
  await goto(reader.page,'foros/?item='+topic.id);
- const topicButton=reader.page.locator('[data-action="content-reaction"][data-comment="false"][data-id="'+topic.id+'"][data-reaction="celebrate"]');await topicButton.click();await reader.page.waitForFunction(id=>document.querySelector('[data-action="content-reaction"][data-comment="false"][data-id="'+id+'"][data-reaction="celebrate"]')?.getAttribute('aria-pressed')==='true',topic.id);
- const commentButton=reader.page.locator('[data-action="content-reaction"][data-comment="true"][data-id="'+comment.id+'"][data-reaction="useful"]');await commentButton.click();await reader.page.waitForFunction(id=>document.querySelector('[data-action="content-reaction"][data-comment="true"][data-id="'+id+'"][data-reaction="useful"]')?.getAttribute('aria-pressed')==='true',comment.id);
- assert.equal((await ok(reader.page,'items/'+topic.id+'/comments')).find(c=>c.id===comment.id).reaction,'useful');
+ const topicButton=reader.page.locator('[data-action="content-reaction"][data-comment="false"][data-id="'+topic.id+'"][data-reaction="like"]');await topicButton.click();await reader.page.waitForFunction(id=>document.querySelector('[data-action="content-reaction"][data-comment="false"][data-id="'+id+'"][data-reaction="like"]')?.getAttribute('aria-pressed')==='true',topic.id);
+ const commentButton=reader.page.locator('[data-action="content-reaction"][data-comment="true"][data-id="'+comment.id+'"][data-reaction="like"]');await commentButton.click();await reader.page.waitForFunction(id=>document.querySelector('[data-action="content-reaction"][data-comment="true"][data-id="'+id+'"][data-reaction="like"]')?.getAttribute('aria-pressed')==='true',comment.id);
+ assert.equal((await ok(reader.page,'items/'+topic.id+'/comments')).find(c=>c.id===comment.id).reaction,'like');
+ assert.deepEqual(await reader.page.locator('.reaction-picker').evaluateAll(groups=>groups.map(group=>[...group.querySelectorAll('button')].map(button=>button.dataset.reaction))),[['like'],['like']]);
  await reader.page.screenshot({path:root+'/test-results/editorial-reactions.png'});
- pass('Temas y comentarios permiten reaccionar mediante controles accesibles');
+ pass('Temas y comentarios muestran únicamente Me gusta, con estado accesible');
+ const resource=await ok(admin,'content/resource',{title:'Recurso '+suffix,body:'Recurso publicado para comprobar Me gusta',status:'publish'});posts.push(resource.id);
+ for(const [item,section] of [[hub,'hub'],[resource,'centro-conocimiento']]){
+  await goto(reader.page,section+'/?item='+item.id);
+  const buttons=reader.page.locator('.reaction-picker [data-comment="false"][data-id="'+item.id+'"]');await buttons.first().waitFor();
+  assert.deepEqual(await buttons.evaluateAll(nodes=>nodes.map(node=>node.dataset.reaction)),['like']);
+  await buttons.click();await reader.page.waitForFunction(id=>document.querySelector('.reaction-picker [data-comment="false"][data-id="'+id+'"]')?.getAttribute('aria-pressed')==='true',item.id);
+ }
+ pass('Hub y Centro de Conocimiento también conservan únicamente Me gusta');
  const moderation='admin/comments/'+comment.id;
  assert.equal((await api(reader.page,moderation,{decision:'reject',reason:'Sin permisos'})).status,403);
  assert.equal((await api(admin,moderation,{decision:'reject',reason:'  '})).status,400);
@@ -73,7 +86,7 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  assert.equal((await api(reader.page,'comments/'+comment.id+'/reaction',{active:true,reaction:'like'})).status,404);
  const audit=(await ok(admin,'admin')).audit.find(row=>Number(row.id)>previous&&row.action==='moderation'&&Number(row.object_id)===topic.id);assert.ok(audit);const diff=JSON.parse(audit.detail);assert.equal(diff.state.before,'publish');assert.equal(diff.state.after,'ascla_hidden');assert.equal(diff.reason.after,'Contenido retirado para revisión QA');
  pass('Retirar contenido impide nuevas reacciones y registra estado/motivo antes y después');
- await ok(reader.page,'native:users/me',{locale:'en_US'});await goto(reader.page,'directorio/');assert.equal(await reader.page.evaluate(()=>ASCLA.translations['Útil']),'Useful');assert.ok(await reader.page.getByRole('heading',{name:'Your professional network'}).isVisible());
+ await ok(reader.page,'native:users/me',{locale:'en_US'});await goto(reader.page,'directorio/');assert.equal(await reader.page.evaluate(()=>ASCLA.translations['Me gusta']),'Like');assert.ok(await reader.page.getByRole('heading',{name:'Your professional network'}).isVisible());
  assert.equal(await writer.page.evaluate(()=>ASCLA.language),'es');
  await reader.page.setViewportSize({width:390,height:900});await reader.page.screenshot({path:root+'/test-results/editorial-english-mobile.png'});assert.ok(await reader.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  pass('Inglés por cuenta, diccionario gettext para JavaScript y móvil sin desbordamiento');

@@ -63,7 +63,7 @@ final class ContentLifecycleTest extends TestCase
     }
     public function testAuthorCanDeleteOwnPendingContentAndModeratorCanReviewButOtherMembersCannot():void
     {
-        wp_set_current_user($this->users[2]);$p=$this->post();self::assertSame('pending',$p['status']);self::assertTrue($p['can_delete']);
+        wp_set_current_user($this->users[2]);$p=$this->post('hub',['status'=>'pending']);self::assertSame('pending',$p['status']);self::assertTrue($p['can_delete']);
         wp_set_current_user($this->users[1]);self::assertTrue(Content::serialize(Content::get($p['id']))['can_delete']);
         wp_set_current_user($this->users[3]);self::assertSame(404,$this->api('DELETE','items/'.$p['id'])->get_status());
         wp_set_current_user($this->users[2]);self::assertSame(200,$this->api('DELETE','items/'.$p['id'])->get_status());
@@ -82,6 +82,31 @@ final class ContentLifecycleTest extends TestCase
         wp_set_current_user($this->users[1]);self::assertTrue(Content::canDeleteComment(get_comment($c['id'])));
         wp_set_current_user($this->users[3]);self::assertSame(403,$this->api('DELETE','comments/'.$c['id'])->get_status());
         wp_set_current_user($this->users[2]);self::assertSame(200,$this->api('DELETE','comments/'.$c['id'])->get_status());self::assertNotContains($c['id'],array_column(Content::comments($hub['id']),'id'));
+    }
+    public function testRemovedReactionsRemainRemovableLikesAndCannotBeSubmittedAgain():void
+    {
+        $topic=$this->post('topic');$comment=Content::comment($topic['id'],'Comentario con reacciones anteriores');
+        wp_set_current_user($this->users[2]);
+        foreach (['like'=>$topic['id'],'comment_like'=>$comment['id']] as $kind=>$id) {
+            $route=$kind==='like'?'items/'.$id.'/reaction':'comments/'.$id.'/reaction';
+            $where=['user_id'=>$this->users[2],'target_id'=>$id,'kind'=>$kind];
+            foreach (['useful','celebrate',''] as $previous) {
+                Store::insert('relations',$where+['reason'=>$previous,'created_at'=>current_time('mysql',true)]);
+                $item=$kind==='like'?Content::serialize(Content::get($id)):Content::comments($topic['id'])[0];
+                self::assertSame('like',$item['reaction']);self::assertSame(['like'=>1],$item['reaction_counts']);
+                foreach (['useful','celebrate'] as $removed) {
+                    self::assertSame(400,$this->api('POST',$route,['kind'=>'like','reaction'=>$removed,'active'=>true])->get_status());
+                }
+                for ($attempt=0;$attempt<2;$attempt++) {
+                    $result=$this->api('POST',$route,['kind'=>'like','reaction'=>'like','active'=>true]);
+                    self::assertSame(200,$result->get_status());self::assertSame(['like'=>1],$result->get_data()['reaction_counts']);
+                }
+                $result=$this->api('POST',$route,['kind'=>'like','active'=>false]);
+                self::assertSame(200,$result->get_status());self::assertSame(['like'=>0],$result->get_data()['reaction_counts']);
+                self::assertSame('', $result->get_data()['reaction']);
+                self::assertSame([],Store::rows('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where)));
+            }
+        }
     }
     public function testFileDeletionRemovesPostAndProfileReferencesButPreservesOtherFiles():void
     {

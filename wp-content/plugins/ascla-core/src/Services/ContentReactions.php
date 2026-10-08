@@ -3,10 +3,10 @@ namespace ASCLA\Core\Services;
 
 use ASCLA\Core\Repositories\Store;
 
-/** One predefined reaction per member; legacy likes remain valid without a migration. */
+/** One like per member; earlier reactions remain likes without deleting engagement. */
 final class ContentReactions
 {
-    public const TYPES=['like','useful','celebrate'];
+    public const TYPES=['like'];
 
     public static function summary(int $id,bool $comment=false): array
     {

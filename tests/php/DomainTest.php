@@ -58,7 +58,7 @@ final class DomainTest extends TestCase
         $redacted=Anonymizer::redact($text,['María Pérez','Empresa Azul']);
         self::assertStringNotContainsString('María Pérez',$redacted);self::assertStringNotContainsString('Empresa Azul',$redacted);
         self::assertStringNotContainsString('example.invalid',$redacted);self::assertStringNotContainsString('[identidad reservada]',$redacted);self::assertStringContainsString('decisión',$redacted);
-        self::assertSame('Participante: idea',Anonymizer::redact('Orador Uno: idea'));
+        self::assertSame('Identidad reservada: idea',Anonymizer::redact('Orador Uno: idea'));
     }
     public function testVideoParsingUsesStrictHostAndId(): void
     {

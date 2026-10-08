@@ -1,7 +1,7 @@
 <?php
 namespace ASCLA\Core\Services;
 use ASCLA\Core\Integrations\{AIProviderInterface,MockAIProvider,RealAIProvider,OpenAIProvider,DeepSeekProvider,MockVideoProvider,YouTubeVideoProvider};
-use ASCLA\Core\Domain\{Anonymizer,EntityRedactor,Grounding};
+use ASCLA\Core\Domain\{Anonymizer,EditorialPrivacy,EntityRedactor,Grounding};
 final class Knowledge
 {
     private const UPDATED_SOURCES_LABEL='Fuentes actualizadas';
@@ -44,7 +44,7 @@ final class Knowledge
         [$sources,$identities,$protected]=self::storedSources($originalIds);
         if (count($sources)!==count($originalIds)) {return ['answer'=>'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar al Asistente ASCLA.','sources'=>[],'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL];}
         $candidate=['answer'=>$result['answer']??'','source_ids'=>array_column($result['sources']??[],'id')];
-        if ($protected) { $candidate=EntityRedactor::tree($candidate,$identities); }
+        if ($protected) { $candidate=EntityRedactor::tree($candidate,$identities,array_column($sources,'title')); }
         $verified=Grounding::answer($candidate,$sources);$answer=$verified['answer']?:'No existe suficiente información verificable en las fuentes actuales. Puedes volver a consultar al Asistente ASCLA.';
         $verified['grounding']=array_merge($result['grounding']??[],$verified['grounding']);
         return ['answer'=>$answer,'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url']],$verified['sources']),'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL,'grounding'=>$verified['grounding']];
@@ -61,7 +61,7 @@ final class Knowledge
             $body=wp_strip_all_tags($post->post_content);$title=$post->post_title;
             if (!empty($meta['chatham'])) {
                 $protected=true;$known=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];$identities=array_merge($identities,$known);
-                $body=EntityRedactor::redact($body,$known);$title=EntityRedactor::redact($title,$known);
+                $title=EditorialPrivacy::title($title,$meta);$body=EntityRedactor::redact($body,$known,[$title]);
             }
             $sources[]=['id'=>$post->ID,'body'=>$body,'title'=>$title,'url'=>Content::serialize($post)['url']];
         }
@@ -334,6 +334,8 @@ final class KnowledgeAnswer
         $history=self::history($history);
         $contextQuestion=self::contextQuestion($question,$history);
         $context=AssistantContext::build($contextQuestion);
+        $protected=$protected || $context['protected'];
+        $identities=array_values(array_unique(array_merge($identities,$context['identities'])));
         $sources=self::sources($context,$ranked);
         $conversation=self::conversational($question);
         if (!$sources && empty($context['answerable']) && !$conversation) {
@@ -350,9 +352,10 @@ final class KnowledgeAnswer
             $meta=(array)get_post_meta($post->ID,'_ascla',true);
             if (!empty($meta['generated']) && empty($meta['reviewed'])) { continue; }
             [$title,$body,$identities]=self::sourceText($post,$meta);
-            if ($identities) { $protected=true;$allIdentities=array_merge($allIdentities,$identities); }
             $score=\ASCLA\Core\Repositories\KnowledgeSearch::score($title,$body,$tokens);
             if ($score>0) {
+                $protected=$protected || !empty($meta['chatham']);
+                $allIdentities=array_merge($allIdentities,$identities);
                 $ranked[]=['id'=>$post->ID,'title'=>$title,'body'=>\ASCLA\Core\Repositories\KnowledgeSearch::excerpt($body,$tokens),'score'=>$score,'url'=>Content::serialize($post)['url'],'kind'=>'resource'];
             }
         }
@@ -365,8 +368,8 @@ final class KnowledgeAnswer
         $body=wp_strip_all_tags($post->post_content);$title=$post->post_title;$identities=[];
         if (!empty($meta['chatham'])) {
             $identities=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];
-            $body=Anonymizer::redact($body,$identities);
-            $title=Anonymizer::redact($title,$identities);
+            $title=EditorialPrivacy::title($title,$meta);
+            $body=EntityRedactor::redact($body,$identities,[$title]);
         }
         return [$title,$body,$identities];
     }
@@ -400,10 +403,11 @@ final class KnowledgeAnswer
 
     private static function generate(string $question,array $history,array $context,array $sources,bool $conversation,bool $protected,array $identities): array
     {
-        $inputQuestion=$protected?EntityRedactor::redact($question,$identities):$question;
-        if ($protected) { $history=EntityRedactor::tree($history,$identities); }
+        $references=array_column($sources,'title');
+        $inputQuestion=$protected?EntityRedactor::redact($question,$identities,$references):$question;
+        if ($protected) { $history=EntityRedactor::tree($history,$identities,$references); }
         $result=Knowledge::provider()->generate('answer',['question'=>$inputQuestion,'sources'=>$sources,'live_context'=>$context['live'],'history'=>$history]);
-        if ($protected) { $result=EntityRedactor::tree($result,$identities); }
+        if ($protected) { $result=EntityRedactor::tree($result,$identities,$references); }
         $verified=Grounding::answer($result,$sources);
         $verified['grounding']['live_context_used']=!empty($context['answerable']);
         $verified['grounding']['conversation_only']=$conversation&&!$sources&&!$context['answerable'];
@@ -411,8 +415,8 @@ final class KnowledgeAnswer
         if (!$verified['answer']) {
             return ['answer'=>'No pude preparar una respuesta verificable con la información disponible en ASCLA. Intenta reformular la pregunta.','sources'=>[],'mode'=>Knowledge::provider()->mode(),'grounding'=>$verified['grounding']];
         }
-        $answer=$protected?EntityRedactor::redact($verified['answer'],$identities):$verified['answer'];
-        if ($protected) { Access::require(EntityRedactor::validateRedaction($answer,$identities)['valid'],'La respuesta requiere revisión de anonimización.',502); }
+        $answer=$protected?EntityRedactor::redact($verified['answer'],$identities,$references):$verified['answer'];
+        if ($protected) { Access::require(EntityRedactor::validateRedaction($answer,$identities,$references)['valid'],'La respuesta requiere revisión de anonimización.',502); }
         return ['answer'=>Access::text($answer,20000),'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url'],'kind'=>$source['kind']??'content'],$verified['sources']),'mode'=>Knowledge::provider()->mode(),'grounding'=>$verified['grounding']];
     }
 

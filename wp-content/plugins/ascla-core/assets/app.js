@@ -1512,12 +1512,9 @@
     return `<details class="overflow-menu"><summary aria-label="${E(T("Más opciones"))}" title="${E(T("Más opciones"))}">${I("more")}</summary><div class="overflow-popover">${items.join("")}</div></details>`;
   }
   function reactionButtons(data, id, comment = false) {
-    const choices = [['like','heart','Me gusta'],['useful','spark','Útil'],['celebrate','check','Celebrar']];
     const counts = data.reaction_counts || {like: data.likes || data.reactions || 0};
-    return '<div class="reaction-picker" role="group" aria-label="'+E(T('Reacciones'))+'">'+choices.map(([key,icon,label]) => {
-      const selected = data.reaction === key;
-      return btn(I(icon)+' '+E(T(label))+' <span>'+Number(counts[key] || 0)+'</span>', 'content-reaction', 'data-id="'+Number(id)+'" data-comment="'+comment+'" data-reaction="'+key+'" data-active="'+(!selected)+'" aria-pressed="'+selected+'"', 'ghost small'+(selected?' active':''));
-    }).join('')+'</div>';
+    const selected = data.reaction === 'like';
+    return '<div class="reaction-picker">'+btn(I('heart')+' '+E(T('Me gusta'))+' <span>'+Number(counts.like || 0)+'</span>', 'content-reaction', 'data-id="'+Number(id)+'" data-comment="'+comment+'" data-reaction="like" data-active="'+(!selected)+'" aria-pressed="'+selected+'"', 'ghost small'+(selected?' active':''))+'</div>';
   }
   async function changeContentReaction(button, id) {
     const comment = button.dataset.comment === 'true';

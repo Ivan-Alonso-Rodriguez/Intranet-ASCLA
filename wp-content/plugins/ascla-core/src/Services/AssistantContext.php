@@ -1,7 +1,7 @@
 <?php
 namespace ASCLA\Core\Services;
 
-use ASCLA\Core\Domain\{Anonymizer,Catalog};
+use ASCLA\Core\Domain\{EditorialPrivacy,EntityRedactor,Catalog};
 use ASCLA\Core\Frontend\Language;
 use ASCLA\Core\Repositories\Store;
 
@@ -62,13 +62,18 @@ final class AssistantContext
             ],array_slice($feed['items']??[],0,5));
         }
 
-        $seen=[];$safe=[];
+        $seen=[];$safe=[];$protected=false;$identities=[];
         foreach($sources as $source){
             $id=(int)($source['id']??0);
             if($id<=0||isset($seen[$id])) {continue; }
             $seen[$id]=true;$safe[]=$source;
+            $meta=(array)get_post_meta($id,'_ascla',true);
+            if (!empty($meta['chatham'])) {
+                $protected=true;
+                $identities=array_merge($identities,preg_split(self::IDENTITIES_SEPARATOR,(string)($meta['identities']??''))?:[]);
+            }
         }
-        return ['live'=>$live,'sources'=>array_slice($safe,0,8),'answerable'=>in_array(true,$intents,true)];
+        return ['live'=>$live,'sources'=>array_slice($safe,0,8),'answerable'=>in_array(true,$intents,true),'protected'=>$protected,'identities'=>array_values(array_unique($identities))];
     }
 
     private static function events(): array
@@ -139,7 +144,7 @@ final class AssistantContext
         $title=$post->post_title;$body=wp_strip_all_tags($post->post_content);
         if(!empty($meta['chatham'])){
             $identities=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];
-            $title=Anonymizer::redact($title,$identities);$body=Anonymizer::redact($body,$identities);
+            $title=EditorialPrivacy::title($title,$meta);$body=EntityRedactor::redact($body,$identities,[$title]);
         }
         return [$title,$body];
     }

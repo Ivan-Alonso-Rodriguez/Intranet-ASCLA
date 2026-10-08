@@ -597,9 +597,6 @@ msgstr "Catalog prepared."
 msgid "Catálogo y normalización"
 msgstr "Catalog and normalization"
 
-msgid "Celebrar"
-msgstr "Celebrate"
-
 msgid "Centro de Conocimiento"
 msgstr "Knowledge Center"
 
@@ -4097,9 +4094,6 @@ msgstr "Last attendance"
 
 msgid "Última clasificación"
 msgstr "Last classification"
-
-msgid "Útil"
-msgstr "Useful"
 
 msgid "“No me interesa” es privado. Puedes restituir aquí la elegibilidad de cualquier perfil."
 msgstr "Not interested is private. You can restore any profile's eligibility here."

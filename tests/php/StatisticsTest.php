@@ -137,14 +137,14 @@ final class StatisticsTest extends TestCase
     {
         $p=Content::save('hub',['title'=>'Reporte de prueba','body'=>'Contenido','status'=>'publish']);$this->posts[]=$p['id'];
         wp_set_current_user($this->users[3]);Content::report($p['id'],'other','Prueba');$r=Store::rows('relations','target_id=%d AND kind=%s',[$p['id'],'report'],'LIMIT 1')[0];
-        self::assertSame(403,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());wp_set_current_user($this->users[2]);self::assertSame(409,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());Reports::review((int)$r['id']);
-        wp_set_current_user($this->users[3]);Content::report($p['id'],'other','Reabierto');wp_set_current_user($this->users[2]);self::assertSame(409,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());Reports::review((int)$r['id']);self::assertSame(200,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());self::assertNull(Store::one('relations',(int)$r['id']));self::assertSame('publish',get_post_status($p['id']));self::assertSame(404,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());
+        self::assertSame(403,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());wp_set_current_user($this->users[2]);self::assertSame(409,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());Reports::review((int)$r['id'],'Reporte revisado; se conserva el contenido original.');
+        wp_set_current_user($this->users[3]);Content::report($p['id'],'other','Reabierto');wp_set_current_user($this->users[2]);self::assertSame(409,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());Reports::review((int)$r['id'],'Reporte revisado; se conserva el contenido original.');self::assertSame(200,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());self::assertNull(Store::one('relations',(int)$r['id']));self::assertSame('publish',get_post_status($p['id']));self::assertSame(404,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());
         $like=Store::insert('relations',['user_id'=>$this->users[3],'target_id'=>$p['id'],'kind'=>'like','created_at'=>current_time('mysql',true)]);self::assertSame(404,$this->api('DELETE','admin/reports/'.$like)->get_status());
     }
     public function testCommentReportsHaveTheSameDeletionGate():void
     {
         $p=Content::save('hub',['title'=>'Comentario reportado','body'=>'Contenido','status'=>'publish']);$this->posts[]=$p['id'];$comment=wp_insert_comment(['comment_post_ID'=>$p['id'],'user_id'=>$this->users[0],'comment_content'=>'Texto original','comment_approved'=>1]);
-        wp_set_current_user($this->users[3]);Content::reportComment($comment,'other','Revisar');$r=Store::rows('relations','target_id=%d AND kind=%s',[$comment,'comment_report'],'LIMIT 1')[0];wp_set_current_user($this->users[1]);Reports::review((int)$r['id']);Reports::remove((int)$r['id']);self::assertNotNull(get_comment($comment));self::assertNull(Store::one('relations',(int)$r['id']));
+        wp_set_current_user($this->users[3]);Content::reportComment($comment,'other','Revisar');$r=Store::rows('relations','target_id=%d AND kind=%s',[$comment,'comment_report'],'LIMIT 1')[0];wp_set_current_user($this->users[1]);Reports::review((int)$r['id'],'Reporte revisado; se conserva el contenido original.');Reports::remove((int)$r['id']);self::assertNotNull(get_comment($comment));self::assertNull(Store::one('relations',(int)$r['id']));
     }
     public function testClosedRequestsArchiveWithoutDeletingTheirHistory():void
     {

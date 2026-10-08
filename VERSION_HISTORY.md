@@ -1,6 +1,6 @@
 # Historial de versiones — Intranet ASCLA
 
-Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub.
+Este documento registra la evolución funcional del proyecto **Intranet ASCLA / ASCLA Core**. Su objetivo es dejar evidencia clara del progreso realizado entre entregas y facilitar la revisión del repositorio en GitHub. Las secciones anteriores a 1.10.7 describen el comportamiento de su propia entrega; sus límites, cifras de pruebas e identificadores de requisitos no sustituyen la [matriz vigente](requirements/ascla-analysis.md).
 
 > **Versión actual:** `1.10.7`
 > **Esquema de base de datos:** `14`
@@ -87,15 +87,20 @@ Este documento registra la evolución funcional del proyecto **Intranet ASCLA / 
 
 ## 1.10.7 — Directorio y continuidad del Documento de Análisis y Diseño
 
+- **Documentación del 8 de octubre:** matriz Markdown/JSON sincronizada para 302 requisitos, README, manual y notas QA actualizados. Conserva el texto extraído del PDF, distingue brechas reales de validaciones pendientes y registra excepciones del usuario. Cambio documental, sin nueva versión ni esquema.
+
+- **Corrección QA del 8 de octubre:** referencias editoriales públicas intactas en fichas, listados y Asistente (incluido historial); conserva anonimización explícita y evita sustituir títulos por «participante». Aprobar un comentario ya aprobado es idempotente y no duplica avisos. Se actualizan contratos de pruebas para perfiles incompletos, motivos de moderación, Hub y aprobación/publicación de microeventos.
+- **Directorio compacto:** la fila ajusta su altura al contenido, sin reservar 420 px para la persona; se elimina el encabezado duplicado de Mis conexiones.
+
 - **Directorio:** búsqueda prioritaria, filtros con casillas, conexiones plegables y diseño adaptable. Perfiles incompletos visibles por decisión expresa del usuario; se mantienen privacidad, membresía y bloqueos.
 - **Publicaciones:** fecha futura, estado Oculto y cron de publicación; cancelación y revisión de permisos. Hub permite publicación manual explícita, borrador o envío a revisión sin alterar la opción administrativa heredada.
 - **Microeventos:** aprobación separada de divulgación, prioridad desde publicación, periodicidad configurable y revalidación de candidatos con cancelación motivada.
 - **Contacto / perfiles:** categorías institucionales, solicitud asignada de uso único para datos personales/profesionales y protección de REST nativo.
-- **Reacciones:** Me gusta, Útil y Celebrar; una reacción por persona, cambio/retiro, compatibilidad con registros anteriores y controles accesibles.
-- **Idiomas:** gettext WordPress con 1.367 mensajes por idioma, catálogos PO/MO y proyección del catálogo al JavaScript. Inglés/español por cuenta.
+- **Reacciones:** únicamente Me gusta, por decisión del usuario; una por persona, activación/retiro y controles accesibles. Las reacciones anteriores se conservan como Me gusta; la API rechaza los tipos retirados.
+- **Idiomas:** gettext WordPress con 1.365 mensajes por idioma, catálogos PO/MO y proyección del catálogo al JavaScript. Inglés/español por cuenta.
 - **Integridad:** transacciones InnoDB y savepoints para conexiones, mensajería directa, eventos, moderación, publicaciones, cuentas y Contacto. Correos nativos/ASCLA y Calendar diferidos al commit; rollback verificado ante fallos de auditoría y metadatos, incluyendo sesión y autorización de Contacto. Se conserva contenido ajeno al eliminar cuentas con identificadores coincidentes.
 - **Auditoría:** diferencias de roles nativos y estados/motivos de moderación. Continúa pendiente la cobertura integral descrita en COMPLIANCE.md.
-- **Entrega:** versión 1.10.7, esquema 14. PHPUnit y cobertura final diferidos por solicitud del usuario.
+- **Entrega:** versión 1.10.7, esquema 14. Suite completa del 8 de octubre anterior al ajuste de reacción única: 325 pruebas PHP/5.284 aserciones, 40 comprobaciones de navegador y 8 controles del scanner manual. Cobertura de esa ejecución: PHP 82,92 % y JavaScript 94,76 %. Después del ajuste pasaron 43 pruebas PHP/512 aserciones y 9 comprobaciones de navegador; no se repitió el pipeline completo ni la cobertura. Quality Gate remoto y aceptación final pendientes.
 - **Moderación:** motivo obligatorio en comentarios y resolución de reportes; auditoría antes/después con actor y UTC, conservada al eliminar reportes revisados. Rollback comprobado ante un fallo de auditoría.
 
 ## 1.10.6 — Adecuación al análisis ASCLA, cierre QA y auditoría

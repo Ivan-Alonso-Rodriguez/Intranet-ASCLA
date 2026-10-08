@@ -1,6 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
-use ASCLA\Core\Services\Content;
+use ASCLA\Core\Services\{Content,AssistantContext,Knowledge};
 use ASCLA\Core\Domain\Transcript;
 
 final class EditorialPrivacyTest extends TestCase
@@ -54,5 +54,30 @@ final class EditorialPrivacyTest extends TestCase
         $clip=['start'=>60,'youtube_url'=>'https://untrusted.invalid/identity'];
         self::assertSame('https://www.youtube.com/watch?v=M7lc1UVf-VE&t=60s',Transcript::videoLinks([$clip],'M7lc1UVf-VE')[0]['youtube_url']);
         foreach(['','invalid','M7lc1UVf-VE&identity=secret'] as $id){self::assertSame('',Transcript::videoLinks([$clip],$id)[0]['youtube_url']);}
+    }
+    public function testPublicTitlesRemainIntactInListingsAssistantAndSavedReferences(): void
+    {
+        $titles=['resource'=>'ASCLA invita al Congreso Internacional 2026 | Lima, 18 de septiembre','gallery'=>'Buenas Prácticas de Gobierno Corporativo','event'=>'Congreso Anual de Secretarios Operativos 2026'];
+        foreach ($titles as $type=>$title) {
+            wp_set_current_user($this->users[0]);
+            update_post_meta($this->post,'_ascla',['chatham'=>true,'identities'=>'Persona Prueba','start'=>gmdate('c',time()+DAY_IN_SECONDS),'end'=>gmdate('c',time()+2*DAY_IN_SECONDS)]);
+            wp_update_post(['ID'=>$this->post,'post_type'=>'ascla_'.$type,'post_title'=>$title,'post_content'=>$title.'. Persona Prueba compartió sus experiencias.']);
+            wp_set_current_user($this->users[3]);
+            $view=Content::serialize(Content::get($this->post));
+            self::assertSame($title,$view['title']);self::assertStringContainsString($title,$view['body']);
+            self::assertStringNotContainsString('Persona Prueba',$view['body']);
+            $items=Content::listing($type,['q'=>$title])['items'];
+            self::assertSame($title,array_column($items,'title','id')[$this->post]);
+            $context=AssistantContext::build('Eventos y novedades');
+            self::assertSame($title,array_column($context['sources'],'title','id')[$this->post]);
+            $saved=Knowledge::storedAnswer(['answer'=>'Consulta '.$title,'sources'=>[['id'=>$this->post,'title'=>'participante']]]);
+            self::assertSame($title,$saved['sources'][0]['title']);self::assertSame('Consulta '.$title,$saved['answer']);
+        }
+    }
+    public function testPublicAttributionIsPreservedWhenChathamIsDisabled(): void
+    {
+        $meta=get_post_meta($this->post,'_ascla',true);$meta['chatham']=false;update_post_meta($this->post,'_ascla',$meta);
+        wp_update_post(['ID'=>$this->post,'post_type'=>'ascla_event']);wp_set_current_user($this->users[3]);
+        self::assertSame('Sesión de Persona Prueba',Content::serialize(Content::get($this->post))['title']);
     }
 }

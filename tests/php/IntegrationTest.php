@@ -132,7 +132,8 @@ final class IntegrationTest extends TestCase
     {
         $p=$this->make('hub');$this->user(1);Content::report($p['id'],'spam','Reporte de prueba.');
         $row=Store::rows('relations','user_id=%d AND target_id=%d AND kind=%s',[$this->users[1],$p['id'],'report'],'LIMIT 1')[0];self::assertEmpty($row['reviewed_at']);
-        $this->user(0);$reviewed=$this->api('POST','/admin/reports/'.(int)$row['id'].'/review');self::assertSame(200,$reviewed->get_status());
+        $this->user(0);self::assertSame(400,$this->api('POST','/admin/reports/'.(int)$row['id'].'/review')->get_status());
+        $reviewed=$this->api('POST','/admin/reports/'.(int)$row['id'].'/review',['reason'=>'Reporte comprobado; el contenido cumple las normas.']);self::assertSame(200,$reviewed->get_status());
         $row=Store::one('relations',(int)$row['id']);self::assertNotEmpty($row['reviewed_at']);self::assertSame($this->users[0],(int)$row['reviewed_by']);
         $this->user(1);Content::report($p['id'],'spam','Información adicional nueva.');$row=Store::one('relations',(int)$row['id']);self::assertEmpty($row['reviewed_at']);self::assertSame(0,(int)$row['reviewed_by']);
     }
@@ -166,11 +167,14 @@ final class IntegrationTest extends TestCase
     }
 
 
-    public function testMemberCannotPublishOrModerateOrReadOthersDrafts(): void
+    public function testMemberCanPublishHubButCannotModerateOrPublishEditorialContentOrReadOthersDrafts(): void
 
     {
 
-        $this->user(1);$p=$this->make('hub');self::assertSame('pending',$p['status']);$this->user(2);self::assertSame(404,$this->api('GET','/items/'.$p['id'])->get_status());self::assertSame(403,$this->api('POST','/items/'.$p['id'].'/moderate',['decision'=>'approve','reason'=>'Test'])->get_status());
+        $this->user(1);$published=$this->make('hub');self::assertSame('publish',$published['status']);
+        $draft=$this->make('hub',['status'=>'draft']);$p=$this->make('hub',['status'=>'pending']);self::assertSame('pending',$p['status']);
+        $this->user(2);self::assertSame(200,$this->api('GET','/items/'.$published['id'])->get_status());
+        self::assertSame(404,$this->api('GET','/items/'.$draft['id'])->get_status());self::assertSame(404,$this->api('GET','/items/'.$p['id'])->get_status());self::assertSame(403,$this->api('POST','/items/'.$p['id'].'/moderate',['decision'=>'approve','reason'=>'Test'])->get_status());
 
         $this->user(0);$p=Content::moderate($p['id'],'approve','Contenido relevante.');self::assertSame('publish',$p['status']);$this->user(2);self::assertSame(200,$this->api('GET','/items/'.$p['id'])->get_status());
 

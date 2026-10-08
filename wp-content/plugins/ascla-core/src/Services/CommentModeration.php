@@ -18,8 +18,12 @@ final class CommentModeration
             $previous=(array)get_comment_meta($id,'_ascla_moderation',true);
             $before=['state'=>(string)$comment->comment_approved,'reason'=>$previous['reason']??''];
             $status=$decision==='approve'?'approve':'hold';
-            $saved=wp_set_comment_status($id,$status,true);
-            Access::require(!is_wp_error($saved) && $saved===true,'No se pudo guardar la decisión.',500);
+            $expected=$decision==='approve'?'1':'0';
+            if ((string)$comment->comment_approved!==$expected) {
+                $saved=wp_set_comment_status($id,$status,true);
+                Access::require(!is_wp_error($saved) && $saved===true,'No se pudo guardar la decisión.',500);
+            }
+            Access::require((string)get_comment($id)->comment_approved===$expected,'No se pudo guardar la decisión.',500);
             $moderation=['decision'=>$decision,'reason'=>$reason,'actor'=>get_current_user_id(),'at'=>gmdate('c')];
             update_comment_meta($id,'_ascla_moderation',$moderation);
             Access::require(get_comment_meta($id,'_ascla_moderation',true)===$moderation,'No se pudo guardar la decisión.',500);

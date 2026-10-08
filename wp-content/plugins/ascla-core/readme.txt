@@ -11,6 +11,9 @@ ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 == Changelog ==
 
 = 1.10.7 =
+* Conserva únicamente Me gusta en publicaciones y comentarios. Las reacciones anteriores se cuentan como Me gusta y la API rechaza los tipos retirados.
+* Corrige la altura de Mis conexiones y preserva títulos públicos en contenido, referencias e historial del Asistente.
+* Aprobar comentarios ya aprobados es idempotente; actualiza regresiones a los contratos actuales de perfiles, Hub, moderación y microeventos.
 * Reorganiza el Directorio e incluye perfiles incompletos respetando privacidad y membresía.
 * Incorpora programación editorial, revalidación de candidatos y aprobación separada de microeventos.
 * Amplía categorías de Contacto, autorización de cambios personales y protección REST nativa.
