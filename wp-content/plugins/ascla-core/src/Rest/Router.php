@@ -50,7 +50,7 @@ final class RouterRoutes
 {
     public static function community(): void
     {
-        Router::route('/bootstrap','GET',static fn()=>['me'=>Profiles::visible(get_current_user_id()),'profile_completion'=>Profiles::completion(get_current_user_id()),'profile_review'=>\ASCLA\Core\Services\ProfileReview::status(get_current_user_id()),'can_create'=>array_combine(array_keys(\ASCLA\Core\Domain\Catalog::TYPES),array_map([Content::class,'canCreate'],array_keys(\ASCLA\Core\Domain\Catalog::TYPES))),'birthday'=>\ASCLA\Core\Services\Birthdays::info(get_current_user_id()),'catalogs'=>Profiles::catalogs(),'admin_area'=>current_user_can('ascla_admin_area'),'moderator'=>current_user_can('ascla_moderate'),'executive'=>current_user_can('ascla_publish'),'admin'=>current_user_can('ascla_manage'),'demo'=>Settings::get()['demo'],'ai_mode'=>Knowledge::provider()->mode(),'google_connected'=>\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='','password_min_length'=>Settings::get()['password_min_length'],'notification_cursor'=>Notifications::latestId()]);
+        Router::route('/bootstrap','GET',static fn()=>['me'=>Profiles::visible(get_current_user_id()),'profile_completion'=>Profiles::completion(get_current_user_id()),'profile_review'=>\ASCLA\Core\Services\ProfileReview::status(get_current_user_id()),'can_create'=>array_combine(array_keys(\ASCLA\Core\Domain\Catalog::TYPES),array_map([Content::class,'canCreate'],array_keys(\ASCLA\Core\Domain\Catalog::TYPES))),'birthday'=>\ASCLA\Core\Services\Birthdays::info(get_current_user_id()),'catalogs'=>Profiles::catalogs(),'support_categories'=>\ASCLA\Core\Services\SupportCategories::all(),'admin_area'=>current_user_can('ascla_admin_area'),'moderator'=>current_user_can('ascla_moderate'),'executive'=>current_user_can('ascla_publish'),'admin'=>current_user_can('ascla_manage'),'demo'=>Settings::get()['demo'],'ai_mode'=>Knowledge::provider()->mode(),'google_connected'=>\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='','password_min_length'=>Settings::get()['password_min_length'],'notification_cursor'=>Notifications::latestId()]);
         Router::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
         Router::route('/profiles','GET',static fn($r)=>Profiles::directory($r->get_params()));
         Router::route('/locations/countries','GET',static fn()=>Locations::countries());
@@ -86,9 +86,9 @@ final class RouterRoutes
         Router::route('/comments/(?P<id>\d+)','DELETE',static fn($r)=>Content::removeComment((int)$r['id']),'ascla_write');
         Router::route('/items/(?P<id>\d+)/comments','GET',static fn($r)=>Content::comments((int)$r['id']));
         Router::route('/items/(?P<id>\d+)/comments','POST',static fn($r)=>Content::comment((int)$r['id'],(string)$r['body'],(int)($r['parent']??0)),'ascla_write');
-        Router::route('/comments/(?P<id>\d+)/reaction','POST',static fn($r)=>Content::reactComment((int)$r['id'],rest_sanitize_boolean($r['active'])),'ascla_write');
+        Router::route('/comments/(?P<id>\d+)/reaction','POST',static fn($r)=>Content::reactComment((int)$r['id'],rest_sanitize_boolean($r['active']),(string)($r['reaction']??'like')),'ascla_write');
         Router::route('/comments/(?P<id>\d+)/report','POST',static fn($r)=>Content::reportComment((int)$r['id'],(string)$r['reason'],(string)($r['detail']??'')),'ascla_write');
-        Router::route('/items/(?P<id>\d+)/reaction','POST',static fn($r)=>Content::react((int)$r['id'],(string)$r['kind'],rest_sanitize_boolean($r['active'])),'ascla_write');
+        Router::route('/items/(?P<id>\d+)/reaction','POST',static fn($r)=>Content::react((int)$r['id'],(string)$r['kind'],rest_sanitize_boolean($r['active']),(string)($r['reaction']??'like')),'ascla_write');
         Router::route('/items/(?P<id>\d+)/report','POST',static fn($r)=>Content::report((int)$r['id'],(string)$r['reason'],(string)($r['detail']??'')),'ascla_write');
         Router::route('/items/(?P<id>\d+)/moderate','POST',static fn($r)=>Content::moderate((int)$r['id'],(string)$r['decision'],(string)$r['reason'],rest_sanitize_boolean($r['reviewed'])),'ascla_admin_area');
         Router::route('/conversations','GET',static fn($r)=>Messaging::conversations(Access::text($r['q']??'',120)));
@@ -185,11 +185,8 @@ final class RouterRoutes
         Router::route('/admin','GET',static fn()=>RouterAdmin::build(),'ascla_admin_area');
         Router::route('/admin/reports/(?P<id>\d+)','DELETE',static fn($r)=>\ASCLA\Core\Services\Reports::remove((int)$r['id']),'ascla_moderate');
         Router::route('/admin/contact/(?P<id>\d+)','DELETE',static fn($r)=>\ASCLA\Core\Services\Administration::deleteContact((int)$r['id']),'ascla_publish');
-        Router::route('/admin/reports/(?P<id>\d+)/review','POST',static fn($r)=>Content::reviewReport((int)$r['id']),'ascla_moderate');
-        Router::route('/admin/comments/(?P<id>\d+)','POST',static function($r) {
-            $comment=get_comment((int)$r['id']); Access::require($comment && Content::get((int)$comment->comment_post_ID),'Comentario no válido.',404);
-            $status=$r['decision']==='approve'?'approve':'hold'; wp_set_comment_status($comment->comment_ID,$status); Audit::record('comment_moderation',(int)$comment->comment_ID,$status); return ['ok'=>true];
-        },'ascla_moderate');
+        Router::route('/admin/reports/(?P<id>\d+)/review','POST',static fn($r)=>Content::reviewReport((int)$r['id'],(string)($r['reason']??'')),'ascla_moderate');
+        Router::route('/admin/comments/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\CommentModeration::decide((int)$r['id'],(string)$r['decision'],(string)($r['reason']??'')),'ascla_moderate');
         Router::route('/admin/contact/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Administration::contactStatus((int)$r['id'],(string)$r['status'],(string)($r['response']??'')),'ascla_publish');
         Router::route('/admin/member/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Administration::suspend((int)$r['id'],rest_sanitize_boolean($r['suspended'])),'ascla_manage');
         Router::route('/demo','POST',static fn($r)=>\ASCLA\Core\Services\Demo::seed((string)$r['password']),'ascla_manage');

@@ -1,6 +1,7 @@
 <?php
 namespace ASCLA\Core\Services;
 use ASCLA\Core\Repositories\Store;
+use ASCLA\Core\Repositories\WordPressWrites;
 
 /** RSVP history and time-limited offers share the event lock with registrations. */
 final class EventParticipation
@@ -24,15 +25,15 @@ final class EventParticipation
     public static function reconfirm(int $id,array $before,array $after): void
     {
         if (!self::changedSchedule($before,$after)) { return; }
-        Store::lock('event:'.$id,static function()use($id,$before,$after){
+        Store::atomic('event:'.$id,static function()use($id,$before,$after){
             $rows=Store::rows('registrations',"event_id=%d AND status IN ('accepted','offered')",[$id],'ORDER BY id');
             $history=(array)(get_post_meta($id,'_ascla_rsvp_history',true)?:[]);
             $fields=array_flip(['start','end','modality']);
             $history[]=['at'=>gmdate('c'),'actor'=>get_current_user_id(),'reason'=>$after['change_reason']??'',
                 'before'=>array_intersect_key($before,$fields),'after'=>array_intersect_key($after,$fields),'registrations'=>$rows];
-            update_post_meta($id,'_ascla_rsvp_history',$history);
+            WordPressWrites::meta('post',$id,'_ascla_rsvp_history',$history);
             foreach ($rows as $row) { Store::update('registrations',['status'=>'reconfirm'],['id'=>(int)$row['id']]); }
-            delete_post_meta($id,'_ascla_waitlist_offers');
+            WordPressWrites::deleteMeta('post',$id,'_ascla_waitlist_offers');
             wp_clear_scheduled_hook('ascla_event_offers',[$id]);
         });
     }
@@ -43,10 +44,10 @@ final class EventParticipation
         $deadline=min(time()+$hours*HOUR_IN_SECONDS,strtotime(!empty($meta['micro'])?($meta['registration_deadline']??$meta['start']):$meta['end']));
         $offers=(array)(get_post_meta($id,'_ascla_waitlist_offers',true)?:[]);
         $offers[$registration]=$deadline;
-        update_post_meta($id,'_ascla_waitlist_offers',$offers);
+        WordPressWrites::meta('post',$id,'_ascla_waitlist_offers',$offers);
         $history=(array)(get_post_meta($id,'_ascla_waitlist_offer_history',true)?:[]);
         $history[]=['registration_id'=>$registration,'offered_at'=>gmdate('c'),'expires_at'=>gmdate('c',$deadline)];
-        update_post_meta($id,'_ascla_waitlist_offer_history',$history);
+        WordPressWrites::meta('post',$id,'_ascla_waitlist_offer_history',$history);
         self::reschedule($id);
     }
 

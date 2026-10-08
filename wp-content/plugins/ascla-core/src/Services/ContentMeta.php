@@ -12,6 +12,7 @@ final class ContentMeta
         $mod=current_user_can('ascla_moderate');
         $editorial=$mod||($type==='resource'&&Access::canPublish());
         self::texts($data,$input,$editorial);
+        if ($type==='contact') { SupportCategories::validate($data,$input); }
         self::urls($data,$input);
         if ($editorial && isset($input['chatham'])) { $data['chatham']=rest_sanitize_boolean($input['chatham']); }
         elseif (!isset($data['chatham'])) { $data['chatham']=Settings::get()['chatham_default']; }

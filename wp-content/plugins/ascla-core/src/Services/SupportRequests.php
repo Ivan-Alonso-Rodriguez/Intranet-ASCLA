@@ -1,6 +1,7 @@
 <?php
 namespace ASCLA\Core\Services;
 use ASCLA\Core\Repositories\Store;
+use ASCLA\Core\Repositories\WordPressWrites;
 use ASCLA\Core\Domain\Catalog;
 
 /** RN-029 / RF-083..087: assignment, confidential history and ordered resolution. */
@@ -25,7 +26,7 @@ final class SupportRequests
         if (get_post_type($id)!=='ascla_contact') { return; }
         $meta=(array)(get_post_meta($id,'_ascla',true)?:[]);
         if (($meta['request_version']??0)>=2) { return; }
-        Store::lock('contact:'.$id,static fn()=>self::migrateRequest($id));
+        Store::atomic('contact:'.$id,static fn()=>self::migrateRequest($id));
     }
 
     private static function migrateRequest(int $id): void
@@ -37,8 +38,8 @@ final class SupportRequests
         if ($meta['request_status']==='closed') { $meta['request_status']='resolved'; }
         $meta['request_history']=self::normalizeHistory((array)($meta['request_history']??[]));
         $meta['request_version']=2;
-        update_post_meta($id,'_ascla',$meta);
-        if (!metadata_exists('post',$id,self::META)) { update_post_meta($id,self::META,self::defaultAssignee()); }
+        WordPressWrites::meta('post',$id,'_ascla',$meta);
+        if (!metadata_exists('post',$id,self::META)) { WordPressWrites::meta('post',$id,self::META,self::defaultAssignee()); }
     }
 
     private static function normalizeHistory(array $history): array
@@ -82,13 +83,13 @@ final class SupportRequests
         $post=get_post($id);
         Access::require($post && $post->post_type==='ascla_contact' && $post->post_status==='private','Solicitud no encontrada.',404);
         Access::require(in_array($user,array_column(self::staff(),'id'),true),'Selecciona un administrador o ejecutivo activo.',400);
-        return Store::lock('contact:'.$id,static function()use($id,$user,$post){
+        return Store::atomic('contact:'.$id,static function()use($id,$user,$post){
             $old=self::assignee($id);
             if ($old!==$user) {
-                update_post_meta($id,self::META,$user);
+                WordPressWrites::meta('post',$id,self::META,$user);
                 $meta=(array)get_post_meta($id,'_ascla',true);
                 $meta['request_history'][]=['kind'=>'assignment','at'=>gmdate('c'),'actor'=>Profiles::publicName(get_current_user_id()),'actor_id'=>get_current_user_id(),'previous_assignee'=>$old,'assignee'=>$user];
-                update_post_meta($id,'_ascla',$meta);
+                WordPressWrites::meta('post',$id,'_ascla',$meta);
                 Audit::record('contact_assigned',$id,'before='.$old.'; after='.$user);
                 Notifications::send($user,'support_request','Se te asignó la solicitud #'.$id.'.',Catalog::url('administracion',['section'=>'solicitudes']),['type'=>'post','id'=>$id]);
             }
@@ -101,7 +102,7 @@ final class SupportRequests
         Access::require(self::canHandle($id),'Solo el responsable asignado puede atender esta solicitud.',403);
         Access::require(isset(self::STATES[$status]),'Estado no válido.',400);
         $response=trim(Access::text($response,10000));
-        return Store::lock('contact:'.$id,static function()use($id,$status,$response){
+        return Store::atomic('contact:'.$id,static function()use($id,$status,$response){
             $post=Content::get($id);
             Access::require(self::canHandle($id),'La asignación cambió. Actualiza la vista.',403);
             $meta=(array)get_post_meta($id,'_ascla',true);$before=$meta['request_status']??'open';
@@ -112,7 +113,7 @@ final class SupportRequests
             if ($status!==$before || $response!=='') {
                 $meta['request_status']=$status;$meta['request_updated_at']=gmdate('c');
                 $meta['request_history'][]=['kind'=>'response','from'=>$before,'to'=>$status,'response'=>$response,'at'=>$meta['request_updated_at'],'actor'=>Profiles::publicName(get_current_user_id()),'actor_id'=>get_current_user_id()];
-                update_post_meta($id,'_ascla',$meta);
+                WordPressWrites::meta('post',$id,'_ascla',$meta);
                 Audit::record('contact_status',$id,'before='.$before.'; after='.$status);
                 Notifications::send((int)$post->post_author,'support_update','Tu solicitud #'.$id.' está '.self::STATES[$status].'.',Catalog::url('contacto'),['type'=>'post','id'=>$id,'actor'=>get_current_user_id()]);
             }
@@ -123,10 +124,10 @@ final class SupportRequests
     public static function archive(int $id): array
     {
         Access::require(self::canHandle($id),'Solo el responsable asignado puede archivar esta solicitud.',403);
-        return Store::lock('contact:'.$id,static function()use($id){
+        return Store::atomic('contact:'.$id,static function()use($id){
             Content::get($id);Access::require(self::canHandle($id),'La asignación cambió.',403);$meta=(array)get_post_meta($id,'_ascla',true);
             Access::require(($meta['request_status']??'open')==='closed','Cierra la solicitud antes de archivarla.',409);
-            update_post_meta($id,'_ascla_request_archived',true);
+            WordPressWrites::meta('post',$id,'_ascla_request_archived',true);
             Audit::record('contact_archived',$id);
             return ['id'=>$id,'archived'=>true,'message'=>'Solicitud archivada. El historial sigue disponible.'];
         });

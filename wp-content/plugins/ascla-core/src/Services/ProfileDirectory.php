@@ -40,7 +40,9 @@ final class ProfileDirectory
     {
         if (!Access::member($id) || Messaging::blocked(get_current_user_id(),$id)) { return false; }
         $raw=Profiles::raw($id);
-        return !empty($raw['directory']) && !ProfileRequirements::missing($raw);
+        // Directory inclusion is independent of profile completion. Recommendations
+        // still require the minimum fields; visibility and membership remain mandatory.
+        return !empty($raw['directory']);
     }
 
     private static function candidateData(int $id): array

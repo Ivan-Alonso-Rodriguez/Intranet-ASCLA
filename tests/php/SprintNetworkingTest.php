@@ -81,4 +81,24 @@ final class SprintNetworkingTest extends TestCase
         $agenda=NetworkingAI::agenda($this->users);self::assertSame('DEMO MODE',$agenda['mode']);self::assertTrue($agenda['fallback']);
     }
 
+    public function testAssistantKeepsPublicReferencesAndRedactsProviderIdentitiesWithoutAnExplicitIdentityList(): void {
+        $token='referencia'.bin2hex(random_bytes(5));$title='Congreso Anual de Secretarios Operativos 2026';
+        $id=wp_insert_post(['post_type'=>'ascla_resource','post_title'=>$title,'post_content'=>$token.'. El ponente Juan Pérez presentó el programa.','post_status'=>'publish','post_author'=>$this->users[0]]);$this->posts[]=$id;
+        update_post_meta($id,'_ascla',['chatham'=>true]);
+        $this->http=static function($pre,$args,$url)use($id,$title){
+            $input=json_decode(json_decode($args['body'],true)['contents'][0]['parts'][0]['text'],true);
+            self::assertStringContainsString($title,wp_json_encode($input,JSON_UNESCAPED_UNICODE));
+            self::assertStringNotContainsString('Juan Pérez',wp_json_encode($input,JSON_UNESCAPED_UNICODE));
+            $result=['answer'=>$title.'. La directora María presentó el programa.','source_ids'=>[$id]];
+            return ['response'=>['code'=>200],'headers'=>[],'body'=>wp_json_encode(['candidates'=>[['content'=>['parts'=>[['text'=>wp_json_encode($result)]]],'finishReason'=>'STOP']]])];
+        };add_filter('pre_http_request',$this->http,10,3);
+        wp_set_current_user($this->users[1]);
+        foreach([$token,'Dime las novedades'] as $question) {
+            $answer=Knowledge::answer($question);
+            self::assertSame($title,$answer['sources'][0]['title']);self::assertStringContainsString($title,$answer['answer']);
+            self::assertStringNotContainsString('María',$answer['answer']);self::assertStringNotContainsString('participante',$answer['answer']);
+            $saved=Knowledge::storedAnswer($answer);self::assertSame($title,$saved['sources'][0]['title']);self::assertSame($answer['answer'],$saved['answer']);
+        }
+    }
+
 }

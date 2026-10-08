@@ -14,6 +14,16 @@ final class SprintEditorialTest extends TestCase
         $tree=EntityRedactor::tree(['summary'=>'La directora María aprobó la propuesta.','infographic'=>['key_points'=>['Pedro Gómez de Empresa Boreal intervino.']]]);
         self::assertStringNotContainsString('María',json_encode($tree));self::assertStringNotContainsString('Boreal',json_encode($tree));
     }
+    public function testPublicReferencesCannotOverrideExplicitlyReservedIdentities(): void {
+        $title='Foro Internacional con Juan Pérez';$known=[' Juan Pérez '];
+        $text=$title.'. La directora María respondió.';
+        $out=EntityRedactor::redact($text,$known,[$title]);
+        self::assertStringContainsString('Foro Internacional con identidad reservada',$out);
+        foreach(['Juan Pérez','María','participante'] as $secret)self::assertStringNotContainsString($secret,$out);
+        self::assertTrue(EntityRedactor::validateRedaction($out,$known,[$title])['valid']);
+        self::assertFalse(EntityRedactor::validateRedaction($text,$known,[$title])['valid']);
+        self::assertSame($out,EntityRedactor::redact($out,$known,[$title]));
+    }
     public function testNaturalAnswerIsPreservedAndOnlyUnknownReferencesAreRemoved(): void {
         $body='El directorio puede revisar los riesgos. La evaluación tiene seguimiento.';
         $natural='La supervisión combina la revisión de riesgos con el seguimiento de la evaluación.';

@@ -122,7 +122,8 @@ final class RoleWorkflowTest extends TestCase
         self::assertSame('publish',get_post_status($topic['id']));
         wp_set_current_user($this->member);$comment=Content::comment($topic['id'],'Comentario para moderar');
         wp_set_current_user($this->executive);
-        self::assertSame(200,$this->api('POST','admin/comments/'.$comment['id'],['decision'=>'approve'])->get_status());
+        self::assertSame(400,$this->api('POST','admin/comments/'.$comment['id'],['decision'=>'approve'])->get_status());
+        self::assertSame(200,$this->api('POST','admin/comments/'.$comment['id'],['decision'=>'approve','reason'=>'Comentario revisado y conforme.'])->get_status());
         self::assertSame(200,$this->api('DELETE','comments/'.$comment['id'])->get_status());
         self::assertSame(200,$this->api('GET','admin/contacts')->get_status());
     }

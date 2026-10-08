@@ -1,6 +1,7 @@
 <?php
 namespace ASCLA\Core\Services;
 use ASCLA\Core\Repositories\Store;
+use ASCLA\Core\Repositories\WordPressWrites;
 
 /** Administration reads and decisions reuse WordPress users, posts and existing metadata. */
 final class Administration
@@ -104,7 +105,7 @@ final class Administration
             'role'=>$account['role'],
         ]);
         Access::require(!is_wp_error($id),is_wp_error($id)?$id->get_error_message():'No se pudo crear la cuenta.',400);$id=(int)$id;
-        update_user_meta($id,'_ascla_profile',[
+        WordPressWrites::meta('user',$id,'_ascla_profile',[
             'first_name'=>$account['first'],'last_name'=>$account['last'],'position'=>$account['position'],'company'=>$account['company'],'member_type'=>$account['member_type'],
             'birth_date'=>$account['birth_date'],'phone'=>$account['phone'],'phone_visibility'=>$account['phone_visibility'],'directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[],'revision'=>1,
         ]);
@@ -138,7 +139,7 @@ final class Administration
             'membership'=>Membership::validate($input),
             'send_invite'=>!array_key_exists('send_invite',$input)||rest_sanitize_boolean($input['send_invite']),
         ];
-        return Store::lock('admin-create-user:'.hash('sha256',$login.'|'.$email),static fn()=>self::createUserLocked($account));
+        return Store::atomic('admin-create-user',static fn()=>self::createUserLocked($account));
     }
 
     public static function user(int $id): array
@@ -170,11 +171,12 @@ final class Administration
 
     public static function updateUser(int $id,array $input): array
     {
-        return Store::lock('profile-interests:'.$id,static fn()=>self::updateUserUnlocked($id,$input));
+        return Store::atomic('profile-interests:'.$id,static fn()=>self::updateUserUnlocked($id,$input));
     }
 
     private static function updateUserUnlocked(int $id,array $input): array
     {
+        clean_user_cache($id);
         $user=self::editableMember($id);
         Access::require(current_user_can('edit_user',$id),'No puedes editar esta cuenta.',403);
         $email=sanitize_email(Access::text($input['email']??'',100));
@@ -187,31 +189,32 @@ final class Administration
         $last=Access::text($input['last_name']??'',100);
         Access::require(trim($first.$last)!=='','Indica al menos un nombre o apellido.',400);
         $membership=Membership::validate($input,$id);
-        $previousProfile=(array)get_user_meta($id,'_ascla_profile',true);
+        $previousProfile=(array)get_user_meta($id,'_ascla_profile',true)+['first_name'=>$user->first_name,'last_name'=>$user->last_name,'phone_visibility'=>'private'];
         $phone=\ASCLA\Core\Domain\Phone::normalize($input['phone']??($previousProfile['phone']??''));
         $phoneVisibility=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']??($previousProfile['phone_visibility']??'private'));
         $profile=$previousProfile;
         $profile['first_name']=$first;$profile['last_name']=$last;
         $profile['phone']=$phone;$profile['phone_visibility']=$phoneVisibility;
-        $changed=[];
         foreach (['position','company'] as $field) {
             $profile[$field]=Access::text($input[$field]??($previousProfile[$field]??''),200);
             if ($profile[$field]!==($previousProfile[$field]??'')) {
                 ProfileValidation::validateRequired([$field=>$profile[$field]]);
-                $changed[]=$field;
             }
         }
         $profile['member_type']=Access::text($input['member_type']??($previousProfile['member_type']??''),200);
         $profile['birth_date']=Birthdays::normalize($input['birth_date']??($previousProfile['birth_date']??''));
+        $changed=ProfessionalChanges::changed($previousProfile,$profile);
+        if ($changed) { ProfileValidation::validateRequired(array_intersect_key($profile,array_flip($changed))); }
         $profile['revision']=(int)($profile['revision']??0)+1;
         $save=static function()use($id,$user,$email,$first,$last,$role,$profile,$membership): void {
             $display=trim($first.' '.$last)?:$user->display_name;
             $result=wp_update_user(['ID'=>$id,'user_email'=>$email,'first_name'=>$first,'last_name'=>$last,'display_name'=>$display]);
             Access::require(!is_wp_error($result),is_wp_error($result)?$result->get_error_message():'No se pudo actualizar la cuenta.',400);
             $previousRoles=$user->roles;$user->set_role($role);
+            Access::require((new \WP_User($id))->roles===[$role],'No se pudo guardar el rol de la cuenta.',500);
             Membership::apply($id,$membership);
             Audit::changes('member_roles_updated',$id,['roles'=>$previousRoles],['roles'=>[$role]]);
-            update_user_meta($id,'_ascla_profile',$profile);
+            WordPressWrites::meta('user',$id,'_ascla_profile',$profile);
             update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
             Audit::record('member_updated',$id,'role='.$role);
         };
@@ -227,12 +230,17 @@ final class Administration
         Access::require(current_user_can('delete_user',$id),'No puedes eliminar esta cuenta.',403);
         $actor=get_current_user_id();
         $login=$target->user_login;
-        return Store::lock('admin-delete-user:'.$id,static function()use($id,$actor,$login){
+        return Store::atomic('profile-interests:'.$id,static function()use($id,$actor,$login){
+            clean_user_cache($id);self::editableMember($id);
+            Access::require(current_user_can('delete_user',$id),'No puedes eliminar esta cuenta.',403);
             require_once ABSPATH.'wp-admin/includes/user.php';
             $deleted=wp_delete_user($id,$actor);
             Access::require($deleted===true,'No se pudo eliminar la cuenta.',500);
             Store::delete('relations',['user_id'=>$id]);
-            Store::delete('relations',['target_id'=>$id]);
+            // target_id also identifies posts/comments; only these kinds point to a person.
+            foreach (['connect','connected','block','conversation_request','conversation_allowed','connection_cooldown','connection_history','history_revoked'] as $kind) {
+                Store::delete('relations',['target_id'=>$id,'kind'=>$kind]);
+            }
             Events::removeMemberRegistrations($id);
             Store::delete('notifications',['user_id'=>$id]);
             Store::delete('jobs',['user_id'=>$id]);
@@ -248,8 +256,11 @@ final class Administration
     {
         Access::require(current_user_can('ascla_manage'));
         Access::require($id>0 && $id!==get_current_user_id()&&!user_can($id,'manage_options')&&user_can($id,'ascla_access'),'Cuenta no disponible.',400);
-        $input=['membership_status'=>$suspended?'suspended':'active'];
-        Membership::apply($id,Membership::validate($input,$id));
+        Store::atomic('profile-interests:'.$id,static function()use($id,$suspended){
+            clean_user_cache($id);
+            $input=['membership_status'=>$suspended?'suspended':'active'];
+            Membership::apply($id,Membership::validate($input,$id));
+        });
         return ['id'=>$id,'suspended'=>$suspended];
     }
 }

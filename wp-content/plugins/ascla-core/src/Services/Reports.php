@@ -21,14 +21,19 @@ final class Reports
     {
         $r=self::get($id);
         $key=($r['kind']==='comment_report'?'comment-report:':'report:').$r['user_id'].':'.$r['target_id'].':'.$r['kind'];
-        return Store::lock($key,static fn()=>$callback(self::get($id)));
+        return Store::atomic($key,static fn()=>$callback(self::get($id)));
     }
-    public static function review(int $id): array
+    public static function review(int $id,string $reason=''): array
     {
-        return self::locked($id,static function($r)use($id){
+        $reason=trim(Access::text($reason,1000));
+        Access::require($reason!=='','Indique un motivo de moderación.',400);
+        return self::locked($id,static function($r)use($id,$reason){
             $when=current_time('mysql',true);
             Store::update('relations',['reviewed_at'=>$when,'reviewed_by'=>get_current_user_id()],['id'=>$id]);
-            Audit::record('report_reviewed',$id,$r['kind']);
+            Audit::changes('report_reviewed',$id,
+                ['state'=>empty($r['reviewed_at'])?'pending':'reviewed','reviewed_at'=>$r['reviewed_at'],'reviewed_by'=>(int)$r['reviewed_by'],'reason'=>''],
+                ['state'=>'reviewed','reviewed_at'=>$when,'reviewed_by'=>get_current_user_id(),'reason'=>$reason],
+                ['kind'=>$r['kind'],'target_id'=>(int)$r['target_id']]);
             return ['id'=>$id,'reviewed'=>true,'reviewed_at'=>$when];
         });
     }
@@ -38,7 +43,7 @@ final class Reports
             Access::require(!empty($r['reviewed_at']),'Revisa el reporte antes de eliminarlo.',409);
             global $wpdb;
             Access::require($wpdb->delete(Store::table('relations'),['id'=>$id])===1,'No se pudo eliminar el reporte.',500);
-            Audit::record('report_deleted',$id,$r['kind'].'; target='.$r['target_id']);
+            Audit::changes('report_deleted',$id,['state'=>'reviewed'],['state'=>'deleted'],['kind'=>$r['kind'],'target_id'=>(int)$r['target_id']]);
             return ['id'=>$id,'deleted'=>true];
         });
     }

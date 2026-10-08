@@ -47,7 +47,7 @@ final class AnalysisComplianceTest extends TestCase
         return $id;
     }
 
-    public function testRequiredProfileFieldsGateDirectoryAndOptionalFieldsDoNotPreventCompletion(): void
+    public function testIncompleteProfilesRemainDiscoverableButRequiredFieldsStillControlCompletion(): void
     {
         [$a,$b]=$this->users;
         self::assertSame(100,Profiles::completion($b)['percent']);
@@ -55,7 +55,8 @@ final class AnalysisComplianceTest extends TestCase
         foreach (['bio','city','industries','interests','goals'] as $key) {
             $original=Profiles::raw($b);$incomplete=$original;$incomplete[$key]=is_array($incomplete[$key])?[]:'';
             update_user_meta($b,'_ascla_profile',$incomplete);
-            self::assertNotContains($b,array_column(Profiles::directory()['items'],'id'),$key);
+            self::assertContains($b,array_column(Profiles::directory()['items'],'id'),$key);
+            self::assertNotEmpty(ProfileRequirements::missing(Profiles::raw($b)),$key);
             update_user_meta($b,'_ascla_profile',$original);
         }
         self::assertContains($b,array_column(Profiles::directory(['industries'=>Profiles::raw($b)['industries']])['items'],'id'));

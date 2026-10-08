@@ -23,7 +23,8 @@ final class Store
     }
     public static function delete(string $table,array $where): void
     {
-        global $wpdb; $wpdb->delete(self::table($table),$where);
+        global $wpdb;
+        if ($wpdb->delete(self::table($table),$where)===false) { throw new RepositoryException('No se pudo eliminar el registro.'); }
     }
     public static function rows(string $table,string $where='1=1',array $args=[],string $suffix='ORDER BY id DESC LIMIT 100'): array
     {
@@ -47,5 +48,9 @@ final class Store
         global $wpdb; $name='ascla_'.substr(hash('sha256',$wpdb->prefix.$key),0,56);
         if ((int)$wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, %d)',$name,max(0,min(3,$timeout))))!==1) { throw new RepositoryException('Operación en curso. Intente nuevamente.'); }
         try { return $callback(); } finally { $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)',$name)); }
+    }
+    public static function atomic(string $key,callable $callback): mixed
+    {
+        return self::lock($key,static fn()=>Transaction::run($callback));
     }
 }

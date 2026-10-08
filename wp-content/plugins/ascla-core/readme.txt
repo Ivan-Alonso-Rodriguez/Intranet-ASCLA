@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.10.6
+Stable tag: 1.10.7
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,20 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.10.7 =
+* Conserva únicamente Me gusta en publicaciones y comentarios. Las reacciones anteriores se cuentan como Me gusta y la API rechaza los tipos retirados.
+* Corrige la altura de Mis conexiones y preserva títulos públicos en contenido, referencias e historial del Asistente.
+* Aprobar comentarios ya aprobados es idempotente; actualiza regresiones a los contratos actuales de perfiles, Hub, moderación y microeventos.
+* Reorganiza el Directorio e incluye perfiles incompletos respetando privacidad y membresía.
+* Incorpora programación editorial, revalidación de candidatos y aprobación separada de microeventos.
+* Amplía categorías de Contacto, autorización de cambios personales y protección REST nativa.
+* Continúa la adecuación al PDF con publicación directa del Hub, reacciones y localización gettext.
+* Añade rollback InnoDB para conexiones, RSVP y moderación, con correo ASCLA después del commit.
+* Exige motivo en comentarios y reportes, registra estado anterior/posterior y conserva auditoría al eliminar reportes revisados.
+* Extiende transacciones a publicaciones, cuentas, Contacto y estados de microeventos; comprueba escrituras de WordPress y difiere correos nativos/Calendar hasta confirmar cambios.
+* Conserva reacciones ajenas al eliminar cuentas con identificadores coincidentes; valida cron en todas las secciones y vencimientos FIFO concurrentes.
+* Conserva el esquema 14 y los datos existentes.
 
 = 1.10.6 =
 * Consolida la adecuación al Documento de Análisis y Diseño ASCLA y las correcciones QA 024–058.

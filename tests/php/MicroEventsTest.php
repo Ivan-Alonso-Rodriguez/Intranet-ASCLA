@@ -37,6 +37,11 @@ final class MicroEventsTest extends TestCase
     {
         try{$fn();self::fail('Expected rejection');}catch(ASCLA\Core\Rest\ApiException $e){self::assertSame($code,$e->getCode(),$e->getMessage());}
     }
+    private function publish(int $id): array
+    {
+        $post=get_post($id);
+        return Content::save('event',['title'=>$post->post_title,'body'=>$post->post_content,'status'=>'publish'],$id);
+    }
     public function testWeeklyBatchIsIdempotentWithIndependentConsentAndMandatoryReview(): void
     {
         wp_set_current_user($this->users[1]);$id=$this->proposal();$result=MicroEvents::create($this->users);
@@ -45,13 +50,17 @@ final class MicroEventsTest extends TestCase
         wp_update_post(['ID'=>$id,'post_status'=>'publish']);self::assertSame('pending',get_post_status($id));
         $this->reject(fn()=>Content::moderate($id,'approve','Aprobar'),403);
         wp_set_current_user($this->users[0]);$approved=Content::moderate($id,'approve','Agenda revisada');
+        self::assertSame('ascla_hidden',$approved['status']);self::assertFalse($approved['meta']['invited']);
+        self::assertSame(0,Store::count('registrations','event_id=%d',[$id]));
+        self::assertSame(['pending','approved'],array_column(get_post_meta($id,'_ascla_micro_history',true),'state'));
+        $approved=$this->publish($id);
         self::assertSame('publish',$approved['status']);self::assertTrue($approved['meta']['invited']);self::assertSame(count($approved['meta']['invitees']),Store::count('registrations','event_id=%d',[$id]));
         self::assertSame(['pending','approved','published'],array_column(get_post_meta($id,'_ascla_micro_history',true),'state'));
         MicroEvents::invite($id);self::assertSame(count($approved['meta']['invitees']),Store::count('registrations','event_id=%d',[$id]));
     }
     public function testPriorityWindowOpensToMembersWhoOptedOutAndCannotBeBypassedByAuthor(): void
     {
-        $id=$this->proposal();Content::moderate($id,'approve','Revisado');$meta=get_post_meta($id,'_ascla',true);
+        $id=$this->proposal();Content::moderate($id,'approve','Revisado');$this->publish($id);$meta=get_post_meta($id,'_ascla',true);
         $outsider=array_values(array_diff($this->users,$meta['invitees']))[0];
         update_user_meta($outsider,'_ascla_profile',ascla_test_profile(['microevents'=>false,'directory'=>false]));
         wp_set_current_user($outsider);$this->reject(fn()=>Events::register($id,'accepted'),user_can($outsider,'ascla_manage')?403:404);
@@ -62,7 +71,7 @@ final class MicroEventsTest extends TestCase
     }
     public function testInsufficientRegistrationsReopenAfterAdminExtendsDeadlineAndHistoryIsRetained(): void
     {
-        $id=$this->proposal();Content::moderate($id,'approve','Revisado');$meta=get_post_meta($id,'_ascla',true);$meta['registration_deadline']=gmdate('c',time()-1);
+        $id=$this->proposal();Content::moderate($id,'approve','Revisado');$this->publish($id);$meta=get_post_meta($id,'_ascla',true);$meta['registration_deadline']=gmdate('c',time()-1);
         update_post_meta($id,'_ascla',$meta);MicroLifecycle::tick($id);self::assertSame('insufficient',get_post_meta($id,'_ascla_micro_state',true));
         wp_set_current_user($meta['invitees'][0]);$this->reject(fn()=>Events::register($id,'accepted'),409);
         wp_set_current_user($this->users[0]);$post=get_post($id);
@@ -93,7 +102,7 @@ final class MicroEventsTest extends TestCase
     }
     public function testOnlyConfirmedMembersReceiveOneReminderAndFinishedStateIsRecorded(): void
     {
-        $id=$this->proposal();Content::moderate($id,'approve','Revisado');$meta=get_post_meta($id,'_ascla',true);
+        $id=$this->proposal();Content::moderate($id,'approve','Revisado');$this->publish($id);$meta=get_post_meta($id,'_ascla',true);
         wp_set_current_user($meta['invitees'][0]);Events::register($id,'accepted');
         $meta['start']=gmdate('c',time()+3500);$meta['end']=gmdate('c',time()+7100);update_post_meta($id,'_ascla',$meta);
         EventReminders::send($id,1);EventReminders::send($id,1);

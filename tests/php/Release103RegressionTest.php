@@ -216,7 +216,7 @@ final class Release103RegressionTest extends TestCase
         $results=Profiles::directory(['q'=>'MIEMBRO ASCLA']);
         $ids=array_column($results['items'],'id');
         self::assertContains($this->member,$ids);
-        self::assertNotContains($this->executive,$ids,'An empty required position excludes the profile; a hidden completed position keeps its visible fallback.');
+        self::assertContains($this->executive,$ids,'Both an empty and a hidden position use the visible fallback; completeness does not exclude active members.');
         self::assertNotContains($this->moderator,$ids);
         self::assertSame(0,Profiles::directory(['q'=>'SecretPosition103'])['total']);
         self::assertArrayNotHasKey('position',Profiles::visible($this->member));

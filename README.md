@@ -4,23 +4,25 @@ Plugin WordPress portable para una comunidad profesional privada. Incluye perfil
 
 Toda la funcionalidad propia está en `wp-content/plugins/ascla-core/`. Elementor es opcional. No se modifica WordPress Core ni se necesita un tema específico. El plugin conserva sus datos al desactivarse o desinstalarse.
 
-## Versión actual: 1.10.6 · esquema 14
+## Versión actual: 1.10.7 · esquema 14
 
-La versión **1.10.6** consolida la adecuación de ASCLA al Documento de Análisis y Diseño y el cierre de los casos QA 024–058. Refuerza sesiones y credenciales, membresías, privacidad y revisión de perfiles, Directorio, Contacto, conexiones y mensajería, además del ciclo de vida de eventos y microeventos. También incorpora la migración de auditoría del **esquema 14** y sincroniza el paquete instalable, SonarQube, pruebas de cierre y documentación. Consulta el detalle en [VERSION_HISTORY.md](VERSION_HISTORY.md).
+La versión **1.10.7** consolida la adecuación de ASCLA al Documento de Análisis y Diseño y las correcciones de los casos QA reportados (024, 028, 030, 033, 034, 038, 039, 047, 049, 050 y 058). Refuerza sesiones y credenciales, membresías, privacidad y revisión de perfiles, Directorio, Contacto, conexiones y mensajería, además del ciclo de vida de eventos y microeventos. También incorpora la migración de auditoría del **esquema 14** y sincroniza el paquete instalable, SonarQube, pruebas de cierre y documentación. Consulta el detalle en [VERSION_HISTORY.md](VERSION_HISTORY.md).
 
-**Estado documental:** `1.10.6` es la versión vigente; `1.10.5` es la versión inmediatamente anterior. El historial se presenta de forma descendente (más reciente → más antigua) para conservar una lectura cronológica clara.
+Novedades de 1.10.7 (revisión documental del 8 de octubre): Directorio reorganizado y perfiles incompletos visibles por decisión del usuario, programación de publicaciones institucionales, aprobación de microeventos separada de publicación, revalidación de candidatos, categorías de Contacto, autorización de cambios personales y auditoría de roles nativos. [COMPLIANCE.md](COMPLIANCE.md) registra pruebas, excepciones y brechas pendientes del PDF. Se añaden publicación explícita del Hub, únicamente Me gusta en publicaciones/comentarios, catálogos gettext y transacciones para conexiones, eventos, moderación, publicaciones, cuentas y Contacto. Resolver reportes y moderar comentarios exige motivo, con auditoría antes/después. La suite completa previa al ajuste de reacción única pasó 325 pruebas PHP; el ajuste posterior pasó 43 pruebas PHP y 9 comprobaciones de navegador. El alcance exacto está en [COMPLIANCE.md](COMPLIANCE.md).
 
-La adecuación local al documento y los [fixes de QA 024–058](BUGFIXES_QA.md) forman parte de esta versión. Estado y pendientes: [COMPLIANCE.md](COMPLIANCE.md).
+**Estado documental:** `1.10.7` es la versión vigente; `1.10.6` es la versión inmediatamente anterior. El historial se presenta de forma descendente (más reciente → más antigua) para conservar una lectura cronológica clara.
 
-### Cambios principales de 1.10.6
+La adecuación local al documento y los [casos QA reportados](BUGFIXES_QA.md) forman parte de esta versión. La [matriz de 302 requisitos](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) distinguen implementación, brechas, validación pendiente y excepciones del usuario. No se declara cumplimiento integral del PDF.
 
-- **Seguridad y sesiones:** inactividad de 30 minutos, recuperación de cuenta, políticas configurables de contraseña, captcha y bloqueo temporal, sin exponer credenciales ni secretos.
-- **Membresías y perfiles:** estados activo/suspendido/vencido, requisitos mínimos de perfil, revisión configurable, privacidad reforzada y exclusión de perfiles no elegibles del Directorio y recomendaciones.
+### Cambios principales de 1.10.7
+
+- **Seguridad y sesiones:** inactividad de 30 minutos; bloqueo de cuenta predeterminado de 15 minutos tras cinco fallos. Complejidad y longitud mínima de contraseña, vigencia de recuperación y umbrales configurables. Recordarme amplía la duración máxima de la cookie, sin evitar el cierre por inactividad.
+- **Membresías y perfiles:** estados activo/suspendido/vencido, requisitos mínimos de perfil, revisión configurable, privacidad reforzada. El Directorio incluye perfiles incompletos activos con participación habilitada; las recomendaciones conservan los mínimos de completitud.
 - **Conexiones y mensajería:** presentación opcional, rechazo silencioso, esperas de reconexión, bloqueo que disuelve el vínculo y conservación del historial permitido sin edición ni borrado de mensajes enviados.
 - **Contacto y administración:** flujo Pendiente → En revisión → Resuelta → Cerrada, asignación, respuesta e historial; cambios profesionales administrativos vinculados a solicitudes autorizadas.
 - **Eventos y microeventos:** reconfirmación por reprogramación, recordatorios, lista de espera FIFO con ofertas persistentes y vencimiento, y ciclo de propuestas de microeventos con aprobación humana.
 - **Auditoría y compatibilidad:** esquema **14** para ampliar el detalle de auditoría conservando datos existentes; se mantienen las funciones publicadas de 1.10.5.
-- **Entrega:** metadatos, SonarQube, pruebas de cierre, documentación y `dist/ascla-core.zip` quedan alineados con **1.10.6**.
+- **Entrega:** metadatos, SonarQube, pruebas de cierre, documentación y `dist/ascla-core.zip` quedan alineados con **1.10.7**.
 
 ### Cambios principales de 1.10.5
 
@@ -34,7 +36,7 @@ La adecuación local al documento y los [fixes de QA 024–058](BUGFIXES_QA.md) 
 ### Cambios principales de 1.10.4
 
 - **Mensajería móvil:** la entrada muestra la lista de chats; tocar uno abre únicamente su conversación y **← Chats** regresa al listado. El polling respeta esta navegación y no selecciona automáticamente el primer chat en pantallas móviles. La vista dividida se conserva en escritorio.
-- **Directorio (RF-013 / CP-021):** incorpora botones numéricos de página, **Anterior/Siguiente**, el rango mostrado y un límite fijo de **15 perfiles por página**. El servicio de perfiles aplica el mismo límite en backend, por lo que el conjunto demo de 18 perfiles se distribuye en dos páginas (15 + 3).
+- **Directorio (RF-013 / CP-021):** incorpora botones numéricos de página, **Anterior/Siguiente**, el rango mostrado y tamaño configurable en Administración (15 por defecto). Backend y paginación usan el mismo valor. Los filtros permiten varias selecciones con casillas.
 - **Mi perfil:** divide el contenido en **Información**, **Intereses**, **Privacidad y avisos** y **Cuenta y seguridad**. Las pestañas admiten teclado/ARIA, son desplazables horizontalmente en móvil y abren la sección correcta cuando una validación de campos obligatorios requiere atención. Al intentar salir con cambios pendientes, el modal ofrece **Seguir editando**, **Descartar cambios** y **Guardar cambios y salir**; esta última opción persiste el perfil antes de continuar la navegación y cancela la salida si el guardado falla.
 - **Google Calendar:** al publicar un evento con una cuenta Google conectada, ASCLA crea o sincroniza el evento organizador. Las invitaciones agregan a los asociados como asistentes y solicitan a Google el envío de las invitaciones; las actualizaciones y cancelaciones relevantes también se sincronizan.
 - **DeepSeek:** se incorpora como proveedor real de IA configurable, con modelo y API Key independientes, prueba de conexión y el mismo alcance de datos autorizado que los demás proveedores.
@@ -44,11 +46,11 @@ La adecuación local al documento y los [fixes de QA 024–058](BUGFIXES_QA.md) 
 
 **Administración → Estadísticas** incorpora cinco vistas: **Estadísticas**, **Usuarios que más asisten**, **Temas de mayor interés**, **Tendencias** e **IA y tendencias**. Administrador y Ejecutivo ASCLA pueden consultarlas y registrar asistencia. Moderador y Asociado no tienen acceso, tampoco mediante peticiones REST directas. El menú nativo de WordPress usa la misma capacidad `ascla_publish`; las capacidades y roles acumulativos existentes se conservan.
 
-### Eliminación de reportes y solicitudes
+### Reportes y solicitudes de Contacto
 
-- En **Moderación → Reportes de la comunidad**, marca el reporte como revisado para habilitar **Eliminar reporte**. La eliminación retira el reporte y conserva la publicación o el comentario reportado. Un reporte recibido nuevamente vuelve a quedar pendiente y no puede eliminarse hasta revisarlo otra vez.
-- En **Solicitudes**, cambia el estado a **Resuelta** para habilitar **Eliminar solicitud**. La solicitud pasa a la papelera de WordPress. Las solicitudes recibidas, en atención o reabiertas no se pueden eliminar. Esta regla también se comprueba en la ruta general de eliminación de contenido.
-- Administrador, Ejecutivo y Moderador conservan esta gestión mediante `ascla_moderate`, validación por objeto, sesión y nonce. Ambas acciones piden confirmación en la interfaz, registran auditoría y vuelven a comprobar el estado en el servidor.
+- En **Moderación → Reportes de la comunidad**, registra el motivo de revisión antes de **Eliminar reporte**. Se retira el reporte, se conserva el contenido denunciado y queda auditoría. Un reporte nuevo vuelve a requerir revisión.
+- Contacto sigue **Pendiente → En revisión → Resuelta → Cerrada**. Solo el asociado y el responsable activo asignado pueden leer su contenido. El responsable es un Administrador o Ejecutivo; la capacidad de moderación por sí sola no da acceso.
+- Una solicitud **Cerrada** puede archivarse según permisos; permanece privada y conserva su historial. Ya no corresponde documentar que una solicitud Resuelta se envía a la papelera.
 
 ### Registrar asistencia y consultar estadísticas
 
@@ -76,8 +78,8 @@ El servidor valida los identificadores devueltos y guarda las propuestas por eve
 
 ### Validación heredada de 1.10.1 y cierre de 1.10.2
 
-- La línea base de **1.10.1** registró **208 pruebas PHP y 4.399 comprobaciones** sin fallos ni errores. En 1.10.2 se añadieron pruebas de regresión para el máximo de tres intereses, teléfono internacional y correo de prueba HTML; la suite completa de cierre debe ejecutarse nuevamente antes de promover a QA/UAT.
-- **1.10.2** incorpora `php tests/release-sanity.php`, una verificación independiente de WordPress/PHPUnit para los cierres críticos. La ejecución actual pasa **49 comprobaciones** (Forms máx. 3, teléfono internacional, intervalos Zoom, plantilla HTML, coherencia versión/esquema y cobertura de traducciones de los flujos nuevos). Esto no sustituye la suite PHPUnit integrada.
+- La línea base de **1.10.1** registró **208 pruebas PHP y 4.399 comprobaciones** sin fallos ni errores. En 1.10.2 se añadieron pruebas de regresión para el máximo de tres intereses, teléfono internacional y correo de prueba HTML; sus resultados son históricos; la validación de 1.10.7 se documenta más abajo.
+- **1.10.2** incorpora `php tests/release-sanity.php`, una verificación independiente de WordPress/PHPUnit para los cierres críticos. La evidencia histórica de esa entrega registró **49 comprobaciones** (Forms máx. 3, teléfono internacional, intervalos Zoom, plantilla HTML, coherencia versión/esquema y cobertura de traducciones de los flujos nuevos). Esto no sustituye la suite PHPUnit integrada.
 - La línea base de **1.10.1** registró **28 recorridos de navegador aprobados**. Las funciones nuevas de 1.10.2 requieren repetir los recorridos relevantes y validar Gemini/SMTP/Zoom en un entorno integrado.
 - Los servicios nuevos separan lectura de datos, cálculos, asistencia, lectura CSV, clasificación y ciclo de reportes. Las pruebas de IA usan un proveedor controlado; las credenciales reales de Gemini/OpenAI/DeepSeek y la aceptación en el servidor de destino se validan en QA/UAT antes de promover los cambios por el flujo obligatorio `development → qa → uat → main`.
 
@@ -142,7 +144,7 @@ Incluye filtros combinados por autor, fuente, tema, etiqueta y categoría; naveg
 
 El acceso de asociados se realiza desde `/login/`, con logo, colores y textos de ASCLA adaptados a móvil. `/intranet/` y las demás páginas privadas quedan reservadas a usuarios autenticados y, si no existe sesión, redirigen a `/login/` conservando la sección solicitada. Ejecutivo, Moderador y Administrador trabajan en `/administracion/`; `/wp-admin/` queda reservado al Administrador técnico de WordPress. El cierre de sesión vuelve a `/login/`. `wp-login.php` permanece disponible para recuperación/restablecimiento de contraseña y autenticación técnica. Se utiliza la autenticación nativa de WordPress; no se cambian las cuentas ni las contraseñas.
 
-## Roles y permisos acumulativos en 1.10
+## Roles y permisos vigentes
 
 La jerarquía es **Administrador > Ejecutivo ASCLA > Moderador > Asociado**. Cada nivel incluye las capacidades del anterior; la autorización utiliza capacidades de WordPress, sin comparar nombres de roles en las operaciones.
 
@@ -150,12 +152,12 @@ La jerarquía es **Administrador > Ejecutivo ASCLA > Moderador > Asociado**. Cad
 |---|:---:|:---:|:---:|:---:|
 | `ascla_access`: entrar y consultar la intranet | Sí | Sí | Sí | Sí |
 | `ascla_write`: perfil, foros, temas, aportaciones, comentarios y funciones de asociado | Sí | Sí | Sí | Sí |
-| `ascla_moderate`: moderar comunidad, comentarios, reportes y solicitudes | — | Sí | Sí | Sí |
+| `ascla_moderate`: moderar comunidad, comentarios y reportes | — | Sí | Sí | Sí |
 | `ascla_admin_area`: espacio de gestión ASCLA | — | Sí | Sí | Sí |
 | `ascla_publish`: eventos, galerías y recursos editoriales | — | — | Sí | Sí |
 | `ascla_manage`: usuarios, configuración, auditoría y administración global | — | — | — | Sí |
 
-`ascla_publish` y `ascla_admin_area` se conservan por compatibilidad. Un Ejecutivo puede gestionar sus publicaciones editoriales y moderar aportaciones de otros miembros; la administración global de contenido editorial ajeno y los microeventos siguen reservados al Administrador. La propiedad, visibilidad y reglas de cada objeto se validan además de la capacidad general. Los permisos de moderación no dan acceso a consultas privadas al asistente ni a archivos personales sin asociación a contenido autorizado.
+`ascla_publish` y `ascla_admin_area` se conservan por compatibilidad. Un Ejecutivo puede gestionar sus publicaciones editoriales y moderar aportaciones de otros miembros; la administración global de contenido editorial ajeno sigue reservada al Administrador. Los ejecutivos pueden preparar propuestas de microeventos; su aprobación y publicación requieren administración. La propiedad, visibilidad y reglas de cada objeto se validan además de la capacidad general. Los permisos de moderación no dan acceso a consultas privadas al asistente ni a archivos personales sin asociación a contenido autorizado.
 
 `Domain/Roles.php` define los niveles acumulativos y sincroniza las capacidades propias de ASCLA. `Installer` ejecuta esta actualización una vez mediante `ascla_roles_version`, incluso en sitios que ya declaran versión **1.10**. Conserva los identificadores `ascla_member`, `ascla_moderator`, `ascla_executive` y `administrator`, las asignaciones de usuarios, contraseñas, perfiles y capacidades personalizadas ajenas al plugin. No elimina ni recrea cuentas. Las asignaciones individuales de capacidades siguen las reglas nativas de WordPress.
 
@@ -174,7 +176,7 @@ Menús, pestañas y botones reflejan capacidades o permisos por objeto devueltos
 python scripts/build.py
 ```
 
-Genera `dist/ascla-core.zip` y su SHA-256. El ZIP contiene una única carpeta `ascla-core/`, con archivos de ejecución; no incluye secretos, pruebas, dependencias de desarrollo ni documentos de referencia.
+Genera `dist/ascla-core.zip` y su SHA-256. Ejecuta después `python scripts/verify-package.py` para verificar versión, integridad y coincidencia con las fuentes. El ZIP contiene una única carpeta `ascla-core/`, con archivos de ejecución; no incluye secretos, pruebas, dependencias de desarrollo ni documentos de referencia.
 
 En WordPress: **Plugins → Añadir plugin → Subir plugin → elegir ZIP → Instalar → Activar**. Se crean doce páginas faltantes, roles, permisos, taxonomías y tablas versionadas. El instalador no sobrescribe páginas ajenas ni duplica las páginas que ya creó.
 
@@ -198,7 +200,7 @@ También puedes crear la demo desde **ASCLA → Configuración → Preparar dato
 ## Integraciones
 
 - **Ubicaciones de perfil:** País/región usa un catálogo ISO normalizado y Ciudad ofrece sugerencias dependientes del país mediante CountriesNow. ASCLA consulta el servicio desde el servidor, cachea la respuesta durante 7 días y no bloquea un perfil existente si el proveedor geográfico está temporalmente indisponible.
-- **Cloudflare Turnstile:** opcional y desactivado por defecto. Configura un widget en modo **Managed** y guarda Site Key/Secret en **ASCLA → Configuración → Seguridad**. El login usa una política adaptativa: los primeros intentos se procesan normalmente, tras **3 fallos de credenciales** aparece el widget oficial de Cloudflare, al **5.º fallo** se aplica una espera temporal por cuenta y una ráfaga mayor desde la misma IP puede activar un bloqueo temporal adicional. El Secret se cifra y el token siempre se valida en PHP contra Siteverify; ver “Success” no sustituye la validación de usuario y contraseña.
+- **Cloudflare Turnstile:** opcional y desactivado por defecto. Configura un widget en modo **Managed** y guarda Site Key/Secret en **ASCLA → Configuración → Seguridad**. El login usa una política adaptativa: los primeros intentos se procesan normalmente, tras **3 fallos de credenciales** aparece el widget oficial de Cloudflare, al **5.º fallo** se aplica por defecto una espera de **15 minutos** por cuenta. Los umbrales son configurables; el límite por IP es independiente (20 fallos por defecto). El Secret se cifra y el token siempre se valida en PHP contra Siteverify; ver “Success” no sustituye la validación de usuario y contraseña.
 - **IA:** por defecto `DEMO MODE`, sin gasto. Para API real configura una Google Gemini API Key y un modelo habilitado en tu cuenta. El chat prioriza la información visible dentro de ASCLA y el contenido multimedia generado queda revisable, y un Administrador o Ejecutivo puede publicarlo directamente cuando confirma su revisión editorial. La arquitectura permite implementar otra `AIProviderInterface`.
 - **YouTube:** introduce una URL válida en el recurso. Los videos se embeben; no se descargan ni almacenan completos. Puedes suministrar transcripción autorizada o conectar OAuth con permisos sobre los subtítulos. Sin permisos, se informa el error; en modo mock se identifica explícitamente la transcripción ficticia.
 - **Google Calendar:** los eventos futuros pueden abrirse en Google Calendar sin credenciales o sincronizarse con un calendario conectado mediante OAuth. Al publicar un evento desde la interfaz con Google conectado, ASCLA crea o actualiza una copia organizadora en el calendario principal. Cuando un Administrador/Ejecutivo invita asociados, sus correos se agregan como `attendees` y la petición usa `sendUpdates=all`, de modo que Google envía el correo de invitación y mantiene el evento compartido. Las actualizaciones del evento se propagan al evento organizador y la cancelación solicita a Google notificar a los invitados. ASCLA conserva además la notificación interna y el correo institucional según las preferencias del asociado. La aparición automática en el calendario del invitado depende de la configuración de invitaciones de su cuenta de Google; si Google no reconoce al organizador, el invitado puede necesitar aceptar el correo/RSVP. La descarga ICS permanece retirada. Configura Client ID/Secret y la URI de redirección OAuth; cada cuenta organizadora conecta Google Calendar desde Perfil.
@@ -210,9 +212,9 @@ Los secretos se cifran con AES-256-GCM y una clave derivada de las salts de Word
 
 Las pruebas están en `tests/`; deben ejecutarse exclusivamente contra WordPress local desechable. Las configuraciones de herramientas no sustituyen resultados medidos.
 
-La implementación incluida en **1.10** tiene **12 pruebas PHP específicas aprobadas (115 comprobaciones)** y **8 recorridos de navegador aprobados**, que cubren caché, invalidación, privacidad, concurrencia, errores de IA y respuestas tardías. Están en `tests/php/ProfileLoadingTest.php` y `tests/profile-loading.cjs`. Las llamadas de IA se interceptaron en un WordPress aislado, sin credenciales reales de los proveedores.
+Como antecedente histórico, la implementación de **1.10** registró **12 pruebas PHP específicas aprobadas (115 comprobaciones)** y **8 recorridos de navegador aprobados**, que cubren caché, invalidación, privacidad, concurrencia, errores de IA y respuestas tardías. Están en `tests/php/ProfileLoadingTest.php` y `tests/profile-loading.cjs`. Las llamadas de IA se interceptaron en un WordPress aislado, sin credenciales reales de los proveedores.
 
-La jerarquía y su migración se verificaron con **19 pruebas PHP aprobadas (262 comprobaciones)** en `CapabilityHierarchyTest.php` y `RoleWorkflowTest.php`, y **16 recorridos de navegador aprobados** en `tests/role-workflow.cjs`. Incluyen los cuatro roles, promoción/degradación, cuentas suspendidas, conservación de usuarios existentes, menús/botones, vistas administrativas, peticiones REST directas, nonces inválidos o ausentes y descargas privadas por `admin-post.php`. Los 8 recorridos de perfiles se repitieron y siguen aprobados.
+En esa etapa histórica, la jerarquía y su migración se verificaron con **19 pruebas PHP aprobadas (262 comprobaciones)** en `CapabilityHierarchyTest.php` y `RoleWorkflowTest.php`, y **16 recorridos de navegador aprobados** en `tests/role-workflow.cjs`. Incluyen los cuatro roles, promoción/degradación, cuentas suspendidas, conservación de usuarios existentes, menús/botones, vistas administrativas, peticiones REST directas, nonces inválidos o ausentes y descargas privadas por `admin-post.php`. Los 8 recorridos de perfiles se repitieron y siguen aprobados.
 
 En la entrega **1.10**, la suite PHP completa del **17/09/2026** pasó con **193 pruebas y 4.264 comprobaciones, sin fallos, errores ni advertencias**. Se cerraron los 16 pendientes tras la corrección de roles: migración de archivos temporales, enlaces de cápsulas, privacidad editorial, conservación del mensaje de abstención y coherencia de fuentes demo; además se actualizaron pruebas que usaban respuestas, métodos, permisos o esquemas antiguos. La prueba de notificaciones ahora publica el evento desde una cuenta autorizada y verifica su estado antes de comprobar el aviso.
 
@@ -231,3 +233,23 @@ La documentación interna de desarrollo se conserva localmente en `docs/`, pero 
 El flujo activo usa Git, Docker y SonarQube sin Jenkins. Consulta [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md) para promover ramas, generar cobertura y analizar ASCLA-QA / ASCLA-UAT esperando el Quality Gate. El Jenkinsfile es opcional.
 
 La revisión de requisitos y las brechas restantes se documentan en [COMPLIANCE.md](COMPLIANCE.md). Un Quality Gate aprobado no acredita por sí solo todos los requisitos funcionales.
+
+### Catálogos de idioma
+
+ASCLA carga gettext de WordPress con `languages/ascla-core-es_ES.po/.mo` y `ascla-core-en_US.po/.mo`. Un catálogo instalado en `wp-content/languages/plugins/` tiene prioridad. El catálogo resuelto también alimenta las traducciones JavaScript. Para añadir cadenas, actualizar `languages/en.json` y ejecutar `python scripts/translations.py`; conserva traducciones ya editadas en los PO. `python scripts/build.py` compila los PO vigentes, valida los MO con GNU gettext y los incluye en el ZIP.
+
+### Aceptación local de 1.10.7
+
+`tests/editorial107.cjs` recorre Hub, reacciones, formularios y permisos de moderación, auditoría e idioma en el navegador desechable. `node tests/run-atomic107.cjs` requiere los contenedores locales `ascla_audit-wordpress-1` y `ascla-audit-browser`; inyecta fallos de auditoría y metadatos limitados a usuarios temporales `atomic_*`, comprueba rollback, correos retenidos y ofertas concurrentes, y retira los triggers al finalizar. No ejecutar estas pruebas contra un despliegue compartido. La suite completa anterior al ajuste de Me gusta pasó el 8 de octubre; después se ejecutaron las pruebas específicas del ajuste, no otra suite completa.
+
+
+### Resultado de validación de 1.10.7
+
+| Ejecución del 8 de octubre | Resultado |
+|---|---|
+| Flujo completo anterior al ajuste de reacción única | 325 pruebas PHP / 5.284 aserciones, 40 comprobaciones de navegador y 8 controles del scanner manual aprobados. Cobertura de esa ejecución: PHP 82,92 %; JavaScript 94,76 %. |
+| Ajuste posterior: solo Me gusta | 43 pruebas PHP / 512 aserciones y 9 comprobaciones de navegador aprobadas; sin errores JavaScript. No incluye nueva medición de cobertura ni repetición del pipeline completo. |
+
+No se suman ambas ejecuciones ni se requiere 100 % de cobertura. Sigue pendiente ejecutar QA/UAT sobre el commit final, obtener el Quality Gate remoto y validar el despliegue. La edición posterior de documentos no constituye una nueva ejecución funcional.
+
+Para continuar el cumplimiento del PDF, quedan brechas de filtros por rango completo, historial de comentarios propios, completitud configurable, integridad, permisos y operación. La lista concreta y las decisiones sobre Directorio y Me gusta están en [COMPLIANCE.md](COMPLIANCE.md). El flujo de promoción e instalación está en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md).

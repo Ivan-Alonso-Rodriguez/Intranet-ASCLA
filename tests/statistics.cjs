@@ -67,7 +67,9 @@ async function runStatistics(){let f,browser,page;const coverage=[];
     await test('Reportes: revisar antes de eliminar y conservar la publicación',async()=>{
      await page.locator('.admin-tabs [data-tab="moderacion"]').click();await page.locator(`[data-action="report-reviewed"][data-id="${f.report}"]`).waitFor();assert.equal(await page.locator(`[data-action="admin-delete"][data-kind="report"][data-id="${f.report}"]`).count(),0);
      assert.equal((await api(page,'admin/reports/'+f.report,'DELETE',{})).status,409);
-     await page.locator(`[data-action="report-reviewed"][data-id="${f.report}"]`).click();await page.locator(`[data-action="admin-delete"][data-kind="report"][data-id="${f.report}"]`).click();await page.locator('[data-action="admin-delete-confirm"]').click();await page.locator('.modal-backdrop').waitFor({state:'detached'});
+     await page.locator(`[data-action="report-reviewed"][data-id="${f.report}"]`).click();
+     const review=page.locator('[data-form="review-decision"]');await review.locator('[name="reason"]').fill('Reporte comprobado; se conserva la publicación.');await review.getByRole('button',{name:'Guardar decisión',exact:true}).click();await review.waitFor({state:'detached'});
+     await page.locator(`[data-action="admin-delete"][data-kind="report"][data-id="${f.report}"]`).click();await page.locator('[data-action="admin-delete-confirm"]').click();await page.locator('.modal-backdrop').waitFor({state:'detached'});
      assert.equal((await api(page,'items/'+f.hub)).status,200);assert.equal((await api(page,'admin/reports/'+f.report,'DELETE',{})).status,404);
     });
     await test('Solicitudes: archivar conserva el contenido y el historial',async()=>{

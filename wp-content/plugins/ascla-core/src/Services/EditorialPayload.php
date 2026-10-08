@@ -2,7 +2,6 @@
 namespace ASCLA\Core\Services;
 
 use ASCLA\Core\Domain\EditorialPrivacy;
-use ASCLA\Core\Domain\EntityRedactor;
 
 final class EditorialPayload
 {
@@ -14,11 +13,6 @@ final class EditorialPayload
             return [$title,$body,$meta];
         }
         $view=EditorialPrivacy::reader($title,$body,$meta);
-        $redactedTitle=$view['title'];
-        if ($post->post_type==='ascla_event') {
-            $identities=array_values(array_filter(array_map('trim',preg_split('/[\r\n,;]+/u',(string)($meta['identities']??''))?:[])));
-            $redactedTitle=EntityRedactor::redactEntities($title,$identities);
-        }
-        return [$redactedTitle,$view['body'],$view['meta']];
+        return [$view['title'],$view['body'],$view['meta']];
     }
 }

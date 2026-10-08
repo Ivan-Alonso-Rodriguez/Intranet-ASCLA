@@ -9,7 +9,7 @@ final class Connections
     public const REQUIRED='Debes tener una conexión confirmada con este asociado para poder enviarle mensajes.';
     public static function lockPair(int $a,int $b,callable $callback): mixed
     {
-        $ids=[$a,$b]; sort($ids); return Store::lock('connection:'.implode(':',$ids),$callback);
+        $ids=[$a,$b]; sort($ids); return Store::atomic('connection:'.implode(':',$ids),$callback);
     }
     private static function rows(int $me,array $targets=[]): array
     {
