@@ -1828,6 +1828,12 @@
     const dateValue = new Date(value);
     return new Date(dateValue - dateValue.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   }
+  function eventDateTimeField(name, label, value) {
+    const localValue = editorDateValue(value);
+    const [dateValue = "", timeValue = ""] = localValue.split("T");
+    const labelId = `f-${name}-label`;
+    return `<div class="field event-datetime-field" role="group" aria-labelledby="${E(labelId)}"><span class="event-datetime-label" id="${E(labelId)}">${E(T(label))}</span><div class="event-datetime-controls"><label class="event-datetime-control" for="f-${E(name)}-date"><span>${E(T("Fecha"))}</span><input id="f-${E(name)}-date" name="${E(name)}_date" type="date" value="${E(dateValue)}" required></label><label class="event-datetime-control" for="f-${E(name)}-time"><span>${E(T("Hora"))}</span><input id="f-${E(name)}-time" name="${E(name)}_time" type="time" value="${E(timeValue)}" step="60" required></label></div></div>`;
+  }
   function publicationFields(value, scheduled) {
     return '<div data-publication-date '+(scheduled?'':'hidden')+'>'+field('publish_at','Fecha y hora de publicación',editorDateValue(value),'datetime-local',scheduled?'required':'')+'<p class="private-note">'+E(T('Usa la hora local de tu dispositivo. El contenido permanecerá oculto hasta esta fecha.'))+'</p></div>';
   }
@@ -1843,7 +1849,7 @@
       const reminderMode=m.micro && (m.invited || p.status === "publish") ? "readonly" : "required";
       const reminderField=S.boot.admin ? field("reminder_hours","Recordatorios: horas antes del inicio",(m.reminder_hours || [24,1]).join(", "),"text",reminderMode) : "";
       const changeReasonField=p.id ? field("change_reason", "Motivo de reprogramación (obligatorio para microeventos)", "", "textarea", 'maxlength="1000"') : "";
-      return `<div class="form-grid">${field("start", "Inicio (tu zona horaria)", editorDateValue(m.start), "datetime-local", "required")}${field("end", "Fin (tu zona horaria)", editorDateValue(m.end), "datetime-local", "required")}${field("capacity", "Cupos (0 = ilimitado)", m.capacity || 0, "number", 'min="0" max="100000"')}${field("offer_hours", "Horas para confirmar un cupo liberado", m.offer_hours || 24, "number", 'min="1" max="168"')}${select("modality", "Modalidad", ["Virtual", "Presencial", "Híbrido"], m.modality || "Virtual")}${field("location", "Ubicación", m.location || "")}${field("url", "Enlace del encuentro", m.url || "", "url")}</div>${microEventFields(m)}${reminderField}${field("agenda", "Agenda", m.agenda || "", "textarea")}${changeReasonField}`;
+      return `<div class="form-grid">${eventDateTimeField("start", "Inicio (tu zona horaria)", m.start)}${eventDateTimeField("end", "Fin (tu zona horaria)", m.end)}${field("capacity", "Cupos (0 = ilimitado)", m.capacity || 0, "number", 'min="0" max="100000"')}${field("offer_hours", "Horas para confirmar un cupo liberado", m.offer_hours || 24, "number", 'min="1" max="168"')}${select("modality", "Modalidad", ["Virtual", "Presencial", "Híbrido"], m.modality || "Virtual")}${field("location", "Ubicación", m.location || "")}${field("url", "Enlace del encuentro", m.url || "", "url")}</div>${microEventFields(m)}${reminderField}${field("agenda", "Agenda", m.agenda || "", "textarea")}${changeReasonField}`;
     }
     if (type === "resource") return resourceEditorExtra(m);
     if (type === "ally") return select("alliance_type", "Tipo de alianza", ["Socio estratégico", "Convenio", "Otro"], m.alliance_type) + field("url", "Sitio del aliado", m.url || "", "url") + field("benefits", "Beneficios", m.benefits || "", "textarea") + field("initiatives", "Iniciativas y recursos", m.initiatives || "", "textarea");
@@ -3687,8 +3693,8 @@ root.addEventListener("click", async (event) => {
       if (key in data) meta[key] = data[key];
     }
     if (type === "event") {
-      meta.start = new Date(data.start).toISOString();
-      meta.end = new Date(data.end).toISOString();
+      meta.start = new Date(`${data.start_date}T${data.start_time}`).toISOString();
+      meta.end = new Date(`${data.end_date}T${data.end_time}`).toISOString();
       if (data.registration_deadline) meta.registration_deadline = new Date(data.registration_deadline).toISOString();
       if (data.reminder_hours) meta.reminder_hours = data.reminder_hours.split(",").map(v=>Number(v.trim()));
     }

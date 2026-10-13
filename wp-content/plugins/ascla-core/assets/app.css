@@ -1135,6 +1135,32 @@
   min-height: 110px;
   line-height: 1.65;
 }
+.event-datetime-field > .event-datetime-label {
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--muted);
+}
+.event-datetime-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(118px, .85fr);
+  gap: 10px;
+}
+.event-datetime-control {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.field .event-datetime-control span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.event-datetime-control input {
+  min-width: 0;
+  color-scheme: light;
+}
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2273,6 +2299,7 @@ html[data-ascla-theme="dark"] #ascla-root .filters input,
 html[data-ascla-theme="dark"] #ascla-root .filters select,
 html[data-ascla-theme="dark"] #ascla-root .chat-compose textarea,
 html[data-ascla-theme="dark"] #ascla-root .header-language select { background: #111b24; color: var(--ink); border-color: #344756; }
+html[data-ascla-theme="dark"] #ascla-root .event-datetime-control input { color-scheme: dark; }
 html[data-ascla-theme="dark"] #ascla-root input::placeholder,
 html[data-ascla-theme="dark"] #ascla-root textarea::placeholder { color: #718598; opacity: 1; }
 html[data-ascla-theme="dark"] #ascla-root .field label,
