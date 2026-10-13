@@ -1161,6 +1161,87 @@
   min-width: 0;
   color-scheme: light;
 }
+.event-editor-status {
+  margin: 2px 0 20px;
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--line);
+}
+.event-status-field {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.event-status-field legend {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.event-status-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.event-status-option {
+  position: relative;
+  cursor: pointer;
+}
+.event-status-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.event-status-option span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  transition: border-color .16s ease, background-color .16s ease, color .16s ease;
+}
+.event-status-option span::before {
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--line);
+  content: "";
+  transition: background-color .16s ease, box-shadow .16s ease;
+}
+.event-status-option:hover span {
+  border-color: color-mix(in srgb, var(--blue) 42%, var(--line));
+  color: var(--ink);
+}
+.event-status-option input:checked + span {
+  border-color: color-mix(in srgb, var(--blue) 48%, var(--line));
+  background: color-mix(in srgb, var(--blue) 9%, var(--surface));
+  color: var(--blue);
+}
+.event-status-option input:checked + span::before {
+  background: var(--blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 14%, transparent);
+}
+.event-status-option input:focus-visible + span {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+.event-editor-status .private-note {
+  margin: 8px 0 0;
+}
+.event-draft-action {
+  border-color: color-mix(in srgb, var(--blue) 55%, var(--line));
+  color: var(--blue);
+}
+.event-draft-action[hidden] {
+  display: none !important;
+}
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3662,6 +3743,11 @@ form[data-form="group-edit"] textarea[name="description"] { min-height: 86px; re
 /* 1.9.36: preserve modal edits and expose optional email preferences. */
 .modal-decision-backdrop{z-index:100000;background:#071a2db0}
 .modal-decision{width:540px}
+.modal-decision .form-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch}
+.modal-decision .form-actions .btn{width:100%;min-width:0}
+.modal-decision .form-actions [data-action="modal-unsaved-save"]{grid-column:1/-1;grid-row:1}
+.modal-decision .form-actions [data-action="modal-unsaved-stay"]{grid-column:1;grid-row:2}
+.modal-decision .form-actions [data-action="modal-unsaved-discard"]{grid-column:2;grid-row:2}
 .email-notification-panel{max-width:720px;border:1px solid var(--line);border-radius:16px;padding:0 20px}
 .email-notification-panel .participation-option:last-of-type{border-bottom:0}
 .email-notification-panel .profile-save-hint{margin:14px 0 16px}

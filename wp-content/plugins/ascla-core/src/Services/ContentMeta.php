@@ -6,7 +6,7 @@ final class ContentMeta
 
 {
 
-    public static function sanitize(string $type,array $input,int $id=0): array
+    public static function sanitize(string $type,array $input,int $id=0,bool $allowIncomplete=false): array
     {
         $data=$id?(array)get_post_meta($id,'_ascla',true):[];
         $mod=current_user_can('ascla_moderate');
@@ -19,7 +19,7 @@ final class ContentMeta
         self::media($data,$input,$id);
         if ($type==='event') {
             self::event($data,$input);
-            MicroLifecycle::sanitize($data,$input,$id);
+            MicroLifecycle::sanitize($data,$input,$id,$allowIncomplete);
             EventReminders::sanitize($data,$input,$id);
             EventParticipation::validateChange($id,$id?(array)get_post_meta($id,'_ascla',true):[],$data,$input);
         }
@@ -85,9 +85,13 @@ final class ContentMeta
         }
         $data['media_ids']=$eventMedia;
         foreach (['start','end'] as $key) {
-            $data[$key]=self::eventDate($input[$key]??$data[$key]??'');
+            $value=$input[$key]??$data[$key]??'';
+            if ($value==='') { unset($data[$key]); }
+            else { $data[$key]=self::eventDate($value); }
         }
-        Access::require(strtotime($data['end'])>strtotime($data['start']),'El fin debe ser posterior al inicio.',400);
+        if (!empty($data['start']) && !empty($data['end'])) {
+            Access::require(strtotime($data['end'])>strtotime($data['start']),'El fin debe ser posterior al inicio.',400);
+        }
         $data['offer_hours']=max(1,min(168,(int)($input['offer_hours']??$data['offer_hours']??24)));
         $data['capacity']=max(0,min(100000,absint($input['capacity']??$data['capacity']??0)));
     }

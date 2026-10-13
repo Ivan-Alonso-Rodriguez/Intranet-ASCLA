@@ -144,6 +144,20 @@ final class ContentLifecycleTest extends TestCase
         foreach(array_slice($this->users,1) as $id){wp_set_current_user($id);self::assertSame(403,$this->api('POST','content/event',$payload)->get_status());self::assertSame(403,$this->api('POST','content/event/'.$p['id'],$payload)->get_status());self::assertSame($id===$this->users[1]?404:403,$this->api('POST','items/'.$draft['id'].'/moderate',['decision'=>'approve','reason'=>'Publicar'])->get_status());}
         wp_set_current_user($this->users[2]);Content::comment($p['id'],'Participaré');self::assertSame('publish',get_post_status($p['id']));
     }
+    public function testIncompleteEventCanBeSavedAsDraftButCannotBePublished():void
+    {
+        wp_set_current_user($this->users[0]);
+        $created=$this->api('POST','content/event',['title'=>'','body'=>'','status'=>'draft','meta'=>[]]);
+        self::assertSame(200,$created->get_status());$draft=$created->get_data();$this->posts[]=$draft['id'];
+        self::assertSame('draft',$draft['status']);self::assertSame('Borrador de evento',$draft['title']);
+        self::assertArrayNotHasKey('start',$draft['meta']);self::assertArrayNotHasKey('end',$draft['meta']);
+        $partial=$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento todavía incompleto','body'=>'','status'=>'draft','meta'=>[]]);
+        self::assertSame(200,$partial->get_status());self::assertSame('draft',$partial->get_data()['status']);
+        self::assertSame(400,$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento todavía incompleto','body'=>'','status'=>'publish','meta'=>[]])->get_status());
+        self::assertSame(400,$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento listo','body'=>'Descripción completa','status'=>'publish','meta'=>[]])->get_status());
+        $complete=$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento listo','body'=>'Descripción completa','status'=>'publish','meta'=>['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000)]]);
+        self::assertSame(200,$complete->get_status());self::assertSame('publish',$complete->get_data()['status']);
+    }
     public function testEventCoverAcceptsOneImageAndRejectsMultipleFilesOrPdf():void
     {
         wp_set_current_user($this->users[0]);

@@ -12,9 +12,25 @@ final class MicroLifecycle
         return $meta+['micro_min'=>$settings['micro_min'],'priority_hours'=>$settings['micro_priority_hours'],
             'registration_deadline'=>gmdate('c',strtotime($meta['start']??'+14 days')-DAY_IN_SECONDS),'reminder_hours'=>[24,1]];
     }
-    public static function sanitize(array &$meta,array $input,int $id): void
+    public static function sanitize(array &$meta,array $input,int $id,bool $allowIncomplete=false): void
     {
         if (empty($meta['micro'])) { return; }
+        if ($allowIncomplete) {
+            foreach (['micro_min'=>[2,50],'priority_hours'=>[0,168]] as $key=>$range) {
+                if (!array_key_exists($key,$input)) { continue; }
+                $value=$input[$key];
+                Access::require(filter_var($value,FILTER_VALIDATE_INT)!==false && $value>=$range[0] && $value<=$range[1],'Parámetro de microeventos no válido.',400);
+                $meta[$key]=(int)$value;
+            }
+            if (array_key_exists('registration_deadline',$input)) {
+                if ($input['registration_deadline']==='') { unset($meta['registration_deadline']); }
+                else { $meta['registration_deadline']=ContentMeta::eventDate($input['registration_deadline']); }
+            }
+            if (!empty($meta['registration_deadline']) && !empty($meta['start'])) {
+                Access::require(strtotime($meta['registration_deadline'])<=strtotime($meta['start']),'El plazo de inscripción debe terminar antes del inicio.',400);
+            }
+            return;
+        }
         $meta=self::defaults($meta);
         if ($id && get_post_status($id)==='publish' && current_user_can('ascla_manage')) { $meta['micro_approved']=true; }
         foreach (['micro_min'=>[2,50],'priority_hours'=>[0,168]] as $key=>$range) {

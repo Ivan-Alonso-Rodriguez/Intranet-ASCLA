@@ -290,8 +290,10 @@ final class ContentPublishing
             if ($type==='event') { $oldMeta=(array)get_post_meta($id,'_ascla',true);$oldTitle=(string)$post->post_title; }
         }
         $title=trim(Access::text($input['title']??'',200));$body=trim(Access::text($input['body']??'',30000));
-        Access::require($title!=='' && $body!=='','Complete título y contenido.',400);
-        return ['editor'=>$editor,'publisher'=>$publisher,'old_meta'=>$oldMeta,'old_title'=>$oldTitle,'title'=>$title,'body'=>$body,'meta'=>ContentMeta::sanitize($type,(array)($input['meta']??[]),$id)];
+        $incompleteEventDraft=$type==='event' && ($input['status']??'')==='draft';
+        Access::require($incompleteEventDraft || ($title!=='' && $body!==''),'Complete título y contenido.',400);
+        if ($incompleteEventDraft && $title==='' && $body==='') { $title='Borrador de evento'; }
+        return ['editor'=>$editor,'publisher'=>$publisher,'old_meta'=>$oldMeta,'old_title'=>$oldTitle,'title'=>$title,'body'=>$body,'meta'=>ContentMeta::sanitize($type,(array)($input['meta']??[]),$id,$incompleteEventDraft)];
     }
 
     private static function saveTaxonomies(array $input): array
@@ -497,6 +499,9 @@ final class ContentSaveState
             $meta['tags']=array_map(static fn($name)=>Access::text($name,60),array_slice((array)$input['tag_names'],0,20));
         }
         Access::require(in_array($requested,['draft','pending','publish','scheduled'],true),'Estado no válido.',400);
+        if ($type==='event' && $requested!=='draft') {
+            Access::require(!empty($meta['start']) && !empty($meta['end']),'Complete la fecha y hora de inicio y fin.',400);
+        }
         $direct=$type==='resource' && $context['publisher'] && $requested==='publish' && !empty($meta['generated']);
         $status=self::status($type,$requested,$meta,$context['editor'],$context['publisher'],$direct);
         $parent=self::parent($type,$input);

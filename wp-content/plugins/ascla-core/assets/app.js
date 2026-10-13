@@ -349,12 +349,20 @@
     if (!form?.isConnected || !modalUnsavedBaselines.has(form)) return false;
     return modalUnsavedBaselines.get(form) !== formSnapshot(form);
   }
+  function canSaveEventAsDraft(form) {
+    return form?.dataset.form === "editor" && form.dataset.type === "event";
+  }
   function requestModalClose() {
     const backdrop = [...document.querySelectorAll(".modal-backdrop")].find(node => !node.classList.contains("modal-decision-backdrop"));
     const form = backdrop?.querySelector("form[data-guard-modal-unsaved]");
     if (!modalHasUnsavedChanges(form)) { closeModal(); return; }
     S.modalUnsavedForm = form;
-    modalDecision(T("Cambios sin guardar"), `<p class="detail-body">${E(T("Has realizado cambios que todavía no se han guardado."))}</p><p class="private-note">${E(T("¿Quieres guardar los cambios antes de cerrar esta ventana?"))}</p><div class="form-actions">${btn(T("Seguir editando"), "modal-unsaved-stay")}${btn(T("Descartar cambios"), "modal-unsaved-discard", "", "danger")}${btn(I("check")+" "+T("Guardar cambios"), "modal-unsaved-save", "", "primary")}</div>`);
+    const saveDraft = canSaveEventAsDraft(form);
+    const question = saveDraft ? "Puedes guardar el progreso como borrador antes de salir." : "¿Quieres guardar los cambios antes de cerrar esta ventana?";
+    const actions = saveDraft
+      ? `${btn(T("Seguir editando"), "modal-unsaved-stay")}${btn(I("check")+" "+T("Guardar como borrador"), "modal-unsaved-save", "", "primary")}${btn(T("Salir sin guardar"), "modal-unsaved-discard", "", "danger")}`
+      : `${btn(T("Seguir editando"), "modal-unsaved-stay")}${btn(T("Descartar cambios"), "modal-unsaved-discard", "", "danger")}${btn(I("check")+" "+T("Guardar cambios"), "modal-unsaved-save", "", "primary")}`;
+    modalDecision(T("Cambios sin guardar"), `<p class="detail-body">${E(T("Has realizado cambios que todavía no se han guardado."))}</p><p class="private-note">${E(T(question))}</p><div class="form-actions">${actions}</div>`);
   }
   function modal(title, body, wide = false) {
     closeModal();
@@ -1834,6 +1842,10 @@
     const labelId = `f-${name}-label`;
     return `<div class="field event-datetime-field" role="group" aria-labelledby="${E(labelId)}"><span class="event-datetime-label" id="${E(labelId)}">${E(T(label))}</span><div class="event-datetime-controls"><label class="event-datetime-control" for="f-${E(name)}-date"><span>${E(T("Fecha"))}</span><input id="f-${E(name)}-date" name="${E(name)}_date" type="date" value="${E(dateValue)}" required></label><label class="event-datetime-control" for="f-${E(name)}-time"><span>${E(T("Hora"))}</span><input id="f-${E(name)}-time" name="${E(name)}_time" type="time" value="${E(timeValue)}" step="60" required></label></div></div>`;
   }
+  function eventDateTimeISO(dateValue, timeValue) {
+    if (!dateValue || !timeValue) return "";
+    return new Date(`${dateValue}T${timeValue}`).toISOString();
+  }
   function publicationFields(value, scheduled) {
     return '<div data-publication-date '+(scheduled?'':'hidden')+'>'+field('publish_at','Fecha y hora de publicación',editorDateValue(value),'datetime-local',scheduled?'required':'')+'<p class="private-note">'+E(T('Usa la hora local de tu dispositivo. El contenido permanecerá oculto hasta esta fecha.'))+'</p></div>';
   }
@@ -1843,6 +1855,27 @@
     if (!panel) return;
     panel.hidden = input.value !== 'scheduled';
     panel.querySelector('input').required = !panel.hidden;
+  }
+  function syncEventEditorRequirements(form) {
+    if (!form || form.dataset.form !== "editor" || form.dataset.type !== "event") return;
+    const status = form.elements.status?.value || "draft";
+    const incompleteAllowed = status === "draft";
+    for (const name of ["title", "body", "start_date", "start_time", "end_date", "end_time"]) {
+      if (form.elements[name]) form.elements[name].required = !incompleteAllowed;
+    }
+    const submit = form.querySelector("[data-editor-primary]");
+    if (submit) {
+      const label = status === "draft" ? "Guardar borrador" : status === "scheduled" ? "Programar evento" : Number(form.dataset.id) ? "Guardar evento" : "Publicar evento";
+      submit.textContent = T(label);
+    }
+    const draftAction = form.querySelector('[data-action="save-event-draft"]');
+    if (draftAction) draftAction.hidden = status === "draft";
+  }
+  function prepareEventDraft(form) {
+    if (!form || form.dataset.type !== "event") return;
+    form.elements.status.value = "draft";
+    publicationFieldState(form.querySelector('[name="status"]:checked') || form.elements.status);
+    syncEventEditorRequirements(form);
   }
   async function editorExtra(type, p, m) {
     if (type === "event") {
@@ -1868,8 +1901,21 @@
     if (statusOptions.some((option) => option[0] === initialStatus)) return initialStatus;
     return "draft";
   }
+  function eventStatusControl(values, value) {
+    const selected = values.some((option) => String(option[0]) === String(value)) ? String(value) : String(values[0]?.[0] || "draft");
+    return `<fieldset class="event-status-field"><legend>${E(T("Estado del evento"))}</legend><div class="event-status-options">${values.map((option, index) => {
+      const pair = Array.isArray(option) ? option : [option, option];
+      const id = `f-event-status-${index}`;
+      return `<label class="event-status-option" for="${id}"><input id="${id}" type="radio" name="status" value="${E(pair[0])}" ${selected === String(pair[0]) ? "checked" : ""}><span>${E(T(pair[1]))}</span></label>`;
+    }).join("")}</div></fieldset>`;
+  }
   function editorFormMarkup({type, id, p, m, extra, eventCoverEditor, statusOptions, statusValue, canSchedule, directResourcePublisher}) {
-    return `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => ("<label class=\"chip-check\"><input type=\"checkbox\" name=\"interest\" value=\"" + (t.id) + "\" " + (p.tags.some((x) => x.id === t.id) ? "checked" : "") + ">" + (E(t.name)) + "</label>")).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? ("<label class=\"btn small\">" + (I("plus")) + " " + (E(T("Adjuntar imagen o PDF"))) + "<input type=\"file\" data-upload=\"content\" accept=\"image/jpeg,image/png,image/webp,application/pdf\" hidden></label><div id=\"attachments\">" + ((m.media_ids || []).map((mid) => ("<span class=\"attached-file\" data-media=\"" + (mid) + "\">Archivo #" + (mid) + "" + (btn("Quitar", "detach-media", ("data-id=\"" + (mid) + "\""), "ghost small")) + "</span>")).join("")) + "</div><p class=\"private-note\">" + (E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))) + "</p>") : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${select("status", "Guardar como", statusOptions, statusValue)}${canSchedule ? publicationFields(m.publish_at, statusValue === "scheduled") : ""}${m.generated && directResourcePublisher ? ("<p class=\"private-note\">" + (E(T("Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."))) + "</p>") : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar ${typeLabel[type]}</button></div></form>`;
+    const statusControl = type === "event" ? eventStatusControl(statusOptions, statusValue) : select("status", "Guardar como", statusOptions, statusValue);
+    const publicationControl = canSchedule ? publicationFields(m.publish_at, statusValue === "scheduled") : "";
+    const eventWorkflow = type === "event" ? `<section class="event-editor-status">${statusControl}${publicationControl}<p class="private-note">${E(T("Puedes guardar un borrador aunque todavía falten datos. Para publicar, completa los campos obligatorios."))}</p></section>` : "";
+    const trailingWorkflow = type === "event" ? "" : statusControl + publicationControl;
+    const draftAction = type === "event" ? btn(I("check")+" "+T("Guardar como borrador"), "save-event-draft", statusValue === "draft" ? "hidden" : "", "event-draft-action") : "";
+    return `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${eventWorkflow}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => ("<label class=\"chip-check\"><input type=\"checkbox\" name=\"interest\" value=\"" + (t.id) + "\" " + (p.tags.some((x) => x.id === t.id) ? "checked" : "") + ">" + (E(t.name)) + "</label>")).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? ("<label class=\"btn small\">" + (I("plus")) + " " + (E(T("Adjuntar imagen o PDF"))) + "<input type=\"file\" data-upload=\"content\" accept=\"image/jpeg,image/png,image/webp,application/pdf\" hidden></label><div id=\"attachments\">" + ((m.media_ids || []).map((mid) => ("<span class=\"attached-file\" data-media=\"" + (mid) + "\">Archivo #" + (mid) + "" + (btn("Quitar", "detach-media", ("data-id=\"" + (mid) + "\""), "ghost small")) + "</span>")).join("")) + "</div><p class=\"private-note\">" + (E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))) + "</p>") : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${trailingWorkflow}${m.generated && directResourcePublisher ? ("<p class=\"private-note\">" + (E(T("Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."))) + "</p>") : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}${draftAction}<button class="btn primary" data-editor-primary>Guardar ${typeLabel[type]}</button></div></form>`;
   }
   async function editor(type, id = 0) {
     const p = id
@@ -1889,7 +1935,8 @@
     const eventCoverFile = type === "event" ? (p.media || []).find(file => file.mime?.startsWith("image/")) : null;
     const eventCoverEditor = eventCoverEditorMarkup(type, eventCoverFile);
     const formMarkup = editorFormMarkup({type, id, p, m, extra, eventCoverEditor, statusOptions, statusValue, canSchedule, directResourcePublisher});
-    modal((id ? "Editar " : "Crear ") + typeLabel[type], formMarkup, true);
+    const dialog = modal((id ? "Editar " : "Crear ") + typeLabel[type], formMarkup, true);
+    syncEventEditorRequirements(dialog.querySelector('[data-form="editor"]'));
   }
   async function files(page = 1, q = "", scope = S.files?.scope || "mine", owner = S.files?.owner || 0) {
     const previousScope = S.files?.scope || "";
@@ -2822,14 +2869,23 @@
       closeModalDecision();
     }
   }
-  async function handleClickActions02(a, _b, _id, _event) {
+  async function handleClickActions02(a, b, _id, _event) {
     if (a === "modal-unsaved-discard") {
       closeModalDecision(); S.modalUnsavedForm = null; closeModal();
     }
     else if (a === "modal-unsaved-save") {
       const guarded = S.modalUnsavedForm;
       closeModalDecision();
-      if (guarded?.isConnected) guarded.requestSubmit();
+      if (guarded?.isConnected) {
+        if (canSaveEventAsDraft(guarded)) prepareEventDraft(guarded);
+        guarded.requestSubmit();
+      }
+    }
+    else if (a === "save-event-draft") {
+      const form = b.closest('form[data-form="editor"][data-type="event"]');
+      if (!form) return;
+      prepareEventDraft(form);
+      form.requestSubmit();
     }
   }
   async function handleClickActions03(a, _b, _id, _event) {
@@ -3502,7 +3558,7 @@
   }
   const HANDLECLICKACTIONS_DISPATCH = [
     { test: (a) => (a === "close") || (a === "modal-unsaved-stay"), run: handleClickActions01 },
-    { test: (a) => (a === "modal-unsaved-discard") || (a === "modal-unsaved-save"), run: handleClickActions02 },
+    { test: (a) => (a === "modal-unsaved-discard") || (a === "modal-unsaved-save") || (a === "save-event-draft"), run: handleClickActions02 },
     { test: (a) => (a === "profile-review-confirm") || (a === "profile-nudge-later") || (a === "profile-nudge-go"), run: handleClickActions03 },
     { test: (a) => (a === "unsaved-stay") || (a === "unsaved-discard") || (a === "unsaved-save"), run: handleClickActions04 },
     { test: (a) => (a === "theme-menu") || (a === "theme-set"), run: handleClickActions05 },
@@ -3693,8 +3749,8 @@ root.addEventListener("click", async (event) => {
       if (key in data) meta[key] = data[key];
     }
     if (type === "event") {
-      meta.start = new Date(`${data.start_date}T${data.start_time}`).toISOString();
-      meta.end = new Date(`${data.end_date}T${data.end_time}`).toISOString();
+      meta.start = eventDateTimeISO(data.start_date, data.start_time);
+      meta.end = eventDateTimeISO(data.end_date, data.end_time);
       if (data.registration_deadline) meta.registration_deadline = new Date(data.registration_deadline).toISOString();
       if (data.reminder_hours) meta.reminder_hours = data.reminder_hours.split(",").map(v=>Number(v.trim()));
     }
@@ -4127,6 +4183,7 @@ root.addEventListener("submit", async (event) => {
     if (reportForm && input.name === "reason") updateReportDetailRequirement(reportForm);
     updateProfilePreference(input);
     publicationFieldState(input);
+    syncEventEditorRequirements(input.closest?.('[data-form="editor"]'));
     refreshUnsavedGuard(input);
     if (!input.dataset.upload || !input.files?.length) return;
     await handleUploadInput(input);
