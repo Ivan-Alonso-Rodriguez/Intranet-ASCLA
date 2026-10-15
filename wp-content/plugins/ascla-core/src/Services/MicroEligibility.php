@@ -39,6 +39,20 @@ final class MicroEligibility
         }
     }
 
+    /** Refresh the group synchronously when an administrator opens a proposal review. */
+    public static function review(int $id): array
+    {
+        Access::require(Access::member() && current_user_can('ascla_manage'),'La revisión del microevento requiere administración.',403);
+        return Store::atomic('event:'.$id,static function()use($id){
+            clean_post_cache($id);$post=Content::get($id);$before=(array)get_post_meta($id,'_ascla',true);
+            Access::require($post->post_type==='ascla_event' && !empty($before['micro']),'Seleccione una propuesta de microevento.',400);
+            self::proposal($id);
+            $meta=(array)get_post_meta($id,'_ascla',true);
+            return ['item'=>Content::serialize(get_post($id)),'candidates'=>count((array)($meta['invitees']??[])),
+                'removed'=>count(array_diff((array)($before['invitees']??[]),(array)($meta['invitees']??[])))];
+        });
+    }
+
     private static function candidates(array $ids): array
     {
         $eligible=[];

@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-07T15:21:23.322Z",
+  "baseline_commit": "22e2d64",
+  "version": "1.10.6",
+  "environment": "WordPress/MariaDB local desechable",
+  "phpunit": "diferido por solicitud del usuario",
+  "php_syntax_files": 127,
+  "bugs-ui": {
+    "checks": [
+      "024: presentación opcional visible al destinatario",
+      "028: rechazo silencioso y bloqueo de reenvío",
+      "030: filtro local inmediato en Mis conexiones",
+      "038: la API y la interfaz impiden borrar mensajes",
+      "039: historial accesible de solo lectura al desconectar",
+      "034: enfriamiento bilateral tras desconexión",
+      "033: bloquear elimina vínculo y desbloquear no lo restaura",
+      "049: borrador conservado y publicación posterior",
+      "047: el asociado ve el título institucional completo",
+      "058: oferta con fecha límite visible y cupo reservado al primero",
+      "050: reprogramar exige reconfirmación",
+      "Directorio usable en móvil sin desbordamiento"
+    ],
+    "errors": []
+  },
+  "directory-publication": {
+    "checks": [
+      "Directorio incluye incompletos y respeta privacidad, campos ocultos y suspensión",
+      "Directorio excluye bloqueados y recupera su visibilidad al desbloquear",
+      "Paginación recorre todas las personas visibles sin duplicados",
+      "Filtros con casillas, búsqueda y limpieza funcionan sin Ctrl/Cmd",
+      "Directorio verificado a 1920, 1440, 768 y 390 px",
+      "Programación privada, permisos, fecha futura, editor y cancelación comprobados",
+      "WP-Cron publica automáticamente al alcanzar la hora real"
+    ],
+    "errors": []
+  },
+  "workflows-ui": {
+    "checks": [
+      "Contacto usa categorías vigentes, configurables y validadas por el servidor",
+      "Datos personales requieren solicitud asignada de uso único; formularios y REST nativo protegidos",
+      "Cambios de permisos desde WordPress registran diferencias antes/después",
+      "Ejecutivo programa; administración aprueba; cron publica e inicia la prioridad al divulgar",
+      "Pérdida de candidatos cancela la propuesta y conserva motivo e historial"
+    ],
+    "errors": []
+  },
+  "checks_passed": 24
+}

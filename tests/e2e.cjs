@@ -233,7 +233,7 @@ async function goto(page, route) {
         "publish",
       );
     });
-    await test("Comments, reactions, following and reporting work", async () => {
+    await test("Comments, reactions and reporting work without following", async () => {
       await p.goto(base + "/hub/?item=" + post.id);
       await p
         .locator(".modal [name=body]")
@@ -244,10 +244,10 @@ async function goto(page, route) {
         .getByText("E2E Comentario constructivo.")
         .waitFor();
       await Promise.all([p.waitForResponse(r=>r.url().includes('/reaction')&&r.request().method()==='POST'),p.locator('.modal [data-action="content-reaction"][data-comment="false"][data-reaction="like"]').click()]);
-      await Promise.all([p.waitForResponse(r=>r.url().includes('/reaction')&&r.request().method()==='POST'),p.locator(".modal [data-action=follow]").click()]);
+      assert.equal(await p.locator(".modal [data-action=follow]").count(), 0);
       const data = (await request(p, "items/" + post.id)).body;
       assert.equal(data.liked, true);
-      assert.equal(data.following, true);
+      assert.equal(Object.hasOwn(data, 'following'), false);
       assert.equal(await p.locator(".modal [data-action=report]").count(), 0, "Authors cannot report their own content");
       await a.goto(base + "/hub/?item=" + post.id);
       await a.locator(".modal [data-action=report]").click();
@@ -373,9 +373,8 @@ async function goto(page, route) {
       await goto(p,'directorio');
       const overview=p.locator('.connections-overview');await overview.waitFor();
       if((await overview.getAttribute('open'))===null) await overview.locator(':scope > summary').click();
-      const blocked=p.locator('.connections-sections > details').filter({has:p.locator('summary').filter({hasText:/^Asociados bloqueados/})});
-      await blocked.locator('summary').click();
-      await blocked.getByRole('button',{name:'Desbloquear',exact:true}).click();
+      await p.locator('[data-action="connection-tab"][data-tab="blocked"]').click();
+      await p.locator('[data-connections-content]').getByRole('button',{name:'Desbloquear',exact:true}).click();
       assert.equal((await request(p,"profiles/" + target.id)).body.connection.state,'none');
       assert.equal((await request(p,"conversations/" + conversation.id + "/messages")).status,404);
     });

@@ -100,7 +100,7 @@ final class ConversationRequests
     {
         $me=self::writer();
         $body=trim(Access::text($body,5000));
-        Access::require($body!=='','Escribe el mensaje que quieres enviar con la solicitud.',400);
+        Access::require(Access::hasText($body),'Escribe el mensaje que quieres enviar con la solicitud.',400);
         Access::require($target>0 && $target!==$me && Access::member($target),'Asociado no válido.',400);
         return Connections::lockPair($me,$target,static function () use($me,$target,$body) {
             Access::require(!Connections::areConnected($me,$target),'Ya existe una conexión confirmada; puedes iniciar la conversación directamente.',409);

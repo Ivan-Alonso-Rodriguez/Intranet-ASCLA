@@ -1,0 +1,119 @@
+{
+  "date": "2026-10-15",
+  "completed_at_utc": "2026-10-15T05:12:57.096345+00:00",
+  "target": "https://wordpress.ingsoftware.lat",
+  "version": "1.10.8",
+  "schema": 15,
+  "scope": "QA plugin update, authenticated read-only browser review with existing data, anonymous login presentation and public asset byte checks. No new PHP/coverage/full remote Bruno or Playwright acceptance run.",
+  "status": "passed",
+  "package": {
+    "sha256": "96337a02d6e78c2de9739ff2d0214dec5604ee87cf9719c44736e4b2e2efc307",
+    "bytes": 1301502,
+    "files": 175,
+    "crc_valid": true,
+    "source_bytes_match": true
+  },
+  "browser_review": {
+    "target": "https://wordpress.ingsoftware.lat",
+    "version": "1.10.8",
+    "package_sha256": "96337a02d6e78c2de9739ff2d0214dec5604ee87cf9719c44736e4b2e2efc307",
+    "checks": [
+      "WordPress confirmed successful plugin update",
+      "Administrative overview renders with task cards and grouped navigation",
+      "Existing QA member detail renders declared interests and stored activity",
+      "30-day and all-history controls update results",
+      "Like filter and empty state render without invented activity",
+      "No horizontal overflow at 1440, 1024, 768 and 390 pixels",
+      "Returning to users preserves the search",
+      "Moderation and statistics remain reachable from grouped navigation",
+      "Member view exposes its privacy scope and distinguishes registrations from attendance",
+      "No browser console errors during the inspected flows"
+    ],
+    "views": [
+      {
+        "metrics": 5,
+        "overflow": false,
+        "width": 1440
+      },
+      {
+        "metrics": 5,
+        "overflow": false,
+        "width": 1024
+      },
+      {
+        "metrics": 5,
+        "overflow": false,
+        "width": 768
+      },
+      {
+        "metrics": 5,
+        "overflow": false,
+        "width": 390
+      },
+      {
+        "overflow": false,
+        "section": "statistics",
+        "width": 390
+      }
+    ],
+    "profile": {
+      "metrics": "1\nPublicaciones\n0\nComentarios\n0\nMe gusta\n0\nInscripciones vigentes\n0\nAsistencias registradas",
+      "historyItems": 1,
+      "declaredInterestGroups": 8
+    },
+    "completed_at_utc": "2026-10-15T05:11:42.172Z",
+    "scope": "Authenticated read-only browser review with existing QA data; no new accounts, likes, posts or messages; no repeat of the complete Bruno/Playwright acceptance suite"
+  },
+  "anonymous_login": {
+    "views": 8,
+    "minimum_gap_px": 20,
+    "errors": [],
+    "report": "test-results/login-notice108-qa.json"
+  },
+  "public_assets": {
+    "target": "https://wordpress.ingsoftware.lat",
+    "scope": "Anonymous static asset byte comparison only; no authenticated API or database requests",
+    "checks": [
+      {
+        "asset": "app.css",
+        "sha256": "12191c9b0158c8d8447be6e026b571c130d391659422eb43a7bd2b236cb56826",
+        "status": 200,
+        "bytes_match": true
+      },
+      {
+        "asset": "app.js",
+        "sha256": "ecd5671eb6ab366e828f5c5a1809ff583ceab29f402ca11300ed1908f939407c",
+        "status": 200,
+        "bytes_match": true
+      },
+      {
+        "asset": "admin-members.js",
+        "sha256": "73f3f06e2d4c14bdd35c20ffdc174e5dbe0f1a206b327f5714f93f07f4f159fb",
+        "status": 200,
+        "bytes_match": true
+      },
+      {
+        "asset": "login.css",
+        "sha256": "e23f9205458515024d16d8ff1900b48fdbef92152028f3074e546e6346a0ce79",
+        "status": 200,
+        "bytes_match": true
+      }
+    ]
+  },
+  "test_data_created": false,
+  "qa_helper_installed_this_stage": false,
+  "sources": [
+    "test-results/check-login-notice108.cjs",
+    "test-results/check-admin108-assets.cjs"
+  ],
+  "screenshots": [
+    "test-results/admin108-qa-overview.jpg",
+    "test-results/admin108-qa-member.jpg",
+    "test-results/admin108-qa-mobile.jpg"
+  ],
+  "limitations": [
+    "Read-only review is not a repeat of the complete authenticated remote acceptance suite.",
+    "Remote member inspected had one eligible history row; multi-page behavior was verified with local synthetic records.",
+    "Privacy and permissions regression tests belong to the local 44-test run; the remote review checks rendering and scope explanation."
+  ]
+}

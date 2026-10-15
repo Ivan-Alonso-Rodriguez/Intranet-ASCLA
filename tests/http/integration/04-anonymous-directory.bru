@@ -1,0 +1,19 @@
+meta {
+  name: anonymous-directory
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/profiles
+  body: none
+  auth: none
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("Directorio rechaza visitantes sin sesi\u00f3n", function () { expect(res.getStatus()).to.equal(401); });
+}

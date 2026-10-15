@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-08T01:38:58.758Z",
+  "version": "1.10.7",
+  "baseline_commit": "22e2d64",
+  "environment": "WordPress/MariaDB local desechable",
+  "phpunit": "Diferido por indicación del usuario",
+  "php_syntax_files": 132,
+  "gettext": {
+    "wordpress_mo_loaded": true,
+    "messages_per_locale": 1367
+  },
+  "checks_passed": 47,
+  "bugs-ui": {
+    "checks": [
+      "024: presentación opcional visible al destinatario",
+      "028: rechazo silencioso y bloqueo de reenvío",
+      "030: filtro local inmediato en Mis conexiones",
+      "038: la API y la interfaz impiden borrar mensajes",
+      "039: historial accesible de solo lectura al desconectar",
+      "034: enfriamiento bilateral tras desconexión",
+      "033: bloquear elimina vínculo y desbloquear no lo restaura",
+      "049: borrador conservado y publicación posterior",
+      "047: el asociado ve el título institucional completo",
+      "058: oferta con fecha límite visible y cupo reservado al primero",
+      "050: reprogramar exige reconfirmación",
+      "Directorio usable en móvil sin desbordamiento"
+    ],
+    "errors": []
+  },
+  "editorial107": {
+    "checks": [
+      "Hub: publicación explícita inmediata, borrador privado, editor e historial propio",
+      "Reacciones: compatibilidad con Me gusta, cambio sin duplicados, concurrencia y retiro",
+      "Temas y comentarios permiten reaccionar mediante controles accesibles",
+      "Moderación de comentarios: permisos, motivo obligatorio, formulario y auditoría antes/después",
+      "Reportes: justificación, actor y UTC obligatorios; la auditoría conserva el resultado después de eliminarlos",
+      "Reportes de publicaciones también registran resolución sin copiar la denuncia privada a la bitácora",
+      "Retirar contenido impide nuevas reacciones y registra estado/motivo antes y después",
+      "Inglés por cuenta, diccionario gettext para JavaScript y móvil sin desbordamiento"
+    ],
+    "errors": []
+  },
+  "atomic107": {
+    "checks": [
+      "Rollback conserva conexión y permisos si falla la auditoría al disolver o bloquear",
+      "Rollback restaura el cupo confirmado y la lista de espera tras un fallo intermedio",
+      "La misma operación confirma cambios y ofrece el cupo cuando desaparece el fallo",
+      "Moderación atómica: un fallo de auditoría revierte comentario, reporte y publicación",
+      "Un reporte revisado solo se elimina si su auditoría queda confirmada",
+      "Publicaciones: alta, edición, taxonomías y papelera revierten juntas cuando falla la auditoría",
+      "Los fallos silenciosos de metadatos de WordPress revierten el título y el resto del evento",
+      "Eventos: reprogramación, reconfirmación, invitaciones y cancelación se confirman o revierten completas",
+      "Cuentas y Contacto: rollback conserva rol, perfil, membresía, sesión y autorización, sin enviar correos",
+      "Alta y eliminación administrativas conservan la cuenta completa ante un fallo intermedio",
+      "Eliminar una cuenta conserva reacciones de contenido que comparten su identificador numérico",
+      "WP-Cron revierte una publicación si falla la auditoría y permite reprogramarla después",
+      "Vencimiento concurrente: oferta FIFO al siguiente, rechazo del cupo expirado y aforo sin duplicados"
+    ],
+    "errors": []
+  },
+  "directory-publication": {
+    "checks": [
+      "Directorio incluye incompletos y respeta privacidad, campos ocultos y suspensión",
+      "Directorio excluye bloqueados y recupera su visibilidad al desbloquear",
+      "Paginación recorre todas las personas visibles sin duplicados",
+      "Filtros con casillas, búsqueda y limpieza funcionan sin Ctrl/Cmd",
+      "Directorio verificado a 1920, 1440, 768 y 390 px",
+      "Programación privada, permisos, fecha futura, editor y cancelación comprobados",
+      "WP-Cron publica automáticamente al alcanzar la hora real",
+      "WP-Cron publica Galería, Conocimiento, Hub y Aliados con visibilidad correcta antes y después",
+      "La publicación programada permanece oculta si su autor pierde los permisos"
+    ],
+    "errors": []
+  },
+  "workflows-ui": {
+    "checks": [
+      "Contacto usa categorías vigentes, configurables y validadas por el servidor",
+      "Datos personales requieren solicitud asignada de uso único; formularios y REST nativo protegidos",
+      "Cambios de permisos desde WordPress registran diferencias antes/después",
+      "Ejecutivo programa; administración aprueba; cron publica e inicia la prioridad al divulgar",
+      "Pérdida de candidatos cancela la propuesta y conserva motivo e historial"
+    ],
+    "errors": []
+  }
+}

@@ -34,17 +34,16 @@ final class Attendance
         self::event($id);
         $status=Access::text($input['status']??'',16);
         Access::require(in_array($status,['present','partial','absent','review','unknown'],true),'Estado de asistencia no válido.',400);
-        $email=trim(Access::text($input['email']??'',100));$uid=absint($input['user_id']??0);
+        $email=trim(Access::text($input['email']??'',100));$uid=FormRules::bounded($input['user_id']??0,0,PHP_INT_MAX);
         if(!$uid) {$user=get_user_by('email',$email);$uid=$user?(int)$user->ID:0;}
         Access::require($uid>0 && user_can($uid,'ascla_access'),'No se encontró un usuario ASCLA con ese correo.',400);
-        $value=$input['minutes']??null;$minutes=($value===null || $value==='')?null:filter_var($value,FILTER_VALIDATE_INT);
-        Access::require($minutes===null || ($minutes!==false && $minutes>=0 && $minutes<=self::maxMinutes($id)),'Duración no válida para este evento.',400);
+        $value=$input['minutes']??null;$minutes=($value===null || $value==='')?null:FormRules::bounded($value,0,self::maxMinutes($id),'Duración no válida para este evento.');
         if($status==='absent') {$minutes=0; }
-        return Store::lock('attendance:'.$id,static function()use($id,$uid,$status,$minutes){
+        return Store::atomic('attendance:'.$id,static function()use($id,$uid,$status,$minutes){
             clean_post_cache($id);self::event($id);
             if($status==='unknown') {Store::delete('attendance',['event_id'=>$id,'user_id'=>$uid]); }
             else { self::upsert($id,$uid,$status,$minutes,'manual'); }
-            delete_post_meta($id,'_ascla_attendance_complete');
+            \ASCLA\Core\Repositories\WordPressWrites::deleteMeta('post',$id,'_ascla_attendance_complete');
             Audit::record('attendance_saved',$id,$status.'; member='.$uid);
             return self::roster($id);
         });
@@ -59,11 +58,11 @@ final class Attendance
     public static function complete(int $id,bool $complete): array
     {
         self::event($id);
-        return Store::lock('attendance:'.$id,static function()use($id,$complete){
+        return Store::atomic('attendance:'.$id,static function()use($id,$complete){
             clean_post_cache($id);self::event($id);
             // Completing a roster explicitly confirms that unmarked registered users did not attend.
-            if($complete) { update_post_meta($id,'_ascla_attendance_complete',['by'=>get_current_user_id(),'at'=>gmdate('c')]); }
-            else { delete_post_meta($id,'_ascla_attendance_complete'); }
+            if($complete) { \ASCLA\Core\Repositories\WordPressWrites::meta('post',$id,'_ascla_attendance_complete',['by'=>get_current_user_id(),'at'=>gmdate('c')]); }
+            else { \ASCLA\Core\Repositories\WordPressWrites::deleteMeta('post',$id,'_ascla_attendance_complete'); }
             Audit::record('attendance_roster',$id,$complete?'complete':'reopened');
             return self::roster($id);
         });
@@ -75,12 +74,12 @@ final class Attendance
     private static function threshold(int $id): int{return (int)(get_post_meta($id,'_ascla_attendance_threshold',true)?:70);}
     public static function configure(int $id,array $input): array
     {
-        self::event($id);$threshold=filter_var($input['threshold']??null,FILTER_VALIDATE_INT);Access::require($threshold!==false && $threshold>=1 && $threshold<=100,'El umbral debe estar entre 1 y 100%.',400);
-        return Store::lock('attendance:'.$id,static function()use($id,$threshold){
-            self::event($id);update_post_meta($id,'_ascla_attendance_threshold',$threshold);
+        self::event($id);$threshold=FormRules::bounded($input['threshold']??null,1,100,'El umbral debe estar entre 1 y 100%.');
+        return Store::atomic('attendance:'.$id,static function()use($id,$threshold){
+            self::event($id);\ASCLA\Core\Repositories\WordPressWrites::meta('post',$id,'_ascla_attendance_threshold',$threshold);
             global $wpdb;$table=Store::table('attendance');$duration=self::duration($id);
-            $wpdb->query($wpdb->prepare("UPDATE $table SET status=CASE WHEN seconds=0 THEN 'absent' WHEN seconds*100 >= %d THEN 'present' ELSE 'partial' END WHERE event_id=%d AND source='zoom' AND seconds IS NOT NULL AND review_reason=''",$duration*$threshold,$id));
-            delete_post_meta($id,'_ascla_attendance_complete');Audit::record('attendance_threshold',$id,(string)$threshold);return self::roster($id);
+            if ($wpdb->query($wpdb->prepare("UPDATE $table SET status=CASE WHEN seconds=0 THEN 'absent' WHEN seconds*100 >= %d THEN 'present' ELSE 'partial' END WHERE event_id=%d AND source='zoom' AND seconds IS NOT NULL AND review_reason=''",$duration*$threshold,$id))===false) { throw new \ASCLA\Core\Repositories\RepositoryException('No se pudo actualizar la asistencia.'); }
+            \ASCLA\Core\Repositories\WordPressWrites::deleteMeta('post',$id,'_ascla_attendance_complete');Audit::record('attendance_threshold',$id,(string)$threshold);return self::roster($id);
         });
     }
     private static function cacheCsvUsers(array $rows): void
@@ -122,7 +121,7 @@ final class Attendance
     }
     public static function import(int $id,string $csv,string $token,array $options=[]): array
     {
-        self::event($id);$importId=Store::lock('attendance:'.$id,static function()use($id,$csv,$token,$options){
+        self::event($id);$importId=Store::atomic('attendance:'.$id,static function()use($id,$csv,$token,$options){
             clean_post_cache($id);self::event($id);$plan=self::plan($id,$csv,$options);Access::require($token!=='' && hash_equals($plan['token'],$token),'El registro cambió. Revisa nuevamente la vista previa del CSV.',409);Access::require($plan['importable']>0,'No hay participantes nuevos o actualizables en este CSV.',400);
             $rows=[];foreach($plan['matched'] as $m){$m['kind']='matched';$rows[]=$m;}foreach($plan['unmatched'] as $u){$u['kind']='unidentified';$rows[]=$u;}
             $importId=ImportRecords::create('attendance',Access::text($options['filename']??'zoom.csv',255),['options'=>$plan['options'],'threshold'=>$plan['threshold'],'window'=>get_post_meta($id,'_ascla_end',true).'|'.get_post_meta($id,'_ascla_start',true),'duplicates'=>$plan['duplicates']],$rows,$id);
@@ -131,26 +130,22 @@ final class Attendance
     }
     private static function applyPendingRows(int $id,int $importId): void
     {
-        global $wpdb;$wpdb->query('START TRANSACTION');
-        try {
-            foreach (ImportRecords::rows($importId,'pending',50) as $row) {
-                $payload=$row['payload'];$uid=(int)($payload['id']??0);
-                if ($payload['kind']==='unidentified') { ImportRecords::save($row,'unidentified',$payload);continue; }
-                $old=Store::rows('attendance','event_id=%d AND user_id=%d',[$id,$uid],'LIMIT 1')[0]??null;
-                if ($payload['protected'] || ($old['source']??'')==='manual') { ImportRecords::save($row,'protected',$payload,$uid);continue; }
-                if (!user_can($uid,'ascla_access') || !hash_equals($payload['snapshot'],hash('sha256',wp_json_encode($old)))) { ImportRecords::save($row,'conflict',$payload,$uid);continue; }
-                self::upsert($id,$uid,$payload['status'],$payload['minutes'],'zoom',$payload);ImportRecords::save($row,'updated',$payload,$uid);
-            }
-            if ($wpdb->query('COMMIT')===false) { throw new ServiceException('No se pudo confirmar el lote.'); }
-        } catch (\Throwable $error) { $wpdb->query('ROLLBACK');throw $error; }
+        foreach (ImportRecords::rows($importId,'pending',50) as $row) {
+            $payload=$row['payload'];$uid=(int)($payload['id']??0);
+            if ($payload['kind']==='unidentified') { ImportRecords::save($row,'unidentified',$payload);continue; }
+            $old=Store::rows('attendance','event_id=%d AND user_id=%d',[$id,$uid],'LIMIT 1')[0]??null;
+            if ($payload['protected'] || ($old['source']??'')==='manual') { ImportRecords::save($row,'protected',$payload,$uid);continue; }
+            if (!user_can($uid,'ascla_access') || !hash_equals($payload['snapshot'],hash('sha256',wp_json_encode($old)))) { ImportRecords::save($row,'conflict',$payload,$uid);continue; }
+            self::upsert($id,$uid,$payload['status'],$payload['minutes'],'zoom',$payload);ImportRecords::save($row,'updated',$payload,$uid);
+        }
     }
     public static function apply(int $id,int $importId): array
     {
-        self::event($id);return Store::lock('attendance:'.$id,static function()use($id,$importId){
+        self::event($id);return Store::atomic('attendance:'.$id,static function()use($id,$importId){
             self::event($id);$import=ImportRecords::get($importId,'attendance');Access::require((int)$import['event_id']===$id,'Importación no disponible.',404);Access::require(in_array($import['status'],['applying','complete'],true),'Importación no confirmada.',409);
             if ($import['status']==='applying') {
                 Access::require((int)$import['config']['threshold']===self::threshold($id) && $import['config']['window']===get_post_meta($id,'_ascla_end',true).'|'.get_post_meta($id,'_ascla_start',true),'El evento o el umbral cambió. Genera una nueva vista previa.',409);
-                self::applyPendingRows($id,$importId);delete_post_meta($id,'_ascla_attendance_complete');
+                self::applyPendingRows($id,$importId);\ASCLA\Core\Repositories\WordPressWrites::deleteMeta('post',$id,'_ascla_attendance_complete');
                 $counts=ImportRecords::counts($importId);
                 if (empty($counts['pending'])) { Store::update('imports',['status'=>'complete','completed_at'=>current_time('mysql',true)],['id'=>$importId]);Audit::record('attendance_imported',$id,'import='.$importId.'; updated='.($counts['updated']??0)); }
             }
@@ -182,8 +177,12 @@ final class AttendanceCsv
 
     private static function appendRow(array $row,array &$matched,array &$unmatched,array &$lookup): void
     {
-        if (!array_key_exists($row['email'],$lookup)) { $lookup[$row['email']]=$row['error']===''?get_user_by('email',$row['email']):false; }
-        $user=$lookup[$row['email']];
+        // Invalid evidence must not cache a failed identity lookup for later valid rows.
+        $user=false;
+        if ($row['error']==='') {
+            if (!array_key_exists($row['email'],$lookup)) { $lookup[$row['email']]=get_user_by('email',$row['email']); }
+            $user=$lookup[$row['email']];
+        }
         if ($row['error']!=='' || !$user || !user_can($user,'ascla_access')) {
             $unmatched[]=['line'=>$row['line'],'email'=>Access::excerpt($row['email'],100),'name'=>$row['name'],'reason'=>$row['error']?:'Correo sin cuenta ASCLA','sessions'=>[$row]];
             return;

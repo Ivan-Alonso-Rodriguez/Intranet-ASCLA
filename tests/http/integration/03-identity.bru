@@ -1,0 +1,24 @@
+meta {
+  name: identity
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/bootstrap
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("Identidad correcta", function () { expect(res.getStatus()).to.equal(200); });
+  test("La sesión pertenece al asociado de prueba", function () { expect(res.getBody().me.id).to.equal(Number(bru.getEnvVar("aId"))); });
+}

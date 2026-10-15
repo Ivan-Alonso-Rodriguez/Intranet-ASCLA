@@ -12,15 +12,28 @@ final class MicroLifecycle
         return $meta+['micro_min'=>$settings['micro_min'],'priority_hours'=>$settings['micro_priority_hours'],
             'registration_deadline'=>gmdate('c',strtotime($meta['start']??'+14 days')-DAY_IN_SECONDS),'reminder_hours'=>[24,1]];
     }
-    public static function sanitize(array &$meta,array $input,int $id): void
+    public static function sanitize(array &$meta,array $input,int $id,bool $allowIncomplete=false): void
     {
         if (empty($meta['micro'])) { return; }
+        if ($allowIncomplete) {
+            foreach (['micro_min','priority_hours'] as $key) {
+                if (!array_key_exists($key,$input)) { continue; }
+                $meta[$key]=FormRules::integer($key,$input[$key],'Parámetro de microeventos no válido.');
+            }
+            if (array_key_exists('registration_deadline',$input)) {
+                if ($input['registration_deadline']==='') { unset($meta['registration_deadline']); }
+                else { $meta['registration_deadline']=ContentMeta::eventDate($input['registration_deadline']); }
+            }
+            if (!empty($meta['registration_deadline']) && !empty($meta['start'])) {
+                Access::require(strtotime($meta['registration_deadline'])<=strtotime($meta['start']),'El plazo de inscripción debe terminar antes del inicio.',400);
+            }
+            return;
+        }
         $meta=self::defaults($meta);
         if ($id && get_post_status($id)==='publish' && current_user_can('ascla_manage')) { $meta['micro_approved']=true; }
-        foreach (['micro_min'=>[2,50],'priority_hours'=>[0,168]] as $key=>$range) {
+        foreach (['micro_min','priority_hours'] as $key) {
             $value=$input[$key]??$meta[$key];
-            Access::require(filter_var($value,FILTER_VALIDATE_INT)!==false && $value>=$range[0] && $value<=$range[1],'Parámetro de microeventos no válido.',400);
-            $meta[$key]=(int)$value;
+            $meta[$key]=FormRules::integer($key,$value,'Parámetro de microeventos no válido.');
         }
         Access::require($meta['capacity']>=$meta['micro_min'],'El mínimo no puede superar los cupos.',400);
         if (isset($input['registration_deadline'])) {
@@ -57,13 +70,14 @@ final class MicroLifecycle
     public static function review(int $id,string $decision,string $reason,array &$meta): void
     {
         Access::require(current_user_can('ascla_manage'),'La revisión del microevento requiere administración.',403);
+        Access::require(in_array($decision,['approve','reject'],true),'Para cancelar un microevento utiliza la opción de cancelación de su ficha.',400);
         if ($decision==='approve') {
             Access::require(empty($meta['cancelled']),'Una propuesta cancelada conserva su historial y no puede aprobarse.',409);
             $meta=self::defaults($meta);
             MicroEvents::validateInvitees($meta);
             Access::require(strtotime($meta['registration_deadline'])>time(),'Amplía el plazo de inscripción antes de aprobar.',400);
             $meta['micro_approved']=true;self::history($id,'approved',$reason);
-        } else { $meta['micro_approved']=false;self::history($id,$decision==='reject'?'denied':'cancelled',$reason); }
+        } else { $meta['micro_approved']=false;self::history($id,'denied',$reason); }
     }
     public static function publish(int $id): void
     {

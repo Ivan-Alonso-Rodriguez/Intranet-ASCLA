@@ -51,12 +51,15 @@
     list: null,
     conversation: 0,
     conversations: [],
+    connectionTab: "",
+    connectionData: null,
+    connectionVersion: 0,
     messageTab: "chats",
     profileTab: "info",
     groupChat: null,
     groupEdit: null,
     calendar: new Date(),
-    adminTab: "moderacion",
+    adminTab: "resumen",
     adminFilters: {users: {}, contacts: {}},
     pendingUnsavedResolver: null,
     pendingUnsavedSaveForm: null,
@@ -65,6 +68,7 @@
     noticeFilter: "all",
     noticePage: 1,
     assistantThread: "",
+    assistantVersion: 0,
     locations: null,
     locationTimer: null,
     liveToastCursor: 0,
@@ -84,13 +88,16 @@
   }
   function assistantThread(reset = false, forced = "") {
     const key = ASSISTANT_THREAD_PREFIX + String(S.boot?.me?.id || "member");
-    let value = forced;
+    // The active tab owns its context, even if browser storage refuses a write.
+    let value = forced || (!reset ? S.assistantThread : "");
+    if (!value && !reset) { try { value = sessionStorage.getItem(key) || ""; } catch {} }
     if (!value && !reset) { try { value = localStorage.getItem(key) || ""; } catch {} }
     if (!/^[a-zA-Z0-9_-]{6,80}$/.test(value)) {
       const random = secureRandomId();
       value = "chat_" + random.replaceAll(/[^a-zA-Z0-9_-]/g, "");
     }
     S.assistantThread = value;
+    try { sessionStorage.setItem(key, value); } catch {}
     try { localStorage.setItem(key, value); } catch {}
     return value;
   }
@@ -127,7 +134,7 @@
   function date(value, opts = DEFAULT_DATE_OPTIONS) {
     if (!value) return T("Por confirmar");
     let normalized = value;
-    if (!/(?:Z|[+-]\d\d:\d\d)$/.test(value)) normalized = value.replace(" ", "T") + "Z";
+    if (typeof value === "string" && !/(?:Z|[+-]\d\d:\d\d)$/.test(value)) normalized = value.replace(" ", "T") + "Z";
     return new Date(normalized).toLocaleDateString(C.locale || "es-PE", opts);
   }
   const time = (value) =>
@@ -300,7 +307,7 @@
     t.className = "toast feedback-toast";
     t.role = "status";
     t.textContent = T(message);
-    root.append(t);
+    (root.querySelector(".ascla-image-editor") || root.querySelector(".modal-decision") || root.querySelector(".modal") || root).append(t);
     setTimeout(() => t.remove(), 5500);
   }
   async function discardTemporaryMedia(id, keepalive = false) {
@@ -332,66 +339,90 @@
     else delete node.dataset.pendingMedia;
   }
   const modalUnsavedBaselines = new WeakMap();
+  let accessibility;
   function modalDecision(title, body) {
     document.querySelector(".modal-decision-backdrop")?.remove();
     const div = document.createElement("div");
     div.className = "modal-backdrop modal-decision-backdrop";
     div.innerHTML = `<section role="alertdialog" aria-modal="true" aria-label="${E(title)}" class="modal modal-decision"><div class="modal-top"><h2>${E(title)}</h2>${btn(I("close"), "modal-unsaved-stay", ("aria-label=\"" + (E(T("Seguir editando"))) + "\""), "ghost")}</div><div class="modal-content">${body}</div></section>`;
     root.append(div);
+    accessibility?.refresh();
     div.addEventListener("click", event => { if (event.target === div) closeModalDecision(); });
     div.querySelector("button")?.focus();
   }
   function closeModalDecision() {
     document.querySelector(".modal-decision-backdrop")?.remove();
+    accessibility?.refresh();
     S.modalUnsavedForm?.querySelector("button,input,textarea,select")?.focus();
   }
   function modalHasUnsavedChanges(form) {
     if (!form?.isConnected || !modalUnsavedBaselines.has(form)) return false;
     return modalUnsavedBaselines.get(form) !== formSnapshot(form);
   }
+  function canSaveEventAsDraft(form) {
+    return form?.dataset.form === "editor" && form.dataset.type === "event";
+  }
   function requestModalClose() {
     const backdrop = [...document.querySelectorAll(".modal-backdrop")].find(node => !node.classList.contains("modal-decision-backdrop"));
     const form = backdrop?.querySelector("form[data-guard-modal-unsaved]");
     if (!modalHasUnsavedChanges(form)) { closeModal(); return; }
     S.modalUnsavedForm = form;
-    modalDecision(T("Cambios sin guardar"), `<p class="detail-body">${E(T("Has realizado cambios que todavía no se han guardado."))}</p><p class="private-note">${E(T("¿Quieres guardar los cambios antes de cerrar esta ventana?"))}</p><div class="form-actions">${btn(T("Seguir editando"), "modal-unsaved-stay")}${btn(T("Descartar cambios"), "modal-unsaved-discard", "", "danger")}${btn(I("check")+" "+T("Guardar cambios"), "modal-unsaved-save", "", "primary")}</div>`);
+    const saveDraft = canSaveEventAsDraft(form);
+    const question = saveDraft ? "Puedes guardar el progreso como borrador antes de salir." : "¿Quieres guardar los cambios antes de cerrar esta ventana?";
+    const actions = saveDraft
+      ? `${btn(T("Seguir editando"), "modal-unsaved-stay")}${btn(I("check")+" "+T("Guardar como borrador"), "modal-unsaved-save", "", "primary")}${btn(T("Salir sin guardar"), "modal-unsaved-discard", "", "danger")}`
+      : `${btn(T("Seguir editando"), "modal-unsaved-stay")}${btn(T("Descartar cambios"), "modal-unsaved-discard", "", "danger")}${btn(I("check")+" "+T("Guardar cambios"), "modal-unsaved-save", "", "primary")}`;
+    modalDecision(T("Cambios sin guardar"), `<p class="detail-body">${E(T("Has realizado cambios que todavía no se han guardado."))}</p><p class="private-note">${E(T(question))}</p><div class="form-actions">${actions}</div>`);
   }
   function modal(title, body, wide = false) {
     closeModal();
+    S.focus = S.actionFocus?.isConnected ? S.actionFocus : document.activeElement;
     const div = document.createElement("div");
     div.className = "modal-backdrop";
     div.innerHTML = `<section role="dialog" aria-modal="true" aria-label="${E(title)}" class="modal ${wide ? "wide" : ""}"><div class="modal-top"><h2>${E(title)}</h2>${btn(I("close"), "close", ("aria-label=\"" + (E(T("Cerrar"))) + "\""), "ghost")}</div><div class="modal-content">${body}</div></section>`;
     root.append(div);
+    accessibility?.refresh();
     const guarded = div.querySelector("form[data-guard-modal-unsaved]");
     if (guarded) modalUnsavedBaselines.set(guarded, formSnapshot(guarded));
     div.addEventListener("click", (event) => {
       if (event.target === div) requestModalClose();
     });
-    S.focus = document.activeElement;
     div.querySelector("button,input")?.focus();
     return div;
   }
   function closeModal() {
+    const focus = S.focus;
+    S.focus = null;
     const pending = S.pendingUnsavedResolver;
     S.pendingUnsavedResolver = null;
     S.pendingUnsavedSaveForm = null;
     S.modalUnsavedForm = null;
     document.querySelectorAll(".modal-backdrop").forEach(node => { discardPendingWithin(node); node.remove(); });
-    S.focus?.focus();
+    accessibility?.refresh();
+    if (focus?.isConnected) focus.focus();
     if (pending) pending(false);
   }
+  let fieldSequence = 0;
+  const requiredTextErrors = new WeakSet();
   function field(name, label, value = "", type = "text", extra = "") {
-    return `<div class="field"><label for="f-${E(name)}">${E(T(label))}</label>${type === "textarea" ? ("<textarea id=\"f-" + (E(name)) + "\" name=\"" + (E(name)) + "\" " + (extra) + ">" + (E(value)) + "</textarea>") : ("<input id=\"f-" + (E(name)) + "\" name=\"" + (E(name)) + "\" type=\"" + (type) + "\" value=\"" + (E(value)) + "\" " + (extra) + ">")}</div>`;
+    const id = `f-${E(name)}-${++fieldSequence}`;
+    const bounds = globalThis.ASCLA_FORM_LIMITS?.integers[name];
+    const max = globalThis.ASCLA_FORM_LIMITS?.text[name];
+    if (type === "number" && bounds) extra = extra.replace(/\b(?:min|max|step)="[^"]*"/g, "") + ` min="${bounds[0]}" max="${bounds[1]}" step="1"`;
+    if (["text", "textarea", "url", "email", "password"].includes(type) && max && !/\bmaxlength=/.test(extra)) extra += ` maxlength="${max}"`;
+    return `<div class="field"><label for="${id}">${E(T(label))}</label>${type === "textarea" ? `<textarea id="${id}" name="${E(name)}" ${extra}>${E(value)}</textarea>` : `<input id="${id}" name="${E(name)}" type="${E(type)}" value="${E(value)}" ${extra}>`}</div>`;
   }
   const check = (name, label, value) =>
     `<label class="check"><input type="checkbox" name="${E(name)}" ${value ? "checked" : ""}> <span>${E(T(label))}</span></label>`;
-  const select = (name, label, values, value = "") =>
-    `<div class="field"><label for="f-${E(name)}">${E(T(label))}</label><select name="${E(name)}" id="f-${E(name)}">${values
+  const select = (name, label, values, value = "") => {
+    const id = `f-${E(name)}-${++fieldSequence}`;
+    return `<div class="field"><label for="${id}">${E(T(label))}</label><select name="${E(name)}" id="${id}">${values
       .map((v) => {
         const pair = Array.isArray(v) ? v : [v, v];
         return ("<option value=\"" + (E(pair[0])) + "\" " + (String(value) === String(pair[0]) ? "selected" : "") + ">" + (E(T(pair[1]))) + "</option>");
       })
       .join("")}</select></div>`;
+  };
   function formData(form) {
     return Object.fromEntries(new FormData(form));
   }
@@ -657,7 +688,7 @@
     if (!review?.due || S.page !== "intranet") return;
     const completion = S.boot.profile_completion;
     const title = review.incomplete ? T("Completa tu perfil") : T("Revisa tu perfil");
-    const copy = review.incomplete ? T("Completa todos los campos mínimos para aparecer en el directorio y recibir recomendaciones.") : T("Confirma que tu información profesional sigue vigente o actualízala.");
+    const copy = review.incomplete ? T("Completa los criterios de tu perfil profesional. Puedes posponer este aviso y continuar navegando.") : T("Confirma que tu información profesional sigue vigente o actualízala.");
     modal(title, '<p>'+E(copy)+'</p>'+ (review.incomplete ? '<p>'+E(completion.missing.join(", "))+'</p>' : '') + '<div class="form-actions">'+btn(T("Ahora no"),"profile-nudge-later")+btn(T("Actualizar mi perfil"),"profile-nudge-go")+(review.incomplete ? '' : btn(T("Mi información sigue vigente"),"profile-review-confirm","","primary"))+'</div>');
   }
   const unsavedGuard = { form: null, baseline: "", dirty: false };
@@ -781,7 +812,7 @@
     const p = S.boot.me;
     const links = navOrder.map((k) => `<a class="nav-link ${S.page === k ? "active" : ""}" href="${E(C.pages[k].url)}">${I(pageIcon[k])}<span>${E(C.pages[k].label)}</span></a>`).join("");
     const adminLink = S.boot.admin_area ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}${E(T("Administración"))}</a>` : "";
-    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></a><div class="brand-sub">${E(T("COMUNIDAD DE ASOCIADOS"))}</div><nav aria-label="${E(T("Navegación principal"))}">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}${E(T("Cerrar sesión"))}</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img class="brand-logo-normal" src="${E(C.logo)}" alt="ASCLA"><img class="brand-logo-inverse" src="${E(C.logoWhite || C.logo)}" alt="" aria-hidden="true"></a>${btn(I("menu"), "menu", ("aria-label=\"" + (E(T("Abrir navegación"))) + "\""), "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="${E(T("Buscar en ASCLA"))}" placeholder="${E(T("Buscar en tu comunidad…"))}" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${C.page === "admin" ? adminLanguageControl() + btn(themeIcons(), "theme-menu", ("aria-label=\"" + (E(T("Apariencia"))) + "\""), "icon-button theme-button") : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", ("aria-label=\"" + (E(T("Notificaciones"))) + "\""), "icon-button")}<a class="header-profile" aria-label="${E(T("Mi perfil"))}" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || T("Comunidad ASCLA"))}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || T("Administración"))}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · ${E(T("Conectamos conocimiento, fortalecemos la gobernanza."))}${S.boot.demo ? " · " + E(T("Datos ficticios de demostración.")) : ""}</div></main></div>`;
+    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></a><div class="brand-sub">${E(T("COMUNIDAD DE ASOCIADOS"))}</div><nav aria-label="${E(T("Navegación principal"))}">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}${E(T("Cerrar sesión"))}</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img class="brand-logo-normal" src="${E(C.logo)}" alt="ASCLA"><img class="brand-logo-inverse" src="${E(C.logoWhite || C.logo)}" alt="" aria-hidden="true"></a>${btn(I("menu"), "menu", ("aria-label=\"" + (E(T("Abrir navegación"))) + "\""), "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="${E(T("Buscar en ASCLA"))}" placeholder="${E(T("Buscar en tu comunidad…"))}" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${C.page === "admin" ? adminLanguageControl() + btn(themeIcons(), "theme-menu", ("aria-label=\"" + (E(T("Apariencia"))) + "\""), "icon-button theme-button") : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", ("aria-label=\"" + (E(T("Notificaciones"))) + "\""), "icon-button")}<a class="header-profile" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || T("Comunidad ASCLA"))}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap" tabindex="-1"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || T("Administración"))}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · ${E(T("Conectamos conocimiento, fortalecemos la gobernanza."))}${S.boot.demo ? " · " + E(T("Datos ficticios de demostración.")) : ""}</div></main></div>`;
     refreshNotifications();
   }
   function heading(title, subtitle, action = "") {
@@ -864,17 +895,60 @@
     closeModal(); await refreshRelationshipState(id); await refreshConnectionsPanel();
     toast(T('Solicitud de conexión enviada.'));
   }
-  function connectionRow(p) {
-    const introduction = p.connection?.initial_message || p.conversation?.initial_message;
-    const preview = introduction ? `<div class="conversation-request-preview"><span>${E(T('Mensaje'))}</span><p>${E(introduction)}</p></div>` : '';
+  function connectionMenuItem(label, action, extra, danger = false) {
+    return `<button type="button" class="overflow-item${danger ? ' danger-text' : ''}" data-action="${action}" ${extra}>${E(T(label))}</button>`;
+  }
+  function connectionRequestRowButtons(p) {
+    const id = Number(p.id), c = p.connection || {}, r = p.conversation || {}, target = `data-id="${id}"`;
+    const incoming = c.state === 'incoming_pending';
+    const primary = incoming
+      ? btn('Aceptar','connection-respond',`${target} data-request="${Number(c.request_id)}" data-decision="accept" aria-label="${E(T('Aceptar conexión')+' · '+p.name)}" ${c.blocked ? 'disabled' : ''}`,'primary small') + btn('Rechazar','connection-respond',`${target} data-request="${Number(c.request_id)}" data-decision="reject" aria-label="${E(T('Rechazar solicitud')+' · '+p.name)}"`,'small')
+      : `<span class="connection-waiting">${I('clock')}${E(T('Pendiente'))}</span>`;
+    let more = incoming ? '' : connectionMenuItem('Cancelar solicitud','connection-remove-request',`${target} data-mode="cancel"`,true);
+    if (r.can_message) more += connectionMenuItem('Enviar mensaje','message-start',target);
+    else if (r.can_request) more += connectionMenuItem('Enviar mensaje','conversation-request',target);
+    else if (r.conversation_id) more += connectionMenuItem('Ver mensaje','conversation-open',`data-conversation="${Number(r.conversation_id)}"`);
+    return {primary,more};
+  }
+  function conversationRequestRowButtons(p) {
+    const id = Number(p.id), r = p.conversation || {}, target = `data-id="${id}"`;
+    let primary = '', more = '';
+    if (r.state === 'incoming_pending') {
+      primary = btn('Aceptar','conversation-request-respond',`${target} data-request="${Number(r.request_id)}" data-decision="accept" aria-label="${E(T('Aceptar conversación')+' · '+p.name)}" ${r.blocked ? 'disabled' : ''}`,'primary small') + btn('Rechazar','conversation-request-respond',`${target} data-request="${Number(r.request_id)}" data-decision="reject" aria-label="${E(T('Rechazar solicitud')+' · '+p.name)}"`,'small');
+    } else {
+      more = connectionMenuItem('Cancelar solicitud','conversation-request-cancel',target,true);
+    }
+    if (r.conversation_id) primary += btn('Ver mensaje','conversation-open',`data-conversation="${Number(r.conversation_id)}"`,'ghost small');
+    return {primary,more};
+  }
+  function connectionRowActions(p, kind) {
+    const id = Number(p.id), c = p.connection || {}, target = `data-id="${id}"`;
+    let buttons;
+    if (kind === 'blocked') buttons = {primary:btn('Desbloquear','block',`${target} data-active="false"`,'small'),more:''};
+    else if (kind === 'conversation') buttons = conversationRequestRowButtons(p);
+    else if (c.state === 'connected') buttons = {
+      primary:c.can_message ? btn(I('mail')+' '+T('Enviar mensaje'),'message-start',target,'small') : '',
+      more:connectionMenuItem('Eliminar conexión','connection-remove-request',`${target} data-mode="disconnect"`,true),
+    };
+    else buttons = connectionRequestRowButtons(p);
+    const menu = buttons.more ? `<details class="overflow-menu connection-row-menu"><summary aria-label="${E(T('Más opciones')+' · '+p.name)}" title="${E(T('Más opciones'))}">${I('more')}</summary><div class="overflow-popover">${buttons.more}</div></details>` : '';
+    return `<div class="connection-row-actions">${buttons.primary}${menu}</div>`;
+  }
+  function connectionRow(p, kind = 'connection') {
+    const introduction = kind === 'conversation' ? p.conversation?.initial_message : p.connection?.initial_message;
+    const preview = introduction ? `<details class="connection-introduction"><summary>${I('hub')}${E(T('Mensaje de presentación'))}${I('chevron')}</summary><p>${E(introduction)}</p></details>` : '';
     const confirmed = p.connection?.state === 'connected' && p.connection.connected_at
-      ? `<span class="connection-confirmed-date">${I('calendar')}<span>${E(T('Conexión confirmada el'))} <time datetime="${E(p.connection.connected_at)}">${E(date(p.connection.connected_at,{day:'numeric',month:'long',year:'numeric'}))}</time></span></span>`
-      : '';
-    const professional = `<div class="connection-professional"><span><small>${E(T('Cargo'))}</small><span class="connection-position">${E(p.position || T('Cargo no visible'))}</span></span><span><small>${E(T('Organización'))}</small><span class="connection-company">${E(p.company || T('Organización no visible'))}</span></span></div>`;
-    return `<article class="connection-row" data-connection-name="${E(p.name)}"><div class="connection-person">${avatar(p)}<div class="connection-person-copy"><strong>${E(p.name)}</strong>${professional}${confirmed}${p.profile_url ? ("<button type=\"button\" class=\"profile-inline-link\" data-action=\"member\" data-id=\"" + (Number(p.id)) + "\">" + (E(T('Ver perfil'))) + "</button>") : ("<small>" + (E(T('Perfil no disponible'))) + "</small>")}${preview}</div></div>${connectionActions(p)}</article>`;
+      ? `<span class="connection-confirmed-date">${I('calendar')}<span>${E(T('Conexión confirmada el'))} <time datetime="${E(p.connection.connected_at)}">${E(date(p.connection.connected_at,{day:'numeric',month:'long',year:'numeric'}))}</time></span></span>` : '';
+    const professional = [p.position,p.company].filter(Boolean).map(E).join(' · ') || E(T('Comunidad ASCLA'));
+    const name = p.profile_url ? `<button type="button" class="connection-name" data-action="member" data-id="${Number(p.id)}" aria-label="${E(T('Ver perfil')+' · '+p.name)}">${E(p.name)}</button>` : `<strong>${E(p.name)}</strong>`;
+    return `<article class="connection-row" data-connection-row="${Number(p.id)}" data-connection-name="${E(p.name)}"><div class="connection-person">${avatar(p)}<div class="connection-person-copy">${name}<p class="connection-description">${professional}</p>${confirmed}${preview}</div></div>${connectionRowActions(p,kind)}</article>`;
+  }
+  function connectionsEmpty(text) {
+    return `<div class="connections-empty">${I('users')}<p>${E(T(text))}</p></div>`;
   }
   function confirmedConnections(people) {
-    return '<details class="confirmed-connections"><summary>'+E(T('Conexiones confirmadas'))+' ('+people.length+')</summary><div class="field connections-search"><label for="connection-name-filter">'+E(T('Buscar en mis conexiones'))+'</label><input type="search" id="connection-name-filter" value="'+E(S.connectionFilter || '')+'" autocomplete="off" placeholder="'+E(T('Nombre del contacto'))+'"></div><div data-confirmed-connections>'+people.map(connectionRow).join('')+'</div><p class="private-note" data-connections-empty role="status" hidden>'+E(T('No hay conexiones que coincidan con ese nombre.'))+'</p></details>';
+    if (!people.length) return connectionsEmpty('No tienes conexiones confirmadas.');
+    return `<div class="confirmed-connections"><div class="field connections-search"><label for="connection-name-filter">${E(T('Buscar en mis conexiones'))}</label><div>${I('search')}<input type="search" id="connection-name-filter" value="${E(S.connectionFilter || '')}" autocomplete="off" placeholder="${E(T('Nombre del contacto'))}"></div></div><div class="connections-list" data-confirmed-connections>${people.map(p=>connectionRow(p,'connected')).join('')}</div><p class="private-note" data-connections-empty role="status" hidden>${E(T('No hay conexiones que coincidan con ese nombre.'))}</p></div>`;
   }
   function filterConfirmedConnections() {
     const panel = document.querySelector('.confirmed-connections');
@@ -887,20 +961,46 @@
     });
     panel.querySelector('[data-connections-empty]').hidden = visible > 0;
   }
-  function connectionSection(label, people, emptyText, showIncoming = false) {
-    return '<details '+(showIncoming && people.length ? 'open' : '')+'><summary>'+E(T(label))+' <span class="connection-count">'+people.length+'</span></summary>'+ (people.map(connectionRow).join('') || '<p class="private-note">'+E(T(emptyText))+'</p>')+'</details>';
+  const CONNECTION_TABS = [['contacts','Contactos'],['received','Recibidas'],['sent','Enviadas'],['blocked','Bloqueados']];
+  function connectionSection(label, people, kind) {
+    if (!people.length) return '';
+    return `<section class="connections-group"><h3>${E(T(label))}<span>${people.length}</span></h3><div class="connections-list">${people.map(p=>connectionRow(p,kind)).join('')}</div></section>`;
+  }
+  function connectionTabContent(tab, data, requests) {
+    if (tab === 'contacts') return confirmedConnections(data.connected);
+    if (tab === 'blocked') return (data.blocked || []).map(p=>connectionRow(p,'blocked')).join('') || connectionsEmpty('No hay asociados bloqueados.');
+    const direction = tab === 'received' ? 'incoming' : 'outgoing';
+    return connectionSection('Conexiones',data[direction],'connection') + connectionSection('Conversaciones',requests[direction],'conversation') || connectionsEmpty(tab === 'received' ? 'No tienes solicitudes pendientes.' : 'No hay solicitudes enviadas pendientes.');
+  }
+  function selectConnectionTab(tab, focus = false) {
+    if (!CONNECTION_TABS.some(([key])=>key===tab) || !S.connectionData) return;
+    const panel = document.getElementById('connections-panel'), target = panel?.querySelector('[data-connections-content]');
+    if (!target) return;
+    S.connectionTab = tab;
+    for (const button of panel.querySelectorAll('[data-action="connection-tab"]')) {
+      const selected = button.dataset.tab === tab;
+      button.setAttribute('aria-selected',String(selected));button.tabIndex = selected ? 0 : -1;
+    }
+    target.setAttribute('aria-labelledby','connections-tab-'+tab);
+    target.innerHTML = connectionTabContent(tab,S.connectionData.data,S.connectionData.requests);
+    filterConfirmedConnections();
+    if (focus) panel.querySelector('#connections-tab-'+tab)?.focus();
   }
   async function refreshConnectionsPanel() {
     const panel = document.getElementById('connections-panel'); if (!panel) return;
-    const expanded = !!panel.querySelector(".confirmed-connections")?.open;
-    const previousOverview = panel.querySelector(".connections-overview");
-    const [data, requests] = await Promise.all([api('connections'), api('conversation-requests')]); if (!panel.isConnected) return;
+    const version = ++S.connectionVersion;
+    const previousOverview = panel.querySelector('.connections-overview'), restoreFocus = panel.contains(document.activeElement);
+    const [data, requests] = await Promise.all([api('connections'), api('conversation-requests')]);
+    if (!panel.isConnected || version !== S.connectionVersion) return;
+    S.connectionData = {data,requests};
     const pendingCount = data.incoming.length + requests.incoming.length;
+    const counts = {contacts:data.connected.length,received:pendingCount,sent:data.outgoing.length+requests.outgoing.length,blocked:(data.blocked || []).length};
+    const tab = S.connectionTab || (pendingCount ? 'received' : 'contacts');
     const openOverview = previousOverview ? previousOverview.open : pendingCount > 0 || (innerWidth > 640 && data.connected.length > 0);
-    const sections = '<div class="connections-toolbar">'+btn('Actualizar conexiones','connections-refresh','','ghost small')+'</div><div class="connections-sections">'+connectionSection('Solicitudes recibidas',data.incoming,'No tienes solicitudes pendientes.',true)+confirmedConnections(data.connected)+connectionSection('Solicitudes enviadas',data.outgoing,'No hay solicitudes enviadas pendientes.')+connectionSection('Solicitudes de conversación',requests.incoming,'No tienes solicitudes de conversación pendientes.',true)+connectionSection('Conversaciones solicitadas',requests.outgoing,'No hay solicitudes de conversación enviadas.')+connectionSection('Asociados bloqueados',data.blocked || [],'No hay asociados bloqueados.')+'</div>';
-    panel.innerHTML = '<details class="connections-overview" '+(openOverview?'open':'')+'><summary><span>'+I('users')+' '+E(T('Mis conexiones'))+'</span><span class="muted">'+data.connected.length+' '+E(T('confirmadas'))+' · '+pendingCount+' '+E(T('solicitudes recibidas'))+'</span></summary><div class="connections-overview-body">'+sections+'</div></details>';
-    panel.querySelector(".confirmed-connections").open = expanded || !!S.connectionFilter;
-    filterConfirmedConnections();
+    const tabs = CONNECTION_TABS.map(([key,label])=>btn(`${E(T(label))}<span>${counts[key]}</span>`,'connection-tab',`id="connections-tab-${key}" data-tab="${key}" role="tab" aria-selected="${tab===key}" aria-controls="connections-tab-panel" tabindex="${tab===key?0:-1}"`,'connection-tab')).join('');
+    const summary = pendingCount ? pendingCount+' '+T('solicitudes recibidas') : data.connected.length+' '+T('confirmadas');
+    panel.innerHTML = `<details class="connections-overview" ${openOverview?'open':''}><summary><span>${I('users')}${E(T('Mis conexiones'))}</span><span class="muted">${E(summary)}</span></summary><div class="connections-overview-body"><div class="connections-toolbar"><div class="connections-tabs" role="tablist" aria-label="${E(T('Gestionar mis conexiones'))}">${tabs}</div>${btn(I('clock'),'connections-refresh',`aria-label="${E(T('Actualizar conexiones'))}" title="${E(T('Actualizar conexiones'))}"`,'ghost small connections-reload')}</div><div class="connections-content" id="connections-tab-panel" data-connections-content role="tabpanel" aria-labelledby="connections-tab-${tab}" tabindex="0"></div></div></details>`;
+    selectConnectionTab(tab,restoreFocus && openOverview);
   }
   let relationshipRefreshing = false;
   async function refreshOpenConnection() {
@@ -1022,10 +1122,27 @@
     }).join("");
     return `<div class="calendar-head"><strong>${E(d.toLocaleDateString(C.locale || "es-PE", { month: "long", year: "numeric" }))}</strong><span>${btn("‹", "calendar-prev", previousAttrs, "ghost")}${btn("›", "calendar-next", nextAttrs, "ghost")}</span></div><div class="calendar">${weekdayHtml}${"<span></span>".repeat(first)}${dayHtml}</div><div class="calendar-legend"><i></i> ${E(T("Eventos de la comunidad"))}</div>`;
   }
+  async function dashboardRecommendations(request, resources, version) {
+    try {
+      const outcome = await request;
+      if (version !== S.viewVersion || S.page !== "intranet") return;
+      const target = document.getElementById("dashboard-recommendations");
+      if (!target) return;
+      if (outcome.error) throw outcome.error;
+      target.innerHTML = recommendationsHome(outcome.data, resources);
+    } catch (error) {
+      if (error.name === "AbortError" || version !== S.viewVersion || S.page !== "intranet") return;
+      const target = document.getElementById("dashboard-recommendations");
+      if (target) target.innerHTML = `<section class="card"><p role="status">${E(T("No se pudieron cargar las recomendaciones. Puedes seguir usando la comunidad."))}</p>${btn("Reintentar", "refresh", "", "small")}</section>`;
+    }
+  }
   async function dashboard() {
-    const [recommendations, events, resources, hub, directory, notes, monthEvents, recentResources] =
+    const version = S.viewVersion;
+    // Optional AI explanations must not hold the rest of the home page open.
+    // Handle rejection immediately, including when a different home request fails.
+    const recommendations = api("recommendations").then(data => ({ data }), error => ({ error }));
+    const [events, resources, hub, directory, notes, monthEvents, recentResources] =
       await Promise.all([
-        api("recommendations"),
         api("content/event?past=0&status=publish"),
         api("content/resource?recommended=1&per_page=6"),
         api("content/hub"),
@@ -1034,6 +1151,7 @@
         calendarEvents(),
         api("content/resource?status=publish"),
       ]);
+    if (version !== S.viewVersion) return;
     S.events = monthEvents;
     const upcoming = events.items
       .filter((p) => new Date(p.meta.end) > new Date())
@@ -1057,19 +1175,36 @@
         "",
       )}</div>`;
     const aside=`<aside class="dashboard-aside"><div><div class="section-top"><h2>${E(T("Tu agenda ASCLA"))}</h2>${I("calendar")}</div><div class="card calendar-card"><div id="calendar-body">${calendar(monthEvents)}</div><div style="border-top:1px solid var(--line);margin-top:16px;padding-top:8px">${upcoming.slice(0, 2).map(eventMini).join("") || ("<p class=\"muted\">" + E(T("Sin próximos eventos.")) + "</p>")}</div></div></div><div class="notice-card">${I("spark")}<h3>${E(T("El conocimiento, a una pregunta"))}</h3><p>${E(T("Encuentra respuestas en los recursos de nuestra comunidad con el Asistente ASCLA."))}</p>${link("asistente", "Hacer una pregunta " + I("arrow"), "ghost small")}</div><div class="notice-card trust-card">${I("shield")}<h3>${E(T("Un espacio de confianza"))}</h3><p>${E(T("Compartimos conocimiento con respeto, confidencialidad y bajo la Regla de Chatham House."))}</p>${btn("Normas de la comunidad " + I("arrow"), "rules", "", "ghost small")}</div></aside>`;
-    const recommendationsLayout=`<div class="dashboard-recommendations-layout"><div>${recommendationsHome(recommendations,resources)}</div>${aside}</div>`;
+    const recommendationsLayout=`<div class="dashboard-recommendations-layout"><div id="dashboard-recommendations"><section class="card" role="status"><span class="loading-dot"></span> ${E(T("Cargando recomendaciones…"))}</section></div>${aside}</div>`;
     const activity=`<div class="dashboard-activity"><div class="section-top"><h2>${E(T("Conocimiento reciente"))}</h2>${link("centro-conocimiento", "Ver todo " + I("arrow"), "ghost")}</div><div class="cards two">${recentResources.items.slice(0, 2).map(resourceCard).join("") || empty("Tu biblioteca está por comenzar")}</div><div class="section-gap"><div class="section-top"><h2>${E(T("La conversación en nuestra comunidad"))}</h2>${link("hub", "Ir al Hub " + I("arrow"), "ghost")}</div>${hub.items.slice(0, 1).map(feedCard).join("") || empty("Comparte la primera idea")}</div></div>`;
     content().innerHTML=hero+stats+recommendationsLayout+activity;
+    void dashboardRecommendations(recommendations, resources, version);
+  }
+  function commentCountText(count) {
+    return `${count} ${T(count === 1 ? "comentario" : "comentarios")}`;
+  }
+  function syncCommentCount(item) {
+    const id = Number(item.id), count = Number(item.comments);
+    if (!Number.isSafeInteger(id) || id <= 0 || !Number.isSafeInteger(count) || count < 0) return;
+    // Use the authorized server total; the comment list can contain pending entries or be limited.
+    root.querySelectorAll(`[data-comment-count="${id}"]`).forEach(node => { node.textContent = commentCountText(count); });
+    const cached = S.list?.items?.find(entry => Number(entry.id) === id);
+    if (cached) cached.comments = count;
   }
   function feedCard(p) {
     const editorialState = p.status === "publish" ? "" : status(p.status);
-    return `<article class="card feed-card"><div class="feed-top">${avatar({ name: p.author.name })}<div><strong>${E(p.author.name)}</strong><small>${date(p.date)} · Comunidad ASCLA</small></div><span style="margin-left:auto">${editorialState}</span></div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(p.body.slice(0, 450))}${p.body.length > 450 ? "…" : ""}</p>${UI.attachments(p, true)}${p.tags.length ? ("<div class=\"tag-row\">" + (p.tags.map((t) => ("<span class=\"tag\">" + (E(t.name)) + "</span>")).join("")) + "</div>") : ""}<div class="feed-actions">${btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (p.id) + "\" data-active=\"" + (!p.liked) + "\" aria-label=\"" + (E(T("Me gusta"))) + "\""))}${btn(I("hub") + " " + p.comments + " " + T(p.comments === 1 ? "comentario" : "comentarios"), "item", ("data-id=\"" + (p.id) + "\""))}${btn(I("arrow") + " " + T("Ver conversación"), "item", ("data-id=\"" + (p.id) + "\""))}</div></article>`;
+    return `<article class="card feed-card"><div class="feed-top">${avatar({ name: p.author.name })}<div><strong>${E(p.author.name)}</strong><small>${date(p.date)} · Comunidad ASCLA</small></div><span style="margin-left:auto">${editorialState}</span></div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(p.body.slice(0, 450))}${p.body.length > 450 ? "…" : ""}</p>${UI.attachments(p, true)}${p.tags.length ? ("<div class=\"tag-row\">" + (p.tags.map((t) => ("<span class=\"tag\">" + (E(t.name)) + "</span>")).join("")) + "</div>") : ""}<div class="feed-actions">${btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (p.id) + "\" data-active=\"" + (!p.liked) + "\" aria-label=\"" + (E(T("Me gusta") + " " + p.reactions)) + "\""))}${btn(I("hub") + ` <span data-comment-count="${Number(p.id)}">${E(commentCountText(p.comments))}</span>`, "item", ("data-id=\"" + (p.id) + "\""))}${btn(I("arrow") + " " + T("Ver conversación"), "item", ("data-id=\"" + (p.id) + "\""))}</div></article>`;
   }
   function pager(list) {
-    if (list.pages <= 1) return "";
+    const perPage = Number(list.per_page || 0);
+    const total = Math.max(0, Number(list.total || 0));
+    const first = total ? (list.page - 1) * perPage + 1 : 0;
+    const last = total ? Math.min(total, first + list.items.length - 1) : 0;
+    const summary = perPage ? `<p class="content-pagination-summary">${E(T("Mostrando"))} ${first}–${last} ${E(T("de"))} ${total} · ${perPage} ${E(T("por página"))}</p>` : "";
+    if (list.pages <= 1) return summary;
     const previousDisabled = list.page <= 1 ? "disabled" : "";
     const nextDisabled = list.page >= list.pages ? "disabled" : "";
-    return `<div class="pagination">${btn("Anterior", "page", ("data-page=\"" + (list.page - 1) + "\" " + previousDisabled), "small")}<span>${E(T("Página"))} ${list.page} ${E(T("de"))} ${list.pages}</span>${btn("Siguiente", "page", ("data-page=\"" + (list.page + 1) + "\" " + nextDisabled), "small")}</div>`;
+    return `${summary}<nav class="pagination" aria-label="${E(T("Paginación de contenidos"))}">${btn("Anterior", "page", ("data-page=\"" + (list.page - 1) + "\" " + previousDisabled), "small")}<span aria-current="page">${E(T("Página"))} ${list.page} ${E(T("de"))} ${list.pages}</span>${btn("Siguiente", "page", ("data-page=\"" + (list.page + 1) + "\" " + nextDisabled), "small")}</nav>`;
   }
   function directoryPager(list) {
     const page = Math.max(1, Number(list.page || 1));
@@ -1302,6 +1437,11 @@
       + '<span class="profile-tab-copy"><strong>' + E(T(title)) + '</strong><small>' + E(T(description)) + '</small></span>'
       + '</button>';
   }
+  let learningModule;
+  function interestLearning() {
+    learningModule ||= globalThis.ASCLAInterestLearning({root,api});
+    return learningModule;
+  }
   function profileTabs() {
     const tabs = [
       ["info", "users", "Información", "Datos personales y profesionales"],
@@ -1359,13 +1499,13 @@
         "Mi perfil",
         "Tu experiencia es el punto de partida de nuevas conexiones.",
       ) +
-      (p.publication_missing?.length ? `<div class="alert" role="status">${E(T("Para aparecer en el directorio y recibir recomendaciones, completa:"))} ${E(p.publication_missing.map(T).join(", "))}.</div>` : "") +
+      (p.publication_missing?.length ? `<div class="alert" role="status">${E(T("Para completar tu perfil y recibir recomendaciones, completa:"))} ${E(p.publication_missing.map(T).join(", "))}.</div>` : "") +
       profileTabs() +
       `<form class="card profile-tab-form" data-form="profile" data-guard-unsaved>
         <section class="profile-tab-panel" id="profile-panel-info" data-profile-panel="info" role="tabpanel" aria-labelledby="profile-tab-info">
           <div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small" style="margin-top:10px">${I("edit")} ${E(T("Cambiar fotografía"))}<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">${E(T("JPG, PNG o WebP. Podrás mover, ampliar y recortar antes de guardar; ASCLA optimiza la imagen automáticamente."))}</div></div></div>
           <div class="form-section">${E(T("Información personal y profesional"))}</div>
-          <div class="form-grid">${["first_name", "last_name", "position", "company"].map((k) => field(k, profileLabels[k], p[k] || "", "text", 'required maxlength="200"')).join("")}${profileLocationFields(p)}${field("member_type", profileLabels.member_type, p.member_type || "", "text", 'maxlength="200"')}${profileBirthdayField(p)}${profilePhoneFields(p)}${["linkedin", "twitter"].map((k) => field(k, profileLabels[k], p[k] || "", "url", 'maxlength="200"')).join("")}<div class="full profile-website-field">${field("website", profileLabels.website, p.website || "", "url", 'maxlength="200"')}</div><div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>
+          <div class="form-grid">${["first_name", "last_name", "position", "company"].map((k) => field(k, profileLabels[k], p[k] || "", "text", 'required maxlength="200"')).join("")}${profileLocationFields(p)}${field("member_type", profileLabels.member_type, p.member_type || "", "text", 'maxlength="200"')}${profileBirthdayField(p)}${profilePhoneFields(p)}${["linkedin", "twitter"].map((k) => field(k, profileLabels[k], p[k] || "", "url", 'maxlength="200"')).join("")}<div class="full profile-website-field">${field("website", profileLabels.website, p.website || "", "url", 'maxlength="200"')}</div><div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'required maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>
         </section>
         <section class="profile-tab-panel" id="profile-panel-interests" data-profile-panel="interests" role="tabpanel" aria-labelledby="profile-tab-interests" hidden>
           ${profileKnowledge(p)}
@@ -1421,6 +1561,12 @@
     const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     return allContent("event", { month, tz_offset: d.getTimezoneOffset(), status: "publish" });
   }
+  function profileCompletionSettings(settings) {
+    const options = settings.profile_completion_options || { required: {}, additional: {} };
+    const selected = settings.profile_completion_extra || [];
+    const checkboxes = Object.entries(options.additional).map(([key, label]) => `<label class="completion-choice"><input type="checkbox" name="profile_completion_extra" value="${E(key)}" ${selected.includes(key) ? "checked" : ""}><span>${E(T(label))}</span></label>`).join("");
+    return `<fieldset class="profile-completion-settings"><legend>${E(T("Criterios de completitud"))}</legend><p class="private-note">${E(T("Los ocho grupos mínimos siempre se incluyen y son obligatorios al guardar. Los criterios adicionales cuentan para llegar al 100 %, pero no impiden guardar un perfil con sus mínimos completos."))}</p><p>${E(Object.values(options.required).map(T).join(", "))}</p><div class="completion-choices">${checkboxes}</div><p class="private-note">${E(T("Los campos no seleccionados son opcionales y no afectan el porcentaje."))}</p></fieldset>`;
+  }
   function listingCreateAction(type, canWrite) {
     let createType = type;
     let createLabel;
@@ -1440,16 +1586,21 @@
       const selected = S.filter.resource_type === resourceType ? "selected" : "";
       return '<option value="' + E(resourceType) + '" ' + selected + '>' + E(T(resourceType)) + '</option>';
     }).join("");
-    return `<select name="resource_type" aria-label="${E(T("Tipo de recurso"))}" style="max-width:180px"><option value="">${E(T("Todos los tipos"))}</option>${options}</select><input type="date" name="after" value="${E(S.filter.after || "")}" aria-label="${E(T("Desde fecha"))}" style="max-width:160px;min-width:100px">`;
+    return `<select name="resource_type" aria-label="${E(T("Tipo de recurso"))}" style="max-width:180px"><option value="">${E(T("Todos los tipos"))}</option>${options}</select>`;
+  }
+  function listingDateFilters(type, label='Fecha de publicación') {
+    if (!["hub", "topic", "gallery", "resource", "event"].includes(type)) return "";
+    return `<fieldset class="content-date-range"><legend>${E(T(label))}</legend><label>${E(T("Desde fecha"))}<input type="date" name="after" value="${E(S.filter.after || "")}"></label><label>${E(T("Hasta fecha"))}<input type="date" name="before" value="${E(S.filter.before || "")}"></label></fieldset>`;
   }
   function listingTabs(type, canWrite) {
     const allLabel = type === "event" ? "Próximos eventos" : "Comunidad";
-    const allButton = btn(allLabel, "filter-all", "", "tab " + (!S.filter.mine && !S.filter.past ? "active" : ""));
+    const allButton = btn(allLabel, "filter-all", "", "tab " + (!S.filter.mine && !S.filter.past && !S.filter.comments ? "active" : ""));
     const pastClass = S.filter.past ? "active" : "";
     const mineClass = S.filter.mine ? "active" : "";
     const pastButton = type === "event" ? btn("Eventos anteriores", "filter-past", "", "tab " + pastClass) : "";
-    const mineButton = canWrite ? btn("Mis publicaciones", "filter-mine", "", "tab " + mineClass) : "";
-    return `<div class="tabs">${allButton}${pastButton}${mineButton}</div>`;
+    const mineButton = canWrite || type==='topic' ? btn(type==='topic'?'Mis temas':"Mis publicaciones", "filter-mine", "", "tab " + mineClass) : "";
+    const commentsButton=type==='topic'?btn('Mis comentarios','filter-comments','','tab '+(S.filter.comments?'active':'')):'';
+    return `<div class="tabs">${allButton}${pastButton}${mineButton}${commentsButton}</div>`;
   }
   function listingForumDirectory(type, forums) {
     if (type !== "topic" || !forums.length) return "";
@@ -1461,7 +1612,6 @@
       resource: () => `<div class="cards">${items.map(resourceCard).join("")}</div>`,
       event: () => `<div class="cards two">${items.map(eventCard).join("")}</div>`,
       gallery: () => `<div class="cards">${items.map(galleryCard).join("")}</div>`,
-      ally: () => `<div class="cards">${items.map(allyCard).join("")}</div>`,
     };
     return (renderers[type] || (() => items.map(feedCard).join("")))();
   }
@@ -1472,9 +1622,13 @@
   }
   async function listing() {
     const type = typeByPage[S.page];
+    if (type==='topic' && S.filter.comments) { await ownComments();return; }
     const params = type === "event" ? { past: 0, ...S.filter } : S.filter;
+    if(type==='ally'){params.status='publish';params.mine=false;}
     const list = await api("content/" + type + "?" + new URLSearchParams(params));
     S.list = list;
+    if (S.filter.page) S.filter.page = list.page;
+    if(type==='ally'){content().innerHTML=alliesUI().catalog(list,S.filter,S.boot.admin)+pager(list);return;}
     const canWrite = !!S.boot.can_create?.[type];
     const labels = {
       hub: ["Hub ASCLA", "Ideas, experiencias y conversaciones que nos acercan."],
@@ -1487,9 +1641,15 @@
     const authors = type === "resource" ? await api("resource-authors") : [];
     const forums = type === "topic" ? (await allContent("forum")).map(p => ({ id: p.id, name: p.title })) : [];
     const searchPlaceholder = type === "resource" ? "Buscar por tema, autor o contenido…" : "Buscar en esta sección…";
-    const filtersHtml = `<form class="filters content-list-filters" data-form="filters"><input name="q" aria-label="${E(T("Buscar contenido"))}" value="${E(S.filter.q || "")}" placeholder="${E(T(searchPlaceholder))}">${listingResourceFilters(type)}${UI.filters(type, S.filter, S.boot.catalogs, authors, forums)}<button class="btn">${I("search")} ${E(T("Buscar"))}</button></form>`;
+    const filtersHtml = `<form class="filters content-list-filters" data-form="filters"><input name="q" aria-label="${E(T("Buscar contenido"))}" value="${E(S.filter.q || "")}" placeholder="${E(T(searchPlaceholder))}">${listingResourceFilters(type)}${listingDateFilters(type,type==='event'?'Fechas del evento':'Fecha de publicación')}${UI.filters(type, S.filter, S.boot.catalogs, authors, forums)}<button class="btn">${I("search")} ${E(T("Buscar"))}</button>${btn("Limpiar filtros", "filter-reset", "", "ghost")}</form>`;
     const items = list.items;
     content().innerHTML = heading(...labels[type], listingCreateAction(type, canWrite)) + filtersHtml + listingTabs(type, canWrite) + listingForumDirectory(type, forums) + listingItems(type, items) + listingEmpty(items) + pager(list);
+  }
+  async function ownComments() {
+    const list=await api('comments/mine?'+new URLSearchParams(S.filter));
+    const filters=`<form class="filters content-list-filters" data-form="filters"><input name="q" aria-label="${E(T('Buscar en mis comentarios'))}" placeholder="${E(T('Buscar en mis comentarios'))}" value="${E(S.filter.q||'')}">${listingDateFilters('topic','Fecha del comentario')}<button class="btn">${E(T('Buscar'))}</button>${btn('Limpiar filtros','filter-reset','','ghost')}</form>`;
+    const entries=list.items.map(comment=>`<article class="card own-comment" data-own-comment="${Number(comment.id)}"><strong>${E(comment.title)}</strong><p>${E(comment.body)}</p><div class="form-actions"><small>${date(comment.date)}</small>${comment.status==='pending'?status('pending'):''}${btn('Ver conversación','item',`data-id="${Number(comment.post_id)}"`,'small')}</div></article>`).join('');
+    content().innerHTML=heading('Mis comentarios','Consulta tus aportes y abre la conversación original.')+filters+listingTabs('topic',!!S.boot.can_create?.topic)+entries+(entries?'':empty('Aún no hay comentarios propios','Los comentarios visibles de tus foros aparecerán aquí.'))+pager(list);
   }
   function eventCard(p) {
     let state = "";
@@ -1500,9 +1660,6 @@
   }
   function galleryCard(p) {
     return `<article class="card resource-card">${p.meta.media_ids?.length ? ("<img src=\"" + (E(C.mediaUrl + p.meta.media_ids[0])) + "\" alt=\"" + (E(p.title)) + "\" style=\"height:190px;object-fit:cover;width:100%\">") : ("<div class=\"resource-cover v1\"><div class=\"cover-label\">" + (E(T("ASCLA · ENCUENTROS"))) + "</div><strong>" + (E(p.title)) + "</strong><span class=\"cover-icon\">" + (I("gallery")) + "</span></div>")}<div class="resource-content"><h3>${E(p.title)}</h3><p>${E(p.body.slice(0, 120))}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Ver galería", "item", ("data-id=\"" + (p.id) + "\""), "ghost")}</div></div></article>`;
-  }
-  function allyCard(p) {
-    return `<article class="card">${UI.images(p).length ? ("<img class=\"ally-logo\" src=\"" + (E(UI.images(p)[0].url)) + "\" alt=\"" + (E(T("Logo de"))) + " " + (E(p.title)) + "\" loading=\"lazy\">") : ("<div class=\"stat-icon\" style=\"margin-bottom:17px\">" + (I("ally")) + "</div>")}<span class="tag">${E(T(p.meta.alliance_type || "Alianza"))}</span><h3 style="margin-top:12px">${E(p.title)}</h3><p class="detail-body" style="font-size:12px">${E(p.body)}</p>${btn("Conoce más " + I("arrow"), "item", ("data-id=\"" + (p.id) + "\""), "ghost")}</article>`;
   }
   function commentOverflow(c, postId) {
     const items = [];
@@ -1555,13 +1712,14 @@
     document.querySelectorAll('.comment-reply-form').forEach(form => form.remove());
     const slot = comment.querySelector(':scope > .comment-reply-slot');
     if (!slot) return;
-    slot.innerHTML = `<form class="comment-reply-form" data-form="comment-reply" data-id="${Number(button.dataset.post)}" data-parent="${Number(button.dataset.id)}"><label>${E(T("Responder a"))} ${E(button.dataset.author || T('este comentario'))}</label><textarea name="body" required maxlength="5000" placeholder="${E(T("Escribe una respuesta…"))}"></textarea><div class="form-actions">${btn('Cancelar','comment-reply-cancel','','ghost small')}<button class="btn primary small">${E(T("Responder"))}</button></div></form>`;
+    const replyId = `reply-body-${++fieldSequence}`;
+    slot.innerHTML = `<form class="comment-reply-form" data-form="comment-reply" data-id="${Number(button.dataset.post)}" data-parent="${Number(button.dataset.id)}"><label for="${replyId}">${E(T("Responder a"))} ${E(button.dataset.author || T('este comentario'))}</label><textarea id="${replyId}" name="body" required maxlength="5000" placeholder="${E(T("Escribe una respuesta…"))}"></textarea><div class="form-actions">${btn('Cancelar','comment-reply-cancel','','ghost small')}<button class="btn primary small">${E(T("Responder"))}</button></div></form>`;
     slot.querySelector('textarea')?.focus();
   }
   function eventAttendees(d) {
     if (!Array.isArray(d.attendees)) return '';
     const people = d.attendees;
-    const title = d.is_past ? T('Participantes confirmados') : T('Personas que asistirán');
+    const title = d.is_past ? T('Inscripciones confirmadas') : T('Personas que asistirán');
     const hidden = Number(d.attendees_hidden || 0);
     const cards = people.map(person => {
       const role = [person.position, person.company].filter(Boolean).join(' · ');
@@ -1569,12 +1727,12 @@
       return `<article class="event-attendee-card${person.is_me ? ' is-me' : ''}"><button type="button" class="event-attendee-profile" data-action="member" data-id="${Number(person.id)}" aria-label="${E(T('Ver perfil de'))} ${E(person.name)}">${avatar(person)}<span class="event-attendee-copy"><span class="event-attendee-name">${E(person.name)}${mine}</span><small>${E(role || T('Miembro ASCLA'))}</small></span><span class="event-attendee-arrow" aria-hidden="true">${I('arrow')}</span></button></article>`;
     }).join('');
     const hiddenLabel = hidden === 1
-      ? 'participante no se muestra por sus preferencias de privacidad.'
-      : 'participantes no se muestran por sus preferencias de privacidad.';
+      ? 'persona no se muestra por sus preferencias de privacidad.'
+      : 'personas no se muestran por sus preferencias de privacidad.';
     const privacy = hidden > 0
       ? `<p class="event-attendee-privacy">${I('shield')} ${hidden} ${E(T(hiddenLabel))}</p>`
       : `<p class="event-attendee-privacy">${I('shield')} ${E(T('Solo se muestra la información que cada asociado permite compartir con la comunidad.'))}</p>`;
-    return `<section class="event-attendees" aria-labelledby="event-attendees-title"><div class="event-attendees-head"><div class="event-attendees-heading"><span class="event-attendees-icon">${I('users')}</span><div><h3 id="event-attendees-title">${E(title)}</h3><p>${E(T('Disponible porque confirmaste tu asistencia. Conoce a otros participantes antes del encuentro.'))}</p></div></div><span class="event-attendees-count"><strong>${Number(d.attending || people.length)}</strong><small>${E(T('confirmados'))}</small></span></div><div class="event-attendee-grid">${cards}</div>${privacy}</section>`;
+    return `<section class="event-attendees" aria-labelledby="event-attendees-title"><div class="event-attendees-head"><div class="event-attendees-heading"><span class="event-attendees-icon">${I('users')}</span><div><h3 id="event-attendees-title">${E(title)}</h3><p>${E(T('Disponible porque confirmaste tu asistencia. Conoce a otras personas antes del encuentro.'))}</p></div></div><span class="event-attendees-count"><strong>${Number(d.attending || people.length)}</strong><small>${E(T('confirmados'))}</small></span></div><div class="event-attendee-grid">${cards}</div>${privacy}</section>`;
   }
   function eventRegistrationPresentation(d, id) {
     let registrationActions = "";
@@ -1634,6 +1792,22 @@
     return '<p class="private-note">'+E(T(microStates[meta.micro_state] || "Pendiente de revisión"))+'</p>'+
       (rows?'<details><summary>'+E(T("Historial de microeventos"))+'</summary><ol>'+rows+'</ol></details>':"");
   }
+  async function openContentReview(id) {
+    const reason = root.querySelector(`[data-form="moderate"][data-id="${Number(id)}"] [name="reason"]`)?.value || "";
+    let p = await api("items/" + id), candidateNotice = "";
+    if (p.meta.micro) {
+      const review = await api(`events/${id}/candidates`, {});
+      p = review.item; S.item = p;
+      candidateNotice = `<div class="alert micro-review-notice" role="status"><strong>${E(T("Candidatos elegibles"))}: ${Number(review.candidates)} · ${E(T("Mínimo requerido"))}: ${Number(p.meta.micro_min || 4)}</strong><p>${E(T(review.removed ? "Se retiraron de la propuesta los candidatos que ya no cumplen las condiciones. Revisa la convocatoria actualizada." : "La convocatoria se comprobó con la membresía, el consentimiento, el perfil y los bloqueos actuales."))}</p></div>`;
+      if (!p.can_moderate) {
+        modal(T("Revisar microevento"), `<h3>${E(p.title)}</h3>${candidateNotice}${microEventHistory(p.meta)}${p.meta.cancellation_reason ? `<p class="detail-body">${E(p.meta.cancellation_reason)}</p>` : ""}<p class="private-note">${E(T("Esta propuesta conserva su historial y ya no está pendiente de aprobación."))}</p><div class="form-actions">${btn(T("Volver a la ficha"), "item", `data-id="${Number(id)}"`)}</div>`);
+        return;
+      }
+    }
+    const decisions = p.meta.micro ? [["approve", "Aprobar propuesta"], ["reject", "Denegar propuesta"]] : [["approve", "Aprobar y publicar"], ["reject", "Rechazar"], ["hide", "Ocultar"], ["suspend", "Suspender publicación"]];
+    const microHelp = p.meta.micro ? `<p class="private-note">${E(T("Aprobar permite elegir después la fecha de publicación. No inscribe automáticamente a los asociados."))}</p>${btn(T("Actualizar candidatos"), "moderate", `data-id="${Number(id)}"`, "ghost small")}` : "";
+    modal(T(p.meta.micro ? "Revisar microevento" : "Revisar publicación"), `<h3>${E(p.title)}</h3><p class="detail-body">${E(p.body)}</p>${candidateNotice}${microHelp}<form data-form="moderate" data-id="${Number(id)}" data-micro="${!!p.meta.micro}">${select("decision", "Decisión", decisions)}${field("reason", "Motivo de la decisión", reason, "textarea", 'required maxlength="1000"')}${p.meta.generated ? check("reviewed", "Revisé fuentes, identidades, afiliaciones y derechos de propiedad intelectual.", false) : ""}<div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">${E(T("Guardar decisión"))}</button></div></form>`);
+  }
   function eventStateSummary(d) {
     if (d.cancelled) return ` · ${E(T("Cancelado"))}`;
     if (d.is_past) return ` · ${E(T("Finalizado"))}`;
@@ -1654,7 +1828,7 @@
   function eventParticipantsSection(d) {
     if (!d.participants) return "";
     const rows=d.participants.map((x) => `<p>${E(x.name)} · ${status(x.status)}</p>`).join("");
-    return `<details class="event-moderation-participants"><summary class="private-note">${E(T("Participantes y lista de espera (gestión de eventos)"))}</summary>${rows}</details>`;
+    return `<details class="event-moderation-participants"><summary class="private-note">${E(T("Inscripciones y lista de espera (gestión de eventos)"))}</summary>${rows}</details>`;
   }
   function eventChangeReason(p) {
     if (!p.meta.change_reason) return "";
@@ -1691,17 +1865,21 @@
   function itemActionButtons(p, id, eventIsPast, eventCancelled) {
     let actionButtons = "";
     if (p.can_delete) actionButtons += btn("Eliminar", "delete-content", ("data-id=\"" + (id) + "\""), "danger");
-    if (p.can_edit) actionButtons += btn(I("edit") + " Editar", "editor", ("data-type=\"" + (p.type) + "\" data-id=\"" + (id) + "\""));
-    const canManageEvent = (S.boot.admin || (S.boot.executive && !p.meta.micro)) && p.type === "event" && p.status === "publish" && !eventIsPast && !eventCancelled;
+    if (S.page === "admin" && p.meta.can_archive) actionButtons += btn(T(p.meta.micro_archived ? "Restaurar en el panel" : "Archivar del panel"), "micro-archive", `data-id="${Number(id)}" data-archived="${!p.meta.micro_archived}"`);
+    if (p.can_edit) actionButtons += btn(I("edit") + " " + T(p.meta.micro && p.meta.micro_approved && p.status !== "publish" ? "Editar y publicar" : "Editar"), "editor", ("data-type=\"" + (p.type) + "\" data-id=\"" + (id) + "\""));
+    const canManageEvent = p.type === "event" && !eventCancelled && !p.meta.cancelled && (p.meta.micro
+      ? S.boot.admin && (p.status !== "publish" || !eventIsPast)
+      : (S.boot.admin || S.boot.executive) && p.status === "publish" && !eventIsPast);
     if (canManageEvent) {
-      actionButtons += btn("Cancelar evento", "event-cancel-request", ("data-id=\"" + (id) + "\" data-title=\"" + (E(p.title)) + "\""), "danger");
+      actionButtons += btn(T(p.meta.micro ? "Cancelar microevento" : "Cancelar evento"), "event-cancel-request", ("data-id=\"" + (id) + "\" data-micro=\"" + (!!p.meta.micro) + "\" data-title=\"" + (E(p.title)) + "\""), "danger");
       if (!p.meta.micro) actionButtons += btn("Invitar asociados", "event-invite", ("data-id=\"" + (id) + "\""));
     }
     const canManageResource = (S.boot.admin || S.boot.executive) && p.type === "resource";
     if (canManageResource && p.meta.video_id) actionButtons += btn("Actualizar datos de YouTube", "video-metadata", ("data-id=\"" + (id) + "\""));
     if (canManageResource) actionButtons += btn(I("spark") + " Generar resumen y nota", "generate", ("data-id=\"" + (id) + "\""));
-    if (p.can_moderate) actionButtons += btn(I("shield") + " Moderar", "moderate", ("data-id=\"" + (id) + "\""));
-    actionButtons += publishedItemActions(p, id, eventIsPast, eventCancelled);
+    if (p.can_moderate) actionButtons += btn(I("shield") + " " + T(p.meta.micro ? "Revisar propuesta" : "Moderar"), "moderate", ("data-id=\"" + (id) + "\""));
+    else if (S.boot.admin && p.meta.micro && p.status === "ascla_hidden" && p.meta.micro_approved && !p.meta.cancelled && !p.meta.invited) actionButtons += btn(T("Actualizar candidatos"), "moderate", `data-id="${Number(id)}"`);
+    actionButtons += publishedItemActions(p, id);
     return publicationNotice(p) + `<div class="form-actions">${actionButtons}</div>`;
   }
   function publicationNotice(p) {
@@ -1711,10 +1889,9 @@
     if (p.meta.micro && p.meta.micro_approved && p.status !== 'publish') return '<div class="alert">'+E(T('Microevento aprobado. Edita para publicar ahora o programar su publicación.'))+'</div>';
     return '';
   }
-  function publishedItemActions(p, id, eventIsPast, eventCancelled) {
+  function publishedItemActions(p, id) {
     if (p.status !== "publish") return "";
     let actions = reactionButtons(p, id);
-    if (!eventIsPast && !eventCancelled) actions += btn(p.following ? "Dejar de seguir" : "Seguir conversación", "follow", ("data-id=\"" + (id) + "\" data-active=\"" + (!p.following) + "\""));
     if (Number(p.author.id) !== Number(S.boot.me.id)) actions += btn("Reportar", "report", ("data-id=\"" + (id) + "\""), "ghost");
     return actions;
   }  function itemMediaMarkup(p, id) {
@@ -1751,6 +1928,8 @@
   async function item(id) {
     const p = await api("items/" + id);
     S.item = p;
+    syncCommentCount(p);
+    if(p.type==='ally'){await alliesUI().detail(p);void interestLearning().watch(p,root.querySelector('.modal-backdrop'),S.page==='admin');return;}
     const extra = p.type === "event" ? await eventItemExtra(p, id) : "";
     const reviewedLabel = T(p.meta.reviewed ? "Revisado" : "Requiere revisión de fuentes, anonimización y derechos.");
     const eventIsPast = p.type === "event" && !!S.event?.is_past;
@@ -1765,11 +1944,12 @@
     const supplemental = itemSupplementalMarkup(p);
     const actions = itemActionButtons(p, id, eventIsPast, eventCancelled);
     const commentsSection = itemCommentsMarkup(p, id);
-    modal(
+    const dialog = modal(
       p.title,
       `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${demoTag}</div>${media.eventCoverMarkup}${chatham}${generated}<p class="detail-body">${E(p.body)}</p>${media.video}${transcriptWarning}${extra}${media.attachmentsMarkup}${media.deleteMedia}${UI.generated(p)}${UI.agenda(p)}${supplemental.demoSource}${supplemental.external}${supplemental.benefits}${supplemental.initiatives}${supplemental.clip}${supplemental.copyright}${actions}${commentsSection}`,
       true,
     );
+    void interestLearning().watch(p,dialog,S.page==="admin");
     await loadItemComments(p, id);
   }
   function resourceEditorExtra(m) {
@@ -1793,6 +1973,7 @@
     return `<div class="form-grid">${select("resource_type", "Tipo de recurso", ["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"], m.resource_type || "Artículo")}${field("source", "Fuente / autoría", m.source || "")}${field("youtube_url", "URL de YouTube", m.youtube_url || "", "url")}${field("url", "URL del recurso externo", m.url || "", "url")}</div>${videoNote}${field("copyright", "Propiedad intelectual", m.copyright || "© ASCLA – Asociación de Secretarios Corporativos de América Latina")}${field("summary", "Resumen", m.summary || "", "textarea")}${moderatorFields}<p class="private-note">Las conferencias completas permanecen en YouTube. La duración se consulta directamente desde los metadatos del video y nunca se estima a partir de la transcripción.</p>`;
   }
   function editorStatusOptions(type, m, directResourcePublisher, directContentPublisher) {
+    if(type==='ally')return [['publish','Activo · Visible en el catálogo'],['inactive','Inactivo · Fuera del catálogo'],['draft','Borrador']];
     if (type === 'hub' && !m.generated) return [['draft','Borrador'],['pending','Enviar a revisión'],['publish','Publicar ahora']];
     const directPublishType = ["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated);
     if (directPublishType) return [["draft", "Borrador"], ["publish", "Publicar ahora"]];
@@ -1803,6 +1984,7 @@
     return [["draft", "Borrador"], ["pending", "Enviar a revisión"]];
   }
   function editorStatusValue(type, id, p, m, directResourcePublisher, directContentPublisher) {
+    if(type==='ally')return !id?'publish':(p.status==='ascla_hidden'&&!m.publish_at?'inactive':p.status);
     if (type === 'hub' && !m.generated) return id ? p.status : 'publish';
     const directPublishType = ["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated);
     if (directPublishType) return id && p.status === "draft" ? "draft" : "publish";
@@ -1828,6 +2010,16 @@
     const dateValue = new Date(value);
     return new Date(dateValue - dateValue.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   }
+  function eventDateTimeField(name, label, value) {
+    const localValue = editorDateValue(value);
+    const [dateValue = "", timeValue = ""] = localValue.split("T");
+    const labelId = `f-${name}-label`;
+    return `<div class="field event-datetime-field" role="group" aria-labelledby="${E(labelId)}"><span class="event-datetime-label" id="${E(labelId)}">${E(T(label))}</span><div class="event-datetime-controls"><label class="event-datetime-control" for="f-${E(name)}-date"><span>${E(T("Fecha"))}</span><input id="f-${E(name)}-date" name="${E(name)}_date" type="date" value="${E(dateValue)}" required></label><label class="event-datetime-control" for="f-${E(name)}-time"><span>${E(T("Hora"))}</span><input id="f-${E(name)}-time" name="${E(name)}_time" type="time" value="${E(timeValue)}" step="60" required></label></div></div>`;
+  }
+  function eventDateTimeISO(dateValue, timeValue) {
+    if (!dateValue || !timeValue) return "";
+    return new Date(`${dateValue}T${timeValue}`).toISOString();
+  }
   function publicationFields(value, scheduled) {
     return '<div data-publication-date '+(scheduled?'':'hidden')+'>'+field('publish_at','Fecha y hora de publicación',editorDateValue(value),'datetime-local',scheduled?'required':'')+'<p class="private-note">'+E(T('Usa la hora local de tu dispositivo. El contenido permanecerá oculto hasta esta fecha.'))+'</p></div>';
   }
@@ -1838,15 +2030,42 @@
     panel.hidden = input.value !== 'scheduled';
     panel.querySelector('input').required = !panel.hidden;
   }
+  function syncEventEditorRequirements(form) {
+    if (!form || form.dataset.form !== "editor" || form.dataset.type !== "event") return;
+    const status = form.elements.status?.value || "draft";
+    const incompleteAllowed = status === "draft";
+    for (const name of ["title", "body", "start_date", "start_time", "end_date", "end_time", "registration_deadline"]) {
+      const input = form.elements[name];
+      if (!input) continue;
+      input.required = !incompleteAllowed;
+      if (incompleteAllowed && requiredTextErrors.has(input)) {
+        input.setCustomValidity("");
+        requiredTextErrors.delete(input);
+      }
+    }
+    const submit = form.querySelector("[data-editor-primary]");
+    if (submit) {
+      const labels = {draft: "Guardar borrador", scheduled: "Programar evento", pending: "Enviar a revisión"};
+      const label = labels[status] || (Number(form.dataset.id) ? "Guardar evento" : "Publicar evento");
+      submit.textContent = T(label);
+    }
+    const draftAction = form.querySelector('[data-action="save-event-draft"]');
+    if (draftAction) draftAction.hidden = status === "draft";
+  }
+  function prepareEventDraft(form) {
+    if (!form || form.dataset.type !== "event") return;
+    form.elements.status.value = "draft";
+    publicationFieldState(form.querySelector('[name="status"]:checked') || form.elements.status);
+    syncEventEditorRequirements(form);
+  }
   async function editorExtra(type, p, m) {
     if (type === "event") {
       const reminderMode=m.micro && (m.invited || p.status === "publish") ? "readonly" : "required";
       const reminderField=S.boot.admin ? field("reminder_hours","Recordatorios: horas antes del inicio",(m.reminder_hours || [24,1]).join(", "),"text",reminderMode) : "";
       const changeReasonField=p.id ? field("change_reason", "Motivo de reprogramación (obligatorio para microeventos)", "", "textarea", 'maxlength="1000"') : "";
-      return `<div class="form-grid">${field("start", "Inicio (tu zona horaria)", editorDateValue(m.start), "datetime-local", "required")}${field("end", "Fin (tu zona horaria)", editorDateValue(m.end), "datetime-local", "required")}${field("capacity", "Cupos (0 = ilimitado)", m.capacity || 0, "number", 'min="0" max="100000"')}${field("offer_hours", "Horas para confirmar un cupo liberado", m.offer_hours || 24, "number", 'min="1" max="168"')}${select("modality", "Modalidad", ["Virtual", "Presencial", "Híbrido"], m.modality || "Virtual")}${field("location", "Ubicación", m.location || "")}${field("url", "Enlace del encuentro", m.url || "", "url")}</div>${microEventFields(m)}${reminderField}${field("agenda", "Agenda", m.agenda || "", "textarea")}${changeReasonField}`;
+      return `<div class="form-grid">${eventDateTimeField("start", "Inicio (tu zona horaria)", m.start)}${eventDateTimeField("end", "Fin (tu zona horaria)", m.end)}${field("capacity", "Cupos (0 = ilimitado)", m.capacity || 0, "number", 'min="0" max="100000"')}${field("offer_hours", "Horas para confirmar un cupo liberado", m.offer_hours || 24, "number", 'min="1" max="168"')}${select("modality", "Modalidad", ["Virtual", "Presencial", "Híbrido"], m.modality || "Virtual")}${field("location", "Ubicación", m.location || "")}${field("url", "Enlace del encuentro", m.url || "", "url")}</div>${microEventFields(m)}${reminderField}${field("agenda", "Agenda", m.agenda || "", "textarea")}${changeReasonField}`;
     }
     if (type === "resource") return resourceEditorExtra(m);
-    if (type === "ally") return select("alliance_type", "Tipo de alianza", ["Socio estratégico", "Convenio", "Otro"], m.alliance_type) + field("url", "Sitio del aliado", m.url || "", "url") + field("benefits", "Beneficios", m.benefits || "", "textarea") + field("initiatives", "Iniciativas y recursos", m.initiatives || "", "textarea");
     if (type === "topic") {
       const forums = { items: await allContent("forum") };
       return select("parent", "Foro", [[0, "Conversación general"], ...forums.items.map((f) => [f.id, f.title])], p.parent || 0);
@@ -1862,8 +2081,22 @@
     if (statusOptions.some((option) => option[0] === initialStatus)) return initialStatus;
     return "draft";
   }
+  function eventStatusControl(values, value) {
+    const selected = values.some((option) => String(option[0]) === String(value)) ? String(value) : String(values[0]?.[0] || "draft");
+    return `<fieldset class="event-status-field"><legend>${E(T("Estado del evento"))}</legend><div class="event-status-options">${values.map((option, index) => {
+      const pair = Array.isArray(option) ? option : [option, option];
+      const id = `f-event-status-${index}`;
+      return `<label class="event-status-option" for="${id}"><input id="${id}" type="radio" name="status" value="${E(pair[0])}" ${selected === String(pair[0]) ? "checked" : ""}><span>${E(T(pair[1]))}</span></label>`;
+    }).join("")}</div></fieldset>`;
+  }
   function editorFormMarkup({type, id, p, m, extra, eventCoverEditor, statusOptions, statusValue, canSchedule, directResourcePublisher}) {
-    return `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => ("<label class=\"chip-check\"><input type=\"checkbox\" name=\"interest\" value=\"" + (t.id) + "\" " + (p.tags.some((x) => x.id === t.id) ? "checked" : "") + ">" + (E(t.name)) + "</label>")).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? ("<label class=\"btn small\">" + (I("plus")) + " " + (E(T("Adjuntar imagen o PDF"))) + "<input type=\"file\" data-upload=\"content\" accept=\"image/jpeg,image/png,image/webp,application/pdf\" hidden></label><div id=\"attachments\">" + ((m.media_ids || []).map((mid) => ("<span class=\"attached-file\" data-media=\"" + (mid) + "\">Archivo #" + (mid) + "" + (btn("Quitar", "detach-media", ("data-id=\"" + (mid) + "\""), "ghost small")) + "</span>")).join("")) + "</div><p class=\"private-note\">" + (E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))) + "</p>") : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${select("status", "Guardar como", statusOptions, statusValue)}${canSchedule ? publicationFields(m.publish_at, statusValue === "scheduled") : ""}${m.generated && directResourcePublisher ? ("<p class=\"private-note\">" + (E(T("Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."))) + "</p>") : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar ${typeLabel[type]}</button></div></form>`;
+    const statusControl = type === "event" ? eventStatusControl(statusOptions, statusValue) : select("status", "Guardar como", statusOptions, statusValue);
+    const publicationControl = canSchedule ? publicationFields(m.publish_at, statusValue === "scheduled") : "";
+    if(type==='ally')return alliesUI().editorMarkup({id,p,m,statusOptions,statusValue,publicationControl});
+    const eventWorkflow = type === "event" ? `<section class="event-editor-status">${statusControl}${publicationControl}<p class="private-note">${E(T("Puedes guardar un borrador aunque todavía falten datos. Para publicar, completa los campos obligatorios."))}</p></section>` : "";
+    const trailingWorkflow = type === "event" ? "" : statusControl + publicationControl;
+    const draftAction = type === "event" ? btn(I("check")+" "+T("Guardar como borrador"), "save-event-draft", statusValue === "draft" ? "hidden" : "", "event-draft-action") : "";
+    return `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${eventWorkflow}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => ("<label class=\"chip-check\"><input type=\"checkbox\" name=\"interest\" value=\"" + (t.id) + "\" " + (p.tags.some((x) => x.id === t.id) ? "checked" : "") + ">" + (E(t.name)) + "</label>")).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? ("<label class=\"btn small\">" + (I("plus")) + " " + (E(T("Adjuntar imagen o PDF"))) + "<input type=\"file\" data-upload=\"content\" accept=\"image/jpeg,image/png,image/webp,application/pdf\" hidden></label><div id=\"attachments\">" + ((m.media_ids || []).map((mid) => ("<span class=\"attached-file\" data-media=\"" + (mid) + "\">Archivo #" + (mid) + "" + (btn("Quitar", "detach-media", ("data-id=\"" + (mid) + "\""), "ghost small")) + "</span>")).join("")) + "</div><p class=\"private-note\">" + (E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))) + "</p>") : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${trailingWorkflow}${m.generated && directResourcePublisher ? ("<p class=\"private-note\">" + (E(T("Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."))) + "</p>") : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}${draftAction}<button class="btn primary" data-editor-primary>Guardar ${typeLabel[type]}</button></div></form>`;
   }
   async function editor(type, id = 0) {
     const p = id
@@ -1883,7 +2116,8 @@
     const eventCoverFile = type === "event" ? (p.media || []).find(file => file.mime?.startsWith("image/")) : null;
     const eventCoverEditor = eventCoverEditorMarkup(type, eventCoverFile);
     const formMarkup = editorFormMarkup({type, id, p, m, extra, eventCoverEditor, statusOptions, statusValue, canSchedule, directResourcePublisher});
-    modal((id ? "Editar " : "Crear ") + typeLabel[type], formMarkup, true);
+    const dialog = modal((id ? "Editar " : "Crear ") + typeLabel[type], formMarkup, true);
+    syncEventEditorRequirements(dialog.querySelector('[data-form="editor"]'));
   }
   async function files(page = 1, q = "", scope = S.files?.scope || "mine", owner = S.files?.owner || 0) {
     const previousScope = S.files?.scope || "";
@@ -1927,7 +2161,7 @@
     const input = event.target.closest('[data-group-member]');
     if (!input || !S.groupChat) return;
     const id = Number(input.dataset.groupMember);
-    if (input.checked && S.groupChat.selected.size >= 49) { input.checked = false; toast('Un grupo puede tener como máximo 50 participantes.'); return; }
+    if (input.checked && S.groupChat.selected.size >= 49) { input.checked = false; toast('Un grupo puede tener como máximo 50 asociados.'); return; }
     if (input.checked) S.groupChat.selected.add(id); else S.groupChat.selected.delete(id);
     const count = document.getElementById('group-selected'); if (count) count.textContent = S.groupChat.selected.size;
   });
@@ -1939,8 +2173,8 @@
     const data = await api('connections');
     S.groupChat = {selected:new Set(), members:data.connected || [], photo:null};
     const options = S.groupChat.members.map(p => `<label class="check group-member-option"><input type="checkbox" name="users" value="${Number(p.id)}" data-group-member="${Number(p.id)}"><span>${avatar(p)}<span><strong>${E(p.name)}</strong><small>${E(p.company || T('Conexión ASCLA'))}</small></span></span></label>`).join('');
-    const photo = `<div class="group-photo-field"><div id="group-photo-preview" class="group-photo-preview"><span class="group-photo-placeholder">${I('users')}</span></div><div><label class="btn small">${I('plus')} Elegir foto<input type="file" accept="image/jpeg,image/png,image/webp" data-upload="group-photo" hidden></label><input type="hidden" name="photo_id" value="0"><p class="private-note">JPG, PNG o WebP. Se ajustará en formato cuadrado.</p></div></div>`;
-    modal('Crear chat grupal', `<form data-form="group-chat">${photo}${field('title','Nombre del grupo','','text','required maxlength="120" placeholder="Ej. Comité de Innovación"')}${field('description','Descripción breve','','textarea','maxlength="240" placeholder="Ej. Coordinación del comité y próximos acuerdos"')}<p class="private-note">Selecciona al menos dos conexiones confirmadas. El grupo admite hasta 50 participantes contando tu cuenta.</p><div class="group-member-list">${options || empty('Necesitas al menos dos conexiones confirmadas','Conecta con otros asociados antes de crear un grupo.')}</div><p class="private-note"><strong id="group-selected">0</strong> seleccionados</p><div class="form-actions">${btn('Cancelar','close')}<button class="btn primary" ${S.groupChat.members.length < 2 ? 'disabled' : ''}>${I('plus')} Crear grupo</button></div></form>`);
+    const photo = `<div class="group-photo-field"><div id="group-photo-preview" class="group-photo-preview"><span class="group-photo-placeholder">${I('users')}</span></div><div><label class="btn small">${I('plus')} ${E(T("Elegir foto"))}<input type="file" accept="image/jpeg,image/png,image/webp" data-upload="group-photo" hidden></label><input type="hidden" name="photo_id" value="0"><p class="private-note">${E(T("JPG, PNG o WebP. Se ajustará en formato cuadrado."))}</p></div></div>`;
+    modal(T('Crear chat grupal'), `<form data-form="group-chat">${photo}${field('title','Nombre del grupo','','text','required maxlength="120" placeholder="'+E(T("Ej. Comité de Innovación"))+'"')}${field('description','Descripción breve','','textarea','maxlength="240" placeholder="'+E(T("Ej. Coordinación del comité y próximos acuerdos"))+'"')}<p class="private-note">${E(T("Selecciona al menos dos conexiones confirmadas. El grupo admite hasta 50 asociados contando tu cuenta."))}</p><div class="group-member-list">${options || empty('Necesitas al menos dos conexiones confirmadas','Conecta con otros asociados antes de crear un grupo.')}</div><p class="private-note"><strong id="group-selected">0</strong> ${E(T('seleccionados'))}</p><div class="form-actions">${btn('Cancelar','close')}<button class="btn primary" ${S.groupChat.members.length < 2 ? 'disabled' : ''}>${I('plus')} ${E(T('Crear grupo'))}</button></div></form>`);
   }
   async function groupEditDialog(id) {
     const current = await api('conversations/' + Number(id));
@@ -1949,8 +2183,8 @@
     const preview = current.photo_url
       ? `<img src="${E(current.photo_url)}" alt="${E(T('Foto del grupo'))}">${btn('Quitar foto','group-edit-photo-clear','','ghost small')}`
       : `<span class="group-photo-placeholder">${I('users')}</span>`;
-    const photo = `<div class="group-photo-field"><div id="group-edit-photo-preview" class="group-photo-preview">${preview}</div><div><label class="btn small">${I('plus')} Cambiar foto<input type="file" accept="image/jpeg,image/png,image/webp" data-upload="group-photo-edit" hidden></label><input type="hidden" name="photo_id" value="${Number(current.photo_id || 0)}"><p class="private-note">JPG, PNG o WebP. La nueva foto reemplazará a la actual al guardar.</p></div></div>`;
-    modal(T('Editar grupo'), `<form data-form="group-edit" data-guard-modal-unsaved data-id="${Number(current.id)}">${photo}${field('title','Nombre del grupo',current.title || '','text','required maxlength="120"')}${field('description','Descripción breve',current.description || '','textarea','maxlength="240" placeholder="Añade una breve descripción del propósito del grupo"')}<div class="form-actions">${btn('Cancelar','group-menu',("data-id=\"" + (Number(current.id)) + "\""))}<button class="btn primary">${I('check')} Guardar cambios</button></div></form>`);
+    const photo = `<div class="group-photo-field"><div id="group-edit-photo-preview" class="group-photo-preview">${preview}</div><div><label class="btn small">${I('plus')} ${E(T("Cambiar foto"))}<input type="file" accept="image/jpeg,image/png,image/webp" data-upload="group-photo-edit" hidden></label><input type="hidden" name="photo_id" value="${Number(current.photo_id || 0)}"><p class="private-note">${E(T("JPG, PNG o WebP. La nueva foto reemplazará a la actual al guardar."))}</p></div></div>`;
+    modal(T('Editar grupo'), `<form data-form="group-edit" data-guard-modal-unsaved data-id="${Number(current.id)}">${photo}${field('title','Nombre del grupo',current.title || '','text','required maxlength="120"')}${field('description','Descripción breve',current.description || '','textarea','maxlength="240" placeholder="'+E(T("Añade una breve descripción del propósito del grupo"))+'"')}<div class="form-actions">${btn('Cancelar','group-menu',("data-id=\"" + (Number(current.id)) + "\""))}<button class="btn primary">${I('check')} ${E(T('Guardar cambios'))}</button></div></form>`);
   }
   async function groupInfoDialog(id) {
     const current = await api('conversations/' + Number(id));
@@ -2224,9 +2458,16 @@
     const area = document.getElementById("assistant-messages");
     if (area) area.scrollTop = area.scrollHeight;
   }
-  async function assistant() {
-    const thread = assistantThread();
-    const rows = await api("assistant/thread?" + new URLSearchParams({ thread }));
+  async function assistant(fresh = false) {
+    const thread = assistantThread(fresh), version = ++S.assistantVersion, view = S.viewVersion;
+    const current = () => S.page === "asistente" && view === S.viewVersion && version === S.assistantVersion && thread === S.assistantThread;
+    try {
+      // A new conversation needs no history request and clears the UI immediately.
+      const rows = fresh ? [] : await api("assistant/thread?" + new URLSearchParams({ thread }));
+      if (current()) renderAssistant(rows);
+    } catch (error) { if (current()) throw error; }
+  }
+  function renderAssistant(rows) {
     const suggestions = [
       "¿Hay alguna reunión o evento pronto?",
       "¿Qué se publicó recientemente?",
@@ -2246,11 +2487,13 @@
     assistantScroll();
   }
   async function watchJob(id, target, onDone, onError = null) {
+    if (!target.isConnected) return;
     let attempts = 0;
     const assistantMode = target.classList?.contains("assistant-message");
     target.innerHTML = assistantMode ? assistantLoadingBody("pending") :
       '<div class="alert">Pendiente · Estamos preparando la respuesta…</div>';
     const poll = async () => {
+      if (!target.isConnected) return;
       try {
         const j = await api("jobs/" + id);
         if (!target.isConnected) return;
@@ -2286,12 +2529,7 @@
   }
   async function contact() {
     const list = await api("content/contact?mine=1");
-    content().innerHTML =
-      heading(
-        "Estamos para ayudarte",
-        "Consultas, sugerencias y soporte para tu experiencia en ASCLA.",
-      ) +
-      `<div class="cards two"><form class="card" data-form="contact">${field("title", "Asunto", "", "text", 'required maxlength="200"')}${select("category", "Categoría", S.boot.support_categories)}${field("body", "Mensaje", "", "textarea", 'required maxlength="5000"')}<input name="website_confirm" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true"><button class="btn primary">Enviar solicitud</button><p class="private-note">Solo tú y la persona asignada de administración o del equipo ejecutivo pueden ver tu solicitud.</p></form><div><div class="card"><h2>Preguntas frecuentes</h2>${[
+    const questions = [
         [
           "¿Cómo actualizo mis intereses?",
           "En Perfil encontrarás Conocimiento e intereses. Guarda los cambios para actualizar tus recomendaciones.",
@@ -2304,19 +2542,30 @@
           "¿Qué significa Chatham House?",
           "Comparte el conocimiento sin revelar identidades o afiliaciones de los participantes.",
         ],
-      ]
-        .map(
-          ([q, a]) =>
-            ("<details style=\"padding:16px 0;border-bottom:1px solid var(--line)\"><summary>" + (E(q)) + "</summary><p class=\"private-note\">" + (E(a)) + "</p></details>"),
-        )
-        .join(
-          "",
-        )}</div><div class="card"><h3>Mis solicitudes</h3>${list.items.map((p) => ("<div class=\"notification-row\"><div><strong>" + (E(p.title)) + "</strong><p class=\"private-note\">" + (date(p.date)) + "</p></div><span class=\"tag\">" + (E(T(requestLabels[p.meta.request_status] || "Pendiente"))) + "</span>"+supportHistory(p)+"</div>")).join("") || '<p class="private-note">Aún no has enviado solicitudes.</p>'}</div></div></div>`;
+      ].map(([q, a]) => `<details class="contact-question"><summary>${E(T(q))}${I("plus")}</summary><p>${E(T(a))}</p></details>`).join("");
+    const requests = list.items.map(p => {
+      const state = Object.hasOwn(requestLabels, p.meta.request_status) ? p.meta.request_status : "open";
+      return `<article class="contact-request"><div class="contact-request-heading"><h3>${E(p.title)}</h3><span class="contact-status ${state}">${E(T(requestLabels[state]))}</span></div><p class="contact-request-date">#${Number(p.id)} · ${date(p.date)}</p>${supportHistory(p)}</article>`;
+    }).join("");
+    content().innerHTML = `<div class="contact-workspace">
+      <header class="contact-heading"><span class="contact-symbol">${I("mail")}</span><div><span class="eyebrow">${E(T("CONTACTO ASCLA"))}</span><h1>${E(T("Estamos para ayudarte"))}</h1><p>${E(T("Consultas, sugerencias y soporte para tu experiencia en ASCLA."))}</p></div></header>
+      <div class="contact-layout"><form class="card contact-form" data-form="contact" aria-labelledby="contact-form-title">
+        <div class="contact-card-heading"><span class="contact-section-icon">${I("contact")}</span><div><h2 id="contact-form-title">${E(T("Envíanos tu consulta"))}</h2><p>${E(T("Cuéntanos qué necesitas y el equipo dará seguimiento a tu solicitud."))}</p></div></div>
+        ${field("title", "Asunto", "", "text", `required maxlength="200" placeholder="${E(T("Resume el motivo de tu consulta"))}"`)}
+        ${select("category", "Categoría", S.boot.support_categories)}
+        ${field("body", "Mensaje", "", "textarea", `required maxlength="5000" placeholder="${E(T("Describe tu consulta e incluye los detalles que nos ayuden a atenderte."))}"`)}
+        <input name="website_confirm" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+        <div class="contact-form-footer"><span>${E(T("Podrás consultar las respuestas en Mis solicitudes."))}</span><button class="btn primary" type="submit">${E(T("Enviar solicitud"))}${I("arrow")}</button></div>
+        <div class="contact-privacy">${I("shield")}<p>${E(T("Solo tú y la persona asignada de administración o del equipo ejecutivo pueden ver tu solicitud."))}</p></div>
+      </form><div class="contact-sidebar">
+        <section class="card contact-faq" aria-labelledby="contact-faq-title"><div class="contact-card-heading"><span class="contact-section-icon">${I("book")}</span><h2 id="contact-faq-title">${E(T("Preguntas frecuentes"))}</h2></div>${questions}</section>
+        <section class="card contact-requests" aria-labelledby="contact-requests-title"><div class="contact-card-heading"><span class="contact-section-icon">${I("clock")}</span><div><h2 id="contact-requests-title">${E(T("Mis solicitudes"))}</h2><p>${E(T("Consulta el estado y el historial de atención."))}</p></div></div>${requests || `<div class="contact-no-requests">${I("mail")}<p>${E(T("Aún no has enviado solicitudes."))}</p></div>`}</section>
+      </div></div></div>`;
   }
   function notificationCount(total) {
     const badge = document.querySelector(".notification-count"), bell = document.querySelector('[data-action="notifications"]');
-    if (badge) { badge.hidden = !total; badge.textContent = total > 99 ? "99+" : total; }
-    bell?.setAttribute("aria-label", T("Notificaciones") + (total ? `, ${total} ${T("sin leer")}` : `, ${T("estás al día")}`));
+    if (badge) { badge.hidden = !total; badge.setAttribute("aria-hidden", "true"); badge.textContent = total > 99 ? "99+" : total; }
+    bell?.setAttribute("aria-label", T("Notificaciones") + (total ? `${total > 99 ? " 99+" : ""}, ${total} ${T("sin leer")}` : `, ${T("estás al día")}`));
   }
   async function refreshNotifications() {
     try { notificationCount((await api("notifications/summary")).unread_total); } catch {}
@@ -2382,12 +2631,22 @@
     if (existing) { existing.innerHTML = html; document.querySelector(`.activity-filters [data-filter="${S.noticeFilter}"]`)?.focus(); }
     else { modal(T("Tus notificaciones"), html); document.querySelector(".modal").classList.add("notification-modal"); S.focus = document.querySelector('[data-action="notifications"]'); }
   }
+  async function assistantHistoryData(path) {
+    const version = S.assistantVersion, view = S.viewVersion;
+    const current = () => S.page === "asistente" && version === S.assistantVersion && view === S.viewVersion;
+    try {
+      const data = await api(path);
+      return current() ? data : null;
+    } catch (error) { if (current()) throw error; return null; }
+  }
   async function restoreAnswer(id) {
-    const j = await api("jobs/" + id);
+    const j = await assistantHistoryData("jobs/" + id);
+    if (!j) return;
     if (j.kind !== "answer") { toast("Este aviso corresponde a una tarea de administración."); return; }
     if (j.thread) {
       assistantThread(false, j.thread);
       await assistant();
+      if (S.assistantThread !== j.thread) return;
       const target = document.getElementById(`assistant-job-${j.id}`);
       target?.scrollIntoView({ block: "center" });
       return;
@@ -2399,7 +2658,8 @@
     target?.scrollIntoView({ block: "center" });
   }
   async function answerHistory() {
-    const rows = await api("answers");
+    const rows = await assistantHistoryData("answers");
+    if (!rows) return;
     modal(T("Mis consultas anteriores"), `<p class="private-note">${E(T("Tus últimas 50 consultas, guardadas para volver a ellas cuando las necesites."))}</p>${rows.map(j => {
       const url = new URL(C.pages.asistente.url); url.searchParams.set("job", j.id);
       const status = T({ completed: "Respuesta lista", pending: "Pendiente", processing: "Preparando respuesta", error: "Necesita atención" }[j.status] || j.status);
@@ -2475,37 +2735,83 @@
     });
     selector.dispatchEvent(new Event('change'));
   }
+  function adminAccountPermissionsFields(u) {
+    const selected = u.assigned_roles || [u.role];
+    const choices = (u.roles || []).map(role => `<label class="completion-choice"><input type="checkbox" name="assigned_roles" value="${E(role.id)}" ${selected.includes(role.id) ? "checked" : ""}><span>${E(T(role.name))}</span></label>`).join("");
+    const overrides = u.permission_overrides || {};
+    const permissions = Object.entries(u.permission_options || {}).map(([cap, label]) => select("permission_" + cap, T(label), [["", T("Heredar del rol")], ["deny", T("Denegar")]], overrides[cap] === false ? "deny" : "")).join("");
+    const approval = u.role_approval || {};
+    const reference = approval.reference ? `<p class="private-note">${E(T("Autorización registrada"))}: ${E(approval.reference)} · ${E(approval.decision_date)}</p>` : "";
+    return `<div class="form-section">${E(T("Roles y permisos individuales"))}</div><fieldset class="profile-completion-settings"><legend>${E(T("Roles asignados"))}</legend><div class="completion-choices">${choices}</div><p class="private-note">${E(T("El rol principal siempre está seleccionado. Acumular varios roles exige una autorización previa de la Junta registrada en ASCLA."))}</p><div data-board-approval>${reference}${field("board_reference", "Referencia del acta o autorización de la Junta", "", "text", 'maxlength="200"')}${field("board_date", "Fecha de la autorización", "", "date", 'max="'+new Date().toISOString().slice(0,10)+'"')}${check("board_confirmed", "Confirmo que la Junta autorizó los roles seleccionados", false)}</div></fieldset><p class="private-note">${E(T("Puedes denegar permisos del rol asignado. Este formulario no concede permisos superiores al rol."))}</p><div class="form-grid">${permissions}</div>`;
+  }
+  function bindAccountPermissions(form, u) {
+    const primary = form.elements.role;
+    let previous = primary.value;
+    const refresh = () => {
+      const choices = [...form.querySelectorAll('[name="assigned_roles"]')];
+      for (const choice of choices) {
+        choice.disabled = choice.value === primary.value;
+        if (choice.disabled) choice.checked = true;
+      }
+      const selected = choices.filter(choice => choice.checked).map(choice => choice.value);
+      const approval = u.role_approval || {};
+      const covered = approval.reference && approval.recorded_at && approval.recorded_by && selected.every(role => (approval.roles || []).includes(role));
+      const needs = selected.length > 1 && !covered;
+      form.querySelector('[data-board-approval]').hidden = selected.length < 2;
+      for (const key of ['board_reference', 'board_date', 'board_confirmed']) {
+        form.elements[key].required = needs;
+        form.elements[key].disabled = selected.length < 2;
+      }
+    };
+    primary.addEventListener('change', () => {
+      const old = form.querySelector('[name="assigned_roles"][value="'+previous+'"]');
+      if (old) old.checked = false;
+      previous = primary.value;
+      refresh();
+    });
+    for (const choice of form.querySelectorAll('[name="assigned_roles"]')) choice.addEventListener('change', refresh);
+    refresh();
+  }
   async function adminUserEditor(id) {
     const u=await api(`admin/users/${Number(id)}`);
     const roleOptions=(u.roles||[]).map(r=>[r.id,r.name]);
     const dialog=modal(
       'Editar usuario',
-      `<form data-form="admin-user-edit" data-id="${Number(u.id)}" data-guard-modal-unsaved class="admin-user-editor"><div class="admin-user-editor-head">${avatar({name:[u.first_name,u.last_name].filter(Boolean).join(' ')||u.login,photo_url:u.photo_url},'lg')}<div><span class="eyebrow">CUENTA ASCLA</span><h3>${E([u.first_name,u.last_name].filter(Boolean).join(' ')||u.login)}</h3><p>@${E(u.login)} · ${E(u.email)}</p><span class="request-status ${u.suspended?'closed':'open'}">${E(T({active:"Acceso activo",suspended:"Acceso suspendido",expired:"Membresía vencida"}[u.membership_status] || "Acceso activo"))}</span></div></div><div class="form-section">Datos de acceso</div><div class="form-grid">${field('login','Nombre de usuario',u.login,'text','readonly aria-readonly="true"')}${field('email','Correo electrónico',u.email,'email','required maxlength="100" autocomplete="email"')}${select('role','Rol en ASCLA',roleOptions,u.role)}</div>${membershipFields(u)}<div class="form-section">Información del asociado</div><div class="form-grid">${profilePhoneFields(u)}${field('first_name','Nombres',u.first_name||'','text','maxlength="100"')}${field('last_name','Apellidos',u.last_name||'','text','maxlength="100"')}${field('birth_date','Fecha de nacimiento',u.birth_date||'','date','min="1900-01-01" max="'+new Date().toISOString().slice(0,10)+'"')}${professionalRequestFields(u)}${field('position','Cargo',u.position||'','text','maxlength="200" readonly aria-readonly="true"')}${field('company','Empresa / organización',u.company||'','text','maxlength="200" readonly aria-readonly="true"')}${field('member_type','Tipo de asociado',u.member_type||'','text','maxlength="200"')}</div><div class="admin-user-edit-note">${I('shield')}<div><strong>Gestión dentro de ASCLA</strong><p>Estos cambios actualizan la cuenta y el perfil del asociado sin abrir WordPress. La suspensión de acceso se administra desde la lista de usuarios.</p></div></div><div class="form-actions"><button type="button" class="btn" data-action="close">Cancelar</button><button class="btn primary">${I('check')} Guardar cambios</button></div></form>`,
+      `<form data-form="admin-user-edit" data-id="${Number(u.id)}" data-guard-modal-unsaved class="admin-user-editor"><div class="admin-user-editor-head">${avatar({name:[u.first_name,u.last_name].filter(Boolean).join(' ')||u.login,photo_url:u.photo_url},'lg')}<div><span class="eyebrow">CUENTA ASCLA</span><h3>${E([u.first_name,u.last_name].filter(Boolean).join(' ')||u.login)}</h3><p>@${E(u.login)} · ${E(u.email)}</p><span class="request-status ${u.suspended?'closed':'open'}">${E(T(u.membership_status === "active" && u.access_enabled === false ? "Acceso restringido por permisos" : ({active:"Acceso activo",suspended:"Acceso suspendido",expired:"Membresía vencida"}[u.membership_status] || "Acceso activo")))}</span></div></div><div class="form-section">Datos de acceso</div><div class="form-grid">${field('login','Nombre de usuario',u.login,'text','readonly aria-readonly="true"')}${field('email','Correo electrónico',u.email,'email','required maxlength="100" autocomplete="email"')}${select('role','Rol en ASCLA',roleOptions,u.role)}</div>${membershipFields(u)}${adminAccountPermissionsFields(u)}<div class="form-section">Información del asociado</div><div class="form-grid">${profilePhoneFields(u)}${field('first_name','Nombres',u.first_name||'','text','maxlength="100"')}${field('last_name','Apellidos',u.last_name||'','text','maxlength="100"')}${field('birth_date','Fecha de nacimiento',u.birth_date||'','date','min="1900-01-01" max="'+new Date().toISOString().slice(0,10)+'"')}${professionalRequestFields(u)}${field('position','Cargo',u.position||'','text','maxlength="200" readonly aria-readonly="true"')}${field('company','Empresa / organización',u.company||'','text','maxlength="200" readonly aria-readonly="true"')}${field('member_type','Tipo de asociado',u.member_type||'','text','maxlength="200"')}</div><div class="admin-user-edit-note">${I('shield')}<div><strong>Gestión dentro de ASCLA</strong><p>Estos cambios actualizan la cuenta y el perfil del asociado sin abrir WordPress. La suspensión de acceso se administra desde la lista de usuarios.</p></div></div><div class="form-actions"><button type="button" class="btn" data-action="close">Cancelar</button><button class="btn primary">${I('check')} ${E(T('Guardar cambios'))}</button></div></form>`,
       true,
     );
     bindProfessionalRequest(dialog.querySelector("form"),u);
+    bindAccountPermissions(dialog.querySelector("form"),u);
+  }
+  function boardApprovalEditor(id) {
+    const roles = [['administrator', 'Administrador'], ['ascla_executive', 'Ejecutivo ASCLA'], ['ascla_moderator', 'Moderador ASCLA'], ['ascla_member', 'Asociado ASCLA']];
+    const choices = roles.map(([key, label]) => `<label class="completion-choice"><input type="checkbox" name="roles" value="${key}"><span>${E(T(label))}</span></label>`).join('');
+    const dialog=modal('Autorización de roles de la Junta', `<form data-form="board-approval" data-id="${Number(id)}" data-guard-modal-unsaved><p>${E(T('Registra una decisión previa de la Junta. Esta acción no asigna roles ni emite la autorización. Las cuentas técnicas continúan gestionándose desde WordPress.'))}</p><div class="completion-choices">${choices}</div>${field('board_reference','Referencia del acta o autorización de la Junta','','text','required maxlength="200"')}${field('board_date','Fecha de la autorización','','date','required max="'+new Date().toISOString().slice(0,10)+'"')}${check('board_confirmed','Confirmo que la Junta autorizó los roles seleccionados',false)}<button class="btn primary">${E(T('Registrar autorización'))}</button></form>`);
   }
   function adminUserCard(u, roles) {
-    const accessClass = u.membership_status === 'active' ? 'open' : 'closed';
-    const accessLabel = {active:'Acceso activo',suspended:'Acceso suspendido',expired:'Membresía vencida'}[u.membership_status] || 'Acceso activo';
+    const accessClass = u.membership_status === 'active' && u.access_enabled !== false ? 'open' : 'closed';
+    const accessLabel = u.membership_status === 'active' && u.access_enabled === false ? 'Acceso restringido por permisos' : ({active:'Acceso activo',suspended:'Acceso suspendido',expired:'Membresía vencida'}[u.membership_status] || 'Acceso activo');
     const technicalBadge = u.technical_admin ? '<span class="tag admin-technical-tag">Administración técnica</span>' : '';
-    let actions = '';
+    let actions = btn(I('users')+' Actividad e intereses','user-insights',`data-id="${Number(u.id)}"`,'primary small');
     if (u.profile_url) actions += btn('Ver perfil','member',("data-id=\"" + (Number(u.id)) + "\""),'small');
+    if (u.can_record_role_approval) actions += btn('Autorización de roles','board-role-approval', 'data-id="'+Number(u.id)+'"','small');
     if (u.can_edit) actions += btn(I('edit')+' Editar usuario','user-edit',("data-id=\"" + (u.id) + "\""),'small');
+    let accountActions='';
     if (u.can_suspend && u.membership_status !== 'expired') {
       const suspendLabel = u.suspended ? 'Reactivar acceso' : 'Suspender acceso';
-      actions += btn(suspendLabel,'user-access',("data-id=\"" + (u.id) + "\" data-suspended=\"" + (!u.suspended) + "\" data-name=\"" + (E(u.name)) + "\""),'ghost small');
+      accountActions += btn(suspendLabel,'user-access',("data-id=\"" + (u.id) + "\" data-suspended=\"" + (!u.suspended) + "\" data-name=\"" + (E(u.name)) + "\""),'ghost small');
     }
-    if (u.can_delete) actions += btn('Eliminar usuario','user-delete',("data-id=\"" + (u.id) + "\" data-name=\"" + (E(u.name)) + "\" data-login=\"" + (E(u.login)) + "\" data-email=\"" + (E(u.email)) + "\""),'danger small');
+    if (u.can_delete) accountActions += btn('Eliminar usuario','user-delete',("data-id=\"" + (u.id) + "\" data-name=\"" + (E(u.name)) + "\" data-login=\"" + (E(u.login)) + "\" data-email=\"" + (E(u.email)) + "\""),'danger small');
+    if(accountActions) actions+=`<details class="admin-user-more"><summary>${E(T('Más opciones de cuenta'))}</summary><div>${accountActions}</div></details>`;
     const roleBadges = u.roles.map(r => "<span class=\"tag\">" + E(roles[r] || r) + "</span>").join('');
-    return `<article class="admin-user" data-admin-user="${u.id}"><div class="admin-user-person">${avatar(u)}<div><h3>${E(u.name)}</h3><span>@${E(u.login)}</span><a href="mailto:${E(u.email)}">${E(u.email)}</a></div></div><div class="admin-user-access">${roleBadges}<span class="request-status ${accessClass}">${accessLabel}</span>${technicalBadge}<small>Registro: ${date(u.registered)}</small></div><div class="admin-user-actions">${actions}</div></article>`;
+    return `<article class="admin-user" data-admin-user="${u.id}"><div class="admin-user-person">${avatar(u)}<div><h3>${E(u.name)}</h3><span>@${E(u.login)}</span>${u.email ? `<a href="mailto:${E(u.email)}">${E(u.email)}</a>` : `<small>${E(T("Correo no registrado"))}</small>`}</div></div><div class="admin-user-access">${roleBadges}<span class="request-status ${accessClass}">${accessLabel}</span>${technicalBadge}<small>Registro: ${date(u.registered)}</small></div><div class="admin-user-actions">${actions}</div></article>`;
   }
   async function adminUsers(panel) {
     const f=S.adminFilters.users,list=await api('admin/users?'+new URLSearchParams(f));
     const roles=Object.fromEntries(list.roles.map(r=>[r.id,r.name]));
     const createAction = list.can_create ? btn(I('plus')+' Añadir usuario','user-create',("data-roles=\"" + (E(JSON.stringify(list.create_roles||[]))) + "\""),'primary') : '';
     const userCards = list.items.map(u => adminUserCard(u, roles)).join('') || empty('No encontramos usuarios','Prueba otro nombre o cambia los filtros.');
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PERSONAS Y ACCESOS</span><h2>Usuarios de la comunidad</h2><p>Encuentra cuentas, consulta sus roles y administra su acceso directamente desde ASCLA.</p></div>${createAction}</div><form class="filters admin-filters" data-form="admin-filter" data-area="users"><input name="q" aria-label="Buscar usuarios" placeholder="Nombre, usuario o correo…" value="${E(f.q||'')}">${select('role','Rol',[['','Todos los roles'],...list.roles.map(r=>[r.id,r.name])],f.role||'')}${select('state','Acceso',[['','Todos'],['active','Activo'],['suspended','Suspendido'],['expired','Vencido']],f.state||'')}<button class="btn primary">${I('search')} Buscar</button></form><p class="private-note">${list.total} usuarios encontrados</p><div class="admin-users">${userCards}</div>${adminPager(list,'users')}`;
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PERSONAS Y ACCESOS</span><h2>${E(T('Usuarios e intereses'))}</h2><p>${E(T('Busca un asociado y abre Actividad e intereses para conocer su participación en la comunidad.'))}</p></div>${createAction}</div><form class="filters admin-filters" data-form="admin-filter" data-area="users"><input name="q" aria-label="Buscar usuarios" placeholder="Nombre, usuario o correo…" value="${E(f.q||'')}">${select('role','Rol',[['','Todos los roles'],...list.roles.map(r=>[r.id,r.name])],f.role||'')}${select('state','Acceso',[['','Todos'],['active','Activo'],['suspended','Suspendido'],['expired','Vencido']],f.state||'')}<button class="btn primary">${I('search')} Buscar</button></form><p class="private-note">${list.total} usuarios encontrados</p><div class="admin-users">${userCards}</div>${adminPager(list,'users')}`;
   }
   function adminPendingRow(p) {
     let badges = "";
@@ -2557,27 +2863,39 @@
     }
     return `<div class="admin-section-heading"><div><span class="eyebrow">CALIDAD Y CONVIVENCIA</span><h2>Revisión de contenido</h2><p>Los foros se publican directamente. Galería, Eventos y Conocimiento los gestiona el Ejecutivo o un administrador.</p></div></div><div class="card"><h3>Contenido pendiente y borradores</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>Contenido</th><th>Autor</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${pendingRows}</tbody></table></div></div>${reviewGrid}`;
   }
-  let statisticsPanel, interestImports;
+  let statisticsPanel, interestImports, memberInsights, alliesView;
+  function alliesUI(){return alliesView ||= globalThis.ASCLAAllies({root,api,E,T,I,modal,closeModal,toast,btn,field,select,date,config:C,safeURL,afterChange:render});}
   function adminTabs() {
     const tabs = [];
+    if(S.boot.admin) tabs.push(['resumen','Resumen','home']);
     if (S.boot.executive) tabs.push(["estadisticas", "Estadísticas", "users"]);
     tabs.push(["moderacion", S.boot.moderator ? "Moderación" : "Publicaciones", "shield"]);
     if (S.boot.admin || S.boot.executive) tabs.push(["solicitudes", "Solicitudes", "contact"]);
-    if (S.boot.admin) tabs.push(["importar", "Importar intereses", "book"], ["usuarios", "Usuarios", "users"], ["archivos", "Archivos", "book"]);
+    if (S.boot.admin) tabs.push(["importar", "Importar intereses", "book"], ["usuarios", "Usuarios e intereses", "users"], ["archivos", "Archivos", "book"],['aliados','Aliados','ally']);
     tabs.push(["trabajos", "IA y trabajos", "spark"]);
     if (S.boot.admin || S.boot.executive) tabs.push(["microeventos", "Microeventos", "calendar"]);
     if (S.boot.admin) tabs.push(["logs", "Auditoría", "clock"], ["configuracion", "Configuración", "settings"]);
     return tabs;
   }
-  function adminShell(d, tabs, tab) {
-    const overview = [
-      [d.counts.members,'Miembros','users',S.boot.admin?'usuarios':'moderacion'],
-      [d.pending.length,'Contenidos por revisar','shield','moderacion'],
-      [d.jobs.filter(j=>['pending','processing'].includes(j.status)).length,'Trabajos activos','spark','trabajos'],
-      [d.reports.filter(r=>!r.reviewed).length,'Reportes por revisar','bell','moderacion'],
-    ].map(([n,label,icon,target])=>btn(("<span class=\"stat-icon\">" + (I(icon)) + "</span><span class=\"admin-stat-copy\"><strong>" + (n) + "</strong><small>" + (E(T(label))) + "</small></span><span class=\"admin-stat-arrow\">" + (I('chevron')) + "</span>"),'admin-tab',("data-tab=\"" + (target) + "\" aria-label=\"" + (E(T(label))) + "\""),'admin-stat')).join('');
-    const tabButtons = tabs.map(([key,label,icon])=>btn(I(icon)+E(T(label)),'admin-tab',("data-tab=\"" + (key) + "\" aria-pressed=\"" + (tab===key) + "\""),'admin-tab'+(tab===key?' active':''))).join('');
-    return `<div class="admin-workspace"><header class="admin-hero"><div class="admin-hero-main"><div class="admin-hero-logo"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></div><div class="admin-hero-copy"><span class="eyebrow">${E(T("GESTIÓN DE LA COMUNIDAD"))}</span><h1>${E(T("Administración ASCLA"))}</h1><p>${E(T("Personas, contenido y atención en un mismo lugar."))}</p></div></div><div class="admin-hero-actions">${link('intranet',E(T('Ver intranet'))+' '+I('arrow'),'ghost')}</div></header><div class="admin-overview">${overview}</div><nav class="admin-tabs" aria-label="${E(T("Secciones de administración"))}">${tabButtons}</nav><section id="admin-panel" class="admin-panel"></section></div>`;
+  function adminShell(tabs, tab) {
+    const groups=[['Vista general',['resumen','estadisticas']],['Comunidad',['usuarios','solicitudes','importar']],['Contenido',['moderacion','archivos','microeventos','aliados']],['Sistema',['trabajos','logs','configuracion']]];
+    const navigation=groups.map(([group,keys])=>{
+      const entries=tabs.filter(([key])=>keys.includes(key));
+      if(!entries.length) return '';
+      return `<div class="admin-nav-group"><span>${E(T(group))}</span>${entries.map(([key,label,icon])=>btn(I(icon)+E(T(label)),'admin-tab',`data-tab="${key}" aria-pressed="${tab===key}"`,'admin-tab'+(tab===key?' active':''))).join('')}</div>`;
+    }).join('');
+    const wordpress = C.wpAdminUrl ? `<a class="btn ghost admin-wordpress-link" href="${E(C.wpAdminUrl)}">${I('settings')}${E(T('Administrar WordPress'))}</a>` : '';
+    return `<div class="admin-workspace admin-workspace-v108"><header class="admin-hero"><div class="admin-hero-main"><div class="admin-hero-copy"><span class="eyebrow">${E(T("GESTIÓN DE LA COMUNIDAD"))}</span><h1>${E(T("Administración ASCLA"))}</h1><p>${E(T("Personas, contenido y atención en un mismo lugar."))}</p></div></div><div class="admin-hero-actions">${link('intranet',E(T('Ver intranet'))+' '+I('arrow'),'ghost admin-intranet-link')}${wordpress}</div></header><div class="admin-workspace-body"><nav class="admin-tabs" aria-label="${E(T("Secciones de administración"))}">${navigation}</nav><section id="admin-panel" class="admin-panel" aria-live="polite"></section></div></div>`;
+  }
+  function adminOverview(panel,d) {
+    const metrics=[[d.counts.members,'Cuentas ASCLA','users','usuarios'],[d.pending.length,'Borradores y pendientes','shield','moderacion'],[d.reports.filter(r=>!r.reviewed).length,'Reportes por revisar','bell','moderacion'],[d.jobs.filter(j=>['pending','processing'].includes(j.status)).length,'Trabajos activos','spark','trabajos']];
+    const cards=[['usuarios','users','Conoce a tu comunidad','Consulta intereses y actividad de cada asociado, o administra sus cuentas.','Explorar usuarios'],['moderacion','shield','Revisa el contenido','Atiende publicaciones, comentarios pendientes y reportes de la comunidad.','Abrir moderación'],['solicitudes','contact','Atiende las solicitudes','Responde consultas y gestiona las solicitudes recibidas en Contacto.','Ver solicitudes'],['estadisticas','calendar','Mide la participación','Consulta inscripciones, asistencias y tendencias por tema y período.','Ver estadísticas'],['microeventos','hub','Organiza los encuentros','Revisa propuestas y prepara círculos de conversación.','Ver encuentros']].filter(([key])=>adminTabs().some(([tab])=>tab===key));
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T('TU ESPACIO DE TRABAJO'))}</span><h2>${E(T('¿Qué quieres gestionar hoy?'))}</h2><p>${E(T('Empieza por una tarea o explora la actividad de tu comunidad.'))}</p></div>${btn(I('clock')+' '+E(T('Actualizar')),'admin-refresh','','small')}</div><div class="admin-overview">${metrics.map(([n,label,icon,target])=>btn(`<span class="stat-icon">${I(icon)}</span><span class="admin-stat-copy"><strong>${n}</strong><small>${E(T(label))}</small></span>`,'admin-tab',`data-tab="${target}"`,'admin-stat')).join('')}</div><p class="private-note admin-count-scope">${E(T('Los pendientes, reportes y trabajos corresponden a los elementos cargados en sus bandejas.'))}</p><div class="admin-task-grid">${cards.map(([key,icon,title,description,action])=>`<article class="card admin-task-card"><span class="admin-task-icon">${I(icon)}</span><h3>${E(T(title))}</h3><p>${E(T(description))}</p>${btn(E(T(action))+' '+I('arrow'),'admin-tab',`data-tab="${key}"`,'ghost')}</article>`).join('')}</div><div class="admin-help-note">${I('shield')}<p>${E(T('Las acciones de cuenta y moderación mantienen sus permisos, confirmaciones e historial de auditoría.'))}</p></div>`;
+  }
+  async function adminMemberInsights(id) {
+    if(!S.boot.admin) return;
+    memberInsights ||= globalThis.ASCLAMembers({root,api,E,T,date,I,avatar,back:adminUsers,toast});
+    await memberInsights.open(document.getElementById('admin-panel'),id);
   }
   async function adminStatisticsTab(panel) {
     if (!S.boot.executive) return;
@@ -2600,11 +2918,24 @@
   }
   async function adminMicroeventsTab(panel) {
     panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ENCUENTROS ENTRE ASOCIADOS</span><h2>Círculos de conversación</h2><p>Grupos con intereses comunes y cupos configurables, con una agenda para conversar.</p></div></div><div class="card"><h3>Preparar los próximos encuentros</h3><p class="detail-body">Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.</p><div class="admin-actions">${(S.boot.admin||S.boot.executive)?btn(I('spark')+' Preparar propuestas del período','micro-job','','primary'):''}${link('eventos','Ver encuentros','small')}</div><div id="micro-job-result"></div></div>`;
-    const proposals=await allContent("event",{micro:1,...(S.boot.admin?{}:{mine:1})});
-    panel.insertAdjacentHTML("beforeend",'<h3>'+E(T("Historial de microeventos"))+'</h3>'+proposals.map(p=>'<article class="card"><h3>'+E(p.title)+'</h3>'+microEventHistory(p.meta)+btn("Ver","item",'data-id="'+p.id+'"',"small")+'</article>').join(""));
+    const [proposals,diagnostics]=await Promise.all([allContent("event",{micro:1,...(S.boot.admin?{}:{mine:1})}),api("microevents/diagnostics").catch(error=>({error:error.message}))]);
+    panel.querySelector('#micro-job-result').innerHTML=microDiagnosticsHTML(diagnostics);
+    const archived=!!S.microShowArchived,shown=proposals.filter(p=>!!p.meta.micro_archived===archived);
+    panel.insertAdjacentHTML("beforeend",'<h3>'+E(T("Historial de microeventos"))+'</h3>'+(S.boot.admin?'<div class="tabs" role="group" aria-label="'+E(T('Mostrar microeventos'))+'">'+btn(T('Historial'), 'micro-archive-tab', 'data-archived="false" aria-pressed="'+!archived+'"',!archived?'primary':'')+btn(T('Archivados'), 'micro-archive-tab', 'data-archived="true" aria-pressed="'+archived+'"',archived?'primary':'')+'</div><p class="private-note">'+E(T('Archivar quita el encuentro de este listado principal. Sus datos permanecen disponibles en Archivados.'))+'</p>':'')+shown.map(p=>'<article class="card" data-micro-id="'+Number(p.id)+'"><h3>'+E(p.title)+'</h3>'+microEventHistory(p.meta)+'<div class="form-actions">'+btn("Ver","item",'data-id="'+p.id+'"',"small")+(p.meta.can_archive?btn(T(p.meta.micro_archived?'Restaurar en el panel':'Archivar del panel'),'micro-archive','data-id="'+Number(p.id)+'" data-archived="'+!p.meta.micro_archived+'"','small'):'')+'</div></article>').join("")+(shown.length?'':empty(archived?'No hay microeventos archivados.':'No hay microeventos en este listado.')));
+  }
+  function microDiagnosticsHTML(d) {
+    if (!d || d.error) return '<div class="error">'+E(T('No se pudieron comprobar las condiciones para generar microeventos.'))+'</div>';
+    const messages={ready:'Hay candidatos para preparar propuestas.',insufficient_candidates:'No hay suficientes asociados elegibles para alcanzar el mínimo.',insufficient_shared_interest:'Ningún interés visible reúne el mínimo de asociados requerido.',incompatible_group:'No se encontró un grupo compatible con los bloqueos actuales.',no_group:'No se encontró un grupo que cumpla las condiciones actuales.'};
+    return '<div class="alert micro-diagnostics" role="status"><strong>'+E(T(messages[d.reason] || messages.no_group))+'</strong><p>'+E(T('Asociados elegibles'))+': '+Number(d.eligible)+' · '+E(T('Mínimo por grupo'))+': '+Number(d.minimum)+' · '+E(T('Mayor grupo con un interés común'))+': '+Number(d.max_shared_interest)+'</p><details><summary>'+E(T('Revisar condiciones'))+'</summary><p>'+E(T('Se respetan la membresía activa, el consentimiento para microeventos, el perfil completo, la privacidad de intereses y los bloqueos.'))+'</p><p>'+E(T('Excluidos por membresía'))+': '+Number(d.excluded?.inactive || 0)+' · '+E(T('Sin consentimiento'))+': '+Number(d.excluded?.no_consent || 0)+' · '+E(T('Perfil incompleto'))+': '+Number(d.excluded?.incomplete || 0)+'</p><p>'+E(T('Revisa los mínimos en Configuración → Participación y revisión y los intereses autorizados de los perfiles.'))+'</p></details></div>';
+  }
+  async function handleMicroArchive(a,b,id) {
+    if (a === 'micro-archive-tab') { S.microShowArchived=b.dataset.archived==='true';await admin();return; }
+    const archived=b.dataset.archived==='true';
+    await api(`events/${id}/archive`,{archived});closeModal();
+    toast(T(archived?'Microevento archivado. Su historial se conserva.':'Microevento restaurado en el panel.'));await admin();
   }
   function adminAuditActionName(action) {
-    const labels={settings_updated:'Configuración actualizada',content_saved:'Contenido guardado',content_trashed:'Contenido eliminado',comment_trashed:'Comentario eliminado',content_reported:'Contenido reportado',comment_reported:'Comentario reportado',report_reviewed:'Reporte revisado',moderation:'Decisión de moderación',comment_moderation:'Comentario moderado',member_created:'Usuario creado',member_updated:'Usuario actualizado',professional_profile_updated:'Datos profesionales actualizados',member_deleted:'Usuario eliminado',member_suspended:'Acceso suspendido',member_reactivated:'Acceso reactivado',contact_status:'Solicitud actualizada',event_registration:'Inscripción a evento',event_invited:'Invitaciones a evento',event_cancelled:'Evento cancelado',connection_requested:'Solicitud de conexión',connection_accepted:'Conexión aceptada',connection_rejected:'Conexión rechazada',connection_cancelled:'Solicitud de conexión cancelada',connection_removed:'Conexión eliminada',conversation_requested:'Solicitud de conversación',conversation_request_accepted:'Conversación autorizada',conversation_request_rejected:'Solicitud de conversación rechazada',conversation_request_cancelled:'Solicitud de conversación cancelada',conversation_started:'Conversación iniciada',group_conversation_created:'Grupo de mensajería creado',group_conversation_updated:'Grupo de mensajería actualizado',group_conversation_deleted:'Grupo de mensajería eliminado',message_deleted:'Mensaje eliminado',password_changed:'Contraseña cambiada',password_reset_requested:'Recuperación solicitada',media_deleted:'Archivo eliminado',oauth_connected:'Servicio Google conectado',oauth_disconnected:'Servicio Google desconectado',calendar_create:'Evento añadido a Google Calendar',calendar_delete:'Evento retirado de Google Calendar',calendar_save:'Evento guardado en Google Calendar',calendar_cancel:'Evento retirado o cancelado en Google Calendar',calendar_organize:'Evento organizador creado en Google Calendar',calendar_update:'Evento organizador actualizado en Google Calendar',turnstile_passed:'Verificación de seguridad superada',turnstile_failed:'Verificación de seguridad fallida',turnstile_error:'Error de verificación de seguridad',request_failed:'Solicitud con error',job_completed:'Trabajo en segundo plano completado',job_failed:'Trabajo en segundo plano con error',ai_generated:'Contenido asistido por IA creado'};
+    const labels={board_role_authorization:'Autorización de roles de la Junta',member_roles_updated:'Roles de cuenta actualizados',account_permissions_changed:'Permisos de cuenta actualizados',technical_error:'Error técnico',settings_updated:'Configuración actualizada',content_saved:'Contenido guardado',content_trashed:'Contenido eliminado',comment_trashed:'Comentario eliminado',content_reported:'Contenido reportado',comment_reported:'Comentario reportado',report_reviewed:'Reporte revisado',moderation:'Decisión de moderación',comment_moderation:'Comentario moderado',member_created:'Usuario creado',member_updated:'Usuario actualizado',professional_profile_updated:'Datos profesionales actualizados',member_deleted:'Usuario eliminado',member_suspended:'Acceso suspendido',member_reactivated:'Acceso reactivado',contact_status:'Solicitud actualizada',event_registration:'Inscripción a evento',event_invited:'Invitaciones a evento',event_cancelled:'Evento cancelado',connection_requested:'Solicitud de conexión',connection_accepted:'Conexión aceptada',connection_rejected:'Conexión rechazada',connection_cancelled:'Solicitud de conexión cancelada',connection_removed:'Conexión eliminada',conversation_requested:'Solicitud de conversación',conversation_request_accepted:'Conversación autorizada',conversation_request_rejected:'Solicitud de conversación rechazada',conversation_request_cancelled:'Solicitud de conversación cancelada',conversation_started:'Conversación iniciada',group_conversation_created:'Grupo de mensajería creado',group_conversation_updated:'Grupo de mensajería actualizado',group_conversation_deleted:'Grupo de mensajería eliminado',message_deleted:'Mensaje eliminado',password_changed:'Contraseña cambiada',password_reset_requested:'Recuperación solicitada',media_deleted:'Archivo eliminado',oauth_connected:'Servicio Google conectado',oauth_disconnected:'Servicio Google desconectado',calendar_create:'Evento añadido a Google Calendar',calendar_delete:'Evento retirado de Google Calendar',calendar_save:'Evento guardado en Google Calendar',calendar_cancel:'Evento retirado o cancelado en Google Calendar',calendar_organize:'Evento organizador creado en Google Calendar',calendar_update:'Evento organizador actualizado en Google Calendar',turnstile_passed:'Verificación de seguridad superada',turnstile_failed:'Verificación de seguridad fallida',turnstile_error:'Error de verificación de seguridad',request_failed:'Solicitud con error',job_completed:'Trabajo en segundo plano completado',job_failed:'Trabajo en segundo plano con error',ai_generated:'Contenido asistido por IA creado'};
     return labels[action]||String(action||'Actividad del sistema').replaceAll('_',' ');
   }
   function adminLogsTab(panel, d) {
@@ -2615,6 +2946,8 @@
   }
   async function adminSettingsTab(panel) { if (S.boot.admin) await settings(panel); }
   const ADMIN_TAB_HANDLERS = {
+    aliados: panel=>alliesUI().registry(panel),
+    resumen: (panel,d) => adminOverview(panel,d),
     estadisticas: (panel) => adminStatisticsTab(panel),
     importar: (panel) => adminImportTab(panel),
     solicitudes: (panel) => adminContacts(panel),
@@ -2630,9 +2963,9 @@
     const d = await api("admin");
     S.admin=d;
     const tabs=adminTabs();
-    const tab=tabs.some(([key])=>key===S.adminTab)?S.adminTab:"moderacion";
+    const tab=tabs.some(([key])=>key===S.adminTab)?S.adminTab:(S.boot.admin?'resumen':'moderacion');
     S.adminTab=tab;
-    content().innerHTML=adminShell(d, tabs, tab);
+    content().innerHTML=adminShell(tabs, tab);
     const panel=document.getElementById('admin-panel');
     const handler=ADMIN_TAB_HANDLERS[tab];
     if (handler) {
@@ -2649,7 +2982,7 @@
     form.querySelectorAll('[data-ai-provider-panel]').forEach(panel=>{
       const active=panel.dataset.aiProviderPanel===provider;
       panel.hidden=!active;
-      panel.querySelectorAll('input,select,textarea').forEach(control=>{ control.disabled=!active; });
+      panel.querySelectorAll('input,select,textarea').forEach(control=>{ control.disabled=!active || control.dataset.serverSecret === '1'; });
     });
     const test=form.querySelector('[data-ai-test-actions]');
     if (test) test.hidden=provider==='mock';
@@ -2667,7 +3000,38 @@
       lastAttempt = 'Último intento: ' + E(deliveryStatus) + ' · ' + E(date(last.at, {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}));
     }
     const body=`${local}<p class="private-note">Usa el servicio de correo de tu hosting o un proveedor SMTP. Si otro plugin ya gestiona los envíos, conserva “Transporte de WordPress”. Guarda los cambios antes de enviar una prueba a tu correo de administrador.</p><div class="form-grid">${select('mail_mode', 'Envío de correos', [['wordpress', 'Transporte de WordPress / otro plugin'], ['smtp', 'Servidor SMTP']], s.mail_mode)}${field('smtp_host', 'Servidor SMTP', s.smtp_host, 'text', 'placeholder="smtp.tuproveedor.com" autocomplete="off"')}${select('smtp_port', 'Puerto', [[587,'587'],[465,'465'],[2525,'2525']], s.smtp_port)}${select('smtp_security', 'Cifrado', [['tls', 'STARTTLS (587 / 2525)'],['ssl', 'SSL/TLS (465)']], s.smtp_security)}${field('smtp_user','Usuario SMTP',s.smtp_user,'text','autocomplete="off"')}${field('smtp_password', s.has_smtp_password ? 'Contraseña SMTP (guardada; vacío para conservar)' : 'Contraseña SMTP', '', 'password', 'autocomplete="new-password"')}${field('smtp_from','Correo remitente autorizado',s.smtp_from,'email')}${field('smtp_name','Nombre del remitente',s.smtp_name)}</div>${check('clear_smtp_password','Eliminar contraseña SMTP guardada',false)}<p class="private-note">La contraseña se guarda cifrada. Para eliminarla, cambia primero al transporte de WordPress. ${lastAttempt}</p>${btn('Enviar correo de prueba a mi cuenta','mail-test','','small')}`;
-    return settingsSection('contact','Correo y recuperación','Configura la salida de correos, recuperación de contraseña y pruebas de entrega.',body,true);
+    const counts=s.deliveries||{};
+    const deliveries=`<p>${E(T('Entregas pendientes'))}: ${Number(counts.pending||0)} · ${E(T('Entregas que requieren revisión'))}: ${Number(counts.failed||0)}</p>${btn('Revisar entregas','delivery-list','','small')}`;
+    return settingsSection('contact','Correo y recuperación','Configura la salida de correos, recuperación de contraseña y pruebas de entrega.',body+deliveries,true);
+  }
+  async function deliveryList() {
+    const data=await api('admin/deliveries');
+    const kinds={mail:'Correo',notification:'Notificación por correo',calendar:'Google Calendar',cache:'Actualización interna'};
+    const states={pending:'Pendiente',processing:'Procesando',failed:'Requiere revisión'};
+    const rows=data.items.map(row=>`<div class="admin-job"><strong>#${Number(row.id)} · ${E(T(kinds[row.kind]||'Entrega'))}</strong><p>${E(T(states[row.status]||'Pendiente'))} · ${E(T('Intentos'))}: ${Number(row.attempts)}</p>${row.status==='failed'?btn('Reintentar','delivery-retry',`data-id="${Number(row.id)}"`,'small'):''}</div>`).join('');
+    modal('Entregas y actualizaciones',`<p>${E(T('Las entregas se reintentan automáticamente. Si requieren revisión, verifica primero la conexión del servicio.'))}</p>${rows||'<p>'+E(T('No hay entregas pendientes.'))+'</p>'}`);
+  }
+  function bindServerSecrets(form, settings) {
+    for (const [name, source] of Object.entries(settings.secret_sources || {})) {
+      if (!source.managed_externally) continue;
+      const input = form.elements[name];
+      if (input) {
+        input.disabled = true;
+        input.dataset.serverSecret = '1';
+        input.value = '';
+        const note = document.createElement('p');
+        note.className = 'private-note';
+        note.textContent = T('Esta credencial se administra en el servidor.') + ' ' + source.variable;
+        input.parentElement.append(note);
+      }
+      const clear = form.elements['clear_' + name];
+      if (clear) { clear.checked = false; clear.disabled = true; clear.dataset.serverSecret = '1'; }
+    }
+  }
+  function serverSecretsStatus(settings) {
+    const descriptions = {constant: 'Constante del servidor', environment: 'Variable de entorno', external_required: 'Pendiente de configurar en el servidor', encrypted_option: 'Almacenamiento cifrado anterior', absent: 'Sin configurar'};
+    const rows = Object.values(settings.secret_sources || {}).map(source => `<tr><td><code>${E(source.variable)}</code></td><td>${E(T(descriptions[source.source] || 'Sin configurar'))}</td></tr>`).join('');
+    return settingsSection('shield', 'Custodia de credenciales', 'Origen de las credenciales de servicio, sin mostrar sus valores.', `<p>${E(T(settings.external_secrets_only ? 'Modo externo: las claves de servicio se administran en el servidor.' : 'Compatibilidad activa con claves cifradas anteriores. Configura las variables en el servidor antes de activar el modo externo.'))}</p><div class="table-wrap"><table class="data-table"><thead><tr><th>${E(T('Variable'))}</th><th>${E(T('Origen'))}</th></tr></thead><tbody>${rows}</tbody></table></div>`);
   }
   async function settings(panel) {
     const s = await api("settings");
@@ -2678,9 +3042,10 @@
     const google=settingsSection('calendar','Google OAuth','Credenciales para que cada asociado conecte servicios autorizados de Google desde su cuenta.',`<div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert settings-code-alert"><span>URI de redirección</span><code>${E(s.google_redirect)}</code></div><p class="private-note">Cada asociado conecta su calendario desde Perfil. YouTube se conecta desde IA y trabajos.</p>`);
     const social=settingsSection('contact','Social Listening','Estado de conectores sociales y restricciones de integración externa.',`<div class="alert">LinkedIn y X permanecen en DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; ASCLA no realiza scraping ni envía respuestas externas.</div>`);
     const legal=settingsSection('book','Identidad y propiedad intelectual','Texto institucional mostrado en las áreas correspondientes de la intranet.',`${field("copyright", "Propiedad intelectual", s.copyright)}`);
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PREFERENCIAS Y SERVICIOS</span><h2>Configuración</h2><p>Gestiona las reglas de comunidad, recomendaciones, seguridad e integraciones. Cada bloque agrupa opciones relacionadas para evitar configuraciones ambiguas.</p></div><span class="admin-config-status">${I('shield')} Cambios protegidos</span></div><form class="admin-settings" data-form="settings" data-guard-unsaved><div class="settings-grid">${participation}${settingsSection("mail","Categorías de Contacto","Opciones vigentes del formulario de solicitudes.",field("support_categories","Una categoría por línea",(s.support_categories || []).join("\n"),"textarea",'required rows="6"'))}${settingsSection("users","Perfiles y directorio","Frecuencia de revisión y tamaño de los resultados.", '<div class="form-grid">'+field("profile_review_days","Revisar el perfil cada (días)",s.profile_review_days,"number",'min="1" max="730" required')+field("profile_snooze_days","Posponer avisos durante (días)",s.profile_snooze_days,"number",'min="1" max="30" required')+field("directory_page_size","Perfiles por página",s.directory_page_size,"number",'min="5" max="100" required')+"</div>")}${matching}${social}${security}${ai}${google}${legal}${mailSettings(s)}</div><div class="settings-savebar"><div><strong>Configuración de ASCLA</strong><span>Los cambios se aplican al guardar.</span></div><button class="btn primary">Guardar configuración</button></div></form><form class="card section-gap demo-settings-card" data-form="demo"><div class="admin-feature-icon">${I('spark')}</div><div><h2>Preparar datos de demostración</h2><p class="private-note">Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes.</p>${field("password", "Contraseña para nuevas cuentas demo", "", "password", 'required minlength="12" autocomplete="new-password"')}</div><button class="btn">Crear / completar demo</button></form>`;
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PREFERENCIAS Y SERVICIOS</span><h2>Configuración</h2><p>Gestiona las reglas de comunidad, recomendaciones, seguridad e integraciones. Cada bloque agrupa opciones relacionadas para evitar configuraciones ambiguas.</p></div><span class="admin-config-status">${I('shield')} Cambios protegidos</span></div><form class="admin-settings" data-form="settings" data-guard-unsaved><div class="settings-grid">${participation}${settingsSection("mail","Categorías de Contacto","Opciones vigentes del formulario de solicitudes.",field("support_categories","Una categoría por línea",(s.support_categories || []).join("\n"),"textarea",'required rows="6"'))}${settingsSection("users","Perfiles y directorio","Frecuencia de revisión y tamaño de los resultados.", '<div class="form-grid">'+field("profile_review_days","Revisar el perfil cada (días)",s.profile_review_days,"number",'min="1" max="730" required')+field("profile_snooze_days","Posponer avisos durante (días)",s.profile_snooze_days,"number",'min="1" max="30" required')+field("directory_page_size","Perfiles por página",s.directory_page_size,"number",'min="5" max="100" required')+"</div>"+profileCompletionSettings(s))}${matching}${social}${serverSecretsStatus(s)}${security}${ai}${google}${legal}${mailSettings(s)}</div><div class="settings-savebar"><div><strong>Configuración de ASCLA</strong><span>Los cambios se aplican al guardar.</span></div><button class="btn primary">Guardar configuración</button></div></form><form class="card section-gap demo-settings-card" data-form="demo"><div class="admin-feature-icon">${I('spark')}</div><div><h2>Preparar datos de demostración</h2><p class="private-note">Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes.</p>${field("password", "Contraseña para nuevas cuentas demo", "", "password", 'required minlength="12" autocomplete="new-password"')}</div><button class="btn">Crear / completar demo</button></form>`;
     const settingsForm=panel.querySelector('[data-form="settings"]');
     syncAIProvider(settingsForm);
+    bindServerSecrets(settingsForm,s);
     registerUnsavedForm(settingsForm);
   }
   function rules() {
@@ -2755,7 +3120,7 @@
     stopChat(); closeModal(); document.querySelector('.feedback-toast')?.remove();
     S.page = page; S.filter = {}; S.item = null; S.conversation = 0; S.messagesLoaded = false;
     const q = new URLSearchParams(location.search); if (q.has('q')) S.filter.q = q.get('q');
-    root.querySelector('.ascla-sidebar')?.classList.remove('open');
+    accessibility?.setMenu(false);
   }
   async function routeDetails() {
     const q = new URLSearchParams(location.search);
@@ -2802,6 +3167,13 @@
   });
 
   root.addEventListener("keydown", event => {
+    const connectionTab = event.target.closest?.('[data-action="connection-tab"]');
+    if (connectionTab && ['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) {
+      event.preventDefault();
+      const index = CONNECTION_TABS.findIndex(([key])=>key===connectionTab.dataset.tab);
+      const next = event.key === 'Home' ? 0 : event.key === 'End' ? CONNECTION_TABS.length-1 : (index+(event.key==='ArrowRight'?1:-1)+CONNECTION_TABS.length)%CONNECTION_TABS.length;
+      selectConnectionTab(CONNECTION_TABS[next][0],true);return;
+    }
     const input = event.target.closest?.('.assistant-compose textarea[name="question"]');
     if (!input || event.key !== "Enter" || event.shiftKey || event.isComposing) return;
     event.preventDefault();
@@ -2816,14 +3188,23 @@
       closeModalDecision();
     }
   }
-  async function handleClickActions02(a, _b, _id, _event) {
+  async function handleClickActions02(a, b, _id, _event) {
     if (a === "modal-unsaved-discard") {
       closeModalDecision(); S.modalUnsavedForm = null; closeModal();
     }
     else if (a === "modal-unsaved-save") {
       const guarded = S.modalUnsavedForm;
       closeModalDecision();
-      if (guarded?.isConnected) guarded.requestSubmit();
+      if (guarded?.isConnected) {
+        if (canSaveEventAsDraft(guarded)) prepareEventDraft(guarded);
+        guarded.requestSubmit();
+      }
+    }
+    else if (a === "save-event-draft") {
+      const form = b.closest('form[data-form="editor"][data-type="event"]');
+      if (!form) return;
+      prepareEventDraft(form);
+      form.requestSubmit();
     }
   }
   async function handleClickActions03(a, _b, _id, _event) {
@@ -2866,7 +3247,7 @@
   }
   async function handleClickActions06(a, _b, _id, _event) {
     if (a === "menu") {
-      document.querySelector(".ascla-sidebar").classList.toggle("open");
+      accessibility?.setMenu(!root.querySelector(".ascla-sidebar.open"), true);
     }
     else if (a === "refresh") {
       if (await confirmUnsavedExit()) await render();
@@ -3011,7 +3392,7 @@
     }
   }
   async function handleClickActions19(a, b, id, _event) {
-    if (["like", "follow"].includes(a)) {
+    if (a === "like") {
       await api(`items/${id}/reaction`, {
       kind: a,
       active: b.dataset.active === "true",
@@ -3083,7 +3464,10 @@
     }
   }
   async function handleClickActions23(a, b, id, _event) {
-    if (a === "connection-remove-confirm") {
+    if (a === "connection-tab") {
+      selectConnectionTab(b.dataset.tab);
+    }
+    else if (a === "connection-remove-confirm") {
       const mode = b.dataset.mode;
       await api("relations", {target:id, kind:"connect", active:false});
       closeModal(); await refreshRelationshipState(id); await refreshConnectionsPanel(); await refreshNotifications();
@@ -3219,7 +3603,8 @@
       await olderMessages(b);
     }
     else if (a === "event-cancel-request") {
-      modal(T("Cancelar evento"), `<p class="detail-body">${E(T("¿Seguro que deseas cancelar este evento?"))}</p><p>${E(T("El evento se conservará como cancelado y se notificará a las personas inscritas, invitadas o en lista de espera. Esta acción no elimina el historial."))}</p><div class="form-actions">${field("cancellation_reason","Motivo de cancelación","","textarea",'required maxlength="1000"')}${btn(T("Volver"),"item",("data-id=\"" + (id) + "\""))}${btn(T("Cancelar evento"),"event-cancel-confirm",("data-id=\"" + (id) + "\""),'danger primary')}</div>`);
+      const title = T(b.dataset.micro === "true" ? "Cancelar microevento" : "Cancelar evento");
+      modal(title, `<div class="event-cancellation"><p class="detail-body">${E(b.dataset.title || "")}</p><p>${E(T("¿Seguro que deseas cancelar este evento?"))}</p><p class="private-note">${E(T("El evento se conservará como cancelado y se notificará a las personas inscritas, invitadas o en lista de espera. Esta acción no elimina el historial."))}</p>${field("cancellation_reason","Motivo de cancelación","","textarea",'required maxlength="1000" rows="4"')}<div class="form-actions">${btn(T("Volver"),"item",("data-id=\"" + (id) + "\""))}${btn(title,"event-cancel-confirm",("data-id=\"" + (id) + "\""),'danger primary')}</div></div>`);
     }
   }
   async function handleClickActions32(a, b, id, _event) {
@@ -3229,6 +3614,7 @@
       await api(`events/${id}/cancel`, {reason:reasonField.value.trim()});
       toast("Evento cancelado. Las personas relacionadas fueron notificadas.");
       if (S.page === "eventos") await listing();
+      else if (S.page === "admin") await admin();
       await item(id);
     }
     else if (a === "register") {
@@ -3249,12 +3635,19 @@
     if (a === "page") {
       S.filter.page = b.dataset.page;
       await render();
+      const title = content().querySelector("h1");
+      if (title) { title.tabIndex = -1; title.focus({preventScroll:true}); title.scrollIntoView({block:"start"}); }
+    }
+    else if (a === "filter-reset") {
+      S.filter = S.page==='foros' && S.filter.comments ? {comments:1} : {};
+      await render();
     }
     else if (a.startsWith("filter-")) {
       S.filter = {
       ...S.filter, page: 1,
       mine: a === "filter-mine" ? 1 : "",
       past: a === "filter-past" ? 1 : "",
+      comments: a === "filter-comments" ? 1 : "",
       };
       await render();
     }
@@ -3297,8 +3690,10 @@
   }
   async function handleClickActions37(a, _b, _id, _event) {
     if (a === "assistant-new") {
-      assistantThread(true);
-      await assistant();
+      const url = new URL(location.href);
+      ["job", "history", "notification"].forEach(key => url.searchParams.delete(key));
+      history.replaceState(history.state, "", url);
+      await assistant(true);
       document.querySelector('[data-form="ask"] [name="question"]')?.focus();
     }
     else if (a === "ai-test") {
@@ -3344,7 +3739,10 @@
     }
   }
   async function handleClickActions42(a, b, id, _event) {
-    if (a === "user-edit") {
+    if (a === "user-insights") {
+      await adminMemberInsights(id);
+    }
+    else if (a === "user-edit") {
       await adminUserEditor(id);
     }
     else if (a === "user-delete") {
@@ -3366,20 +3764,7 @@
       if (await confirmUnsavedExit()) await admin();
     }
     else if (a === "moderate") {
-      const p = await api("items/" + id);
-      modal(
-      "Revisar publicación",
-      `<h3>${E(p.title)}</h3><p class="detail-body">${E(p.body)}</p><form data-form="moderate" data-id="${id}">${select(
-      "decision",
-      "Decisión",
-      [
-      ["approve", "Aprobar y publicar"],
-      ["reject", "Rechazar"],
-      ["hide", "Ocultar"],
-      ["suspend", "Suspender publicación"],
-      ],
-      )}${field("reason", "Motivo de la decisión", "", "textarea", 'required maxlength="1000"')}${p.meta.generated ? check("reviewed", "Revisé fuentes, identidades, afiliaciones y derechos de propiedad intelectual.", false) : ""}<div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Guardar decisión</button></div></form>`,
-      );
+      await openContentReview(id);
     }
   }
   async function handleClickActions45(a, b, id, _event) {
@@ -3436,10 +3821,11 @@
   }
   async function handleClickActions48(a, _b, _id, _event) {
     if (a === "micro-job") {
+      const target=document.getElementById("micro-job-result");
       const j = await api("jobs", { kind: "microevents" });
-      watchJob(j.id, document.getElementById("micro-job-result"), (r) => {
-      document.getElementById("micro-job-result").innerHTML =
-      `<div class="alert">${r.events.length} microeventos propuestos. ${r.waiting.length} asociados en espera.</div>${r.events.map((e) => btn("Revisar #" + e, "item", ("data-id=\"" + (e) + "\""), "small")).join("")}`;
+      watchJob(j.id, target, (r) => {
+      if (!target.isConnected) return;
+      target.innerHTML = `<div class="alert">${E(T(r.reused ? "Se recuperaron las propuestas existentes del período; no se crearon duplicados." : r.events.length ? "Propuestas preparadas para revisión." : "No se generaron propuestas con las condiciones actuales."))}<p>${Number(r.events.length)} ${E(T("microeventos"))} · ${Number(r.waiting.length)} ${E(T("asociados en espera"))}</p></div>${microDiagnosticsHTML(r.diagnostics)}${r.events.map((e) => btn("Revisar #" + e, "item", ("data-id=\"" + (e) + "\""), "small")).join("")}`;
       });
     }
     else if (a === "social-job") {
@@ -3488,6 +3874,8 @@
     else if (a === "mail-test") {
       const result = await api("mail/test", {}); toast(result.message);
     }
+    else if (a === "delivery-list") { await deliveryList(); }
+    else if (a === "delivery-retry") { await api(`admin/deliveries/${id}/retry`,{}); await deliveryList(); }
   }
   async function handleClickActions52(a, _b, _id, _event) {
     if (a === "infographic") {
@@ -3495,8 +3883,9 @@
     }
   }
   const HANDLECLICKACTIONS_DISPATCH = [
+    { test: a => ['micro-archive','micro-archive-tab'].includes(a), run: handleMicroArchive },
     { test: (a) => (a === "close") || (a === "modal-unsaved-stay"), run: handleClickActions01 },
-    { test: (a) => (a === "modal-unsaved-discard") || (a === "modal-unsaved-save"), run: handleClickActions02 },
+    { test: (a) => (a === "modal-unsaved-discard") || (a === "modal-unsaved-save") || (a === "save-event-draft"), run: handleClickActions02 },
     { test: (a) => (a === "profile-review-confirm") || (a === "profile-nudge-later") || (a === "profile-nudge-go"), run: handleClickActions03 },
     { test: (a) => (a === "unsaved-stay") || (a === "unsaved-discard") || (a === "unsaved-save"), run: handleClickActions04 },
     { test: (a) => (a === "theme-menu") || (a === "theme-set"), run: handleClickActions05 },
@@ -3514,11 +3903,11 @@
     { test: (a) => (a === "notification-filter") || (a === "notification-page"), run: handleClickActions16 },
     { test: (a) => (a === "notifications-read-all") || (a === "notification-open"), run: handleClickActions17 },
     { test: (a) => (a === "answer-history") || (a === "report"), run: handleClickActions18 },
-    { test: (a) => (["like", "follow"].includes(a)) || (["recommendation-dismiss", "recommendation-restore", "password-reset-email"].includes(a)), run: handleClickActions19 },
+    { test: (a) => a === "like" || (["recommendation-dismiss", "recommendation-restore", "password-reset-email"].includes(a)), run: handleClickActions19 },
     { test: (a) => (a === "connect") || (a === "connection-respond"), run: handleClickActions20 },
     { test: (a) => (a === "conversation-request") || (a === "conversation-request-respond"), run: handleClickActions21 },
     { test: (a) => (a === "conversation-request-cancel") || (a === "connection-remove-request"), run: handleClickActions22 },
-    { test: (a) => (a === "connection-remove-confirm") || (a === "connections-refresh") || (a === "directory-reset"), run: handleClickActions23 },
+    { test: (a) => ["connection-remove-confirm","connections-refresh","directory-reset","connection-tab"].includes(a), run: handleClickActions23 },
     { test: (a) => (a === "intro") || (a === "group-chat-open"), run: handleClickActions24 },
     { test: (a) => (a === "group-photo-clear") || (a === "group-edit-open"), run: handleClickActions25 },
     { test: (a) => (a === "group-edit-photo-clear") || (a === "conversation-open"), run: handleClickActions26 },
@@ -3537,7 +3926,7 @@
     { test: (a) => (a === "report-reviewed") || (a === "request-filter"), run: handleClickActions39 },
     { test: (a) => (a === "admin-page") || (a === "user-access"), run: handleClickActions40 },
     { test: (a) => (a === "user-status") || (a === "user-create"), run: handleClickActions41 },
-    { test: (a) => (a === "user-edit") || (a === "user-delete"), run: handleClickActions42 },
+    { test: (a) => (a === "user-insights") || (a === "user-edit") || (a === "user-delete"), run: handleClickActions42 },
     { test: (a) => (a === "user-delete-confirm") || (a === "admin-tab"), run: handleClickActions43 },
     { test: (a) => (a === "admin-refresh") || (a === "moderate"), run: handleClickActions44 },
     { test: (a) => (a === "comment-moderate") || (a === "contact-status"), run: handleClickActions45 },
@@ -3546,16 +3935,18 @@
     { test: (a) => (a === "micro-job") || (a === "social-job"), run: handleClickActions48 },
     { test: (a) => (a === "job-detail") || (a === "retry-job"), run: handleClickActions49 },
     { test: (a) => (a === "google-connect") || (a === "google-disconnect"), run: handleClickActions50 },
-    { test: (a) => (a === "google-event") || (a === "mail-test"), run: handleClickActions51 },
+    { test: (a) => ["google-event","mail-test","delivery-list","delivery-retry"].includes(a), run: handleClickActions51 },
     { test: (a) => (a === "infographic"), run: handleClickActions52 },
   ];
 root.addEventListener("click", async (event) => {
     const b = event.target.closest("[data-action]");
     if (!b) return;
+    if (b.dataset.action === "board-role-approval") { event.preventDefault(); boardApprovalEditor(Number(b.dataset.id)); return; }
     if (b.dataset.action === "notification-open" && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) return;
     event.preventDefault();
     const a = b.dataset.action,
       id = Number(b.dataset.id || 0);
+    S.actionFocus = b;
     b.disabled = true;
     try {
       const actionHandler = HANDLECLICKACTIONS_DISPATCH.find((entry) => entry.test(a));
@@ -3565,6 +3956,8 @@ root.addEventListener("click", async (event) => {
       if (e.name !== "AbortError") toast(e.message);
     } finally {
       b.disabled = false;
+      if (S.actionFocus === b) S.actionFocus = null;
+      if (b.isConnected && document.activeElement === document.body && !b.closest('[inert]')) b.focus();
     }
   });
   async function handleSubmitActions01(action, _form, data, _submit, _event) {
@@ -3574,6 +3967,7 @@ root.addEventListener("click", async (event) => {
       await navigateTo(url.href);
     }
     else if (action === "filters") {
+      if (data.after && data.before && data.after > data.before) throw new Error(T("La fecha inicial no puede ser posterior a la fecha final."));
       if (S.page === "directorio") {
         const values = new FormData(_form);
         for (const key of ["industries", "interests", "areas"]) data[key] = values.getAll(key).map(Number);
@@ -3591,6 +3985,7 @@ root.addEventListener("click", async (event) => {
     }
   }
   function googleInviteNote(result) {
+    if (result.google_calendar?.queued) return ' '+T('La entrega a Google Calendar quedó registrada y se reintentará si el servicio falla.');
     const googleSent = Number(result.google_calendar?.sent || 0);
     if (googleSent > 0) {
       const suffix = googleSent === 1 ? "" : "es";
@@ -3682,14 +4077,14 @@ root.addEventListener("click", async (event) => {
     for (const key of [
       "start", "end", "capacity", "offer_hours", "micro_min", "priority_hours", "change_reason", "modality", "location", "url", "agenda", "resource_type", "source",
       "youtube_url", "copyright", "summary", "transcript", "identities", "alliance_type", "benefits",
-      "initiatives", "event_id", "duration_seconds",
+      "initiatives", "event_id", "duration_seconds",'contact_name','contact_email','contact_phone','conditions',
     ]) {
       if (key in data) meta[key] = data[key];
     }
     if (type === "event") {
-      meta.start = new Date(data.start).toISOString();
-      meta.end = new Date(data.end).toISOString();
-      if (data.registration_deadline) meta.registration_deadline = new Date(data.registration_deadline).toISOString();
+      meta.start = eventDateTimeISO(data.start_date, data.start_time);
+      meta.end = eventDateTimeISO(data.end_date, data.end_time);
+      if ("registration_deadline" in data) meta.registration_deadline = data.registration_deadline ? new Date(data.registration_deadline).toISOString() : "";
       if (data.reminder_hours) meta.reminder_hours = data.reminder_hours.split(",").map(v=>Number(v.trim()));
     }
     if (form.elements.chatham) meta.chatham = form.elements.chatham.checked;
@@ -3726,7 +4121,7 @@ root.addEventListener("click", async (event) => {
       }
     }
     closeModal();
-    toast(editorSavedMessage(p.status, p.meta) + calendarMessage);
+    toast(type==='ally'&&p.meta.ally_status==='inactive'?'Aliado guardado como inactivo. Su registro se conserva.':editorSavedMessage(p.status, p.meta) + calendarMessage);
     S.boot = await api("bootstrap");
     await render();
   }
@@ -3828,14 +4223,15 @@ root.addEventListener("click", async (event) => {
       await admin();
     }
     else if (action === "moderate") {
-      await api("items/" + form.dataset.id + "/moderate", {
+      const reviewed = await api("items/" + form.dataset.id + "/moderate", {
       decision: data.decision,
       reason: data.reason,
       reviewed: form.elements.reviewed?.checked || false,
       });
       closeModal();
-      toast("Decisión registrada.");
+      toast(T(reviewed.meta.micro && data.decision === "approve" ? "Propuesta aprobada. Elige cuándo publicarla desde su ficha." : "Decisión registrada."));
       await render();
+      if (reviewed.meta.micro) await item(Number(form.dataset.id));
     }
     else if (action === "admin-user-create") {
       const result=await api('admin/users',{
@@ -3866,9 +4262,18 @@ root.addEventListener("click", async (event) => {
     await adminContacts(document.getElementById("admin-panel"));
   }
   async function handleSubmitActions11(action, form, data, _submit, _event) {
-    if (action === "admin-user-edit") {
+    if (action === "board-approval") {
+      await api('admin/users/'+Number(form.dataset.id)+'/role-approval', {...data, roles:new FormData(form).getAll('roles'), board_confirmed:!!form.elements.board_confirmed.checked});
+      closeModal();toast('Autorización registrada');
+    }
+    else if (action === "admin-user-edit") {
       const userId=Number(form.dataset.id);
       const result=await api('admin/users/'+userId,{
+      assigned_roles:[...new Set([data.role,...new FormData(form).getAll("assigned_roles")])],
+      permission_overrides:Object.fromEntries(Object.keys(data).filter(key => key.startsWith("permission_") && data[key] === "deny").map(key => [key.slice(11), false])),
+      board_reference:data.board_reference || "",
+      board_date:data.board_date || "",
+      board_confirmed:!!form.elements.board_confirmed?.checked,
       professional_request_id:Number(data.professional_request_id||0),
       phone:data.phone,
       phone_visibility:data.phone_visibility,
@@ -3910,6 +4315,7 @@ root.addEventListener("click", async (event) => {
       data.clear_ai_key = data.ai_provider === "gemini" && !!form.elements.clear_ai_key?.checked;
       data.clear_openai_key = data.ai_provider === "openai" && !!form.elements.clear_openai_key?.checked;
       data.clear_deepseek_key = data.ai_provider === "deepseek" && !!form.elements.clear_deepseek_key?.checked;
+      data.profile_completion_extra = new FormData(form).getAll("profile_completion_extra");
       data.matching_min_affinity = Number(data.matching_min_affinity);
       data.matching_max_suggestions = Number(data.matching_max_suggestions);
       await api("settings", data);
@@ -3937,7 +4343,7 @@ root.addEventListener("click", async (event) => {
     { test: (action) => (action === "ask") || (action === "contact"), run: handleSubmitActions09 },
     { test: (action) => (action === "moderate") || (action === "review-decision") || (action === "admin-user-create"), run: handleSubmitActions10 },
     { test: (action) => ["contact-assign","contact-update"].includes(action), run: handleSupportSubmit },
-    { test: (action) => (action === "admin-user-edit") || (action === "admin-filter"), run: handleSubmitActions11 },
+    { test: (action) => (action === "board-approval") || (action === "admin-user-edit") || (action === "admin-filter"), run: handleSubmitActions11 },
     { test: (action) => (action === "settings") || (action === "demo"), run: handleSubmitActions12 },
   ];
 root.addEventListener("submit", async (event) => {
@@ -3948,6 +4354,17 @@ root.addEventListener("submit", async (event) => {
       data = formData(form),
       submit = form.querySelector("button[type=submit],button:not([type])"),
       saveAndLeave = S.pendingUnsavedSaveForm === form && !!S.pendingUnsavedResolver;
+    const invalidText = [...form.querySelectorAll('textarea[required],input[required]')].find(field =>
+      (field.tagName === "TEXTAREA" || ["text", "search", "email", "url", "tel", "password"].includes(field.type))
+      && !/[^\s\p{Z}\p{Cf}\p{Cc}]/u.test(field.value));
+    if (invalidText) {
+      invalidText.setCustomValidity(T("Completa este campo con texto visible."));
+      requiredTextErrors.add(invalidText);
+      invalidText.reportValidity();
+      invalidText.focus();
+      if (saveAndLeave) { S.pendingUnsavedSaveForm = null; resolveUnsavedExit(false); }
+      return;
+    }
     if (submit) submit.disabled = true;
     try {
       const actionHandler = HANDLESUBMITACTIONS_DISPATCH.find((entry) => entry.test(action));
@@ -3964,6 +4381,10 @@ root.addEventListener("submit", async (event) => {
     }
   });
   root.addEventListener("input", (event) => {
+    if (requiredTextErrors.has(event.target)) {
+      event.target.setCustomValidity("");
+      requiredTextErrors.delete(event.target);
+    }
     if (event.target.id === "connection-name-filter") {
       S.connectionFilter = event.target.value;
       filterConfirmedConnections();
@@ -4121,11 +4542,13 @@ root.addEventListener("submit", async (event) => {
     if (reportForm && input.name === "reason") updateReportDetailRequirement(reportForm);
     updateProfilePreference(input);
     publicationFieldState(input);
+    syncEventEditorRequirements(input.closest?.('[data-form="editor"]'));
     refreshUnsavedGuard(input);
     if (!input.dataset.upload || !input.files?.length) return;
     await handleUploadInput(input);
   });
   applyTheme(themeMode());
+  accessibility = globalThis.ASCLAAccessibility(root, T);
   themeMedia?.addEventListener?.("change", () => { if (themeMode() === "system") applyTheme("system"); });
   globalThis.addEventListener("storage", (event) => { if (event.key === THEME_KEY) applyTheme(themeMode()); });
   globalThis.addEventListener("beforeunload", (event) => {
@@ -4136,25 +4559,9 @@ root.addEventListener("submit", async (event) => {
     if (!event.persisted) discardPendingWithin(root, true);
   });
   document.addEventListener("keydown", (event) => {
-    const dialog = document.querySelector(".modal-decision") || document.querySelector(".modal");
     if (event.key === "Escape") {
       if (document.querySelector(".modal-decision-backdrop")) closeModalDecision();
       else if (document.querySelector(".modal-backdrop")) requestModalClose();
-      document.querySelector(".ascla-sidebar")?.classList.remove("open");
-    }
-    if (event.key === "Tab" && dialog) {
-      const f = [
-          ...dialog.querySelectorAll("button,input,select,textarea,a[href]"),
-        ].filter((x) => !x.disabled && x.offsetParent !== null),
-        first = f[0],
-        last = f.at(-1);
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last?.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first?.focus();
-      }
     }
   });
   root.addEventListener("error", (event) => {
@@ -4190,7 +4597,7 @@ root.addEventListener("submit", async (event) => {
             "ascla-logs": "logs",
             "ascla-integraciones": "configuracion",
             "ascla-configuracion": "configuracion",
-          }[menu] || "moderacion";
+          }[menu] || (S.boot.admin?'resumen':'moderacion');
       }
       shell();
       S.liveToastCursor = Number(S.boot.notification_cursor || 0);

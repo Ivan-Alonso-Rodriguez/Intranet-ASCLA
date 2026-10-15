@@ -1,0 +1,28 @@
+meta {
+  name: nonce-admin
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base}}/intranet/
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{adminCookie}}
+  X-WP-Nonce: {{adminNonce}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+script:post-response {
+  const match = String(res.getBody()).match(/var ASCLA\s*=\s*(\{[\s\S]*?\});/);
+  if (match) bru.setVar("adminNonce", JSON.parse(match[1]).nonce);
+}
+tests {
+  test("Sesi\u00f3n autenticada admin", function () { expect(res.getStatus()).to.equal(200); });
+  test("Nonce REST disponible", function () { expect(bru.getVar("adminNonce")).to.be.a("string").and.not.empty; });
+}

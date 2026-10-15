@@ -6,7 +6,7 @@ final class ContentMeta
 
 {
 
-    public static function sanitize(string $type,array $input,int $id=0): array
+    public static function sanitize(string $type,array $input,int $id=0,bool $allowIncomplete=false): array
     {
         $data=$id?(array)get_post_meta($id,'_ascla',true):[];
         $mod=current_user_can('ascla_moderate');
@@ -16,10 +16,11 @@ final class ContentMeta
         self::urls($data,$input);
         if ($editorial && isset($input['chatham'])) { $data['chatham']=rest_sanitize_boolean($input['chatham']); }
         elseif (!isset($data['chatham'])) { $data['chatham']=Settings::get()['chatham_default']; }
+        if ($type==='ally') { Allies::metadata($data,$input); }
         self::media($data,$input,$id);
         if ($type==='event') {
             self::event($data,$input);
-            MicroLifecycle::sanitize($data,$input,$id);
+            MicroLifecycle::sanitize($data,$input,$id,$allowIncomplete);
             EventReminders::sanitize($data,$input,$id);
             EventParticipation::validateChange($id,$id?(array)get_post_meta($id,'_ascla',true):[],$data,$input);
         }
@@ -68,7 +69,7 @@ final class ContentMeta
     {
         if (!isset($input['media_ids'])) { return; }
         Access::require(is_array($input['media_ids'])&&count($input['media_ids'])<=12,'Máximo 12 archivos.',400);
-        $data['media_ids']=array_values(array_unique(array_map('absint',$input['media_ids'])));
+        $data['media_ids']=FormRules::ids($input['media_ids']);
         foreach ($data['media_ids'] as $media) {
             $file=\ASCLA\Core\Repositories\Store::one('media',$media);
             Access::require($file && ((int)$file['user_id']===get_current_user_id()||($id&&(int)$file['post_id']===$id)),'Archivo no autorizado.');
@@ -85,11 +86,16 @@ final class ContentMeta
         }
         $data['media_ids']=$eventMedia;
         foreach (['start','end'] as $key) {
-            $data[$key]=self::eventDate($input[$key]??$data[$key]??'');
+            $value=$input[$key]??$data[$key]??'';
+            if ($value==='') { unset($data[$key]); }
+            else { $data[$key]=self::eventDate($value); }
         }
-        Access::require(strtotime($data['end'])>strtotime($data['start']),'El fin debe ser posterior al inicio.',400);
-        $data['offer_hours']=max(1,min(168,(int)($input['offer_hours']??$data['offer_hours']??24)));
-        $data['capacity']=max(0,min(100000,absint($input['capacity']??$data['capacity']??0)));
+        if (!empty($data['start']) && !empty($data['end'])) {
+            Access::require(strtotime($data['end'])>strtotime($data['start']),'El fin debe ser posterior al inicio.',400);
+        }
+        $data['offer_hours']=FormRules::integer('offer_hours',$input['offer_hours']??$data['offer_hours']??24);
+        $data['capacity']=FormRules::integer('capacity',$input['capacity']??$data['capacity']??0);
+        Access::require(in_array($data['modality']??'Virtual',['Virtual','Presencial','Híbrido'],true),'Modalidad no válida.',400);
     }
 
     public static function eventDate(mixed $value): string
@@ -112,8 +118,7 @@ final class ContentMeta
     private static function duration(array &$data,array $input): void
     {
         if (!isset($input['duration_seconds'])) { return; }
-        Access::require(is_numeric($input['duration_seconds']) && (int)$input['duration_seconds']>=0 && (int)$input['duration_seconds']<=604800,'Duración no válida.',400);
-        $data['duration_seconds']=(int)$input['duration_seconds'];
+        $data['duration_seconds']=FormRules::integer('duration_seconds',$input['duration_seconds']);
         $data['video_metadata_mode']='Datos manuales';
     }
 

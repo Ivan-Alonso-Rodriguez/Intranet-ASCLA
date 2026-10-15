@@ -9,6 +9,7 @@ final class Plugin
     {
         if (self::$booted) { return; }
         self::$booted=true;
+        Services\TechnicalErrors::boot();
         Repositories\Transaction::boot();
         add_filter('cron_schedules',static function(array $schedules): array {
             $schedules['ascla_weekly']=['interval'=>7*DAY_IN_SECONDS,'display'=>'Cada siete días (ASCLA)'];
@@ -28,19 +29,24 @@ final class Plugin
         Services\MicroEligibility::boot();
         Services\ProfessionalChanges::boot();
         Services\AccountAudit::boot();
+        Services\AccountPermissions::boot();
         add_action('init',[Services\MicroPlanning::class,'schedule'],21);
         Services\SessionPolicy::boot();
+        Repositories\CacheRecovery::boot();
         Admin\Panel::boot();
         Rest\Router::boot();
         Jobs\Queue::boot();
+        Jobs\Deliveries::boot();
         Services\Media::boot();
         Services\InterestIndex::boot();
+        Services\LearnedInterests::boot();
         add_action('deleted_user',static fn($id)=>Repositories\Store::delete('attendance',['user_id'=>(int)$id]));
         add_action('before_delete_post',[Services\EventReminders::class,'cancel']);
         add_action('wp_trash_post',[Services\EventReminders::class,'cancel']);
         add_action('before_delete_post',static fn($id)=>Repositories\Store::delete('attendance',['event_id'=>(int)$id]));
         add_action('added_post_meta',[Services\Content::class,'indexMeta'],10,4);
         add_action('updated_post_meta',[Services\Content::class,'indexMeta'],10,4);
+        add_action('deleted_post_meta',[Repositories\AllySearch::class,'deleted'],10,4);
         Integrations\GoogleOAuth::boot();
         Integrations\Mailer::boot();
         add_action('transition_comment_status',[Services\Content::class,'commentTransition'],10,3);
@@ -99,5 +105,6 @@ final class Plugin
         \WP_CLI::add_command('ascla demo-user',static fn($args,$options)=>self::demoUserCli((array)$args,(array)$options));
         \WP_CLI::add_command('ascla migrate',static function () { Database\Installer::activate(false); \WP_CLI::success('Migraciones aplicadas.'); });
         \WP_CLI::add_command('ascla jobs',[Jobs\Queue::class,'run']);
+        \WP_CLI::add_command('ascla deliveries',static function() { Jobs\Deliveries::run();\WP_CLI::line(wp_json_encode(Jobs\Deliveries::overview())); });
     }
 }

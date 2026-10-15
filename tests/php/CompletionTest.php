@@ -116,7 +116,7 @@ final class CompletionTest extends TestCase
         // even when the activity topic is not part of the explicit profile.
         $activityTag='Actividad '.bin2hex(random_bytes(4));
         wp_set_current_user($this->users[0]);
-        $activitySource=$this->create('resource',['title'=>'QZ Fuente de actividad','tag_names'=>[$activityTag]]);
+        $activitySource=$this->create('resource',['title'=>'QZ Fuente de actividad','tag_names'=>[$activityTag],'meta'=>['chatham'=>false]]);
         $activityTarget=$this->create('resource',['title'=>'QZ Recomendación por actividad','tag_names'=>[$activityTag]]);
         wp_set_current_user($this->users[1]);
         Content::react($activitySource['id'],'like',true);

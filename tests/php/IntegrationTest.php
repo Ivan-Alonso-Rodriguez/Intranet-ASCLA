@@ -76,7 +76,7 @@ final class IntegrationTest extends TestCase
 
     }
 
-    public function testPastEventsCannotBeRegisteredOrFollowed(): void
+    public function testPastEventsCannotBeRegisteredOrAddedToCalendar(): void
 
     {
 
@@ -87,11 +87,7 @@ final class IntegrationTest extends TestCase
         self::assertSame(400,$this->api('POST','/events/'.$p['id'].'/register',['status'=>'accepted'])->get_status());
         self::assertSame(400,$this->api('POST','/events/'.$p['id'].'/google',['operation'=>'save'])->get_status());
 
-        self::assertSame(400,$this->api('POST','/items/'.$p['id'].'/reaction',['kind'=>'follow','active'=>true])->get_status());
-
         self::assertSame(0,Store::count('registrations','event_id=%d AND user_id=%d',[$p['id'],$this->users[1]]));
-
-        self::assertSame(0,Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',[$this->users[1],$p['id'],'follow']));
 
     }
 
@@ -102,9 +98,10 @@ final class IntegrationTest extends TestCase
         $this->user(1);Profiles::save($eligible);
         $this->user(2);Profiles::save(array_merge($eligible,['first_name'=>'Beatriz']));
         $this->user(1);Settings::save(['matching_weights'=>['interests'=>100,'areas'=>0,'industries'=>0,'goals'=>0,'languages'=>0],'matching_min_affinity'=>100]);
-        $recommended=Matching::recommendations();self::assertNotEmpty($recommended);self::assertSame(100,(int)$recommended[0]['affinity']['score']);
+        $recommended=Matching::recommendations();self::assertContains($this->users[2],array_column($recommended,'id'));self::assertSame(100,(int)$recommended[0]['affinity']['score']);
         Profiles::save(['interests'=>[$two]],$this->users[2]);
-        self::assertSame([],Matching::recommendations());
+        // Other eligible profiles may exist after a previous interrupted disposable run.
+        self::assertNotContains($this->users[2],array_column(Matching::recommendations(),'id'));
     }
 
     public function testInstallerIsIdempotentAndKeepsExistingPages(): void
@@ -188,10 +185,30 @@ final class IntegrationTest extends TestCase
 
         $p=$this->make('hub');$this->user(1);$r=Content::comment($p['id'],'Un comentario constructivo.');self::assertSame('publish',$r['status']);self::assertCount(1,Content::comments($p['id']));
 
-        Content::react($p['id'],'like',true);Content::react($p['id'],'like',true);Content::react($p['id'],'follow',true);Content::report($p['id'],'spam');self::assertSame(1,Content::serialize(Content::get($p['id']))['reactions']);Content::react($p['id'],'like',false);self::assertSame(0,Content::serialize(Content::get($p['id']))['reactions']);
+        Content::react($p['id'],'like',true);Content::react($p['id'],'like',true);Content::report($p['id'],'spam');self::assertSame(1,Content::serialize(Content::get($p['id']))['reactions']);Content::react($p['id'],'like',false);self::assertSame(0,Content::serialize(Content::get($p['id']))['reactions']);
 
         $this->user(0);Settings::save(['moderate_comments'=>true]);$this->user(2);self::assertSame('pending',Content::comment($p['id'],'Revisión previa.')['status']);
 
+    }
+
+    public function testRetiredFollowingIsRejectedAcrossPublishedContentWithoutChangingLegacyData(): void
+    {
+        foreach (['hub','forum','topic','resource','gallery','event','ally'] as $type) {
+            $this->user(0);
+            $id=wp_insert_post(['post_type'=>'ascla_'.$type,'post_status'=>'publish','post_author'=>$this->users[0],'post_title'=>'Retired following '.$type]);
+            $this->posts[]=$id;update_post_meta($id,'_ascla',['chatham'=>false]);$this->user(1);
+            $route='/items/'.$id.'/reaction';
+            self::assertSame(400,$this->api('POST',$route,['kind'=>'follow','active'=>true])->get_status(),$type);
+            self::assertSame(0,Store::count('relations',"user_id=%d AND target_id=%d AND kind='follow'",[$this->users[1],$id]));
+            // Retire the action without destructively migrating historic rows.
+            Store::insert('relations',['user_id'=>$this->users[1],'target_id'=>$id,'kind'=>'follow','created_at'=>current_time('mysql',true)]);
+            self::assertSame(400,$this->api('POST',$route,['kind'=>'follow','active'=>false])->get_status(),$type);
+            self::assertSame(1,Store::count('relations',"user_id=%d AND target_id=%d AND kind='follow'",[$this->users[1],$id]));
+            $detail=$this->api('GET','/items/'.$id);self::assertSame(200,$detail->get_status(),$type);
+            self::assertArrayNotHasKey('following',$detail->get_data());
+            self::assertSame(200,$this->api('POST',$route,['kind'=>'like','active'=>true])->get_status(),$type);
+            self::assertTrue($this->api('GET','/items/'.$id)->get_data()['liked']);
+        }
     }
 
     public function testCommentReportsCannotTargetOwnComment(): void
@@ -385,10 +402,11 @@ Compañía Privada"]]);
 
         self::assertSame(400,$this->api('POST','/settings',['matching_weights'=>array_fill_keys(['interests','areas','industries','goals','languages'],0)])->get_status());
         Settings::save(['matching_min_affinity'=>67]);self::assertSame(67,Settings::get()['matching_min_affinity']);
-        Settings::save(['matching_min_affinity'=>999]);self::assertSame(100,Settings::get()['matching_min_affinity']);
-        Settings::save(['matching_min_affinity'=>-10]);self::assertSame(0,Settings::get()['matching_min_affinity']);
-        Settings::save(['matching_max_suggestions'=>99]);self::assertSame(5,Settings::get()['matching_max_suggestions']);
-        Settings::save(['matching_max_suggestions'=>0]);self::assertSame(1,Settings::get()['matching_max_suggestions']);
+        foreach ([['matching_min_affinity'=>999],['matching_min_affinity'=>-10],['matching_max_suggestions'=>99],['matching_max_suggestions'=>0]] as $invalid) {
+            $before=Settings::get();
+            self::assertSame(400,$this->api('POST','/settings',$invalid)->get_status());
+            self::assertSame($before,Settings::get());
+        }
 
     }
 

@@ -34,4 +34,27 @@ final class Translations
         }
         return $labels;
     }
+
+    /** Only registered system errors are translated; user content is never rewritten. */
+    public static function error(string $message): string
+    {
+        $translated=self::text($message);
+        if ($translated!==$message) { return $translated; }
+        $formats=[
+            '/^El texto supera el límite de (\d+) caracteres\.$/u'=>'El texto supera el límite de %d caracteres.',
+            '/^La nueva contraseña debe tener al menos (\d+) caracteres y como máximo (\d+) bytes\.$/u'=>'La nueva contraseña debe tener al menos %d caracteres y como máximo %d bytes.',
+        ];
+        foreach ($formats as $pattern=>$format) {
+            if (preg_match($pattern,$message,$matches)) { return vsprintf(self::text($format),array_map('intval',array_slice($matches,1))); }
+        }
+        $prefix='Completa los campos obligatorios: ';
+        if (str_starts_with($message,$prefix) && str_ends_with($message,'.')) {
+            $fields=explode(', ',substr($message,strlen($prefix),-1));
+            $allowed=array_values(\ASCLA\Core\Services\ProfileRequirements::options()['required']);
+            if ($fields && !array_diff($fields,$allowed)) {
+                return self::text('Completa los campos obligatorios:').' '.implode(', ',array_map([self::class,'text'],$fields)).'.';
+            }
+        }
+        return $message;
+    }
 }

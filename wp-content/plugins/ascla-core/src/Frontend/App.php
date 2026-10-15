@@ -114,7 +114,7 @@ final class App
         return add_query_arg($args,$base);
     }
 
-    private static function assetVersion(string $relative): string
+    public static function assetVersion(string $relative): string
     {
         $path=ASCLA_PATH.ltrim($relative,'/');
         $hash=is_file($path)?substr((string)hash_file('sha256',$path),0,12):'missing';
@@ -129,13 +129,18 @@ final class App
         wp_enqueue_script('ascla-notifications',ASCLA_URL.'assets/notifications-ui.js',[],self::assetVersion('assets/notifications-ui.js'),true);
         wp_enqueue_script('ascla-live-toasts',ASCLA_URL.'assets/live-toasts.js',[],self::assetVersion('assets/live-toasts.js'),true);
         wp_enqueue_script('ascla-navigation',ASCLA_URL.'assets/navigation.js',[],self::assetVersion('assets/navigation.js'),true);
+        wp_enqueue_script('ascla-accessibility',ASCLA_URL.'assets/accessibility.js',[],self::assetVersion('assets/accessibility.js'),true);
         wp_enqueue_script('ascla-imports',ASCLA_URL.'assets/interest-imports.js',[],self::assetVersion('assets/interest-imports.js'),true);
         wp_enqueue_script('ascla-statistics',ASCLA_URL.'assets/admin-statistics.js',[],self::assetVersion('assets/admin-statistics.js'),true);
-        wp_enqueue_script('ascla-app',ASCLA_URL.'assets/app.js',['ascla-imports','ascla-statistics','ascla-image-editor','ascla-content','ascla-notifications','ascla-live-toasts','ascla-navigation'],self::assetVersion('assets/app.js'),true);
+        wp_enqueue_script('ascla-members',ASCLA_URL.'assets/admin-members.js',[],self::assetVersion('assets/admin-members.js'),true);
+        wp_enqueue_script('ascla-allies',ASCLA_URL.'assets/allies-ui.js',[],self::assetVersion('assets/allies-ui.js'),true);
+        wp_enqueue_script('ascla-learning',ASCLA_URL.'assets/interest-learning.js',[],self::assetVersion('assets/interest-learning.js'),true);
+        wp_enqueue_script('ascla-app',ASCLA_URL.'assets/app.js',['ascla-imports','ascla-statistics','ascla-members','ascla-allies','ascla-learning','ascla-image-editor','ascla-content','ascla-notifications','ascla-live-toasts','ascla-navigation','ascla-accessibility'],self::assetVersion('assets/app.js'),true);
         wp_enqueue_script('ascla-session',ASCLA_URL.'assets/session.js',['ascla-app'],self::assetVersion('assets/session.js'),true);
         $pages=[]; foreach (Catalog::PAGES as $slug=>$label) { $pages[$slug]=['label'=>Language::label($label),'url'=>Catalog::url($slug)]; }
+        wp_add_inline_script('ascla-app','globalThis.ASCLA_FORM_LIMITS='.wp_json_encode(['integers'=>\ASCLA\Core\Services\FormRules::INTEGERS,'text'=>array_merge(\ASCLA\Core\Services\FormRules::TEXT,\ASCLA\Core\Services\FormRules::MAIL_TEXT)]).';','before');
         $logo=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo.png');
         $logoWhite=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo-white.png');
-        wp_localize_script('ascla-app','ASCLA',['locale'=>str_replace('_','-',Language::current()),'userLocale'=>Language::current(),'language'=>Language::english()?'en':'es','translations'=>Language::english()?Language::labels():[],'languageOptions'=>Language::SUPPORTED,'languageNonce'=>wp_create_nonce('ascla_change_language'),'api'=>esc_url_raw(rest_url('ascla/v1/')),'nonce'=>wp_create_nonce('wp_rest'),'page'=>$page,'pages'=>$pages,'icons'=>Icons::PATHS,'logo'=>$logo,'logoWhite'=>$logoWhite,'login'=>Login::url(),'logout'=>wp_logout_url(Login::url()),'adminUrl'=>self::adminUrl(),'mediaUrl'=>admin_url('admin-post.php?action=ascla_media&id=')]);
+        wp_localize_script('ascla-app','ASCLA',['locale'=>str_replace('_','-',Language::current()),'userLocale'=>Language::current(),'language'=>Language::english()?'en':'es','translations'=>Language::english()?Language::labels():[],'languageOptions'=>Language::SUPPORTED,'languageNonce'=>wp_create_nonce('ascla_change_language'),'api'=>esc_url_raw(rest_url('ascla/v1/')),'nonce'=>wp_create_nonce('wp_rest'),'page'=>$page,'pages'=>$pages,'icons'=>Icons::PATHS,'logo'=>$logo,'logoWhite'=>$logoWhite,'login'=>Login::url(),'logout'=>wp_logout_url(Login::url()),'adminUrl'=>self::adminUrl(),'wpAdminUrl'=>current_user_can('manage_options')?admin_url():'','mediaUrl'=>admin_url('admin-post.php?action=ascla_media&id=')]);
     }
 }

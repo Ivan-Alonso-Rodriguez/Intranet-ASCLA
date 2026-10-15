@@ -82,13 +82,8 @@ final class Events
         Access::require(!empty($users) && count($users)<=50,'Seleccione entre 1 y 50 asociados.',400);
         foreach ($users as $uid) { Access::require(Access::member($uid),'Asociado no disponible.',400); }
         $invited=self::storeInvitations($id,$users);
-        $calendar=['available'=>false,'sent'=>0];
-        if ($invited) {
-            Transaction::afterCommit(static function()use($id,$invited,&$calendar){
-                try { $calendar=\ASCLA\Core\Integrations\GoogleOAuth::inviteEvent($id,$invited); }
-                catch (\Throwable $error) { $calendar=['available'=>false,'sent'=>0,'error'=>$error->getMessage()]; }
-            });
-        }
+        $calendar=['available'=>false,'sent'=>0,'queued'=>false];
+        if ($invited) { $calendar['queued']=\ASCLA\Core\Integrations\GoogleOAuth::connected(get_current_user_id()) || \ASCLA\Core\Integrations\GoogleOAuth::connected(absint(get_post_meta($id,'_ascla_google_organizer_user',true))) || \ASCLA\Core\Integrations\GoogleOAuth::connected((int)$post->post_author); }
         $sent=count($invited);
         return ['sent'=>$sent,'skipped'=>count($users)-$sent,'google_calendar'=>$calendar,'message'=>self::invitationMessage($sent,$calendar)];
     }
@@ -107,6 +102,7 @@ final class Events
                 $invited[]=$uid;
             }
             Audit::record('event_invited',$id,'sent_'.count($invited));
+            if ($invited) { \ASCLA\Core\Jobs\DeliveryHandlers::queueCalendar($id); }
             return $invited;
         });
     }
@@ -114,7 +110,9 @@ final class Events
     private static function invitationMessage(int $sent,array $calendar): string
     {
         $message='Invitaciones internas enviadas. Los cupos se confirman al aceptar.';
-        if (($calendar['sent']??0)>0) {
+        if (!empty($calendar['queued'])) {
+            $message.=' La entrega a Google Calendar quedó registrada y se reintentará si el servicio falla.';
+        } elseif (($calendar['sent']??0)>0) {
             $message.=' Google Calendar envió las invitaciones por correo a '.(int)$calendar['sent'].' asociado(s).';
         } elseif (!empty($calendar['error'])) {
             $message.=' Google Calendar no pudo enviar la invitación: '.$calendar['error'];
@@ -166,10 +164,7 @@ final class Events
                 ['type'=>'post','id'=>$id,'actor'=>get_current_user_id(),'changes'=>$changed]
             );
         }
-        Transaction::afterCommit(static function()use($id){
-            try { \ASCLA\Core\Integrations\GoogleOAuth::syncOrganizerEvent($id,0,true); }
-            catch (\Throwable) { /* Google is complementary; the ASCLA update remains saved. */ }
-        });
+        \ASCLA\Core\Jobs\DeliveryHandlers::queueCalendar($id);
         return count($users);
     }
 
@@ -178,23 +173,33 @@ final class Events
     {
         Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador puede cancelar eventos.',403);
         $post=Content::get($id);
-        Access::require($post->post_type==='ascla_event' && $post->post_status==='publish',self::EVENT_UNAVAILABLE,400);
+        Access::require($post->post_type==='ascla_event',self::EVENT_UNAVAILABLE,400);
+        $initialMeta=(array)get_post_meta($id,'_ascla',true);
+        Access::require($post->post_status==='publish' || !empty($initialMeta['micro']),self::EVENT_UNAVAILABLE,400);
         $reason=trim(Access::text($reason,1000));
         Access::require($reason!=='','Indica el motivo de cancelación.',400);
         Store::atomic('event:'.$id,static function () use($id,$reason) {
             clean_post_cache($id);
             $post=Content::get($id);
-            Access::require($post->post_status==='publish',self::EVENT_UNAVAILABLE,409);
             $meta=(array)get_post_meta($id,'_ascla',true);
+            $micro=!empty($meta['micro']);
+            Access::require($post->post_status==='publish' || ($micro && in_array($post->post_status,['draft','pending','ascla_hidden','ascla_rejected'],true)),self::EVENT_UNAVAILABLE,409);
             Access::require(empty($meta['micro']) || current_user_can('ascla_manage'),'Solo administración puede cancelar microeventos.',403);
             Access::require(empty($meta['cancelled']),'El evento ya fue cancelado.',409);
-            Access::require(strtotime((string)($meta['end']??''))>time(),self::EVENT_FINISHED,400);
+            Access::require($post->post_status!=='publish' || strtotime((string)($meta['end']??''))>time(),self::EVENT_FINISHED,400);
             $meta['cancelled']=true;
             $meta['cancellation_reason']=$reason;
             wp_clear_scheduled_hook('ascla_event_offers',[$id]);
             $meta['cancelled_at']=current_time('mysql',true);
             $meta['cancelled_by']=get_current_user_id();
-            if (!empty($meta['micro'])) { MicroLifecycle::history($id,'cancelled',$reason);EventReminders::schedule($id,$meta); }
+            if ($micro) {
+                $meta['micro_approved']=false;
+                unset($meta['publish_at'],$meta['publish_actor_id'],$meta['schedule_error']);
+                ContentSchedule::cancel($id);wp_clear_scheduled_hook('ascla_micro_tick',[$id]);
+                MicroLifecycle::history($id,'cancelled',$reason);
+                if ($post->post_status!=='publish') { WordPressWrites::post(['ID'=>$id,'post_status'=>'ascla_hidden']); }
+            }
+            EventReminders::cancel($id);
             WordPressWrites::meta('post',$id,'_ascla',$meta);
             $users=[];
             foreach (Store::rows('registrations',"event_id=%d AND status IN ('accepted','offered','waitlisted','invited','reconfirm')",[$id],self::ORDER_BY_ID_ASC) as $row) {
@@ -212,10 +217,7 @@ final class Events
                 );
             }
             Audit::record('event_cancelled',$id,'notified_'.count($users));
-        });
-        Transaction::afterCommit(static function()use($id){
-            try { \ASCLA\Core\Integrations\GoogleOAuth::cancelOrganizerEvent($id); }
-            catch (\Throwable) { /* Cancellation in ASCLA is authoritative even if Google is unavailable. */ }
+            \ASCLA\Core\Jobs\DeliveryHandlers::queueCalendar($id);
         });
         return self::detail($id);
     }

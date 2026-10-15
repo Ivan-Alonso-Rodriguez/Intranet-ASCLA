@@ -37,7 +37,7 @@ final class Notifications
         foreach (array_keys(self::EMAIL_DEFAULTS) as $key) {
             if (array_key_exists($key,$input)) { $preferences[$key]=rest_sanitize_boolean($input[$key]); }
         }
-        update_user_meta($user,self::EMAIL_META,$preferences);
+        \ASCLA\Core\Repositories\WordPressWrites::meta('user',$user,self::EMAIL_META,$preferences);
         return $preferences;
     }
 
@@ -58,18 +58,20 @@ final class Notifications
     public static function send(int $user,string $kind,string $label,string $url='',array $context=[]): void
     {
         if ($user && Access::member($user)) {
-            Store::insert('notifications',self::data($user,$kind,$label,$url,$context));
-            \ASCLA\Core\Repositories\Transaction::afterCommit(static fn()=>NotificationEmail::send($user,$kind,$label,$url,$context));
+            \ASCLA\Core\Repositories\Transaction::run(static function() use($user,$kind,$label,$url,$context) {
+                $id=Store::insert('notifications',self::data($user,$kind,$label,$url,$context));
+                \ASCLA\Core\Jobs\Deliveries::enqueue('notification',['id'=>$id],'notice:'.$id);
+            });
         }
     }
     public static function once(int $user,string $key,string $kind,string $label,string $url='',array $context=[]): bool
     {
         if (!$user || !Access::member($user)) { return false; }
         $key=substr($key,0,96);
-        return Store::lock('notice:'.$user.':'.$key,static function () use($user,$key,$kind,$label,$url,$context) {
+        return Store::atomic('notice:'.$user.':'.$key,static function () use($user,$key,$kind,$label,$url,$context) {
             if (Store::count('notifications','user_id=%d AND event_key=%s',[$user,$key])) { return false; }
-            Store::insert('notifications',self::data($user,$kind,$label,$url,$context)+['event_key'=>$key]);
-            \ASCLA\Core\Repositories\Transaction::afterCommit(static fn()=>NotificationEmail::send($user,$kind,$label,$url,$context));
+            $id=Store::insert('notifications',self::data($user,$kind,$label,$url,$context)+['event_key'=>$key]);
+            \ASCLA\Core\Jobs\Deliveries::enqueue('notification',['id'=>$id],'notice:'.$id);
             return true;
         });
     }
@@ -183,85 +185,3 @@ final class Notifications
         return ['url'=>$view['url'],'available'=>$view['available']];
     }
 }
-
-final class NotificationEmail
-{
-    private const MESSAGE_EMAIL_META='_ascla_message_email_last_sent';
-    private const MESSAGE_EMAIL_WINDOW=900;
-    private const KINDS=[
-        'connection'=>'connections','connection_accepted'=>'connections',
-        'conversation_request'=>'messages','conversation_accepted'=>'messages','conversation_group'=>'messages','message'=>'messages',
-        'event'=>'events','event_reminder'=>'events','event_waitlist_available'=>'events','event_cancelled'=>'events','event_updated'=>'events','microevent'=>'events',
-        'support_received'=>'support','support_request'=>'support','support_update'=>'support',
-    ];
-
-    public static function send(int $user,string $kind,string $label,string $url,array $context): void
-    {
-        $category=self::KINDS[sanitize_key($kind)]??'';
-        if ($category==='' || empty(Notifications::emailPreferences($user)[$category])) { return; }
-        if (sanitize_key($kind)==='message' && !self::messageAllowed($user,$context)) { return; }
-        try {
-            \ASCLA\Core\Integrations\Mailer::notification($user,$category,self::copy($kind,$label,$context),$url);
-        } catch (\Throwable) {
-            // Email delivery is complementary: an SMTP failure must never cancel the in-app notification.
-        }
-    }
-
-    private static function copy(string $kind,string $fallback,array $context): string
-    {
-        $actor=absint($context['actor']??0);
-        $name=$actor && Access::member($actor)?Profiles::publicName($actor):'Un asociado';
-        return match (sanitize_key($kind)) {
-            'connection'=>$name.' quiere conectar contigo en ASCLA.',
-            'connection_accepted'=>$name.' aceptó tu solicitud de conexión en ASCLA.',
-            'conversation_request'=>$name.' te envió una solicitud de conversación en ASCLA.',
-            'conversation_accepted'=>$name.' aceptó tu solicitud de conversación en ASCLA.',
-            'conversation_group'=>$name.' te añadió a una conversación grupal en ASCLA.',
-            'message'=>'Tienes mensajes nuevos en ASCLA.',
-            'event'=>'Tienes una nueva invitación a un evento de ASCLA.',
-            'event_waitlist_available'=>'Se liberó un cupo para ti en un evento de ASCLA. Entra para confirmar tu asistencia.',
-            'event_cancelled'=>'Un evento en el que participabas o estabas en espera fue cancelado. Revisa los detalles en ASCLA.',
-            'event_updated'=>'Un evento relacionado contigo cambió información importante. Revisa los detalles actualizados en ASCLA.',
-            'event_reminder'=>'Se acerca un encuentro en el que confirmaste tu participación. Revisa el horario y los detalles en ASCLA.',
-            'microevent'=>'Tienes una nueva invitación a un círculo ASCLA.',
-            'support_received','support_request','support_update'=>'Hay una actualización de una solicitud en ASCLA. Ingresa para consultar sus detalles.',
-            default=>Access::excerpt($fallback,255),
-        };
-    }
-
-    private static function messageAllowed(int $user,array $context): bool
-    {
-        $conversation=(($context['type']??'')==='conversation')?absint($context['id']??0):0;
-        $key=(string)$conversation;
-        return (bool)Store::lock('message-email:'.$user.':'.$key,static fn()=>self::messageAllowedLocked($user,$key));
-    }
-
-    private static function recentMessageHistory(int $user,int $now): array
-    {
-        $history=get_user_meta($user,self::MESSAGE_EMAIL_META,true);
-        $history=is_array($history)?$history:[];
-        foreach ($history as $conversation=>$sentAt) {
-            if ((int)$sentAt < $now-DAY_IN_SECONDS) { unset($history[$conversation]); }
-        }
-        return $history;
-    }
-
-    private static function trimMessageHistory(array $history): array
-    {
-        if (count($history)>50) { arsort($history);$history=array_slice($history,0,50,true); }
-        return $history;
-    }
-
-    private static function messageAllowedLocked(int $user,string $key): bool
-    {
-        $now=time();$history=self::recentMessageHistory($user,$now);$last=(int)($history[$key]??0);
-        if ($last>0 && ($now-$last)<self::MESSAGE_EMAIL_WINDOW) {
-            if (count($history)>50) { update_user_meta($user,self::MESSAGE_EMAIL_META,self::trimMessageHistory($history)); }
-            return false;
-        }
-        $history[$key]=$now;
-        update_user_meta($user,self::MESSAGE_EMAIL_META,self::trimMessageHistory($history));
-        return true;
-    }
-}
-

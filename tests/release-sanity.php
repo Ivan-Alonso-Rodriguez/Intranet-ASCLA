@@ -20,7 +20,8 @@ namespace ASCLA\Core\Services {
 }
 
 namespace {
-    const PROJECT_ROOT = __DIR__.'/..';
+    define('PROJECT_ROOT',getenv('ASCLA_PROJECT_ROOT')?:dirname(__DIR__));
+    define('PLUGIN_ROOT',getenv('ASCLA_PLUGIN_ROOT')?:PROJECT_ROOT.'/wp-content/plugins/ascla-core');
     if (!defined('ASCLA_URL')) define('ASCLA_URL','https://example.test/wp-content/plugins/ascla-core/');
     function esc_html(string $value): string { return htmlspecialchars($value,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8'); }
     function esc_url(string $value,array $protocols=[]): string
@@ -33,11 +34,11 @@ namespace {
     }
     function home_url(string $path=''): string { return 'https://example.test'.('/'.ltrim($path,'/')); }
 
-    require PROJECT_ROOT.'/wp-content/plugins/ascla-core/src/Domain/Phone.php';
-    require PROJECT_ROOT.'/wp-content/plugins/ascla-core/src/Domain/AttendanceSessions.php';
-    require PROJECT_ROOT.'/wp-content/plugins/ascla-core/src/Integrations/EmailTemplate.php';
-    require PROJECT_ROOT.'/wp-content/plugins/ascla-core/src/Integrations/AIProviderInterface.php';
-    require PROJECT_ROOT.'/wp-content/plugins/ascla-core/src/Services/InterestImports.php';
+    require PLUGIN_ROOT.'/src/Domain/Phone.php';
+    require PLUGIN_ROOT.'/src/Domain/AttendanceSessions.php';
+    require PLUGIN_ROOT.'/src/Integrations/EmailTemplate.php';
+    require PLUGIN_ROOT.'/src/Integrations/AIProviderInterface.php';
+    require PLUGIN_ROOT.'/src/Services/InterestImports.php';
 
     $checks=0;
     $assert=function(bool $condition,string $message) use (&$checks): void {
@@ -76,17 +77,17 @@ namespace {
     $assert(!str_contains($html,'href="javascript:'),'email rejects javascript CTA');
 
     // Point 4: release metadata must stay synchronized.
-    $read=fn(string $path): string => (string)file_get_contents(PROJECT_ROOT.'/'.$path);
+    $read=fn(string $path): string => (string)file_get_contents(str_starts_with($path,'wp-content/plugins/ascla-core/')?PLUGIN_ROOT.'/'.substr($path,strlen('wp-content/plugins/ascla-core/')):PROJECT_ROOT.'/'.$path);
     $plugin=$read('wp-content/plugins/ascla-core/ascla-core.php');
     $wpReadme=$read('wp-content/plugins/ascla-core/readme.txt');
     $installer=$read('wp-content/plugins/ascla-core/src/Database/Installer.php');
-    $assert((bool)preg_match('/Version:\s*1\.10\.7/',$plugin),'plugin header version');
-    $assert(str_contains($plugin,"define('ASCLA_VERSION', '1.10.7');"),'ASCLA_VERSION constant');
-    $assert((bool)preg_match('/Stable tag:\s*1\.10\.7/',$wpReadme),'WordPress stable tag');
-    $assert(str_contains($read('sonar-project.properties'),'sonar.projectVersion=1.10.7'),'Sonar version');
-    $assert((bool)preg_match('/SCHEMA_VERSION\s*=\s*14/',$installer),'schema version 14');
-    $assert(str_contains($read('README.md'),'Versión actual: 1.10.7 · esquema 14'),'README version/schema');
-    $assert(str_contains($read('VERSION_HISTORY.md'),'**Versión actual:** `1.10.7`'),'history current version');
+    $assert((bool)preg_match('/Version:\s*1\.10\.8/',$plugin),'plugin header version');
+    $assert(str_contains($plugin,"define('ASCLA_VERSION', '1.10.8');"),'ASCLA_VERSION constant');
+    $assert((bool)preg_match('/Stable tag:\s*1\.10\.8/',$wpReadme),'WordPress stable tag');
+    $assert(str_contains($read('sonar-project.properties'),'sonar.projectVersion=1.10.8'),'Sonar version');
+    $assert((bool)preg_match('/SCHEMA_VERSION\s*=\s*15/',$installer),'schema version 15');
+    $assert(str_contains($read('README.md'),'Versión actual: 1.10.8 · esquema 15'),'README version/schema');
+    $assert(str_contains($read('VERSION_HISTORY.md'),'**Versión actual:** `1.10.8`'),'history current version');
 
     // Point 1: both server and admin UI contain the hard three-interest guard.
     $imports=$read('wp-content/plugins/ascla-core/src/Services/InterestImports.php');

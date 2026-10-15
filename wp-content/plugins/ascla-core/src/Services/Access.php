@@ -30,4 +30,8 @@ final class Access
         self::require(mb_strlen($value)<=$max,'El texto supera el límite de '.$max.' caracteres.',400);
         return $value;
     }
+    public static function hasText(string $value): bool
+    {
+        return (bool)preg_match('/[^\s\p{Z}\p{Cf}\p{Cc}]/u',$value);
+    }
 }

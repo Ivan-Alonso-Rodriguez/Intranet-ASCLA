@@ -1,0 +1,49 @@
+{
+  "scope": "Disposable local WordPress, actual submissions/replies/deletion/moderation and totals; no remote deployment",
+  "baseline": false,
+  "checks": [
+    "Publicar y cerrar actualiza de cero a un comentario sin sustituir la tarjeta ni recargar",
+    "Una respuesta actualiza solo el tema correspondiente y usa el plural",
+    "Eliminar una respuesta disminuye el contador al cerrar por el fondo",
+    "Se conservan la búsqueda y el documento durante publicación, respuesta y eliminación",
+    "El total usa los 102 comentarios del servidor aunque el detalle solo cargue cien",
+    "El Hub comparte la actualización y los comentarios pendientes no aumentan el total publicado",
+    "Abrir el detalle sincroniza también un comentario aprobado por moderación",
+    "El contador conserva singular y plural en inglés"
+  ],
+  "errors": [],
+  "date": "2026-10-15T11:56:19.162037+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "requirements": [
+    "RF-178"
+  ],
+  "before_patch": {
+    "expected": "1 comentario",
+    "actual": "0 comentarios",
+    "previous_package_sha256": "55e7a2b49bd622db6a550b7bedcf7ada99ceb76b1c60bed66b0d16e74dd4c4cf",
+    "app_js_sha256": "e87c9a966ad6432b175d6d5687ddbdc819d77bda9f1931ef5a2c0efedff047bd"
+  },
+  "portable_checks_passed": 49,
+  "fixture_cleanup_confirmed": true,
+  "backend_changed": false,
+  "source_sha256": {
+    "wp-content/plugins/ascla-core/assets/app.js": "a6c8f66cd63cacfa3a1aea29ecab54337661da3544a44df2861e73c059f9079b",
+    "tests/comment-count108.cjs": "7b78b8d15701755095d89f5bbfefac2a8b09dd1b6fb1453d23c976a9b0f1262d",
+    "tests/comment-count108-fixture.php": "5eb8141ee9064f1552b5fe95d02ad0098efd92b2f0a140f17067b2be7c043e19"
+  },
+  "screenshot_sha256": "66f793ce9f5c054e5c48480d0a6c284da6811b2383ce582f9d0b2530baebdebf",
+  "package": {
+    "version": "1.10.8",
+    "bytes": 1339809,
+    "sha256": "512110ac06567553d89ec04118245fc70e24dcd66ae14e19692636db296cdef9",
+    "files": 183,
+    "source_bytes_match": true,
+    "crc_valid": true
+  },
+  "limitations": [
+    "Disposable local WordPress only; not deployed to public QA.",
+    "No new complete PHP suite or coverage measurement.",
+    "No push updates from other members; totals refresh when opening or updating the detail."
+  ]
+}

@@ -1,6 +1,7 @@
 <?php
 namespace ASCLA\Core\Services;
 use ASCLA\Core\Domain\Catalog;
+use ASCLA\Core\Repositories\{Store,Transaction,WordPressWrites};
 
 final class Profiles
 {
@@ -47,6 +48,7 @@ final class Profiles
     }
     public static function visible(int $id): array
     {
+        if ($id===get_current_user_id()) { AutomaticInterests::synchronize($id); }
         $data=self::raw($id);
         $own=$id===get_current_user_id();
         Access::require($own||current_user_can('ascla_manage')||!empty($data['directory']),'Perfil no disponible.',404);
@@ -109,9 +111,7 @@ final class Profiles
     public static function save(array $input,int $id=0): array
     {
         $id=$id?:get_current_user_id();
-        $profile=\ASCLA\Core\Repositories\Store::lock('profile-interests:'.$id,static fn()=>self::saveUnlocked($input,$id));
-        Matching::refreshBatch($id);
-        return $profile;
+        return Store::atomic('profile-interests:'.$id,static fn()=>self::saveUnlocked($input,$id));
     }
     private static function saveUnlocked(array $input,int $id): array
     {
@@ -126,12 +126,14 @@ final class Profiles
         $data=self::savePreferenceFields($data,$input,$id);
         $data['revision']=(int)($old['revision']??0)+1;
         unset($data['email'],$data['terms'],$data['photo_url']);
-        update_user_meta($id,'_ascla_profile',$data);
+        if (array_key_exists('interests',$input)) { AutomaticInterests::manual($id,(array)($old['interests']??[]),(array)$data['interests']); }
+        WordPressWrites::meta('user',$id,'_ascla_profile',$data);
         if (!empty($data['photo_id'])) { Media::commit((int)$data['photo_id'],$id); }
-        wp_update_user(['ID'=>$id,'first_name'=>$data['first_name'],'last_name'=>$data['last_name'],'display_name'=>trim($data['first_name'].' '.$data['last_name'])?:$data['name']]);
-        update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+        WordPressWrites::user(['ID'=>$id,'first_name'=>$data['first_name'],'last_name'=>$data['last_name'],'display_name'=>trim($data['first_name'].' '.$data['last_name'])?:$data['name']]);
+        WordPressWrites::bumpProfileRevision();
         if ($id===get_current_user_id()) { ProfileReview::confirmed($id); }
-        Birthdays::celebrate($id);
+        Transaction::afterCommit(static fn()=>Matching::refreshBatch($id));
+        Transaction::afterCommit(static fn()=>Birthdays::celebrate($id));
         return self::visible($id);
     }
 
@@ -168,7 +170,7 @@ final class Profiles
         foreach (self::TERMS as $field=>$tax) {
             if (!array_key_exists($field,$input)) { continue; }
             Access::require(is_array($input[$field]) && count($input[$field])<=20,'Selección no válida.',400);
-            $ids=array_values(array_unique(array_map('absint',$input[$field])));
+            $ids=FormRules::ids($input[$field]);
             foreach ($ids as $tid) { Access::require((bool)term_exists($tid,'ascla_'.$tax),'Tema no válido.',400); }
             $data[$field]=$ids;
         }

@@ -6,7 +6,7 @@ final class Installer
 {
     private const UPGRADE_INCLUDE='wp-admin/includes/upgrade.php';
     private const TABLE_EXISTS_SQL='SHOW TABLES LIKE %s';
-    public const SCHEMA_VERSION=14;
+    public const SCHEMA_VERSION=15;
     public static function activate(bool $networkWide=false): void
     {
         if ($networkWide) { wp_die('Active ASCLA Core individualmente en cada sitio; no se admite activación de red.'); }
@@ -20,6 +20,9 @@ final class Installer
         self::migrateAttendance();
         self::migrateImports();
         AuditMigration::run();
+        self::migrateDeliveries();
+        EventFiltersMigration::run();
+        AllySearchMigration::run();
         self::loginPage();
         self::pages();
         self::adminPage();
@@ -33,7 +36,7 @@ final class Installer
     }
     public static function upgrade(): void
     {
-        if (get_option('ascla_version') !== ASCLA_VERSION || (int)get_option('ascla_schema',0)<self::SCHEMA_VERSION) { self::activate(false); }
+        if (get_option('ascla_version') !== ASCLA_VERSION || (int)get_option('ascla_schema',0)<self::SCHEMA_VERSION || !EventFiltersMigration::ready() || !AllySearchMigration::ready()) { self::activate(false); }
         \ASCLA\Core\Domain\Roles::upgrade();
     }
     private static function migrateIndexes(): void
@@ -178,6 +181,30 @@ final class Installer
         update_option('ascla_schema',13,false);
         update_option('ascla_interest_index_cursor',0,false);
         if(!wp_next_scheduled('ascla_interest_index')) {wp_schedule_single_event(time()+1,'ascla_interest_index'); }
+    }
+    private static function migrateDeliveries(): void
+    {
+        if ((int)get_option('ascla_schema',0)>=15) { return; }
+        global $wpdb;require_once ABSPATH.self::UPGRADE_INCLUDE;
+        $table=$wpdb->prefix.'ascla_deliveries';$collate=$wpdb->get_charset_collate();
+        dbDelta("CREATE TABLE $table (
+            id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            kind varchar(24) NOT NULL,
+            delivery_key varchar(96) NOT NULL,
+            actor_id bigint(20) unsigned NOT NULL,
+            payload longtext NOT NULL,
+            status varchar(16) NOT NULL,
+            attempts int unsigned NOT NULL DEFAULT 0,
+            available_at datetime NOT NULL,
+            locked_at datetime DEFAULT NULL,
+            created_at datetime NOT NULL,
+            completed_at datetime DEFAULT NULL,
+            PRIMARY KEY  (id),
+            UNIQUE KEY delivery_key (delivery_key),
+            KEY queue (status,available_at,id)
+        ) ENGINE=InnoDB $collate;");
+        if ($wpdb->get_var($wpdb->prepare(self::TABLE_EXISTS_SQL,$wpdb->esc_like($table)))!==$table) { throw new MigrationException('No se pudo crear la cola de entregas.'); }
+        \ASCLA\Core\Repositories\WordPressWrites::option('ascla_schema',15);
     }
     private static function migrate(): void
     {

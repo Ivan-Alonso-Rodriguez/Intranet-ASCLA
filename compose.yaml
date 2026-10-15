@@ -1,4 +1,13 @@
 name: ascla-dev
+x-ascla-service-secrets: &ascla-service-secrets
+  ASCLA_EXTERNAL_SECRETS_ONLY:
+  ASCLA_AI_KEY:
+  ASCLA_OPENAI_KEY:
+  ASCLA_DEEPSEEK_KEY:
+  ASCLA_GOOGLE_CLIENT_SECRET:
+  ASCLA_TURNSTILE_SECRET:
+  ASCLA_SMTP_PASSWORD:
+
 services:
   db:
     image: mariadb:11.4
@@ -22,6 +31,7 @@ services:
   wordpress:
     image: wordpress:6.8.3-php8.3-apache
     environment:
+      <<: *ascla-service-secrets
       WORDPRESS_DB_HOST: ${ASCLA_DB_HOST:-db}
       WORDPRESS_DB_USER: ${ASCLA_DB_USER:-wordpress}
       WORDPRESS_DB_PASSWORD: ${ASCLA_DB_PASSWORD}
@@ -56,6 +66,7 @@ services:
     image: wordpress:cli-php8.3
     user: "33:33"
     environment:
+      <<: *ascla-service-secrets
       WORDPRESS_DB_HOST: ${ASCLA_DB_HOST:-db}
       WORDPRESS_DB_USER: ${ASCLA_DB_USER:-wordpress}
       WORDPRESS_DB_PASSWORD: ${ASCLA_DB_PASSWORD}
@@ -76,6 +87,7 @@ services:
     user: "33:33"
     profiles: ["tools"]
     environment:
+      <<: *ascla-service-secrets
       WORDPRESS_DB_HOST: ${ASCLA_DB_HOST:-db}
       WORDPRESS_DB_USER: ${ASCLA_DB_USER:-wordpress}
       WORDPRESS_DB_PASSWORD: ${ASCLA_DB_PASSWORD}

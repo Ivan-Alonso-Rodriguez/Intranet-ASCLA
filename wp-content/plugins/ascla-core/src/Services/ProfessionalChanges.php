@@ -24,7 +24,7 @@ final class ProfessionalChanges
 
     public static function nativeChange(int $id,array $input): bool
     {
-        if (!$id || $id===get_current_user_id() || !user_can($id,'ascla_access')) { return false; }
+        if (!$id || $id===get_current_user_id() || !AccountPermissions::roles($id)) { return false; }
         $user=get_userdata($id);
         foreach (['first_name','last_name','display_name','description','user_url'] as $key) {
             if (array_key_exists($key,$input) && (string)$input[$key]!== (string)$user->$key) { return true; }

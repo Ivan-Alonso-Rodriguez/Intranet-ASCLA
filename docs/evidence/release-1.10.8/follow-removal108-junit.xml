@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="48" assertions="433" errors="0" failures="0" skipped="0" time="16.900687">
+    <testsuite name="AutomaticInterestsTest" file="/opt/ascla-tests/php/AutomaticInterestsTest.php" tests="8" assertions="27" errors="0" failures="0" skipped="0" time="1.848959">
+      <testcase name="testLikeAutomaticallySelectsTheCanonicalInterestAndPreservesOtherProfileData" file="/opt/ascla-tests/php/AutomaticInterestsTest.php" line="34" class="AutomaticInterestsTest" classname="AutomaticInterestsTest" assertions="5" time="0.257030"/>
+      <testcase name="testAValidManualRemovalPersistsAndFurtherSignalsCannotReactivateIt" file="/opt/ascla-tests/php/AutomaticInterestsTest.php" line="42" class="AutomaticInterestsTest" classname="AutomaticInterestsTest" assertions="4" time="0.333715"/>
+      <testcase name="testExplicitReselectionIsTheOnlyWayToLiftTheManualExclusion" file="/opt/ascla-tests/php/AutomaticInterestsTest.php" line="52" class="AutomaticInterestsTest" classname="AutomaticInterestsTest" assertions="3" time="0.216136"/>
+      <testcase name="testPartialUpdatesAndReloadsDoNotForgetTheManualDecision" file="/opt/ascla-tests/php/AutomaticInterestsTest.php" line="59" class="AutomaticInterestsTest" classname="AutomaticInterestsTest" assertions="3" time="0.207786"/>
+      <testcase name="testStaleReadTicketsAndCachedLearningCannotOverrideAManualRemoval" file="/opt/ascla-tests/php/AutomaticInterestsTest.php" line="66" class="AutomaticInterestsTest" classname="AutomaticInterestsTest" assertions="3" time="0.211551"/>
+      <testcase name="testFailedManualSaveRollsBackBothProfileAndExclusions" file="/opt/ascla-tests/php/AutomaticInterestsTest.php" line="73" class="AutomaticInterestsTest" classname="AutomaticInterestsTest" assertions="3" time="0.200880"/>
+      <testcase name="testFailedAutomaticSelectionRollsBackTheOriginAndCanBeRetried" file="/opt/ascla-tests/php/AutomaticInterestsTest.php" line="79" class="AutomaticInterestsTest" classname="AutomaticInterestsTest" assertions="4" time="0.202423"/>
+      <testcase name="testASingleReadingAndNonCanonicalTagsDoNotCheckProfileInterests" file="/opt/ascla-tests/php/AutomaticInterestsTest.php" line="86" class="AutomaticInterestsTest" classname="AutomaticInterestsTest" assertions="2" time="0.219437"/>
+    </testsuite>
+    <testsuite name="IntegrationTest" file="/opt/ascla-tests/php/IntegrationTest.php" tests="30" assertions="354" errors="0" failures="0" skipped="0" time="11.976802">
+      <testcase name="testParticipationDefaultsEnableNetworkingAndMicroevents" file="/opt/ascla-tests/php/IntegrationTest.php" line="69" class="IntegrationTest" classname="IntegrationTest" assertions="8" time="0.256060"/>
+      <testcase name="testPastEventsCannotBeRegisteredOrAddedToCalendar" file="/opt/ascla-tests/php/IntegrationTest.php" line="79" class="IntegrationTest" classname="IntegrationTest" assertions="10" time="0.302272"/>
+      <testcase name="testRecommendationsRespectMinimumAffinity" file="/opt/ascla-tests/php/IntegrationTest.php" line="94" class="IntegrationTest" classname="IntegrationTest" assertions="9" time="0.578368"/>
+      <testcase name="testInstallerIsIdempotentAndKeepsExistingPages" file="/opt/ascla-tests/php/IntegrationTest.php" line="107" class="IntegrationTest" classname="IntegrationTest" assertions="19" time="0.742774"/>
+      <testcase name="testAdminProfileMediaLibraryRemainsPersonalWhileAdminScopeCanSeeAll" file="/opt/ascla-tests/php/IntegrationTest.php" line="119" class="IntegrationTest" classname="IntegrationTest" assertions="10" time="0.248614"/>
+      <testcase name="testReportedContentCanBeMarkedReviewedAndNewReportReopensIt" file="/opt/ascla-tests/php/IntegrationTest.php" line="128" class="IntegrationTest" classname="IntegrationTest" assertions="11" time="0.264489"/>
+      <testcase name="testProfilePrivacyCannotBeBypassedBySearchOrMatching" file="/opt/ascla-tests/php/IntegrationTest.php" line="138" class="IntegrationTest" classname="IntegrationTest" assertions="9" time="0.498351"/>
+      <testcase name="testProfileRejectsUnknownTaxonomiesAndUnsafeURLs" file="/opt/ascla-tests/php/IntegrationTest.php" line="150" class="IntegrationTest" classname="IntegrationTest" assertions="6" time="0.233547"/>
+      <testcase name="testProfileCompletionAndCountryNormalization" file="/opt/ascla-tests/php/IntegrationTest.php" line="158" class="IntegrationTest" classname="IntegrationTest" assertions="9" time="0.334396"/>
+      <testcase name="testMemberCanPublishHubButCannotModerateOrPublishEditorialContentOrReadOthersDrafts" file="/opt/ascla-tests/php/IntegrationTest.php" line="167" class="IntegrationTest" classname="IntegrationTest" assertions="13" time="0.320582"/>
+      <testcase name="testCommentsReactionsAndReports" file="/opt/ascla-tests/php/IntegrationTest.php" line="182" class="IntegrationTest" classname="IntegrationTest" assertions="9" time="0.294045"/>
+      <testcase name="testRetiredFollowingIsRejectedAcrossPublishedContentWithoutChangingLegacyData" file="/opt/ascla-tests/php/IntegrationTest.php" line="194" class="IntegrationTest" classname="IntegrationTest" assertions="60" time="0.435708"/>
+      <testcase name="testCommentReportsCannotTargetOwnComment" file="/opt/ascla-tests/php/IntegrationTest.php" line="214" class="IntegrationTest" classname="IntegrationTest" assertions="13" time="0.294545"/>
+      <testcase name="testMessagesArePrivateAndRespectBlocking" file="/opt/ascla-tests/php/IntegrationTest.php" line="236" class="IntegrationTest" classname="IntegrationTest" assertions="12" time="0.364237"/>
+      <testcase name="testEventCapacityAndCancellation" file="/opt/ascla-tests/php/IntegrationTest.php" line="250" class="IntegrationTest" classname="IntegrationTest" assertions="9" time="0.294200"/>
+      <testcase name="testConfirmedAttendeesCanSeeOnlyPrivacySafeParticipantProfiles" file="/opt/ascla-tests/php/IntegrationTest.php" line="260" class="IntegrationTest" classname="IntegrationTest" assertions="16" time="0.583760"/>
+      <testcase name="testEventCanBeCancelledWithoutDeletingHistoryAndBlocksFurtherRsvp" file="/opt/ascla-tests/php/IntegrationTest.php" line="286" class="IntegrationTest" classname="IntegrationTest" assertions="10" time="0.397729"/>
+      <testcase name="testContactRequestsStayPrivateAndHaveStatuses" file="/opt/ascla-tests/php/IntegrationTest.php" line="302" class="IntegrationTest" classname="IntegrationTest" assertions="9" time="0.619741"/>
+      <testcase name="testAIEnrichesTheOriginalResourceWithoutCreatingDerivedPosts" file="/opt/ascla-tests/php/IntegrationTest.php" line="310" class="IntegrationTest" classname="IntegrationTest" assertions="17" time="0.302563"/>
+      <testcase name="testAssistantUsesOnlyPublishedSourcesAndAbstains" file="/opt/ascla-tests/php/IntegrationTest.php" line="326" class="IntegrationTest" classname="IntegrationTest" assertions="8" time="0.299214"/>
+      <testcase name="testAssistantKnowsUpcomingEventsFromTheIntranet" file="/opt/ascla-tests/php/IntegrationTest.php" line="340" class="IntegrationTest" classname="IntegrationTest" assertions="6" time="0.263667"/>
+      <testcase name="testAssistantThreadsKeepConversationHistoryScopedToTheMember" file="/opt/ascla-tests/php/IntegrationTest.php" line="351" class="IntegrationTest" classname="IntegrationTest" assertions="9" time="0.249964"/>
+      <testcase name="testKnowledgeFindsOldSourcesBeyondTheFirst300Posts" file="/opt/ascla-tests/php/IntegrationTest.php" line="363" class="IntegrationTest" classname="IntegrationTest" assertions="5" time="2.051352"/>
+      <testcase name="testBackgroundJobsTrackOwnershipCompletionAndFailure" file="/opt/ascla-tests/php/IntegrationTest.php" line="375" class="IntegrationTest" classname="IntegrationTest" assertions="9" time="0.253237"/>
+      <testcase name="testAnonymousAndOrdinaryWPUsersCannotUseAnyPrivateEndpoint" file="/opt/ascla-tests/php/IntegrationTest.php" line="385" class="IntegrationTest" classname="IntegrationTest" assertions="14" time="0.243576"/>
+      <testcase name="testSettingsNeverReturnSecretsAndValidateWeights" file="/opt/ascla-tests/php/IntegrationTest.php" line="397" class="IntegrationTest" classname="IntegrationTest" assertions="18" time="0.252864"/>
+      <testcase name="testNotificationsReadOperationIsScopedToRecipient" file="/opt/ascla-tests/php/IntegrationTest.php" line="413" class="IntegrationTest" classname="IntegrationTest" assertions="6" time="0.237246"/>
+      <testcase name="testBrowserISODateMillisecondsAndInvalidCalendarDates" file="/opt/ascla-tests/php/IntegrationTest.php" line="421" class="IntegrationTest" classname="IntegrationTest" assertions="6" time="0.258403"/>
+      <testcase name="testNativeRecentCommentsBlockExcludesPrivateHub" file="/opt/ascla-tests/php/IntegrationTest.php" line="433" class="IntegrationTest" classname="IntegrationTest" assertions="7" time="0.257884"/>
+      <testcase name="testEventDateValidationAndUnsupportedContent" file="/opt/ascla-tests/php/IntegrationTest.php" line="441" class="IntegrationTest" classname="IntegrationTest" assertions="7" time="0.243412"/>
+    </testsuite>
+    <testsuite name="LearnedInterestsTest" file="/opt/ascla-tests/php/LearnedInterestsTest.php" tests="10" assertions="52" errors="0" failures="0" skipped="0" time="3.074927">
+      <testcase name="testRealActionsProducePersistedTopicsWithoutChangingDeclaredInterests" file="/opt/ascla-tests/php/LearnedInterestsTest.php" line="49" class="LearnedInterestsTest" classname="LearnedInterestsTest" assertions="7" time="0.265696"/>
+      <testcase name="testReadsRequireServerTimeSingleUseTicketsAndCorrectMember" file="/opt/ascla-tests/php/LearnedInterestsTest.php" line="58" class="LearnedInterestsTest" classname="LearnedInterestsTest" assertions="8" time="0.282819"/>
+      <testcase name="testLearningIsAutomaticAndTheFormerGlobalControlsAreNotWritable" file="/opt/ascla-tests/php/LearnedInterestsTest.php" line="72" class="LearnedInterestsTest" classname="LearnedInterestsTest" assertions="3" time="0.281355"/>
+      <testcase name="testPrivateUnpublishedProtectedDerivedAndOwnContentNeverTeachesTopics" file="/opt/ascla-tests/php/LearnedInterestsTest.php" line="79" class="LearnedInterestsTest" classname="LearnedInterestsTest" assertions="4" time="0.483089"/>
+      <testcase name="testLearnedTopicsDriveResourceRankingAndManualTopicRemovalsTakePriority" file="/opt/ascla-tests/php/LearnedInterestsTest.php" line="90" class="LearnedInterestsTest" classname="LearnedInterestsTest" assertions="5" time="0.287088"/>
+      <testcase name="testCommentRegistrationAndAttendanceUseOnlyCurrentPositiveRecords" file="/opt/ascla-tests/php/LearnedInterestsTest.php" line="100" class="LearnedInterestsTest" classname="LearnedInterestsTest" assertions="3" time="0.263010"/>
+      <testcase name="testLegacyFollowsDoNotTeachTopicsOrMatchingAndLikesStillDo" file="/opt/ascla-tests/php/LearnedInterestsTest.php" line="111" class="LearnedInterestsTest" classname="LearnedInterestsTest" assertions="8" time="0.298465"/>
+      <testcase name="testRoutesEnforceSessionOwnershipTypesAndAdministrativeReadOnlyAccess" file="/opt/ascla-tests/php/LearnedInterestsTest.php" line="125" class="LearnedInterestsTest" classname="LearnedInterestsTest" assertions="7" time="0.273491"/>
+      <testcase name="testOldSignalsAndRetentionAreBoundedWithoutDeletingLikes" file="/opt/ascla-tests/php/LearnedInterestsTest.php" line="138" class="LearnedInterestsTest" classname="LearnedInterestsTest" assertions="4" time="0.385532"/>
+      <testcase name="testFailedInterestWriteDoesNotClaimSuccessOrKeepAPartialReading" file="/opt/ascla-tests/php/LearnedInterestsTest.php" line="149" class="LearnedInterestsTest" classname="LearnedInterestsTest" assertions="3" time="0.254382"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

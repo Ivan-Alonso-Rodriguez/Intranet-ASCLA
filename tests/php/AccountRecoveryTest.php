@@ -10,7 +10,8 @@ final class AccountRecoveryTest extends TestCase
         $this->settings=Settings::get();$this->post=$_POST;$this->server=$_SERVER;$this->cookies=$_COOKIE;$this->secret=Secrets::get('turnstile_secret');
         $login='recovery_'.bin2hex(random_bytes(4));$this->user=wp_insert_user(['user_login'=>$login,'user_email'=>$login.'@example.invalid','user_pass'=>wp_generate_password(32),'role'=>'ascla_member']);
         $this->mail=static fn()=>true;add_filter('pre_wp_mail',$this->mail);
-        $_POST=[];$_COOKIE=[];$_SERVER['REMOTE_ADDR']='2001:db8:'.bin2hex(random_bytes(3)).'::2';
+        // A six-digit hextet is invalid IPv6 and shares the unknown-IP bucket across runs.
+        $_POST=[];$_COOKIE=[];$_SERVER['REMOTE_ADDR']='2001:db8:'.bin2hex(random_bytes(2)).':'.bin2hex(random_bytes(2)).'::2';
         Settings::save(['turnstile_enabled'=>false]);
     }
     protected function tearDown(): void

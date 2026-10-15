@@ -1,6 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
-use ASCLA\Core\Services\{MicroEvents,MicroPlanning,MicroLifecycle,EventReminders,Content,Events,Settings};
+use ASCLA\Core\Services\{MicroEvents,MicroPlanning,MicroLifecycle,MicroEligibility,ContentSchedule,EventReminders,Content,Events,Settings};
 use ASCLA\Core\Repositories\Store;
 
 final class MicroEventsTest extends TestCase
@@ -110,5 +110,98 @@ final class MicroEventsTest extends TestCase
         foreach(array_slice($meta['invitees'],1) as $uid)self::assertSame(0,Store::count('notifications','user_id=%d AND kind=%s',[$uid,'event_reminder']));
         $meta['end']=gmdate('c',time()-1);update_post_meta($id,'_ascla',$meta);MicroLifecycle::tick($id);
         self::assertSame('finished',get_post_meta($id,'_ascla_micro_state',true));
+    }
+
+    public function testPendingProposalCanBeCancelledWithReasonWithoutLosingItsHistoryOrRecurringBatch(): void
+    {
+        $id=$this->proposal();$this->reject(fn()=>Events::cancel($id,''),400);
+        $detail=Events::cancel($id,'No hay disponibilidad para esta propuesta.');
+        self::assertTrue($detail['cancelled']);self::assertSame('ascla_hidden',get_post_status($id));
+        self::assertFalse($detail['can_edit']);self::assertFalse($detail['can_moderate']);self::assertFalse($detail['can_delete']);
+        self::assertSame(['pending','cancelled'],array_column(get_post_meta($id,'_ascla_micro_history',true),'state'));
+        self::assertSame([$id],MicroEvents::create($this->users)['events']);
+        $this->reject(fn()=>Events::cancel($id,'Otra vez'),409);$this->reject(fn()=>Content::remove($id),403);
+        self::assertSame(2,count(get_post_meta($id,'_ascla_micro_history',true)));
+    }
+
+    public function testCancellingAnApprovedScheduledProposalStopsFuturePublication(): void
+    {
+        $id=$this->proposal();Content::moderate($id,'approve','Convocatoria revisada');$post=get_post($id);
+        $at=time()+3600;
+        Content::save('event',['title'=>$post->post_title,'body'=>$post->post_content,'status'=>'scheduled','publish_at'=>gmdate('c',$at)],$id);
+        self::assertNotFalse(wp_next_scheduled('ascla_publish_content',[$id,$at]));
+        Events::cancel($id,'Se suspende la convocatoria.');$meta=get_post_meta($id,'_ascla',true);
+        self::assertFalse($meta['micro_approved']);self::assertArrayNotHasKey('publish_at',$meta);
+        self::assertFalse(wp_next_scheduled('ascla_publish_content',[$id,$at]));
+        self::assertFalse(wp_next_scheduled('ascla_micro_tick',[$id]));
+        ContentSchedule::publish($id,$at);
+        self::assertSame('ascla_hidden',get_post_status($id));self::assertSame(0,Store::count('registrations','event_id=%d',[$id]));
+        self::assertSame(['pending','approved','cancelled'],array_column(get_post_meta($id,'_ascla_micro_history',true),'state'));
+    }
+
+    public function testReviewRefreshReopensAnApprovedGroupAfterRemovingAnIncompleteCandidate(): void
+    {
+        $id=$this->proposal();$meta=get_post_meta($id,'_ascla',true);$meta['micro_min']=2;update_post_meta($id,'_ascla',$meta);
+        Content::moderate($id,'approve','Grupo inicialmente revisado');self::assertSame('approved',get_post_meta($id,'_ascla_micro_state',true));
+        $removed=$meta['invitees'][0];$profile=get_user_meta($removed,'_ascla_profile',true);$profile['bio']='';update_user_meta($removed,'_ascla_profile',$profile);
+        $review=MicroEligibility::review($id);
+        self::assertSame(1,$review['removed']);self::assertSame(count($meta['invitees'])-1,$review['candidates']);
+        self::assertNotContains($removed,$review['item']['meta']['invitees']);self::assertFalse($review['item']['meta']['micro_approved']);
+        self::assertSame('pending',$review['item']['status']);
+        Content::moderate($id,'approve','Grupo actualizado y revisado');$saved=$this->publish($id);
+        self::assertSame('publish',$saved['status']);self::assertSame($review['candidates'],Store::count('registrations','event_id=%d',[$id]));
+        self::assertSame(0,Store::count('registrations','event_id=%d AND user_id=%d',[$id,$removed]));
+    }
+
+    public function testReviewCancelsAnInsufficientGroupImmediatelyAndIsIdempotent(): void
+    {
+        $id=$this->proposal();$meta=get_post_meta($id,'_ascla',true);
+        foreach (array_slice($meta['invitees'],1) as $uid) {
+            $profile=get_user_meta($uid,'_ascla_profile',true);$profile['microevents']=false;update_user_meta($uid,'_ascla_profile',$profile);
+        }
+        $review=MicroEligibility::review($id);self::assertTrue($review['item']['meta']['cancelled']);self::assertSame(1,$review['candidates']);
+        self::assertSame('cancelled',$review['item']['meta']['micro_state']);self::assertFalse($review['item']['can_moderate']);
+        $history=get_post_meta($id,'_ascla_micro_history',true);self::assertCount(2,$history);self::assertStringContainsString('mínimo',$history[1]['reason']);
+        MicroEligibility::review($id);self::assertSame($history,get_post_meta($id,'_ascla_micro_history',true));
+        self::assertSame([$id],MicroEvents::create($this->users)['events']);self::assertSame(0,Store::count('registrations','event_id=%d',[$id]));
+    }
+
+    public function testConsentChangesAfterReviewCannotBeApprovedAndOnlyAdministrationMayReconcileOrCancel(): void
+    {
+        wp_set_current_user($this->users[1]);$id=$this->proposal();
+        $this->reject(fn()=>MicroEligibility::review($id),403);$this->reject(fn()=>Events::cancel($id,'No corresponde'),403);
+        wp_set_current_user($this->users[0]);MicroEligibility::review($id);$meta=get_post_meta($id,'_ascla',true);
+        $uid=$meta['invitees'][0];$profile=get_user_meta($uid,'_ascla_profile',true);$profile['microevents']=false;update_user_meta($uid,'_ascla_profile',$profile);
+        try { Content::moderate($id,'approve','Revisado antes del cambio');self::fail('Consent withdrawal must reject approval.'); }
+        catch (ASCLA\Core\Rest\ApiException $error) { self::assertSame(400,$error->getCode());self::assertStringContainsString('consentimiento',$error->getMessage()); }
+        self::assertSame('pending',get_post_status($id));self::assertCount(1,get_post_meta($id,'_ascla_micro_history',true));
+        $this->reject(fn()=>Content::moderate($id,'hide','Ocultar no equivale a cancelar'),400);
+        self::assertEmpty(get_post_meta($id,'_ascla',true)['cancelled']??false);
+    }
+
+    public function testPublishedCancellationPreservesRegistrationsNotifiesOnceAndStopsReminders(): void
+    {
+        $id=$this->proposal();Content::moderate($id,'approve','Revisado');$this->publish($id);$meta=get_post_meta($id,'_ascla',true);
+        wp_set_current_user($meta['invitees'][0]);Events::register($id,'accepted');wp_set_current_user($this->users[0]);
+        $before=Store::rows('registrations','event_id=%d',[$id],'ORDER BY id');Events::cancel($id,'Cancelación comprobada');
+        self::assertSame($before,Store::rows('registrations','event_id=%d',[$id],'ORDER BY id'));
+        foreach ($meta['invitees'] as $uid) { self::assertSame(1,Store::count('notifications',"user_id=%d AND kind='event_cancelled'",[$uid])); }
+        foreach ([24,1] as $hour) { self::assertFalse(wp_next_scheduled('ascla_event_reminder',[$id,$hour])); }
+        self::assertFalse(wp_next_scheduled('ascla_micro_tick',[$id]));self::assertFalse(Content::canModerate(get_post($id)));
+        $this->reject(fn()=>Events::cancel($id,'Reintento'),409);
+    }
+
+    public function testFailedCancellationRollsBackTheProposalHistoryAndPublicationSchedule(): void
+    {
+        $id=$this->proposal();Content::moderate($id,'approve','Revisado');$post=get_post($id);$at=time()+3600;
+        Content::save('event',['title'=>$post->post_title,'body'=>$post->post_content,'status'=>'scheduled','publish_at'=>gmdate('c',$at)],$id);
+        $meta=get_post_meta($id,'_ascla',true);$history=get_post_meta($id,'_ascla_micro_history',true);
+        $fail=static fn($result,$object,$key,$value)=>$object===$id && $key==='_ascla' && !empty($value['cancelled'])?false:$result;
+        add_filter('update_post_metadata',$fail,10,4);
+        try { Events::cancel($id,'Escritura rechazada');self::fail('Cancellation write must fail.'); }
+        catch (ASCLA\Core\Repositories\RepositoryException $error) { self::assertNotSame('',$error->getMessage()); }
+        finally { remove_filter('update_post_metadata',$fail,10); }
+        self::assertSame($meta,get_post_meta($id,'_ascla',true));self::assertSame($history,get_post_meta($id,'_ascla_micro_history',true));
+        self::assertNotFalse(wp_next_scheduled('ascla_publish_content',[$id,$at]));
     }
 }

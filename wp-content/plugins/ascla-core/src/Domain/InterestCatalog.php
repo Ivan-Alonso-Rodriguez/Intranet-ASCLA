@@ -46,8 +46,8 @@ final class InterestCatalog
     }
     public static function validate(array $ids): array
     {
-        Access::require(count($ids)<=20,'Selecciona como máximo 20 intereses.',400);$allowed=array_column(self::terms(),'id');$out=[];
-        foreach($ids as $id){Access::require((is_int($id)||(is_scalar($id) && ctype_digit((string)$id))) && in_array((int)$id,$allowed,true),'Interés fuera del catálogo.',400);$out[]=(int)$id;}
+        Access::require(count($ids)<=20,'Selecciona como máximo 20 intereses.',400);$ids=\ASCLA\Core\Services\FormRules::ids($ids);$allowed=array_column(self::terms(),'id');$out=[];
+        foreach($ids as $id){Access::require(in_array($id,$allowed,true),'Interés fuera del catálogo.',400);$out[]=$id;}
         return array_values(array_unique($out));
     }
     public static function seed(): array

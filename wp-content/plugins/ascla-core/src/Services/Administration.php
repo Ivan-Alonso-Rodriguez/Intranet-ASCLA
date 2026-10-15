@@ -33,7 +33,7 @@ final class Administration
         Access::require($user instanceof \WP_User,'Usuario no encontrado.',404);
         Access::require($id!==get_current_user_id(),'Tu cuenta administrativa se gestiona desde WordPress.',400);
         Access::require(!user_can($id,'manage_options'),'Los administradores técnicos se gestionan desde WordPress.',403);
-        Access::require(user_can($id,'ascla_access'),'La cuenta no pertenece a la comunidad ASCLA.',400);
+        Access::require((bool)array_intersect($user->roles,self::COMMUNITY_ROLES),'La cuenta no pertenece a la comunidad ASCLA.',400);
         return $user;
     }
 
@@ -61,7 +61,7 @@ final class Administration
         foreach($query->get_results() as $user) {
             $id=(int)$user->ID;$card=Profiles::card($id);
             $technical=user_can($id,'manage_options');
-            $community=user_can($id,'ascla_access');
+            $community=(bool)array_intersect($user->roles,self::COMMUNITY_ROLES);
             $items[]=[
                 'id'=>$id,
                 'name'=>$user->display_name,
@@ -70,6 +70,7 @@ final class Administration
                 'roles'=>array_values($user->roles),
                 'registered'=>$user->user_registered,
                 'suspended'=>(bool)get_user_meta($id,'_ascla_suspended',true),
+                'access_enabled'=>user_can($id,'ascla_access'),
             ...Membership::view($id),
                 'photo_url'=>$card['photo_url'],
                 'profile_url'=>$card['profile_url'],
@@ -77,6 +78,7 @@ final class Administration
                 'can_edit'=>$community&&!$technical&&$id!==get_current_user_id()&&current_user_can('edit_user',$id),
                 'can_delete'=>$community&&!$technical&&$id!==get_current_user_id()&&current_user_can('delete_user',$id),
                 'can_suspend'=>$id!==get_current_user_id()&&!$technical&&$community,
+                'can_record_role_approval'=>current_user_can('edit_user',$id),
             ];
         }
         $roles=[];foreach(wp_roles()->roles as $id=>$roleData) {$roles[]=['id'=>$id,'name'=>self::roleLabel($id)]; }
@@ -109,7 +111,7 @@ final class Administration
             'first_name'=>$account['first'],'last_name'=>$account['last'],'position'=>$account['position'],'company'=>$account['company'],'member_type'=>$account['member_type'],
             'birth_date'=>$account['birth_date'],'phone'=>$account['phone'],'phone_visibility'=>$account['phone_visibility'],'directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[],'revision'=>1,
         ]);
-        update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+        WordPressWrites::bumpProfileRevision();
         Membership::apply($id,$account['membership']);
         Audit::changes('member_created',$id,[],['roles'=>[$account['role']]]);
         if($account['send_invite']) {
@@ -131,7 +133,7 @@ final class Administration
         $email=sanitize_email(Access::text($input['email']??'',100));
         Access::require($email!==''&&is_email($email),'Correo electrónico no válido.',400);Access::require(!email_exists($email),self::EMAIL_IN_USE,409);
         $role=Access::text($input['role']??'ascla_member',60);Access::require(in_array($role,self::COMMUNITY_ROLES,true),'Rol no válido para la comunidad.',400);
-        $first=Access::text($input['first_name']??'',100);$last=Access::text($input['last_name']??'',100);Access::require(trim($first.$last)!=='','Indica al menos un nombre o apellido.',400);
+        $first=Access::text($input['first_name']??'',100);$last=Access::text($input['last_name']??'',100);Access::require(Access::hasText($first.$last),'Indica al menos un nombre o apellido.',400);
         $account=[
             'login'=>$login,'email'=>$email,'role'=>$role,'first'=>$first,'last'=>$last,
             'position'=>Access::text($input['position']??'',200),'company'=>Access::text($input['company']??'',200),'member_type'=>Access::text($input['member_type']??'',200),
@@ -146,8 +148,7 @@ final class Administration
     {
         $user=self::editableMember($id);
         $profile=(array)get_user_meta($id,'_ascla_profile',true);
-        $role='ascla_member';
-        foreach(self::COMMUNITY_ROLES as $candidate) { if(in_array($candidate,$user->roles,true)) {$role=$candidate;break;} }
+        $role=AccountPermissions::roles($id)[0]??'ascla_member';
         return [
             'id'=>$id,
             'login'=>$user->user_login,
@@ -155,6 +156,8 @@ final class Administration
             'registered'=>$user->user_registered,
             'role'=>$role,
             'roles'=>self::communityRoles(),
+            'access_enabled'=>user_can($id,'ascla_access'),
+            ...AccountPermissions::view($id),
             'first_name'=>$profile['first_name']??$user->first_name,
             'last_name'=>$profile['last_name']??$user->last_name,
             'professional_requests'=>ProfessionalChanges::pending($id),
@@ -185,9 +188,10 @@ final class Administration
         Access::require(!$existing||(int)$existing===$id,self::EMAIL_IN_USE,409);
         $role=Access::text($input['role']??'',60);
         Access::require(in_array($role,self::COMMUNITY_ROLES,true),'Rol no válido para la comunidad.',400);
+        $permissionPlan=AccountPermissions::plan($id,$role,$input);
         $first=Access::text($input['first_name']??'',100);
         $last=Access::text($input['last_name']??'',100);
-        Access::require(trim($first.$last)!=='','Indica al menos un nombre o apellido.',400);
+        Access::require(Access::hasText($first.$last),'Indica al menos un nombre o apellido.',400);
         $membership=Membership::validate($input,$id);
         $previousProfile=(array)get_user_meta($id,'_ascla_profile',true)+['first_name'=>$user->first_name,'last_name'=>$user->last_name,'phone_visibility'=>'private'];
         $phone=\ASCLA\Core\Domain\Phone::normalize($input['phone']??($previousProfile['phone']??''));
@@ -206,16 +210,14 @@ final class Administration
         $changed=ProfessionalChanges::changed($previousProfile,$profile);
         if ($changed) { ProfileValidation::validateRequired(array_intersect_key($profile,array_flip($changed))); }
         $profile['revision']=(int)($profile['revision']??0)+1;
-        $save=static function()use($id,$user,$email,$first,$last,$role,$profile,$membership): void {
+        $save=static function()use($id,$user,$email,$first,$last,$role,$profile,$membership,$permissionPlan): void {
             $display=trim($first.' '.$last)?:$user->display_name;
             $result=wp_update_user(['ID'=>$id,'user_email'=>$email,'first_name'=>$first,'last_name'=>$last,'display_name'=>$display]);
             Access::require(!is_wp_error($result),is_wp_error($result)?$result->get_error_message():'No se pudo actualizar la cuenta.',400);
-            $previousRoles=$user->roles;$user->set_role($role);
-            Access::require((new \WP_User($id))->roles===[$role],'No se pudo guardar el rol de la cuenta.',500);
+            AccountPermissions::apply($id,$permissionPlan);
             Membership::apply($id,$membership);
-            Audit::changes('member_roles_updated',$id,['roles'=>$previousRoles],['roles'=>[$role]]);
             WordPressWrites::meta('user',$id,'_ascla_profile',$profile);
-            update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+            WordPressWrites::bumpProfileRevision();
             Audit::record('member_updated',$id,'role='.$role);
         };
         if ($changed) { ProfessionalChanges::apply($id,absint($input['professional_request_id']??0),$changed,$save); }
@@ -247,7 +249,7 @@ final class Administration
             Store::update('media',['user_id'=>$actor],['user_id'=>$id]);
             \ASCLA\Core\Integrations\Secrets::remove('google_calendar_'.$id);
             Audit::record('member_deleted',$id,$login);
-            update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false);
+            WordPressWrites::bumpProfileRevision();
             return ['id'=>$id,'deleted'=>true,'message'=>'Usuario eliminado. El contenido publicado se conservó bajo administración de ASCLA.'];
         });
     }
@@ -255,7 +257,7 @@ final class Administration
     public static function suspend(int $id,bool $suspended): array
     {
         Access::require(current_user_can('ascla_manage'));
-        Access::require($id>0 && $id!==get_current_user_id()&&!user_can($id,'manage_options')&&user_can($id,'ascla_access'),'Cuenta no disponible.',400);
+        Access::require($id>0 && $id!==get_current_user_id()&&!user_can($id,'manage_options')&&(bool)array_intersect(AccountPermissions::roles($id),self::COMMUNITY_ROLES),'Cuenta no disponible.',400);
         Store::atomic('profile-interests:'.$id,static function()use($id,$suspended){
             clean_user_cache($id);
             $input=['membership_status'=>$suspended?'suspended':'active'];
