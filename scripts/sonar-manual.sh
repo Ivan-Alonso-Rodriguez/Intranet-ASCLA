@@ -14,7 +14,11 @@ esac
 if [ "$(git branch --show-current)" != "$branch" ]; then
   echo "ERROR: cambia primero a la rama $branch." >&2; exit 1
 fi
-if [ -n "$(git status --porcelain)" ]; then
+if ! source_status="$(git status --porcelain)"; then
+  echo 'ERROR: no se pudo leer el repositorio. Vuelve a entrar a su carpeta desde una terminal operativa y repite git status.' >&2
+  exit 1
+fi
+if [ -n "$source_status" ]; then
   echo 'ERROR: hay cambios sin commit. Analiza una revisión reproducible.' >&2; exit 1
 fi
 head="$(git rev-parse HEAD)"

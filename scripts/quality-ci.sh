@@ -174,7 +174,11 @@ fi
 cd /
 cd "$ROOT"
 
-if [ -z "$SOURCE_CLEAN" ] && [ -z "$(git status --porcelain)" ] && [ "$(git rev-parse HEAD)" = "$SOURCE_REVISION" ]; then
+if ! FINAL_STATUS="$(git status --porcelain)"; then
+  echo 'ERROR: no se pudo comprobar el repositorio al finalizar. No se acredita esta revisión para SonarQube.' >&2
+  exit 1
+fi
+if [ -z "$SOURCE_CLEAN" ] && [ -z "$FINAL_STATUS" ] && [ "$(git rev-parse HEAD)" = "$SOURCE_REVISION" ]; then
   printf '%s\n' "$SOURCE_REVISION" > coverage/source-revision
 fi
 

@@ -88,6 +88,8 @@ Los mensajes `ASCLA technical_error` durante PHPUnit pueden corresponder a casos
 
 Si un recorrido falla con `Timeout`, revisa `test-results/e2e.json` y las capturas `test-results/failure-admin.png` y `test-results/failure-member.png`. Contrasta la sección y los controles visibles con la navegación del caso. El reporte JavaScript se guarda también al fallar y puede ser parcial: su porcentaje no acredita que terminó la suite. SonarQube rechaza esa ejecución porque todavía no existe `coverage/source-revision`; corrige el caso y repite el flujo completo sobre un commit limpio.
 
+En accesibilidad, revisa `test-results/accessibility107.json` y `test-results/accessibility107-progress.json`; al fallar también se guardan `test-results/accessibility107-failure.png` y `test-results/accessibility107-failure.json` con el foco y estado de los adjuntos. El caso de carga debe abrir el selector nativo con teclado, en ambos temas, antes de comprobar el editor de imagen. No sustituyas esa comprobación por asignar directamente el archivo al campo.
+
 <a id="sonarqube"></a>
 
 ## 4. Enviar el análisis a SonarQube y revisar el Quality Gate
@@ -128,6 +130,7 @@ Los umbrales efectivos son los configurados en SonarQube. Si falla una condició
 | Docker no conecta | Abre Docker Desktop, comprueba la integración WSL y repite `docker version`. |
 | Rama incorrecta | Conserva tus cambios y sitúate en `qa`; el argumento del scanner no cambia de rama. |
 | Cambios sin commit | Revisa y confirma los cambios intencionados; repite `quality-ci.sh` sobre esa revisión limpia. |
+| Git muestra `Unable to read current working directory` | En WSL, sal del directorio con `cd /` y vuelve a entrar a la raíz real del repositorio, o abre una terminal nueva allí. Repite `git status` y `git diff` antes de continuar. Si Windows y WSL leen estados distintos, comprueba de nuevo el montaje antes de confirmar o descartar archivos. Los scripts se detienen si Git no puede comprobar el estado. |
 | Falta `source-revision` o no coincide | Repite la suite sobre el commit actual y sin ediciones durante la ejecución. No crees ni modifiques ese archivo a mano. |
 | Faltan Clover, JUnit o LCOV | Revisa dónde se interrumpió `quality-ci.sh`, resuelve el fallo y vuelve a ejecutarlo. |
 | Token rechazado | Comprueba vigencia y permiso sobre ASCLA-QA; facilita el token al repetir la entrada oculta. |

@@ -67,6 +67,9 @@ async function trap(selector){
 }
 (async()=>{try{
  browser=await chromium.launch({headless:true});await nestedAdminDialogs();page=await browser.newPage();page.on('pageerror',e=>errors.push(e.message));
+ // Enable interception before navigation; toggling it at the same time as a
+ // keyboard activation can race Chromium's native chooser under load.
+ page.on('filechooser',()=>{});
  await page.goto(base+'/wp-login.php');await page.locator('#user_login').fill(env.ASCLA_ADMIN_USER||'ascla.admin');await page.locator('#user_pass').fill(env.ASCLA_ADMIN_PASSWORD);
  await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),page.locator('#wp-submit').click()]);
  await goto('intranet');nativeUrl=await page.evaluate(()=>ASCLA.api.replace(/ascla\/v1\/?$/,'wp/v2/')+'users/me');
@@ -92,7 +95,8 @@ async function trap(selector){
     const upload=page.locator('.modal label[role="button"]:has(input[type="file"][hidden])');
     if(await upload.count()&&!uploadChecked){
      uploadChecked=true;await upload.first().focus();assert.ok(await upload.first().evaluate(n=>n===document.activeElement),'upload focus '+type+' '+theme);
-     const picker=page.waitForEvent('filechooser');await page.keyboard.press('Enter');await (await picker).setFiles(root+'/wp-content/plugins/ascla-core/assets/ascla-logo.png');
+     const [picker]=await Promise.all([page.waitForEvent('filechooser'),upload.first().press(theme==='light'?'Enter':'Space')]);
+     await picker.setFiles(root+'/wp-content/plugins/ascla-core/assets/ascla-logo.png');
      await page.locator('.ascla-image-editor').waitFor();await scan('editor de imagen '+theme);await trap('.ascla-image-editor');
      const zoom=page.locator('.ascla-image-editor input[type="range"]');await zoom.focus();const initial=Number(await zoom.inputValue());await page.keyboard.press('ArrowRight');assert.equal(Number(await zoom.inputValue()),initial+1);
      assert.ok(await page.locator('.modal').evaluate(n=>n.closest('.modal-backdrop').inert));await page.keyboard.press('Escape');await page.locator('.ascla-image-editor').waitFor({state:'hidden'});
@@ -101,6 +105,7 @@ async function trap(selector){
     await page.keyboard.press('Escape');await page.locator('.modal').waitFor({state:'hidden'});assert.ok(await button.first().evaluate(n=>n===document.activeElement));
    }
   }
+  assert.ok(uploadChecked,'Keyboard upload must be exercised in '+theme+' theme');
  }
  pass('13 pantallas en 360, 768 y 1024 px, ambos temas; administración y editores con análisis WCAG 2.1');
  pass('Adjuntos accesibles con teclado y campos de editores sin identificadores duplicados');
@@ -132,7 +137,19 @@ async function trap(selector){
  pass('Gettext inglés: navegación, salto al contenido y cierre del menú; idioma original restaurado');
  assert.deepEqual(errors,[]);const failures=scans.filter(r=>r.violations.length||r.overflow);assert.equal(failures.length,0,JSON.stringify(failures.map(r=>({name:r.name,ids:r.violations.map(v=>v.id),overflow:r.overflow})),null,2));
  pass('Sin infracciones automáticas A/AA ni desbordamiento en los estados examinados');
-}catch(error){console.error(error.stack);process.exitCode=1;errors.push(error.message);}finally{
+ }catch(error){
+  console.error(error.stack);process.exitCode=1;errors.push(error.message);
+  if(page){
+   await page.screenshot({path:root+'/test-results/accessibility107-failure.png',fullPage:true}).catch(()=>{});
+   const state=await page.evaluate(()=>({
+    focused:document.activeElement?.outerHTML,
+    uploads:[...document.querySelectorAll('.modal label[role="button"]:has(input[type="file"][hidden])')].map(n=>({
+     label:n.textContent.trim(),focused:n===document.activeElement,inert:!!n.closest('[inert]'),disabled:n.querySelector('input').disabled
+    }))
+   })).catch(()=>null);
+   fs.writeFileSync(root+'/test-results/accessibility107-failure.json',JSON.stringify(state,null,2));
+  }
+ }finally{
  if(page&&originalLocale!==undefined)await changeLocale(originalLocale);
  fs.writeFileSync(root+'/test-results/accessibility107.json',JSON.stringify({axe:require('axe-core/package.json').version,checks,errors,scans},null,2));if(browser)await browser.close();
 }})();
