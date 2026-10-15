@@ -4,7 +4,8 @@ namespace ASCLA\Core\Repositories;
 /** Defer cache-only values (including WordPress transients) without publishing SQL read caches. */
 final class CacheJournal
 {
-    private array $writes=[],$cleared=[];
+    private array $writes=[];
+    private array $cleared=[];
     private const DATABASE_GROUPS=['options','site-options','users','user_meta','useremail','userlogins','userslugs','user-queries',
         'posts','post_meta','post-queries','terms','term_meta','term-queries','comments','comment','comment_meta','comment-queries',
         'sites','site-details','site-queries','blog-details','blog-lookup','blog-id-cache','blog_meta','networks','network-queries','counts'];
@@ -14,15 +15,17 @@ final class CacheJournal
     {
         $found=false;
         if (isset($this->writes[$key])) {
-            $write=$this->writes[$key];
-            if ($write['remove'] || $write['until']>0 && $write['until']<=time()) { return false; }
-            $found=true;return $write['value'];
+            return self::saved($this->writes[$key],$found);
         }
-        if (self::databaseGroup($group)) { return false; }
-        if (isset($this->cleared['*']) || isset($this->cleared[$group])) { return false; }
+        if (self::databaseGroup($group) || isset($this->cleared['*']) || isset($this->cleared[$group])) { return false; }
         $this->original->switch_to_blog($blog);
         try { return $this->original->get($id,$group,false,$found); }
         finally { $this->original->switch_to_blog(get_current_blog_id()); }
+    }
+    private static function saved(array $write,mixed &$found): mixed
+    {
+        if ($write['remove'] || $write['until']>0 && $write['until']<=time()) { return false; }
+        $found=true;return $write['value'];
     }
     public function write(string $key,int $blog,mixed $id,string $group,mixed $value,int $until,bool $remove=false): void
     {

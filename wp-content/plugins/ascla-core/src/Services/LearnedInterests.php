@@ -29,8 +29,8 @@ final class LearnedInterests
         $visited[$id]=true;$post=get_post($id);
         if (!$post || $post->post_status!=='publish' || !in_array(substr($post->post_type,6),['hub','forum','topic','resource','gallery','event','ally'],true)) { return false; }
         $meta=(array)get_post_meta($id,'_ascla',true);
-        if (!empty($meta['chatham']) || !empty($meta['micro']) || (!empty($meta['generated']) && empty($meta['reviewed']))) { return false; }
-        return !$post->post_parent || self::eligible((int)$post->post_parent,$visited);
+        $unprotected=empty($meta['chatham']) && empty($meta['micro']) && (empty($meta['generated']) || !empty($meta['reviewed']));
+        return $unprotected && (!$post->post_parent || self::eligible((int)$post->post_parent,$visited));
     }
 
     public static function get(int $user=0): array
@@ -65,20 +65,32 @@ final class LearnedInterests
             if (isset($seen[$id]) && $seen[$id]>=self::WEIGHTS[$kind]) { continue; }
             $terms=wp_get_object_terms($id,['ascla_interest','ascla_category','ascla_tag']);
             if (is_wp_error($terms)) { continue; }
-            foreach ($terms as $term) {
-                $key=$term->taxonomy.':'.$term->term_id;
-                $topics[$key]??=['id'=>(int)$term->term_id,'taxonomy'=>substr($term->taxonomy,6),'name'=>$term->name,'score'=>0,'contents'=>0];
-                $topics[$key]['score']+=self::WEIGHTS[$kind]-($seen[$id]??0);
-                if (!isset($seen[$id])) { $topics[$key]['contents']++; }
-            }
+            self::addTopics($topics,$terms,self::WEIGHTS[$kind],$seen[$id]??null);
             $seen[$id]=self::WEIGHTS[$kind];
         }
         $topics=array_values($topics);
-        $excluded=AutomaticInterests::excluded($user);$names=[];
-        foreach($excluded as $id) { $term=get_term($id,'ascla_interest');if($term&&!is_wp_error($term)) { $names[]=mb_strtolower(remove_accents($term->name)); } }
+        $names=self::excludedNames($user);
         $topics=array_values(array_filter($topics,static fn($topic)=>!in_array(mb_strtolower(remove_accents($topic['name'])),$names,true)));
         usort($topics,static fn($a,$b)=>($b['score']<=>$a['score'])?:strcmp($a['name'],$b['name']));
         return array_slice($topics,0,40);
+    }
+    private static function addTopics(array &$topics,array $terms,int $weight,?int $previous): void
+    {
+        foreach ($terms as $term) {
+            $key=$term->taxonomy.':'.$term->term_id;
+            $topics[$key]??=['id'=>(int)$term->term_id,'taxonomy'=>substr($term->taxonomy,6),'name'=>$term->name,'score'=>0,'contents'=>0];
+            $topics[$key]['score']+=$weight-($previous??0);
+            if ($previous===null) { $topics[$key]['contents']++; }
+        }
+    }
+    private static function excludedNames(int $user): array
+    {
+        $names=[];
+        foreach (AutomaticInterests::excluded($user) as $id) {
+            $term=get_term($id,'ascla_interest');
+            if ($term && !is_wp_error($term)) { $names[]=mb_strtolower(remove_accents($term->name)); }
+        }
+        return $names;
     }
 
     /** Start only when a readable detail is open. Server time prevents instant fabricated readings. */

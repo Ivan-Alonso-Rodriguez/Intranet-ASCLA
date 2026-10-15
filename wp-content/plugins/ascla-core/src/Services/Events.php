@@ -193,11 +193,7 @@ final class Events
             $meta['cancelled_at']=current_time('mysql',true);
             $meta['cancelled_by']=get_current_user_id();
             if ($micro) {
-                $meta['micro_approved']=false;
-                unset($meta['publish_at'],$meta['publish_actor_id'],$meta['schedule_error']);
-                ContentSchedule::cancel($id);wp_clear_scheduled_hook('ascla_micro_tick',[$id]);
-                MicroLifecycle::history($id,'cancelled',$reason);
-                if ($post->post_status!=='publish') { WordPressWrites::post(['ID'=>$id,'post_status'=>'ascla_hidden']); }
+                self::cancelMicroevent($id,$post,$meta,$reason);
             }
             EventReminders::cancel($id);
             WordPressWrites::meta('post',$id,'_ascla',$meta);
@@ -220,6 +216,14 @@ final class Events
             \ASCLA\Core\Jobs\DeliveryHandlers::queueCalendar($id);
         });
         return self::detail($id);
+    }
+    private static function cancelMicroevent(int $id,\WP_Post $post,array &$meta,string $reason): void
+    {
+        $meta['micro_approved']=false;
+        unset($meta['publish_at'],$meta['publish_actor_id'],$meta['schedule_error']);
+        ContentSchedule::cancel($id);wp_clear_scheduled_hook('ascla_micro_tick',[$id]);
+        MicroLifecycle::history($id,'cancelled',$reason);
+        if ($post->post_status!=='publish') { WordPressWrites::post(['ID'=>$id,'post_status'=>'ascla_hidden']); }
     }
 
     /** Remove a deleted member from event participation and release any reserved seat fairly. */

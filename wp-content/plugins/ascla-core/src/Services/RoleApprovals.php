@@ -14,10 +14,17 @@ final class RoleApprovals
         $reference=$record['reference']??null;$date=$record['decision_date']??null;$approved=$record['roles']??null;
         if (!is_string($reference) || !preg_match('/[^\\s\\p{Z}\\x{200B}\\x{FEFF}]/u',$reference)) { return false; }
         if (!self::validDate($date) || !is_array($approved) || !array_is_list($approved)) { return false; }
+        return self::recorded($record) && self::knownRoles($approved) && !array_diff($roles,$approved);
+    }
+    private static function recorded(array $record): bool
+    {
         $recorded=$record['recorded_at']??null;
-        if (!is_string($recorded) || !preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00$/',$recorded) || (int)($record['recorded_by']??0)<=0) { return false; }
-        foreach ($approved as $role) { if (!is_string($role) || !array_key_exists($role,Roles::capabilities())) { return false; } }
-        return !array_diff($roles,$approved);
+        return is_string($recorded) && (bool)preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+00:00$/',$recorded) && (int)($record['recorded_by']??0)>0;
+    }
+    private static function knownRoles(array $roles): bool
+    {
+        foreach ($roles as $role) { if (!is_string($role) || !array_key_exists($role,Roles::capabilities())) { return false; } }
+        return true;
     }
 
     private static function validDate(mixed $date): bool
@@ -71,12 +78,16 @@ final class RoleApprovals
         global $wpdb;
         if ($check!==null || $key!==$wpdb->prefix.'capabilities' || !is_array($value)) { return $check; }
         $roles=array_values(array_intersect(array_keys(array_filter($value)),array_keys(Roles::capabilities())));
-        if (count($roles)>1 && !self::covered((array)get_user_meta($id,self::META,true),$roles)) { return false; }
+        if ((count($roles)>1 && !self::covered((array)get_user_meta($id,self::META,true),$roles)) || !self::withinCeiling($value,$roles)) { return false; }
+        return $check;
+    }
+    private static function withinCeiling(array $value,array $roles): bool
+    {
         $allowed=AccountPermissions::ceiling($roles);
         foreach (AccountPermissions::LABELS as $cap=>$label) {
             if (!empty($value[$cap]) && empty($allowed[$cap])) { return false; }
         }
-        return $check;
+        return true;
     }
 
     public static function validateNative(mixed $response,array $handler,\WP_REST_Request $request): mixed

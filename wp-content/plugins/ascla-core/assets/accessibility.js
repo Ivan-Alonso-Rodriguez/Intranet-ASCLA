@@ -1,6 +1,16 @@
 /* Keyboard and background access follow the currently visible dialog/drawer. */
 (() => {
   "use strict";
+  function activateUpload(event) {
+    const upload = event.target.matches?.('label[role="button"]') && event.target.querySelector('input[type="file"][hidden]');
+    if (!upload || !["Enter", " "].includes(event.key)) return false;
+    event.preventDefault();
+    if (!upload.disabled) {
+      if (typeof upload.showPicker === "function") upload.showPicker();
+      else upload.click();
+    }
+    return true;
+  }
   globalThis.ASCLAAccessibility = (root, T) => {
     const mobile = matchMedia("(max-width: 900px)"), background = new Map();
     const dialog = () => root.querySelector(".ascla-image-editor") || root.querySelector(".modal-decision") || root.querySelector(".modal");
@@ -9,6 +19,12 @@
     function refresh() {
       for (const [node, previous] of background) node.inert = previous;
       background.clear();
+      enhanceControls();
+      updateNavigation();
+      const active = dialog()?.closest(".modal-backdrop,.ascla-image-editor-backdrop");
+      if (active) isolate(active);
+    }
+    function enhanceControls() {
       for (const label of root.querySelectorAll('label:has(input[type="file"][hidden])')) {
         label.tabIndex = label.querySelector('input[type="file"]').disabled ? -1 : 0;
         label.setAttribute("role", "button");
@@ -19,6 +35,8 @@
         table.setAttribute("role", "region");
         table.setAttribute("aria-label", table.closest(".card,.stats-section,.import-row")?.querySelector("h2,h3")?.textContent || T("Tabla de datos"));
       }
+    }
+    function updateNavigation() {
       const sidebar = root.querySelector(".ascla-sidebar"), trigger = root.querySelector('[data-action="menu"]');
       const open = !!sidebar?.classList.contains("open") && mobile.matches;
       if (sidebar) { sidebar.id = "ascla-navigation"; sidebar.inert = mobile.matches && !open; }
@@ -27,8 +45,8 @@
         trigger.setAttribute("aria-expanded", String(open));
         trigger.setAttribute("aria-label", T(open ? "Cerrar navegación" : "Abrir navegación"));
       }
-      const active = dialog()?.closest(".modal-backdrop,.ascla-image-editor-backdrop");
-      if (!active) return;
+    }
+    function isolate(active) {
       const nodes = [];
       // Native wp-admin nests root inside wpwrap. Keep the dialog's entire
       // ancestor path interactive and isolate siblings at every level.
@@ -46,14 +64,7 @@
       if (focus) (open ? sidebar?.querySelector('a[aria-current="page"]') || sidebar?.querySelector("a") : root.querySelector('[data-action="menu"]'))?.focus();
     }
     document.addEventListener("keydown", event => {
-      const upload = event.target.matches?.('label[role="button"]') && event.target.querySelector('input[type="file"][hidden]');
-      if (upload && ["Enter", " "].includes(event.key)) {
-        event.preventDefault();
-        if (upload.disabled) return;
-        if (typeof upload.showPicker === "function") upload.showPicker();
-        else upload.click();
-        return;
-      }
+      if (activateUpload(event)) return;
       const active = dialog();
       if (!active) {
         if (event.key === "Escape" && root.querySelector(".ascla-sidebar.open")) setMenu(false, true);

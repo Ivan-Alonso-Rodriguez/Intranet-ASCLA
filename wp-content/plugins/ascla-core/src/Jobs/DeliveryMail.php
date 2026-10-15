@@ -8,9 +8,9 @@ final class DeliveryMail
         $files=[];$total=0;
         foreach ((array)($mail['attachments']??[]) as $path) {
             $size=is_file($path)?filesize($path):false;
-            if ($size===false || ($total+=$size)>10*1024*1024) { throw new \RuntimeException('No se pudo conservar el adjunto del correo.'); }
+            if ($size===false || ($total+=$size)>10*1024*1024) { throw new DeliveryException('No se pudo conservar el adjunto del correo.'); }
             $bytes=file_get_contents($path);
-            if ($bytes===false) { throw new \RuntimeException('No se pudo leer el adjunto del correo.'); }
+            if ($bytes===false) { throw new DeliveryException('No se pudo leer el adjunto del correo.'); }
             $files[]=['name'=>sanitize_file_name(basename($path)),'bytes'=>base64_encode($bytes)];
         }
         return array_intersect_key($mail,array_flip(['to','subject','message','headers']))+['files'=>$files];
@@ -22,9 +22,9 @@ final class DeliveryMail
         try {
             foreach ($mail['files']??[] as $file) {
                 $path=wp_tempnam($file['name']);$bytes=base64_decode($file['bytes'],true);
-                if (!$path) { throw new \RuntimeException('No se pudo restaurar el adjunto.'); }
+                if (!$path) { throw new DeliveryException('No se pudo restaurar el adjunto.'); }
                 $paths[]=$path;
-                if ($bytes===false || file_put_contents($path,$bytes)!==strlen($bytes)) { throw new \RuntimeException('No se pudo restaurar el adjunto.'); }
+                if ($bytes===false || file_put_contents($path,$bytes)!==strlen($bytes)) { throw new DeliveryException('No se pudo restaurar el adjunto.'); }
             }
             return self::identified(static fn()=>wp_mail($mail['to'],$mail['subject'],$mail['message'],$mail['headers']??[],$paths),$key);
         } finally { foreach ($paths as $path) { wp_delete_file($path); } }

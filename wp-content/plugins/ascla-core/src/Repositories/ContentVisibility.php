@@ -13,7 +13,10 @@ final class ContentVisibility
         $known=array_map(static fn($type)=>'ascla_'.$type,array_keys(Catalog::TYPES));
         if (!$types || array_diff($types,$known)) { return $sql; }
         if (!Access::member()) { return $sql.' AND 1=0'; }
-        if (current_user_can('ascla_manage')) { return $sql; }
+        return current_user_can('ascla_manage')?$sql:self::memberWhere($sql,$types);
+    }
+    private static function memberWhere(string $sql,array $types): string
+    {
         global $wpdb;
         $clauses=[];
         foreach ($types as $type) {

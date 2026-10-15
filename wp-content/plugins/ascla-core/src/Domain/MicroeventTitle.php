@@ -8,6 +8,6 @@ final class MicroeventTitle
     {
         if (empty($meta['micro']) || empty($meta['chatham']) || !is_array($meta['agenda_ai']??null) || ($meta['agenda_ai']['title']??null)!==$title) { return $title; }
         $title=preg_replace('/^(?:participante|identidad reservada)(?=\h*·)/iu','Círculo ASCLA',$title)??$title;
-        return preg_replace('/\h+(?:y|e)\h+(?:participante|identidad reservada)\h*$/iu','',$title)??$title;
+        return preg_replace('/\h+[ye]\h+(?:participante|identidad reservada)\h*$/iu','',$title)??$title;
     }
 }

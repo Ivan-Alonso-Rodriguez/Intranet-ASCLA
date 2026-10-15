@@ -123,6 +123,8 @@ El script exige rama `qa`, checkout limpio, reportes presentes y `coverage/sourc
 
 Los umbrales efectivos son los configurados en SonarQube. Si falla una condición de cobertura, consulta ese umbral y las líneas afectadas; no se requiere convertir todo el proyecto a 100 %. Cambiar las condiciones debe ser una decisión explícita del equipo, no una forma de ocultar fallos.
 
+Un gate puede fallar por incidencias aunque la cobertura ya cumpla. En ese caso, corrige las reglas señaladas y valida el comportamiento con las pruebas existentes; no necesitas añadir casos para aumentar ese porcentaje. Conserva por separado la exportación original y el análisis posterior. Una comprobación local sin cobertura no reemplaza el análisis de QA ni permite atribuir reportes de cobertura anteriores a otro commit.
+
 ### Si algo falla
 
 | Situación | Cómo continuar |

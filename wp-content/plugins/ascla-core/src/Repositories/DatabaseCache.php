@@ -4,7 +4,8 @@ namespace ASCLA\Core\Repositories;
 /** While recovery is pending, SQL read caches remain private; cache-only locks stay atomic. */
 final class DatabaseCache
 {
-    private array $values=[],$globals=[];
+    private array $values=[];
+    private array $globals=[];
     private int $blog;
     public function __construct(public readonly object $provider)
     {

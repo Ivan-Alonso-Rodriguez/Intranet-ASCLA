@@ -4,6 +4,7 @@ namespace ASCLA\Core\Services;
 /** Bounds shared by the form controls and domain writes, including forced REST calls. */
 final class FormRules
 {
+    private const INVALID_SELECTION='Selección no válida.';
     public const INTEGERS=[
         'capacity'=>[0,100000],'offer_hours'=>[1,168],'duration_seconds'=>[0,604800],
         'matching_min_affinity'=>[0,100],'matching_max_suggestions'=>[1,5],'matching_weight'=>[0,100],
@@ -28,12 +29,12 @@ final class FormRules
     }
     public static function ids(mixed $values): array
     {
-        Access::require(is_array($values)&&array_is_list($values),'Selección no válida.',400);
-        return array_values(array_unique(array_map(static fn($value)=>self::bounded($value,1,PHP_INT_MAX,'Selección no válida.'),$values)));
+        Access::require(is_array($values)&&array_is_list($values),self::INVALID_SELECTION,400);
+        return array_values(array_unique(array_map(static fn($value)=>self::bounded($value,1,PHP_INT_MAX,self::INVALID_SELECTION),$values)));
     }
     public static function boolean(mixed $value): bool
     {
-        Access::require(in_array($value,[true,false,0,1,'0','1','true','false'],true),'Selección no válida.',400);
+        Access::require(in_array($value,[true,false,0,1,'0','1','true','false'],true),self::INVALID_SELECTION,400);
         return rest_sanitize_boolean($value);
     }
 }

@@ -18,8 +18,7 @@ final class ContentQuery
     public static function search(string $sql, \WP_Query $query): string
     {
         if ((array)$query->get('post_type')===['ascla_ally'] && ($query->get('ascla_ally_search') || $query->get('ascla_search'))) { return AllySearch::search($query); }
-        if (!$query->get('ascla_search')) { return $sql; }
-        $text = Access::text($query->get('s'), 150);
+        $text = $query->get('ascla_search')?Access::text($query->get('s'), 150):'';
         if ($text === '') { return $sql; }
         global $wpdb;
         $like = '%' . $wpdb->esc_like($text) . '%';

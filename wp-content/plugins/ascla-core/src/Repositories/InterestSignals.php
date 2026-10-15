@@ -4,6 +4,7 @@ namespace ASCLA\Core\Repositories;
 /** Current, positive community actions; never message bodies or free-text searches. */
 final class InterestSignals
 {
+    private const SQL_DATE_FORMAT='Y-m-d H:i:s';
     public static function recent(int $user,array $baseline=[]): array
     {
         global $wpdb;
@@ -20,7 +21,7 @@ final class InterestSignals
         $union=implode(' UNION ALL ',array_map(static fn($sql)=>$wpdb->prepare($sql,$user),$parts));
         // Group repeated comments/reads before the bound; one source cannot amplify itself by repetition.
         $sql="SELECT post_id,kind,MAX(occurred_at) occurred_at FROM ($union) signals WHERE occurred_at>=%s AND occurred_at<=%s GROUP BY post_id,kind ORDER BY occurred_at DESC,post_id DESC,kind ASC LIMIT 400";
-        $rows=$wpdb->get_results($wpdb->prepare($sql,gmdate('Y-m-d H:i:s',time()-90*DAY_IN_SECONDS),gmdate('Y-m-d H:i:s')),ARRAY_A);
+        $rows=$wpdb->get_results($wpdb->prepare($sql,gmdate(self::SQL_DATE_FORMAT,time()-90*DAY_IN_SECONDS),gmdate(self::SQL_DATE_FORMAT)),ARRAY_A);
         if ($wpdb->last_error!=='') { throw new RepositoryException('No se pudieron consultar los intereses. Reintente la operación.'); }
         return $rows?:[];
     }
@@ -30,7 +31,7 @@ final class InterestSignals
         foreach (Store::rows('relations',"user_id=%d AND kind='interest_read'",[$user],'ORDER BY created_at DESC,id DESC LIMIT 10000 OFFSET 250') as $row) {
             Store::delete('relations',['id'=>(int)$row['id']]);
         }
-        foreach (Store::rows('relations',"user_id=%d AND kind='interest_read' AND created_at<%s",[$user,gmdate('Y-m-d H:i:s',time()-90*DAY_IN_SECONDS)],'') as $row) {
+        foreach (Store::rows('relations',"user_id=%d AND kind='interest_read' AND created_at<%s",[$user,gmdate(self::SQL_DATE_FORMAT,time()-90*DAY_IN_SECONDS)],'') as $row) {
             Store::delete('relations',['id'=>(int)$row['id']]);
         }
     }

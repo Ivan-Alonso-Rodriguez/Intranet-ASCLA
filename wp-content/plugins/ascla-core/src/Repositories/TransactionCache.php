@@ -4,11 +4,13 @@ namespace ASCLA\Core\Repositories;
 /** Core Object Cache API, isolated from the shared provider until the SQL commit. */
 final class TransactionCache
 {
-    private array $values=[],$touched=[],$globals=[];
+    use CacheStatistics;
+    private array $values=[];
+    private array $touched=[];
+    private array $globals=[];
     private bool $flushAll=false;
     private int $blog;
     private CacheJournal $journal;
-    public int $cache_hits=0,$cache_misses=0;
     public function __construct(private object $original)
     {
         $this->blog=get_current_blog_id();
@@ -31,10 +33,10 @@ final class TransactionCache
         $this->touch($key,$id,$group);$entry=$this->values[$key]??null;
         if (!$entry || $entry['until']>0 && $entry['until']<=time()) {
             unset($this->values[$key]);$value=$this->journal->read($key,$this->blog,$id,$group,$found);
-            if (!$found) { ++$this->cache_misses;return false; }
+            if (!$found) { ++$this->cacheMisses;return false; }
             $entry=['value'=>$value,'until'=>0];$this->values[$key]=$entry;
         }
-        $found=true;++$this->cache_hits;return is_object($entry['value'])?clone $entry['value']:$entry['value'];
+        $found=true;++$this->cacheHits;return is_object($entry['value'])?clone $entry['value']:$entry['value'];
     }
     public function set(mixed $id,mixed $value,string $group='default',int $expire=0): bool
     {
@@ -90,6 +92,8 @@ final class TransactionCache
     }
     public function __call(string $method,array $args): mixed
     {
+        if ($method==='add_global_groups') { $this->addGroups((array)$args[0]);return null; }
+        if ($method==='switch_to_blog') { $this->switchBlog((int)$args[0]);return null; }
         return match($method) {
             'get_multiple','delete_multiple'=>$this->multiple(str_replace('_multiple','',$method),$args[0],$args[1]??'default'),
             'set_multiple','add_multiple'=>$this->multiple(str_replace('_multiple','',$method),$args[0],$args[1]??'default',$args[2]??0),
@@ -97,9 +101,7 @@ final class TransactionCache
             'decr'=>$this->adjust($args[0],-(int)($args[1]??1),$args[2]??'default'),
             'flush_runtime','reset'=>$this->clear(),
             'flush_group'=>$this->flushGroup($args[0]),
-            'add_global_groups'=>$this->addGroups((array)$args[0]),
             'add_non_persistent_groups','close','stats'=>true,
-            'switch_to_blog'=>$this->switchBlog((int)$args[0]),
             // Group flushing cannot reliably invalidate an unknown shared provider on commit.
             'supports'=>in_array($args[0],['add_multiple','set_multiple','get_multiple','delete_multiple','flush_runtime'],true),
             default=>throw new RepositoryException('Operación de caché no compatible con la transacción.'),

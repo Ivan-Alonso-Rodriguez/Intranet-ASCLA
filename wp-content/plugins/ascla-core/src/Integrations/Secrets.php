@@ -18,8 +18,8 @@ final class Secrets
         $constant='ASCLA_'.strtoupper($name);
         if (defined($constant)) { return 'constant'; }
         if (getenv($constant)!==false) { return 'environment'; }
-        if (self::externalOnly() && in_array($name,self::SERVICE_KEYS,true)) { return 'external_required'; }
-        return self::hasLegacy($name)?'encrypted_option':'absent';
+        $fallback=self::hasLegacy($name)?'encrypted_option':'absent';
+        return self::externalOnly() && in_array($name,self::SERVICE_KEYS,true)?'external_required':$fallback;
     }
     public static function hasLegacy(string $name): bool { return get_option('ascla_secret_'.$name,'')!==''; }
     public static function managedExternally(string $name): bool { return in_array(self::source($name),['constant','environment','external_required'],true); }
@@ -38,7 +38,10 @@ final class Secrets
         if (defined($constant)) { return (string)constant($constant); }
         $environment=getenv($constant);
         if ($environment!==false) { return $environment; }
-        if (self::externalOnly() && in_array($name,self::SERVICE_KEYS,true)) { return ''; }
+        return self::externalOnly() && in_array($name,self::SERVICE_KEYS,true)?'':self::legacy($name);
+    }
+    private static function legacy(string $name): string
+    {
         $raw=base64_decode((string)get_option('ascla_secret_'.$name,''),true);
         if (!$raw||strlen($raw)<29) { return ''; }
         $value=openssl_decrypt(substr($raw,28),'aes-256-gcm',self::key(),OPENSSL_RAW_DATA,substr($raw,0,12),substr($raw,12,16),$name);

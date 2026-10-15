@@ -10,20 +10,38 @@ final class RequestValidation
     private const IDS=['target','parent','photo_id','professional_request_id','assignee','resource_id','conversation_id','user_id','last','page','per_page'];
     private const FILTERS=['mine','past','recommended','micro'];
     private const LISTS=['users','media_ids','interest','category','tag','topics','tag_names','assigned_roles','interests','areas','industries','goals','languages','learn','help','connect_topics','hidden','profile_completion_extra'];
+    private const INVALID_FORMAT='Formato de solicitud no válido.';
 
     public static function validate(\WP_REST_Request $request): void
     {
         $json=$request->get_json_params();
+        self::jsonShape($request,$json);
+        $params=$request->get_params();
+        self::textFields($params);
+        self::booleanFields($request,$params);
+        self::identifiers($request,$params);
+        $fields=is_array($json)?$json:$request->get_body_params();
+        self::lists($request,$params,$fields);
+        self::objects($request,$params,$fields);
+    }
+
+    private static function jsonShape(\WP_REST_Request $request,mixed $json): void
+    {
         if ($json!==null) {
             // Empty arrays remain compatible with existing clients for bodyless actions.
-            Access::require(is_array($json) && ($json===[] || !array_is_list($json)),'Formato de solicitud no válido.',400);
+            Access::require(is_array($json) && ($json===[] || !array_is_list($json)),self::INVALID_FORMAT,400);
         } elseif ($request->is_json_content_type() && trim((string)$request->get_body())!=='') {
-            Access::require(false,'Formato de solicitud no válido.',400);
+            Access::require(false,self::INVALID_FORMAT,400);
         }
-        $params=$request->get_params();
+    }
+    private static function textFields(array $params): void
+    {
         foreach (self::TEXT as $key) {
             if (isset($params[$key])) { Access::require(is_string($params[$key]),'Texto no válido.',400); }
         }
+    }
+    private static function booleanFields(\WP_REST_Request $request,array $params): void
+    {
         foreach (self::BOOLEANS as $key) {
             if (array_key_exists($key,$params)) { self::boolean($params[$key]);$request->set_param($key,rest_sanitize_boolean($params[$key])); }
         }
@@ -35,6 +53,9 @@ final class RequestValidation
         foreach ($params as $key=>$value) {
             if (str_starts_with((string)$key,'clear_')) { self::boolean($value);$request->set_param($key,rest_sanitize_boolean($value)); }
         }
+    }
+    private static function identifiers(\WP_REST_Request $request,array $params): void
+    {
         foreach (self::IDS as $key) {
             // Optional list controls submit an empty value to mean no filter.
             if ($request->get_method()==='GET' && in_array($key,['parent','last','page','per_page'],true) && ($params[$key]??null)==='') { continue; }
@@ -42,9 +63,11 @@ final class RequestValidation
         }
         if (array_key_exists('duration_seconds',$params)) { FormRules::integer('duration_seconds',$params['duration_seconds']); }
         foreach (['after','before'] as $key) {
-            if (isset($params[$key])) { Access::require(is_string($params[$key])||is_int($params[$key]),'Formato de solicitud no válido.',400); }
+            if (isset($params[$key])) { Access::require(is_string($params[$key])||is_int($params[$key]),self::INVALID_FORMAT,400); }
         }
-        $fields=is_array($json)?$json:$request->get_body_params();
+    }
+    private static function lists(\WP_REST_Request $request,array $params,array $fields): void
+    {
         // Analytics selects one ID (zero means all); editorial taxonomies are lists.
         $statistics=in_array($request->get_route(),['/ascla/v1/admin/statistics','/ascla/v1/admin/statistics/topics'],true);
         if ($statistics) {
@@ -58,6 +81,9 @@ final class RequestValidation
             self::list($fields[$key]);
             if (in_array($key,['users','media_ids','interest','category','tag','topics'],true)||isset(Profiles::TERMS[$key])) { FormRules::ids($fields[$key]); }
         }
+    }
+    private static function objects(\WP_REST_Request $request,array $params,array $fields): void
+    {
         foreach (['meta','columns','permission_overrides','email_notifications','matching_weights'] as $key) {
             if (array_key_exists($key,$params)) { self::object($params[$key]); }
         }
@@ -79,7 +105,7 @@ final class RequestValidation
     }
     private static function object(mixed $value): void
     {
-        Access::require(is_array($value) && ($value===[] || !array_is_list($value)),'Formato de solicitud no válido.',400);
+        Access::require(is_array($value) && ($value===[] || !array_is_list($value)),self::INVALID_FORMAT,400);
     }
     private static function metadata(array &$meta): void
     {

@@ -6,6 +6,7 @@ use ASCLA\Core\Services\{Access,Audit,TechnicalErrors};
 /** Transactional outbox. A recurring worker also recovers a commit followed by process death. */
 final class Deliveries
 {
+    private const SQL_DATE_FORMAT='Y-m-d H:i:s';
     private static bool $running=false;
     private const MAX_ATTEMPTS=8;
     public static function boot(): void
@@ -23,7 +24,7 @@ final class Deliveries
         if (!in_array($kind,['notification','mail','calendar'],true)) { throw new \InvalidArgumentException('Entrega no válida'); }
         $id=Store::insert('deliveries',['kind'=>$kind,'delivery_key'=>$key!==''?$key:bin2hex(random_bytes(16)),
             'actor_id'=>get_current_user_id(),'payload'=>DeliveryPayload::seal($kind,$payload),'status'=>'pending',
-            'available_at'=>gmdate('Y-m-d H:i:s'),'created_at'=>gmdate('Y-m-d H:i:s')]);
+            'available_at'=>gmdate(self::SQL_DATE_FORMAT),'created_at'=>gmdate(self::SQL_DATE_FORMAT)]);
         Transaction::afterCommit(static fn()=>self::run($id));
         return $id;
     }
@@ -64,11 +65,11 @@ final class Deliveries
             wp_set_current_user((int)$row['actor_id']);
             $payload=DeliveryPayload::open($row['kind'],$row['payload']);
             $sent=DeliveryHandlers::send($row,$payload);
-            Store::update('deliveries',['status'=>$sent?'sent':'skipped','payload'=>'','locked_at'=>null,'completed_at'=>gmdate('Y-m-d H:i:s')],['id'=>$row['id']]);
+            Store::update('deliveries',['status'=>$sent?'sent':'skipped','payload'=>'','locked_at'=>null,'completed_at'=>gmdate(self::SQL_DATE_FORMAT)],['id'=>$row['id']]);
         } catch (\Throwable $error) {
             $attempts=(int)$row['attempts']+1;$cache=$row['kind']==='cache';$failed=!$cache && $attempts>=self::MAX_ATTEMPTS;
             Store::update('deliveries',['status'=>$failed?'failed':'pending','locked_at'=>null,
-                'available_at'=>gmdate('Y-m-d H:i:s',time()+($cache?60:min(21600,60*3**min(7,$attempts-1))))],['id'=>$row['id']]);
+                'available_at'=>gmdate(self::SQL_DATE_FORMAT,time()+($cache?60:min(21600,60*3**min(7,$attempts-1))))],['id'=>$row['id']]);
             TechnicalErrors::record('delivery','delivery_failed',$error,(int)$row['id']);
         } finally { wp_set_current_user($original); }
     }
@@ -85,7 +86,7 @@ final class Deliveries
         Access::require(Access::member()&&current_user_can('ascla_manage'));
         Store::atomic('delivery:'.$id,static function() use($id) {
             $row=Store::one('deliveries',$id);Access::require($row && $row['status']==='failed','Entrega no disponible para reintentar.',409);
-            Store::update('deliveries',['status'=>'pending','attempts'=>0,'available_at'=>gmdate('Y-m-d H:i:s')],['id'=>$id]);
+            Store::update('deliveries',['status'=>'pending','attempts'=>0,'available_at'=>gmdate(self::SQL_DATE_FORMAT)],['id'=>$id]);
             Audit::record('delivery_retry',$id,$row['kind']);
         });
         self::run($id);return self::overview();

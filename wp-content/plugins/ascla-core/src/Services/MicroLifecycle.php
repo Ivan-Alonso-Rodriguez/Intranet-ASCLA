@@ -16,17 +16,7 @@ final class MicroLifecycle
     {
         if (empty($meta['micro'])) { return; }
         if ($allowIncomplete) {
-            foreach (['micro_min','priority_hours'] as $key) {
-                if (!array_key_exists($key,$input)) { continue; }
-                $meta[$key]=FormRules::integer($key,$input[$key],'Parámetro de microeventos no válido.');
-            }
-            if (array_key_exists('registration_deadline',$input)) {
-                if ($input['registration_deadline']==='') { unset($meta['registration_deadline']); }
-                else { $meta['registration_deadline']=ContentMeta::eventDate($input['registration_deadline']); }
-            }
-            if (!empty($meta['registration_deadline']) && !empty($meta['start'])) {
-                Access::require(strtotime($meta['registration_deadline'])<=strtotime($meta['start']),'El plazo de inscripción debe terminar antes del inicio.',400);
-            }
+            self::sanitizeDraft($meta,$input);
             return;
         }
         $meta=self::defaults($meta);
@@ -40,6 +30,19 @@ final class MicroLifecycle
             $meta['registration_deadline']=ContentMeta::eventDate($input['registration_deadline']);
         }
         Access::require(strtotime($meta['registration_deadline'])<=strtotime($meta['start']),'El plazo de inscripción debe terminar antes del inicio.',400);
+    }
+    private static function sanitizeDraft(array &$meta,array $input): void
+    {
+        foreach (['micro_min','priority_hours'] as $key) {
+            if (array_key_exists($key,$input)) { $meta[$key]=FormRules::integer($key,$input[$key],'Parámetro de microeventos no válido.'); }
+        }
+        if (array_key_exists('registration_deadline',$input)) {
+            if ($input['registration_deadline']==='') { unset($meta['registration_deadline']); }
+            else { $meta['registration_deadline']=ContentMeta::eventDate($input['registration_deadline']); }
+        }
+        if (!empty($meta['registration_deadline']) && !empty($meta['start'])) {
+            Access::require(strtotime($meta['registration_deadline'])<=strtotime($meta['start']),'El plazo de inscripción debe terminar antes del inicio.',400);
+        }
     }
     public static function publicAccess(array $meta): bool
     {

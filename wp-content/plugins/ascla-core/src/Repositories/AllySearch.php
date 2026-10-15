@@ -7,12 +7,13 @@ use ASCLA\Core\Frontend\Language;
 /** RF-077: query visible names and agreement types before counting or paginating. */
 final class AllySearch
 {
-    private const LABELS=['Socio estratégico','Convenio','Otro','Alianza institucional'];
+    private const DEFAULT_TYPE='Alianza institucional';
+    private const LABELS=['Socio estratégico','Convenio','Otro',self::DEFAULT_TYPE];
 
     public static function value(array $meta): string
     {
         $value=is_string($meta['alliance_type']??null)?trim($meta['alliance_type']):'';
-        return self::normalize($value!==''?$value:'Alianza institucional');
+        return self::normalize($value!==''?$value:self::DEFAULT_TYPE);
     }
 
     private static function normalize(string $value): string
@@ -32,7 +33,7 @@ final class AllySearch
             }
         }
         $fallback='';
-        if (mb_stripos(self::normalize(Language::label('Alianza institucional')),$needle)!==false || mb_stripos('alianza institucional',$needle)!==false) {
+        if (mb_stripos(self::normalize(Language::label(self::DEFAULT_TYPE)),$needle)!==false || mb_stripos('alianza institucional',$needle)!==false) {
             $fallback=" OR NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} ally_original WHERE ally_original.post_id={$wpdb->posts}.ID AND ally_original.meta_key='_ascla')";
         }
         return "({$wpdb->posts}.post_type='ascla_ally' AND (EXISTS (SELECT 1 FROM {$wpdb->postmeta} ally_type WHERE ally_type.post_id={$wpdb->posts}.ID AND ally_type.meta_key='_ascla_alliance_type' AND ($match))$fallback))";

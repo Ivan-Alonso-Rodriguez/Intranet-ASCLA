@@ -66,8 +66,8 @@ final class MailSettingsInput108Test extends TestCase
     public function testFalseClearFlagsPreserveStoredCredentialsInRestAndService(mixed $value): void
     {
         $input=['clear_smtp_password'=>$value,'clear_openai_key'=>$value];Settings::save($input);
-        self::assertTrue(Secrets::get('smtp_password')===$this->password);self::assertTrue(Secrets::get('openai_key')==='temporary-service-key');
-        self::assertSame(200,$this->api($input)->get_status());self::assertTrue(Secrets::get('smtp_password')===$this->password);self::assertTrue(Secrets::get('openai_key')==='temporary-service-key');
+        self::assertSame($this->password,Secrets::get('smtp_password'));self::assertSame('temporary-service-key',Secrets::get('openai_key'));
+        self::assertSame(200,$this->api($input)->get_status());self::assertSame($this->password,Secrets::get('smtp_password'));self::assertSame('temporary-service-key',Secrets::get('openai_key'));
     }
     public static function invalidClearFlags(): array{return [['yes'],[2],[[]],[null]];}
     #[DataProvider('invalidClearFlags')]
@@ -76,8 +76,8 @@ final class MailSettingsInput108Test extends TestCase
     public function testZeroPasswordIsStoredAndAnEmptyPasswordPreservesIt(): void
     {
         foreach(['0','  password with spaces  '] as $password){
-            $status=Settings::save(['smtp_password'=>$password]);self::assertTrue(Secrets::get('smtp_password')===$password);self::assertTrue($status['has_smtp_password']);
-            self::assertSame(200,$this->api(['smtp_password'=>''])->get_status());self::assertTrue(Secrets::get('smtp_password')===$password);
+            $status=Settings::save(['smtp_password'=>$password]);self::assertSame($password,Secrets::get('smtp_password'));self::assertTrue($status['has_smtp_password']);
+            self::assertSame(200,$this->api(['smtp_password'=>''])->get_status());self::assertSame($password,Secrets::get('smtp_password'));
             self::assertStringNotContainsString($password==='0'?'"smtp_password":"0"':$password,wp_json_encode($status));
         }
     }
@@ -85,7 +85,7 @@ final class MailSettingsInput108Test extends TestCase
     {
         foreach([[465,'ssl'],['587','tls'],[2525,'tls']] as [$port,$security]){
             $r=$this->api(['mail_mode'=>'smtp','smtp_host'=>'smtp.example.invalid','smtp_user'=>'sender@example.invalid','smtp_from'=>'sender@example.invalid','smtp_name'=>'ASCLA · Formación','smtp_port'=>$port,'smtp_security'=>$security,'smtp_password'=>'']);
-            self::assertSame(200,$r->get_status());self::assertSame((int)$port,Settings::get()['smtp_port']);self::assertTrue(Secrets::get('smtp_password')===$this->password);
+            self::assertSame(200,$r->get_status());self::assertSame((int)$port,Settings::get()['smtp_port']);self::assertSame($this->password,Secrets::get('smtp_password'));
         }
         Settings::save(['mail_mode'=>'wordpress','clear_smtp_password'=>'true']);self::assertSame('',Secrets::get('smtp_password'));
     }

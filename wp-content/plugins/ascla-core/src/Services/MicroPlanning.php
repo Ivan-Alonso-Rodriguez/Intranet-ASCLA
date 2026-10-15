@@ -55,7 +55,7 @@ final class MicroPlanning
             !empty($plan['groups'])=>'ready',
             count($profiles)<$minimum=>'insufficient_candidates',
             $shared<$minimum=>'insufficient_shared_interest',
-            count($blocked)>0=>'incompatible_group',
+            !empty($blocked)=>'incompatible_group',
             default=>'no_group',
         };
         return ['eligible'=>count($profiles),'minimum'=>$minimum,'capacity'=>(int)Settings::get()['micro_capacity'],

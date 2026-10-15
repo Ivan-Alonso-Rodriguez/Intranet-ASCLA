@@ -71,8 +71,7 @@ final class MemberInsights
         $visited[$id]=true;$post=get_post($id);
         if (!$post || $post->post_status!=='publish' || !Content::canRead($post)) { return false; }
         $meta=(array)get_post_meta($id,'_ascla',true);
-        if (!empty($meta['chatham']) || !empty($meta['micro'])) { return false; }
-        return !$post->post_parent || self::attributable((int)$post->post_parent,$visited);
+        return empty($meta['chatham']) && empty($meta['micro']) && (!$post->post_parent || self::attributable((int)$post->post_parent,$visited));
     }
 
     private static function likedTopics(int $post,array &$topics): void

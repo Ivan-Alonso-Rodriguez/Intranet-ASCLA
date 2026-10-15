@@ -39,8 +39,7 @@ final class Content
         $type=substr($post->post_type,6);
         if ($type==='contact') { return false; }
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
-        if (!empty($meta['micro']) && !empty($meta['cancelled'])) { return false; }
-        if (!empty($meta['micro']) && $post->post_status==='publish' && !current_user_can('ascla_manage')) { return false; }
+        if (!empty($meta['micro']) && (!empty($meta['cancelled']) || ($post->post_status==='publish' && !current_user_can('ascla_manage')))) { return false; }
         return self::canRead($post) && self::canCreate($type)
             && (current_user_can('ascla_manage') || (int)$post->post_author===get_current_user_id()
                 || (current_user_can('ascla_moderate') && !in_array($type,self::EDITORIAL_TYPES,true)));

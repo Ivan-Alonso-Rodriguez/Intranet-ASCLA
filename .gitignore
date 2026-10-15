@@ -68,6 +68,7 @@ __pycache__/
 !/docs/evidence/release-1.10.8/connections-panel108.json
 !/docs/evidence/release-1.10.8/events108.json
 !/docs/evidence/release-1.10.8/e2e-runner108.json
+!/docs/evidence/release-1.10.8/sonar-fixes108.json
 !/docs/evidence/release-1.10.8/forms108.json
 !/docs/evidence/release-1.10.8/follow-removal108.json
 !/docs/evidence/release-1.10.8/follow-removal108-junit.xml

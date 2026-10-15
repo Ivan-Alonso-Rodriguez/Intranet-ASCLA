@@ -11,10 +11,7 @@ final class CommentHistory
         $page=max(1,min(10000,(int)($filter['page']??1)));$size=20;$offset=($page-1)*$size;
         $text=Access::text($filter['q']??'',150);$items=[];$total=0;$cursor=0;
         do {
-            global $wpdb;$wpdb->last_error='';
-            $rows=get_comments(['user_id'=>get_current_user_id(),'status'=>['approve','hold'],'type'=>'comment',
-                'number'=>200,'offset'=>$cursor,'orderby'=>'comment_ID','order'=>'DESC']);
-            if ($wpdb->last_error!=='') { throw new \ASCLA\Core\Repositories\RepositoryException('No se pudo consultar el historial.'); }
+            $rows=self::batch($cursor);
             foreach ($rows as $comment) {
                 $post=self::context($comment);
                 if (!$post || !self::matches($comment,$post,$filter,$text)) { continue; }
@@ -27,6 +24,14 @@ final class CommentHistory
             $cursor+=200;
         } while (count($rows)===200);
         return ['items'=>$items,'total'=>$total,'page'=>$page,'pages'=>max(1,(int)ceil($total/$size))];
+    }
+    private static function batch(int $cursor): array
+    {
+        global $wpdb;$wpdb->last_error='';
+        $rows=get_comments(['user_id'=>get_current_user_id(),'status'=>['approve','hold'],'type'=>'comment',
+            'number'=>200,'offset'=>$cursor,'orderby'=>'comment_ID','order'=>'DESC']);
+        if ($wpdb->last_error!=='') { throw new \ASCLA\Core\Repositories\RepositoryException('No se pudo consultar el historial.'); }
+        return $rows;
     }
     private static function context(\WP_Comment $comment): ?\WP_Post
     {

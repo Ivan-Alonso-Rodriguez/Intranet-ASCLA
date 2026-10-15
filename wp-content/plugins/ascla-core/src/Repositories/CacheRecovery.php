@@ -6,16 +6,17 @@ use ASCLA\Core\Services\{SessionPolicy,TechnicalErrors};
 /** Durable invalidations contain keys only: retry can never restore an older SQL value. */
 final class CacheRecovery
 {
+    private const SQL_DATE_FORMAT='Y-m-d H:i:s';
     public static function boot(): void { self::reconcile(); }
     public static function stage(array $plan): int
     {
         if (!wp_using_ext_object_cache() || empty($plan['flush']) && empty($plan['entries'])) { return 0; }
         return Store::insert('deliveries',['kind'=>'cache','delivery_key'=>bin2hex(random_bytes(16)),'actor_id'=>0,
-            'payload'=>DeliveryPayload::seal('cache',$plan),'status'=>'pending','available_at'=>gmdate('Y-m-d H:i:s'),'created_at'=>gmdate('Y-m-d H:i:s')]);
+            'payload'=>DeliveryPayload::seal('cache',$plan),'status'=>'pending','available_at'=>gmdate(self::SQL_DATE_FORMAT),'created_at'=>gmdate(self::SQL_DATE_FORMAT)]);
     }
     public static function complete(int $id): void
     {
-        if ($id>0) { Store::update('deliveries',['status'=>'sent','payload'=>'','locked_at'=>null,'completed_at'=>gmdate('Y-m-d H:i:s')],['id'=>$id,'kind'=>'cache']); }
+        if ($id>0) { Store::update('deliveries',['status'=>'sent','payload'=>'','locked_at'=>null,'completed_at'=>gmdate(self::SQL_DATE_FORMAT)],['id'=>$id,'kind'=>'cache']); }
     }
     public static function apply(array $plan,?object $provider=null): bool
     {
@@ -91,10 +92,10 @@ final class CacheRecovery
     {
         // The common advisory lock proves no live worker owns a processing cache invalidation.
         foreach (Store::rows('deliveries',"kind='cache' AND status IN ('pending','processing','failed') AND (available_at<=UTC_TIMESTAMP() OR status='processing')",[],'ORDER BY id ASC LIMIT 10') as $row) {
-            Store::update('deliveries',['status'=>'processing','attempts'=>(int)$row['attempts']+1,'locked_at'=>gmdate('Y-m-d H:i:s')],['id'=>$row['id']]);
+            Store::update('deliveries',['status'=>'processing','attempts'=>(int)$row['attempts']+1,'locked_at'=>gmdate(self::SQL_DATE_FORMAT)],['id'=>$row['id']]);
             try { self::apply(DeliveryPayload::open('cache',$row['payload']));self::complete((int)$row['id']); }
             catch (\Throwable $error) {
-                Store::update('deliveries',['status'=>'pending','available_at'=>gmdate('Y-m-d H:i:s',time()+60),'locked_at'=>null],['id'=>$row['id']]);
+                Store::update('deliveries',['status'=>'pending','available_at'=>gmdate(self::SQL_DATE_FORMAT,time()+60),'locked_at'=>null],['id'=>$row['id']]);
                 TechnicalErrors::record('database','request_failed',$error,(int)$row['id'],severity:'critical');break;
             }
         }

@@ -410,7 +410,7 @@
     const max = globalThis.ASCLA_FORM_LIMITS?.text[name];
     if (type === "number" && bounds) extra = extra.replace(/\b(?:min|max|step)="[^"]*"/g, "") + ` min="${bounds[0]}" max="${bounds[1]}" step="1"`;
     if (["text", "textarea", "url", "email", "password"].includes(type) && max && !/\bmaxlength=/.test(extra)) extra += ` maxlength="${max}"`;
-    return `<div class="field"><label for="${id}">${E(T(label))}</label>${type === "textarea" ? `<textarea id="${id}" name="${E(name)}" ${extra}>${E(value)}</textarea>` : `<input id="${id}" name="${E(name)}" type="${E(type)}" value="${E(value)}" ${extra}>`}</div>`;
+    return `<div class="field"><label for="${id}">${E(T(label))}</label>${type === "textarea" ? ("<textarea id=\"" + (id) + "\" name=\"" + (E(name)) + "\" " + (extra) + ">" + (E(value)) + "</textarea>") : ("<input id=\"" + (id) + "\" name=\"" + (E(name)) + "\" type=\"" + (E(type)) + "\" value=\"" + (E(value)) + "\" " + (extra) + ">")}</div>`;
   }
   const check = (name, label, value) =>
     `<label class="check"><input type="checkbox" name="${E(name)}" ${value ? "checked" : ""}> <span>${E(T(label))}</span></label>`;
@@ -901,8 +901,9 @@
   function connectionRequestRowButtons(p) {
     const id = Number(p.id), c = p.connection || {}, r = p.conversation || {}, target = `data-id="${id}"`;
     const incoming = c.state === 'incoming_pending';
+    const disabled = c.blocked ? 'disabled' : '';
     const primary = incoming
-      ? btn('Aceptar','connection-respond',`${target} data-request="${Number(c.request_id)}" data-decision="accept" aria-label="${E(T('Aceptar conexión')+' · '+p.name)}" ${c.blocked ? 'disabled' : ''}`,'primary small') + btn('Rechazar','connection-respond',`${target} data-request="${Number(c.request_id)}" data-decision="reject" aria-label="${E(T('Rechazar solicitud')+' · '+p.name)}"`,'small')
+      ? btn('Aceptar','connection-respond',`${target} data-request="${Number(c.request_id)}" data-decision="accept" aria-label="${E(T('Aceptar conexión')+' · '+p.name)}" ${disabled}`,'primary small') + btn('Rechazar','connection-respond',`${target} data-request="${Number(c.request_id)}" data-decision="reject" aria-label="${E(T('Rechazar solicitud')+' · '+p.name)}"`,'small')
       : `<span class="connection-waiting">${I('clock')}${E(T('Pendiente'))}</span>`;
     let more = incoming ? '' : connectionMenuItem('Cancelar solicitud','connection-remove-request',`${target} data-mode="cancel"`,true);
     if (r.can_message) more += connectionMenuItem('Enviar mensaje','message-start',target);
@@ -999,7 +1000,7 @@
     const openOverview = previousOverview ? previousOverview.open : pendingCount > 0 || (innerWidth > 640 && data.connected.length > 0);
     const tabs = CONNECTION_TABS.map(([key,label])=>btn(`${E(T(label))}<span>${counts[key]}</span>`,'connection-tab',`id="connections-tab-${key}" data-tab="${key}" role="tab" aria-selected="${tab===key}" aria-controls="connections-tab-panel" tabindex="${tab===key?0:-1}"`,'connection-tab')).join('');
     const summary = pendingCount ? pendingCount+' '+T('solicitudes recibidas') : data.connected.length+' '+T('confirmadas');
-    panel.innerHTML = `<details class="connections-overview" ${openOverview?'open':''}><summary><span>${I('users')}${E(T('Mis conexiones'))}</span><span class="muted">${E(summary)}</span></summary><div class="connections-overview-body"><div class="connections-toolbar"><div class="connections-tabs" role="tablist" aria-label="${E(T('Gestionar mis conexiones'))}">${tabs}</div>${btn(I('clock'),'connections-refresh',`aria-label="${E(T('Actualizar conexiones'))}" title="${E(T('Actualizar conexiones'))}"`,'ghost small connections-reload')}</div><div class="connections-content" id="connections-tab-panel" data-connections-content role="tabpanel" aria-labelledby="connections-tab-${tab}" tabindex="0"></div></div></details>`;
+    panel.innerHTML = `<details class="connections-overview" ${openOverview?'open':''}><summary><span>${I('users')}${E(T('Mis conexiones'))}</span><span class="muted">${E(summary)}</span></summary><div class="connections-overview-body"><div class="connections-toolbar"><div class="connections-tabs" role="tablist" aria-label="${E(T('Gestionar mis conexiones'))}">${tabs}</div>${btn(I('clock'),'connections-refresh',("aria-label=\"" + (E(T('Actualizar conexiones'))) + "\" title=\"" + (E(T('Actualizar conexiones'))) + "\""),'ghost small connections-reload')}</div><div class="connections-content" id="connections-tab-panel" data-connections-content role="tabpanel" aria-labelledby="connections-tab-${tab}" tabindex="0"></div></div></details>`;
     selectConnectionTab(tab,restoreFocus && openOverview);
   }
   let relationshipRefreshing = false;
@@ -1193,7 +1194,7 @@
   }
   function feedCard(p) {
     const editorialState = p.status === "publish" ? "" : status(p.status);
-    return `<article class="card feed-card"><div class="feed-top">${avatar({ name: p.author.name })}<div><strong>${E(p.author.name)}</strong><small>${date(p.date)} · Comunidad ASCLA</small></div><span style="margin-left:auto">${editorialState}</span></div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(p.body.slice(0, 450))}${p.body.length > 450 ? "…" : ""}</p>${UI.attachments(p, true)}${p.tags.length ? ("<div class=\"tag-row\">" + (p.tags.map((t) => ("<span class=\"tag\">" + (E(t.name)) + "</span>")).join("")) + "</div>") : ""}<div class="feed-actions">${btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (p.id) + "\" data-active=\"" + (!p.liked) + "\" aria-label=\"" + (E(T("Me gusta") + " " + p.reactions)) + "\""))}${btn(I("hub") + ` <span data-comment-count="${Number(p.id)}">${E(commentCountText(p.comments))}</span>`, "item", ("data-id=\"" + (p.id) + "\""))}${btn(I("arrow") + " " + T("Ver conversación"), "item", ("data-id=\"" + (p.id) + "\""))}</div></article>`;
+    return `<article class="card feed-card"><div class="feed-top">${avatar({ name: p.author.name })}<div><strong>${E(p.author.name)}</strong><small>${date(p.date)} · Comunidad ASCLA</small></div><span style="margin-left:auto">${editorialState}</span></div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(p.body.slice(0, 450))}${p.body.length > 450 ? "…" : ""}</p>${UI.attachments(p, true)}${p.tags.length ? ("<div class=\"tag-row\">" + (p.tags.map((t) => ("<span class=\"tag\">" + (E(t.name)) + "</span>")).join("")) + "</div>") : ""}<div class="feed-actions">${btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (p.id) + "\" data-active=\"" + (!p.liked) + "\" aria-label=\"" + (E(T("Me gusta") + " " + p.reactions)) + "\""))}${btn(I("hub") + (" <span data-comment-count=\"" + (Number(p.id)) + "\">" + (E(commentCountText(p.comments))) + "</span>"), "item", ("data-id=\"" + (p.id) + "\""))}${btn(I("arrow") + " " + T("Ver conversación"), "item", ("data-id=\"" + (p.id) + "\""))}</div></article>`;
   }
   function pager(list) {
     const perPage = Number(list.per_page || 0);
@@ -1598,8 +1599,10 @@
     const pastClass = S.filter.past ? "active" : "";
     const mineClass = S.filter.mine ? "active" : "";
     const pastButton = type === "event" ? btn("Eventos anteriores", "filter-past", "", "tab " + pastClass) : "";
-    const mineButton = canWrite || type==='topic' ? btn(type==='topic'?'Mis temas':"Mis publicaciones", "filter-mine", "", "tab " + mineClass) : "";
-    const commentsButton=type==='topic'?btn('Mis comentarios','filter-comments','','tab '+(S.filter.comments?'active':'')):'';
+    const mineLabel=type==='topic'?'Mis temas':"Mis publicaciones";
+    const commentsClass=S.filter.comments?'active':'';
+    const mineButton = canWrite || type==='topic' ? btn(mineLabel, "filter-mine", "", "tab " + mineClass) : "";
+    const commentsButton=type==='topic'?btn('Mis comentarios','filter-comments','','tab '+commentsClass):'';
     return `<div class="tabs">${allButton}${pastButton}${mineButton}${commentsButton}</div>`;
   }
   function listingForumDirectory(type, forums) {
@@ -1648,7 +1651,7 @@
   async function ownComments() {
     const list=await api('comments/mine?'+new URLSearchParams(S.filter));
     const filters=`<form class="filters content-list-filters" data-form="filters"><input name="q" aria-label="${E(T('Buscar en mis comentarios'))}" placeholder="${E(T('Buscar en mis comentarios'))}" value="${E(S.filter.q||'')}">${listingDateFilters('topic','Fecha del comentario')}<button class="btn">${E(T('Buscar'))}</button>${btn('Limpiar filtros','filter-reset','','ghost')}</form>`;
-    const entries=list.items.map(comment=>`<article class="card own-comment" data-own-comment="${Number(comment.id)}"><strong>${E(comment.title)}</strong><p>${E(comment.body)}</p><div class="form-actions"><small>${date(comment.date)}</small>${comment.status==='pending'?status('pending'):''}${btn('Ver conversación','item',`data-id="${Number(comment.post_id)}"`,'small')}</div></article>`).join('');
+    const entries=list.items.map(comment=>`<article class="card own-comment" data-own-comment="${Number(comment.id)}"><strong>${E(comment.title)}</strong><p>${E(comment.body)}</p><div class="form-actions"><small>${date(comment.date)}</small>${comment.status==='pending'?status('pending'):''}${btn('Ver conversación','item',("data-id=\"" + (Number(comment.post_id)) + "\""),'small')}</div></article>`).join('');
     content().innerHTML=heading('Mis comentarios','Consulta tus aportes y abre la conversación original.')+filters+listingTabs('topic',!!S.boot.can_create?.topic)+entries+(entries?'':empty('Aún no hay comentarios propios','Los comentarios visibles de tus foros aparecerán aquí.'))+pager(list);
   }
   function eventCard(p) {
@@ -1800,12 +1803,12 @@
       p = review.item; S.item = p;
       candidateNotice = `<div class="alert micro-review-notice" role="status"><strong>${E(T("Candidatos elegibles"))}: ${Number(review.candidates)} · ${E(T("Mínimo requerido"))}: ${Number(p.meta.micro_min || 4)}</strong><p>${E(T(review.removed ? "Se retiraron de la propuesta los candidatos que ya no cumplen las condiciones. Revisa la convocatoria actualizada." : "La convocatoria se comprobó con la membresía, el consentimiento, el perfil y los bloqueos actuales."))}</p></div>`;
       if (!p.can_moderate) {
-        modal(T("Revisar microevento"), `<h3>${E(p.title)}</h3>${candidateNotice}${microEventHistory(p.meta)}${p.meta.cancellation_reason ? `<p class="detail-body">${E(p.meta.cancellation_reason)}</p>` : ""}<p class="private-note">${E(T("Esta propuesta conserva su historial y ya no está pendiente de aprobación."))}</p><div class="form-actions">${btn(T("Volver a la ficha"), "item", `data-id="${Number(id)}"`)}</div>`);
+        modal(T("Revisar microevento"), `<h3>${E(p.title)}</h3>${candidateNotice}${microEventHistory(p.meta)}${p.meta.cancellation_reason ? ("<p class=\"detail-body\">" + (E(p.meta.cancellation_reason)) + "</p>") : ""}<p class="private-note">${E(T("Esta propuesta conserva su historial y ya no está pendiente de aprobación."))}</p><div class="form-actions">${btn(T("Volver a la ficha"), "item", ("data-id=\"" + (Number(id)) + "\""))}</div>`);
         return;
       }
     }
     const decisions = p.meta.micro ? [["approve", "Aprobar propuesta"], ["reject", "Denegar propuesta"]] : [["approve", "Aprobar y publicar"], ["reject", "Rechazar"], ["hide", "Ocultar"], ["suspend", "Suspender publicación"]];
-    const microHelp = p.meta.micro ? `<p class="private-note">${E(T("Aprobar permite elegir después la fecha de publicación. No inscribe automáticamente a los asociados."))}</p>${btn(T("Actualizar candidatos"), "moderate", `data-id="${Number(id)}"`, "ghost small")}` : "";
+    const microHelp = p.meta.micro ? `<p class="private-note">${E(T("Aprobar permite elegir después la fecha de publicación. No inscribe automáticamente a los asociados."))}</p>${btn(T("Actualizar candidatos"), "moderate", ("data-id=\"" + (Number(id)) + "\""), "ghost small")}` : "";
     modal(T(p.meta.micro ? "Revisar microevento" : "Revisar publicación"), `<h3>${E(p.title)}</h3><p class="detail-body">${E(p.body)}</p>${candidateNotice}${microHelp}<form data-form="moderate" data-id="${Number(id)}" data-micro="${!!p.meta.micro}">${select("decision", "Decisión", decisions)}${field("reason", "Motivo de la decisión", reason, "textarea", 'required maxlength="1000"')}${p.meta.generated ? check("reviewed", "Revisé fuentes, identidades, afiliaciones y derechos de propiedad intelectual.", false) : ""}<div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">${E(T("Guardar decisión"))}</button></div></form>`);
   }
   function eventStateSummary(d) {
@@ -1862,24 +1865,60 @@
     const reviewedSuffix = p.meta.ai_enriched ? "" : " · " + E(reviewedLabel);
     return `<div class="alert">${E(T(generatedLabel))} · ${E(p.meta.ai_mode || p.meta.social_mode || "IA")}${reviewedSuffix}</div>`;
   }
-  function itemActionButtons(p, id, eventIsPast, eventCancelled) {
-    let actionButtons = "";
-    if (p.can_delete) actionButtons += btn("Eliminar", "delete-content", ("data-id=\"" + (id) + "\""), "danger");
-    if (S.page === "admin" && p.meta.can_archive) actionButtons += btn(T(p.meta.micro_archived ? "Restaurar en el panel" : "Archivar del panel"), "micro-archive", `data-id="${Number(id)}" data-archived="${!p.meta.micro_archived}"`);
-    if (p.can_edit) actionButtons += btn(I("edit") + " " + T(p.meta.micro && p.meta.micro_approved && p.status !== "publish" ? "Editar y publicar" : "Editar"), "editor", ("data-type=\"" + (p.type) + "\" data-id=\"" + (id) + "\""));
-    const canManageEvent = p.type === "event" && !eventCancelled && !p.meta.cancelled && (p.meta.micro
-      ? S.boot.admin && (p.status !== "publish" || !eventIsPast)
-      : (S.boot.admin || S.boot.executive) && p.status === "publish" && !eventIsPast);
-    if (canManageEvent) {
-      actionButtons += btn(T(p.meta.micro ? "Cancelar microevento" : "Cancelar evento"), "event-cancel-request", ("data-id=\"" + (id) + "\" data-micro=\"" + (!!p.meta.micro) + "\" data-title=\"" + (E(p.title)) + "\""), "danger");
-      if (!p.meta.micro) actionButtons += btn("Invitar asociados", "event-invite", ("data-id=\"" + (id) + "\""));
+  function itemEditingActions(p,id) {
+    let actions='';
+    if(p.can_delete) actions+=btn('Eliminar','delete-content','data-id="'+id+'"','danger');
+    if(S.page==='admin'&&p.meta.can_archive) actions+=btn(T(p.meta.micro_archived?'Restaurar en el panel':'Archivar del panel'),'micro-archive','data-id="'+Number(id)+'" data-archived="'+!p.meta.micro_archived+'"');
+    if(p.can_edit) actions+=btn(I('edit')+' '+T(p.meta.micro&&p.meta.micro_approved&&p.status!=='publish'?'Editar y publicar':'Editar'),'editor','data-type="'+p.type+'" data-id="'+id+'"');
+    return actions;
+  }
+  function itemEventActions(p,id,eventIsPast,eventCancelled) {
+    if(p.type!=='event'||eventCancelled||p.meta.cancelled)return '';
+    const allowed=p.meta.micro
+      ? S.boot.admin&&(p.status!=='publish'||!eventIsPast)
+      : (S.boot.admin||S.boot.executive)&&p.status==='publish'&&!eventIsPast;
+    if(!allowed)return '';
+    const cancel=btn(T(p.meta.micro?'Cancelar microevento':'Cancelar evento'),'event-cancel-request','data-id="'+id+'" data-micro="'+!!p.meta.micro+'" data-title="'+E(p.title)+'"','danger');
+    const invite=p.meta.micro?'':btn('Invitar asociados','event-invite','data-id="'+id+'"');
+    return cancel+invite;
+  }
+  function itemResourceActions(p,id) {
+    if(!(S.boot.admin||S.boot.executive)||p.type!=='resource')return '';
+    let actions='';
+    if(p.meta.video_id)actions+=btn('Actualizar datos de YouTube','video-metadata','data-id="'+id+'"');
+    return actions+btn(I('spark')+' Generar resumen y nota','generate','data-id="'+id+'"');
+  }
+  function itemModerationActions(p,id) {
+    if(p.can_moderate)return btn(I('shield')+' '+T(p.meta.micro?'Revisar propuesta':'Moderar'),'moderate','data-id="'+id+'"');
+    if(S.boot.admin&&p.meta.micro&&p.status==='ascla_hidden'&&p.meta.micro_approved&&!p.meta.cancelled&&!p.meta.invited)return btn(T('Actualizar candidatos'),'moderate','data-id="'+Number(id)+'"');
+    return '';
+  }
+  async function showJobError(target,id,error,onError) {
+    if(!onError){
+      target.innerHTML=`<div class="error">${E(error)} ${btn('Reintentar','retry-job','data-id="'+id+'"','small')}</div>`;
+      return;
     }
-    const canManageResource = (S.boot.admin || S.boot.executive) && p.type === "resource";
-    if (canManageResource && p.meta.video_id) actionButtons += btn("Actualizar datos de YouTube", "video-metadata", ("data-id=\"" + (id) + "\""));
-    if (canManageResource) actionButtons += btn(I("spark") + " Generar resumen y nota", "generate", ("data-id=\"" + (id) + "\""));
-    if (p.can_moderate) actionButtons += btn(I("shield") + " " + T(p.meta.micro ? "Revisar propuesta" : "Moderar"), "moderate", ("data-id=\"" + (id) + "\""));
-    else if (S.boot.admin && p.meta.micro && p.status === "ascla_hidden" && p.meta.micro_approved && !p.meta.cancelled && !p.meta.invited) actionButtons += btn(T("Actualizar candidatos"), "moderate", `data-id="${Number(id)}"`);
-    actionButtons += publishedItemActions(p, id);
+    try { await onError(error); }
+    catch(fallbackError) { target.innerHTML=`<div class="error">${E(error)}<br>${E(fallbackError.message||'')}</div>`; }
+  }
+  function microHistoryTabs(archived) {
+    if(!S.boot.admin)return '';
+    const historyClass=archived?'':'primary',archiveClass=archived?'primary':'';
+    return '<div class="tabs" role="group" aria-label="'+E(T('Mostrar microeventos'))+'">'+btn(T('Historial'),'micro-archive-tab','data-archived="false" aria-pressed="'+!archived+'"',historyClass)+btn(T('Archivados'),'micro-archive-tab','data-archived="true" aria-pressed="'+archived+'"',archiveClass)+'</div><p class="private-note">'+E(T('Archivar quita el encuentro de este listado principal. Sus datos permanecen disponibles en Archivados.'))+'</p>';
+  }
+  function microHistoryCard(p) {
+    const archiveLabel=p.meta.micro_archived?'Restaurar en el panel':'Archivar del panel';
+    const archive=p.meta.can_archive?btn(T(archiveLabel),'micro-archive','data-id="'+Number(p.id)+'" data-archived="'+!p.meta.micro_archived+'"','small'):'';
+    return '<article class="card" data-micro-id="'+Number(p.id)+'"><h3>'+E(p.title)+'</h3>'+microEventHistory(p.meta)+'<div class="form-actions">'+btn('Ver','item','data-id="'+p.id+'"','small')+archive+'</div></article>';
+  }
+  function microHistoryMarkup(proposals) {
+    const archived=!!S.microShowArchived,shown=proposals.filter(p=>!!p.meta.micro_archived===archived);
+    const emptyText=archived?'No hay microeventos archivados.':'No hay microeventos en este listado.';
+    return '<h3>'+E(T('Historial de microeventos'))+'</h3>'+microHistoryTabs(archived)+shown.map(microHistoryCard).join('')+(shown.length?'':empty(emptyText));
+  }
+  function itemActionButtons(p, id, eventIsPast, eventCancelled) {
+    const actionButtons = itemEditingActions(p,id) + itemEventActions(p,id,eventIsPast,eventCancelled)
+      + itemResourceActions(p,id) + itemModerationActions(p,id) + publishedItemActions(p,id);
     return publicationNotice(p) + `<div class="form-actions">${actionButtons}</div>`;
   }
   function publicationNotice(p) {
@@ -1984,13 +2023,16 @@
     return [["draft", "Borrador"], ["pending", "Enviar a revisión"]];
   }
   function editorStatusValue(type, id, p, m, directResourcePublisher, directContentPublisher) {
-    if(type==='ally')return !id?'publish':(p.status==='ascla_hidden'&&!m.publish_at?'inactive':p.status);
+    if(type==='ally')return allyEditorStatus(id,p,m);
     if (type === 'hub' && !m.generated) return id ? p.status : 'publish';
     const directPublishType = ["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated);
     if (directPublishType) return id && p.status === "draft" ? "draft" : "publish";
-    if (!id && type === "resource" && directResourcePublisher) return "publish";
-    if (p.status === "publish" && directContentPublisher) return "publish";
+    if ((!id && type === "resource" && directResourcePublisher) || (p.status === "publish" && directContentPublisher)) return "publish";
     return p.status;
+  }
+  function allyEditorStatus(id,p,m) {
+    if (!id) return 'publish';
+    return p.status==='ascla_hidden'&&!m.publish_at?'inactive':p.status;
   }
   function eventCoverEditorMarkup(type, eventCoverFile) {
     if (type !== "event") return "";
@@ -2031,7 +2073,7 @@
     panel.querySelector('input').required = !panel.hidden;
   }
   function syncEventEditorRequirements(form) {
-    if (!form || form.dataset.form !== "editor" || form.dataset.type !== "event") return;
+    if (form?.dataset.form !== "editor" || form.dataset.type !== "event") return;
     const status = form.elements.status?.value || "draft";
     const incompleteAllowed = status === "draft";
     for (const name of ["title", "body", "start_date", "start_time", "end_date", "end_time", "registration_deadline"]) {
@@ -2053,7 +2095,7 @@
     if (draftAction) draftAction.hidden = status === "draft";
   }
   function prepareEventDraft(form) {
-    if (!form || form.dataset.type !== "event") return;
+    if (form?.dataset.type !== "event") return;
     form.elements.status.value = "draft";
     publicationFieldState(form.querySelector('[name="status"]:checked') || form.elements.status);
     syncEventEditorRequirements(form);
@@ -2095,7 +2137,8 @@
     if(type==='ally')return alliesUI().editorMarkup({id,p,m,statusOptions,statusValue,publicationControl});
     const eventWorkflow = type === "event" ? `<section class="event-editor-status">${statusControl}${publicationControl}<p class="private-note">${E(T("Puedes guardar un borrador aunque todavía falten datos. Para publicar, completa los campos obligatorios."))}</p></section>` : "";
     const trailingWorkflow = type === "event" ? "" : statusControl + publicationControl;
-    const draftAction = type === "event" ? btn(I("check")+" "+T("Guardar como borrador"), "save-event-draft", statusValue === "draft" ? "hidden" : "", "event-draft-action") : "";
+    const draftVisibility=statusValue === "draft" ? "hidden" : "";
+    const draftAction = type === "event" ? btn(I("check")+" "+T("Guardar como borrador"), "save-event-draft", draftVisibility, "event-draft-action") : "";
     return `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", "Contenido", p.body, "textarea", 'required maxlength="30000"')}${eventWorkflow}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => ("<label class=\"chip-check\"><input type=\"checkbox\" name=\"interest\" value=\"" + (t.id) + "\" " + (p.tags.some((x) => x.id === t.id) ? "checked" : "") + ">" + (E(t.name)) + "</label>")).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? ("<label class=\"btn small\">" + (I("plus")) + " " + (E(T("Adjuntar imagen o PDF"))) + "<input type=\"file\" data-upload=\"content\" accept=\"image/jpeg,image/png,image/webp,application/pdf\" hidden></label><div id=\"attachments\">" + ((m.media_ids || []).map((mid) => ("<span class=\"attached-file\" data-media=\"" + (mid) + "\">Archivo #" + (mid) + "" + (btn("Quitar", "detach-media", ("data-id=\"" + (mid) + "\""), "ghost small")) + "</span>")).join("")) + "</div><p class=\"private-note\">" + (E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))) + "</p>") : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${trailingWorkflow}${m.generated && directResourcePublisher ? ("<p class=\"private-note\">" + (E(T("Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."))) + "</p>") : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}${draftAction}<button class="btn primary" data-editor-primary>Guardar ${typeLabel[type]}</button></div></form>`;
   }
   async function editor(type, id = 0) {
@@ -2489,41 +2532,20 @@
   async function watchJob(id, target, onDone, onError = null) {
     if (!target.isConnected) return;
     let attempts = 0;
-    const assistantMode = target.classList?.contains("assistant-message");
-    target.innerHTML = assistantMode ? assistantLoadingBody("pending") :
-      '<div class="alert">Pendiente · Estamos preparando la respuesta…</div>';
+    const assistantMode = target.classList?.contains('assistant-message');
+    target.innerHTML = assistantMode ? assistantLoadingBody('pending') : '<div class="alert">Pendiente · Estamos preparando la respuesta…</div>';
     const poll = async () => {
       if (!target.isConnected) return;
       try {
-        const j = await api("jobs/" + id);
+        const j = await api('jobs/' + id);
         if (!target.isConnected) return;
-        if (j.status === "completed") {
-          onDone(j.result);
-          return;
-        }
-        if (j.status === "error") {
-          if (onError) {
-            try {
-              // The supplied error renderer owns both success and failure UI.
-              await onError(j.error);
-            } catch (fallbackError) {
-              target.innerHTML = `<div class="error">${E(j.error)}<br>${E(fallbackError.message || "")}</div>`;
-              return;
-            }
-            return;
-          }
-          target.innerHTML = `<div class="error">${E(j.error)} ${btn("Reintentar", "retry-job", 'data-id="' + id + '"', "small")}</div>`;
-          return;
-        }
-        const jobStatusLabel = j.status === "processing" ? "Procesando" : "Pendiente";
-        target.innerHTML = assistantMode ? assistantLoadingBody(j.status) : `<div class="alert">${I("clock")} ${jobStatusLabel} · Trabajo #${id}</div>`;
+        if (j.status === 'completed') { onDone(j.result);return; }
+        if (j.status === 'error') { await showJobError(target,id,j.error,onError);return; }
+        const jobStatusLabel = j.status === 'processing' ? 'Procesando' : 'Pendiente';
+        target.innerHTML = assistantMode ? assistantLoadingBody(j.status) : `<div class="alert">${I('clock')} ${jobStatusLabel} · Trabajo #${id}</div>`;
         if (++attempts < 90) setTimeout(poll, 2500);
-        else
-          target.innerHTML = assistantMode ? `<div class="assistant-message-meta"><span>${I("spark")} ASCLA</span></div><div class="assistant-message-copy">${E(T("La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta."))}</div>` :
-            '<div class="alert">El trabajo continúa en segundo plano. Recibirás una notificación cuando esté listo.</div>';
-      } catch (e) {
-        target.innerHTML = `<div class="error">${E(e.message)}</div>`;
-      }
+        else target.innerHTML = assistantMode ? `<div class="assistant-message-meta"><span>${I('spark')} ASCLA</span></div><div class="assistant-message-copy">${E(T('La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta.'))}</div>` : '<div class="alert">El trabajo continúa en segundo plano. Recibirás una notificación cuando esté listo.</div>';
+      } catch (error) { target.innerHTML = `<div class="error">${E(error.message)}</div>`; }
     };
     setTimeout(poll, 1800);
   }
@@ -2565,7 +2587,9 @@
   function notificationCount(total) {
     const badge = document.querySelector(".notification-count"), bell = document.querySelector('[data-action="notifications"]');
     if (badge) { badge.hidden = !total; badge.setAttribute("aria-hidden", "true"); badge.textContent = total > 99 ? "99+" : total; }
-    bell?.setAttribute("aria-label", T("Notificaciones") + (total ? `${total > 99 ? " 99+" : ""}, ${total} ${T("sin leer")}` : `, ${T("estás al día")}`));
+    const overflow=total > 99 ? " 99+" : "";
+    const summary=total ? `${overflow}, ${total} ${T("sin leer")}` : `, ${T("estás al día")}`;
+    bell?.setAttribute("aria-label", T("Notificaciones") + summary);
   }
   async function refreshNotifications() {
     try { notificationCount((await api("notifications/summary")).unread_total); } catch {}
@@ -2637,7 +2661,7 @@
     try {
       const data = await api(path);
       return current() ? data : null;
-    } catch (error) { if (current()) throw error; return null; }
+    } catch (error) { if (current()) { throw error; } return null; }
   }
   async function restoreAnswer(id) {
     const j = await assistantHistoryData("jobs/" + id);
@@ -2786,7 +2810,7 @@
   function boardApprovalEditor(id) {
     const roles = [['administrator', 'Administrador'], ['ascla_executive', 'Ejecutivo ASCLA'], ['ascla_moderator', 'Moderador ASCLA'], ['ascla_member', 'Asociado ASCLA']];
     const choices = roles.map(([key, label]) => `<label class="completion-choice"><input type="checkbox" name="roles" value="${key}"><span>${E(T(label))}</span></label>`).join('');
-    const dialog=modal('Autorización de roles de la Junta', `<form data-form="board-approval" data-id="${Number(id)}" data-guard-modal-unsaved><p>${E(T('Registra una decisión previa de la Junta. Esta acción no asigna roles ni emite la autorización. Las cuentas técnicas continúan gestionándose desde WordPress.'))}</p><div class="completion-choices">${choices}</div>${field('board_reference','Referencia del acta o autorización de la Junta','','text','required maxlength="200"')}${field('board_date','Fecha de la autorización','','date','required max="'+new Date().toISOString().slice(0,10)+'"')}${check('board_confirmed','Confirmo que la Junta autorizó los roles seleccionados',false)}<button class="btn primary">${E(T('Registrar autorización'))}</button></form>`);
+    modal('Autorización de roles de la Junta', `<form data-form="board-approval" data-id="${Number(id)}" data-guard-modal-unsaved><p>${E(T('Registra una decisión previa de la Junta. Esta acción no asigna roles ni emite la autorización. Las cuentas técnicas continúan gestionándose desde WordPress.'))}</p><div class="completion-choices">${choices}</div>${field('board_reference','Referencia del acta o autorización de la Junta','','text','required maxlength="200"')}${field('board_date','Fecha de la autorización','','date','required max="'+new Date().toISOString().slice(0,10)+'"')}${check('board_confirmed','Confirmo que la Junta autorizó los roles seleccionados',false)}<button class="btn primary">${E(T('Registrar autorización'))}</button></form>`);
   }
   function adminUserCard(u, roles) {
     const accessClass = u.membership_status === 'active' && u.access_enabled !== false ? 'open' : 'closed';
@@ -2804,7 +2828,7 @@
     if (u.can_delete) accountActions += btn('Eliminar usuario','user-delete',("data-id=\"" + (u.id) + "\" data-name=\"" + (E(u.name)) + "\" data-login=\"" + (E(u.login)) + "\" data-email=\"" + (E(u.email)) + "\""),'danger small');
     if(accountActions) actions+=`<details class="admin-user-more"><summary>${E(T('Más opciones de cuenta'))}</summary><div>${accountActions}</div></details>`;
     const roleBadges = u.roles.map(r => "<span class=\"tag\">" + E(roles[r] || r) + "</span>").join('');
-    return `<article class="admin-user" data-admin-user="${u.id}"><div class="admin-user-person">${avatar(u)}<div><h3>${E(u.name)}</h3><span>@${E(u.login)}</span>${u.email ? `<a href="mailto:${E(u.email)}">${E(u.email)}</a>` : `<small>${E(T("Correo no registrado"))}</small>`}</div></div><div class="admin-user-access">${roleBadges}<span class="request-status ${accessClass}">${accessLabel}</span>${technicalBadge}<small>Registro: ${date(u.registered)}</small></div><div class="admin-user-actions">${actions}</div></article>`;
+    return `<article class="admin-user" data-admin-user="${u.id}"><div class="admin-user-person">${avatar(u)}<div><h3>${E(u.name)}</h3><span>@${E(u.login)}</span>${u.email ? ("<a href=\"mailto:" + (E(u.email)) + "\">" + (E(u.email)) + "</a>") : ("<small>" + (E(T("Correo no registrado"))) + "</small>")}</div></div><div class="admin-user-access">${roleBadges}<span class="request-status ${accessClass}">${accessLabel}</span>${technicalBadge}<small>Registro: ${date(u.registered)}</small></div><div class="admin-user-actions">${actions}</div></article>`;
   }
   async function adminUsers(panel) {
     const f=S.adminFilters.users,list=await api('admin/users?'+new URLSearchParams(f));
@@ -2864,7 +2888,10 @@
     return `<div class="admin-section-heading"><div><span class="eyebrow">CALIDAD Y CONVIVENCIA</span><h2>Revisión de contenido</h2><p>Los foros se publican directamente. Galería, Eventos y Conocimiento los gestiona el Ejecutivo o un administrador.</p></div></div><div class="card"><h3>Contenido pendiente y borradores</h3><div class="table-wrap"><table class="data-table"><thead><tr><th>Contenido</th><th>Autor</th><th>Estado</th><th>Acción</th></tr></thead><tbody>${pendingRows}</tbody></table></div></div>${reviewGrid}`;
   }
   let statisticsPanel, interestImports, memberInsights, alliesView;
-  function alliesUI(){return alliesView ||= globalThis.ASCLAAllies({root,api,E,T,I,modal,closeModal,toast,btn,field,select,date,config:C,safeURL,afterChange:render});}
+  function alliesUI(){
+    alliesView ||= globalThis.ASCLAAllies({root,api,E,T,I,modal,closeModal,toast,btn,field,select,date,config:C,safeURL,afterChange:render});
+    return alliesView;
+  }
   function adminTabs() {
     const tabs = [];
     if(S.boot.admin) tabs.push(['resumen','Resumen','home']);
@@ -2882,7 +2909,7 @@
     const navigation=groups.map(([group,keys])=>{
       const entries=tabs.filter(([key])=>keys.includes(key));
       if(!entries.length) return '';
-      return `<div class="admin-nav-group"><span>${E(T(group))}</span>${entries.map(([key,label,icon])=>btn(I(icon)+E(T(label)),'admin-tab',`data-tab="${key}" aria-pressed="${tab===key}"`,'admin-tab'+(tab===key?' active':''))).join('')}</div>`;
+      return `<div class="admin-nav-group"><span>${E(T(group))}</span>${entries.map(([key,label,icon])=>btn(I(icon)+E(T(label)),'admin-tab',("data-tab=\"" + (key) + "\" aria-pressed=\"" + (tab===key) + "\""),'admin-tab'+(tab===key?' active':''))).join('')}</div>`;
     }).join('');
     const wordpress = C.wpAdminUrl ? `<a class="btn ghost admin-wordpress-link" href="${E(C.wpAdminUrl)}">${I('settings')}${E(T('Administrar WordPress'))}</a>` : '';
     return `<div class="admin-workspace admin-workspace-v108"><header class="admin-hero"><div class="admin-hero-main"><div class="admin-hero-copy"><span class="eyebrow">${E(T("GESTIÓN DE LA COMUNIDAD"))}</span><h1>${E(T("Administración ASCLA"))}</h1><p>${E(T("Personas, contenido y atención en un mismo lugar."))}</p></div></div><div class="admin-hero-actions">${link('intranet',E(T('Ver intranet'))+' '+I('arrow'),'ghost admin-intranet-link')}${wordpress}</div></header><div class="admin-workspace-body"><nav class="admin-tabs" aria-label="${E(T("Secciones de administración"))}">${navigation}</nav><section id="admin-panel" class="admin-panel" aria-live="polite"></section></div></div>`;
@@ -2890,7 +2917,7 @@
   function adminOverview(panel,d) {
     const metrics=[[d.counts.members,'Cuentas ASCLA','users','usuarios'],[d.pending.length,'Borradores y pendientes','shield','moderacion'],[d.reports.filter(r=>!r.reviewed).length,'Reportes por revisar','bell','moderacion'],[d.jobs.filter(j=>['pending','processing'].includes(j.status)).length,'Trabajos activos','spark','trabajos']];
     const cards=[['usuarios','users','Conoce a tu comunidad','Consulta intereses y actividad de cada asociado, o administra sus cuentas.','Explorar usuarios'],['moderacion','shield','Revisa el contenido','Atiende publicaciones, comentarios pendientes y reportes de la comunidad.','Abrir moderación'],['solicitudes','contact','Atiende las solicitudes','Responde consultas y gestiona las solicitudes recibidas en Contacto.','Ver solicitudes'],['estadisticas','calendar','Mide la participación','Consulta inscripciones, asistencias y tendencias por tema y período.','Ver estadísticas'],['microeventos','hub','Organiza los encuentros','Revisa propuestas y prepara círculos de conversación.','Ver encuentros']].filter(([key])=>adminTabs().some(([tab])=>tab===key));
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T('TU ESPACIO DE TRABAJO'))}</span><h2>${E(T('¿Qué quieres gestionar hoy?'))}</h2><p>${E(T('Empieza por una tarea o explora la actividad de tu comunidad.'))}</p></div>${btn(I('clock')+' '+E(T('Actualizar')),'admin-refresh','','small')}</div><div class="admin-overview">${metrics.map(([n,label,icon,target])=>btn(`<span class="stat-icon">${I(icon)}</span><span class="admin-stat-copy"><strong>${n}</strong><small>${E(T(label))}</small></span>`,'admin-tab',`data-tab="${target}"`,'admin-stat')).join('')}</div><p class="private-note admin-count-scope">${E(T('Los pendientes, reportes y trabajos corresponden a los elementos cargados en sus bandejas.'))}</p><div class="admin-task-grid">${cards.map(([key,icon,title,description,action])=>`<article class="card admin-task-card"><span class="admin-task-icon">${I(icon)}</span><h3>${E(T(title))}</h3><p>${E(T(description))}</p>${btn(E(T(action))+' '+I('arrow'),'admin-tab',`data-tab="${key}"`,'ghost')}</article>`).join('')}</div><div class="admin-help-note">${I('shield')}<p>${E(T('Las acciones de cuenta y moderación mantienen sus permisos, confirmaciones e historial de auditoría.'))}</p></div>`;
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T('TU ESPACIO DE TRABAJO'))}</span><h2>${E(T('¿Qué quieres gestionar hoy?'))}</h2><p>${E(T('Empieza por una tarea o explora la actividad de tu comunidad.'))}</p></div>${btn(I('clock')+' '+E(T('Actualizar')),'admin-refresh','','small')}</div><div class="admin-overview">${metrics.map(([n,label,icon,target])=>btn(("<span class=\"stat-icon\">" + (I(icon)) + "</span><span class=\"admin-stat-copy\"><strong>" + (n) + "</strong><small>" + (E(T(label))) + "</small></span>"),'admin-tab',("data-tab=\"" + (target) + "\""),'admin-stat')).join('')}</div><p class="private-note admin-count-scope">${E(T('Los pendientes, reportes y trabajos corresponden a los elementos cargados en sus bandejas.'))}</p><div class="admin-task-grid">${cards.map(([key,icon,title,description,action])=>("<article class=\"card admin-task-card\"><span class=\"admin-task-icon\">" + (I(icon)) + "</span><h3>" + (E(T(title))) + "</h3><p>" + (E(T(description))) + "</p>" + (btn(E(T(action))+' '+I('arrow'),'admin-tab',("data-tab=\"" + (key) + "\""),'ghost')) + "</article>")).join('')}</div><div class="admin-help-note">${I('shield')}<p>${E(T('Las acciones de cuenta y moderación mantienen sus permisos, confirmaciones e historial de auditoría.'))}</p></div>`;
   }
   async function adminMemberInsights(id) {
     if(!S.boot.admin) return;
@@ -2920,8 +2947,7 @@
     panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ENCUENTROS ENTRE ASOCIADOS</span><h2>Círculos de conversación</h2><p>Grupos con intereses comunes y cupos configurables, con una agenda para conversar.</p></div></div><div class="card"><h3>Preparar los próximos encuentros</h3><p class="detail-body">Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.</p><div class="admin-actions">${(S.boot.admin||S.boot.executive)?btn(I('spark')+' Preparar propuestas del período','micro-job','','primary'):''}${link('eventos','Ver encuentros','small')}</div><div id="micro-job-result"></div></div>`;
     const [proposals,diagnostics]=await Promise.all([allContent("event",{micro:1,...(S.boot.admin?{}:{mine:1})}),api("microevents/diagnostics").catch(error=>({error:error.message}))]);
     panel.querySelector('#micro-job-result').innerHTML=microDiagnosticsHTML(diagnostics);
-    const archived=!!S.microShowArchived,shown=proposals.filter(p=>!!p.meta.micro_archived===archived);
-    panel.insertAdjacentHTML("beforeend",'<h3>'+E(T("Historial de microeventos"))+'</h3>'+(S.boot.admin?'<div class="tabs" role="group" aria-label="'+E(T('Mostrar microeventos'))+'">'+btn(T('Historial'), 'micro-archive-tab', 'data-archived="false" aria-pressed="'+!archived+'"',!archived?'primary':'')+btn(T('Archivados'), 'micro-archive-tab', 'data-archived="true" aria-pressed="'+archived+'"',archived?'primary':'')+'</div><p class="private-note">'+E(T('Archivar quita el encuentro de este listado principal. Sus datos permanecen disponibles en Archivados.'))+'</p>':'')+shown.map(p=>'<article class="card" data-micro-id="'+Number(p.id)+'"><h3>'+E(p.title)+'</h3>'+microEventHistory(p.meta)+'<div class="form-actions">'+btn("Ver","item",'data-id="'+p.id+'"',"small")+(p.meta.can_archive?btn(T(p.meta.micro_archived?'Restaurar en el panel':'Archivar del panel'),'micro-archive','data-id="'+Number(p.id)+'" data-archived="'+!p.meta.micro_archived+'"','small'):'')+'</div></article>').join("")+(shown.length?'':empty(archived?'No hay microeventos archivados.':'No hay microeventos en este listado.')));
+    panel.insertAdjacentHTML("beforeend",microHistoryMarkup(proposals));
   }
   function microDiagnosticsHTML(d) {
     if (!d || d.error) return '<div class="error">'+E(T('No se pudieron comprobar las condiciones para generar microeventos.'))+'</div>';
@@ -2963,7 +2989,8 @@
     const d = await api("admin");
     S.admin=d;
     const tabs=adminTabs();
-    const tab=tabs.some(([key])=>key===S.adminTab)?S.adminTab:(S.boot.admin?'resumen':'moderacion');
+    const defaultTab=S.boot.admin?'resumen':'moderacion';
+    const tab=tabs.some(([key])=>key===S.adminTab)?S.adminTab:defaultTab;
     S.adminTab=tab;
     content().innerHTML=adminShell(tabs, tab);
     const panel=document.getElementById('admin-panel');
@@ -3008,7 +3035,7 @@
     const data=await api('admin/deliveries');
     const kinds={mail:'Correo',notification:'Notificación por correo',calendar:'Google Calendar',cache:'Actualización interna'};
     const states={pending:'Pendiente',processing:'Procesando',failed:'Requiere revisión'};
-    const rows=data.items.map(row=>`<div class="admin-job"><strong>#${Number(row.id)} · ${E(T(kinds[row.kind]||'Entrega'))}</strong><p>${E(T(states[row.status]||'Pendiente'))} · ${E(T('Intentos'))}: ${Number(row.attempts)}</p>${row.status==='failed'?btn('Reintentar','delivery-retry',`data-id="${Number(row.id)}"`,'small'):''}</div>`).join('');
+    const rows=data.items.map(row=>`<div class="admin-job"><strong>#${Number(row.id)} · ${E(T(kinds[row.kind]||'Entrega'))}</strong><p>${E(T(states[row.status]||'Pendiente'))} · ${E(T('Intentos'))}: ${Number(row.attempts)}</p>${row.status==='failed'?btn('Reintentar','delivery-retry',("data-id=\"" + (Number(row.id)) + "\""),'small'):''}</div>`).join('');
     modal('Entregas y actualizaciones',`<p>${E(T('Las entregas se reintentan automáticamente. Si requieren revisión, verifica primero la conexión del servicio.'))}</p>${rows||'<p>'+E(T('No hay entregas pendientes.'))+'</p>'}`);
   }
   function bindServerSecrets(form, settings) {
@@ -3171,7 +3198,10 @@
     if (connectionTab && ['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) {
       event.preventDefault();
       const index = CONNECTION_TABS.findIndex(([key])=>key===connectionTab.dataset.tab);
-      const next = event.key === 'Home' ? 0 : event.key === 'End' ? CONNECTION_TABS.length-1 : (index+(event.key==='ArrowRight'?1:-1)+CONNECTION_TABS.length)%CONNECTION_TABS.length;
+      const direction=event.key==='ArrowRight'?1:-1;
+      let next=(index+direction+CONNECTION_TABS.length)%CONNECTION_TABS.length;
+      if(event.key==='Home')next=0;
+      if(event.key==='End')next=CONNECTION_TABS.length-1;
       selectConnectionTab(CONNECTION_TABS[next][0],true);return;
     }
     const input = event.target.closest?.('.assistant-compose textarea[name="question"]');
@@ -3825,7 +3855,9 @@
       const j = await api("jobs", { kind: "microevents" });
       watchJob(j.id, target, (r) => {
       if (!target.isConnected) return;
-      target.innerHTML = `<div class="alert">${E(T(r.reused ? "Se recuperaron las propuestas existentes del período; no se crearon duplicados." : r.events.length ? "Propuestas preparadas para revisión." : "No se generaron propuestas con las condiciones actuales."))}<p>${Number(r.events.length)} ${E(T("microeventos"))} · ${Number(r.waiting.length)} ${E(T("asociados en espera"))}</p></div>${microDiagnosticsHTML(r.diagnostics)}${r.events.map((e) => btn("Revisar #" + e, "item", ("data-id=\"" + (e) + "\""), "small")).join("")}`;
+      const generatedLabel=r.events.length ? "Propuestas preparadas para revisión." : "No se generaron propuestas con las condiciones actuales.";
+      const resultLabel=r.reused ? "Se recuperaron las propuestas existentes del período; no se crearon duplicados." : generatedLabel;
+      target.innerHTML = `<div class="alert">${E(T(resultLabel))}<p>${Number(r.events.length)} ${E(T("microeventos"))} · ${Number(r.waiting.length)} ${E(T("asociados en espera"))}</p></div>${microDiagnosticsHTML(r.diagnostics)}${r.events.map((e) => btn("Revisar #" + e, "item", ("data-id=\"" + (e) + "\""), "small")).join("")}`;
       });
     }
     else if (a === "social-job") {

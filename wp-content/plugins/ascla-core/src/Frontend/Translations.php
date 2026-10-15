@@ -47,6 +47,10 @@ final class Translations
         foreach ($formats as $pattern=>$format) {
             if (preg_match($pattern,$message,$matches)) { return vsprintf(self::text($format),array_map('intval',array_slice($matches,1))); }
         }
+        return self::completionError($message);
+    }
+    private static function completionError(string $message): string
+    {
         $prefix='Completa los campos obligatorios: ';
         if (str_starts_with($message,$prefix) && str_ends_with($message,'.')) {
             $fields=explode(', ',substr($message,strlen($prefix),-1));
