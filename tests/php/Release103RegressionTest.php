@@ -122,7 +122,8 @@ final class Release103RegressionTest extends TestCase
         $response=$this->api('POST','profiles/me',[$field=>$blank,'bio'=>'Should not be saved','email_notifications'=>['all'=>false]]);
         self::assertSame(400,$response->get_status());
         self::assertSame($before,get_user_meta($this->member,'_ascla_profile',true));
-        self::assertSame($revision,get_option('ascla_profile_revision'));
+        // Rollback clears caches; WordPress reloads numeric options from SQL as strings.
+        self::assertSame((int)$revision,(int)get_option('ascla_profile_revision'));
     }
 
     public function testValidProfileAndPartialPreferencesPreserveRequiredFields(): void

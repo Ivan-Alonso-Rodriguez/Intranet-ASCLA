@@ -1,0 +1,34 @@
+meta {
+  name: start-chat
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/conversations
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+  Content-Type: application/json
+}
+body:json {
+  {}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+script:pre-request {
+  req.setBody({target:Number(bru.getEnvVar("bId"))});
+}
+script:post-response {
+  if(res.getStatus()===200) bru.setVar("conversationId",res.getBody().id);
+}
+tests {
+  test("A abre conversaci\u00f3n", function () { expect(res.getStatus()).to.equal(200); });
+  test("Conversación creada", function () { expect(Number(res.getBody().id)).to.be.above(0); });
+}

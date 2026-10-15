@@ -9,8 +9,8 @@ final class EventReminders
     {
         $old=(array)($id?get_post_meta($id,'_ascla',true):[]);$previous=$old['reminder_hours']??[24,1];
         $hours=$input['reminder_hours']??$meta['reminder_hours']??[24,1];
-        Access::require(is_array($hours) && count($hours)>=1 && count($hours)<=5,'Indica entre uno y cinco recordatorios.',400);
-        foreach ($hours as $hour) { Access::require(filter_var($hour,FILTER_VALIDATE_INT)!==false && $hour>=1 && $hour<=720,'Anticipación de recordatorio no válida.',400); }
+        Access::require(is_array($hours) && array_is_list($hours) && count($hours)>=1 && count($hours)<=5,'Indica entre uno y cinco recordatorios.',400);
+        foreach ($hours as $hour) { FormRules::integer('reminder_hours',$hour,'Anticipación de recordatorio no válida.'); }
         $hours=array_values(array_unique(array_map('intval',$hours)));rsort($hours);
         if ($hours!==$previous) {
             Access::require(current_user_can('ascla_manage'),'Solo administración puede configurar los recordatorios.',403);

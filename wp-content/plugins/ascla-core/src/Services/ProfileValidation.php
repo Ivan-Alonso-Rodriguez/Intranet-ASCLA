@@ -12,7 +12,7 @@ final class ProfileValidation
         foreach (self::REQUIRED as $field=>$label) {
             if (!array_key_exists($field,$input)) { continue; }
             $value=Access::text($input[$field],200);
-            Access::require((bool)preg_match('/[^\s\p{Z}\x{200B}\x{FEFF}]/u',$value),$label.': este campo es obligatorio.',400);
+            Access::require(Access::hasText($value),$label.': este campo es obligatorio.',400);
         }
     }
 }

@@ -59,9 +59,9 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  assert.equal((await api(admin,'content/event',{...input,publish_at:new Date(Date.now()-1000).toISOString()})).status,400);
  let event=await ok(admin,'content/event',input);posts.push(event.id);assert.equal(event.status,'ascla_hidden');assert.equal((await api(viewer.page,'items/'+event.id)).status,404);
  await goto(admin,'eventos/?item='+event.id);await admin.locator('[data-action="editor"][data-id="'+event.id+'"]').click();
- const form=admin.locator('[data-form="editor"]');assert.equal(await form.locator('[name="status"]').inputValue(),'scheduled');assert.ok(await form.locator('[name="publish_at"]').isVisible());
- await form.locator('[name="status"]').selectOption('draft');assert.equal(await form.locator('[name="publish_at"]').isVisible(),false);
- await form.locator('[name="status"]').selectOption('scheduled');await admin.screenshot({path:root+'/test-results/publication-editor.png'});
+ const form=admin.locator('[data-form="editor"]');assert.equal(await form.locator('[name="status"]:checked').inputValue(),'scheduled');assert.ok(await form.locator('[name="publish_at"]').isVisible());
+ await form.locator('[name="status"][value="draft"]').check();assert.equal(await form.locator('[name="publish_at"]').isVisible(),false);assert.equal(await form.locator('[data-action="save-event-draft"]').isVisible(),false);
+ await form.locator('[name="status"][value="scheduled"]').check();await admin.screenshot({path:root+'/test-results/publication-editor.png'});
  // Leave the unchanged form before submitting date changes through the API.
  await admin.reload();await admin.keyboard.press('Escape');
  event=await ok(admin,'content/event/'+event.id,{...input,status:'draft'});assert.equal(event.status,'draft');assert.equal(event.meta.publish_at,undefined);

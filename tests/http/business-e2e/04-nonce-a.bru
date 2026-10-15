@@ -1,0 +1,28 @@
+meta {
+  name: nonce-a
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base}}/intranet/
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+script:post-response {
+  const match = String(res.getBody()).match(/var ASCLA\s*=\s*(\{[\s\S]*?\});/);
+  if (match) bru.setVar("aNonce", JSON.parse(match[1]).nonce);
+}
+tests {
+  test("Sesi\u00f3n autenticada a", function () { expect(res.getStatus()).to.equal(200); });
+  test("Nonce REST disponible", function () { expect(bru.getVar("aNonce")).to.be.a("string").and.not.empty; });
+}

@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-15",
+  "recorded_at_utc": "2026-10-15T06:11:29.038158+00:00",
+  "version": "1.10.8",
+  "target": "https://wordpress.ingsoftware.lat/",
+  "package_sha256": "9d5758b5e0779bf34600c7593ad2aaa0bffdb5a1051c274964d951b381e2fd05",
+  "installation": "WordPress visibly confirmed plugin update successful",
+  "scope": "Authenticated review of own Profile > Interests and own administrative member insights. Public assets compared with package. No new remote users, posts, likes, registrations or read signals; the normal learned-topic projection may be written when a summary is read. No full remote acceptance rerun.",
+  "observations": [
+    "Own panel displays learned interests, active state, reset and disable controls, privacy explanation and immediate-save notice",
+    "Current QA account correctly shows no eligible learned topics; no example data was inserted",
+    "Administrative view separates estimates from declared interests and period-filtered evidence",
+    "No horizontal overflow at the normal in-app browser viewport",
+    "No console errors observed in the reviewed administrative view"
+  ],
+  "assets": [
+    {
+      "asset": "app.js",
+      "sha256": "94c8fa4eb3508ad4ae36d83528d3cc88e84880d84d372801c83cff5387ebe757",
+      "bytes_match": true
+    },
+    {
+      "asset": "app.css",
+      "sha256": "1ae5e0a5fd8eb8313292735a4937f50d98d6ef64a8c512148165e11fc50b0cab",
+      "bytes_match": true
+    },
+    {
+      "asset": "allies-ui.js",
+      "sha256": "f4df554ef0ffeb5aa19ce0acdf4b6482f5c8ea7bdf5c4dd57cf8652a420b9860",
+      "bytes_match": true
+    },
+    {
+      "asset": "admin-members.js",
+      "sha256": "5033929682c2f32ef7404a83a031ca98e118307a1242a8822ed9e2ab64c1d9da",
+      "bytes_match": true
+    },
+    {
+      "asset": "interest-learning.js",
+      "sha256": "aca3560097c5115d988ca690e9323e14ddd46219f7232f225c76bc80f9b94c30",
+      "bytes_match": true
+    },
+    {
+      "asset": "login.css",
+      "sha256": "e23f9205458515024d16d8ff1900b48fdbef92152028f3074e546e6346a0ce79",
+      "bytes_match": true
+    }
+  ],
+  "screenshots": [
+    "test-results/learning108-qa-profile.jpg"
+  ],
+  "local_mutation_tests": "docs/evidence/release-1.10.8/learning108.json"
+}

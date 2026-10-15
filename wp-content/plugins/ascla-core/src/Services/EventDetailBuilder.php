@@ -49,7 +49,7 @@ final class EventDetailBuilder
         $item['google_url']='';
         if(!$item['is_past'] && !$item['cancelled']){
             $description=!empty($meta['chatham'])?'Sesión bajo la Regla de Chatham House.':$post->post_content;
-            $item['google_url']=Calendar::google($post->post_title,$meta,$description);
+            $item['google_url']=Calendar::google($item['title'],$item['meta'],$description);
         }
     }
 

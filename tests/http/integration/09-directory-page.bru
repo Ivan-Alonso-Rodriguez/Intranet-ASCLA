@@ -1,0 +1,24 @@
+meta {
+  name: directory-page
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/profiles?q={{prefix}}&page=1&per_page=5
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("Directorio paginado", function () { expect(res.getStatus()).to.equal(200); });
+  test("Resultados de las cuentas del lote", function () { const data=res.getBody();expect(data.items).to.be.an("array");expect(data.total).to.be.at.least(5);expect(data.items.length).to.be.at.most(5); });
+}

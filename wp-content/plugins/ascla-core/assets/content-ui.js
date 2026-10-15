@@ -128,6 +128,9 @@ globalThis.ASCLAContent = function ({ escape: E, icon: I, config: C, T = (text) 
       controls += termFilter("keyword", "Etiqueta", catalogs.tag, filter);
       controls += option("author", "Autor", authors, filter.author);
     }
+    if (type === "event") {
+      controls += option("modality", "Modalidad", ["Virtual","Presencial","Híbrido"].map(name=>({id:name,name:T(name)})), filter.modality);
+    }
     if (type === "topic")
       controls =
         option(
@@ -136,7 +139,7 @@ globalThis.ASCLAContent = function ({ escape: E, icon: I, config: C, T = (text) 
           [{ id: 0, name: "Conversación general" }, ...forums],
           filter.parent,
         ) + controls;
-    return `<details class="advanced-filters" ${["category", "tag", "keyword", "author", "parent"].some((k) => filter[k] !== undefined && filter[k] !== "") ? "open" : ""}><summary>${E(T("Más filtros"))}</summary><div class="filter-grid">${controls}</div></details>`;
+    return `<details class="advanced-filters" ${["category", "tag", "keyword", "author", "parent", "modality"].some((k) => filter[k] !== undefined && filter[k] !== "") ? "open" : ""}><summary>${E(T("Más filtros"))}</summary><div class="filter-grid">${controls}</div></details>`;
   }
   const labels = {
     title: "Título",

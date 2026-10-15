@@ -17,12 +17,15 @@ final class Router
         try {
             if (strlen((string)$request->get_body())>1048576) { throw new ApiException('Solicitud demasiado grande.',413); }
             if ($request->get_method()!=='GET') { Access::limit('write',100); }
+            RequestValidation::validate($request);
             return rest_ensure_response($callback($request));
         } catch (ApiException $e) {
-            return new \WP_Error('ascla_error',$e->getMessage(),['status'=>$e->getCode()?:400]);
+            if ($e->getCode()>=500) { \ASCLA\Core\Services\TechnicalErrors::record(\ASCLA\Core\Services\TechnicalErrors::routeModule($request->get_route()),'request_failed',$e); }
+            return new \WP_Error('ascla_error',\ASCLA\Core\Frontend\Translations::error($e->getMessage()),['status'=>$e->getCode()?:400]);
         } catch (\Throwable $e) {
-            Audit::record('request_failed',0,get_class($e));
-            return new \WP_Error('ascla_error',$e instanceof \RuntimeException?$e->getMessage():'No se pudo completar la operación. Reintente o contacte al administrador.',['status'=>500]);
+            $database=$e instanceof \ASCLA\Core\Repositories\RepositoryException;
+            \ASCLA\Core\Services\TechnicalErrors::record($database?'database':\ASCLA\Core\Services\TechnicalErrors::routeModule($request->get_route()),'request_failed',$e,severity:$database?'critical':'error');
+            return new \WP_Error('ascla_error',\ASCLA\Core\Frontend\Translations::error($e instanceof \RuntimeException?$e->getMessage():'No se pudo completar la operación. Reintente o contacte al administrador.'),['status'=>500]);
         }
     }
     public static function route(string $path,string $methods,callable $callback,string $cap='ascla_access'): void
@@ -57,6 +60,9 @@ final class RouterRoutes
         Router::route('/locations/cities','GET',static fn($r)=>Locations::cities((string)$r['country'],(string)($r['q']??''),rest_sanitize_boolean($r['exact']??false)));
         Router::route('/profiles/review','POST',static fn($r)=>\ASCLA\Core\Services\ProfileReview::respond((string)$r['decision']),'ascla_write');
         Router::route('/profiles/me','POST',static fn($r)=>Profiles::save($r->get_json_params()?:[]),'ascla_write');
+        Router::route('/interests/learned','GET',static fn()=>\ASCLA\Core\Services\LearnedInterests::get());
+        Router::route('/items/(?P<id>\d+)/reading','POST',static fn($r)=>\ASCLA\Core\Services\LearnedInterests::start((int)$r['id']),'ascla_write');
+        Router::route('/items/(?P<id>\d+)/read','POST',static fn($r)=>\ASCLA\Core\Services\LearnedInterests::read((int)$r['id'],Access::text($r['ticket']??'',40)),'ascla_write');
         Router::route('/account/session','GET',static fn()=>\ASCLA\Core\Services\SessionPolicy::status());
         Router::route('/account/session','POST',static fn()=>\ASCLA\Core\Services\SessionPolicy::status(true));
         Router::route('/account/password','POST',static fn($r)=>Account::changePassword($r->get_json_params()?:[]),'ascla_write');
@@ -84,6 +90,7 @@ final class RouterRoutes
         Router::route('/items/(?P<id>\d+)/video-duration','POST',static fn($r)=>Knowledge::browserVideoDuration((int)$r['id'],(int)($r['duration_seconds']??0)),'ascla_admin_area');
         Router::route('/items/(?P<id>\d+)','DELETE',static fn($r)=>Content::remove((int)$r['id']),'ascla_write');
         Router::route('/comments/(?P<id>\d+)','DELETE',static fn($r)=>Content::removeComment((int)$r['id']),'ascla_write');
+        Router::route('/comments/mine','GET',static fn($r)=>\ASCLA\Core\Services\CommentHistory::listing($r->get_params()));
         Router::route('/items/(?P<id>\d+)/comments','GET',static fn($r)=>Content::comments((int)$r['id']));
         Router::route('/items/(?P<id>\d+)/comments','POST',static fn($r)=>Content::comment((int)$r['id'],(string)$r['body'],(int)($r['parent']??0)),'ascla_write');
         Router::route('/comments/(?P<id>\d+)/reaction','POST',static fn($r)=>Content::reactComment((int)$r['id'],rest_sanitize_boolean($r['active']),(string)($r['reaction']??'like')),'ascla_write');
@@ -102,6 +109,9 @@ final class RouterRoutes
         Router::route('/events/(?P<id>\d+)','GET',static fn($r)=>Events::detail((int)$r['id']));
         Router::route('/events/(?P<id>\d+)/invite','POST',static fn($r)=>Events::invite((int)$r['id'],(array)$r['users']),'ascla_publish');
         Router::route('/events/(?P<id>\d+)/cancel','POST',static fn($r)=>Events::cancel((int)$r['id'],(string)($r['reason']??'')),'ascla_publish');
+        Router::route('/events/(?P<id>\d+)/candidates','POST',static fn($r)=>\ASCLA\Core\Services\MicroEligibility::review((int)$r['id']),'ascla_manage');
+        Router::route('/events/(?P<id>\d+)/archive','POST',static fn($r)=>\ASCLA\Core\Services\MicroArchive::set((int)$r['id'],\ASCLA\Core\Services\FormRules::boolean($r['archived'])),'ascla_manage');
+        Router::route('/microevents/diagnostics','GET',static fn()=>\ASCLA\Core\Services\MicroEvents::diagnostics(),'ascla_publish');
         Router::route('/events/(?P<id>\d+)/register','POST',static fn($r)=>Events::register((int)$r['id'],(string)$r['status']),'ascla_write');
     }
 
@@ -146,8 +156,13 @@ final class RouterRoutes
             };
         },'ascla_manage');
         Router::route('/admin/users','GET',static fn($r)=>\ASCLA\Core\Services\Administration::users($r->get_params()),'ascla_manage');
+        Router::route('/admin/allies','GET',static fn($r)=>\ASCLA\Core\Services\Allies::listing($r->get_params()),'ascla_manage');
+        Router::route('/admin/allies/(?P<id>\d+)/status','POST',static fn($r)=>\ASCLA\Core\Services\Allies::changeStatus((int)$r['id'],Access::text($r['state']??'',20)),'ascla_manage');
+        Router::route('/admin/allies/(?P<id>\d+)/history','GET',static fn($r)=>\ASCLA\Core\Services\Allies::history((int)$r['id']),'ascla_manage');
         Router::route('/admin/users','POST',static fn($r)=>\ASCLA\Core\Services\Administration::createUser($r->get_json_params()?:[]),'ascla_manage');
         Router::route('/admin/users/(?P<id>\d+)','GET',static fn($r)=>\ASCLA\Core\Services\Administration::user((int)$r['id']),'ascla_manage');
+        Router::route('/admin/users/(?P<id>\d+)/insights','GET',static fn($r)=>\ASCLA\Core\Services\MemberInsights::get((int)$r['id'],$r->get_params()),'ascla_manage');
+        Router::route('/admin/users/(?P<id>\d+)/role-approval','POST',static fn($r)=>\ASCLA\Core\Services\RoleApprovals::register((int)$r['id'],$r->get_json_params()?:[]),'ascla_manage');
         Router::route('/admin/users/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Administration::updateUser((int)$r['id'],$r->get_json_params()?:[]),'ascla_manage');
         Router::route('/admin/users/(?P<id>\d+)','DELETE',static fn($r)=>\ASCLA\Core\Services\Administration::deleteUser((int)$r['id']),'ascla_manage');
         Router::route('/admin/interest-catalog','POST',static fn($r)=>!empty($r['seed'])?\ASCLA\Core\Domain\InterestCatalog::seed():\ASCLA\Core\Domain\InterestCatalog::create(Access::text($r['name']??'',100)),'ascla_manage');
@@ -180,6 +195,8 @@ final class RouterRoutes
         Router::route('/admin/contact/(?P<id>\d+)/assign','POST',static fn($r)=>\ASCLA\Core\Services\SupportRequests::assign((int)$r['id'],(int)$r['assignee']),'ascla_manage');
         Router::route('/admin/contacts','GET',static fn($r)=>\ASCLA\Core\Services\Administration::contacts($r->get_params()),'ascla_publish');
         Router::route('/mail/test','POST',static fn()=>\ASCLA\Core\Integrations\Mailer::test(),'ascla_manage');
+        Router::route('/admin/deliveries','GET',static fn()=>\ASCLA\Core\Jobs\Deliveries::overview(),'ascla_manage');
+        Router::route('/admin/deliveries/(?P<id>\d+)/retry','POST',static fn($r)=>\ASCLA\Core\Jobs\Deliveries::retry((int)$r['id']),'ascla_manage');
         Router::route('/settings','GET',static fn()=>Settings::status(),'ascla_manage');
         Router::route('/settings','POST',static fn($r)=>Settings::save($r->get_json_params()?:[]),'ascla_manage');
         Router::route('/admin','GET',static fn()=>RouterAdmin::build(),'ascla_admin_area');

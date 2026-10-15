@@ -1,0 +1,31 @@
+{
+  "stage": "Entrega durable e historial propio del 13 de octubre",
+  "date": "2026-10-13",
+  "base_revision": "d01e3d12b6c404ba5aaa9fc4648f5989565bf590",
+  "base_branch": "development",
+  "working_tree_modified": true,
+  "plugin_version": "1.10.7",
+  "schema_version": 15,
+  "php_tests": 386,
+  "php_assertions": 5822,
+  "php_line_coverage_percent": 84.08,
+  "browser_checks": 36,
+  "new_javascript_coverage": false,
+  "full_quality_ci_rerun": false,
+  "requirements_closed": [
+    "RF-180"
+  ],
+  "requirements_advanced": [
+    "RNF-011",
+    "RNF-012"
+  ],
+  "browser_note": "Cinco comprobaciones del panel de entregas (filas fallidas/reintento simulados), cinco del historial propio con API real y 26 regresiones editoriales, filtros y gobierno. PHP prueba SMTP/Calendar con transporte simulado y recuperación en un proceso nuevo.",
+  "evidence": "docs/evidence/release-1.10.7/completion107.json",
+  "package": {
+    "path": "dist/ascla-core.zip",
+    "bytes": 1254925,
+    "sha256": "8255640fde14d3b5aec2f4175e98b21867efa9ac056c321a2d226d5511f72713",
+    "files": 162,
+    "schema_version": 15
+  }
+}

@@ -17,10 +17,9 @@ final class CredentialPolicy
     }
     public static function settings(array &$data,array $input): void
     {
-        foreach (['password_min_length'=>[12,128],'password_reset_minutes'=>[5,1440],'remember_days'=>[1,90],'login_challenge_after'=>[1,10],'login_lock_after'=>[2,20],'login_ip_lock_after'=>[2,100],'login_lock_minutes'=>[15,60]] as $key=>$range) {
+        foreach (['password_min_length','password_reset_minutes','remember_days','login_challenge_after','login_lock_after','login_ip_lock_after','login_lock_minutes'] as $key) {
             if (!array_key_exists($key,$input)) { continue; }
-            Access::require(filter_var($input[$key],FILTER_VALIDATE_INT)!==false && $input[$key]>=$range[0] && $input[$key]<=$range[1],'Parámetro de seguridad fuera del rango permitido.',400);
-            $data[$key]=(int)$input[$key];
+            $data[$key]=FormRules::integer($key,$input[$key],'Parámetro de seguridad fuera del rango permitido.');
         }
         Access::require($data['login_challenge_after']<$data['login_lock_after'],'El captcha debe activarse antes del bloqueo.',400);
     }

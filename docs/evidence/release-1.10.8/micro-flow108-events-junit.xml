@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="5" assertions="28" errors="0" failures="0" skipped="0" time="1.701491">
+    <testsuite name="EventParticipationTest" file="/opt/ascla-tests/php/EventParticipationTest.php" tests="3" assertions="21" errors="0" failures="0" skipped="0" time="1.085601">
+      <testcase name="testScheduleChangeRequiresNewRsvpAndCancellationPreservesReasonAndHistory" file="/opt/ascla-tests/php/EventParticipationTest.php" line="36" class="EventParticipationTest" classname="EventParticipationTest" assertions="11" time="0.460061"/>
+      <testcase name="testExpiredOfferAdvancesFifoAndCannotTakeTheNextMembersReservedSeat" file="/opt/ascla-tests/php/EventParticipationTest.php" line="53" class="EventParticipationTest" classname="EventParticipationTest" assertions="7" time="0.327093"/>
+      <testcase name="testMicroeventReschedulingNeedsReasonBeforeChangingStoredData" file="/opt/ascla-tests/php/EventParticipationTest.php" line="68" class="EventParticipationTest" classname="EventParticipationTest" assertions="3" time="0.298446"/>
+    </testsuite>
+    <testsuite name="EventRemindersTest" file="/opt/ascla-tests/php/EventRemindersTest.php" tests="2" assertions="7" errors="0" failures="0" skipped="0" time="0.615890">
+      <testcase name="testOrdinaryEventSchedulesReplacesAndSendsOnlyConfirmedOnce" file="/opt/ascla-tests/php/EventRemindersTest.php" line="18" class="EventRemindersTest" classname="EventRemindersTest" assertions="5" time="0.339158"/>
+      <testcase name="testExecutiveCannotChangeReminderPolicyAndInvalidDateIsRejected" file="/opt/ascla-tests/php/EventRemindersTest.php" line="29" class="EventRemindersTest" classname="EventRemindersTest" assertions="2" time="0.276732"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,35 @@
+meta {
+  name: login-b
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base}}/wp-login.php
+  body: formUrlEncoded
+  auth: none
+}
+
+headers {
+  Content-Type: application/x-www-form-urlencoded
+  Cookie: wordpress_test_cookie=WP%20Cookie%20check
+}
+body:form-urlencoded {
+  log: {{bLogin}}
+  pwd: {{bPassword}}
+  testcookie: 1
+  redirect_to: {{base}}/intranet/
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+script:post-response {
+  if (res.getStatus() === 302) {
+    const cookies = res.getHeader("set-cookie") || [];
+    bru.setVar("bCookie", (Array.isArray(cookies) ? cookies : [cookies]).map(value => value.split(";")[0]).join("; "));
+  }
+}
+tests {
+  test("Inicio de sesi\u00f3n b", function () { expect(res.getStatus()).to.equal(302); });
+}

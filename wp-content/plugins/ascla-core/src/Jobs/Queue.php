@@ -103,6 +103,7 @@ final class Queue
 
     private static function failJob(array $row,\Throwable $error): void
     {
+        \ASCLA\Core\Services\TechnicalErrors::record('jobs','job_failed',$error,(int)$row['id']);
         $safe=$error instanceof \ASCLA\Core\Rest\ApiException||$error instanceof \RuntimeException?$error->getMessage():'No se pudo completar el trabajo. Revise la configuración o reintente.';
         Store::update('jobs',['status'=>'error','error'=>substr(sanitize_text_field($safe),0,255),'locked_at'=>null],['id'=>$row['id']]);
         Audit::record('job_failed',(int)$row['id'],$row['kind']);

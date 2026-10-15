@@ -33,7 +33,9 @@ async function runStatistics(){let f,browser,page;const coverage=[];
    if(u.role==='administrator'){
     await test('IA: clasificación explícita sin inventar asistencias',async()=>{
      await page.locator('[data-stats-action="section"][data-section="ai"]').click();await page.locator('[data-stats-action="analyze"]').waitFor();
-     await page.locator('[data-stats-action="analyze"]').click();await page.waitForFunction(()=>document.querySelector('[data-stats-action="analyze"]')?.disabled && !document.querySelector('[data-stats-action="analyze"]')?.hasAttribute('aria-busy'));
+     const classified=page.waitForResponse(r=>r.url().includes('/admin/statistics/topics')&&r.request().method()==='POST');
+     await page.locator('[data-stats-action="analyze"]').click();const classifiedResponse=await classified;const classification=await classifiedResponse.json();assert.equal(classifiedResponse.status(),200,JSON.stringify(classification));assert.equal(classification.pending,0);
+     await page.waitForFunction(()=>document.querySelector('[data-stats-action="analyze"]')?.disabled && !document.querySelector('[data-stats-action="analyze"]')?.hasAttribute('aria-busy'));
      const r=await api(page,'admin/statistics/topics?topic='+f.topic);assert.equal(r.status,200);assert.equal(r.data.pending,0);assert.equal(r.data.classified,2);assert.equal(r.data.groups[0].attendances,1);
      await page.locator('[data-stats-action="section"][data-section="overview"]').click();
     });
@@ -55,13 +57,13 @@ async function runStatistics(){let f,browser,page;const coverage=[];
     });
     await test('Forms: previsualizar, revisar y confirmar sin modificar antes',async()=>{
      await page.locator('.admin-tabs [data-tab="importar"]').click();await page.locator('[data-import-form="file"]').waitFor();
-     const csv=`Email,Code,Intereses,Otros\n${f.users[3].email},,"${f.topicName}",\n`;
+     const csv=`Email,Code,Intereses,Otros\n${f.users[3].email},,"${f.formsTopicName}",\n`;
      await page.locator('[data-import-form="file"] input').setInputFiles({name:'forms.csv',mimeType:'text/csv',buffer:Buffer.from(csv)});await page.locator('[data-import-form="file"] button').click();await page.locator('[data-import-form="mapping"]').waitFor();
      await page.locator('[data-import-form="mapping"] [name="email"]').selectOption('0');await page.locator('[data-import-form="mapping"] [name="structured"]').selectOption('2');await page.locator('[data-import-form="mapping"] [name="free"]').selectOption('3');await page.locator('[data-import-form="mapping"] button').first().click();await page.locator('[data-import-form="review"]').waitFor();
-     const prior=await api(page,'profiles/'+f.users[3].id);assert.ok(!(prior.data.interests||[]).includes(f.topic));
-     await page.locator('[data-import-form="review"] select').selectOption(String(f.topic));await page.locator('[data-import-form="review"] button').first().click();await page.waitForFunction(()=>!document.querySelector('[data-import-action="confirm"]')?.disabled);
+     const prior=await api(page,'profiles/'+f.users[3].id);assert.ok(!(prior.data.interests||[]).includes(f.formsTopic));
+     await page.locator('[data-import-form="review"] select').selectOption(String(f.formsTopic));await page.locator('[data-import-form="review"] button').first().click();await page.waitForFunction(()=>!document.querySelector('[data-import-action="confirm"]')?.disabled);
      await page.locator('[data-import-action="confirm"]').click();await page.locator('[data-import-action="apply"]').click();await page.waitForFunction(()=>document.querySelector('#admin-panel .admin-section-heading p')?.textContent.includes('Completada'));
-     const saved=await api(page,'profiles/'+f.users[3].id);assert.ok(saved.data.interests.includes(f.topic));const stats=await api(page,'admin/statistics?topic='+f.topic);assert.equal(stats.data.topics[0].forms,1);assert.equal(stats.data.topics[0].declared,1);
+     const saved=await api(page,'profiles/'+f.users[3].id);assert.ok(saved.data.interests.includes(f.formsTopic));const stats=await api(page,'admin/statistics?topic='+f.formsTopic);assert.equal(stats.data.topics[0].forms,1);assert.equal(stats.data.topics[0].declared,1);
      await page.screenshot({path:'test-results/forms-reviewed.png',fullPage:true});
     });
     await test('Reportes: revisar antes de eliminar y conservar la publicación',async()=>{
@@ -88,7 +90,7 @@ async function runStatistics(){let f,browser,page;const coverage=[];
   }
   assert.deepEqual(errors,[]);console.log('PASS '+results.length+' statistics browser tests; no uncaught errors.');
  }catch(e){if(page)await page.screenshot({path:'test-results/statistics-failure.png',fullPage:true}).catch(()=>{});throw e;}
- finally{if(page&&!page.isClosed())await stopCoverage(page,coverage).catch(()=>{});if(browser)await browser.close();if(f)fixture({action:'cleanup',users:f.users.map(u=>u.id),topic:f.topic});fs.writeFileSync('test-results/statistics.json',JSON.stringify({results,errors},null,2));}
+ finally{if(page&&!page.isClosed())await stopCoverage(page,coverage).catch(()=>{});if(browser)await browser.close();if(f)fixture({action:'cleanup',users:f.users.map(u=>u.id),topic:f.topic,forms_topic:f.formsTopic});fs.writeFileSync('test-results/statistics.json',JSON.stringify({results,errors},null,2));}
  return coverage;
 }
 module.exports=runStatistics;

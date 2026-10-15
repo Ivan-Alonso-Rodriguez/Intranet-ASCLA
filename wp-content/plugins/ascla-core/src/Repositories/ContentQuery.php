@@ -11,22 +11,34 @@ final class ContentQuery
     {
         if (!$query->get('ascla_search')) { return $sql; }
         global $wpdb;
-        return $sql.$wpdb->prepare(" AND ({$wpdb->posts}.post_status <> 'draft' OR {$wpdb->posts}.post_author = %d)", get_current_user_id());
+        $sql.=$wpdb->prepare(" AND ({$wpdb->posts}.post_status <> 'draft' OR {$wpdb->posts}.post_author = %d)", get_current_user_id());
+        return ContentVisibility::where($sql,$query);
     }
 
     public static function search(string $sql, \WP_Query $query): string
     {
-        if (!$query->get('ascla_search')) { return $sql; }
-        $text = Access::text($query->get('s'), 150);
+        if ((array)$query->get('post_type')===['ascla_ally'] && ($query->get('ascla_ally_search') || $query->get('ascla_search'))) { return AllySearch::search($query); }
+        $text = $query->get('ascla_search')?Access::text($query->get('s'), 150):'';
         if ($text === '') { return $sql; }
         global $wpdb;
         $like = '%' . $wpdb->esc_like($text) . '%';
         $authorIds=Profiles::searchableAuthors($text);
         $authorSql=$authorIds?' OR '.$wpdb->posts.'.post_author IN ('.implode(',',array_map('intval',$authorIds)).')':'';
-        return $wpdb->prepare(" AND ({$wpdb->posts}.post_title LIKE %s OR {$wpdb->posts}.post_content LIKE %s
+        $legacySql='';
+        if (preg_match('/C[ií]rculo\h+ASCLA/iu',$text)) {
+            $aliases=[];
+            foreach (['participante','identidad reservada'] as $label) {
+                $alias=preg_replace('/C[ií]rculo\h+ASCLA/iu',$label,$text);
+                $aliases[]=$wpdb->prepare("{$wpdb->posts}.post_title LIKE %s",'%'.$wpdb->esc_like($alias).'%');
+            }
+            $legacySql=" OR ({$wpdb->posts}.post_type='ascla_event' AND (".implode(' OR ',$aliases).") AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} lm WHERE lm.post_id={$wpdb->posts}.ID AND lm.meta_key='_ascla_micro' AND lm.meta_value='1'))";
+        }
+        $allySql=in_array('ascla_ally',(array)$query->get('post_type'),true)?' OR '.AllySearch::typeClause($text):'';
+        $search=$wpdb->prepare(" AND ({$wpdb->posts}.post_title LIKE %s OR {$wpdb->posts}.post_content LIKE %s
             $authorSql
             OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} am WHERE am.post_id={$wpdb->posts}.ID AND am.meta_key='_ascla_source' AND am.meta_value LIKE %s)
-            OR EXISTS (SELECT 1 FROM {$wpdb->term_relationships} ar INNER JOIN {$wpdb->term_taxonomy} atx ON ar.term_taxonomy_id=atx.term_taxonomy_id INNER JOIN {$wpdb->terms} atr ON atr.term_id=atx.term_id WHERE ar.object_id={$wpdb->posts}.ID AND atx.taxonomy IN ('ascla_interest','ascla_category','ascla_tag') AND atr.name LIKE %s))", $like, $like, $like, $like);
+            OR EXISTS (SELECT 1 FROM {$wpdb->term_relationships} ar INNER JOIN {$wpdb->term_taxonomy} atx ON ar.term_taxonomy_id=atx.term_taxonomy_id INNER JOIN {$wpdb->terms} atr ON atr.term_id=atx.term_id WHERE ar.object_id={$wpdb->posts}.ID AND atx.taxonomy IN ('ascla_interest','ascla_category','ascla_tag') AND atr.name LIKE %s)", $like, $like, $like, $like).$legacySql.$allySql.')';
+        return $search.EditorialSearch::readerConstraint($search,$query,$text,$authorIds);
     }
 
     public static function authors(): array
@@ -40,6 +52,7 @@ final class ContentQuery
     public static function filters(array $args, string $type, array $filter): array
     {
         $args['ascla_search'] = true;
+        $args['date_query'] = $type==='event' ? [] : ContentDateRange::query($filter);
         $args['posts_per_page'] = max(1, min(100, (int)($filter['per_page'] ?? 18)));
         $args['orderby'] = ['date' => 'DESC', 'ID' => 'DESC'];
         if ($type === 'topic') { $args['orderby'] = ['modified' => 'DESC', 'ID' => 'DESC']; }
@@ -47,7 +60,13 @@ final class ContentQuery
             if (!empty($filter[$key])) { $args['tax_query'][] = ['taxonomy' => 'ascla_' . $taxonomy, 'field' => 'term_id', 'terms' => absint($filter[$key])]; }
         }
         if ($type !== 'event') { return $args; }
-        if (!empty($filter['micro'])) { $args['meta_query'][]=['key'=>'_ascla_micro','value'=>'1']; }
+        foreach (ContentDateRange::events($filter) as $clause) { $args['meta_query'][]=$clause; }
+        $modality=$filter['modality']??'';
+        if ($modality!=='') {
+            Access::require(in_array($modality,['Virtual','Presencial','Híbrido'],true),'Modalidad no válida.',400);
+            $args['meta_query'][]=['key'=>'_ascla_modality','value'=>$modality];
+        }
+        if (rest_sanitize_boolean($filter['micro']??false)) { $args['meta_query'][]=['key'=>'_ascla_micro','value'=>'1']; }
         $args['meta_key'] = '_ascla_start';
         $direction = rest_sanitize_boolean($filter['past'] ?? false) ? 'DESC' : 'ASC';
         $args['orderby'] = ['meta_value' => $direction, 'ID' => $direction];

@@ -6,7 +6,7 @@ final class Settings
     public static function get(): array
     {
         $stored=(array)get_option('ascla_settings',[]);
-        $settings=array_merge(['mail_mode'=>'wordpress','smtp_host'=>'','smtp_port'=>587,'smtp_security'=>'tls','smtp_user'=>'','smtp_from'=>'','smtp_name'=>'ASCLA','demo'=>true,'moderation_required'=>true,'moderate_comments'=>false,'chatham_default'=>true,'micro_enabled'=>false,'micro_approval'=>true,'micro_min'=>4,'micro_capacity'=>6,'micro_limit'=>4,'micro_priority_hours'=>48,'micro_interval_days'=>7,'ai_mode'=>'mock','ai_provider'=>'mock','ai_model'=>'','openai_model'=>'gpt-5.6-luna','deepseek_model'=>'deepseek-flash','matching_weights'=>MatchScore::WEIGHTS,'matching_min_affinity'=>30,'matching_max_suggestions'=>5,'google_client_id'=>'','youtube_mode'=>'mock','social_mode'=>'mock','turnstile_enabled'=>false,'turnstile_site_key'=>'','turnstile_login'=>true,'turnstile_recovery'=>true,'turnstile_public'=>true,'copyright'=>'© ASCLA – Asociación de Secretarios Corporativos de América Latina'],CredentialPolicy::DEFAULTS,ProfileReview::DEFAULTS,$stored);
+        $settings=array_merge(['mail_mode'=>'wordpress','smtp_host'=>'','smtp_port'=>587,'smtp_security'=>'tls','smtp_user'=>'','smtp_from'=>'','smtp_name'=>'ASCLA','demo'=>true,'moderation_required'=>true,'moderate_comments'=>false,'chatham_default'=>true,'micro_enabled'=>false,'micro_approval'=>true,'micro_min'=>4,'micro_capacity'=>6,'micro_limit'=>4,'micro_priority_hours'=>48,'micro_interval_days'=>7,'ai_mode'=>'mock','ai_provider'=>'mock','ai_model'=>'','openai_model'=>'gpt-5.6-luna','deepseek_model'=>'deepseek-flash','matching_weights'=>MatchScore::WEIGHTS,'matching_min_affinity'=>30,'matching_max_suggestions'=>5,'google_client_id'=>'','youtube_mode'=>'mock','social_mode'=>'mock','turnstile_enabled'=>false,'turnstile_site_key'=>'','turnstile_login'=>true,'turnstile_recovery'=>true,'turnstile_public'=>true,'copyright'=>'© ASCLA – Asociación de Secretarios Corporativos de América Latina'],CredentialPolicy::DEFAULTS,ProfileReview::DEFAULTS,ProfileRequirements::DEFAULTS,$stored);
         // Public self-registration is intentionally unsupported in ASCLA. Remove any legacy 1.9.13 flag.
         unset($settings['turnstile_register']);
         // Backward compatibility with installations that only stored ai_mode before 1.9.11.
@@ -46,21 +46,36 @@ final class Settings
 
     private static function applyMatching(array &$data,array $input): void
     {
-        if (isset($input['matching_min_affinity'])) { $data['matching_min_affinity']=max(0,min(100,(int)$input['matching_min_affinity'])); }
-        if (isset($input['matching_max_suggestions'])) { $data['matching_max_suggestions']=max(1,min(5,(int)$input['matching_max_suggestions'])); }
+        if (isset($input['matching_min_affinity'])) { $data['matching_min_affinity']=FormRules::integer('matching_min_affinity',$input['matching_min_affinity']); }
+        if (isset($input['matching_max_suggestions'])) { $data['matching_max_suggestions']=FormRules::integer('matching_max_suggestions',$input['matching_max_suggestions']); }
         if (!isset($input['matching_weights'])) { return; }
         $weights=[];
-        foreach (MatchScore::WEIGHTS as $key=>$default) { $weights[$key]=max(0,min(100,(int)($input['matching_weights'][$key]??$default))); }
+        Access::require(is_array($input['matching_weights'])&&($input['matching_weights']===[]||!array_is_list($input['matching_weights'])),'Formato de solicitud no válido.',400);
+        foreach (MatchScore::WEIGHTS as $key=>$default) { $weights[$key]=FormRules::integer('matching_weight',array_key_exists($key,$input['matching_weights'])?$input['matching_weights'][$key]:$default); }
         Access::require(array_sum($weights)>0,'Los pesos deben sumar más de cero.',400);$data['matching_weights']=$weights;
+    }
+
+    private static function secretInput(array $input): array
+    {
+        foreach(\ASCLA\Core\Integrations\Secrets::SERVICE_KEYS as $key) {
+            if(array_key_exists($key,$input)) { Access::require(is_string($input[$key]),'Texto no válido.',400); }
+            $clear='clear_'.$key;
+            if(array_key_exists($clear,$input)) { $input[$clear]=FormRules::boolean($input[$clear]); }
+        }
+        return $input;
     }
 
     private static function saveSecrets(array $input): void
     {
+        foreach (\ASCLA\Core\Integrations\Secrets::SERVICE_KEYS as $secret) {
+            if (($input[$secret]??'')==='' && empty($input['clear_'.$secret])) { continue; }
+            Access::require(!\ASCLA\Core\Integrations\Secrets::managedExternally($secret),'Esta credencial se administra en el servidor.',409);
+        }
         foreach (['ai_key','openai_key','deepseek_key','google_client_secret','turnstile_secret'] as $secret) {
-            if (!empty($input[$secret])) { \ASCLA\Core\Integrations\Secrets::set($secret,Access::text($input[$secret],2000)); }
+            if (isset($input[$secret]) && $input[$secret]!=='') { \ASCLA\Core\Integrations\Secrets::set($secret,Access::text($input[$secret],2000)); }
             if (!empty($input['clear_'.$secret])) { \ASCLA\Core\Integrations\Secrets::remove($secret); }
         }
-        if (!empty($input['smtp_password'])) { \ASCLA\Core\Integrations\Secrets::set('smtp_password',$input['smtp_password']); }
+        if (isset($input['smtp_password']) && $input['smtp_password']!=='') { \ASCLA\Core\Integrations\Secrets::set('smtp_password',$input['smtp_password']); }
         if (!empty($input['clear_smtp_password'])) { \ASCLA\Core\Integrations\Secrets::remove('smtp_password'); }
     }
 
@@ -73,6 +88,12 @@ final class Settings
 
     public static function save(array $input): array
     {
+        return \ASCLA\Core\Repositories\Store::atomic('settings',static fn()=>self::saveUnlocked($input));
+    }
+
+    private static function saveUnlocked(array $input): array
+    {
+        $input=self::secretInput($input);
         $data=self::get();
         self::applyFlags($data,$input);
         self::applyAiProvider($data,$input);
@@ -81,23 +102,33 @@ final class Settings
         MicroPlanning::settings($data,$input);
         CredentialPolicy::settings($data,$input);
         ProfileReview::settings($data,$input);
+        ProfileRequirements::settings($data,$input);
         SupportCategories::settings($data,$input);
         $data=\ASCLA\Core\Integrations\Mailer::validate($input,$data);
         self::saveSecrets($input);
         self::validateTurnstile($data);
-        update_option('ascla_settings',$data,false);MicroPlanning::schedule();Audit::record('settings_updated');
+        \ASCLA\Core\Repositories\WordPressWrites::option('ascla_settings',$data);MicroPlanning::schedule();Audit::record('settings_updated');
         return self::status();
     }
 
     public static function status(): array
     {
+        $options=ProfileRequirements::options();
         $settings=self::get(); $settings['has_ai_key']=\ASCLA\Core\Integrations\Secrets::get('ai_key')!=='';
+        $settings['profile_completion_options']=$options;
+        $settings['external_secrets_only']=\ASCLA\Core\Integrations\Secrets::externalOnly();
+        $settings['secret_sources']=[];
+        foreach (\ASCLA\Core\Integrations\Secrets::SERVICE_KEYS as $name) {
+            $settings['secret_sources'][$name]=['source'=>\ASCLA\Core\Integrations\Secrets::source($name),'variable'=>'ASCLA_'.strtoupper($name),
+                'managed_externally'=>\ASCLA\Core\Integrations\Secrets::managedExternally($name),'legacy_copy'=>\ASCLA\Core\Integrations\Secrets::hasLegacy($name)];
+        }
         $settings['has_openai_key']=\ASCLA\Core\Integrations\Secrets::get('openai_key')!=='';
         $settings['has_deepseek_key']=\ASCLA\Core\Integrations\Secrets::get('deepseek_key')!=='';
         $settings['has_google_secret']=\ASCLA\Core\Integrations\Secrets::get('google_client_secret')!=='';
         $settings['has_turnstile_secret']=\ASCLA\Core\Integrations\Secrets::get('turnstile_secret')!=='';
         $settings['google_connected']=\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='';
         $settings['google_redirect']=admin_url('admin-post.php?action=ascla_google_callback');
+        $settings['deliveries']=\ASCLA\Core\Jobs\Deliveries::overview()['counts'];
         return $settings+\ASCLA\Core\Integrations\Mailer::status();
     }
 }

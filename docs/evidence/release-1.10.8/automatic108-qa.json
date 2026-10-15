@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-15",
+  "recorded_at_utc": "2026-10-15T06:43:37.737682+00:00",
+  "target": "https://wordpress.ingsoftware.lat/",
+  "version": "1.10.8",
+  "package_sha256": "212f6b6202b3f2ccef7792cd3620b0a81f135a4e3c2c664ac9d231dde37e6528",
+  "installation": "WordPress visibly confirmed successful update of existing ASCLA Core",
+  "scope": "Authenticated profile review and public asset comparison. Manual exclusions and subsequent interactions were tested with disposable local accounts, not by editing the real QA administrator profile. No full remote acceptance rerun.",
+  "observations": {
+    "old_learning_block_absent": true,
+    "old_global_controls_absent": true,
+    "normal_interest_choices_present": 6,
+    "normal_viewport_horizontal_overflow": false,
+    "console_errors_observed": []
+  },
+  "public_assets": [
+    {
+      "asset": "app.js",
+      "sha256": "e512b7343d5300b08359f6771dc6062a606c3e763be83f5aa98b44251db6133b",
+      "bytes_match": true
+    },
+    {
+      "asset": "app.css",
+      "sha256": "30577a326eca75bd36e75217a5d8c7a0659acd5c0c52f8ee5c96beac2be18667",
+      "bytes_match": true
+    },
+    {
+      "asset": "allies-ui.js",
+      "sha256": "f4df554ef0ffeb5aa19ce0acdf4b6482f5c8ea7bdf5c4dd57cf8652a420b9860",
+      "bytes_match": true
+    },
+    {
+      "asset": "admin-members.js",
+      "sha256": "66cc0118aab0aac73ae6dbf8a79d0b64ce59a89e8249dc2b68b6b0e41bd8d74c",
+      "bytes_match": true
+    },
+    {
+      "asset": "interest-learning.js",
+      "sha256": "76308aeeeda449c33807331382658d8ba874e1f7b3c97e0d5dad995f64d0a53c",
+      "bytes_match": true
+    },
+    {
+      "asset": "login.css",
+      "sha256": "e23f9205458515024d16d8ff1900b48fdbef92152028f3074e546e6346a0ce79",
+      "bytes_match": true
+    }
+  ],
+  "screenshots": [
+    "test-results/automatic108-qa-profile.jpg",
+    "test-results/automatic108-qa-profile-bottom.jpg"
+  ]
+}

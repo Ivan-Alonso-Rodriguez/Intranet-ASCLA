@@ -1,0 +1,67 @@
+{
+  "scope": "Disposable local WordPress history and actual /ask persistence; job completion timing controlled in Playwright, no live Gemini requests",
+  "checks": [
+    "Historial real restaurado únicamente para el hilo activo",
+    "Reinicio inmediato y borrador limpio aunque el navegador rechace guardar el identificador",
+    "La nueva pregunta llega al backend con un identificador diferente al historial anterior",
+    "Una respuesta tardía queda fuera de la conversación nueva",
+    "El hilo vacío se conserva al recargar con almacenamiento disponible",
+    "Las consultas previas se conservan y solo se recuperan al elegirlas en Historial",
+    "Nueva conversación retira el enlace antiguo y recargar no restaura su contexto",
+    "Una recuperación tardía desde Historial no puede deshacer el reinicio",
+    "Un error de recuperación obsoleto no aparece en la conversación nueva",
+    "Una carga tardía del hilo anterior no vuelve a dibujar sus mensajes",
+    "Un error tardío del historial tampoco reemplaza el chat reiniciado"
+  ],
+  "errors": [],
+  "date": "2026-10-15T11:42:13.351163+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "case": "CP 071 / QA 508",
+  "requirements": [
+    "RF-167",
+    "RF-168"
+  ],
+  "before_patch": {
+    "browser_storage_write_rejected": true,
+    "reset_left_previous_messages_visible": true,
+    "baseline_package_sha256": "18e1b17608c2952a3b8e80d514ef49c28257bf5bf0333bccbd3d63f0b6e5e8cf",
+    "app_js_sha256": "5129e86ef99a04777a5c3d4c0afa3589bd5dc8e8cf2ec3768665c657cc1b1f66"
+  },
+  "php": {
+    "tests": 6,
+    "assertions": 55,
+    "errors": 0,
+    "failures": 0,
+    "new_context_tests": 3,
+    "gemini_http_intercepted": true,
+    "live_provider_requests": 0,
+    "junit_sha256": "1e00ad23b9705f63bd773e495252a69dee4cc507a7ca20842f04b4dcfd35d0a1"
+  },
+  "portable_checks_passed": 49,
+  "fixture_cleanup_confirmed": true,
+  "source_sha256": {
+    "wp-content/plugins/ascla-core/assets/app.js": "e87c9a966ad6432b175d6d5687ddbdc819d77bda9f1931ef5a2c0efedff047bd",
+    "tests/assistant-reset108.cjs": "7b0b68f5b277a19d946b1860988275a01ce362ef49543095ed4a83fc1d738614",
+    "tests/assistant-reset108-fixture.php": "8575295a4d5d1545c2138bde8a999d2af78ee02547a7d12f8db3de16789169a2",
+    "tests/php/AssistantReset108Test.php": "17c02d82e6cdbad244c877f5a98fb636c6298f4b1ec490b9b4fa3ebf9db3fee1"
+  },
+  "screenshots_sha256": {
+    "assistant-reset108-desktop.png": "b44802ce353d270358678d646324e94e06e510d41b6dd1f7bbee6ed9f44f5344",
+    "assistant-reset108-mobile.png": "fd83f8861d8e51402aa992e2d150d575cd294966a79817adbb118e3b0b136052"
+  },
+  "package": {
+    "version": "1.10.8",
+    "bytes": 1339556,
+    "sha256": "55e7a2b49bd622db6a550b7bedcf7ada99ceb76b1c60bed66b0d16e74dd4c4cf",
+    "files": 183,
+    "source_bytes_match": true,
+    "crc_valid": true
+  },
+  "limitations": [
+    "Local disposable WordPress only; not installed on public QA.",
+    "Gemini request bodies were verified with intercepted HTTP; no real model response or API consumption is claimed.",
+    "Playwright used real stored history and REST enqueue, with controlled delayed completion responses.",
+    "No complete PHP suite, new coverage measurement or full remote acceptance run."
+  ]
+}

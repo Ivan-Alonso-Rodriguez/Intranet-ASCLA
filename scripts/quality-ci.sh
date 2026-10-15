@@ -44,6 +44,7 @@ ASCLA_ADMIN_USER=ascla.admin
 ASCLA_ADMIN_EMAIL=admin@example.invalid
 ASCLA_WP_ENVIRONMENT_TYPE=local
 ASCLA_LOCAL_MAIL_CAPTURE=true
+ASCLA_EXTERNAL_SECRETS_ONLY=0
 ASCLA_SEED_DATA=true
 EOF_ENV
 
@@ -70,6 +71,13 @@ if [ "$INSTALADO" != "si" ]; then
   exit 1
 fi
 
+echo 'Verificando contexto local y captura de correo de WP-CLI...'
+dc run --rm cli wp eval '
+  if (wp_get_environment_type() !== "local" || !ASCLA\Core\Integrations\Mailer::local()) {
+    WP_CLI::error("WP-CLI debe usar el entorno local y la captura Mailpit del WordPress desechable. Revise WORDPRESS_CONFIG_EXTRA del servicio cli.");
+  }
+  WP_CLI::success("Contexto WP-CLI local y correo capturado en Mailpit.");
+'
 dc run --rm cli wp ascla seed
 
 echo 'Preparando PHPUnit y PCOV...'
@@ -89,7 +97,9 @@ dc exec -T -u 0 wordpress sh -c '
 '
 
 echo 'Ejecutando PHPUnit con cobertura para SonarQube...'
+# The full suite and PCOV share one process; this limit applies only to PHPUnit.
 dc exec -T wordpress php \
+  -d memory_limit=256M \
   -d pcov.enabled=1 \
   -d pcov.directory=/var/www/html/wp-content/plugins/ascla-core \
   /tmp/phpunit.phar \
@@ -100,6 +110,8 @@ dc exec -T wordpress php \
   --log-junit /tmp/ascla-junit.xml \
   /opt/ascla-tests/php
 
+dc exec -T wordpress env ASCLA_PLUGIN_ROOT=/var/www/html/wp-content/plugins/ascla-core php /opt/ascla-tests/release-sanity.php
+
 dc cp wordpress:/tmp/ascla-clover.xml coverage/clover.xml
 dc cp wordpress:/tmp/ascla-coverage.txt coverage/php-summary.txt
 dc cp wordpress:/tmp/ascla-junit.xml coverage/junit.xml
@@ -109,6 +121,7 @@ sed -i 's#/var/www/html/wp-content/plugins/ascla-core/#wp-content/plugins/ascla-
 sed -i 's#/opt/ascla-tests/#tests/#g' coverage/junit.xml
 
 printf '%s' '{"action":"setup"}' | dc exec -T wordpress php /opt/ascla-tests/statistics-fixture.php > test-results/statistics-fixture.json
+dc run --rm -e ASCLA_E2E_EPHEMERAL=1 cli wp eval-file /opt/ascla-tests/privacy108-fixture.php > test-results/privacy108-fixture.json
 
 dc up -d cron
 
@@ -135,8 +148,21 @@ docker run --rm --ipc=host \
     export NODE_PATH=/tmp/ascla-node/node_modules
     node tests/manual-workflow.cjs
     node tests/e2e.cjs
+    node tests/editorial107.cjs
+    node tests/analysis-filters107.cjs
+    node tests/governance107.cjs
+    node tests/delivery107.cjs
+    node tests/comment-history107.cjs
+    node tests/accessibility107.cjs
+    node tests/forms107.cjs
+    node tests/forms108.cjs
+    node tests/events108.cjs
+    node tests/privacy108.cjs
+    node tests/dashboard-loading108.cjs
     node scripts/verify-coverage.cjs
   '
+
+dc run --rm -e ASCLA_E2E_EPHEMERAL=1 -e ASCLA_FIXTURE_ACTION=cleanup cli wp eval-file /opt/ascla-tests/privacy108-fixture.php
 
 if [ ! -s coverage/lcov.info ] || ! grep -q '^SF:' coverage/lcov.info; then
   echo 'ERROR: no se genero un coverage/lcov.info valido.'
@@ -148,7 +174,11 @@ fi
 cd /
 cd "$ROOT"
 
-if [ -z "$SOURCE_CLEAN" ] && [ -z "$(git status --porcelain)" ] && [ "$(git rev-parse HEAD)" = "$SOURCE_REVISION" ]; then
+if ! FINAL_STATUS="$(git status --porcelain)"; then
+  echo 'ERROR: no se pudo comprobar el repositorio al finalizar. No se acredita esta revisión para SonarQube.' >&2
+  exit 1
+fi
+if [ -z "$SOURCE_CLEAN" ] && [ -z "$FINAL_STATUS" ] && [ "$(git rev-parse HEAD)" = "$SOURCE_REVISION" ]; then
   printf '%s\n' "$SOURCE_REVISION" > coverage/source-revision
 fi
 

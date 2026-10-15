@@ -23,7 +23,7 @@ final class MatchingParticipation
     private static function postIds(int $userId): array
     {
         $ids=[];
-        foreach (Store::rows('relations','user_id=%d AND kind IN (%s,%s)',[$userId,'like','follow'],'ORDER BY id DESC LIMIT 60') as $row) { $ids[]=(int)$row['target_id']; }
+        foreach (Store::rows('relations','user_id=%d AND kind=%s',[$userId,'like'],'ORDER BY id DESC LIMIT 60') as $row) { $ids[]=(int)$row['target_id']; }
         foreach (get_comments(['user_id'=>$userId,'status'=>'approve','number'=>50,'fields'=>'ids']) as $commentId) {
             $comment=get_comment((int)$commentId);
             if ($comment) { $ids[]=(int)$comment->comment_post_ID; }

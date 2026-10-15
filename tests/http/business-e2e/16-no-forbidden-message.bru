@@ -1,0 +1,24 @@
+meta {
+  name: no-forbidden-message
+  type: http
+  seq: 16
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/conversations/{{conversationId}}/messages
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{bCookie}}
+  X-WP-Nonce: {{bNonce}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("Historial consultado de nuevo", function () { expect(res.getStatus()).to.equal(200); });
+  test("El envío rechazado no se guardó", function () { expect(res.getBody().items.some(m=>m.body==="QA: este mensaje no debe enviarse.")).to.equal(false); });
+}

@@ -257,6 +257,11 @@ final class NotificationsTest extends TestCase
     public function testMessageEmailIsThrottledPerConversationButInternalNoticesAreNot(): void
     {
         $user=$this->users[0];
+        wp_set_current_user($user);
+        wp_update_user(['ID'=>$user,'user_email'=>'throttle_'.bin2hex(random_bytes(6)).'@example.invalid']);
+        $accepted=static fn($result)=>$result??true;
+        add_filter('pre_wp_mail',$accepted,PHP_INT_MAX);
+        try {
         $context=['type'=>'conversation','id'=>701,'actor'=>$this->users[1]];
         Notifications::send($user,'message','Primer mensaje','',$context);
         $first=get_user_meta($user,'_ascla_message_email_last_sent',true);
@@ -269,6 +274,7 @@ final class NotificationsTest extends TestCase
         $third=get_user_meta($user,'_ascla_message_email_last_sent',true);
         self::assertArrayHasKey('702',$third);
         self::assertSame(3,Store::count('notifications','user_id=%d AND kind=%s',[$user,'message']));
+        } finally { remove_filter('pre_wp_mail',$accepted,PHP_INT_MAX); }
     }
 
     public function testNotificationEndpointsRequireAuthentication(): void

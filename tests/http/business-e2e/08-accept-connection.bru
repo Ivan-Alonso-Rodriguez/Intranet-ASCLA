@@ -1,0 +1,30 @@
+meta {
+  name: accept-connection
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/connections/{{requestId}}/respond
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{bCookie}}
+  X-WP-Nonce: {{bNonce}}
+  Content-Type: application/json
+}
+body:json {
+  {
+    "decision": "accept"
+  }
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("B acepta la solicitud obtenida", function () { expect(res.getStatus()).to.equal(200); });
+  test("Conexión confirmada", function () { expect(res.getBody().state).to.equal("connected"); });
+}

@@ -19,7 +19,7 @@ final class EntityRedactor
             '/(?<!\p{L})'.$word.'(?:\h+(?:(?:de|del|la)\h+)?'.$word.'){1,3}(?!\p{L})/u',
             '/^\h*('.$name.'):\h*/mu',
         ];
-        $public=['COSO ERM','API REAL','Identidad reservada','ASCLA','Chatham House','Centro de Conocimiento','Gobierno Corporativo','Inteligencia Artificial','Gestión de Riesgos','Gobierno de IA','Secretaría Corporativa'];
+        $public=['COSO ERM','API REAL','Identidad reservada','ASCLA','Círculo ASCLA','Chatham House','Centro de Conocimiento','Gobierno Corporativo','Inteligencia Artificial','Gestión de Riesgos','Gobierno de IA','Secretaría Corporativa'];
         foreach($patterns as $pattern){
             preg_match_all($pattern,$text,$matches,PREG_SET_ORDER);
             foreach($matches as $match){$value=trim($match[1]??$match[0]);if(!in_array($value,$public,true)){ $entities[]=$value; }}

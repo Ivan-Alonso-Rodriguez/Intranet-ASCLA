@@ -1,0 +1,35 @@
+{
+  "stage": "Continuidad de requisitos obligatorios del 13 de octubre",
+  "date": "2026-10-13",
+  "base_revision": "d01e3d12b6c404ba5aaa9fc4648f5989565bf590",
+  "base_branch": "development",
+  "working_tree_modified": true,
+  "plugin_version": "1.10.7",
+  "schema_version": 14,
+  "php_tests": 350,
+  "php_assertions": 5595,
+  "browser_checks": 16,
+  "php_line_coverage_percent": 83.34,
+  "new_javascript_coverage": false,
+  "full_quality_ci_rerun": false,
+  "requirements_closed": [
+    "RF-143",
+    "RF-172",
+    "RF-177",
+    "RF-182",
+    "RNF-027"
+  ],
+  "requirements_advanced": [
+    "RNF-011"
+  ],
+  "evidence": "docs/evidence/release-1.10.7/analysis107.json",
+  "php_reports": [
+    "test-results/analysis107-php.log",
+    "test-results/analysis107-junit.xml",
+    "test-results/analysis107-clover.xml"
+  ],
+  "browser_reports": [
+    "test-results/editorial107.json",
+    "test-results/analysis-filters107.json"
+  ]
+}

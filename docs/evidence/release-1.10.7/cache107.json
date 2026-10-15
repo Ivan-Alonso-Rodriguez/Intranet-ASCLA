@@ -1,0 +1,46 @@
+{
+  "stage": "Caché transaccional y decisión de sesión del 14 de octubre",
+  "date": "2026-10-14",
+  "completed_at_utc": "2026-10-14T05:03:17.263249+00:00",
+  "base_revision": "d01e3d12b6c404ba5aaa9fc4648f5989565bf590",
+  "base_branch": "development",
+  "working_tree_modified": true,
+  "plugin_version": "1.10.7",
+  "schema_version": 15,
+  "php_tests": 394,
+  "php_assertions": 5903,
+  "php_line_coverage_percent": 84.13,
+  "browser_checks": 36,
+  "phpunit_memory_limit": "256M",
+  "new_javascript_coverage": false,
+  "full_quality_ci_rerun": false,
+  "requirements_adjusted": [
+    "RN-058"
+  ],
+  "requirements_advanced": [
+    "RNF-011"
+  ],
+  "cache_note": "Proveedor de archivo compartido entre procesos PHP, no Redis/Memcached reales. Ocho pruebas/81 aserciones de caché; generación serializada y restauración de identidad.",
+  "browser_note": "Regresiones editoriales, filtros/completitud, gobierno, historial propio y entregas. Metadatos externos y filas fallidas/reintento del panel simulados; API local real para el resto.",
+  "evidence": "docs/evidence/release-1.10.7/cache107.json",
+  "php_reports": [
+    "test-results/cache107-php.log",
+    "test-results/cache107-junit.xml",
+    "test-results/cache107-clover.xml"
+  ],
+  "browser_reports": [
+    "test-results/editorial107.json",
+    "test-results/analysis-filters107.json",
+    "test-results/governance107.json",
+    "test-results/delivery107.json",
+    "test-results/comment-history107.json"
+  ],
+  "package": {
+    "version": "1.10.7",
+    "bytes": 1259189,
+    "sha256": "4811a29bafe77c6035994745783b79a3a2d9cb799fe4337959be344924f99397",
+    "files": 164,
+    "path": "dist/ascla-core.zip",
+    "schema_version": 15
+  }
+}

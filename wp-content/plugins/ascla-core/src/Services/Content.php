@@ -13,7 +13,9 @@ final class Content
         unset($metaId);
         if ($key!=='_ascla' || !is_array($value)) { return; }
         if(get_post_type($postId)==='ascla_contact') { WordPressWrites::meta('post',$postId,'_ascla_request_status',$value['request_status']??'open'); }
+        if(get_post_type($postId)==='ascla_ally') { WordPressWrites::meta('post',$postId,'_ascla_alliance_type',\ASCLA\Core\Repositories\AllySearch::value($value)); }
         foreach (['resource_type','start','end','source'] as $field) { WordPressWrites::meta('post',$postId,'_ascla_'.$field,$value[$field]??''); }
+        if (get_post_type($postId)==='ascla_event') { WordPressWrites::meta('post',$postId,'_ascla_modality',$value['modality']??'Virtual'); }
         WordPressWrites::meta('post',$postId,'_ascla_micro',empty($value['micro'])?'0':'1');
         WordPressWrites::meta('post',$postId,'_ascla_micro_public_at',(int)($value['public_at']??0));
         WordPressWrites::meta('post',$postId,'_ascla_cancelled',empty($value['cancelled'])?'0':'1');
@@ -37,7 +39,7 @@ final class Content
         $type=substr($post->post_type,6);
         if ($type==='contact') { return false; }
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
-        if (!empty($meta['micro']) && $post->post_status==='publish' && !current_user_can('ascla_manage')) { return false; }
+        if (!empty($meta['micro']) && (!empty($meta['cancelled']) || ($post->post_status==='publish' && !current_user_can('ascla_manage')))) { return false; }
         return self::canRead($post) && self::canCreate($type)
             && (current_user_can('ascla_manage') || (int)$post->post_author===get_current_user_id()
                 || (current_user_can('ascla_moderate') && !in_array($type,self::EDITORIAL_TYPES,true)));
@@ -49,6 +51,8 @@ final class Content
         $meta=in_array($type,self::EDITORIAL_TYPES,true)?(array)get_post_meta($post->ID,'_ascla',true):[];
         return match (true) {
             $post->post_type==='ascla_ally'=>current_user_can('ascla_manage'),
+            !empty($meta['micro'])=>self::canEdit($post) && current_user_can('ascla_manage')
+                && in_array($post->post_status,['draft','pending'],true) && empty($meta['micro_approved']),
             in_array($type,self::EDITORIAL_TYPES,true)=>self::canEdit($post) && (empty($meta['micro']) || current_user_can('ascla_manage')),
             default=>current_user_can('ascla_moderate'),
         };
@@ -68,7 +72,7 @@ final class Content
         $me=get_current_user_id();
         return match (true) {
             $type==='contact'=>SupportRequests::canRead($post),
-            $type==='ally' && !current_user_can('ascla_manage')=>$post->post_status==='publish',
+            $type==='ally'=>current_user_can('ascla_manage') || $post->post_status==='publish',
             $post->post_status==='draft'=>self::canReadDraft($type,$author,$me),
             default=>self::canReadPublished($post,$type,$author,$me),
         };
@@ -168,6 +172,8 @@ final class ContentPublishing
     {
         $meta=self::serializedMeta($post);
         $title=self::legacyRedaction($post->post_title);
+        $title=\ASCLA\Core\Domain\MicroeventTitle::display($title,$meta);
+        if ($title!==$post->post_title && isset($meta['agenda_ai']['title'])) { $meta['agenda_ai']['title']=$title; }
         $body=self::legacyRedaction($post->post_content);
         return self::serializedPayload($post,$meta,$title,$body);
     }
@@ -232,18 +238,23 @@ final class ContentPublishing
     private static function serializedPayload(\WP_Post $post,array $meta,mixed $title,mixed $body): array
     {
         [$title,$body,$meta]=EditorialPayload::reader($post,$meta,$title,$body);
+        if ($post->post_type==='ascla_ally') { $meta['ally_status']=Allies::state($post,$meta); }
         if (!current_user_can('ascla_moderate') && !Access::canPublish()) {
             unset($meta['transcript'],$meta['identities'],$meta['invitees'],$meta['moderation'],$meta['transcript_error'],$meta['transcript_mode'],$meta['transcript_checked_at']);
         }
         if (!empty($meta['micro'])) {
             $meta['micro_state']=get_post_meta($post->ID,'_ascla_micro_state',true)?:'pending';
-            if (current_user_can('ascla_manage')) { $meta['micro_history']=(array)get_post_meta($post->ID,'_ascla_micro_history',true); }
+            if (current_user_can('ascla_manage')) {
+                $meta['micro_history']=(array)get_post_meta($post->ID,'_ascla_micro_history',true);
+                $meta['micro_archived']=(bool)get_post_meta($post->ID,'_ascla_micro_archived',true);
+                $meta['can_archive']=MicroArchive::canArchive($post,$meta);
+            }
         }
         $author=get_userdata($post->post_author);
         $date=$post->post_date_gmt;
         if (!$date || str_starts_with($date,'0000-')) { $date=get_gmt_from_date($post->post_date); }
         $terms=wp_get_object_terms($post->ID,['ascla_interest','ascla_category','ascla_tag']);
-        return ['id'=>$post->ID,'can_delete'=>self::canDelete($post),'can_edit'=>Content::canEdit($post),'can_moderate'=>Content::canModerate($post),'type'=>substr($post->post_type,6),'title'=>$title,'body'=>$body,'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?Profiles::publicName((int)$author->ID):'ASCLA'],'date'=>$date,'parent'=>(int)$post->post_parent,'meta'=>$meta,'media'=>Media::metadata($post->ID,(array)($meta['media_ids']??[])),'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name,'taxonomy'=>$t->taxonomy],$terms),...ContentReactions::summary($post->ID),'reactions'=>Store::count('relations',"target_id=%d AND kind='like'",[$post->ID]),'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='like'",[$post->ID,get_current_user_id()])>0,'following'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='follow'",[$post->ID,get_current_user_id()])>0,'comments'=>(int)$post->comment_count,'url'=>Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$post->ID])];
+        return ['id'=>$post->ID,'can_delete'=>self::canDelete($post),'can_edit'=>Content::canEdit($post),'can_moderate'=>Content::canModerate($post),'type'=>substr($post->post_type,6),'title'=>$title,'body'=>$body,'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?Profiles::publicName((int)$author->ID):'ASCLA'],'date'=>$date,'parent'=>(int)$post->post_parent,'meta'=>$meta,'media'=>Media::metadata($post->ID,(array)($meta['media_ids']??[])),'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name,'taxonomy'=>$t->taxonomy],$terms),...ContentReactions::summary($post->ID),'reactions'=>Store::count('relations',"target_id=%d AND kind='like'",[$post->ID]),'liked'=>Store::count('relations',"target_id=%d AND user_id=%d AND kind='like'",[$post->ID,get_current_user_id()])>0,'comments'=>(int)$post->comment_count,'url'=>Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$post->ID])];
     }
 
 
@@ -262,20 +273,25 @@ final class ContentPublishing
             $ranked[]=['item'=>$item,'score'=>(int)$rank['score'],'timestamp'=>strtotime($post->post_date_gmt.' UTC')?:0];
         }
         usort($ranked,static fn($a,$b)=>$b['score']<=>$a['score'] ?: $b['timestamp']<=>$a['timestamp'] ?: $b['item']['id']<=>$a['item']['id']);
-        $total=count($ranked);$offset=($page-1)*$perPage;
-        return ['items'=>array_column(array_slice($ranked,$offset,$perPage),'item'),'page'=>$page,'total'=>$total,'pages'=>max(1,(int)ceil($total/$perPage))];
+        $total=count($ranked);$pages=max(1,(int)ceil($total/$perPage));$page=min($page,$pages);$offset=($page-1)*$perPage;
+        return ['items'=>array_column(array_slice($ranked,$offset,$perPage),'item'),'page'=>$page,'per_page'=>$perPage,'total'=>$total,'pages'=>$pages];
     }
 
     private static function standardListing(array $args,int $page,array $filter): array
     {
         $query=new \WP_Query($args);$items=[];
+        // WordPress does not calculate found_posts when an offset returns no rows.
+        if (!$query->posts && $page>1) { $args['paged']=1;$query=new \WP_Query($args); }
+        $pages=max(1,(int)$query->max_num_pages);
+        $page=min($page,$pages);
+        if ((int)$args['paged']!==$page) { $args['paged']=$page;$query=new \WP_Query($args); }
         foreach ($query->posts as $post) {
             if (!Content::canRead($post)) { continue; }
             $item=self::serialize($post);
             if (!empty($filter['resource_type']) && ($item['meta']['resource_type']??'')!==$filter['resource_type']) { continue; }
             $items[]=$item;
         }
-        return ['items'=>$items,'page'=>$page,'total'=>(int)$query->found_posts,'pages'=>(int)$query->max_num_pages];
+        return ['items'=>$items,'page'=>$page,'per_page'=>(int)$args['posts_per_page'],'total'=>(int)$query->found_posts,'pages'=>$pages];
     }
 
     private static function saveBase(string $type,array $input,int $id): array
@@ -289,9 +305,11 @@ final class ContentPublishing
             $post=Content::get($id);Access::require($post->post_type==='ascla_'.$type && Content::canEdit($post),'No puede editar este contenido.');
             if ($type==='event') { $oldMeta=(array)get_post_meta($id,'_ascla',true);$oldTitle=(string)$post->post_title; }
         }
-        $title=trim(Access::text($input['title']??'',200));$body=trim(Access::text($input['body']??'',30000));
-        Access::require($title!=='' && $body!=='','Complete título y contenido.',400);
-        return ['editor'=>$editor,'publisher'=>$publisher,'old_meta'=>$oldMeta,'old_title'=>$oldTitle,'title'=>$title,'body'=>$body,'meta'=>ContentMeta::sanitize($type,(array)($input['meta']??[]),$id)];
+        $title=trim(Access::text($input['title']??'',200));$body=trim(Access::text($input['body']??'',$type==='contact'?5000:30000));
+        $incompleteEventDraft=$type==='event' && ($input['status']??'')==='draft';
+        Access::require($incompleteEventDraft || (Access::hasText($title) && Access::hasText($body)),'Complete título y contenido.',400);
+        if ($incompleteEventDraft && !Access::hasText($title) && !Access::hasText($body)) { $title='Borrador de evento'; }
+        return ['editor'=>$editor,'publisher'=>$publisher,'old_meta'=>$oldMeta,'old_title'=>$oldTitle,'old_ally_state'=>$type==='ally'&&$id?Allies::state($post):null,'title'=>$title,'body'=>$body,'meta'=>ContentMeta::sanitize($type,(array)($input['meta']??[]),$id,$incompleteEventDraft)];
     }
 
     private static function saveTaxonomies(array $input): array
@@ -299,12 +317,12 @@ final class ContentPublishing
         $taxonomies=[];
         foreach (['interest','category','tag'] as $tax) {
             Access::require(!isset($input[$tax])||is_array($input[$tax]),'Categoría no válida.',400);
-            $ids=array_values(array_unique(array_map('absint',$input[$tax]??[])));
+            $ids=FormRules::ids($input[$tax]??[]);
             foreach ($ids as $tid) { Access::require((bool)term_exists($tid,'ascla_'.$tax),'Categoría no válida.',400); }
             $taxonomies[$tax]=$ids;
         }
-        Access::require(!isset($input['tag_names'])||is_array($input['tag_names']),'Etiquetas no válidas.',400);
-        $tagNames=array_map(static fn($name)=>trim(Access::text($name,60)),array_slice($input['tag_names']??[],0,20));
+        Access::require(!isset($input['tag_names'])||(is_array($input['tag_names'])&&array_is_list($input['tag_names'])&&count($input['tag_names'])<=20),'Etiquetas no válidas.',400);
+        $tagNames=array_map(static function($name){Access::require(is_string($name),'Etiquetas no válidas.',400);return trim(Access::text($name,60));},$input['tag_names']??[]);
         return [$taxonomies,$tagNames];
     }
 
@@ -326,6 +344,7 @@ final class ContentPublishing
     private static function afterSave(int $saved,array $context): void
     {
         ContentSchedule::sync($saved);
+        if ($context['type']==='ally') { Allies::recordState($saved,$context['old_ally_state']); }
         if ($context['type']==='event' && $context['id'] && $context['status']==='publish') {
             Events::notifyImportantChanges($saved,$context['old_meta']+['__title'=>$context['old_title']],$context['meta']+['__title'=>$context['title']]);
         }
@@ -456,13 +475,13 @@ final class ContentListingQuery
     public static function build(string $type,array $filter): array
     {
         Access::require(isset(Catalog::TYPES[$type]),'Sección no válida.',400);
-        $page=max(1,min(10000,(int)($filter['page']??1)));$mine=!empty($filter['mine']);
+        $page=max(1,min(10000,(int)($filter['page']??1)));$mine=rest_sanitize_boolean($filter['mine']??false);
         $status=($mine||current_user_can('ascla_moderate'))?['publish','draft','pending','ascla_rejected','ascla_hidden','private']:['publish'];
         if (!empty($filter['status']) && in_array($filter['status'],$status,true)) { $status=[$filter['status']]; }
         $args=['post_type'=>'ascla_'.$type,'post_status'=>$status,'posts_per_page'=>18,'paged'=>$page,'s'=>Access::text($filter['q']??'',150),'orderby'=>$type==='topic'?'modified':'date','order'=>'DESC'];
         self::visibility($args,$type,$filter,$mine);
         self::optionalFilters($args,$type,$filter);
-        $recommended=$type==='resource' && !empty($filter['recommended']);
+        $recommended=$type==='resource' && rest_sanitize_boolean($filter['recommended']??false);
         if ($recommended) { $args['post_status']=['publish']; }
         return [\ASCLA\Core\Repositories\ContentQuery::filters($args,$type,$filter),$page,$recommended];
     }
@@ -478,13 +497,9 @@ final class ContentListingQuery
     private static function optionalFilters(array &$args,string $type,array $filter): void
     {
         if (isset($filter['parent']) && $filter['parent']!=='') { $args['post_parent']=absint($filter['parent']); }
-        if (!empty($filter['after']) && preg_match('/^\d{4}-\d{2}-\d{2}$/',$filter['after'])) { $args['date_query']=[['after'=>$filter['after'],'inclusive'=>true]]; }
         if ($type==='resource' && !empty($filter['resource_type'])) { $args['meta_query'][]=['key'=>'_ascla_resource_type','value'=>Access::text($filter['resource_type'],30)]; }
         if ($type!=='event') { return; }
-        if (!current_user_can('ascla_moderate') && empty($filter['mine'])) {
-            $args['meta_query'][]=['relation'=>'OR',['key'=>'_ascla_micro','value'=>'0'],['key'=>'_ascla_micro','compare'=>'NOT EXISTS'],['key'=>'_ascla_invitee','value'=>get_current_user_id()],['relation'=>'AND',['key'=>'_ascla_micro_public_at','value'=>0,'compare'=>'>','type'=>'NUMERIC'],['key'=>'_ascla_micro_public_at','value'=>time(),'compare'=>'<=','type'=>'NUMERIC']]];
-        }
-        if (array_key_exists('past',$filter)) { $args['meta_query'][]=['key'=>'_ascla_end','value'=>gmdate('c'),'compare'=>!empty($filter['past'])?'<':'>=']; }
+        if (array_key_exists('past',$filter)) { $args['meta_query'][]=['key'=>'_ascla_end','value'=>gmdate('c'),'compare'=>rest_sanitize_boolean($filter['past'])?'<':'>=']; }
     }
 }
 
@@ -496,9 +511,12 @@ final class ContentSaveState
         if (!empty($meta['generated']) && isset($input['tag_names'])) {
             $meta['tags']=array_map(static fn($name)=>Access::text($name,60),array_slice((array)$input['tag_names'],0,20));
         }
-        Access::require(in_array($requested,['draft','pending','publish','scheduled'],true),'Estado no válido.',400);
+        Access::require(in_array($requested,['draft','pending','publish','scheduled'],true) || ($type==='ally' && $requested==='inactive'),'Estado no válido.',400);
+        if ($type==='event' && $requested!=='draft') {
+            Access::require(!empty($meta['start']) && !empty($meta['end']),'Complete la fecha y hora de inicio y fin.',400);
+        }
         $direct=$type==='resource' && $context['publisher'] && $requested==='publish' && !empty($meta['generated']);
-        $status=self::status($type,$requested,$meta,$context['editor'],$context['publisher'],$direct);
+        $status=$type==='ally'?Allies::publicationStatus($requested):self::status($type,$requested,$meta,$context['editor'],$context['publisher'],$direct);
         $parent=self::parent($type,$input);
         if ($id && !empty($meta['generated']) && !$direct) { $meta['reviewed']=false; }
         if ($direct) { $meta['reviewed']=true; }
@@ -591,7 +609,7 @@ final class ContentInteractions
     public static function comment(int $id,string $body,int $parent=0): array
     {
         Access::limit('comment',15); $post=Content::get($id); Access::require($post->post_status==='publish','El contenido aún no está publicado.',400);
-        $body=trim(Access::text($body,5000)); Access::require($body!=='','Escriba un comentario.',400);
+        $body=trim(Access::text($body,5000)); Access::require(Access::hasText($body),'Escriba un comentario.',400);
         if ($parent>0) {
             $parentComment=get_comment($parent);
             Access::require($parentComment && (int)$parentComment->comment_post_ID===$id && (string)$parentComment->comment_approved==='1','El comentario al que intentas responder ya no está disponible.',404);
@@ -673,22 +691,8 @@ final class ContentInteractions
 
     public static function react(int $id,string $kind,bool $active,string $reaction='like'): array
     {
-        Access::require(in_array($kind,['like','follow'],true),'Acción no válida.',400);
-        if ($kind==='like') { return ContentReactions::set($id,$active,$reaction); }
-        $post=Content::get($id); Access::require($post->post_status==='publish',self::UNPUBLISHED_CONTENT,400);
-        if ($kind==='follow' && $active && $post->post_type==='ascla_event') {
-            $meta=(array)get_post_meta($id,'_ascla',true); $end=strtotime((string)($meta['end']??''));
-            Access::require(empty($meta['cancelled']),'No puedes seguir un evento cancelado.',409);
-            Access::require($end===false || $end>time(),'No puedes seguir un evento que ya finalizó.',400);
-        }
-        $where=['user_id'=>get_current_user_id(),'target_id'=>$id,'kind'=>$kind];
-        Store::lock('reaction:'.implode(':',$where),static function () use($where,$active) {
-            if ($active && !Store::count('relations',self::RELATION_FILTER,array_values($where))) {
-                Store::insert('relations',$where+['created_at'=>current_time('mysql',true)]);
-            } elseif (!$active) { Store::delete('relations',$where); }
-        });
-        KnowledgeRecommendations::invalidateActivity(get_current_user_id());
-        return ['active'=>$active];
+        Access::require($kind==='like','Acción no válida.',400);
+        return ContentReactions::set($id,$active,$reaction);
     }
 
     public static function report(int $id,string $reason,string $detail=''): array

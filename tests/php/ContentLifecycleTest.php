@@ -144,6 +144,55 @@ final class ContentLifecycleTest extends TestCase
         foreach(array_slice($this->users,1) as $id){wp_set_current_user($id);self::assertSame(403,$this->api('POST','content/event',$payload)->get_status());self::assertSame(403,$this->api('POST','content/event/'.$p['id'],$payload)->get_status());self::assertSame($id===$this->users[1]?404:403,$this->api('POST','items/'.$draft['id'].'/moderate',['decision'=>'approve','reason'=>'Publicar'])->get_status());}
         wp_set_current_user($this->users[2]);Content::comment($p['id'],'Participaré');self::assertSame('publish',get_post_status($p['id']));
     }
+    public function testIncompleteEventCanBeSavedAsDraftButCannotBePublished():void
+    {
+        wp_set_current_user($this->users[0]);
+        $created=$this->api('POST','content/event',['title'=>'','body'=>'','status'=>'draft','meta'=>[]]);
+        self::assertSame(200,$created->get_status());$draft=$created->get_data();$this->posts[]=$draft['id'];
+        self::assertSame('draft',$draft['status']);self::assertSame('Borrador de evento',$draft['title']);
+        self::assertArrayNotHasKey('start',$draft['meta']);self::assertArrayNotHasKey('end',$draft['meta']);
+        $partial=$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento todavía incompleto','body'=>'','status'=>'draft','meta'=>[]]);
+        self::assertSame(200,$partial->get_status());self::assertSame('draft',$partial->get_data()['status']);
+        self::assertSame(400,$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento todavía incompleto','body'=>'','status'=>'publish','meta'=>[]])->get_status());
+        self::assertSame(400,$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento listo','body'=>'Descripción completa','status'=>'publish','meta'=>[]])->get_status());
+        $complete=$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento listo','body'=>'Descripción completa','status'=>'publish','meta'=>['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000)]]);
+        self::assertSame(200,$complete->get_status());self::assertSame('publish',$complete->get_data()['status']);
+    }
+    public function testIncompleteDraftStillRejectsInvalidDatesNumbersAndPublication():void
+    {
+        $base=['title'=>'Borrador protegido','body'=>'','status'=>'draft'];
+        $created=$this->api('POST','content/event',$base+['meta'=>[]]);
+        self::assertSame(200,$created->get_status());$id=$created->get_data()['id'];$this->posts[]=$id;
+        $before=get_post_meta($id,'_ascla',true);
+        foreach ([['capacity'=>1.5],['capacity'=>true],['offer_hours'=>0],['modality'=>'unknown'],['start'=>'2027-02-30T10:00:00Z'],['start'=>'2027-01-15T10:00'],['start'=>'2027-01-15T11:00:00Z','end'=>'2027-01-15T10:00:00Z']] as $meta) {
+            self::assertSame(400,$this->api('POST','content/event/'.$id,$base+['meta'=>$meta])->get_status());
+            self::assertSame($before,get_post_meta($id,'_ascla',true));
+        }
+        foreach (['publish','scheduled','pending'] as $status) {
+            self::assertSame(400,$this->api('POST','content/event/'.$id,['title'=>'Completo','body'=>'Descripción','status'=>$status,'meta'=>[]])->get_status());
+            self::assertSame('draft',get_post_status($id));
+        }
+        self::assertSame(400,$this->api('POST','content/event/'.$id,['title'=>"\u{200D}",'body'=>'Descripción','status'=>'publish','meta'=>['start'=>'2027-01-15T10:00:00Z','end'=>'2027-01-15T11:00:00Z']])->get_status());
+        wp_set_current_user($this->users[2]);
+        self::assertSame(404,$this->api('GET','items/'.$id)->get_status());
+        self::assertSame(403,$this->api('POST','content/event',$base+['meta'=>[]])->get_status());
+        self::assertSame(400,$this->api('POST','content/hub',['title'=>'','body'=>'','status'=>'draft'])->get_status());
+    }
+    public function testMicroeventDraftAllowsMissingDeadlineWithoutWeakeningIntegerValidation():void
+    {
+        $created=$this->api('POST','content/event',['title'=>'Microevento en preparación','body'=>'','status'=>'draft','meta'=>['capacity'=>0]]);
+        self::assertSame(200,$created->get_status());$id=$created->get_data()['id'];$this->posts[]=$id;
+        // Microevent identity is server-owned, created by the proposal service rather than REST input.
+        update_post_meta($id,'_ascla',get_post_meta($id,'_ascla',true)+['micro'=>true]);
+        self::assertSame(200,$this->api('POST','content/event/'.$id,['title'=>'Microevento en preparación','body'=>'','status'=>'draft','meta'=>['registration_deadline'=>'']])->get_status());
+        $before=get_post_meta($id,'_ascla',true);self::assertArrayNotHasKey('registration_deadline',$before);
+        foreach ([['micro_min'=>true],['micro_min'=>1.5],['priority_hours'=>false],['priority_hours'=>169]] as $meta) {
+            self::assertSame(400,$this->api('POST','content/event/'.$id,['title'=>'Sin modificar','body'=>'','status'=>'draft','meta'=>$meta])->get_status());
+            self::assertSame($before,get_post_meta($id,'_ascla',true));
+        }
+        self::assertSame(400,$this->api('POST','content/event/'.$id,['title'=>'Microevento','body'=>'Descripción','status'=>'pending','meta'=>[]])->get_status());
+        self::assertSame('draft',get_post_status($id));
+    }
     public function testEventCoverAcceptsOneImageAndRejectsMultipleFilesOrPdf():void
     {
         wp_set_current_user($this->users[0]);

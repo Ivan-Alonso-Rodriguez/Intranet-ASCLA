@@ -1,7 +1,7 @@
 <?php
 namespace ASCLA\Core\Services;
 use ASCLA\Core\Domain\{DelimitedFile,InterestCatalog,EntityRedactor};
-use ASCLA\Core\Repositories\{Store,ImportRecords};
+use ASCLA\Core\Repositories\{Store,ImportRecords,WordPressWrites,Transaction};
 use ASCLA\Core\Integrations\AIProviderInterface;
 
 /** Preview, review and apply are separate state transitions. Uploading never updates a profile. */
@@ -17,12 +17,19 @@ final class InterestImports
     }
     public static function start(array $input): array
     {
-        self::authorize();$filename=Access::text($input['filename']??'intereses.csv',255);$file=DelimitedFile::read($input['csv']??'',$filename,Access::text($input['mime']??'text/csv',100));$map=$input['columns']??[];Access::require(is_array($map),'Selecciona las columnas.',400);
-        $columns=[];foreach(['email','code','structured','free'] as $key){$v=$map[$key]??-1;Access::require(filter_var($v,FILTER_VALIDATE_INT)!==false && (int)$v>=-1 && (int)$v<count($file['headers']),'Columna no válida.',400);$columns[$key]=(int)$v;}
+        self::authorize();$filename=Access::text($input['filename']??'intereses.csv',255);$file=DelimitedFile::read($input['csv']??'',$filename,Access::text($input['mime']??'text/csv',100));$map=$input['columns']??[];Access::require(is_array($map)&&($map===[]||!array_is_list($map)),'Selecciona las columnas.',400);
+        $columns=[];foreach(['email','code','structured','free'] as $key){$columns[$key]=FormRules::bounded(array_key_exists($key,$map)?$map[$key]:-1,-1,count($file['headers'])-1,'Columna no válida.');}
         Access::require(($columns['email']>=0 || $columns['code']>=0) && ($columns['structured']>=0 || $columns['free']>=0),'Selecciona identidad y respuestas.',400);
         $mode=Access::text($input['mode']??'merge',20);Access::require(in_array($mode,['merge','replace'],true),'Modo de importación no válido.',400);
+        $rows=self::importRows($file['rows'],$columns);
+        return Store::atomic('interest-import-create:'.get_current_user_id(),static function()use($filename,$mode,$rows) {
+            $id=ImportRecords::create('interests',$filename,['mode'=>$mode],$rows);Audit::record('interests_import_created',$id,'rows='.count($rows));return self::detail($id);
+        });
+    }
+    private static function importRows(array $source,array $columns): array
+    {
         $rows=[];
-        foreach($file['rows'] as $row) {
+        foreach($source as $row) {
             $p=['line'=>$row['line']];
             foreach($columns as $key=>$n) {
                 $limit=in_array($key,['email','code'],true)?200:6000;
@@ -30,21 +37,8 @@ final class InterestImports
             }
             $rows[]=$p;
         }
-        $id=ImportRecords::create('interests',$filename,['mode'=>$mode],$rows);Audit::record('interests_import_created',$id,'rows='.count($rows));return self::detail($id);
+        return $rows;
     }
-    private static function resolve(array $p): array
-    {
-        $email=trim($p['email']);$code=trim($p['code']);$byEmail=$email!=='' && is_email($email)?get_user_by('email',$email):false;$byCode=[];
-        if($code!=='') {$byCode=array_unique(array_map('intval',get_users(['fields'=>'ID','meta_query'=>['relation'=>'OR',['key'=>'_ascla_member_code','value'=>$code],['key'=>'ascla_member_code','value'=>$code]]]))); }
-        if(count($byCode)>1 || ($byCode && $byEmail && $byCode[0]!== (int)$byEmail->ID)) {return [0,'Código y correo ambiguos; revisión manual.']; }
-        $id=0;
-        if($byCode){$id=(int)$byCode[0];}
-        elseif($byEmail){$id=(int)$byEmail->ID;}
-        if(!$id || !user_can($id,'ascla_access') || !current_user_can('edit_user',$id)) {return [0,'Usuario no encontrado o sin permiso de edición.']; }
-        return [$id,($code!=='' && !$byCode)?'Código no encontrado; coincidencia por correo.':''];
-    }
-    private static function profile(int $id): array{return (array)get_user_meta($id,'_ascla_profile',true);}
-    private static function fingerprint(int $id): string{return hash('sha256',wp_json_encode(array_values((array)(self::profile($id)['interests']??[]))));}
     public static function process(int $id): array
     {
         self::authorize();
@@ -60,7 +54,7 @@ final class InterestImports
     private static function processRow(array $row): void
     {
         $p=$row['payload'];
-        [$uid,$warning]=self::resolve($p);
+        [$uid,$warning]=InterestImportAccounts::resolve($p);
         $proposal=InterestCatalog::propose($p['structured']);
         $p+=['topics'=>$proposal['ids'],'classification'=>$proposal['items'],'unknown'=>$proposal['unknown'],'selected_count'=>$proposal['selected_count'],'warnings'=>[],'method'=>'deterministic','confidence'=>'high'];
         if ($warning!=='') { $p['warnings'][]=$warning; }
@@ -69,8 +63,8 @@ final class InterestImports
         if (trim($p['free'])!=='') { $p['warnings'][]='Texto libre pendiente de clasificación o revisión.'; }
         if ($uid) {
             $p['name']=Profiles::publicName($uid);
-            $p['profile_hash']=self::fingerprint($uid);
-            $p['previous']=(array)(self::profile($uid)['interests']??[]);
+            $p['profile_hash']=InterestImportAccounts::fingerprint($uid);
+            $p['previous']=(array)(InterestImportAccounts::profile($uid)['interests']??[]);
         }
         ImportRecords::save($row,'review',$p,$uid);
     }
@@ -88,12 +82,13 @@ final class InterestImports
         self::authorize();return Store::lock('interest-import:'.$id,static function()use($id,$rowId,$input){
             $row=self::editable($id,$rowId);$p=$row['payload'];$decision=Access::text($input['decision']??'',20);Access::require(in_array($decision,['accept','ignore'],true),'Decisión no válida.',400);
             if($decision==='ignore'){ImportRecords::save($row,'ignored',$p,(int)$row['user_id']);return self::detail($id,(int)($input['page']??1));}
-            $uid=(int)$row['user_id'];if(!empty($input['email'])){[$uid]=self::resolve(['email'=>Access::text($input['email'],200),'code'=>'']);$p['matched_manually']=true;}
+            $uid=(int)$row['user_id'];if(!empty($input['email'])){[$uid]=InterestImportAccounts::resolve(['email'=>Access::text($input['email'],200),'code'=>'']);$p['matched_manually']=true;}
             Access::require($uid>0 && user_can($uid,'ascla_access') && current_user_can('edit_user',$uid),'Selecciona un usuario ASCLA válido.',400);
             Access::require(is_array($input['topics']??null),'Selecciona los intereses revisados.',400);$topics=InterestCatalog::validate($input['topics']);
             Access::require(count($topics)<=self::MAX_FORM_INTERESTS,'Selecciona como máximo 3 intereses provenientes del formulario.',400);
-            Access::require(empty($p['warnings']) || rest_sanitize_boolean($input['acknowledge']??false),'Confirma que revisaste las advertencias de esta fila.',400);
-            $p['topics']=$topics;$p['reviewed_by']=get_current_user_id();$p['reviewed_at']=gmdate('c');$p['profile_hash']=self::fingerprint($uid);$p['name']=Profiles::publicName($uid);$p['previous']=(array)(self::profile($uid)['interests']??[]);
+            $acknowledged=FormRules::boolean($input['acknowledge']??false);
+            Access::require(empty($p['warnings']) || $acknowledged,'Confirma que revisaste las advertencias de esta fila.',400);
+            $p['topics']=$topics;$p['reviewed_by']=get_current_user_id();$p['reviewed_at']=gmdate('c');$p['profile_hash']=InterestImportAccounts::fingerprint($uid);$p['name']=Profiles::publicName($uid);$p['previous']=(array)(InterestImportAccounts::profile($uid)['interests']??[]);
             ImportRecords::save($row,'approved',$p,$uid);return self::detail($id,(int)($input['page']??1));
         });
     }
@@ -131,7 +126,7 @@ final class InterestImports
     }
     public static function confirm(int $id): array
     {
-        self::authorize();return Store::lock('interest-import:'.$id,static function()use($id){
+        self::authorize();return Store::atomic('interest-import:'.$id,static function()use($id){
             $i=ImportRecords::get($id,'interests');Access::require($i['status']==='review','Importación no lista para confirmar.',409);$counts=ImportRecords::counts($id);Access::require(empty($counts['pending']) && empty($counts['review']) && empty($counts['conflict']),'Acepta o ignora todas las filas antes de confirmar.',409);
             Store::update('imports',['status'=>'applying'],['id'=>$id]);Audit::record('interests_import_confirmed',$id);return self::detail($id);
         });
@@ -142,24 +137,29 @@ final class InterestImports
         return Store::lock('interest-import:'.$id,static function()use($id){
             $import=ImportRecords::get($id,'interests');
             Access::require($import['status']==='applying','La importación no está confirmada.',409);
-            foreach (ImportRecords::rows($id,'approved',50) as $row) {
-                Store::lock('profile-interests:'.$row['user_id'],static fn()=>self::applyApprovedRow($row,$import,$id));
-            }
-            $counts=ImportRecords::counts($id);
-            if (empty($counts['approved'])) {
-                Store::update('imports',['status'=>empty($counts['conflict'])?'complete':'review','completed_at'=>empty($counts['conflict'])?current_time('mysql',true):null],['id'=>$id]);
-                Audit::record('interests_import_applied',$id,'updated='.($counts['updated']??0));
-            }
-            return self::detail($id);
+            $rows=ImportRecords::rows($id,'approved',50);
+            $keys=array_map(static fn($row)=>'profile-interests:'.$row['user_id'],$rows);
+            return Store::locks($keys,static fn()=>Transaction::run(static function()use($rows,$import,$id) {
+                foreach ($rows as $row) { self::applyApprovedRow($row,$import,$id); }
+                self::finishBatch($id,ImportRecords::counts($id));
+                return self::detail($id);
+            }));
         });
+    }
+
+    private static function finishBatch(int $id,array $counts): void
+    {
+        if (!empty($counts['approved'])) { return; }
+        Store::update('imports',['status'=>empty($counts['conflict'])?'complete':'review','completed_at'=>empty($counts['conflict'])?current_time('mysql',true):null],['id'=>$id]);
+        Audit::record('interests_import_applied',$id,'updated='.($counts['updated']??0));
     }
 
     private static function applyApprovedRow(array $row,array $import,int $id): void
     {
-        $uid=(int)$row['user_id'];$p=$row['payload'];
+        $uid=(int)$row['user_id'];$p=$row['payload'];clean_user_cache($uid);
         $valid=InterestCatalog::validate($p['topics']);
         $error='';
-        if (!user_can($uid,'ascla_access') || !current_user_can('edit_user',$uid) || !hash_equals($p['profile_hash'],self::fingerprint($uid))) {
+        if (!user_can($uid,'ascla_access') || !current_user_can('edit_user',$uid) || !hash_equals($p['profile_hash'],InterestImportAccounts::fingerprint($uid))) {
             $error='El perfil cambió o ya no tienes permiso. Revisa la fila.';
         } elseif (count($valid)>self::MAX_FORM_INTERESTS) {
             $error='La fila aprobada supera el máximo de 3 intereses provenientes del formulario.';
@@ -170,7 +170,7 @@ final class InterestImports
             return;
         }
         $p['topics']=$valid;
-        $profile=self::profile($uid);
+        $profile=InterestImportAccounts::profile($uid);
         $old=array_map('intval',(array)($profile['interests']??[]));
         $next=$import['config']['mode']==='replace'?$p['topics']:array_values(array_unique(array_merge($old,$p['topics'])));
         if (count($next)>20) {
@@ -185,21 +185,14 @@ final class InterestImports
 
     private static function persistApprovedRow(array $row,array $payload,array $profile,array $old,array $next,int $uid,int $id): void
     {
-        global $wpdb;
-        $wpdb->query('START TRANSACTION');
-        try {
-            $changed=$old!==$next;
-            $profile['interests']=$next;
-            if ($changed) { $profile['revision']=(int)($profile['revision']??0)+1; }
-            if ($changed && update_user_meta($uid,'_ascla_profile',$profile)===false) { throw new ServiceException('No se pudo actualizar el perfil.'); }
-            $forms=['ids'=>$payload['topics'],'import_id'=>$id,'at'=>gmdate('c')];
-            if (get_user_meta($uid,'_ascla_forms_interests',true)!==$forms && update_user_meta($uid,'_ascla_forms_interests',$forms)===false) { throw new ServiceException('No se pudo guardar la fuente de intereses.'); }
-            ImportRecords::save($row,$changed?'updated':'unchanged',$payload,$uid);
-            if ($wpdb->query('COMMIT')===false) { throw new ServiceException('No se pudo confirmar el lote.'); }
-        } catch (\Throwable $error) {
-            $wpdb->query('ROLLBACK');clean_user_cache($uid);throw $error;
-        }
-        if ($changed) { update_option('ascla_profile_revision',(int)get_option('ascla_profile_revision',0)+1,false); }
+        $changed=$old!==$next;
+        $profile['interests']=$next;
+        if ($changed) { $profile['revision']=(int)($profile['revision']??0)+1; }
+        if ($changed) { WordPressWrites::meta('user',$uid,'_ascla_profile',$profile); }
+        $forms=['ids'=>$payload['topics'],'import_id'=>$id,'at'=>gmdate('c')];
+        WordPressWrites::meta('user',$uid,'_ascla_forms_interests',$forms);
+        ImportRecords::save($row,$changed?'updated':'unchanged',$payload,$uid);
+        if ($changed) { WordPressWrites::bumpProfileRevision(); }
     }
     public static function cancel(int $id): array
     {

@@ -21,10 +21,9 @@ final class MicroPlanning
     }
     public static function settings(array &$data,array $input): void
     {
-        foreach (['micro_min'=>[2,50],'micro_capacity'=>[2,100],'micro_limit'=>[1,4],'micro_priority_hours'=>[0,168],'micro_interval_days'=>[7,90]] as $key=>$range) {
+        foreach (['micro_min','micro_capacity','micro_limit','micro_priority_hours','micro_interval_days'] as $key) {
             if (!array_key_exists($key,$input)) { continue; }
-            Access::require(filter_var($input[$key],FILTER_VALIDATE_INT)!==false && $input[$key]>=$range[0] && $input[$key]<=$range[1],'Parámetro de microeventos fuera del rango permitido.',400);
-            $data[$key]=(int)$input[$key];
+            $data[$key]=FormRules::integer($key,$input[$key],'Parámetro de microeventos fuera del rango permitido.');
         }
         Access::require($data['micro_min']<=$data['micro_capacity'],'El mínimo no puede superar los cupos.',400);
         $data['micro_approval']=true;
@@ -43,5 +42,23 @@ final class MicroPlanning
             if (count($groups)>=$settings['micro_limit']) { break; }
         }
         return ['groups'=>$groups,'waiting'=>array_values(array_diff(array_column($profiles,'id'),array_keys($used)))];
+    }
+
+    public static function diagnostics(array $profiles,array $blocked,array $plan): array
+    {
+        $minimum=(int)Settings::get()['micro_min'];$topics=[];
+        foreach ($profiles as $profile) {
+            foreach (array_unique(array_map('intval',(array)($profile['interests']??[]))) as $topic) { $topics[$topic]=($topics[$topic]??0)+1; }
+        }
+        $shared=$topics?max($topics):0;
+        $reason=match(true) {
+            !empty($plan['groups'])=>'ready',
+            count($profiles)<$minimum=>'insufficient_candidates',
+            $shared<$minimum=>'insufficient_shared_interest',
+            !empty($blocked)=>'incompatible_group',
+            default=>'no_group',
+        };
+        return ['eligible'=>count($profiles),'minimum'=>$minimum,'capacity'=>(int)Settings::get()['micro_capacity'],
+            'max_shared_interest'=>$shared,'blocked_pairs'=>count($blocked),'reason'=>$reason];
     }
 }

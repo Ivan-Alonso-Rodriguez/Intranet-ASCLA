@@ -15,12 +15,12 @@ final class MicroEvents
                 $current=self::sanitizeResult($existing);
                 if (!empty($current['events'])) {
                     if ($current!==$existing) { update_option('ascla_micro_'.$month,$current,false); }
-                    return $current;
+                    return array_replace($current,['reused'=>true,'diagnostics'=>self::diagnostics($onlyIds)]);
                 }
                 // A deleted proposal must not keep the month locked to stale post IDs.
                 delete_option('ascla_micro_'.$month);
             }
-            $profiles=self::eligible($onlyIds);
+            $profiles=self::eligible($onlyIds,$excluded);
             $history=get_option('ascla_group_history',[]);
             $blocked=self::blockedPairs($profiles);
             $plan=MicroPlanning::plan($profiles,$history,$blocked);
@@ -29,7 +29,8 @@ final class MicroEvents
                 $ids[]=self::proposal($group['members'],(bool)$onlyIds,$group['topic']);
                 $history=self::recordPairs($group['members'],$history);
             }
-            $result=['events'=>$ids,'waiting'=>$plan['waiting'],'month'=>$month];
+            $result=['events'=>$ids,'waiting'=>$plan['waiting'],'month'=>$month,'reused'=>false,
+                'diagnostics'=>MicroPlanning::diagnostics($profiles,$blocked,$plan)+['excluded'=>$excluded]];
             if ($ids) { update_option('ascla_micro_'.$month,$result,false); update_option('ascla_group_history',$history,false); }
             Audit::record('microevents_created',0,'groups_'.count($ids)); return $result;
         });
@@ -69,13 +70,21 @@ final class MicroEvents
             else { delete_option($row['option_name']); }
         }
     }
-    private static function eligible(array $onlyIds): array
+    public static function diagnostics(array $onlyIds=[]): array
     {
-        $profiles=[];
+        $profiles=self::eligible($onlyIds,$excluded);$blocked=self::blockedPairs($profiles);
+        return MicroPlanning::diagnostics($profiles,$blocked,MicroPlanning::plan($profiles,get_option('ascla_group_history',[]),$blocked))+['excluded'=>$excluded];
+    }
+    private static function eligible(array $onlyIds,?array &$excluded=null): array
+    {
+        $profiles=[];$excluded=['inactive'=>0,'no_consent'=>0,'incomplete'=>0];
         foreach (get_users(['capability'=>'ascla_access','fields'=>'ID']) as $id) {
-            if (($onlyIds&&!in_array((int)$id,$onlyIds,true)) || !Access::member((int)$id)) { continue; }
+            if ($onlyIds&&!in_array((int)$id,$onlyIds,true)) { continue; }
+            if (!Access::member((int)$id)) { $excluded['inactive']++;continue; }
             $p=Profiles::raw((int)$id);
-            if (!empty($p['microevents']) && !ProfileRequirements::missing($p)) { $profiles[]=Profiles::matchingProfile((int)$id); }
+            if (empty($p['microevents'])) { $excluded['no_consent']++;continue; }
+            if (ProfileRequirements::missing($p)) { $excluded['incomplete']++;continue; }
+            $profiles[]=Profiles::matchingProfile((int)$id);
         }
         return $profiles;
     }
@@ -130,8 +139,11 @@ final class MicroEvents
         $group=array_values(array_unique(array_map('intval',$meta['invitees']??[])));
         Access::require(count($group)>=(int)($meta['micro_min']??Settings::get()['micro_min']) && count($group)<=(int)($meta['capacity']??Settings::get()['micro_capacity']),'Revise el tamaño del grupo antes de aprobar.',400);
         foreach($group as $a){
-            Access::require(Access::member($a),'Un participante ya no tiene membresía activa.',400);$p=Profiles::raw($a);Access::require(Access::member($a) && !empty($p['microevents']) && !ProfileRequirements::missing($p),'Un participante ya no acepta microeventos.',400);
-            foreach($group as $b){if($a<$b){ Access::require(!Messaging::blocked($a,$b),'El grupo contiene un bloqueo entre participantes. Cree otra propuesta.',400); }}
+            Access::require(Access::member($a),'Un asociado ya no tiene membresía activa. Revisa los candidatos de la propuesta.',400);
+            $p=Profiles::raw($a);
+            Access::require(!empty($p['microevents']),'Un asociado retiró su consentimiento para microeventos. Revisa los candidatos de la propuesta.',400);
+            Access::require(!ProfileRequirements::missing($p),'Un asociado tiene el perfil incompleto. Revisa los candidatos de la propuesta.',400);
+            foreach($group as $b){if($a<$b){ Access::require(!Messaging::blocked($a,$b),'El grupo contiene un bloqueo entre asociados. Revisa los candidatos de la propuesta.',400); }}
         }
     }
     public static function monthly(): void { if (Settings::get()['micro_enabled']) { \ASCLA\Core\Jobs\Queue::enqueue('microevents',[],0); } }

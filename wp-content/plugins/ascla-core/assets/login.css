@@ -72,7 +72,7 @@ body.login.ascla-login {
 .ascla-login #nav a, .ascla-login #backtoblog a, .ascla-login .privacy-policy-link { color: var(--ascla-blue); text-decoration: none; }
 .ascla-login #nav a:hover, .ascla-login #backtoblog a:hover { text-decoration: underline; }
 .ascla-login #backtoblog { padding: 0; text-align: center; margin: 18px 0 0; font-size: 12px; }
-.ascla-login #login .message, .ascla-login #login #login_error, .ascla-login #login .success, .ascla-login #login .notice { border-radius: 7px; padding: 13px; margin: 0 0 20px; box-shadow: none; background: #f2f7fc; color: #29435c; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.ascla-login #login .message, .ascla-login #login #login_error, .ascla-login #login .success, .ascla-login #login .notice { display: block; border-radius: 7px; padding: 13px; margin: 0 0 20px; box-shadow: none; background: #f2f7fc; color: #29435c; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
 .ascla-login #login #login_error { background: #fff3f3; }
 .ascla-login #login .message a, .ascla-login #login #login_error a { color: var(--ascla-blue); }
 .ascla-login .ascla-login-help { width: min(390px, 100%); margin: 22px auto 0; text-align: center; color: var(--ascla-muted); font-size: 12px; line-height: 1.7; }

@@ -90,7 +90,7 @@ final class Login
         if (!self::isFrontendPage()) { return; }
         wp_enqueue_style('login');
         wp_enqueue_style('dashicons');
-        wp_enqueue_style('ascla-login', ASCLA_URL . 'assets/login.css', ['login'], ASCLA_VERSION);
+        wp_enqueue_style('ascla-login', ASCLA_URL . 'assets/login.css', ['login'], App::assetVersion('assets/login.css'));
         // Turnstile normally enqueues itself on wp-login.php. The dedicated ASCLA login
         // calls the same policy so adaptive protection is preserved instead of duplicated.
         Turnstile::enqueue();

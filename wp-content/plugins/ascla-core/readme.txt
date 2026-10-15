@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.10.7
+Stable tag: 1.10.8
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -10,7 +10,37 @@ ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
 
+= 1.10.8 =
+* Valida campos SMTP y borrado explícito de credenciales; conserva contraseñas válidas, espacios y el valor 0 sin exponerlos en respuestas.
+* Rechaza identificadores mal formados y campos obligatorios compuestos únicamente por caracteres invisibles.
+* Valida los pesos de afinidad y los enteros administrativos sin recortar ni convertir silenciosamente entradas inválidas.
+* Amplía la validación de metadatos anidados, listas de selección y recordatorios de eventos.
+* Bloquea texto obligatorio invisible en la interfaz y traduce los errores de perfil incompleto; conserva la visibilidad autorizada de incompletos en el Directorio.
+* Conserva el esquema 15, las decisiones de privacidad y el flujo manual de QA/UAT.
+
 = 1.10.7 =
+* Rechaza estructuras REST inválidas y números fuera de rango; comparte límites entre controles y servidor, incluido Contacto de hasta 5000 caracteres.
+* Comprueba la escritura de la nueva contraseña dentro de la transacción y emite la cookie después de confirmar el cambio.
+* Traduce errores de formulario y textos de grupos sin modificar títulos ni contenido aportado por los asociados; mejora etiquetas y retorno del foco en comentarios.
+* Refuerza contraste, etiquetas, campos únicos y navegación por teclado; conserva foco y avisos accesibles en diálogos anidados y el editor de imágenes.
+* Recupera la búsqueda global móvil y ajusta pestañas, tablas y etiquetas administrativas largas a 360px.
+* Incorpora regresiones WCAG automáticas para pantallas principales, formularios y ambos temas; mantiene la revisión humana y de navegadores como pendiente.
+* Recupera invalidaciones de caché externo tras una interrupción después del commit; conserva claves cifradas en el esquema 15 y usa lecturas SQL privadas mientras hay pendientes.
+* Corrige la invocación sin argumentos del cron de entregas e identifica las actualizaciones internas en Administración.
+* El panel consulta solo metadatos de entrega y el trabajador carga un payload por vez, evitando acumular adjuntos grandes en memoria.
+* Aísla el caché durante transacciones; rollback conserva valores confirmados y commit invalida claves de base de datos. Serializa el incremento global de revisión de perfiles.
+* Recordarme conserva el cierre tras 30 minutos de inactividad por decisión expresa del usuario; excepción documentada a RN-058.
+* Añade permisos individuales y registro de autorización previa de Junta, incluido el rol técnico; restringe rutas nativas y acumulaciones no aprobadas.
+* Forms/Zoom, asistencia, umbrales y configuración usan transacciones comunes; conserva bloqueos de perfiles hasta confirmar lotes.
+* Admite credenciales de entorno/wp-config y modo externo; protege la migración de claves anteriores y los tokens OAuth individuales.
+* Corrige la cuadrícula de cuentas en móvil.
+* Añade criterios de completitud configurables, conservando mínimos obligatorios y opcionales ajenos al cálculo.
+* Hub, Foros, Galería y Centro de Conocimiento incorporan rangos de publicación inclusivos y validación de fechas.
+* Registra errores técnicos con módulo, gravedad y UTC sin copiar secretos; conserva un diagnóstico seguro ante rollback o caída de la base.
+* Crea/edita grupos y envía mensajes con rollback y correos tras confirmar; preserva el historial inmutable.
+* Consulta eventos próximos antes del límite y recorre páginas con eventos restringidos; protege ubicación y modalidad reservadas en el contexto del Asistente.
+* La búsqueda de contenido anonimizado comprueba la proyección del lector antes de contar y paginar, conservando originales para editores autorizados.
+* El perfil valida las escrituras y revierte conjuntamente identidad, preferencias y revisión si alguna falla; recomendaciones y cumpleaños se procesan después del commit.
 * Conserva únicamente Me gusta en publicaciones y comentarios. Las reacciones anteriores se cuentan como Me gusta y la API rechaza los tipos retirados.
 * Corrige la altura de Mis conexiones y preserva títulos públicos en contenido, referencias e historial del Asistente.
 * Aprobar comentarios ya aprobados es idempotente; actualiza regresiones a los contratos actuales de perfiles, Hub, moderación y microeventos.
@@ -22,7 +52,8 @@ ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 * Exige motivo en comentarios y reportes, registra estado anterior/posterior y conserva auditoría al eliminar reportes revisados.
 * Extiende transacciones a publicaciones, cuentas, Contacto y estados de microeventos; comprueba escrituras de WordPress y difiere correos nativos/Calendar hasta confirmar cambios.
 * Conserva reacciones ajenas al eliminar cuentas con identificadores coincidentes; valida cron en todas las secciones y vencimientos FIFO concurrentes.
-* Conserva el esquema 14 y los datos existentes.
+* Foros separa Mis temas de Mis comentarios, con búsqueda, fechas y contexto visible.
+* Migra al esquema 15: cola cifrada de entregas de correo y Calendar; conserva los datos existentes.
 
 = 1.10.6 =
 * Consolida la adecuación al Documento de Análisis y Diseño ASCLA y las correcciones QA 024–058.

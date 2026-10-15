@@ -96,8 +96,8 @@ final class Messaging
         Access::limit('group_chat',10,300);
         $title=trim(Access::text($title,120));
         $description=trim(Access::text($description,240));
-        Access::require($title!=='','Escriba un nombre para el grupo.',400);
-        $ids=array_values(array_unique(array_filter(array_map('absint',$users),static fn($id)=>$id>0 && $id!==$me)));
+        Access::require(Access::hasText($title),'Escriba un nombre para el grupo.',400);
+        $ids=array_values(array_filter(FormRules::ids($users),static fn($id)=>$id!==$me));
         Access::require(count($ids)>=2,'Selecciona al menos dos asociados para crear un grupo.',400);
         Access::require(count($ids)<=49,'Un grupo puede tener como máximo 50 participantes, incluido su creador.',400);
         if ($photoId>0) { Media::requireOwned($photoId,$me,true); }
@@ -107,7 +107,7 @@ final class Messaging
             Access::require(!self::blocked($me,$id),'No puedes añadir al grupo a un asociado bloqueado.',403);
         }
         $key='group:'.wp_generate_uuid4();
-        return Store::lock('group-create:'.$me.':'.hash('sha256',$key),static function () use($me,$ids,$title,$description,$key,$photoId) {
+        return Store::atomic('group-create:'.$me.':'.hash('sha256',$key),static function () use($me,$ids,$title,$description,$key,$photoId) {
             $id=Store::insert('conversations',[
                 'pair_key'=>$key,'kind'=>'group','title'=>$title,'description'=>$description,'created_by'=>$me,'photo_id'=>$photoId,'updated_at'=>current_time('mysql',true),
             ]);
@@ -233,9 +233,9 @@ final class Messaging
     {
         Access::limit('message',20);
         $participant=self::participant($id); $me=get_current_user_id();
-        $body=trim(Access::text($body,5000)); Access::require($body!=='','Escriba un mensaje.',400);
+        $body=trim(Access::text($body,5000)); Access::require(Access::hasText($body),'Escriba un mensaje.',400);
         if ($participant['kind']==='group') {
-            return Store::lock('conversation:'.$id,static function () use($id,$body,$me) {
+            return Store::atomic('conversation:'.$id,static function () use($id,$body,$me) {
                 $participant=self::participant($id);
                 Access::require($participant['kind']==='group',self::NOT_FOUND,404);
                 $mid=Store::insert('messages',['conversation_id'=>$id,'sender_id'=>$me,'body'=>$body,'created_at'=>current_time('mysql',true)]);
@@ -273,9 +273,9 @@ final class Messaging
         Access::require(Access::member($me) && current_user_can('ascla_write'));
         $title=trim(Access::text($title,120));
         $description=trim(Access::text($description,240));
-        Access::require($title!=='','Escriba un nombre para el grupo.',400);
+        Access::require(Access::hasText($title),'Escriba un nombre para el grupo.',400);
         if ($photoId>0) { Media::requireOwned($photoId,$me,true); }
-        return Store::lock('conversation:'.$conversationId,static function () use($conversationId,$me,$title,$description,$photoId) {
+        return Store::atomic('conversation:'.$conversationId,static function () use($conversationId,$me,$title,$description,$photoId) {
             $conversation=Store::one('conversations',$conversationId);
             Access::require($conversation && ($conversation['kind']??'direct')==='group',self::NOT_FOUND,404);
             Access::require((int)$conversation['created_by']===$me,'Solo quien creó el grupo puede editarlo.',403);

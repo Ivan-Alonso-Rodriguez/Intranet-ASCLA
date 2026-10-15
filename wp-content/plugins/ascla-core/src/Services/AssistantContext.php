@@ -104,29 +104,38 @@ final class AssistantContext
 
     private static function events(): array
     {
-        $posts=get_posts([
-            'post_type'=>'ascla_event','post_status'=>'publish','numberposts'=>30,
-            'meta_key'=>'_ascla_start','orderby'=>'meta_value','order'=>'ASC',
-        ]);
-        $items=[];$sources=[];$now=time();$me=get_current_user_id();
-        foreach($posts as $post){
-            if(!Content::canRead($post)) {continue; }
-            $meta=(array)get_post_meta($post->ID,'_ascla',true);
-            $end=strtotime((string)($meta['end']??''));
-            if($end!==false&&$end<=$now) {continue; }
-            $start=strtotime((string)($meta['start']??''));
-            if($start===false) {continue; }
-            $registration=Store::rows('registrations','event_id=%d AND user_id=%d',[$post->ID,$me],'LIMIT 1')[0]['status']??'none';
-            [$title,$body]=self::safeText($post,$meta);
-            $url=Content::serialize($post)['url'];
-            $humanStart=wp_date('Y-m-d H:i T',$start,wp_timezone());
-            $humanEnd=$end!==false?wp_date('Y-m-d H:i T',$end,wp_timezone()):'';
-            $item=['id'=>(int)$post->ID,'title'=>$title,'start'=>$humanStart,'end'=>$humanEnd,'modality'=>$meta['modality']??'','location'=>$meta['location']??'','registration'=>$registration,'url'=>$url];
-            $items[]=$item;
-            $sources[]=['id'=>(int)$post->ID,'title'=>$title,'body'=>trim("Evento ASCLA. Inicio: {$humanStart}. Fin: {$humanEnd}. Modalidad: ".($meta['modality']??'').". Lugar: ".($meta['location']??'').". Estado de inscripción del usuario: {$registration}. ".$body),'score'=>100,'url'=>$url,'kind'=>'event'];
-            if(count($items)>=8) {break; }
-        }
+        $items=[];$sources=[];$now=time();$offset=0;
+        do {
+            $posts=get_posts([
+                'post_type'=>'ascla_event','post_status'=>'publish','numberposts'=>30,'offset'=>$offset,
+                'meta_key'=>'_ascla_start','orderby'=>['meta_value'=>'ASC','ID'=>'ASC'],
+                'meta_query'=>[['key'=>'_ascla_end','value'=>gmdate('c',$now),'compare'=>'>']],
+            ]);
+            $offset+=30;
+            foreach($posts as $post){
+                $event=self::eventData($post,$now);
+                if (!$event) { continue; }
+                [$item,$source]=$event;$items[]=$item;$sources[]=$source;
+                if(count($items)>=8) {break; }
+            }
+        } while (count($posts)===30 && count($items)<8);
         return [$items,$sources];
+    }
+
+    private static function eventData(\WP_Post $post,int $now): ?array
+    {
+        if(!Content::canRead($post)) {return null; }
+        $meta=(array)get_post_meta($post->ID,'_ascla',true);
+        $start=strtotime((string)($meta['start']??''));$end=strtotime((string)($meta['end']??''));
+        if (!$start || !$end || $end<=$now || !empty($meta['cancelled'])) { return null; }
+        $view=EditorialPrivacy::reader($post->post_title,wp_strip_all_tags($post->post_content),$meta);
+        $title=$view['title'];$body=$view['body'];$meta=$view['meta'];
+        $registration=Store::rows('registrations','event_id=%d AND user_id=%d',[$post->ID,get_current_user_id()],'LIMIT 1')[0]['status']??'none';
+        $url=Content::serialize($post)['url'];
+        $humanStart=wp_date('Y-m-d H:i T',$start,wp_timezone());$humanEnd=wp_date('Y-m-d H:i T',$end,wp_timezone());
+        $item=['id'=>(int)$post->ID,'title'=>$title,'start'=>$humanStart,'end'=>$humanEnd,'modality'=>$meta['modality']??'','location'=>$meta['location']??'','registration'=>$registration,'url'=>$url];
+        $source=['id'=>(int)$post->ID,'title'=>$title,'body'=>trim("Evento ASCLA. Inicio: {$humanStart}. Fin: {$humanEnd}. Modalidad: ".($meta['modality']??'').". Lugar: ".($meta['location']??'').". Estado de inscripción del usuario: {$registration}. ".$body),'score'=>100,'url'=>$url,'kind'=>'event'];
+        return [$item,$source];
     }
 
     private static function recent(): array

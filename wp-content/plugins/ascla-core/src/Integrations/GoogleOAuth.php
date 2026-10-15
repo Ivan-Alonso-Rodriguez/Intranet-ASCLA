@@ -122,10 +122,10 @@ final class GoogleOAuth
         }
         $body=self::eventBody($post,$meta,[]); $data=[];
         if ($remote!=='') {
-            $data=self::request($token,'PATCH',self::eventsUrl($remote),$body,false,[200,404,410]);
+            $data=GoogleCalendarTransport::request($token,'PATCH',self::eventsUrl($remote),$body,false,[200,404,410]);
             if (!empty($data['_missing'])) { $remote=''; delete_user_meta($user,$key); }
         }
-        if ($remote==='') { $data=self::request($token,'POST',self::eventsUrl(),$body,false,[200,201]); }
+        if ($remote==='') { $data=GoogleCalendarTransport::request($token,'POST',self::eventsUrl(),$body,false,[200,201]); }
         $remoteId=sanitize_text_field((string)($data['id']??$remote));
         if ($remoteId==='') { throw new IntegrationException('Google Calendar no devolvió el identificador del evento creado.'); }
         update_user_meta($user,$key,$remoteId); Audit::record('calendar_save',$post->ID);
@@ -135,7 +135,7 @@ final class GoogleOAuth
     private static function cancelPersonalCalendar(int $user,string $token,int $postId,string $key,string $remote): array
     {
         if ($remote==='') { return ['ok'=>true]; }
-        self::request($token,'DELETE',self::eventsUrl($remote),null,false,[200,204,404,410]);
+        GoogleCalendarTransport::request($token,'DELETE',self::eventsUrl($remote),null,false,[200,204,404,410]);
         delete_user_meta($user,$key);
         Audit::record('calendar_cancel',$postId);
         return ['ok'=>true,'event_id'=>''];
@@ -162,25 +162,41 @@ final class GoogleOAuth
         }
 
         $token=self::accessToken($organizer,'calendar');
-        $existing=[];
-        if ($remote!=='') {
-            $existing=self::request($token,'GET',self::eventsUrl($remote),null,false,[200,404,410]);
-            if (!empty($existing['_missing'])) {
-                $remote=''; $existing=[];
-                delete_post_meta($id,self::ORGANIZER_EVENT_META);
-            }
-        }
+        $existing=self::existingOrganizerEvent($id,$token,$remote);
 
         $attendees=self::eventAttendees($id,$organizer,(array)($existing['attendees']??[]));
         $method=$remote!==''?'PATCH':'POST';
         $url=self::eventsUrl($remote);
-        $data=self::request($token,$method,$url,self::eventBody($post,$meta,$attendees),$notifyGuests,[200,201]);
+        $body=self::eventBody($post,$meta,$attendees);
+        if ($method==='POST') {
+            $requestId=(string)get_post_meta($id,'_ascla_google_organizer_request',true);
+            if ($requestId==='' || !empty($existing['_missing'])) { $requestId=bin2hex(random_bytes(16)); }
+            \ASCLA\Core\Repositories\WordPressWrites::meta('post',$id,'_ascla_google_organizer_request',$requestId);
+            \ASCLA\Core\Repositories\WordPressWrites::meta('post',$id,self::ORGANIZER_USER_META,$organizer);
+            $body['id']=$requestId;
+        }
+        $data=GoogleCalendarTransport::request($token,$method,$url,$body,$notifyGuests,$method==='POST'?[200,201,409]:[200]);
+        if (!empty($data['_conflict'])) {
+            unset($body['id']);
+            $data=GoogleCalendarTransport::request($token,'PATCH',self::eventsUrl($requestId),$body,$notifyGuests,[200]);
+        }
         $remoteId=sanitize_text_field((string)($data['id']??$remote));
         if ($remoteId==='') { throw new IntegrationException('Google Calendar no devolvió el identificador del evento creado.'); }
-        update_post_meta($id,self::ORGANIZER_USER_META,$organizer);
-        update_post_meta($id,self::ORGANIZER_EVENT_META,$remoteId);
+        \ASCLA\Core\Repositories\WordPressWrites::meta('post',$id,self::ORGANIZER_USER_META,$organizer);
+        \ASCLA\Core\Repositories\WordPressWrites::meta('post',$id,self::ORGANIZER_EVENT_META,$remoteId);
         Audit::record($method==='POST'?'calendar_organize':'calendar_update',$id,'guests_'.count($attendees));
         return ['ok'=>true,'event_id'=>$remoteId,'organizer_user'=>$organizer,'attendees'=>count($attendees)];
+    }
+    private static function existingOrganizerEvent(int $id,string $token,string &$remote): array
+    {
+        if ($remote==='') { return []; }
+        $existing=GoogleCalendarTransport::request($token,'GET',self::eventsUrl($remote),null,false,[200,404,410]);
+        if (!empty($existing['_missing'])) {
+            $remote='';$existing=[];
+            \ASCLA\Core\Repositories\WordPressWrites::deleteMeta('post',$id,self::ORGANIZER_EVENT_META);
+            \ASCLA\Core\Repositories\WordPressWrites::deleteMeta('post',$id,'_ascla_google_organizer_request');
+        }
+        return $existing;
     }
 
     /** Add newly invited ASCLA members as Google Calendar guests and ask Google to email them. */
@@ -215,10 +231,12 @@ final class GoogleOAuth
     {
         $organizer=absint(get_post_meta($id,self::ORGANIZER_USER_META,true));
         $remote=sanitize_text_field((string)get_post_meta($id,self::ORGANIZER_EVENT_META,true));
+        if ($remote==='') { $remote=sanitize_text_field((string)get_post_meta($id,'_ascla_google_organizer_request',true)); }
         if (!$organizer || $remote==='' || !self::connected($organizer)) { return ['ok'=>true,'available'=>false]; }
         $token=self::accessToken($organizer,'calendar');
-        self::request($token,'DELETE',self::eventsUrl($remote),null,true,[200,204,404,410]);
-        delete_post_meta($id,self::ORGANIZER_EVENT_META);
+        GoogleCalendarTransport::request($token,'DELETE',self::eventsUrl($remote),null,true,[200,204,404,410]);
+        \ASCLA\Core\Repositories\WordPressWrites::deleteMeta('post',$id,self::ORGANIZER_EVENT_META);
+        \ASCLA\Core\Repositories\WordPressWrites::deleteMeta('post',$id,'_ascla_google_organizer_request');
         Audit::record('calendar_cancel',$id,'organizer_'.$organizer);
         return ['ok'=>true,'available'=>true];
     }
@@ -289,32 +307,4 @@ final class GoogleOAuth
         return 'https://www.googleapis.com/calendar/v3/calendars/primary/events'.($eventId!==''?'/'.rawurlencode($eventId):'');
     }
 
-    private static function request(string $token,string $method,string $url,?array $body,bool $sendUpdates,array $allowed): array
-    {
-        if ($sendUpdates) { $url.=(str_contains($url,'?')?'&':'?').'sendUpdates=all'; }
-        $args=[
-            'method'=>$method,
-            'timeout'=>25,
-            'redirection'=>0,
-            'limit_response_size'=>262144,
-            'headers'=>['Authorization'=>'Bearer '.$token,'Accept'=>'application/json'],
-        ];
-        if ($body!==null) {
-            $args['headers']['Content-Type']='application/json; charset=UTF-8';
-            $args['body']=wp_json_encode($body);
-        }
-        $response=wp_remote_request($url,$args);
-        if (is_wp_error($response)) { throw new IntegrationException('No se pudo conectar con Google Calendar. Inténtalo nuevamente.'); }
-        $code=wp_remote_retrieve_response_code($response);
-        if (($code===404 || $code===410) && in_array($code,$allowed,true)) { return ['_missing'=>true]; }
-        if (!in_array($code,$allowed,true)) {
-            if ($code===401) { throw new IntegrationException('La autorización de Google Calendar expiró. Desconecta y vuelve a conectar tu cuenta.'); }
-            if ($code===403) { throw new IntegrationException('Google Calendar rechazó la operación. Revisa que la API de Calendar esté habilitada y vuelve a conectar tu cuenta.'); }
-            throw new IntegrationException('Google Calendar no pudo completar la operación. Revisa fechas, permisos y configuración OAuth.');
-        }
-        $raw=wp_remote_retrieve_body($response);
-        if ($raw==='') { return []; }
-        $data=json_decode($raw,true);
-        return is_array($data)?$data:[];
-    }
 }
