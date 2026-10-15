@@ -82,6 +82,10 @@ Espera a que termine sin errores. Si PHPUnit muestra `Failures` o `Errors`, o un
 
 El script valida que los reportes sean utilizables y correspondan a rutas del repositorio; no impone llegar al 100 %. No todas las suites puntuales del repositorio forman parte de este comando: la evidencia de una corrección específica debe indicar qué se ejecutó.
 
+Si PHP termina con `OK` pero después aparece `Disposable test site required`, la suite completa todavía no ha pasado: se detuvo al preparar los datos del navegador. El servicio `cli` debe recibir el mismo entorno `local` y la captura de correo que WordPress mediante `WORDPRESS_CONFIG_EXTRA`. El script comprueba ese contexto antes de PHPUnit. Actualiza la configuración y repite el comando; no retires la protección de las fixtures ni fabriques `coverage/source-revision` para continuar con SonarQube.
+
+Los mensajes `ASCLA technical_error` durante PHPUnit pueden corresponder a casos que simulan fallos de base, proveedores o correo. Su presencia no determina por sí sola el resultado: revisa el resumen de PHPUnit y el final del script. Los avisos de instalación de paquetes/PCOV tampoco equivalen a pruebas fallidas.
+
 <a id="sonarqube"></a>
 
 ## 4. Enviar el análisis a SonarQube y revisar el Quality Gate

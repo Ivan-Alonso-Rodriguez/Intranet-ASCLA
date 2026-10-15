@@ -71,6 +71,13 @@ if [ "$INSTALADO" != "si" ]; then
   exit 1
 fi
 
+echo 'Verificando contexto local y captura de correo de WP-CLI...'
+dc run --rm cli wp eval '
+  if (wp_get_environment_type() !== "local" || !ASCLA\Core\Integrations\Mailer::local()) {
+    WP_CLI::error("WP-CLI debe usar el entorno local y la captura Mailpit del WordPress desechable. Revise WORDPRESS_CONFIG_EXTRA del servicio cli.");
+  }
+  WP_CLI::success("Contexto WP-CLI local y correo capturado en Mailpit.");
+'
 dc run --rm cli wp ascla seed
 
 echo 'Preparando PHPUnit y PCOV...'

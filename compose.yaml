@@ -101,6 +101,12 @@ services:
       ASCLA_DEMO_PASSWORD: ${ASCLA_DEMO_PASSWORD}
       ASCLA_PROFILE_DEMO_PASSWORD: ${ASCLA_PROFILE_DEMO_PASSWORD:-}
       ASCLA_SEED_DATA: ${ASCLA_SEED_DATA:-false}
+      # wp-config reads this per process, including WP-CLI.
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_ENVIRONMENT_TYPE', '${ASCLA_WP_ENVIRONMENT_TYPE:-local}');
+        define('ASCLA_LOCAL_MAIL_CAPTURE', filter_var('${ASCLA_LOCAL_MAIL_CAPTURE:-true}', FILTER_VALIDATE_BOOLEAN));
+        define('AUTOMATIC_UPDATER_DISABLED', true);
+        define('WP_AUTO_UPDATE_CORE', false);
     volumes:
       - wordpress:/var/www/html
       - ./wp-content/plugins/ascla-core:/var/www/html/wp-content/plugins/ascla-core
