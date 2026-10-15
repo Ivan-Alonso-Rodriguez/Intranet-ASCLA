@@ -86,6 +86,8 @@ Si PHP termina con `OK` pero después aparece `Disposable test site required`, l
 
 Los mensajes `ASCLA technical_error` durante PHPUnit pueden corresponder a casos que simulan fallos de base, proveedores o correo. Su presencia no determina por sí sola el resultado: revisa el resumen de PHPUnit y el final del script. Los avisos de instalación de paquetes/PCOV tampoco equivalen a pruebas fallidas.
 
+Si un recorrido falla con `Timeout`, revisa `test-results/e2e.json` y las capturas `test-results/failure-admin.png` y `test-results/failure-member.png`. Contrasta la sección y los controles visibles con la navegación del caso. El reporte JavaScript se guarda también al fallar y puede ser parcial: su porcentaje no acredita que terminó la suite. SonarQube rechaza esa ejecución porque todavía no existe `coverage/source-revision`; corrige el caso y repite el flujo completo sobre un commit limpio.
+
 <a id="sonarqube"></a>
 
 ## 4. Enviar el análisis a SonarQube y revisar el Quality Gate

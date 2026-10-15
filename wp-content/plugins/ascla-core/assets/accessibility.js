@@ -29,7 +29,14 @@
       }
       const active = dialog()?.closest(".modal-backdrop,.ascla-image-editor-backdrop");
       if (!active) return;
-      const nodes = [...root.children, ...document.body.children].filter(node => node !== root && node !== active && !["SCRIPT", "STYLE", "LINK"].includes(node.tagName));
+      const nodes = [];
+      // Native wp-admin nests root inside wpwrap. Keep the dialog's entire
+      // ancestor path interactive and isolate siblings at every level.
+      for (let branch = active; branch && branch !== document.body; branch = branch.parentElement) {
+        for (const node of branch.parentElement?.children || []) {
+          if (node !== branch && !["SCRIPT", "STYLE", "LINK"].includes(node.tagName)) nodes.push(node);
+        }
+      }
       for (const node of nodes) { background.set(node, node.inert); node.inert = true; }
     }
     function setMenu(open, focus = false) {

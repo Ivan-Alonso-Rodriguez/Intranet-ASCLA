@@ -28,6 +28,36 @@ async function scan(name){
  fs.writeFileSync(root+'/test-results/accessibility107-progress.json',JSON.stringify(scans,null,2));
 }
 function pass(name){checks.push(name);console.log('PASS '+name);}
+async function nestedAdminDialogs(){
+ const nested=await browser.newPage({viewport:{width:1280,height:900}});
+ try{
+  await nested.setContent('<style>.modal-backdrop{position:fixed;inset:0;background:#fff;padding:30px}.modal{padding:20px}</style><div id="wpwrap"><aside id="adminmenuwrap"><button>Menú WordPress</button></aside><div id="wpcontent"><div id="wpbody"><div id="wpbody-content"><div id="screen-help"><button>Ayuda</button></div><div id="ascla-root"><main class="ascla-main"><button>Contenido</button></main><div class="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" aria-label="Publicación"><button id="first">Moderar</button><button id="last">Cerrar</button></section></div></div></div></div></div></div><div id="wpadminbar"><button>Barra WordPress</button></div><aside id="kept-inert" inert>Fondo ya bloqueado</aside>');
+  await nested.addScriptTag({path:root+'/wp-content/plugins/ascla-core/assets/accessibility.js'});
+  await nested.evaluate(()=>{
+   window.clicked=0;document.querySelector('#first').onclick=()=>window.clicked++;
+   window.accessibility=ASCLAAccessibility(document.querySelector('#ascla-root'),v=>v);
+  });
+  assert.equal(await nested.locator('.modal').evaluate(n=>!!n.closest('[inert]')),false);
+  assert.ok(await nested.locator('#adminmenuwrap,#screen-help,#wpadminbar,.ascla-main').evaluateAll(nodes=>nodes.every(n=>n.inert)));
+  await nested.locator('#first').click();assert.equal(await nested.evaluate(()=>window.clicked),1);
+  await nested.locator('#last').focus();await nested.keyboard.press('Tab');assert.equal(await nested.evaluate(()=>document.activeElement.id),'first');
+  await nested.keyboard.press('Shift+Tab');assert.equal(await nested.evaluate(()=>document.activeElement.id),'last');
+  await nested.evaluate(()=>{
+   const backdrop=document.createElement('div');backdrop.className='modal-backdrop modal-decision-backdrop';
+   backdrop.innerHTML='<section class="modal modal-decision" role="alertdialog" aria-modal="true" aria-label="Confirmación"><button id="decision">Confirmar</button></section>';
+   document.querySelector('#ascla-root').append(backdrop);document.querySelector('#decision').onclick=()=>window.clicked++;accessibility.refresh();
+  });
+  assert.equal(await nested.locator('.modal:not(.modal-decision)').evaluate(n=>!!n.closest('[inert]')),true);
+  assert.equal(await nested.locator('.modal-decision').evaluate(n=>!!n.closest('[inert]')),false);
+  await nested.locator('#decision').click();assert.equal(await nested.evaluate(()=>window.clicked),2);
+  await nested.evaluate(()=>{document.querySelector('.modal-decision-backdrop').remove();accessibility.refresh();});
+  await nested.locator('#first').click();assert.equal(await nested.evaluate(()=>window.clicked),3);
+  await nested.evaluate(()=>{document.querySelector('.modal-backdrop').remove();accessibility.refresh();});
+  assert.ok(await nested.locator('#adminmenuwrap,#screen-help,#wpadminbar,.ascla-main,#wpwrap').evaluateAll(nodes=>nodes.every(n=>!n.inert)));
+  assert.equal(await nested.locator('#kept-inert').evaluate(n=>n.inert),true);
+ }finally{await nested.close();}
+ pass('Diálogos en wp-admin anidado: clic real, Tab/Shift+Tab, confirmación y restauración del fondo sin bloquear ancestros');
+}
 async function trap(selector){
  const container=page.locator(selector);
  const boundaries=await container.evaluate(n=>{const controls=[...n.querySelectorAll('a[href],button,input,select,textarea,[tabindex],summary')].filter(x=>!x.disabled&&x.tabIndex>=0&&x.getClientRects().length&&!x.closest('[inert]'));controls.at(-1).focus();return controls.length;});
@@ -36,7 +66,7 @@ async function trap(selector){
  assert.ok(await page.locator('.ascla-main').evaluate(n=>n.inert));
 }
 (async()=>{try{
- browser=await chromium.launch({headless:true});page=await browser.newPage();page.on('pageerror',e=>errors.push(e.message));
+ browser=await chromium.launch({headless:true});await nestedAdminDialogs();page=await browser.newPage();page.on('pageerror',e=>errors.push(e.message));
  await page.goto(base+'/wp-login.php');await page.locator('#user_login').fill(env.ASCLA_ADMIN_USER||'ascla.admin');await page.locator('#user_pass').fill(env.ASCLA_ADMIN_PASSWORD);
  await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),page.locator('#wp-submit').click()]);
  await goto('intranet');nativeUrl=await page.evaluate(()=>ASCLA.api.replace(/ascla\/v1\/?$/,'wp/v2/')+'users/me');

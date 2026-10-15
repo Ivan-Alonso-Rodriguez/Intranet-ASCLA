@@ -27,7 +27,7 @@ async function clickAfterReview(locator){
  assert.ok(held.length);await page.waitForFunction(()=>!document.querySelector('#page-content').hasAttribute('aria-busy'));await page.keyboard.press('Escape');
  await page.locator('#dashboard-recommendations [role=status]').waitFor();assert.equal(await page.locator('.stat-grid .stat').count(),4);
  await page.screenshot({path:root+'/test-results/dashboard-loading108-pending.png',fullPage:true});pass('Inicio, estadísticas y agenda disponibles mientras recomendaciones permanece sin responder');
- await clickAfterReview(page.getByRole('link',{name:'Perfil',exact:true}));
+ await clickAfterReview(page.locator('.ascla-sidebar .nav-link[href$="/perfil/"]'));
  await page.locator('[data-form=profile]').waitFor();
  for(const release of held.splice(0))release();await page.locator('[name=company]').waitFor();assert.equal(await page.locator('#dashboard-recommendations').count(),0);pass('Navegar a Perfil cancela la consulta y una respuesta tardía no reemplaza la nueva vista');
  mode='error';await page.goto(base+'/intranet/');await page.locator('.hero h1').waitFor();await page.locator('#dashboard-recommendations [data-action=refresh]').waitFor();

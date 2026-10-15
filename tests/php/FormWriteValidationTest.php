@@ -84,6 +84,40 @@ final class FormWriteValidationTest extends TestCase
         $good=$this->request('/content/hub',['title'=>$title,'body'=>$body,'status'=>'publish']);self::assertSame(200,$good->get_status());$this->posts[]=$good->get_data()['id'];self::assertSame($title,get_post(end($this->posts))->post_title);self::assertStringNotContainsString('<script>',get_post(end($this->posts))->post_content);
         update_user_meta($this->user,'locale','es_ES');self::assertSame('El texto supera el límite de 200 caracteres.',$this->request('/content/hub',['title'=>str_repeat('x',201),'body'=>'Valid'])->get_data()['message']);
     }
+    public function testStatisticsUseScalarCategoryIdsWithoutWeakeningEditorialLists(): void
+    {
+        $topic=(int)wp_insert_term('Stats filter '.bin2hex(random_bytes(5)),'ascla_interest')['term_id'];
+        $category=(int)wp_insert_term('Stats category '.bin2hex(random_bytes(5)),'ascla_category')['term_id'];
+        try {
+            foreach ([0,'0',$category,(string)$category] as $value) {
+                $filters=['topic'=>$topic,'category'=>$value,'event'=>0];
+                $response=$this->request('/admin/statistics/topics',$filters);
+                self::assertSame(200,$response->get_status(),wp_json_encode($response->get_data()));
+                self::assertSame(0,$response->get_data()['pending']);
+                $query=new WP_REST_Request('GET','/ascla/v1/admin/statistics');$query->set_query_params($filters);
+                self::assertSame(200,rest_get_server()->dispatch($query)->get_status());
+            }
+            foreach ([0,'0',$category] as $value) {
+                self::assertSame(400,$this->request('/content/hub',['title'=>'Editorial list','body'=>'Valid content','status'=>'draft','category'=>$value])->get_status());
+            }
+            $valid=$this->request('/content/hub',['title'=>'Editorial list','body'=>'Valid content','status'=>'draft','category'=>[$category]]);
+            self::assertSame(200,$valid->get_status());$this->posts[]=$valid->get_data()['id'];
+            self::assertSame([$category],wp_get_object_terms(end($this->posts),'ascla_category',['fields'=>'ids']));
+        } finally { wp_delete_term($topic,'ascla_interest');wp_delete_term($category,'ascla_category'); }
+    }
+    public function testStatisticsRejectMalformedSingleSelectionFilters(): void
+    {
+        foreach (['topic','category','event'] as $field) {
+            foreach ([true,false,1.5,-1,'1suffix',[],[1],['id'=>1]] as $value) {
+                $response=$this->request('/admin/statistics/topics',[$field=>$value]);
+                self::assertSame(400,$response->get_status(),$field.': '.wp_json_encode($value));
+                foreach (['/admin/statistics','/admin/statistics/topics'] as $path) {
+                    $query=new WP_REST_Request('GET','/ascla/v1'.$path);$query->set_query_params([$field=>$value]);
+                    self::assertSame(400,rest_get_server()->dispatch($query)->get_status(),$path.' '.$field.': '.wp_json_encode($value));
+                }
+            }
+        }
+    }
     public function testFailedPasswordWriteDoesNotClaimSuccessOrIssueANewCookie(): void
     {
         global $wpdb;$id=$this->user;$table=$wpdb->users;$cookies=0;

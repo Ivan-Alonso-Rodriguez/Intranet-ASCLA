@@ -45,8 +45,16 @@ final class RequestValidation
             if (isset($params[$key])) { Access::require(is_string($params[$key])||is_int($params[$key]),'Formato de solicitud no válido.',400); }
         }
         $fields=is_array($json)?$json:$request->get_body_params();
+        // Analytics selects one ID (zero means all); editorial taxonomies are lists.
+        $statistics=in_array($request->get_route(),['/ascla/v1/admin/statistics','/ascla/v1/admin/statistics/topics'],true);
+        if ($statistics) {
+            foreach (['topic','category','event'] as $key) {
+                if (array_key_exists($key,$params)) { self::integer($params[$key]); }
+            }
+        }
         foreach (self::LISTS as $key) {
             if (!array_key_exists($key,$fields)) { continue; }
+            if ($statistics && $key==='category') { continue; }
             self::list($fields[$key]);
             if (in_array($key,['users','media_ids','interest','category','tag','topics'],true)||isset(Profiles::TERMS[$key])) { FormRules::ids($fields[$key]); }
         }

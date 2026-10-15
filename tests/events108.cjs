@@ -11,6 +11,17 @@ async function goto(p,route){await p.goto(base+'/'+route);await p.locator('#page
 async function login(name,password){const p=await browser.newPage({viewport:{width:1280,height:900}});p.on('pageerror',e=>errors.push(e.message));await p.goto(base+'/wp-login.php');await p.locator('#user_login').fill(name);await p.locator('#user_pass').fill(password);await Promise.all([p.waitForNavigation({waitUntil:'domcontentloaded'}),p.locator('#wp-submit').click()]);await goto(p,'intranet/');return p;}
 async function locale(value){await admin.evaluate(async locale=>{const r=await fetch(location.href,{method:'POST',body:new URLSearchParams({_ascla_change_language:'1',_ascla_locale:locale,_ascla_language_nonce:ASCLA.languageNonce})});if(!r.ok)throw Error('Language update failed');},value);assert.equal((await ok(admin,'native:users/me?context=edit')).locale,value);}
 function pass(name){checks.push(name);console.log('PASS '+name);}
+async function removeFixture(route,label){
+ try{
+  let result=await api(admin,route,null,'DELETE');
+  if(result.status===429){
+   const wait=61000-Date.now()%60000;
+   console.log('Fixture cleanup reached the API write limit; waiting '+Math.ceil(wait/1000)+'s before retrying.');
+   await new Promise(resolve=>setTimeout(resolve,wait));result=await api(admin,route,null,'DELETE');
+  }
+  assert.equal(result.status,200,'Fixture cleanup failed: '+label+' '+route+' HTTP '+result.status+' '+(result.body?.message||''));
+ }catch(error){errors.push(error.message);console.error(error.message);process.exitCode=1;}
+}
 async function rendered(p,data){await p.waitForFunction(titles=>JSON.stringify([...document.querySelectorAll('.event-card h3')].map(n=>n.textContent))===JSON.stringify(titles),data.items.map(i=>i.title));}
 async function query(p,text){const form=p.locator('.content-list-filters');await form.locator('[name="q"]').fill(text);const response=p.waitForResponse(r=>r.url().includes('/content/event?')&&r.request().method()==='GET');await form.locator('button:not([type])').first().click();const data=await (await response).json();await rendered(p,data);return data;}
 async function change(p,selector,key){const response=p.waitForResponse(r=>r.url().includes('/content/event?')&&r.url().includes(key));await p.locator(selector).click();const data=await (await response).json();await rendered(p,data);return data;}
@@ -44,6 +55,6 @@ async function scan(p,name){await p.addScriptTag({path:require.resolve('axe-core
  await locale('en_US');await goto(admin,'eventos/');await query(admin,prefix);await admin.getByRole('navigation',{name:'Content pagination',exact:true}).waitFor();assert.ok((await admin.locator('.content-pagination-summary').textContent()).includes('Showing'));pass('Inglés: paginación y resumen traducidos, títulos del evento sin modificar');
  assert.deepEqual(errors,[]);
 }catch(error){console.error(error.stack);errors.push(error.message);process.exitCode=1;}finally{
- if(admin){for(const id of posts){const result=await api(admin,'items/'+id,null,'DELETE').catch(()=>null);if(!result||result.status!==200){errors.push('Fixture cleanup failed: event');process.exitCode=1;}}for(const id of users)await api(admin,'native:users/'+id+'?force=true&reassign=1',null,'DELETE').catch(()=>{});if(originalLocale!==undefined)await locale(originalLocale).catch(e=>{errors.push(e.message);process.exitCode=1;});}
+ if(admin){for(const id of posts)await removeFixture('items/'+id,'event');for(const id of users)await removeFixture('native:users/'+id+'?force=true&reassign=1','user');if(originalLocale!==undefined)await locale(originalLocale).catch(e=>{errors.push(e.message);process.exitCode=1;});}
  fs.mkdirSync(root+'/test-results',{recursive:true});fs.writeFileSync(root+'/test-results/events108.json',JSON.stringify({checks,errors,scans},null,2));if(browser)await browser.close();
 }})();

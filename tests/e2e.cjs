@@ -214,11 +214,14 @@ async function goto(page, route) {
       assert.equal(noPerm.status, 403);
       await a.goto(base + "/wp-admin/admin.php?page=ascla");
       await a.locator("#admin-panel").waitFor();
-      await a
+      await a.locator('.admin-tabs [data-tab="moderacion"]').click();
+      const review = a.locator("#admin-panel")
         .getByRole("row")
         .filter({ hasText: "E2E Publicación de gobernanza" })
-        .getByRole("button", { name: "Revisar" })
-        .click();
+        .getByRole("button", { name: "Revisar", exact: true });
+      await review.waitFor({ state: "visible" });
+      assert.equal(await review.getAttribute("data-id"), String(post.id));
+      await review.click();
       await a.getByRole("button", { name: "Moderar", exact: true }).click();
       await a
         .locator(".modal [name=reason]")
@@ -554,7 +557,7 @@ async function goto(page, route) {
         await a.locator('[data-contact="'+contact.id+'"][data-state="'+state+'"]').waitFor();
       }
       await p.reload();
-      await p.locator(".notification-row").filter({hasText:contact.title}).locator(".tag").filter({hasText:/^Resuelta$/}).waitFor();
+      await p.locator(".contact-request").filter({hasText:contact.title}).locator(".contact-status").filter({hasText:/^Resuelta$/}).waitFor();
     });
     await require("./admin-compliance.cjs")({browser,admin:a,member:p,base,request,test,login,coverage,root});
     await test("Admin configuration saves without returning secrets", async () => {
