@@ -1,0 +1,30 @@
+meta {
+  name: 07. Rechazar empresa vacía
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/profiles/me
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAsociado}}
+  X-WP-Nonce: {{nonceAsociado}}
+  Content-Type: application/json
+}
+body:json {
+  {
+    "company": ""
+  }
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("El error identifica Empresa", function () { expect(res.getBody().message).to.include("Empresa"); });
+  test("Empresa obligatoria se valida en servidor", function () { expect(res.getStatus()).to.equal(400); });
+}

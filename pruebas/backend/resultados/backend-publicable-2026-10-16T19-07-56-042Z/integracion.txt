@@ -1,0 +1,80 @@
+integracion\01-login-a (302 Found) - 211 ms
+Tests
+   ✓ Inicio de sesión a
+integracion\02-nonce-a (200 OK) - 211 ms
+Tests
+   ✓ Sesión autenticada a
+   ✓ Nonce REST disponible
+integracion\03-identity (200 OK) - 158 ms
+Tests
+   ✓ Identidad correcta
+   ✓ La sesión pertenece al asociado de prueba
+integracion\04-anonymous-directory (401 Unauthorized) - 99 ms
+Tests
+   ✓ Directorio rechaza visitantes sin sesión
+integracion\05-admin-denied (403 Forbidden) - 100 ms
+Tests
+   ✓ Asociado no accede a administración
+integracion\06-profile-before (200 OK) - 213 ms
+Tests
+   ✓ Perfil disponible
+integracion\07-invalid-profile (400 Bad Request) - 149 ms
+Tests
+   ✓ El error identifica Empresa
+   ✓ Empresa obligatoria se valida en servidor
+integracion\08-profile-preserved (200 OK) - 140 ms
+Tests
+   ✓ Perfil se vuelve a consultar
+   ✓ El rechazo conserva la empresa
+integracion\09-directory-page (200 OK) - 179 ms
+Tests
+   ✓ Directorio paginado
+   ✓ El directorio respeta el tamaño configurado y calcula las páginas
+integracion\10-invalid-date-range (400 Bad Request) - 150 ms
+Tests
+   ✓ Rango de fechas invertido rechazado
+integracion\11-login-administrador (302 Found) - 140 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Administrador
+integracion\12-inicio-administrador (302 Found) - 105 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ El inicio redirige al panel administrativo
+integracion\13-directorio-sin-administrador (200 OK) - 213 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ El directorio incluye a Ana y excluye al administrador en todas las páginas
+integracion\14-perfil-administrador-oculto (404 Not Found) - 121 ms
+Tests
+   ✓ Código HTTP esperado: 404
+integracion\15-conexion-hacia-administrador (400 Bad Request) - 123 ms
+Tests
+   ✓ Código HTTP esperado: 400
+integracion\16-chat-hacia-administrador (400 Bad Request) - 119 ms
+Tests
+   ✓ Código HTTP esperado: 400
+integracion\17-conexion-desde-administrador (403 Forbidden) - 125 ms
+Tests
+   ✓ Código HTTP esperado: 403
+integracion\18-chat-desde-administrador (403 Forbidden) - 119 ms
+Tests
+   ✓ Código HTTP esperado: 403
+
+📊 Execution Summary
+┌───────────────┬────────────────┐
+│ Metric        │     Result     │
+├───────────────┼────────────────┤
+│ Status        │     ✓ PASS     │
+├───────────────┼────────────────┤
+│ Requests      │ 18 (18 Passed) │
+├───────────────┼────────────────┤
+│ Tests         │     26/26      │
+├───────────────┼────────────────┤
+│ Assertions    │      0/0       │
+├───────────────┼────────────────┤
+│ Duration (ms) │      7925      │
+└───────────────┴────────────────┘
+Wrote html results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\integracion.html
+Wrote json results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\integracion.json
+Wrote junit results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\integracion.xml

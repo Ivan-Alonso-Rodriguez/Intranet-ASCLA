@@ -200,7 +200,7 @@ final class Login
 
     private static function targetFor(\WP_User $user, string $requested): string
     {
-        $fallback=Catalog::url('intranet');
+        $fallback=App::homeUrl((int)$user->ID);
         if ($requested==='') { return $fallback; }
         $safe=wp_validate_redirect($requested,$fallback);
         $allowed=false;
@@ -286,11 +286,15 @@ final class Login
 
     public static function redirect(string $redirect, string $requested, $user): string
     {
-        if (!$user instanceof \WP_User || !user_can($user, 'ascla_access') || user_can($user, 'manage_options')) {
+        if (!$user instanceof \WP_User || !user_can($user, 'ascla_access')) {
             return $redirect;
         }
-        $fallback = Catalog::url('intranet');
+        $fallback = App::homeUrl((int)$user->ID);
         $target = wp_validate_redirect($requested, $fallback);
+        if (Access::isAdministrator((int)$user->ID)) {
+            if ($requested!=='' && str_starts_with($target,admin_url())) { return $target; }
+            if ($requested==='' || url_to_postid($target)===url_to_postid(Catalog::url('intranet'))) { return $fallback; }
+        }
         if(user_can($user,'ascla_admin_area') && str_starts_with($target,admin_url())){
             parse_str((string)wp_parse_url($target,PHP_URL_QUERY),$query);
             $page=is_string($query['page']??null)?sanitize_key($query['page']):'';

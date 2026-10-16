@@ -79,7 +79,7 @@ final class Connections
     {
         $mine=Access::member($me)?Profiles::raw($me):[];
         foreach ($states as $id=>&$state) {
-            $valid=$id>0 && $id!==$me && Access::member($me) && Access::member($id);
+            $valid=$id>0 && $id!==$me && Access::networkingMember($me) && Access::networkingMember($id);
             $state['can_read_messages']=$valid && !$state['blocked'] && $state['state']==='connected';
             $retry=ConnectionPolicy::retryAt($me,$id);
             $state['retry_at']=ConnectionPolicy::visibleRetryAt($me,$id);
@@ -113,8 +113,9 @@ final class Connections
         $out=['incoming'=>[],'outgoing'=>[],'connected'=>[],'blocked'=>[]];
         $conversationStates=ConversationRequests::statesFor($me,$ids);
         foreach(self::statesFor($me,$ids,$rows) as $id=>$state) {
+            if (!Access::networkingMember($me) || !Access::networkingMember($id)) { continue; }
             if ($state['blocked_by_me'] && Access::member($id)) { $out['blocked'][]=Profiles::card($id)+['connection'=>$state]; }
-            if (!Access::member($id) || $state['state']==='none' || $state['blocked']) { continue; }
+            if (!Access::networkingMember($me) || !Access::networkingMember($id) || $state['state']==='none' || $state['blocked']) { continue; }
             $key=['incoming_pending'=>'incoming','outgoing_pending'=>'outgoing','connected'=>'connected'][$state['state']];
             $out[$key][]=Profiles::card($id)+['connection'=>$state,'conversation'=>$conversationStates[$id]??ConversationRequests::between($me,$id)];
         }
@@ -122,11 +123,11 @@ final class Connections
     }
     private static function writer(): int
     {
-        Access::require(Access::member() && current_user_can('ascla_write')); return get_current_user_id();
+        Access::require(Access::networkingMember() && current_user_can('ascla_write')); return get_current_user_id();
     }
     public static function request(int $target,string $message=''): array
     {
-        $me=self::writer(); Access::require($target>0 && $target!==$me && Access::member($target),'Asociado no válido.',400);
+        $me=self::writer(); Access::require($target>0 && $target!==$me && Access::networkingMember($target),'Asociado no válido.',400);
         Access::require(mb_strlen($message)<=1000,'El mensaje de presentación admite hasta 1000 caracteres.',400);
         $message=trim(Access::text($message,1000));
         return self::lockPair($me,$target,static function () use($me,$target,$message) {
@@ -155,7 +156,7 @@ final class Connections
         $row=Store::one('relations',$id);
         Access::require($row && $row['kind']==='connect' && (int)$row['target_id']===$me,'Esta solicitud ya fue resuelta.',409);
         if ($decision==='accept') {
-            Access::require($sender!==$me && Access::member($sender) && !self::between($me,$sender)['blocked'],'No se puede confirmar esta conexión.',403);
+            Access::require($sender!==$me && Access::networkingMember($sender) && !self::between($me,$sender)['blocked'],'No se puede confirmar esta conexión.',403);
             if (!self::areConnected($me,$sender)) { Store::update('relations',['kind'=>'connected','created_at'=>current_time('mysql',true)],['id'=>$id]); }
         }
         foreach (self::rows($me,[$sender]) as $pending) {

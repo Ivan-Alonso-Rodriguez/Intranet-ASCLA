@@ -1,0 +1,54 @@
+flujos-e2e\03-suspension-y-reactivacion\01-iniciar-sesion-administrador (302 Found) - 204 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Administrador
+flujos-e2e\03-suspension-y-reactivacion\02-iniciar-sesion-carla (302 Found) - 141 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Carla
+flujos-e2e\03-suspension-y-reactivacion\03-carla-tiene-acceso-antes-de-la-suspension (200 OK) - 140 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ La identidad corresponde a Carla
+flujos-e2e\03-suspension-y-reactivacion\04-el-administrador-suspende-a-carla (200 OK) - 130 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ La suspensión se aplica a la cuenta de prueba
+flujos-e2e\03-suspension-y-reactivacion\05-la-cuenta-suspendida-pierde-el-acceso (403 Forbidden) - 85 ms
+Tests
+   ✓ Código HTTP esperado: 403
+   ✓ La sesión anterior dejó de ser válida
+flujos-e2e\03-suspension-y-reactivacion\06-el-administrador-reactiva-a-carla (200 OK) - 120 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Cuenta de prueba reactivada
+flujos-e2e\03-suspension-y-reactivacion\07-reactivar-no-revive-la-sesion-revocada (403 Forbidden) - 140 ms
+Tests
+   ✓ Código HTTP esperado: 403
+   ✓ La sesión antigua sigue rechazada
+flujos-e2e\03-suspension-y-reactivacion\08-iniciar-sesion-carla (302 Found) - 150 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Carla
+flujos-e2e\03-suspension-y-reactivacion\09-carla-recupera-el-acceso-con-una-sesion-nueva (200 OK) - 157 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Identidad y acceso recuperados
+
+📊 Execution Summary
+┌───────────────┬──────────────┐
+│ Metric        │    Result    │
+├───────────────┼──────────────┤
+│ Status        │    ✓ PASS    │
+├───────────────┼──────────────┤
+│ Requests      │ 9 (9 Passed) │
+├───────────────┼──────────────┤
+│ Tests         │    18/18     │
+├───────────────┼──────────────┤
+│ Assertions    │     0/0      │
+├───────────────┼──────────────┤
+│ Duration (ms) │     4240     │
+└───────────────┴──────────────┘
+Wrote html results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\03-suspension-y-reactivacion.html
+Wrote json results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\03-suspension-y-reactivacion.json
+Wrote junit results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\03-suspension-y-reactivacion.xml

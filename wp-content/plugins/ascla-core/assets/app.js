@@ -810,9 +810,10 @@
   function shell() {
     if (root.querySelector(".ascla-sidebar")) { refreshNotifications(); return; }
     const p = S.boot.me;
-    const links = navOrder.map((k) => `<a class="nav-link ${S.page === k ? "active" : ""}" href="${E(C.pages[k].url)}">${I(pageIcon[k])}<span>${E(C.pages[k].label)}</span></a>`).join("");
-    const adminLink = S.boot.admin_area ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}${E(T("Administración"))}</a>` : "";
-    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></a><div class="brand-sub">${E(T("COMUNIDAD DE ASOCIADOS"))}</div><nav aria-label="${E(T("Navegación principal"))}">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}${E(T("Cerrar sesión"))}</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(C.pages.intranet.url)}" aria-label="${E(T("ASCLA inicio"))}"><img class="brand-logo-normal" src="${E(C.logo)}" alt="ASCLA"><img class="brand-logo-inverse" src="${E(C.logoWhite || C.logo)}" alt="" aria-hidden="true"></a>${btn(I("menu"), "menu", ("aria-label=\"" + (E(T("Abrir navegación"))) + "\""), "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="${E(T("Buscar en ASCLA"))}" placeholder="${E(T("Buscar en tu comunidad…"))}" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${C.page === "admin" ? adminLanguageControl() + btn(themeIcons(), "theme-menu", ("aria-label=\"" + (E(T("Apariencia"))) + "\""), "icon-button theme-button") : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", ("aria-label=\"" + (E(T("Notificaciones"))) + "\""), "icon-button")}<a class="header-profile" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || T("Comunidad ASCLA"))}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap" tabindex="-1"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || T("Administración"))}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · ${E(T("Conectamos conocimiento, fortalecemos la gobernanza."))}${S.boot.demo ? " · " + E(T("Datos ficticios de demostración.")) : ""}</div></main></div>`;
+    const homeUrl = S.boot.admin ? C.adminUrl : C.pages.intranet.url;
+    const links = navOrder.map((k) => {const adminHome=S.boot.admin&&k==='intranet';return `<a class="nav-link ${(adminHome?S.page==='admin':S.page===k) ? "active" : ""}" href="${E(adminHome?homeUrl:C.pages[k].url)}">${I(adminHome?'settings':pageIcon[k])}<span>${E(adminHome?T('Administración'):C.pages[k].label)}</span></a>`;}).join("");
+    const adminLink = S.boot.admin_area && !S.boot.admin ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}${E(T("Administración"))}</a>` : "";
+    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(homeUrl)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></a><div class="brand-sub">${E(T("COMUNIDAD DE ASOCIADOS"))}</div><nav aria-label="${E(T("Navegación principal"))}">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}${E(T("Cerrar sesión"))}</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(homeUrl)}" aria-label="${E(T("ASCLA inicio"))}"><img class="brand-logo-normal" src="${E(C.logo)}" alt="ASCLA"><img class="brand-logo-inverse" src="${E(C.logoWhite || C.logo)}" alt="" aria-hidden="true"></a>${btn(I("menu"), "menu", ("aria-label=\"" + (E(T("Abrir navegación"))) + "\""), "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="${E(T("Buscar en ASCLA"))}" placeholder="${E(T("Buscar en tu comunidad…"))}" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${C.page === "admin" ? adminLanguageControl() + btn(themeIcons(), "theme-menu", ("aria-label=\"" + (E(T("Apariencia"))) + "\""), "icon-button theme-button") : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", ("aria-label=\"" + (E(T("Notificaciones"))) + "\""), "icon-button")}<a class="header-profile" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || T("Comunidad ASCLA"))}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap" tabindex="-1"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || T("Administración"))}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · ${E(T("Conectamos conocimiento, fortalecemos la gobernanza."))}${S.boot.demo ? " · " + E(T("Datos ficticios de demostración.")) : ""}</div></main></div>`;
     refreshNotifications();
   }
   function heading(title, subtitle, action = "") {
@@ -854,6 +855,7 @@
     return '';
   }
   function connectionActions(p, suggested = false, compactConnected = false, preventiveBlock = false) {
+    if (p.community_participant===false || S.boot.me.community_participant===false) return '';
     if (Number(p.id) === S.boot.me.id || !p.connection) return '';
     const c = p.connection, id = Number(p.id);
     let actions = connectionPrimaryActions(c, id, suggested, compactConnected);
@@ -1043,7 +1045,7 @@
     const relationship = isMe
       ? `<div class="connection-controls member-own-actions"><div class="connection-actions">${link("perfil", "Editar mi perfil", "small")}</div></div>`
       : connectionActions(p, false, true);
-    const relationshipState = isMe ? '' : memberRelationshipState(p.connection);
+    const relationshipState = isMe || S.boot.me.community_participant===false || p.community_participant===false ? '' : memberRelationshipState(p.connection);
     return `<article class="card member-card"><div class="member-card-profile">${avatar(p, "lg")}<h3>${E(p.name)}</h3><div class="role">${E(p.position || T("Miembro ASCLA"))}</div><div class="company">${E(p.company || T("Comunidad profesional"))}</div><span class="country">${I("pin")}${E(p.country || T("América Latina"))}</span><div class="member-card-signal">${signal}<span class="member-card-relationship-state">${relationshipState}</span></div></div><div class="member-card-actions">${btn("Ver perfil " + I("arrow"), "member", ("data-id=\"" + (p.id) + "\""), "small")}${relationship || '<div class="connection-controls member-action-placeholder" aria-hidden="true"></div>'}</div></article>`;
   }
   function recommendationMemberCard(p) {
@@ -1257,14 +1259,14 @@
         "Tu red profesional",
         "Conecta con quienes comparten tus retos, intereses y conocimientos.",
       ) +
-      `<div class="directory-view">${directoryFilters()}<section class="card connections-panel" id="connections-panel" aria-label="${E(T('Mis conexiones'))}"></section><div class="section-top directory-results-heading"><h2>${list.total} ${E(T('perfiles en la comunidad'))}</h2>${link('perfil','Editar mi perfil','ghost small')}</div><p class="directory-visibility-note private-note">${E(T('Se muestran miembros activos que han elegido aparecer en el directorio.'))}</p><div class="cards directory">${list.items.map(memberCard).join('')}</div>${list.items.length ? '' : empty('No encontramos perfiles','Prueba con otro nombre, país o interés.')}${directoryPager(list)}</div>`;
+      `<div class="directory-view">${directoryFilters()}${S.boot.me.community_participant===false?'':`<section class="card connections-panel" id="connections-panel" aria-label="${E(T('Mis conexiones'))}"></section>`}<div class="section-top directory-results-heading"><h2>${list.total} ${E(T('perfiles en la comunidad'))}</h2>${link('perfil','Editar mi perfil','ghost small')}</div><p class="directory-visibility-note private-note">${E(T('Se muestran miembros activos que han elegido aparecer en el directorio.'))}</p><div class="cards directory">${list.items.map(memberCard).join('')}</div>${list.items.length ? '' : empty('No encontramos perfiles','Prueba con otro nombre, país o interés.')}${directoryPager(list)}</div>`;
     await refreshConnectionsPanel();
   }
   async function member(id) {
     const dialog = modal(T("Perfil"), `<div class="view-loading" role="status"><span class="loading-dot"></span>${E(T("Cargando perfil…"))}</div>`);
     const other = Number(id) !== S.boot.me.id;
     // Data and deterministic affinity are independent; neither waits for the AI provider.
-    const matchRequest = other ? api("matching/" + id + "?explain=0").catch(() => null) : Promise.resolve(null);
+    const matchRequest = other && S.boot.me.community_participant!==false ? api("matching/" + id + "?explain=0").catch(() => null) : Promise.resolve(null);
     let p;
     try { p = await api("profiles/" + id); }
     catch (error) {
@@ -1279,7 +1281,8 @@
     const sources = ["linkedin", "twitter", "website"].filter((k) => p[k]).map((k) => `<a href="${E(safeURL(p[k]))}" target="_blank" rel="noopener noreferrer">${E({ linkedin: "LinkedIn", twitter: "X / Twitter", website: T("Sitio personal") }[k])} ↗</a>`).join("");
     dialog.querySelector(".modal-top h2").textContent = p.name;
     dialog.querySelector('[role="dialog"]').setAttribute("aria-label", p.name);
-    const affinitySection = other
+    const showAffinity = other && p.community_participant!==false && S.boot.me.community_participant!==false;
+    const affinitySection = showAffinity
       ? `<div data-profile-affinity aria-live="polite" aria-busy="true"><p class="private-note" role="status">${E(T("Cargando afinidad…"))}</p></div>`
       : "";
     const experienceSection = p.experience
@@ -1289,7 +1292,7 @@
       ? `<p><strong>${E(T("Teléfono"))}:</strong> <a href="tel:${E(p.phone.replaceAll(/[^+0-9]/g, ""))}">${E(p.phone)}</a></p>`
       : "";
     dialog.querySelector(".modal-content").innerHTML = `<div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.position || T("Miembro ASCLA"))}</h2><p class="muted">${E(p.company || "")}</p><p class="muted">${E(p.country || "")} ${E(p.city || "")}</p><span data-profile-affinity-score></span></div></div>${affinitySection}<p class="detail-body">${E(p.bio || T("Este miembro aún no ha añadido su biografía."))}</p>${experienceSection}${phoneSection}${terms}<div class="sources">${sources}</div><div class="form-actions">${actions}</div>`;
-    if (other) void memberAffinity(dialog, id, matchRequest);
+    if (showAffinity) void memberAffinity(dialog, id, matchRequest);
   }
   function affinityDetails(match, pending = false, unavailable = false) {
     return `<div class="alert">${E(match.explanation)}<p class="private-note">${E(match.mode || T("Afinidad determinística"))}</p>${match.conversation_proposal ? ("<p>" + (E(match.conversation_proposal)) + "</p>") : ""}${pending ? ("<p class=\"private-note\" role=\"status\">" + (E(T("Preparando explicación de IA…"))) + "</p>") : ""}${unavailable || match.fallback ? ("<p class=\"private-note\">" + (E(T("La explicación de IA no está disponible ahora. Puedes seguir usando el perfil."))) + "</p>") : ""}</div>`;
@@ -1373,6 +1376,7 @@
     return `<section class="profile-preferences" aria-labelledby="profile-knowledge-title"><div class="preference-heading"><span class="preference-emblem">${I("spark")}</span><div><h2 id="profile-knowledge-title">${E(T("Conocimiento e intereses"))}</h2><p>${E(T("Haz que tu perfil conecte con las personas y las ideas que te interesan."))}</p></div></div><div class="profile-topics">${Object.entries(profileTax).map(([key, tax]) => profileTopic(key, tax, p)).join("")}</div></section>`;
   }
   function profileParticipation(p) {
+    if (p.community_participant===false) return `<p class="private-note">${E(T('La cuenta de administración gestiona la comunidad y no participa en el directorio, las conexiones ni los microeventos.'))}</p>`;
     const options = [
       ["directory", "users", "Aparecer en el directorio", "Permite que otros asociados encuentren tu perfil."],
       ["networking", "spark", "Descubrir nuevas conexiones", "Recibe recomendaciones de personas afines a tus intereses."],
@@ -2912,7 +2916,7 @@
       return `<div class="admin-nav-group"><span>${E(T(group))}</span>${entries.map(([key,label,icon])=>btn(I(icon)+E(T(label)),'admin-tab',("data-tab=\"" + (key) + "\" aria-pressed=\"" + (tab===key) + "\""),'admin-tab'+(tab===key?' active':''))).join('')}</div>`;
     }).join('');
     const wordpress = C.wpAdminUrl ? `<a class="btn ghost admin-wordpress-link" href="${E(C.wpAdminUrl)}">${I('settings')}${E(T('Administrar WordPress'))}</a>` : '';
-    return `<div class="admin-workspace admin-workspace-v108"><header class="admin-hero"><div class="admin-hero-main"><div class="admin-hero-copy"><span class="eyebrow">${E(T("GESTIÓN DE LA COMUNIDAD"))}</span><h1>${E(T("Administración ASCLA"))}</h1><p>${E(T("Personas, contenido y atención en un mismo lugar."))}</p></div></div><div class="admin-hero-actions">${link('intranet',E(T('Ver intranet'))+' '+I('arrow'),'ghost admin-intranet-link')}${wordpress}</div></header><div class="admin-workspace-body"><nav class="admin-tabs" aria-label="${E(T("Secciones de administración"))}">${navigation}</nav><section id="admin-panel" class="admin-panel" aria-live="polite"></section></div></div>`;
+    return `<div class="admin-workspace admin-workspace-v108"><header class="admin-hero"><div class="admin-hero-main"><div class="admin-hero-copy"><span class="eyebrow">${E(T("GESTIÓN DE LA COMUNIDAD"))}</span><h1>${E(T("Administración ASCLA"))}</h1><p>${E(T("Personas, contenido y atención en un mismo lugar."))}</p></div></div><div class="admin-hero-actions">${S.boot.admin?'':link('intranet',E(T('Ver intranet'))+' '+I('arrow'),'ghost admin-intranet-link')}${wordpress}</div></header><div class="admin-workspace-body"><nav class="admin-tabs" aria-label="${E(T("Secciones de administración"))}">${navigation}</nav><section id="admin-panel" class="admin-panel" aria-live="polite"></section></div></div>`;
   }
   function adminOverview(panel,d) {
     const metrics=[[d.counts.members,'Cuentas ASCLA','users','usuarios'],[d.pending.length,'Borradores y pendientes','shield','moderacion'],[d.reports.filter(r=>!r.reviewed).length,'Reportes por revisar','bell','moderacion'],[d.jobs.filter(j=>['pending','processing'].includes(j.status)).length,'Trabajos activos','spark','trabajos']];
@@ -3116,6 +3120,7 @@
     );
   }
   async function render() {
+    if (S.boot?.admin && S.page==='intranet') { location.replace(C.adminUrl); return; }
     const version = S.viewVersion;
     stopChat();
     content().innerHTML = '<div class="view-loading" role="status"><span class="loading-dot"></span> Cargando sección…</div>';

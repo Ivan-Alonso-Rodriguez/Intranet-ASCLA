@@ -46,7 +46,7 @@ try {
  if(remote){try{const copy=path.join(out,'sources/acceptance-remote-cleanup.cjs');cleanup=await require(fs.existsSync(copy)?copy:'./acceptance-remote-cleanup.cjs')(fixture);fs.writeFileSync(path.join(out,'cleanup.log'),'QA helper: temporary batch removed.\n');}catch(error){failure=true;cleanup={status:'failed',message:'Use Tools > ASCLA QA to clean the active batch.'};summaries.push({name:'runner',status:'failed',error:'Remote cleanup was not confirmed. Use WordPress Tools > ASCLA QA.'});fs.writeFileSync(path.join(out,'cleanup.log'),cleanup.message+'\n');}}
  fs.rmSync(privateEnv,{force:true});
  const git=args=>execFileSync('git',['-c','safe.directory='+root,...args],{cwd:root,encoding:'utf8'}).trim();
- const metadata={date:new Date().toISOString(),target:fixture.base,target_version:fixture.core_version||null,target_version_recorded_at:fixture.issued_at||null,source_capture:sourceReady?'execution':'failed',mode:remote?'remote':process.env.ASCLA_ACCEPTANCE_MODE||'ephemeral',tools,cleanup,commit:git(['rev-parse','HEAD']),working_tree:git(['status','--porcelain'])?'uncommitted':'clean',results:summaries};
+ const metadata={date:new Date().toISOString(),target:fixture.base,target_version:fixture.core_version||null,target_version_recorded_at:fixture.issued_at||null,source_capture:sourceReady?'execution':'failed',mode:remote?'remote':process.env.ASCLA_ACCEPTANCE_MODE||'ephemeral',tools,cleanup,commit:git(['rev-parse','HEAD']),branch:git(['branch','--show-current']),working_tree:git(['status','--porcelain'])?'uncommitted':'clean',results:summaries};
  fs.writeFileSync(path.join(out,'summary.json'),JSON.stringify(metadata,null,2));
  provenance.manifest(out,{recorded:true});
  require('./acceptance-report.cjs').render(out);

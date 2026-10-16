@@ -11,6 +11,8 @@ ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 == Changelog ==
 
 = 1.10.8 =
+* Inicia la cuenta administrativa en Administración ASCLA y la excluye del networking, directorio, recomendaciones y microeventos, también con relaciones heredadas.
+* Muestra un solo logo y dispone las secciones administrativas encima del contenido, con un único panel lateral.
 * Valida campos SMTP y borrado explícito de credenciales; conserva contraseñas válidas, espacios y el valor 0 sin exponerlos en respuestas.
 * Rechaza identificadores mal formados y campos obligatorios compuestos únicamente por caracteres invisibles.
 * Valida los pesos de afinidad y los enteros administrativos sin recortar ni convertir silenciosamente entradas inválidas.

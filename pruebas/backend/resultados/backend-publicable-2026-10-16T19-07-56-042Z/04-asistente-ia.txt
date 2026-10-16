@@ -1,0 +1,34 @@
+flujos-e2e\04-asistente-ia\01-iniciar-sesion-ana (302 Found) - 216 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Ana
+flujos-e2e\04-asistente-ia\02-ana-realiza-una-pregunta-en-un-hilo-nuevo (200 OK) - 104 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Se crea un trabajo pendiente con ID real
+flujos-e2e\04-asistente-ia\03-esperar-el-procesamiento-real-del-trabajo (200 OK) - 95 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Trabajo completado con respuesta y contexto correctos
+flujos-e2e\04-asistente-ia\04-el-hilo-conserva-la-pregunta-y-la-respuesta (200 OK) - 81 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ El hilo contiene el trabajo completado de esta ejecución
+
+📊 Execution Summary
+┌───────────────┬──────────────┐
+│ Metric        │    Result    │
+├───────────────┼──────────────┤
+│ Status        │    ✓ PASS    │
+├───────────────┼──────────────┤
+│ Requests      │ 4 (4 Passed) │
+├───────────────┼──────────────┤
+│ Tests         │     8/8      │
+├───────────────┼──────────────┤
+│ Assertions    │     0/0      │
+├───────────────┼──────────────┤
+│ Duration (ms) │     4243     │
+└───────────────┴──────────────┘
+Wrote html results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\04-asistente-ia.html
+Wrote json results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\04-asistente-ia.json
+Wrote junit results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\04-asistente-ia.xml

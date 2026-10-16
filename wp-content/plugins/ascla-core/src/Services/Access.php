@@ -3,6 +3,12 @@ namespace ASCLA\Core\Services;
 final class Access
 {
     public static function member(int $id=0): bool { return user_can($id?:get_current_user_id(),'ascla_access') && Membership::status($id?:get_current_user_id())==='active'; }
+    public static function isAdministrator(int $id=0): bool
+    {
+        $id=$id?:get_current_user_id();
+        return user_can($id,'ascla_manage') || user_can($id,'manage_options');
+    }
+    public static function networkingMember(int $id=0): bool { return self::member($id) && !self::isAdministrator($id); }
     /** Ejecutivo (ascla_publish) or Administrator (ascla_manage): the two roles allowed to publish and manage events, session recordings and technical resources. */
     public static function canPublish(): bool { return current_user_can('ascla_manage') || current_user_can('ascla_publish'); }
     public static function require(bool $condition,string $message='Acceso no autorizado.',int $code=403): void

@@ -1,0 +1,26 @@
+meta {
+  name: 12. La oferta genera un aviso nuevo
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/notifications/summary
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionBruno}}
+  X-WP-Nonce: {{nonceBruno}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Aumenta el contador de avisos pendientes", function () { expect(Number(res.getBody().unread_total)).to.be.above(Number(bru.getCollectionVar("avisosAntesDelCupo"))); });
+}

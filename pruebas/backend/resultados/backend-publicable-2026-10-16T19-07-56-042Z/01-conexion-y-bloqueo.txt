@@ -1,0 +1,66 @@
+flujos-e2e\01-conexion-y-bloqueo\01-iniciar-sesion-ana (302 Found) - 205 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Ana
+flujos-e2e\01-conexion-y-bloqueo\02-iniciar-sesion-bruno (302 Found) - 138 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Bruno
+flujos-e2e\01-conexion-y-bloqueo\03-ana-solicita-conexion-con-bruno (200 OK) - 394 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Solicitud pendiente con ID real
+flujos-e2e\01-conexion-y-bloqueo\04-bruno-acepta-la-solicitud-obtenida (200 OK) - 208 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Conexión confirmada
+flujos-e2e\01-conexion-y-bloqueo\05-ana-comprueba-que-puede-escribir (200 OK) - 109 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ La conexión habilita los mensajes
+flujos-e2e\01-conexion-y-bloqueo\06-ana-abre-la-conversacion (200 OK) - 240 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Conversación con ID real
+flujos-e2e\01-conexion-y-bloqueo\07-ana-envia-un-mensaje (200 OK) - 166 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ El servidor conserva el texto enviado
+flujos-e2e\01-conexion-y-bloqueo\08-bruno-lee-el-mensaje-exacto (200 OK) - 116 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ El destinatario recibe el mensaje de esta ejecución
+flujos-e2e\01-conexion-y-bloqueo\09-bruno-bloquea-a-ana (200 OK) - 124 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Bloqueo activo
+flujos-e2e\01-conexion-y-bloqueo\10-el-bloqueo-impide-escribir (404 Not Found) - 130 ms
+Tests
+   ✓ Código HTTP esperado: 404
+   ✓ El servidor oculta la conversación bloqueada
+flujos-e2e\01-conexion-y-bloqueo\11-bruno-desbloquea-a-ana (200 OK) - 111 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Bloqueo retirado
+flujos-e2e\01-conexion-y-bloqueo\12-desbloquear-no-restaura-la-conexion (200 OK) - 113 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ La relación termina sin permiso de mensajería
+
+📊 Execution Summary
+┌───────────────┬────────────────┐
+│ Metric        │     Result     │
+├───────────────┼────────────────┤
+│ Status        │     ✓ PASS     │
+├───────────────┼────────────────┤
+│ Requests      │ 12 (12 Passed) │
+├───────────────┼────────────────┤
+│ Tests         │     24/24      │
+├───────────────┼────────────────┤
+│ Assertions    │      0/0       │
+├───────────────┼────────────────┤
+│ Duration (ms) │      5587      │
+└───────────────┴────────────────┘
+Wrote html results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\01-conexion-y-bloqueo.html
+Wrote json results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\01-conexion-y-bloqueo.json
+Wrote junit results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\01-conexion-y-bloqueo.xml

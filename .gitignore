@@ -26,7 +26,7 @@ ascla-qa-access*.json
 __pycache__/
 *.py[cod]
 
-# Five maintained Markdown documents; reviewed public evidence only.
+# Main project documents and the explicit pruebas/ delivery; reviewed evidence in docs/.
 /docs/*
 !/docs/evidence/
 /docs/evidence/*
@@ -69,6 +69,7 @@ __pycache__/
 !/docs/evidence/release-1.10.8/events108.json
 !/docs/evidence/release-1.10.8/e2e-runner108.json
 !/docs/evidence/release-1.10.8/sonar-fixes108.json
+!/docs/evidence/release-1.10.8/uat-acceptance108.json
 !/docs/evidence/release-1.10.8/forms108.json
 !/docs/evidence/release-1.10.8/follow-removal108.json
 !/docs/evidence/release-1.10.8/follow-removal108-junit.xml

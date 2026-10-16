@@ -1,0 +1,33 @@
+meta {
+  name: 15. Carla no puede inscribirse al evento cancelado
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/events/{{eventoCupoId}}/register
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionCarla}}
+  X-WP-Nonce: {{nonceCarla}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "accepted"
+  }
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 409", function () { expect(res.getStatus()).to.equal(409); });
+  test("El rechazo identifica la cancelación", function () { expect(res.getBody().message).to.include("cancelado"); });
+}

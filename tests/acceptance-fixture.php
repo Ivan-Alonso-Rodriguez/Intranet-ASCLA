@@ -44,4 +44,4 @@ foreach (['admin'=>'administrator','a'=>'ascla_member','b'=>'ascla_member','ui_a
     wp_set_current_user($id);Profiles::save(ascla_test_profile(['first_name'=>'QA','last_name'=>$name.' '.$prefix,'networking'=>true,'directory'=>true]));
     update_user_meta($id,'locale','es_ES');
 }
-echo wp_json_encode(['base'=>home_url(),'prefix'=>$prefix,'actors'=>$actors]).PHP_EOL;
+echo wp_json_encode(['base'=>home_url(),'core_version'=>ASCLA_VERSION,'prefix'=>$prefix,'actors'=>$actors]).PHP_EOL;

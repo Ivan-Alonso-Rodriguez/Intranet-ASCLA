@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<testsuites>
+  <testsuite name="01. Iniciar sesión como asociado" file="integracion\01-login-a.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-16T19:08:31.514" hostname="Ivan" time="1.088">
+    <testcase name="Inicio de sesión a" status="pass" classname="integracion\01-login-a" time="1.088"/>
+  </testsuite>
+  <testsuite name="02. Obtener protección de la sesión" file="integracion\02-nonce-a.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:31.515" hostname="Ivan" time="0.525">
+    <testcase name="Sesión autenticada a" status="pass" classname="integracion\02-nonce-a" time="0.263"/>
+    <testcase name="Nonce REST disponible" status="pass" classname="integracion\02-nonce-a" time="0.263"/>
+  </testsuite>
+  <testsuite name="03. Verificar identidad del asociado" file="integracion\03-identity.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:31.515" hostname="Ivan" time="0.366">
+    <testcase name="Identidad correcta" status="pass" classname="integracion\03-identity" time="0.183"/>
+    <testcase name="La sesión pertenece al asociado de prueba" status="pass" classname="integracion\03-identity" time="0.183"/>
+  </testsuite>
+  <testsuite name="04. Rechazar acceso sin sesión" file="integracion\04-anonymous-directory.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-16T19:08:31.515" hostname="Ivan" time="0.317">
+    <testcase name="Directorio rechaza visitantes sin sesión" status="pass" classname="integracion\04-anonymous-directory" time="0.317"/>
+  </testsuite>
+  <testsuite name="05. Rechazar administración sin permiso" file="integracion\05-admin-denied.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-16T19:08:31.515" hostname="Ivan" time="0.316">
+    <testcase name="Asociado no accede a administración" status="pass" classname="integracion\05-admin-denied" time="0.316"/>
+  </testsuite>
+  <testsuite name="06. Consultar empresa actual" file="integracion\06-profile-before.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-16T19:08:31.515" hostname="Ivan" time="0.548">
+    <testcase name="Perfil disponible" status="pass" classname="integracion\06-profile-before" time="0.548"/>
+  </testsuite>
+  <testsuite name="07. Rechazar empresa vacía" file="integracion\07-invalid-profile.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:31.515" hostname="Ivan" time="0.382">
+    <testcase name="El error identifica Empresa" status="pass" classname="integracion\07-invalid-profile" time="0.191"/>
+    <testcase name="Empresa obligatoria se valida en servidor" status="pass" classname="integracion\07-invalid-profile" time="0.191"/>
+  </testsuite>
+  <testsuite name="08. Comprobar que la empresa se conserva" file="integracion\08-profile-preserved.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:31.516" hostname="Ivan" time="0.367">
+    <testcase name="Perfil se vuelve a consultar" status="pass" classname="integracion\08-profile-preserved" time="0.183"/>
+    <testcase name="El rechazo conserva la empresa" status="pass" classname="integracion\08-profile-preserved" time="0.183"/>
+  </testsuite>
+  <testsuite name="09. Consultar directorio por páginas" file="integracion\09-directory-page.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:31.516" hostname="Ivan" time="0.385">
+    <testcase name="Directorio paginado" status="pass" classname="integracion\09-directory-page" time="0.192"/>
+    <testcase name="El directorio respeta el tamaño configurado y calcula las páginas" status="pass" classname="integracion\09-directory-page" time="0.192"/>
+  </testsuite>
+  <testsuite name="10. Rechazar fechas invertidas" file="integracion\10-invalid-date-range.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-16T19:08:31.516" hostname="Ivan" time="0.347">
+    <testcase name="Rango de fechas invertido rechazado" status="pass" classname="integracion\10-invalid-date-range" time="0.347"/>
+  </testsuite>
+  <testsuite name="11. Iniciar sesión como Administrador" file="integracion\11-login-administrador.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:31.516" hostname="Ivan" time="0.792">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="integracion\11-login-administrador" time="0.396"/>
+    <testcase name="Sesión y nonce propios de Administrador" status="pass" classname="integracion\11-login-administrador" time="0.396"/>
+  </testsuite>
+  <testsuite name="12. Inicio del administrador en su panel" file="integracion\12-inicio-administrador.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:31.516" hostname="Ivan" time="0.313">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="integracion\12-inicio-administrador" time="0.157"/>
+    <testcase name="El inicio redirige al panel administrativo" status="pass" classname="integracion\12-inicio-administrador" time="0.157"/>
+  </testsuite>
+  <testsuite name="13. Directorio completo sin cuentas de administración" file="integracion\13-directorio-sin-administrador.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:31.516" hostname="Ivan" time="0.529">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="integracion\13-directorio-sin-administrador" time="0.264"/>
+    <testcase name="El directorio incluye a Ana y excluye al administrador en todas las páginas" status="pass" classname="integracion\13-directorio-sin-administrador" time="0.264"/>
+  </testsuite>
+  <testsuite name="14. El asociado no consulta al administrador como contacto" file="integracion\14-perfil-administrador-oculto.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-16T19:08:31.516" hostname="Ivan" time="0.348">
+    <testcase name="Código HTTP esperado: 404" status="pass" classname="integracion\14-perfil-administrador-oculto" time="0.348"/>
+  </testsuite>
+  <testsuite name="15. Rechazar conexión hacia administración" file="integracion\15-conexion-hacia-administrador.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-16T19:08:31.516" hostname="Ivan" time="0.348">
+    <testcase name="Código HTTP esperado: 400" status="pass" classname="integracion\15-conexion-hacia-administrador" time="0.348"/>
+  </testsuite>
+  <testsuite name="16. Rechazar solicitud de conversación hacia administración" file="integracion\16-chat-hacia-administrador.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-16T19:08:31.517" hostname="Ivan" time="0.317">
+    <testcase name="Código HTTP esperado: 400" status="pass" classname="integracion\16-chat-hacia-administrador" time="0.317"/>
+  </testsuite>
+  <testsuite name="17. Rechazar conexión desde administración" file="integracion\17-conexion-desde-administrador.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-16T19:08:31.517" hostname="Ivan" time="0.318">
+    <testcase name="Código HTTP esperado: 403" status="pass" classname="integracion\17-conexion-desde-administrador" time="0.318"/>
+  </testsuite>
+  <testsuite name="18. Rechazar solicitud de conversación desde administración" file="integracion\18-chat-desde-administrador.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-16T19:08:31.517" hostname="Ivan" time="0.318">
+    <testcase name="Código HTTP esperado: 403" status="pass" classname="integracion\18-chat-desde-administrador" time="0.318"/>
+  </testsuite>
+</testsuites>

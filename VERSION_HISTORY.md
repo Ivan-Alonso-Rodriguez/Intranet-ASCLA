@@ -86,6 +86,23 @@ El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y prueba
 
 ## 1.10.8 — Formularios y continuidad del Documento de Análisis y Diseño
 
+### Preparación de development del 16 de octubre
+
+- Se unifica la entrega vigente de Bruno en `pruebas/backend/coleccion-bruno/`: 18 peticiones de integración y cuatro flujos de negocio, 58 peticiones y 105 comprobaciones en total. Playwright conserva cinco recorridos con 11 videos y 11 capturas del último lote local aprobado.
+- `pruebas/` publica solo la última ejecución por herramienta. Se actualizan el manual, los pasos de exposición y la instalación de herramientas; se mantienen las fuentes y metadatos originales de las evidencias.
+- Se retiran tres scripts sustituidos y la copia duplicada de los cuatro flujos. El `Jenkinsfile` se conserva por solicitud del responsable como referencia opcional. La suite complementaria con cuentas temporales permanece activa para sus escenarios propios.
+- Los accesos privados, dependencias y ZIP con contraseñas permanecen fuera de Git. Se conserva versión 1.10.8 y esquema 15; preparar el commit no despliega el plugin ni aprueba UAT.
+- Se completa en el catálogo JSON la traducción del aviso de administración ya presente en gettext. La revisión pasa 49 controles portables, sintaxis de los 16 PHP pendientes y las verificaciones de documentación, paquete y evidencias.
+
+### Ajuste del 16 de octubre: administración e identidad visual
+
+- Se muestra un solo logo en escritorio y las secciones de administración pasan a la parte superior del contenido.
+- El administrador inicia en su panel ASCLA y conserva el acceso técnico explícito a WordPress.
+- Las cuentas administrativas quedan fuera del directorio, recomendaciones y microeventos, y no pueden enviar ni recibir solicitudes de conexión o conversación. Se conservan los datos anteriores y los permisos de gestión.
+- Las regresiones separan al administrador que configura la comunidad de los asociados que participan en las pruebas de networking y microeventos. La verificación local y el ZIP actualizado no equivalen a instalarlo en el sitio publicado.
+
+- **Integración y E2E para presentación UAT, 15 de octubre:** las pruebas se ejecutan independientemente de Jenkins. Se repiten Bruno y Playwright desde `uat`, con base `c525b99`: 10 peticiones/15 comprobaciones de integración, 23/38 de flujos HTTP y tres recorridos de interfaz aprobados, con cinco videos y cinco capturas. El recorrido existente de conexiones abre con un clic real el mensaje de presentación desplegable antes de leerlo y aceptar la solicitud específica. Se conserva el primer intento fallido con su video; no se omiten comprobaciones ni se añaden casos. Los reportes nuevos identifican rama y versión local; su guía remota usa rutas relativas. El [manual](MANUAL_QA_UAT.md#exponer-pruebas) explica la exposición y la integración de ramas con historial divergente. El [resumen verificable](docs/evidence/release-1.10.8/uat-acceptance108.json) declara los ajustes sin commit y la limpieza. Sin nueva cobertura, cambios del core, reconstrucción del ZIP ni instalación remota; se conserva versión 1.10.8 y esquema 15.
+
 - **Corrección de incidencias SonarQube, 15 de octubre:** análisis local con SonarQube Community 26.9.0.129388. La instantánea del commit `88bbad3` reproduce las 137 incidencias exportadas de ASCLA-QA; la instantánea corregida obtiene cero. Se simplifican condiciones, plantillas y funciones; se separan transporte de Calendar, resolución de cuentas de Forms, excepciones de entrega y compatibilidad de estadísticas de caché. Se conserva la interfaz esperada por WordPress y se mantienen permisos, validaciones y privacidad. No se añaden casos ni se cambian reglas, exclusiones o umbrales; las regresiones utilizan las pruebas existentes sin recoger cobertura. El resultado local no acredita el Quality Gate publicado ni un despliegue. Se conservan versión 1.10.8, esquema 15 y estados de la matriz.
   Validación: 677 pruebas PHP/7.565 aserciones, 49 controles portables y doce recorridos de navegador con 110 controles aprobados; 148 estados axe registrados sin infracciones automáticas ni desbordamiento. Se ajusta una aserción existente al mensaje actual de perfil vacío. El [resumen verificable](docs/evidence/release-1.10.8/sonar-fixes108.json) conserva huellas de los reportes nativos, las repeticiones por idioma y cron del entorno de prueba y la comprobación de que los cuatro artefactos originales de cobertura siguen intactos. ZIP reconstruido y verificado: 188 archivos, 1.355.916 bytes; su hash está en el [manifiesto](docs/evidence/release-1.10.8/package.json). Instalación manual y Quality Gate remoto pendientes.
 

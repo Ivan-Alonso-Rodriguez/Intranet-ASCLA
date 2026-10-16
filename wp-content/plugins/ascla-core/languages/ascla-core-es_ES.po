@@ -5261,3 +5261,6 @@ msgstr "Últimos cambios de estado"
 
 msgid "“No me interesa” es privado. Puedes restituir aquí la elegibilidad de cualquier perfil."
 msgstr "“No me interesa” es privado. Puedes restituir aquí la elegibilidad de cualquier perfil."
+
+msgid "La cuenta de administración gestiona la comunidad y no participa en el directorio, las conexiones ni los microeventos."
+msgstr "La cuenta de administración gestiona la comunidad y no participa en el directorio, las conexiones ni los microeventos."

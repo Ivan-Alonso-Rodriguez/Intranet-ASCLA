@@ -85,6 +85,7 @@ final class App
     private static function requirePageAccess(string $page): void
     {
         if (!Access::member()) { wp_die('Esta cuenta no tiene acceso a la comunidad ASCLA. Contacte al administrador.','ASCLA',['response'=>403]); }
+        if ($page==='intranet' && Access::isAdministrator()) { wp_safe_redirect(self::adminUrl());exit; }
         if ($page==='recomendaciones') { wp_safe_redirect(Catalog::url('intranet').'#recomendaciones',301);exit; }
         if ($page==='admin' && !current_user_can('ascla_admin_area')) { wp_die('Esta cuenta no tiene permisos de administración ASCLA.','ASCLA',['response'=>403]); }
     }
@@ -112,6 +113,11 @@ final class App
             if($permalink){$base=$permalink;}
         }
         return add_query_arg($args,$base);
+    }
+
+    public static function homeUrl(int $id=0): string
+    {
+        return Access::isAdministrator($id)?self::adminUrl():Catalog::url('intranet');
     }
 
     public static function assetVersion(string $relative): string

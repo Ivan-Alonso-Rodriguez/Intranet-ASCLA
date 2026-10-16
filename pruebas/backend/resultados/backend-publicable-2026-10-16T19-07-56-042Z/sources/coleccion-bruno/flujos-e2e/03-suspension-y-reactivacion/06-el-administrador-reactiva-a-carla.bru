@@ -1,0 +1,33 @@
+meta {
+  name: 06. El administrador reactiva a Carla
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/admin/member/{{idCarla}}
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAdministrador}}
+  X-WP-Nonce: {{nonceAdministrador}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "suspended": false
+  }
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Cuenta de prueba reactivada", function () { expect(res.getBody().suspended).to.equal(false); });
+}

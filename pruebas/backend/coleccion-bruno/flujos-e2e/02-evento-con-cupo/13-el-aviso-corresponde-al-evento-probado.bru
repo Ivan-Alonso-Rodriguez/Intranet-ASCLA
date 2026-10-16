@@ -1,0 +1,26 @@
+meta {
+  name: 13. El aviso corresponde al evento probado
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/notifications
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionBruno}}
+  X-WP-Nonce: {{nonceBruno}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Existe una notificación de cupo para este evento", function () { expect(res.getBody().some(n=>n.kind==="event_waitlist_available"&&Number((String(n.url).match(/[?&]item=(\d+)/)||[])[1])===Number(bru.getCollectionVar("eventoCupoId")))).to.equal(true); });
+}

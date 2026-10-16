@@ -1,0 +1,29 @@
+meta {
+  name: 09. Guardar avisos antes de liberar el cupo
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/notifications/summary
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionBruno}}
+  X-WP-Nonce: {{nonceBruno}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:post-response {
+  if(res.getStatus()===200) bru.setCollectionVar("avisosAntesDelCupo", Number(res.getBody().unread_total));
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+}

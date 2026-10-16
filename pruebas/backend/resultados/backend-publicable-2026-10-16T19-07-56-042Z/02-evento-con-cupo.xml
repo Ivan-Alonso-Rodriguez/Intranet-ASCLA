@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<testsuites>
+  <testsuite name="01. Iniciar sesión como Administrador" file="flujos-e2e\02-evento-con-cupo\01-iniciar-sesion-administrador.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.283" hostname="Ivan" time="0.977">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\02-evento-con-cupo\01-iniciar-sesion-administrador" time="0.488"/>
+    <testcase name="Sesión y nonce propios de Administrador" status="pass" classname="flujos-e2e\02-evento-con-cupo\01-iniciar-sesion-administrador" time="0.488"/>
+  </testsuite>
+  <testsuite name="02. Iniciar sesión como Ana" file="flujos-e2e\02-evento-con-cupo\02-iniciar-sesion-ana.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.283" hostname="Ivan" time="0.681">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\02-evento-con-cupo\02-iniciar-sesion-ana" time="0.340"/>
+    <testcase name="Sesión y nonce propios de Ana" status="pass" classname="flujos-e2e\02-evento-con-cupo\02-iniciar-sesion-ana" time="0.340"/>
+  </testsuite>
+  <testsuite name="03. Iniciar sesión como Bruno" file="flujos-e2e\02-evento-con-cupo\03-iniciar-sesion-bruno.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.283" hostname="Ivan" time="0.676">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\02-evento-con-cupo\03-iniciar-sesion-bruno" time="0.338"/>
+    <testcase name="Sesión y nonce propios de Bruno" status="pass" classname="flujos-e2e\02-evento-con-cupo\03-iniciar-sesion-bruno" time="0.338"/>
+  </testsuite>
+  <testsuite name="04. Iniciar sesión como Carla" file="flujos-e2e\02-evento-con-cupo\04-iniciar-sesion-carla.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.283" hostname="Ivan" time="0.741">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\02-evento-con-cupo\04-iniciar-sesion-carla" time="0.371"/>
+    <testcase name="Sesión y nonce propios de Carla" status="pass" classname="flujos-e2e\02-evento-con-cupo\04-iniciar-sesion-carla" time="0.371"/>
+  </testsuite>
+  <testsuite name="05. Crear evento con un solo cupo" file="flujos-e2e\02-evento-con-cupo\05-crear-evento-con-un-solo-cupo.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.284" hostname="Ivan" time="0.697">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-evento-con-cupo\05-crear-evento-con-un-solo-cupo" time="0.348"/>
+    <testcase name="Evento publicado con capacidad uno" status="pass" classname="flujos-e2e\02-evento-con-cupo\05-crear-evento-con-un-solo-cupo" time="0.348"/>
+  </testsuite>
+  <testsuite name="06. Ana confirma el único cupo" file="flujos-e2e\02-evento-con-cupo\06-ana-confirma-el-unico-cupo.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.284" hostname="Ivan" time="0.463">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-evento-con-cupo\06-ana-confirma-el-unico-cupo" time="0.232"/>
+    <testcase name="Cupo confirmado y aforo completo" status="pass" classname="flujos-e2e\02-evento-con-cupo\06-ana-confirma-el-unico-cupo" time="0.232"/>
+  </testsuite>
+  <testsuite name="07. Bruno no puede sobrepasar el aforo" file="flujos-e2e\02-evento-con-cupo\07-bruno-no-puede-sobrepasar-el-aforo.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.284" hostname="Ivan" time="0.336">
+    <testcase name="Código HTTP esperado: 409" status="pass" classname="flujos-e2e\02-evento-con-cupo\07-bruno-no-puede-sobrepasar-el-aforo" time="0.168"/>
+    <testcase name="El rechazo se debe a falta de cupos" status="pass" classname="flujos-e2e\02-evento-con-cupo\07-bruno-no-puede-sobrepasar-el-aforo" time="0.168"/>
+  </testsuite>
+  <testsuite name="08. Bruno entra en lista de espera" file="flujos-e2e\02-evento-con-cupo\08-bruno-entra-en-lista-de-espera.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.284" hostname="Ivan" time="0.365">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-evento-con-cupo\08-bruno-entra-en-lista-de-espera" time="0.183"/>
+    <testcase name="Primer puesto de la lista de espera" status="pass" classname="flujos-e2e\02-evento-con-cupo\08-bruno-entra-en-lista-de-espera" time="0.183"/>
+  </testsuite>
+  <testsuite name="09. Guardar avisos antes de liberar el cupo" file="flujos-e2e\02-evento-con-cupo\09-guardar-avisos-antes-de-liberar-el-cupo.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-16T19:08:50.284" hostname="Ivan" time="0.399">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-evento-con-cupo\09-guardar-avisos-antes-de-liberar-el-cupo" time="0.399"/>
+  </testsuite>
+  <testsuite name="10. Ana cancela su inscripción" file="flujos-e2e\02-evento-con-cupo\10-ana-cancela-su-inscripcion.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.285" hostname="Ivan" time="0.466">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-evento-con-cupo\10-ana-cancela-su-inscripcion" time="0.233"/>
+    <testcase name="Inscripción cancelada" status="pass" classname="flujos-e2e\02-evento-con-cupo\10-ana-cancela-su-inscripcion" time="0.233"/>
+  </testsuite>
+  <testsuite name="11. El cupo se ofrece a Bruno" file="flujos-e2e\02-evento-con-cupo\11-el-cupo-se-ofrece-a-bruno.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.285" hostname="Ivan" time="0.401">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-evento-con-cupo\11-el-cupo-se-ofrece-a-bruno" time="0.200"/>
+    <testcase name="Oferta vigente reservada para la lista de espera" status="pass" classname="flujos-e2e\02-evento-con-cupo\11-el-cupo-se-ofrece-a-bruno" time="0.200"/>
+  </testsuite>
+  <testsuite name="12. La oferta genera un aviso nuevo" file="flujos-e2e\02-evento-con-cupo\12-la-oferta-genera-un-aviso-nuevo.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.285" hostname="Ivan" time="0.314">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-evento-con-cupo\12-la-oferta-genera-un-aviso-nuevo" time="0.157"/>
+    <testcase name="Aumenta el contador de avisos pendientes" status="pass" classname="flujos-e2e\02-evento-con-cupo\12-la-oferta-genera-un-aviso-nuevo" time="0.157"/>
+  </testsuite>
+  <testsuite name="13. El aviso corresponde al evento probado" file="flujos-e2e\02-evento-con-cupo\13-el-aviso-corresponde-al-evento-probado.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.285" hostname="Ivan" time="0.406">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-evento-con-cupo\13-el-aviso-corresponde-al-evento-probado" time="0.203"/>
+    <testcase name="Existe una notificación de cupo para este evento" status="pass" classname="flujos-e2e\02-evento-con-cupo\13-el-aviso-corresponde-al-evento-probado" time="0.203"/>
+  </testsuite>
+  <testsuite name="14. El administrador cancela el evento" file="flujos-e2e\02-evento-con-cupo\14-el-administrador-cancela-el-evento.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.285" hostname="Ivan" time="0.462">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-evento-con-cupo\14-el-administrador-cancela-el-evento" time="0.231"/>
+    <testcase name="Evento identificado y cancelado" status="pass" classname="flujos-e2e\02-evento-con-cupo\14-el-administrador-cancela-el-evento" time="0.231"/>
+  </testsuite>
+  <testsuite name="15. Carla no puede inscribirse al evento cancelado" file="flujos-e2e\02-evento-con-cupo\15-carla-no-puede-inscribirse-al-evento-cancelado.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-16T19:08:50.285" hostname="Ivan" time="0.355">
+    <testcase name="Código HTTP esperado: 409" status="pass" classname="flujos-e2e\02-evento-con-cupo\15-carla-no-puede-inscribirse-al-evento-cancelado" time="0.177"/>
+    <testcase name="El rechazo identifica la cancelación" status="pass" classname="flujos-e2e\02-evento-con-cupo\15-carla-no-puede-inscribirse-al-evento-cancelado" time="0.177"/>
+  </testsuite>
+</testsuites>

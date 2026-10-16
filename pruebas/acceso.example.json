@@ -1,0 +1,27 @@
+{
+  "origin": "ascla-shared-test-users",
+  "base": "https://wordpress.ingsoftware.lat",
+  "browser_channel": "msedge",
+  "actors": {
+    "Ana": {
+      "id": 37,
+      "login": "prueba.ascla.ana",
+      "password": ""
+    },
+    "Bruno": {
+      "id": 38,
+      "login": "prueba.ascla.bruno",
+      "password": ""
+    },
+    "Carla": {
+      "id": 39,
+      "login": "prueba.ascla.carla",
+      "password": ""
+    },
+    "Administrador": {
+      "id": 9,
+      "login": "AdministradorASCLA",
+      "password": ""
+    }
+  }
+}

@@ -1,0 +1,77 @@
+flujos-e2e\02-evento-con-cupo\01-iniciar-sesion-administrador (302 Found) - 211 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Administrador
+flujos-e2e\02-evento-con-cupo\02-iniciar-sesion-ana (302 Found) - 143 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Ana
+flujos-e2e\02-evento-con-cupo\03-iniciar-sesion-bruno (302 Found) - 139 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Bruno
+flujos-e2e\02-evento-con-cupo\04-iniciar-sesion-carla (302 Found) - 181 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Carla
+flujos-e2e\02-evento-con-cupo\05-crear-evento-con-un-solo-cupo (200 OK) - 407 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Evento publicado con capacidad uno
+flujos-e2e\02-evento-con-cupo\06-ana-confirma-el-unico-cupo (200 OK) - 264 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Cupo confirmado y aforo completo
+flujos-e2e\02-evento-con-cupo\07-bruno-no-puede-sobrepasar-el-aforo (409 Conflict) - 135 ms
+Tests
+   ✓ Código HTTP esperado: 409
+   ✓ El rechazo se debe a falta de cupos
+flujos-e2e\02-evento-con-cupo\08-bruno-entra-en-lista-de-espera (200 OK) - 156 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Primer puesto de la lista de espera
+flujos-e2e\02-evento-con-cupo\09-guardar-avisos-antes-de-liberar-el-cupo (200 OK) - 104 ms
+Tests
+   ✓ Código HTTP esperado: 200
+flujos-e2e\02-evento-con-cupo\10-ana-cancela-su-inscripcion (200 OK) - 268 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Inscripción cancelada
+flujos-e2e\02-evento-con-cupo\11-el-cupo-se-ofrece-a-bruno (200 OK) - 198 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Oferta vigente reservada para la lista de espera
+flujos-e2e\02-evento-con-cupo\12-la-oferta-genera-un-aviso-nuevo (200 OK) - 107 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Aumenta el contador de avisos pendientes
+flujos-e2e\02-evento-con-cupo\13-el-aviso-corresponde-al-evento-probado (200 OK) - 206 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Existe una notificación de cupo para este evento
+flujos-e2e\02-evento-con-cupo\14-el-administrador-cancela-el-evento (200 OK) - 256 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Evento identificado y cancelado
+flujos-e2e\02-evento-con-cupo\15-carla-no-puede-inscribirse-al-evento-cancelado (409 Conflict) - 133 ms
+Tests
+   ✓ Código HTTP esperado: 409
+   ✓ El rechazo identifica la cancelación
+
+📊 Execution Summary
+┌───────────────┬────────────────┐
+│ Metric        │     Result     │
+├───────────────┼────────────────┤
+│ Status        │     ✓ PASS     │
+├───────────────┼────────────────┤
+│ Requests      │ 15 (15 Passed) │
+├───────────────┼────────────────┤
+│ Tests         │     29/29      │
+├───────────────┼────────────────┤
+│ Assertions    │      0/0       │
+├───────────────┼────────────────┤
+│ Duration (ms) │      7739      │
+└───────────────┴────────────────┘
+Wrote html results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\02-evento-con-cupo.html
+Wrote json results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\02-evento-con-cupo.json
+Wrote junit results to repositorio\test-results\backend-publicable-2026-10-16T19-07-56-042Z\02-evento-con-cupo.xml

@@ -1708,5 +1708,6 @@
   "microeventos": "microevents",
   "asociados en espera": "members waiting",
   "Solo administración puede archivar microeventos.": "Only administration can archive microevents.",
-  "Cancela o deniega la propuesta antes de archivarla.": "Cancel or decline the proposal before archiving it."
+  "Cancela o deniega la propuesta antes de archivarla.": "Cancel or decline the proposal before archiving it.",
+  "La cuenta de administración gestiona la comunidad y no participa en el directorio, las conexiones ni los microeventos.": "The administration account manages the community and does not participate in the directory, connections or microevents."
 }

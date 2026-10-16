@@ -1,0 +1,1950 @@
+{
+  "prepared_on": "2026-10-16",
+  "basis": "IDs y descripciones de las matrices CU/CP y RF/CP del plan y tablas RN/RF del análisis. La relación de evidencia es una evaluación de los scripts y reportes de esta entrega; no representa aceptación integral de los documentos.",
+  "sources": [
+    {
+      "name": "DOCUMENTO DE ANALISIS Y DISEÑO ASCLA .docx",
+      "sha256": "70900a01347e43344140321bf4e449d43b1d63b774782445168095b2d1dde0a9"
+    },
+    {
+      "name": "Plan de Prueba y Casos de Prueba.docx",
+      "sha256": "3b202193c59fe066fde948fbf87215a37efe4ef4577ed087c97d6ecb3f4a0c80"
+    }
+  ],
+  "selections": {
+    "integracion": {
+      "requirements": [
+        "RF-004",
+        "RF-013",
+        "RF-137",
+        "RF-201"
+      ],
+      "rules": [
+        "RN-023",
+        "RN-031",
+        "RN-036"
+      ],
+      "cases": [
+        "CP-001",
+        "CP-013",
+        "CP-021",
+        "CP-101"
+      ]
+    },
+    "01-conexion-y-bloqueo": {
+      "requirements": [
+        "RF-017",
+        "RF-018",
+        "RF-020",
+        "RF-026",
+        "RF-029",
+        "RF-031",
+        "RF-034",
+        "RF-035"
+      ],
+      "rules": [
+        "RN-007",
+        "RN-009",
+        "RN-010"
+      ],
+      "cases": [
+        "CP-024",
+        "CP-025",
+        "CP-032",
+        "CP-033",
+        "CP-035",
+        "CP-036"
+      ]
+    },
+    "02-evento-con-cupo": {
+      "requirements": [
+        "RF-047",
+        "RF-049",
+        "RF-055",
+        "RF-056",
+        "RF-057",
+        "RF-058",
+        "RF-059",
+        "RF-060",
+        "RF-061",
+        "RF-062"
+      ],
+      "rules": [
+        "RN-017",
+        "RN-018",
+        "RN-020"
+      ],
+      "cases": [
+        "CP-047",
+        "CP-049",
+        "CP-051",
+        "CP-052",
+        "CP-053",
+        "CP-055",
+        "CP-056",
+        "CP-059",
+        "CP-061"
+      ]
+    },
+    "03-suspension-y-reactivacion": {
+      "requirements": [
+        "RF-088",
+        "RF-089",
+        "RF-090",
+        "RF-091",
+        "RF-133",
+        "RF-135"
+      ],
+      "rules": [
+        "RN-023",
+        "RN-036"
+      ],
+      "cases": [
+        "CP-005",
+        "CP-009",
+        "CP-010"
+      ]
+    },
+    "04-asistente-ia": {
+      "requirements": [
+        "RF-166",
+        "RF-167",
+        "RF-168"
+      ],
+      "rules": [
+        "RN-022",
+        "RN-042"
+      ],
+      "cases": [
+        "CP-070",
+        "CP-071",
+        "CP-072"
+      ]
+    },
+    "perfil": {
+      "requirements": [
+        "RF-002",
+        "RF-004"
+      ],
+      "rules": [
+        "RN-001",
+        "RN-031"
+      ],
+      "cases": [
+        "CP-011",
+        "CP-013"
+      ]
+    },
+    "conexion-chat-bloqueo": {
+      "requirements": [
+        "RF-017",
+        "RF-018",
+        "RF-020",
+        "RF-029",
+        "RF-034",
+        "RF-035"
+      ],
+      "rules": [
+        "RN-007",
+        "RN-009",
+        "RN-010"
+      ],
+      "cases": [
+        "CP-024",
+        "CP-025",
+        "CP-032",
+        "CP-033",
+        "CP-035",
+        "CP-038"
+      ]
+    },
+    "borrador-publicacion-inscripcion": {
+      "requirements": [
+        "RF-047",
+        "RF-048",
+        "RF-049",
+        "RF-055"
+      ],
+      "rules": [
+        "RN-016",
+        "RN-017",
+        "RN-036"
+      ],
+      "cases": [
+        "CP-047",
+        "CP-048",
+        "CP-049",
+        "CP-051"
+      ]
+    },
+    "aforo-lista-espera-notificacion": {
+      "requirements": [
+        "RF-047",
+        "RF-049",
+        "RF-055",
+        "RF-056",
+        "RF-057",
+        "RF-058",
+        "RF-059",
+        "RF-060",
+        "RF-061",
+        "RF-062",
+        "RF-069",
+        "RF-071"
+      ],
+      "rules": [
+        "RN-017",
+        "RN-018",
+        "RN-020"
+      ],
+      "cases": [
+        "CP-047",
+        "CP-049",
+        "CP-051",
+        "CP-052",
+        "CP-053",
+        "CP-055",
+        "CP-056",
+        "CP-057",
+        "CP-059",
+        "CP-061"
+      ]
+    },
+    "suspension-reactivacion-acceso": {
+      "requirements": [
+        "RF-088",
+        "RF-089",
+        "RF-090",
+        "RF-091",
+        "RF-133"
+      ],
+      "rules": [
+        "RN-023",
+        "RN-036"
+      ],
+      "cases": [
+        "CP-005",
+        "CP-009",
+        "CP-010"
+      ]
+    }
+  },
+  "requirements": [
+    {
+      "id": "RN-001",
+      "title": "Edición del perfil",
+      "source": {
+        "document": "analisis",
+        "table_block": 112
+      }
+    },
+    {
+      "id": "RN-007",
+      "title": "Solicitud de conexión",
+      "source": {
+        "document": "analisis",
+        "table_block": 112
+      }
+    },
+    {
+      "id": "RN-009",
+      "title": "Protocolo de habilitación, privacidad y condiciones de la mensajería directa",
+      "source": {
+        "document": "analisis",
+        "table_block": 112
+      }
+    },
+    {
+      "id": "RN-010",
+      "title": "Bloqueo e Interacción Restringida",
+      "source": {
+        "document": "analisis",
+        "table_block": 112
+      }
+    },
+    {
+      "id": "RN-016",
+      "title": "Ciclo de vida, administración y clasificación de eventos",
+      "source": {
+        "document": "analisis",
+        "table_block": 112
+      }
+    },
+    {
+      "id": "RN-017",
+      "title": "Inscripción, control de aforo y listas de espera",
+      "source": {
+        "document": "analisis",
+        "table_block": 112
+      }
+    },
+    {
+      "id": "RN-018",
+      "title": "Prioridad y expiración en listas de espera",
+      "source": {
+        "document": "analisis",
+        "table_block": 112
+      }
+    },
+    {
+      "id": "RN-020",
+      "title": "Generación y ciclo de vida de notificaciones internas",
+      "source": {
+        "document": "analisis",
+        "table_block": 112
+      }
+    },
+    {
+      "id": "RN-022",
+      "title": "IA como apoyo",
+      "source": {
+        "document": "analisis",
+        "table_block": 112
+      }
+    },
+    {
+      "id": "RN-023",
+      "title": "Vigencia de membresía y acceso a la plataforma",
+      "source": {
+        "document": "analisis",
+        "table_block": 112
+      }
+    },
+    {
+      "id": "RN-031",
+      "title": "Umbral de datos profesionales mínimos obligatorios",
+      "source": {
+        "document": "analisis",
+        "table_block": 112
+      }
+    },
+    {
+      "id": "RN-036",
+      "title": "Segregación de funciones y control de acceso basado en roles (RBAC)",
+      "source": {
+        "document": "analisis",
+        "table_block": 112
+      }
+    },
+    {
+      "id": "RN-042",
+      "title": "Consulta mediante asistente ",
+      "source": {
+        "document": "analisis",
+        "table_block": 112
+      }
+    },
+    {
+      "id": "RF-002",
+      "title": "El sistema debe permitir al asociado editar sus datos laborales (cargo, organización, industria y biografía).",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-004",
+      "title": "El sistema debe validar que los campos obligatorios del perfil no se guarden con valores vacíos o incompletos",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-013",
+      "title": "El sistema debe mostrar los resultados de búsqueda en el directorio estructurados en bloques paginados de tamaño configurable.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-017",
+      "title": "El sistema debe permitir al asociado enviar una solicitud de conexión a otro miembro de la comunidad, incorporando opcionalmente un mensaje de presentación.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-018",
+      "title": "El sistema debe permitir al asociado destinatario aceptar una solicitud de conexión recibida en estado pendiente.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-020",
+      "title": "El sistema debe formalizar la relación de conexión bilateral activa entre ambos asociados inmediatamente tras la aceptación de la solicitud, habilitando los canales de comunicación directa.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-026",
+      "title": "El sistema debe permitir abrir una ventana de conversación directa con un asociado seleccionado desde el listado de conexiones activas.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-029",
+      "title": "El sistema debe permitir el envío de mensajes de texto en conversaciones individuales activas entre asociados con conexión aceptada.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-031",
+      "title": "El sistema debe recuperar y presentar el historial de mensajes de una conversación ordenado cronológicamente por fecha de emisión.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-034",
+      "title": "El sistema debe permitir al asociado ejecutar el bloqueo de otro miembro de la comunidad previa confirmación de la acción.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-035",
+      "title": "El sistema debe permitir al asociado retirar el bloqueo sobre un usuario registrado en su lista de miembros bloqueados.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-047",
+      "title": "El sistema debe permitir a los roles autorizados crear eventos registrando título, descripción, temática, fecha, horario, modalidad, ubicación física o enlace virtual y capacidad máxima de participantes .",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-048",
+      "title": "El sistema debe permitir a los roles autorizados modificar los datos de un evento mientras este se encuentre en estado borrador o publicado.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-049",
+      "title": "El sistema debe permitir a los roles autorizados publicar un evento para ponerlo a disposición de la comunidad de asociados .",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-055",
+      "title": "El sistema debe permitir al asociado confirmar su asistencia a un evento publicado mediante el registro de RSVP.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-056",
+      "title": "El sistema debe permitir al asociado cancelar su asistencia previamente confirmada a un evento.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-057",
+      "title": "El sistema debe validar la existencia de cupos libres antes de procesar una solicitud de RSVP, registrando la inscripción únicamente cuando el número de inscritos sea menor al aforo máximo configurado.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-058",
+      "title": "El sistema debe bloquear la confirmación directa de RSVP y ofrecer el ingreso a la lista de espera cuando el evento alcance su capacidad máxima.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-059",
+      "title": "El sistema debe permitir al asociado solicitar su registro en la lista de espera cuando un evento haya alcanzado el aforo máximo configurado.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-060",
+      "title": "El sistema debe registrar las incorporaciones a la lista de espera asignando un número de turno ordenado estrictamente por marca de fecha y hora.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-061",
+      "title": "El sistema debe notificar internamente al primer asociado de la lista de espera al momento en que se libere un cupo en el evento.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-062",
+      "title": "El sistema debe conceder una ventana de tiempo límite para que el asociado notificado en lista de espera confirme su participación.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-069",
+      "title": "El sistema debe listar las notificaciones internas del usuario indicando su estado de lectura y fecha de recepción.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-071",
+      "title": "El sistema debe redirigir al usuario hacia la sección o contenido relacionado al interactuar con una notificación.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-088",
+      "title": "El sistema debe validar el estado activo de la membresía del asociado durante la autenticación, denegando el ingreso a la plataforma si se encuentra vencida o suspendida.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-089",
+      "title": "El sistema debe revocar la sesión activa e impedir la navegación en la plataforma cuando el estado de la membresía del usuario cambie a vencida o suspendida.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-090",
+      "title": "El sistema debe conservar en la base de datos el perfil, las conexiones, el historial de mensajería y las participaciones del usuario cuya membresía haya sido suspendida o vencida.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-091",
+      "title": "El sistema debe restablecer automáticamente el acceso completo a la plataforma y a los datos históricos del asociado inmediatamente después de que el Administrador reactive su membresía",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-133",
+      "title": "El sistema debe permitir al Administrador actualizar el estado de membresía, el rol asignado y los permisos de acceso de cualquier cuenta de usuario.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-135",
+      "title": "El sistema debe registrar automáticamente en la bitácora de auditoría el identificador del administrador, fecha, hora, usuario afectado, campo modificado, valor previo y nuevo valor ante cualquier cambio de membresía, rol o permisos.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-137",
+      "title": "El sistema debe interceptar y rechazar cualquier petición u operación sobre recursos para los cuales el rol del usuario no cuente con autorización explícita.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-166",
+      "title": "El sistema debe procesar consultas en lenguaje natural dirigidas al Asistente IA, generando respuestas fundamentadas exclusivamente en la información autorizada y publicada de la Intranet.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-167",
+      "title": "El sistema debe permitir al asociado iniciar una nueva sesión de conversación con el Asistente IA, restableciendo el contexto de diálogo.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-168",
+      "title": "El sistema debe permitir al asociado consultar su historial cronológico de sesiones y mensajes intercambiados con el Asistente IA.",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    },
+    {
+      "id": "RF-201",
+      "title": "El sistema debe autenticar al usuario validando sus credenciales y el estado activo de su membresía, concediendo acceso a la plataforma según el rol correspondiente",
+      "source": {
+        "document": "analisis",
+        "table_block": 304
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "CP-001",
+      "use_case": "CU001",
+      "description": "Inicio de sesión exitoso con credenciales válidas y membresía activa.",
+      "status": "escenario_cubierto",
+      "evidence": [
+        "integracion",
+        "frontend"
+      ],
+      "scope": "Inicio de sesión válido e identidad de un miembro activo. No incluye las funciones Recordarme.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-002",
+      "use_case": "CU001",
+      "description": "Intento de acceso con credenciales incorrectas; mensaje genérico de error.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-003",
+      "use_case": "CU001",
+      "description": "Activación de captcha (Turnstile) tras intentos fallidos reiterados.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-004",
+      "use_case": "CU001",
+      "description": "Bloqueo temporal de cuenta al superar el límite máximo de intentos.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-005",
+      "use_case": "CU001",
+      "description": "Intento de acceso con membresía vencida o suspendida.",
+      "status": "parcial",
+      "evidence": [
+        "03-suspension-y-reactivacion",
+        "suspension-reactivacion-acceso"
+      ],
+      "scope": "Se rechazan la sesión existente y un login nuevo mientras la cuenta está suspendida. Falta probar membresía vencida.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-006",
+      "use_case": "CU002",
+      "description": "Creación de nueva cuenta de asociado por el Administrador con rol asignado.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-007",
+      "use_case": "CU002",
+      "description": "Actualización de rol o permisos de una cuenta existente.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-008",
+      "use_case": "CU002",
+      "description": "Intento de modificar datos profesionales sin solicitud de soporte registrada (debe rechazarse).",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-009",
+      "use_case": "CU002",
+      "description": "Suspensión de cuenta de asociado activo; verificar auditoría.",
+      "status": "parcial",
+      "evidence": [
+        "03-suspension-y-reactivacion",
+        "suspension-reactivacion-acceso"
+      ],
+      "scope": "Se comprueba la suspensión por API y mediante confirmación en la interfaz; falta consultar la entrada de auditoría.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-010",
+      "use_case": "CU002",
+      "description": "Reactivación de cuenta suspendida y restauración de acceso completo.",
+      "status": "parcial",
+      "evidence": [
+        "03-suspension-y-reactivacion",
+        "suspension-reactivacion-acceso"
+      ],
+      "scope": "Se recuperan acceso e identidad con login nuevo y se conserva la biografía observada antes de suspender; falta contrastar los demás datos históricos.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-011",
+      "use_case": "CU003",
+      "description": "Edición exitosa de datos laborales (cargo, organización, industria, biografía).",
+      "status": "parcial",
+      "evidence": [
+        "perfil"
+      ],
+      "scope": "Se modifica la biografía; no todos los campos laborales del caso.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-012",
+      "use_case": "CU003",
+      "description": "Actualización de preferencias temáticas (intereses, áreas de especialidad).",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-013",
+      "use_case": "CU003",
+      "description": "Validación de campos obligatorios incompletos al guardar perfil.",
+      "status": "parcial",
+      "evidence": [
+        "integracion",
+        "perfil"
+      ],
+      "scope": "Se prueba Empresa obligatoria y conservación del dato anterior; no todos los campos obligatorios.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-014",
+      "use_case": "CU003",
+      "description": "Carga, recorte y guardado de fotografía de perfil.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-015",
+      "use_case": "CU004",
+      "description": "Desactivar visibilidad de un campo opcional; verificar ocultación en directorio.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-016",
+      "use_case": "CU004",
+      "description": "Activar/desactivar inclusión en el Directorio; verificar que el asociado desaparece de resultados.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-017",
+      "use_case": "CU004",
+      "description": "Activar/desactivar recomendaciones de conexiones de forma independiente.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-018",
+      "use_case": "CU004",
+      "description": "Activar/desactivar inclusión en microeventos de forma independiente.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-019",
+      "use_case": "CU005",
+      "description": "Búsqueda por coincidencia textual sobre nombre y cargo profesional.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-020",
+      "use_case": "CU005",
+      "description": "Filtro por selección múltiple de áreas de conocimiento e industrias.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-021",
+      "use_case": "CU005",
+      "description": "Verificación de paginación de resultados en bloques configurables.",
+      "status": "parcial",
+      "evidence": [
+        "integracion"
+      ],
+      "scope": "Se comprueban tamaño y cálculo de páginas; no se cambia la configuración administrativa del tamaño.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-022",
+      "use_case": "CU005",
+      "description": "Verificación de que perfiles con directorio desactivado no aparecen en resultados.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-023",
+      "use_case": "CU005",
+      "description": "Consulta de ficha de perfil público; solo campos autorizados visibles.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-024",
+      "use_case": "CU006",
+      "description": "Envío exitoso de solicitud de conexión con mensaje de presentación opcional.",
+      "status": "escenario_cubierto",
+      "evidence": [
+        "01-conexion-y-bloqueo",
+        "conexion-chat-bloqueo"
+      ],
+      "scope": "Solicitud con mensaje de presentación e ID obtenido del servidor.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-025",
+      "use_case": "CU006",
+      "description": "Aceptación de solicitud de conexión pendiente; habilitación de mensajería.",
+      "status": "escenario_cubierto",
+      "evidence": [
+        "01-conexion-y-bloqueo",
+        "conexion-chat-bloqueo"
+      ],
+      "scope": "Aceptación y habilitación del envío de mensajes.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-026",
+      "use_case": "CU006",
+      "description": "Rechazo de solicitud de conexión pendiente.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-027",
+      "use_case": "CU006",
+      "description": "Cancelación de solicitud propia en estado pendiente.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-028",
+      "use_case": "CU006",
+      "description": "Intento de reenvío de solicitud antes de finalizar el período de enfriamiento (debe bloquearse).",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-029",
+      "use_case": "CU007",
+      "description": "Consulta del listado de conexiones activas con foto, nombre, cargo, organización y fecha.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-030",
+      "use_case": "CU007",
+      "description": "Búsqueda de conexiones activas por nombre.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-031",
+      "use_case": "CU007",
+      "description": "Disolución de conexión activa con confirmación explícita.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-032",
+      "use_case": "CU007",
+      "description": "Bloqueo de un asociado; verificar restricción de conexión y mensajería.",
+      "status": "parcial",
+      "evidence": [
+        "01-conexion-y-bloqueo",
+        "conexion-chat-bloqueo"
+      ],
+      "scope": "Se bloquea y rechaza la mensajería; falta intentar otra solicitud de conexión durante el bloqueo y comprobar todas las exclusiones de RN-010.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-033",
+      "use_case": "CU007",
+      "description": "Desbloqueo de un asociado; verificar que la conexión anterior no se restablece automáticamente.",
+      "status": "escenario_cubierto",
+      "evidence": [
+        "01-conexion-y-bloqueo",
+        "conexion-chat-bloqueo"
+      ],
+      "scope": "Desbloqueo sin restaurar la conexión anterior.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-034",
+      "use_case": "CU007",
+      "description": "Intento de reenvío de solicitud tras disolución antes de finalizar el período de enfriamiento (debe bloquearse).",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-035",
+      "use_case": "CU008",
+      "description": "Envío de mensaje de texto en conversación individual activa.",
+      "status": "escenario_cubierto",
+      "evidence": [
+        "01-conexion-y-bloqueo",
+        "conexion-chat-bloqueo"
+      ],
+      "scope": "Envío de texto y lectura exacta por el destinatario en conversación individual.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-036",
+      "use_case": "CU008",
+      "description": "Recuperación y presentación del historial ordenado cronológicamente.",
+      "status": "parcial",
+      "evidence": [
+        "01-conexion-y-bloqueo",
+        "conexion-chat-bloqueo"
+      ],
+      "scope": "Se recupera el mensaje exacto; falta una prueba comparativa de orden cronológico con múltiples mensajes.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-037",
+      "use_case": "CU008",
+      "description": "Verificación de indicador de estado de lectura.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-038",
+      "use_case": "CU008",
+      "description": "Intento de eliminar o editar un mensaje enviado (debe bloquearse — inmutabilidad RN-028).",
+      "status": "parcial",
+      "evidence": [
+        "conexion-chat-bloqueo"
+      ],
+      "scope": "Se verifica ausencia del botón de eliminación; no se intentan edición y eliminación mediante HTTP en esta colección.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-039",
+      "use_case": "CU008",
+      "description": "Intento de enviar mensaje tras disolución de conexión (debe bloquearse, pero historial accesible).",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-040",
+      "use_case": "CU008",
+      "description": "Ocultación de conversación y restablecimiento automático al recibir nuevo mensaje.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-041",
+      "use_case": "CU009",
+      "description": "Visualización de hasta cinco miembros recomendados con criterios de afinidad.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-042",
+      "use_case": "CU009",
+      "description": "Descarte de perfil sugerido con \"No me interesa\"; verificar exclusión futura.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-043",
+      "use_case": "CU009",
+      "description": "Visualización de contenidos recomendados según intereses del perfil.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-044",
+      "use_case": "CU010",
+      "description": "Confirmación de inscripción a microevento durante ventana de acceso prioritario.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-045",
+      "use_case": "CU010",
+      "description": "Rechazo de invitación a microevento durante ventana prioritaria.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-046",
+      "use_case": "CU010",
+      "description": "Inscripción abierta a cupos remanentes tras finalizar periodo prioritario.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-047",
+      "use_case": "CU011",
+      "description": "Creación de evento con título, descripción, fecha, modalidad y aforo máximo.",
+      "status": "parcial",
+      "evidence": [
+        "02-evento-con-cupo",
+        "borrador-publicacion-inscripcion"
+      ],
+      "scope": "Se crea evento con datos y aforo; no se recorren todas las combinaciones de temática y modalidad.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-048",
+      "use_case": "CU011",
+      "description": "Modificación de evento en estado publicado.",
+      "status": "parcial",
+      "evidence": [
+        "borrador-publicacion-inscripcion"
+      ],
+      "scope": "Se edita el borrador antes de publicar; no se modifica un evento ya publicado en esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-049",
+      "use_case": "CU011",
+      "description": "Publicación de evento; disponible para la comunidad.",
+      "status": "escenario_cubierto",
+      "evidence": [
+        "02-evento-con-cupo",
+        "borrador-publicacion-inscripcion",
+        "aforo-lista-espera-notificacion"
+      ],
+      "scope": "Publicación del evento y disponibilidad para la inscripción.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-050",
+      "use_case": "CU011",
+      "description": "Reprogramación de evento publicado; inscritos pasan a \"Pendiente de reconfirmación\".",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-051",
+      "use_case": "CU012",
+      "description": "Confirmación de RSVP a evento con cupos disponibles.",
+      "status": "escenario_cubierto",
+      "evidence": [
+        "02-evento-con-cupo",
+        "borrador-publicacion-inscripcion",
+        "aforo-lista-espera-notificacion"
+      ],
+      "scope": "Confirmación de RSVP con cupos disponibles.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-052",
+      "use_case": "CU012",
+      "description": "Cancelación de asistencia confirmada; liberación de cupo.",
+      "status": "escenario_cubierto",
+      "evidence": [
+        "02-evento-con-cupo",
+        "aforo-lista-espera-notificacion"
+      ],
+      "scope": "Cancelación de RSVP y liberación de una vacante.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-053",
+      "use_case": "CU012",
+      "description": "Intento de RSVP a evento sin cupos; ofrecer lista de espera.",
+      "status": "escenario_cubierto",
+      "evidence": [
+        "02-evento-con-cupo",
+        "aforo-lista-espera-notificacion"
+      ],
+      "scope": "Rechazo HTTP por aforo completo y registro posterior en espera; la interfaz ofrece solo la espera al llenarse el evento.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-054",
+      "use_case": "CU012",
+      "description": "Verificación de que la lista de participantes se oculta antes de confirmar RSVP.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-055",
+      "use_case": "CU013",
+      "description": "Registro en lista de espera con número de turno por fecha y hora.",
+      "status": "parcial",
+      "evidence": [
+        "02-evento-con-cupo",
+        "aforo-lista-espera-notificacion"
+      ],
+      "scope": "Se verifica el turno uno de un único asociado en espera; falta comparar el orden de varios asociados.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-056",
+      "use_case": "CU013",
+      "description": "Liberación de cupo y notificación al primer asociado de la lista de espera.",
+      "status": "parcial",
+      "evidence": [
+        "02-evento-con-cupo",
+        "aforo-lista-espera-notificacion"
+      ],
+      "scope": "Se libera un cupo, se ofrece al asociado con turno uno y se verifica su aviso; falta comparar múltiples integrantes en espera.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-057",
+      "use_case": "CU013",
+      "description": "Confirmación de vacante dentro del plazo; RSVP confirmado.",
+      "status": "escenario_cubierto",
+      "evidence": [
+        "aforo-lista-espera-notificacion"
+      ],
+      "scope": "El asociado en espera abre su oferta y confirma la vacante antes de que expire; termina como único inscrito.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-058",
+      "use_case": "CU013",
+      "description": "Expiración de plazo de aceptación; descarte y notificación al siguiente.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-059",
+      "use_case": "CU014",
+      "description": "Visualización de notificaciones internas con estado de lectura y fecha.",
+      "status": "escenario_cubierto",
+      "evidence": [
+        "aforo-lista-espera-notificacion"
+      ],
+      "scope": "Se visualiza el aviso del evento como no leído con fecha válida y se verifica como leído tras abrirlo.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-060",
+      "use_case": "CU014",
+      "description": "Marcado individual y masivo de notificaciones como leídas.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-061",
+      "use_case": "CU014",
+      "description": "Redirección al contenido relacionado al interactuar con una notificación.",
+      "status": "escenario_cubierto",
+      "evidence": [
+        "aforo-lista-espera-notificacion"
+      ],
+      "scope": "Se abre la notificación desde la interfaz y se comprueba que conduce al mismo evento y permite confirmar la oferta.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-062",
+      "use_case": "CU014",
+      "description": "Eliminación individual de notificación del panel personal.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-063",
+      "use_case": "CU014",
+      "description": "Verificación de envío de correo transaccional para categorías habilitadas.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-064",
+      "use_case": "CU015",
+      "description": "Visualización del catálogo de aliados con nombre, logotipo y beneficios.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-065",
+      "use_case": "CU016",
+      "description": "Creación de nuevo aliado por el Administrador con datos completos.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-066",
+      "use_case": "CU016",
+      "description": "Retiro de aliado del catálogo público (estado inactivo, sin eliminar registro histórico).",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-067",
+      "use_case": "CU017",
+      "description": "Registro de solicitud de soporte por asociado con categoría y descripción.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-068",
+      "use_case": "CU017",
+      "description": "Transición de estado de solicitud y registro de respuesta por Admin/Ejecutivo.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-069",
+      "use_case": "CU017",
+      "description": "Verificación de que solo el creador y el personal asignado pueden consultar el detalle.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-070",
+      "use_case": "CU018",
+      "description": "Envío de consulta en lenguaje natural y recepción de respuesta basada en información autorizada.",
+      "status": "parcial",
+      "evidence": [
+        "04-asistente-ia"
+      ],
+      "scope": "El trabajo termina y conserva respuesta/hilo; falta contrastar fundamentación y autorización. El lote actual usa mock local. No acredita OpenAI.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-071",
+      "use_case": "CU018",
+      "description": "Inicio de nueva sesión de conversación con el Asistente IA; restablecimiento de contexto.",
+      "status": "parcial",
+      "evidence": [
+        "04-asistente-ia"
+      ],
+      "scope": "Se usa un hilo nuevo único; no se contrasta el restablecimiento del contexto de un hilo anterior.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-072",
+      "use_case": "CU018",
+      "description": "Consulta del historial cronológico de sesiones con el Asistente.",
+      "status": "parcial",
+      "evidence": [
+        "04-asistente-ia"
+      ],
+      "scope": "Se conserva la pregunta y respuesta del mismo trabajo; falta comprobar cronología de múltiples sesiones.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-073",
+      "use_case": "CU019",
+      "description": "Creación de tema de discusión en foro con título, contenido y categoría.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-074",
+      "use_case": "CU019",
+      "description": "Publicación de comentario en discusión abierta.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-075",
+      "use_case": "CU019",
+      "description": "Registro de reacción predefinida sobre tema o comentario.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-076",
+      "use_case": "CU019",
+      "description": "Intento de publicar en discusión cerrada (consulta permitida, publicación bloqueada).",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-077",
+      "use_case": "CU020",
+      "description": "Creación y publicación de contenido en el Hub comunitario.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-078",
+      "use_case": "CU020",
+      "description": "Búsqueda de publicaciones por título, contenido o autor.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-079",
+      "use_case": "CU020",
+      "description": "Filtro de publicaciones por categoría temática y rango de fechas.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-080",
+      "use_case": "CU020",
+      "description": "Consulta del historial de publicaciones propias.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-081",
+      "use_case": "CU021",
+      "description": "Búsqueda y filtro de galerías publicadas por título o rango de fechas.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-082",
+      "use_case": "CU021",
+      "description": "Consulta de galería seleccionada; visualización de fotografías autorizadas.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-083",
+      "use_case": "CU022",
+      "description": "Búsqueda y filtro de recursos por texto libre, temática y formato.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-084",
+      "use_case": "CU022",
+      "description": "Reproducción de video o acceso a enlace externo de un recurso publicado.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-085",
+      "use_case": "CU023",
+      "description": "Creación de galería con título, descripción, fecha, portada y archivos visuales.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-086",
+      "use_case": "CU023",
+      "description": "Retiro de galería publicada (estado Oculto, sin eliminar registro histórico).",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-087",
+      "use_case": "CU024",
+      "description": "Creación de recurso con título, descripción, tipo, autor, fecha y enlace/archivo.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-088",
+      "use_case": "CU024",
+      "description": "Publicación programada con fecha futura; recurso permanece oculto hasta la fecha configurada.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-089",
+      "use_case": "CU024",
+      "description": "Retiro de recurso publicado a estado Oculto sin eliminar historial.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-090",
+      "use_case": "CU026",
+      "description": "Solicitud de recuperación con correo registrado; envío de enlace de restablecimiento.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-091",
+      "use_case": "CU026",
+      "description": "Solicitud de recuperación con correo no registrado; respuesta genérica sin revelar existencia.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-092",
+      "use_case": "CU026",
+      "description": "Uso de enlace de recuperación expirado o ya utilizado.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-093",
+      "use_case": "CU026",
+      "description": "Establecimiento de nueva contraseña cumpliendo políticas de complejidad.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-094",
+      "use_case": "CU027",
+      "description": "Cambio de contraseña exitoso desde configuración de seguridad.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-095",
+      "use_case": "CU027",
+      "description": "Intento de cambio con contraseña vigente incorrecta (debe rechazarse).",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-096",
+      "use_case": "CU027",
+      "description": "Advertencia de inactividad próxima al límite y extensión de sesión.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-097",
+      "use_case": "CU027",
+      "description": "Revocación automática de sesión por inactividad máxima (timeout).",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-098",
+      "use_case": "CU027",
+      "description": "Cierre de sesión voluntario y redirección a pantalla de acceso.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-099",
+      "use_case": "CU028",
+      "description": "Visualización del panel de inicio con indicadores métricos, accesos rápidos y recomendaciones según rol.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-100",
+      "use_case": "CU028",
+      "description": "Aviso de completitud de perfil no bloqueante cuando el porcentaje es inferior al umbral mínimo.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-101",
+      "use_case": "CU028",
+      "description": "Navegación a módulo autorizado desde barra lateral; rechazo de acceso a módulo no autorizado.",
+      "status": "parcial",
+      "evidence": [
+        "integracion",
+        "borrador-publicacion-inscripcion"
+      ],
+      "scope": "Se rechaza /admin/users al asociado; se comprueban inicio administrativo, exclusión del directorio y solicitudes de conexión/conversación en ambos sentidos. La interfaz verifica logo y navegación administrativa; falta la matriz completa de roles.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-102",
+      "use_case": "CU029",
+      "description": "Visualización de métricas agregadas sobre interacción comunitaria, eventos y conexiones.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    },
+    {
+      "id": "CP-103",
+      "use_case": "CU029",
+      "description": "Verificación de que los datos personales y conversaciones privadas están disociados y excluidos.",
+      "status": "no_incluido",
+      "evidence": [],
+      "scope": "No se acredita con los escenarios de esta entrega.",
+      "source": {
+        "document": "plan",
+        "table_block": 149
+      }
+    }
+  ],
+  "summary": {
+    "escenario_cubierto": 12,
+    "parcial": 17,
+    "no_incluido": 74
+  },
+  "limitations": [
+    "No equivale a ejecutar los 103 casos ni a aprobar UAT.",
+    "CP-058 no está cubierto: no se espera la caducidad de la oferta ni su transferencia al siguiente asociado.",
+    "La lista de espera se prueba con una persona; falta comparar la prioridad de varias personas.",
+    "El lote vigente usa mock local. No se acredita la integración específica con OpenAI descrita en RN-022.",
+    "La prueba de suspensión observa 403 por nonce revocado; no acredita RNF-005 sobre cierre de sesión/inactividad y HTTP 401.",
+    "No se acreditan carga, disponibilidad, latencia bajo concurrencia, SMTP real, todas las reglas de privacidad ni todos los roles.",
+    "Los módulos 6 y 8 y otros escenarios del plan no están incluidos en esta selección de integración/E2E.",
+    "Los cambios nuevos de administración se comprobaron en WordPress local aislado; esta evidencia no acredita su instalación en el servidor publicado."
+  ]
+}

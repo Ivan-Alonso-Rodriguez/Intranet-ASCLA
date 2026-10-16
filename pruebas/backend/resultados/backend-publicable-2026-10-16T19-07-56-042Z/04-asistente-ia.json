@@ -1,0 +1,195 @@
+[
+  {
+    "iterationIndex": 0,
+    "results": [
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-asistente-ia\\01-iniciar-sesion-ana.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:8094/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-login.php",
+          "responseTime": 216,
+          "duration": 216,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "gQBalEtENM_EZts8id7ZD"
+          },
+          {
+            "description": "Sesión y nonce propios de Ana",
+            "status": "pass",
+            "uid": "DWtXSF8cQck6nRPNddg_Z"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.9028937,
+        "name": "01. Iniciar sesión como Ana",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-16T19-07-56-042Z\\.coleccion-ejecucion\\flujos-e2e\\04-asistente-ia\\01-iniciar-sesion-ana",
+        "path": "flujos-e2e\\04-asistente-ia\\01-iniciar-sesion-ana",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-asistente-ia\\02-ana-realiza-una-pregunta-en-un-hilo-nuevo.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:8094/wp-json/ascla/v1/ask",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/ask",
+          "responseTime": 104,
+          "duration": 104,
+          "size": 27
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "8mXvMjbrp7g0bUkpUee52"
+          },
+          {
+            "description": "Se crea un trabajo pendiente con ID real",
+            "status": "pass",
+            "uid": "s0fMpSLC36ef5gFbRp76b"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.4072799,
+        "name": "02. Ana realiza una pregunta en un hilo nuevo",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-16T19-07-56-042Z\\.coleccion-ejecucion\\flujos-e2e\\04-asistente-ia\\02-ana-realiza-una-pregunta-en-un-hilo-nuevo",
+        "path": "flujos-e2e\\04-asistente-ia\\02-ana-realiza-una-pregunta-en-un-hilo-nuevo",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-asistente-ia\\03-esperar-el-procesamiento-real-del-trabajo.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:8094/wp-json/ascla/v1/jobs/1",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/jobs/1",
+          "responseTime": 95,
+          "duration": 95,
+          "size": 579
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "jfUZDJuTC5NzG75IG_iut"
+          },
+          {
+            "description": "Trabajo completado con respuesta y contexto correctos",
+            "status": "pass",
+            "uid": "1o0AnhBf4U3D7ygBZuk32"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 2.6557307,
+        "name": "03. Esperar el procesamiento real del trabajo",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-16T19-07-56-042Z\\.coleccion-ejecucion\\flujos-e2e\\04-asistente-ia\\03-esperar-el-procesamiento-real-del-trabajo",
+        "path": "flujos-e2e\\04-asistente-ia\\03-esperar-el-procesamiento-real-del-trabajo",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-asistente-ia\\04-el-hilo-conserva-la-pregunta-y-la-respuesta.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:8094/wp-json/ascla/v1/assistant/thread?thread=ascla_prueba_1792177741596",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/assistant/thread?thread=ascla_prueba_1792177741596",
+          "responseTime": 81,
+          "duration": 81,
+          "size": 477
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "uRCI3QxjFdXvc_FrYWHgS"
+          },
+          {
+            "description": "El hilo contiene el trabajo completado de esta ejecución",
+            "status": "pass",
+            "uid": "EFjFFYNr3wx2Vswd6RtpD"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.2767087,
+        "name": "04. El hilo conserva la pregunta y la respuesta",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-16T19-07-56-042Z\\.coleccion-ejecucion\\flujos-e2e\\04-asistente-ia\\04-el-hilo-conserva-la-pregunta-y-la-respuesta",
+        "path": "flujos-e2e\\04-asistente-ia\\04-el-hilo-conserva-la-pregunta-y-la-respuesta",
+        "iterationIndex": 0
+      }
+    ],
+    "summary": {
+      "totalRequests": 4,
+      "passedRequests": 4,
+      "failedRequests": 0,
+      "errorRequests": 0,
+      "skippedRequests": 0,
+      "skippedByBail": 0,
+      "totalAssertions": 0,
+      "passedAssertions": 0,
+      "failedAssertions": 0,
+      "totalTests": 8,
+      "passedTests": 8,
+      "failedTests": 0,
+      "totalPreRequestTests": 0,
+      "passedPreRequestTests": 0,
+      "failedPreRequestTests": 0,
+      "totalPostResponseTests": 0,
+      "passedPostResponseTests": 0,
+      "failedPostResponseTests": 0
+    }
+  }
+]

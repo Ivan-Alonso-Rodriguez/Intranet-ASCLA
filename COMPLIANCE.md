@@ -1,8 +1,16 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 15 de octubre de 2026. Plugin **1.10.8**, esquema **15**. Este documento describe el estado del código y la evidencia por etapa. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado.
+Revisión documental: 16 de octubre de 2026. Plugin **1.10.8**, esquema **15**. Este documento describe el estado del código y la evidencia por etapa. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado.
 
 <a id="estado"></a>
+
+## Ajuste de administración del 16 de octubre de 2026
+
+Por solicitud del responsable se elimina el logo duplicado en escritorio y se coloca la navegación administrativa sobre el contenido. El inicio del administrador pasa a Administración ASCLA. La cuenta mantiene sus capacidades de gestión, pero no participa en directorio, afinidad, solicitudes de conexión/conversación ni microeventos; la restricción se aplica en el backend y cubre relaciones antiguas. Los demás roles conservan su networking.
+
+Las [pruebas del rol](tests/php/AdministratorRoleTest.php) y de [interfaz](tests/admin-navigation.cjs) corresponden a WordPress local aislado. Este ajuste requiere instalar el ZIP actualizado para aparecer en el sitio publicado; las evidencias anteriores mantienen su fecha y alcance.
+
+La [entrega vigente de integración y E2E](pruebas/README.md) aprobó 58 peticiones y 105 comprobaciones de Bruno, más cinco recorridos de Playwright con 11 videos y 11 capturas en WordPress local aislado. Incluye el inicio administrativo, el logo único y el rechazo de solicitudes de conexión/conversación hacia y desde administración. El asistente utiliza mock local. `pruebas/` conserva solo la última ejecución por herramienta; no acredita una nueva instalación remota, cobertura ni aceptación UAT.
 
 ## Estado de los requisitos
 
@@ -30,7 +38,7 @@ Sobre el PDF íntegro, 265/302 (**87,7 %**) están marcados Código revisado. Ex
 - Los ejecutivos pueden crear propuestas de microeventos; otra revisión administrativa debe aprobarlas antes de publicarlas.
 - Cambiar datos profesionales ajenos exige una solicitud del asociado en Contacto, asignada al administrador y de un solo uso.
 - La única reacción es **Me gusta**. Las reacciones heredadas retiradas se contabilizan de manera compatible y pueden quitarse.
-- El flujo Git y las pruebas son manuales, sin Jenkins. La instalación de plugins queda a cargo del responsable del entorno.
+- El flujo Git y las pruebas vigentes son manuales. El [Jenkinsfile](Jenkinsfile) se conserva como referencia opcional por solicitud del responsable. La instalación de plugins queda a cargo del responsable del entorno.
 - El aprendizaje de intereses es automático y respeta las desmarcaciones guardadas del usuario.
 
 <a id="casos-qa"></a>
@@ -221,6 +229,7 @@ Cada fila conserva su propia revisión: no se suman ejecuciones repetidas como p
 | Contadores de comentarios | Ocho controles de navegador con envíos, respuestas, borrado, moderación y totales reales en WordPress local; 49 controles portables. Sin cambios de backend, nueva suite PHP, cobertura ni instalación en QA. | [Resumen](docs/evidence/release-1.10.8/comment-count108.json) |
 | Panel de conexiones compacto | Catorce controles de navegador y seis vistas: pestañas, búsqueda, acciones reales, teclado, privacidad y traducción; sin desbordamiento ni infracciones automáticas WCAG A/AA en el panel. 49 controles portables; sin nueva suite PHP, cobertura ni despliegue remoto. | [Resumen](docs/evidence/release-1.10.8/connections-panel108.json) |
 | Correcciones de SonarQube | Las 137 incidencias exportadas se reproducen exactamente en SonarQube local 26.9; el código corregido obtiene cero. 677 pruebas PHP/7.565 aserciones, 49 controles portables y doce recorridos de navegador/110 controles aprobados; 148 estados axe registrados sin infracciones automáticas ni desbordamiento. Sin casos nuevos, nueva cobertura, cambios de reglas, exclusiones o umbrales. | [Resumen verificable](docs/evidence/release-1.10.8/sonar-fixes108.json) |
+| Integración y E2E desde UAT, 15 de octubre | Bruno: 10 peticiones/15 comprobaciones de integración y 23/38 del backend E2E; Playwright: tres recorridos, cinco videos y cinco capturas aprobados. Rama `uat`, base `c525b99`, ajustes del ejecutor sin commit y fuentes capturadas. WordPress local desechable, limpieza confirmada; sin Jenkins, nueva cobertura ni despliegue público. Conserva el intento inicial con un recorrido fallido y su evidencia. | [Resumen](docs/evidence/release-1.10.8/uat-acceptance108.json), [guía para exponer](MANUAL_QA_UAT.md#exponer-pruebas) |
 
 El [paquete vigente](docs/evidence/release-1.10.8/package.json) identifica el ZIP 1.10.8, esquema 15. Las últimas correcciones de CSV, correo, Contacto, Asistente, contadores, Directorio y SonarQube quedan preparadas para instalación manual; no se presentan como ya instaladas en QA. La última aceptación HTTP/UI completa tampoco certifica los ZIP posteriores. No se midió nueva cobertura en esas etapas ni se exige el 100 %. El análisis estático local no acredita el Quality Gate publicado: debe repetirse el flujo de QA sobre el commit que incluya estas correcciones. Los reportes de cobertura anteriores conservan su revisión original.
 

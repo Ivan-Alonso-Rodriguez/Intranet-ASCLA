@@ -44,7 +44,12 @@ final class Profiles
     {
         $user=get_userdata($id); Access::require($user && Access::member($id),'Perfil no encontrado.',404);
         $data=(array)get_user_meta($id,'_ascla_profile',true);
-        return array_merge(['id'=>$id,'name'=>$user->display_name,'first_name'=>$user->first_name,'last_name'=>$user->last_name,'birth_date'=>'','phone'=>'','phone_visibility'=>'private','directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[],'revision'=>0],$data,['id'=>$id,'name'=>$user->display_name]);
+        $profile=array_merge(['id'=>$id,'name'=>$user->display_name,'first_name'=>$user->first_name,'last_name'=>$user->last_name,'birth_date'=>'','phone'=>'','phone_visibility'=>'private','directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[],'revision'=>0],$data,['id'=>$id,'name'=>$user->display_name]);
+        $profile['community_participant']=!Access::isAdministrator($id);
+        if (!$profile['community_participant']) {
+            $profile['directory']=false;$profile['networking']=false;$profile['microevents']=false;
+        }
+        return $profile;
     }
     public static function visible(int $id): array
     {

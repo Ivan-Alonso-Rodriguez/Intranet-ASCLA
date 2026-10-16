@@ -1,6 +1,6 @@
 # Guía práctica de QA, SonarQube y UAT
 
-Versión documentada: **1.10.8**, esquema **15**. Este proyecto WordPress utiliza un flujo manual, **sin Jenkins**. Aquí se explica cómo ejecutar las herramientas, revisar sus resultados e instalar la entrega. No se exige cobertura del 100 %; las pruebas y el Quality Gate deben satisfacer los criterios acordados para la entrega.
+Versión documentada: **1.10.8**, esquema **15**. Este proyecto WordPress utiliza un flujo manual; el [Jenkinsfile](Jenkinsfile) se conserva como referencia opcional para un uso futuro. Aquí se explica cómo ejecutar las herramientas, revisar sus resultados e instalar la entrega. No se exige cobertura del 100 %; las pruebas y el Quality Gate deben satisfacer los criterios acordados para la entrega.
 
 Todos los comandos se ejecutan **desde la raíz del repositorio**, en una terminal Bash; en Windows, usa WSL con Docker Desktop operativo e integrado con esa distribución. Las rutas de los ejemplos son relativas al repositorio. Los dominios publicados corresponden a servicios del proyecto; `localhost` y `127.0.0.1` son ejemplos genéricos de acceso local.
 
@@ -11,7 +11,7 @@ Todos los comandos se ejecutan **desde la raíz del repositorio**, en una termin
 | Verificar documentación | `python3 scripts/check-docs.py` | Repositorio | Mensaje `Documentation OK`. |
 | Probar PHP e interfaz y generar cobertura | `BRANCH_NAME=qa bash scripts/quality-ci.sh` | WordPress Docker desechable | Pruebas, JUnit, Clover y LCOV en `coverage/`. |
 | Analizar código con SonarQube | `bash scripts/sonar-manual.sh qa` | Fuentes y reportes anteriores | Análisis de ASCLA-QA y su Quality Gate. |
-| Probar integración y E2E con Bruno/Playwright | `bash scripts/acceptance-tests.sh` | WordPress desechable; admite también el QA publicado | Reporte HTML, peticiones, comprobaciones, videos y capturas. |
+| Probar integración y E2E con Bruno/Playwright | [Ejecutores de la entrega vigente](pruebas/README.md#ejecutar-y-actualizar) | QA con cuentas dedicadas o fixture local explícita | 58 peticiones, 105 comprobaciones y cinco flujos UI con evidencias. |
 | Preparar el plugin | `python3 scripts/build.py` y `python3 scripts/verify-package.py` | Fuentes del plugin | ZIP, SHA-256 y manifiesto. |
 
 Sigue **2 → 3 → 4 → 5** para validar una revisión de QA. Usa la sección **6** para probar el sitio instalado. La aceptación UAT requiere después revisión humana y evidencia del entorno.
@@ -145,23 +145,94 @@ Si habías exportado `SONAR_TOKEN` en la terminal padre, ejecuta `unset SONAR_TO
 
 ## 5. Ejecutar integración y E2E con Bruno y Playwright
 
-Estas pruebas complementan PHPUnit: verifican HTTP, cookies y nonces de WordPress, flujos de negocio y acciones reales de interfaz. El ejecutor configura cuentas y sesiones; no necesitas preparar a mano las variables de Bruno.
+La [entrega vigente](pruebas/README.md) reúne **58 peticiones y 105 comprobaciones de Bruno**, y **cinco recorridos de Playwright**. La ejecución del 16 de octubre aprobó en WordPress local aislado con el código actualizado, con 11 videos y 11 capturas. El asistente usó mock local; no acredita una API externa ni una nueva instalación en el servidor.
 
-| Grupo | Qué comprueba la colección actual |
-|---|---|
-| Bruno: integración | 10 peticiones y 15 comprobaciones: acceso, identidad, perfil, conservación tras rechazo, Directorio paginado y fechas inválidas. |
-| Bruno: E2E backend | 23 peticiones y 38 comprobaciones encadenadas: conexión, aceptación, chat, disolución y lectura histórica; borrador, publicación, inscripción, reprogramación y reconfirmación de evento. |
-| Playwright: E2E frontend | Tres recorridos de interfaz: perfil persistente; conexión/chat/historial; borrador/publicación/inscripción. Guarda videos y capturas por sesión. |
+| Grupo | Fuente vigente | Alcance |
+|---|---|---|
+| Integración API | [Colección](pruebas/backend/coleccion-bruno/integracion) | 18 peticiones y 26 comprobaciones: acceso, perfil, paginación, validaciones y restricciones del administrador. |
+| E2E de backend | [Cuatro flujos](pruebas/backend/coleccion-bruno/flujos-e2e) | 40 peticiones y 79 comprobaciones con IDs y sesiones obtenidos de pasos anteriores. |
+| E2E de interfaz | [Playwright](tests/acceptance-ui.cjs) | Cinco flujos mediante controles reales; videos, capturas y diagnóstico tanto al aprobar como al fallar. |
 
-Desde la raíz del repositorio:
+Prepara las [herramientas y los accesos privados](pruebas/README.md#ejecutar-y-actualizar). Desde la raíz, ejecuta los dos grupos de forma secuencial con las mismas cuentas:
 
 ```bash
-bash scripts/acceptance-tests.sh
+node scripts/run-publishable-backend.cjs
+node scripts/run-playwright-test-users.cjs
+node scripts/build-qa-delivery.cjs
+python3 scripts/verify-qa-delivery.py
+python3 scripts/check-docs.py
 ```
 
-El modo predeterminado crea otro WordPress desechable y cinco cuentas sintéticas, ejecuta las [colecciones Bruno](tests/http) y los [recorridos Playwright](tests/acceptance-ui.cjs), limpia sus datos y retira su propio entorno. No detiene los otros proyectos Docker. Las herramientas reutilizan un volumen de dependencias separado de WordPress.
+Los dos ejecutores admiten `--fixture` para seleccionar un acceso local explícito. El [ZIP publicable](pruebas/backend/coleccion-bruno.zip) incluye URL, usuarios e IDs, con contraseñas vacías; estas se cargan desde el archivo privado. Cookies y nonces se mantienen en memoria. El ejecutor de Bruno usa una copia temporal para que los IDs locales no reemplacen las variables del QA compartido.
 
-La terminal indica una carpeta `test-results/acceptance-FECHA-ID`. Abre su `index.html` como se explica en la sección 7. Un fallo de prueba o de limpieza devuelve una salida distinta de cero. Este comando no genera cobertura para SonarQube ni acredita todos los escenarios del PDF.
+El constructor publica **solo la última ejecución por herramienta** en `pruebas/`, con su estado original, y retira las anteriores de esa carpeta. Los originales quedan en `test-results/`, fuera de Git. Los reportes registran revisión, rama, destino y cambios sin commit; conservarlos no equivale a aprobar UAT ni a instalar el plugin.
+
+<a id="cuatro-flujos-bruno"></a>
+
+### Cuatro flujos principales del backend
+
+Los pasos, su utilidad y la relación con los Word están en el [README de backend](pruebas/backend/README.md#e2e-flujos-completos-de-negocio). La colección importable de `pruebas/backend/coleccion-bruno/` es la fuente vigente.
+
+| Flujo | Peticiones | Comprobaciones | Secuencia |
+|---|---:|---:|---|
+| Conexión, mensaje y bloqueo | 12 | 24 | Login de Ana y Bruno → solicitud → aceptación → mensaje leído → bloqueo → envío rechazado con 404 → desbloqueo sin restaurar conexión. |
+| Evento con cupo y espera | 15 | 29 | Crear aforo uno → Ana confirma → Bruno recibe 409 → espera → Ana cancela → oferta y aviso → cancelar evento → inscripción rechazada con 409. |
+| Suspensión y reactivación | 9 | 18 | Acceso de Carla → suspender → sesión revocada con 403 → reactivar → sesión anterior sigue inválida → login nuevo → acceso 200. |
+| Asistente IA | 4 | 8 | Pregunta → ID del trabajo → polling → completed → comprobar respuesta → consultar el mismo hilo. |
+
+El asistente consulta cada dos segundos, hasta 120 segundos, y conserva el modo devuelto por el servidor. Un resultado mock no acredita un proveedor externo. El ejecutor intenta reactivar a Carla, retirar el bloqueo y cancelar únicamente su propio evento; revisa `cleanup` en el resumen.
+
+<a id="playwright-usuarios-prueba"></a>
+
+### Playwright con los mismos usuarios de prueba de Bruno
+
+El [ejecutor de interfaz](scripts/run-playwright-test-users.cjs) usa Ana, Bruno, Carla y Administrador desde `test-results/playwright-usuarios.json`, ignorado por Git. En otro equipo copia [el ejemplo sin contraseñas](pruebas/acceso.example.json) y completa los accesos autorizados por el canal interno.
+
+| Recorrido | Usuarios | Secuencia |
+|---|---|---|
+| Perfil | Carla | Editar biografía → guardar → recargar → rechazar Empresa vacía → conservar datos. |
+| Conexión y chat | Ana y Bruno | Solicitud → aceptación → enviar y leer → bloquear → impedir chat → desbloquear sin restaurar conexión. |
+| Publicación e inscripción | Administrador y Ana | Inicio administrativo y restricciones sociales → borrador → validar → publicar → inscribirse → persistir → cancelar evento. |
+| Aforo y espera | Administrador, Ana y Bruno | Un cupo → confirmación → espera → vacante → abrir aviso → aceptar oferta → cancelar evento. |
+| Suspensión | Administrador y Carla | Suspender → revocar sesión → rechazar login → reactivar → login nuevo → conservar biografía. |
+
+En Windows puedes mostrar el navegador con:
+
+```powershell
+.\scripts\playwright-usuarios-prueba.ps1 -Visible
+```
+
+Para un acceso local preparado añade `-Fixture test-results/playwright-usuarios-local.json`. Se requieren Node.js, las dependencias del proyecto, Microsoft Edge y los binarios de video de Playwright. La sesión se verifica mediante REST; las acciones de negocio se realizan desde la interfaz. No ejecutes ambos grupos simultáneamente con las mismas cuentas.
+
+### Interfaz y cuenta de administración
+
+El administrador inicia en **Administración ASCLA**; `/intranet/` también lo lleva a ese panel. El enlace principal y el logo regresan a administración. En escritorio se muestra un único logo y las secciones administrativas encima del contenido, con un solo panel lateral. El menú sigue disponible en móvil. Moderadores, ejecutivos y asociados conservan su participación comunitaria.
+
+La [regresión PHP](tests/php/AdministratorRoleTest.php) y la [prueba de navegación](tests/admin-navigation.cjs) comprueban inicio, permisos, directorio y restricciones sociales. El [fixture](tests/admin-navigation-fixture.php) es exclusivo de un WordPress local ya inicializado. Con ese entorno y las herramientas disponibles:
+
+```bash
+docker compose exec -T wordpress php /opt/ascla-tests/admin-navigation-fixture.php > test-results/admin-role-access.json
+node tests/admin-navigation.cjs
+```
+
+Las evidencias quedan en `test-results/admin-role-ui-FECHA/`; los accesos permanecen privados. El fixture admite la limpieza por CLI con `action: cleanup` y valida IDs y usuarios antes de retirar sus propias cuentas.
+
+### Suite complementaria con cuentas temporales
+
+`bash scripts/acceptance-tests.sh` sigue activo para una aceptación aislada: diez peticiones de integración, 23 de negocio y tres recorridos de interfaz, con preparación y limpieza automática de cuentas. Cubre también desconexión con historial y reprogramación de eventos. Sus fuentes están en [tests/http](tests/http); no sustituye los cuatro flujos y cinco recorridos de la entrega vigente. El modo remoto con auxiliar WordPress se explica en la sección 6.
+
+<a id="exponer-pruebas"></a>
+
+### Cómo exponer los dos primeros puntos
+
+1. Abre el [dashboard general](pruebas/index.html). Identifica fecha, rama, revisión y destino; aclara que la última ejecución fue local y que el asistente usó mock.
+2. En [Bruno Run Dashboard](pruebas/backend/dashboard.html), muestra las 18 peticiones de integración y los rechazos esperados de acceso y networking administrativo. Los HTTP 400/401/403/404/409 previstos son comprobaciones aprobadas.
+3. Explica los cuatro flujos con las flechas del [README de backend](pruebas/backend/README.md). Muestra un ID obtenido por una petición y utilizado por la siguiente; no son valores inventados.
+4. En el [dashboard de Playwright](pruebas/frontend/dashboard.html), reproduce los cinco recorridos. Son clics y formularios reales; también verifican el inicio administrativo y el logo único.
+5. Muestra JSON/JUnit, las fuentes de esa ejecución, `procedencia.json`, `manifest.json` y el ZIP sin secretos. Las huellas permiten detectar modificaciones, no son una certificación independiente.
+6. Revisa el estado de limpieza. Si la última ejecución falla, enseña el diagnóstico y sus videos sin convertirla en aprobación. `pruebas/` conserva un único lote por herramienta.
+
+El código se confirma en `development` y luego se promueve a `qa` y `uat`. Los reportes conservan la rama real en que se ejecutaron; preparar un commit en otra rama no cambia sus metadatos. La aceptación UAT exige revisión humana posterior.
 
 ## 6. Probar el QA publicado teniendo solo administración de WordPress
 
@@ -242,7 +313,7 @@ Después de QA y su Quality Gate, con revisión de testers y autorización del P
 git fetch origin
 git switch uat
 git pull --ff-only origin uat
-git merge --ff-only qa
+git merge --no-ff qa -m "merge: integrar qa en uat"
 git push origin uat
 docker network inspect proxy_net >/dev/null 2>&1 || docker network create proxy_net
 BRANCH_NAME=uat bash scripts/quality-ci.sh
@@ -250,6 +321,8 @@ bash scripts/sonar-manual.sh uat
 ```
 
 El scanner selecciona **ASCLA-UAT** y solicita su token. Aplica las mismas comprobaciones de revisión limpia y reportes del commit actual. Instala manualmente en UAT el paquete de esa revisión y registra su SHA-256. Las presentaciones deben corresponder a `uat`; una repetición local no acredita su instalación remota.
+
+La integración desde `qa` conserva los dos historiales mediante un merge. `git pull --ff-only origin uat` solo actualiza la copia local desde su remoto. Si el merge encuentra conflictos, resuélvelos, comprueba el resultado y confirma la integración antes de hacer push o ejecutar las validaciones; no uses un push forzado para borrar la divergencia.
 
 Los testers recorren los casos acordados del [Documento de Análisis y Diseño](requirements/ascla-analysis.md), registran esperado/obtenido, evidencia y defectos. Incluye los controles de entorno de la sección 10 y las excepciones autorizadas de [COMPLIANCE](COMPLIANCE.md#decisiones). Ante un fallo, conserva la evidencia, corrige mediante el flujo del equipo y repite los casos afectados antes de aprobar.
 
@@ -348,6 +421,6 @@ python3 scripts/check-docs.py
 
 Si cambias la matriz, edita primero [requirements/ascla-analysis.json](requirements/ascla-analysis.json) y ejecuta `python3 scripts/check-docs.py --write-matrix`. Conserva textos/prioridades originales y justifica estados; una corrección documental no aumenta el porcentaje de cumplimiento.
 
-Se mantienen únicamente los cinco MD enlazados en [README](README.md). Usa rutas relativas y dominios del proyecto; evita carpetas personales, rutas absolutas de equipos, nombres de dispositivo e IP privadas en texto, enlaces y bloques de comandos. El verificador comprueba estas referencias, enlaces, anclas, exclusiones Git y sincronización de la matriz.
+Se mantienen los cinco MD principales y los tres MD de la [entrega de pruebas](pruebas/README.md), enlazados en [README](README.md). Usa rutas relativas y dominios del proyecto; evita carpetas personales, rutas absolutas de equipos, nombres de dispositivo e IP privadas en texto, enlaces y bloques de comandos. El verificador comprueba estas referencias, enlaces, anclas, exclusiones Git y sincronización de la matriz.
 
-Los resúmenes JSON/JUnit revisados de `docs/evidence/` se permiten en Git. Reportes completos, videos, capturas, accesos y archivos locales siguen en `test-results/`, ignorados. Documenta esos artefactos como rutas en código, sin enlaces que aparenten estar publicados. Este cambio documental no requiere otra versión ni reconstruir el plugin.
+Los resúmenes JSON/JUnit revisados de `docs/evidence/` se permiten en Git. Los originales, accesos y archivos locales siguen en `test-results/`, ignorados. Por solicitud del responsable, `pruebas/` incluye copias publicables de la colección, reportes, videos y capturas, con las credenciales excluidas y la procedencia registrada. Valida la carpeta con `python3 scripts/verify-qa-delivery.py`. Este cambio documental no requiere otra versión ni reconstruir el plugin.
