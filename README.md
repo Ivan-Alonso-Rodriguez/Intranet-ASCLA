@@ -1,6 +1,6 @@
 # ASCLA Core — Intranet ASCLA
 
-## Versión actual: 1.10.8 · esquema 15
+## Versión actual: 1.10.9 · esquema 15
 
 Plugin WordPress para una comunidad profesional privada: perfiles, Directorio, conexiones, mensajería, Hub, foros, eventos, microeventos, Centro de Conocimiento, Galería, Aliados, Contacto y administración. Elementor es opcional; no se modifica WordPress Core.
 
@@ -33,17 +33,19 @@ python3 scripts/build.py
 python3 scripts/verify-package.py
 ```
 
-Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [resumen público del paquete](docs/evidence/release-1.10.8/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. En WordPress: Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. El responsable del entorno realiza esta instalación; la promoción de Git y las pruebas no despliegan el plugin.
+Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [resumen público del paquete](docs/evidence/release-1.10.9/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. En WordPress: Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. El responsable del entorno realiza esta instalación; la promoción de Git y las pruebas no despliegan el plugin.
 
 ## Calidad y entrega
 
 El flujo vigente es manual: `development → qa → uat → main`. El [Jenkinsfile](Jenkinsfile) se conserva como referencia opcional para un uso futuro. UAT requiere revisión de testers y autorización del PM. `main` debe estar protegida y recibir los cambios mediante pull request. No se exige cobertura del 100 %.
 
-El [manual](MANUAL_QA_UAT.md) indica el orden de ejecución y los resultados esperados. Primero genera PHPUnit/cobertura con `quality-ci.sh`; después envía esa misma revisión a [SonarQube](MANUAL_QA_UAT.md#sonarqube). El scanner no despliega ni prueba el WordPress publicado.
+El [manual](MANUAL_QA_UAT.md) indica el orden de ejecución y los resultados esperados. Para una nueva validación completa de QA, `quality-ci.sh` genera los resultados y la cobertura de esa revisión antes de enviarla a [SonarQube](MANUAL_QA_UAT.md#sonarqube). La revisión documental de esta entrega conserva la cobertura existente: no se ejecuta ese generador ni se atribuyen sus reportes a un commit nuevo. El scanner no despliega ni prueba el WordPress publicado.
 
 La [colección Bruno vigente](pruebas/backend/coleccion-bruno) verifica endpoints y cuatro flujos encadenados: 58 peticiones y 105 comprobaciones. [Playwright](tests/acceptance-ui.cjs) ofrece cinco flujos con cuentas dedicadas: perfil, conexión/chat/bloqueo, publicación/inscripción, aforo/lista de espera y suspensión/reactivación, con videos, capturas y reportes tanto al aprobar como al fallar. El [manual](MANUAL_QA_UAT.md#pruebas-http-e2e) explica cómo ejecutar esta entrega y la suite complementaria de aceptación con cuentas temporales.
 
 La [matriz de cumplimiento](COMPLIANCE.md#estado) distingue código revisado, decisiones del usuario y validaciones pendientes. La aceptación remota existente corresponde al paquete identificado en su propia evidencia; no acredita automáticamente los ZIP posteriores.
+
+Las pruebas de seguridad se ejecutan sin Jenkins con `bash scripts/security-tests.sh` en Bash/WSL y Docker Desktop con motor Linux. Preparan WordPress desechable con HTTPS, ejecutan ZAP sobre las páginas ASCLA y 18 operaciones GET de la API, y verifican CSP por separado. El [manual de ZAP](MANUAL_QA_UAT.md#zap) explica alcance, reportes, límites y configuración del servidor. No generan cobertura ni atacan el sitio publicado.
 
 ## Política documental y evidencias
 

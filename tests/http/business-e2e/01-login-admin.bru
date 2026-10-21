@@ -12,12 +12,13 @@ post {
 
 headers {
   Content-Type: application/x-www-form-urlencoded
-  Cookie: wordpress_test_cookie=WP%20Cookie%20check
+  Cookie: {{asclaAccessCookie}}
 }
 body:form-urlencoded {
   log: {{adminLogin}}
   pwd: {{adminPassword}}
   testcookie: 1
+  _ascla_native_login_nonce: {{asclaAccessNonce}}
   redirect_to: {{base}}/intranet/
 }
 settings {

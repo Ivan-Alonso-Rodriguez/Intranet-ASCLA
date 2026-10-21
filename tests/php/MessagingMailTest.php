@@ -11,12 +11,13 @@ final class MessagingMailTest extends TestCase
     protected function setUp(): void
     {
         $this->settings=Settings::get(); $this->secret=Secrets::get('smtp_password');
-        foreach (['administrator','ascla_member','ascla_member'] as $role) {
+        foreach (['administrator','ascla_member','ascla_member','ascla_member'] as $role) {
             $this->users[]=wp_insert_user(['user_login'=>'mailmsg_'.bin2hex(random_bytes(6)),'user_pass'=>wp_generate_password(32),'role'=>$role]);
         }
-        wp_set_current_user($this->users[0]);
-        Store::insert('relations',['user_id'=>$this->users[0],'target_id'=>$this->users[1],'kind'=>'connected','created_at'=>current_time('mysql',true)]);
+        wp_set_current_user($this->users[3]);
+        Store::insert('relations',['user_id'=>$this->users[3],'target_id'=>$this->users[1],'kind'=>'connected','created_at'=>current_time('mysql',true)]);
         $this->conversation=(int)Messaging::start($this->users[1])['id'];
+        wp_set_current_user($this->users[0]);
     }
     protected function tearDown(): void
     {
@@ -30,7 +31,7 @@ final class MessagingMailTest extends TestCase
     public function testIncrementalMessagesNeverSkipBatchesAndKeepReadCursorMonotonic(): void
     {
         $ids=[];
-        foreach(range(1,135) as $i) $ids[]=Store::insert('messages',['conversation_id'=>$this->conversation,'sender_id'=>$this->users[0],'body'=>'Mensaje '.$i,'created_at'=>current_time('mysql',true)]);
+        foreach(range(1,135) as $i) $ids[]=Store::insert('messages',['conversation_id'=>$this->conversation,'sender_id'=>$this->users[3],'body'=>'Mensaje '.$i,'created_at'=>current_time('mysql',true)]);
         wp_set_current_user($this->users[1]);
         self::assertSame(135,Messaging::conversation($this->conversation)['unread']);
         $first=Messaging::messages($this->conversation,0,0);

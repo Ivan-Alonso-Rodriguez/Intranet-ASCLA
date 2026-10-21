@@ -20,5 +20,6 @@ settings {
 }
 tests {
   test("Directorio paginado", function () { expect(res.getStatus()).to.equal(200); });
-  test("Resultados de las cuentas del lote", function () { const data=res.getBody();expect(data.items).to.be.an("array");expect(data.total).to.be.at.least(5);expect(data.items.length).to.be.at.most(5); });
+  test("Resultados de las cuentas del lote", function () { const data=res.getBody();expect(data.items).to.be.an("array");expect(data.total).to.equal(4);expect(data.items.length).to.be.at.most(5); });
+  test("El administrador técnico no aparece como asociado", function () { expect(res.getBody().items.some(item=>Number(item.id)===Number(bru.getEnvVar("adminId")))).to.equal(false); });
 }

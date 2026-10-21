@@ -1,18 +1,22 @@
 # Guía práctica de QA, SonarQube y UAT
 
-Versión documentada: **1.10.8**, esquema **15**. Este proyecto WordPress utiliza un flujo manual; el [Jenkinsfile](Jenkinsfile) se conserva como referencia opcional para un uso futuro. Aquí se explica cómo ejecutar las herramientas, revisar sus resultados e instalar la entrega. No se exige cobertura del 100 %; las pruebas y el Quality Gate deben satisfacer los criterios acordados para la entrega.
+Versión documentada: **1.10.9**, esquema **15**. Este proyecto WordPress utiliza un flujo manual; el [Jenkinsfile](Jenkinsfile) se conserva como referencia opcional para un uso futuro. Aquí se explica cómo ejecutar las herramientas, revisar sus resultados e instalar la entrega. No se exige cobertura del 100 %; las pruebas y el Quality Gate deben satisfacer los criterios acordados para la entrega.
 
 Todos los comandos se ejecutan **desde la raíz del repositorio**, en una terminal Bash; en Windows, usa WSL con Docker Desktop operativo e integrado con esa distribución. Las rutas de los ejemplos son relativas al repositorio. Los dominios publicados corresponden a servicios del proyecto; `localhost` y `127.0.0.1` son ejemplos genéricos de acceso local.
+
+Esta guía distingue procedimientos disponibles de pruebas ya ejecutadas. La preparación de 1.10.9 conserva los reportes de cobertura anteriores; no los regenera ni cambia su revisión. `quality-ci.sh` sí genera cobertura: úsalo únicamente cuando corresponda realizar una nueva validación completa de QA. Las comprobaciones de documentación, paquete, entrega y seguridad no requieren modificar esos reportes.
 
 ## 1. Elegir qué vas a comprobar
 
 | Objetivo | Comando principal | Dónde actúa | Qué revisar |
 |---|---|---|---|
 | Verificar documentación | `python3 scripts/check-docs.py` | Repositorio | Mensaje `Documentation OK`. |
+| Verificar evidencias publicables | `python3 scripts/verify-qa-delivery.py` | Carpeta `pruebas/` | Inventario, huellas, ZIP y enlaces correctos; no ejecuta pruebas nuevas. |
 | Probar PHP e interfaz y generar cobertura | `BRANCH_NAME=qa bash scripts/quality-ci.sh` | WordPress Docker desechable | Pruebas, JUnit, Clover y LCOV en `coverage/`. |
 | Analizar código con SonarQube | `bash scripts/sonar-manual.sh qa` | Fuentes y reportes anteriores | Análisis de ASCLA-QA y su Quality Gate. |
 | Probar integración y E2E con Bruno/Playwright | [Ejecutores de la entrega vigente](pruebas/README.md#ejecutar-y-actualizar) | QA con cuentas dedicadas o fixture local explícita | 58 peticiones, 105 comprobaciones y cinco flujos UI con evidencias. |
 | Preparar el plugin | `python3 scripts/build.py` y `python3 scripts/verify-package.py` | Fuentes del plugin | ZIP, SHA-256 y manifiesto. |
+| Comprobar seguridad con ZAP | [Procedimiento ZAP](#zap) | WordPress local HTTPS desechable | Informes separados de páginas y API, CSP y límites del análisis. |
 
 Sigue **2 → 3 → 4 → 5** para validar una revisión de QA. Usa la sección **6** para probar el sitio instalado. La aceptación UAT requiere después revisión humana y evidencia del entorno.
 
@@ -41,7 +45,7 @@ python3 scripts/verify-package.py
 python3 scripts/check-docs.py
 ```
 
-El verificador puede actualizar el [manifiesto público](docs/evidence/release-1.10.8/package.json); incorpora ese cambio al commit de la entrega antes de generar cobertura. Revisa y agrega los archivos correspondientes, confirma el commit y comparte `development` según el procedimiento del equipo.
+El verificador puede actualizar el [manifiesto público](docs/evidence/release-1.10.9/package.json); incorpora ese cambio al commit de la entrega antes de generar cobertura. Revisa y agrega los archivos correspondientes, confirma el commit y comparte `development` según el procedimiento del equipo.
 
 Para promover esa revisión a QA, con el checkout ya limpio:
 
@@ -239,7 +243,7 @@ El código se confirma en `development` y luego se promueve a `qa` y `uat`. Los 
 Este recorrido corresponde al entorno de pruebas [wordpress.ingsoftware.lat](https://wordpress.ingsoftware.lat/). Requiere permiso para instalar plugins en WordPress y Docker en el equipo que ejecuta las pruebas; **no requiere SSH ni WP-CLI en el servidor**. Administración ASCLA y administración técnica de WordPress tienen permisos distintos.
 
 1. Ejecuta `python3 scripts/build.py` y `python3 scripts/verify-package.py`. Conserva el SHA-256 del ZIP que vas a evaluar.
-2. En WordPress, abre **Plugins → Añadir plugin → Subir plugin**. Selecciona `dist/ascla-core.zip` y reemplaza la versión instalada. Comprueba que ASCLA Core **1.10.8** está activo; el mismo número de versión puede contener correcciones distintas, por eso debes registrar también el paquete.
+2. En WordPress, abre **Plugins → Añadir plugin → Subir plugin**. Selecciona `dist/ascla-core.zip` y reemplaza la versión instalada. Comprueba que ASCLA Core **1.10.9** está activo; el mismo número de versión puede contener correcciones distintas, por eso debes registrar también el paquete.
 3. Ejecuta `python3 scripts/build-qa-tools.py`. Instala y activa `dist/ascla-qa-tools.zip` desde Plugins. Es un auxiliar independiente del core y restringido a entornos permitidos de pruebas.
 4. Abre **Herramientas → ASCLA QA**, confirma el entorno y pulsa **Crear lote y descargar acceso**. Se crean cinco cuentas sintéticas y se descarga `ascla-qa-access.json`.
 5. Crea la carpeta `test-results` si no existe y coloca el archivo en `test-results/ascla-qa-access.json`. Es privado y está ignorado por Git. No lo agregues a reportes ni al repositorio.
@@ -255,11 +259,11 @@ bash scripts/acceptance-tests.sh
 7. Abre el reporte indicado, comprueba que el destino es el QA publicado y revisa los tres grupos. Examina `cleanup.log`: el ejecutor intenta retirar el lote temporal con autenticación y comprobación de propiedad.
 8. Si no se confirma la limpieza, entra con tu administrador habitual a **Herramientas → ASCLA QA → Limpiar lote temporal**. Conserva el acceso privado hasta confirmar la limpieza. Después retira el JSON descargado y desactiva/elimina **ASCLA QA Tools**. Para repetir, prepara un lote nuevo.
 
-El archivo de acceso debe corresponder a ese sitio, al auxiliar y a Core 1.10.8. El runner rechaza cuentas ajenas al lote. No instala el core ni cambia ramas; prueba lo que ya está instalado. Las pruebas locales no sustituyen este paso.
+El archivo de acceso debe corresponder a ese sitio, al auxiliar y a Core 1.10.9. El runner rechaza cuentas ajenas al lote. No instala el core ni cambia ramas; prueba lo que ya está instalado. Las pruebas locales no sustituyen este paso.
 
 ### Alternativa para quien administra un QA mediante Compose
 
-Solo en el host que gestiona ese proyecto, con su configuración privada y Core 1.10.8 ya activo:
+Solo en el host que gestiona ese proyecto, con su configuración privada y Core 1.10.9 ya activo:
 
 ```bash
 ASCLA_ACCEPTANCE_MODE=deployed \
@@ -403,7 +407,18 @@ El responsable técnico conserva una copia privada y configura en entorno o `wp-
 2. Evalúa los resultados axe `incomplete`, lector de pantalla, zoom/reflujo, orden de lectura, textos alternativos, videos y PDF. Chromium local no acredita las dos versiones exigidas de Chrome, Firefox, Safari y Edge. Referencias: [patrón modal W3C](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/) y [API axe](https://github.com/dequelabs/axe-core/blob/develop/doc/API.md).
 3. Repite en español/inglés ayudas, etiquetas y errores, conservando textos del usuario. Comprueba entradas inválidas desde UI y REST: el rechazo debe conservar lo anterior. Incluye los [formularios implementados](COMPLIANCE.md#formularios).
 4. Revisa con cuentas de prueba acceso anónimo/membresía inactiva, descargas y REST; Directorio incompleto autorizado, búsquedas sin inferir identidades, chat inmutable/solo lectura, bloqueos/esperas, borradores, reprogramación y ofertas con vencimiento. Incluye Aliados, intereses automáticos respetando desmarcaciones, permisos acumulados y autorización de Junta. Los [casos QA](COMPLIANCE.md#casos-qa) describen correcciones, no sustituyen su ejecución en destino.
-5. Para microeventos, comprueba propuesta, diagnóstico de candidatos, aprobación, publicación, cancelación y archivo/restauración del historial. Los grupos deben cumplir consentimiento, mínimos y afinidad antes de aprobar; registra el motivo del diagnóstico cuando no se genere una propuesta.
+5. Para microeventos, comprueba propuesta, diagnóstico de candidatos, aprobación, publicación, cancelación y archivo/restauración del historial. Los grupos deben cumplir consentimiento, mínimos y afinidad antes de aprobar; registra el motivo del diagnóstico cuando no se genere una propuesta. Como administrador, abre la ficha y la revisión: Personas seleccionadas para el microevento debe mostrar los nombres del grupo y Por invitar antes de publicar. Aprobar por sí solo no debe indicar un envío. Publica, entra con dos asociados invitados, acepta con uno y rechaza con otro; vuelve a abrir la ficha administrativa y contrasta sus estados. Actualizar candidatos debe retirar de la lista a quienes dejaron de ser elegibles. Una cancelación anterior a publicar debe indicar que no hay invitación registrada. Los asociados y ejecutivos no deben recibir esta lista administrativa, ni siquiera accediendo directamente al detalle REST. Revisa móvil, ambos temas e inglés. La lista no acredita entrega externa de correos o Calendar.
+6. En Perfil, guarda los datos del administrador sin activar participación social y comprueba los indicadores obligatorios. Desde Directorio, administración abre Actividad e intereses o Gestionar usuario. Al editar una cuenta antigua sin clasificación, selecciona Individual o Empresa asociada; luego inicia sesión como ese asociado y verifica que el tipo sea de lectura. No hay agrupación de cuentas ni control de cupos empresariales en esta entrega. Una conexión pendiente muestra Solicitud enviada y Cancelar visible, con confirmación. Tras eliminar una conexión, la tarjeta muestra la fecha de disponibilidad y no ofrece Conectar durante la espera; revisa la alineación con tarjetas de otros estados.
+7. Para revisar carga, abre las herramientas del navegador → Red y recorre los 13 módulos con un asociado y un administrador de prueba. El arranque normal se incluye en el HTML privado; no necesita un GET adicional a `bootstrap`. Comprueba que puedas cambiar de sección mientras una consulta tarda, reintentar después de un error y guardar sin recibir contadores o perfiles anteriores. Mide el servidor publicado por separado: las comparaciones locales no certifican sus tiempos ni el umbral del análisis con 50 asociados simultáneos.
+8. En Teléfono, elige país con ratón y teclado, pega números con + o 00 y comprueba la bandera y el prefijo. Incluye países que comparten +1, cambia de país sin perder la parte nacional, guarda, recarga y finalmente vacía el campo opcional. Otro asociado no debe recibir el teléfono; administración puede editarlo directamente desde Editar usuario. El selector de país y el número deben estar habilitados y guardarse juntos. Comprueba móvil, ambos temas y el campo internacional de respaldo si se bloquea la descarga del selector.
+9. En Revisar contenido, alterna Publicaciones, Comentarios y Reportes recibidos: comprueba borradores aparte, aprobación de un comentario y revisión de un reporte sin eliminar el contenido. Abre Reportes ya revisados para consultar su registro. En Crear evento, revisa las explicaciones de asistentes, cupos y avisos y conserva un borrador incompleto. En Perfil, las dos ayudas retiradas no deben aparecer; el asterisco de ubicación queda en País/región y el teléfono muestra su aviso privado.
+10. Para comprobar RAG, publica un recurso de prueba con un dato identificable y pregunta por ese tema al Asistente. Abre sus fuentes y contrasta la respuesta; continúa con dos repreguntas y luego inicia una conversación nueva. Un borrador ajeno o una fuente retirada no deben usarse. Repite con los proveedores configurados en el entorno autorizado. Las pruebas locales de los tres transportes interceptan HTTP: comprueban recuperación, permisos y contexto, sin acreditar disponibilidad, coste ni calidad de una respuesta real del proveedor.
+11. En Consultas de Contacto, alterna Todas y los cuatro estados; busca por asunto o mensaje y comprueba que se conserve el filtro. Abre una consulta con ratón y teclado, escribe una respuesta y cierra/abre el resumen sin recargar: el texto debe conservarse. Al guardar, la consulta queda abierta. Resolver sin respuesta debe rechazarse. Cambia el responsable y verifica que el anterior deje de recibir asunto, mensaje e historial. Archiva una consulta cerrada y recupérala con Incluir archivadas; su autor debe conservar el historial. Revisa móvil, ambos temas e inglés.
+12. Para privacidad de IA, utiliza una fuente sintética con referencias públicas a autores, instituciones, normas y conceptos y una intervención privada. Indica sus identidades y afiliaciones reservadas en el campo del editor y activa Chatham House. Verifica que el Asistente y el resumen conserven las referencias públicas sin mostrar identidad reservada ni revelar los datos marcados. Comprueba también una intervención reconocible por su rol, un correo y un enlace de perfil. El original editorial y la transcripción deben conservarse para el editor autorizado; otro asociado no debe recibirlos. La limpieza del historial no reconstruye nombres omitidos por generaciones antiguas: para recuperar esos nombres, regenera solo el recurso autorizado y revisa el resultado.
+
+13. En Administración → Usuarios e intereses, abre Editar usuario con un asociado de prueba sin consultas de Contacto. Cambia nombres, correo, cargo, empresa, clasificación, teléfono, nacimiento y ubicación; despliega biografía, experiencia, enlaces e intereses, guarda y vuelve a abrir para comprobar persistencia. Prueba un enlace inválido, datos obligatorios vacíos y una edición simultánea desde otra sesión: el error debe conservar lo guardado y el formulario. Revisa Historial de cambios, privacidad y participación del asociado. Si vinculas una consulta opcional, debe estar asignada y activa y no podrá reutilizarse. Contrasta móvil, ambos temas e inglés. Esta edición directa es una excepción autorizada a RN-001/RN-032.
+
+14. En Estadísticas, elige fechas y un tema y compara las tarjetas con las listas de asistencia guardadas. Distingue personas únicas de asistencias por evento, e inscripciones de asistencia real. Comprueba Resumen, Participación, Intereses, Comparar períodos y Temas con IA, sus explicaciones y navegación con teclado. Las vistas y el filtro deben aprovechar el ancho disponible incluso cuando estén cargados los estilos nativos de formularios de WordPress; en Participación deben verse las seis columnas en escritorio y la tabla debe poder desplazarse internamente en móvil. Buscar un título debe actualizar opciones; seleccionar un evento debe filtrar cifras. Quitar filtros conserva las fechas. Envía un período futuro: el servidor debe rechazarlo sin hacer desaparecer el formulario. Un período sin eventos debe orientar para cambiar las fechas y mostrar Sin datos donde no puede calcular una tasa. Abre Revisar asistencias, corrige una persona, revisa/importa un CSV y verifica la lista. La vista previa no debe escribir y una corrección manual debe conservarse al importar Zoom. Repite escritorio/móvil, ambos temas y el acceso del ejecutivo en inglés. La IA propone temas; no aporta las cifras de asistencia.
 
 ### Seguridad, rendimiento y copias
 
@@ -411,7 +426,65 @@ Con el responsable del entorno, comprueba HTTPS/TLS, Wordfence/Akismet, Turnstil
 
 Verifica copias diarias de base y archivos esenciales, retención mínima de siete días y una restauración ensayada, incluidas las sales para descifrar datos privados. Conserva historial de disponibilidad y mantenimientos. Registra fecha, revisión, destino, responsable y resultado de cada control.
 
-## 11. Mantener la guía y las evidencias
+Para comprobar los cambios de perfil, introduce un enlace de otro dominio en LinkedIn o X: el formulario debe impedir guardarlo y explicar el dominio permitido. Repite con linkedin.com, x.com y twitter.com y confirma que se guarda; el sitio personal acepta su propia URL. Comprueba también la edición administrativa y la etiqueta «Individual».
+
+En Administración → Galerías y recursos, busca una publicación y pulsa Ocultar. Introduce el motivo, confirma que aparece como Oculto y abre Historial. Con un asociado distinto del autor, comprueba que desaparece del catálogo y que su enlace directo deja de ser accesible. Vuelve a publicarla desde el registro y verifica que conserva el mismo ID, contenido y archivos. Repite con galería y recurso; un Ejecutivo solo puede gestionar el contenido autorizado. En Mensajería, una conexión activa permite escribir «Escribe un mensaje…» y no debe pedir aceptar una solicitud antigua.
+
+<a id="zap"></a>
+
+## 11. Pruebas de seguridad con ZAP, sin Jenkins
+
+Estas pruebas son independientes de Jenkins. El proyecto es un monolito WordPress: sus páginas y su API se comprueban por separado en la misma instalación temporal. No se utiliza una aplicación Next.js ni se ejecutan ataques contra el WordPress publicado.
+
+### Preparar y ejecutar
+
+1. Abre Docker Desktop y comprueba que funciona el motor Linux. En Bash/WSL necesitas Docker Compose, Python 3, OpenSSL y `flock`. Reserva al menos 8 GB disponibles para Docker. La primera ejecución descarga las imágenes y las dependencias fijadas en el lockfile.
+2. Desde la raíz del repositorio, ejecuta:
+
+```bash
+bash scripts/security-tests.sh
+```
+
+3. Espera el resultado final y abre `test-results/security-latest/index.html`. La ejecución prepara una base nueva, cuatro cuentas sintéticas, correo capturado e IA simulada; usa HTTPS con un certificado temporal. El verificador HTTP independiente confía expresamente en ese certificado. No necesita contraseñas del sitio ni tokens personales.
+4. Conserva los reportes de esta ejecución junto con la revisión del código. El comando sustituye únicamente sus archivos generados conocidos; el directorio contiene la última ejecución. Al terminar elimina sus contenedores, volúmenes de datos, cookies, contraseñas y clave TLS privados. Revisa `cleanup.log` si hubo una interrupción. No publica ni instala el ZIP.
+
+### Qué se comprueba y cómo exponerlo
+
+| Etapa | Prueba y evidencia |
+|---|---|
+| Páginas ASCLA | Traditional Spider, Client Spider y escaneo activo con ZAP. Reportes nativos `frontend-zap.html` y `frontend-zap.json`. |
+| API ASCLA | Importación del contrato OpenAPI generado y escaneo activo de 18 operaciones GET. Reportes `backend-zap.html`, `backend-zap.json` y contrato `openapi.json`. |
+| CSP independiente | Peticiones HTTPS fuera de ZAP: política impuesta, restricciones de scripts/estilos, nonce diferente por respuesta y cabeceras. Resultado `csp-validation.json`. |
+| Navegador | Administrador y asociado recorren los módulos, guardan el perfil y cambian idioma bajo CSP; comprueba permisos, CORS y acceso nativo con un nonce ajeno. Resultado `browser-security.json`. |
+| Resultado conjunto | `security-summary.json` conserva PASS, FAIL, WARN o ERROR; `source-manifest.json` identifica archivos e imagen ZAP. Una modificación de las fuentes durante el análisis invalida el resultado. |
+
+En la exposición muestra primero el resultado conjunto, después ambos HTML nativos y la validación CSP. Explica qué rutas y operaciones se analizaron, qué alertas se corrigieron, qué no se analizó y la revisión exacta utilizada. Una prueba interrumpida o sin autenticación válida es ERROR; no se presenta como aprobada.
+
+La política de `security/zap-rules.tsv` rechaza por defecto toda alerta de riesgo bajo, medio o alto. Las informativas se conservan. No se han añadido exclusiones de alertas para obtener un resultado favorable. Los códigos son **0 PASS**, **1 FAIL**, **2 WARN**, **3 ERROR**; un fallo tiene prioridad sobre una advertencia. El análisis activo ejecuta las reglas aplicables al WordPress/PHP, con intensidad LOW: primero XSS DOM con un solo hilo y navegador, después una pasada HTTP con ocho hilos. Ambas deben completar sus reglas; la unión debe completar las 52 reglas aplicables. El informe registra además la regla 40043 (Log4Shell) como no aplicable: su objetivo es Java/Log4j y este laboratorio ejecuta PHP, Apache y MariaDB, sin ese runtime ni un servicio OAST de Java. No se declara ejecutada ni se filtran sus posibles alertas. La intensidad reduce la cantidad de payloads, por lo que debe constar al presentar el alcance. Los tiempos máximos, la navegación del Client Spider limitada a 60 segundos y los límites de recursos evitan ejecuciones indefinidas. Se exige que cada regla declarada aplicable termine: una regla pendiente, un navegador XSS fallido, falta de recursos o una cola pasiva sin terminar producen ERROR, aunque ZAP indique 100 % en el estado general.
+
+El alcance incluye las 14 rutas HTML ASCLA, acceso anónimo y páginas con una sesión administrativa comprobada antes y después del análisis. El navegador comprueba también al asociado. No incluye todo el administrador nativo de WordPress, rutas arbitrarias de otros temas/plugins, operaciones destructivas o de escritura ni integraciones reales de IA, correo, Calendar o Zoom. Las pruebas de integración/E2E y la revisión de permisos complementan este análisis; un resultado local sin alertas no certifica esos componentes ni demuestra ausencia universal de vulnerabilidades.
+
+El recorrido DOM excluye explícitamente el acceso nativo de WordPress, su cierre de sesión y las acciones de contraseña: puede pulsar contenedores de botones y enlaces, y un simple contexto de inclusión no impide esas salidas. Las suites dedicadas verifican el acceso y sus permisos por separado. El escáner solo acepta el host temporal generado y utiliza una red interna de Docker. No admite un parámetro para atacar producción. Las reglas de fuerza bruta pueden bloquear correctamente la IP compartida del laboratorio: el fixture limpia exclusivamente sus contadores entre fases, con cuentas y entorno local validados. Nunca desactiva la protección ni limpia contadores durante los ataques.
+
+### Configuración que debe llegar al entorno de destino
+
+El plugin impone CSP con nonce por respuesta y `strict-dynamic`, bloquea eventos en atributos, añade SRI a los assets locales servidos por WordPress, restringe CORS de su API y protege cookies y formularios de acceso. `script-src` no autoriza dominios completos: los scripts iniciales requieren nonce y pueden cargar sus dependencias. Los marcos, imágenes y conexiones de Turnstile y los reproductores tienen permisos específicos; los marcos YouTube son `credentialless`. El código no incorpora una clave Turnstile de pruebas al producto.
+
+Para revisar la alerta de JSONP de CSP Evaluator, consulta la cabecera de una respuesta nueva de `/login/` o de un módulo ASCLA. En `script-src` deben aparecer solo el nonce y `strict-dynamic`; YouTube puede seguir apareciendo en `frame-src` y en las directivas de imágenes. Verifica además un video y Turnstile en el navegador: una evaluación de texto de la política no demuestra compatibilidad. El botón «Actualizar datos de YouTube» ya no existe; los metadatos se obtienen automáticamente al guardar o procesar el recurso. Si cambias la política o el ZIP después de un análisis ZAP, conserva el resultado anterior con sus huellas y vuelve a ejecutarlo para atribuir un resultado completo al nuevo paquete.
+
+`config/security.conf` y `config/security.ini` se montan en el WordPress de Docker para ocultar versiones de Apache/PHP, bloquear TRACE y listados de directorios y proteger también los archivos estáticos. **Estos archivos no se instalan con el ZIP del plugin**: el responsable del hosting debe aplicar su equivalente y reiniciar o recargar el servicio. En el proxy HTTPS del destino debe establecer HSTS también para recursos estáticos y errores, TLS 1.2 o superior y un certificado válido; el certificado temporal del laboratorio no se despliega. Comprueba compatibilidad de las políticas con cualquier plugin de terceros antes de extenderlas a todo `wp-admin`.
+
+Tras instalar el plugin y aplicar la configuración del servidor, repite las verificaciones en QA con la revisión y el entorno reales autorizados. El chequeo independiente permite revisar las cabeceras sin realizar ataques:
+
+```bash
+node scripts/check-security-headers.cjs https://wordpress.ingsoftware.lat/login/ test-results/csp-qa.json
+```
+
+Los originales ZAP pueden contener URLs, nonces o cabeceras de sesión: permanecen privados en `test-results/`, ignorado por Git. Comparte únicamente un resumen revisado sin credenciales. Los reportes HTML/JSON y los accesos privados no deben subirse automáticamente a Git.
+
+Referencias del fabricante: [Full Scan](https://www.zaproxy.org/docs/docker/full-scan/), [API Scan](https://www.zaproxy.org/docs/docker/api-scan/) y [API de ZAP](https://www.zaproxy.org/docs/api/). La integración YouTube utiliza el [reproductor oficial sobre un iframe existente](https://developers.google.com/youtube/iframe_api_reference).
+
+## 12. Mantener la guía y las evidencias
 
 Antes de compartir cambios documentales:
 

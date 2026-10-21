@@ -149,15 +149,18 @@ final class Release103RegressionTest extends TestCase
         return $extra+['email'=>get_userdata($this->member)->user_email,'role'=>'ascla_member','first_name'=>'Ana','last_name'=>'Prueba','position'=>'Gerente','company'=>'ASCLA Perú'];
     }
 
-    public function testProfessionalEditWithoutRequestDoesNotChangeAnyAccountData(): void
+    public function testAdministratorCanEditProfessionalDataWithoutAContactRequest(): void
     {
-        $before=get_user_meta($this->member,'_ascla_profile',true);
         $email=get_userdata($this->member)->user_email;
         $response=$this->api('POST','admin/users/'.$this->member,$this->editPayload(['email'=>'changed-'.bin2hex(random_bytes(4)).'@example.invalid','role'=>'ascla_executive']));
-        self::assertSame(403,$response->get_status());
-        self::assertSame($before,get_user_meta($this->member,'_ascla_profile',true));
-        self::assertSame($email,get_userdata($this->member)->user_email);
-        self::assertSame(['ascla_member'],get_userdata($this->member)->roles);
+        self::assertSame(200,$response->get_status());
+        self::assertSame('Gerente',Profiles::raw($this->member)['position']);
+        self::assertNotSame($email,get_userdata($this->member)->user_email);
+        self::assertSame(['ascla_executive'],get_userdata($this->member)->roles);
+        $audit=Store::rows('audit','object_id=%d AND action=%s',[$this->member,'professional_profile_updated'],'ORDER BY id DESC LIMIT 1')[0];
+        self::assertSame($this->admin,(int)$audit['actor_id']);
+        self::assertContains('position',json_decode($audit['detail'],true)['profile_fields']['after']);
+        self::assertStringNotContainsString('Gerente',$audit['detail'],'Audit stores field names, not private values.');
     }
 
     public function testUnchangedProfessionalFieldsNeedNoRequest(): void

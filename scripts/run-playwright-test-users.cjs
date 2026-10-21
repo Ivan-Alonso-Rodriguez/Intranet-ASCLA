@@ -14,13 +14,7 @@ const E=value=>String(value??'').replace(/\u001b\[[0-?]*[ -/]*[@-~]/g,'').replac
 const events=[];let admin,bruno,results=[],cleanup={status:'pending'},failure=false;
 const fixture={base,prefix,directoryQuery:'Prueba ASCLA',sharedAccounts:true,headless:!args.includes('--headed'),browser_channel:access.browser_channel||'msedge',actors:{admin:access.actors.Administrador,ui_a:access.actors.Ana,ui_b:access.actors.Bruno,profile:access.actors.Carla},onEventCreated(event){if(!Number.isInteger(event.id)||event.id<1||![' Evento de interfaz',' Evento de aforo'].some(suffix=>event.title===prefix+suffix))throw Error('Evento de prueba inesperado.');events.push(event);fs.writeFileSync(path.join(out,'created-events.json'),JSON.stringify(events,null,2)+'\n');}};
 async function login(actor){
-  const r=await fetch(base+'/wp-login.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Cookie:'wordpress_test_cookie=WP%20Cookie%20check'},body:new URLSearchParams({log:actor.login,pwd:actor.password,testcookie:'1',redirect_to:base+'/intranet/'}),redirect:'manual',signal:AbortSignal.timeout(45000)});
-  if(r.status!==302)throw Error('No se pudo iniciar sesión para '+actor.login+' (HTTP '+r.status+')');
-  const cookie=r.headers.getSetCookie().map(c=>c.split(';')[0]).join('; ');
-  const page=await fetch(base+'/intranet/',{headers:{Cookie:cookie},signal:AbortSignal.timeout(45000)});
-  const match=(await page.text()).match(/var ASCLA\s*=\s*(\{[\s\S]*?\});/);
-  if(!match)throw Error('No se encontró la sesión REST para '+actor.login);
-  const session={cookie,nonce:JSON.parse(match[1]).nonce};
+  const session=await require('./native-login.cjs')(base,actor);
   const identity=await api('/bootstrap',session);
   if(identity.status!==200||Number(identity.data.me?.id)!==actor.id)throw Error('La identidad no coincide con la cuenta de prueba configurada.');
   return {...session,admin:identity.data.admin};
@@ -40,7 +34,7 @@ async function prepare(){
   if(state.retry_at)throw Error('La pareja tiene un período de espera activo; no se omite esa regla.');
   if(state.state!=='none'||state.blocked){for(const active of [true,false])ok(await api('/relations',bruno,{target:access.actors.Ana.id,kind:'block',active}),'Preparar la pareja dedicada');}
   const sources=path.join(out,'sources');fs.mkdirSync(sources,{recursive:true});
-  for(const [from,name] of [[path.join(root,'tests/acceptance-ui.cjs'),'acceptance-ui.cjs'],[__filename,'run-playwright-test-users.cjs'],[path.join(__dirname,'qa-access.cjs'),'qa-access.cjs']]){
+  for(const [from,name] of [[path.join(root,'tests/acceptance-ui.cjs'),'acceptance-ui.cjs'],[__filename,'run-playwright-test-users.cjs'],[path.join(__dirname,'qa-access.cjs'),'qa-access.cjs'],[path.join(__dirname,'native-login.cjs'),'native-login.cjs']]){
     const bytes=fs.readFileSync(from);if(secrets.some(secret=>bytes.includes(Buffer.from(secret))))throw Error('Credenciales inesperadas en las fuentes.');fs.writeFileSync(path.join(sources,name),bytes);
   }
 }

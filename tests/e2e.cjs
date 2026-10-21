@@ -298,7 +298,7 @@ async function goto(page, route) {
           assert.equal(await profile.locator('[data-profile-affinity]').count(), 0);
           await profile.getByRole('button', { name: 'Desbloquear', exact: true }).click();
           await profile.getByRole('button', { name: 'Bloquear', exact: true }).waitFor();
-          await card.getByRole('button', { name: 'Enviar solicitud de conexión', exact: true }).waitFor();
+          await card.getByRole('button', { name: 'Conectar', exact: true }).waitFor();
           await profile.getByRole('button', { name: 'Cerrar', exact: true }).click();
         });
         const current = (await request(p, `profiles/${target.id}`)).body.connection;
@@ -549,6 +549,7 @@ async function goto(page, route) {
       assert.equal((await request(a, "admin/contact/" + contact.id + "/assign", {assignee: (await request(a,'bootstrap')).body.me.id})).status,200);
       await a.goto(base + "/administracion/");
       await a.locator('.admin-tabs [data-tab="solicitudes"]').click();
+      await a.locator('[data-contact="'+contact.id+'"] .support-ticket-details > summary').click();
       for (const state of ["progress","resolved"]) {
         const form=a.locator('[data-form="contact-update"][data-id="'+contact.id+'"]');
         await form.locator('[name="status"]').selectOption(state);

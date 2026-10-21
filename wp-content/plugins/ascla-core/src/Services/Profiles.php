@@ -58,6 +58,9 @@ final class Profiles
         $own=$id===get_current_user_id();
         Access::require($own||current_user_can('ascla_manage')||!empty($data['directory']),'Perfil no disponible.',404);
         $data=self::applyVisibility($data,$id,$own);
+        $data['member_type_code']=MemberTypes::code((string)($data['member_type']??''));
+        $data['member_type']=\ASCLA\Core\Frontend\Language::label(MemberTypes::OPTIONS[$data['member_type_code']]??'');
+        if (current_user_can('ascla_manage')) { $data['administration']=Administration::permissions($id); }
         unset($data['revision']);
         $data['photo_url']=!empty($data['photo_id'])?Media::profilePhotoUrl((int)$data['photo_id'],$id):'';
         if ($own) {
@@ -122,10 +125,9 @@ final class Profiles
     {
         $old=self::raw($id);
         ProfileValidation::validateRequired($input);
-        $data=self::saveTextFields($old,$input);
+        $data=self::details(MemberTypes::profile($old,$input,$id),$input);
         $data=self::savePhoneFields($data,$input,$id);
         if (array_key_exists('birth_date',$input)) { $data['birth_date']=Birthdays::normalize($input['birth_date']); }
-        $data=self::saveTermFields($data,$input);
         $missing=ProfileRequirements::missing($data);
         Access::require(!$missing,'Completa los campos obligatorios: '.implode(', ',$missing).'.',400);
         $data=self::savePreferenceFields($data,$input,$id);
@@ -142,13 +144,20 @@ final class Profiles
         return self::visible($id);
     }
 
+    /** Shared, allowlisted details; account access and personal consent are handled separately. */
+    public static function details(array $data,array $input): array
+    {
+        return self::saveTermFields(self::saveTextFields($data,$input),$input);
+    }
+
     private static function saveTextFields(array $data,array $input): array
     {
-        foreach (self::TEXT as $field) {
+        foreach (array_diff(self::TEXT,['member_type']) as $field) {
             if (!array_key_exists($field,$input)) { continue; }
             $value=Access::text($input[$field],in_array($field,['bio','experience'],true)?3000:200);
             if (in_array($field,['linkedin','twitter','website'],true) && $value!=='') {
                 Access::require((bool)filter_var($value,FILTER_VALIDATE_URL) && in_array(wp_parse_url($value,PHP_URL_SCHEME),['https','http'],true),'URL no válida.',400);
+                if ($field!=='website') { self::validateSocialLink($field,$value); }
                 $value=esc_url_raw($value);
             }
             if ($field==='country' && $value!=='' && $value!==(string)($data['country']??'')) {
@@ -159,6 +168,17 @@ final class Profiles
             $data[$field]=$value;
         }
         return $data;
+    }
+
+    private static function validateSocialLink(string $field,string $value): void
+    {
+        $url=wp_parse_url($value);$host=strtolower($url['host']??'');
+        $domains=$field==='linkedin'?['linkedin.com']:['x.com','twitter.com'];
+        $allowed=false;
+        foreach ($domains as $domain) { $allowed=$allowed || $host===$domain || str_ends_with($host,'.'.$domain); }
+        $defaultPort=($url['scheme']??'')==='https'?443:80;
+        Access::require($allowed && !isset($url['user']) && !isset($url['pass']) && (!isset($url['port']) || $url['port']===$defaultPort),
+            $field==='linkedin'?'Introduce un enlace de linkedin.com.':'Introduce un enlace de x.com o twitter.com.',400);
     }
 
     private static function savePhoneFields(array $data,array $input,int $id): array

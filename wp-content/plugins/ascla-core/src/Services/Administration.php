@@ -47,6 +47,21 @@ final class Administration
         return $roles;
     }
 
+    public static function permissions(int $id): array
+    {
+        $user=get_userdata($id);
+        if (!$user || !current_user_can('ascla_manage')) { return []; }
+        $technical=user_can($id,'manage_options');
+        $community=(bool)array_intersect($user->roles,self::COMMUNITY_ROLES);
+        return [
+            'technical_admin'=>$technical,
+            'can_edit'=>$community && !$technical && $id!==get_current_user_id() && current_user_can('edit_user',$id),
+            'can_delete'=>$community && !$technical && $id!==get_current_user_id() && current_user_can('delete_user',$id),
+            'can_suspend'=>$community && !$technical && $id!==get_current_user_id(),
+            'can_record_role_approval'=>current_user_can('edit_user',$id),
+        ];
+    }
+
     public static function users(array $filter): array
     {
         Access::require(current_user_can('ascla_manage'));
@@ -60,8 +75,6 @@ final class Administration
         $query=new \WP_User_Query($args);$items=[];
         foreach($query->get_results() as $user) {
             $id=(int)$user->ID;$card=Profiles::card($id);
-            $technical=user_can($id,'manage_options');
-            $community=(bool)array_intersect($user->roles,self::COMMUNITY_ROLES);
             $items[]=[
                 'id'=>$id,
                 'name'=>$user->display_name,
@@ -74,11 +87,7 @@ final class Administration
             ...Membership::view($id),
                 'photo_url'=>$card['photo_url'],
                 'profile_url'=>$card['profile_url'],
-                'technical_admin'=>$technical,
-                'can_edit'=>$community&&!$technical&&$id!==get_current_user_id()&&current_user_can('edit_user',$id),
-                'can_delete'=>$community&&!$technical&&$id!==get_current_user_id()&&current_user_can('delete_user',$id),
-                'can_suspend'=>$id!==get_current_user_id()&&!$technical&&$community,
-                'can_record_role_approval'=>current_user_can('edit_user',$id),
+                ...self::permissions($id),
             ];
         }
         $roles=[];foreach(wp_roles()->roles as $id=>$roleData) {$roles[]=['id'=>$id,'name'=>self::roleLabel($id)]; }
@@ -136,7 +145,7 @@ final class Administration
         $first=Access::text($input['first_name']??'',100);$last=Access::text($input['last_name']??'',100);Access::require(Access::hasText($first.$last),'Indica al menos un nombre o apellido.',400);
         $account=[
             'login'=>$login,'email'=>$email,'role'=>$role,'first'=>$first,'last'=>$last,
-            'position'=>Access::text($input['position']??'',200),'company'=>Access::text($input['company']??'',200),'member_type'=>Access::text($input['member_type']??'',200),
+            'position'=>Access::text($input['position']??'',200),'company'=>Access::text($input['company']??'',200),'member_type'=>MemberTypes::selected($input['member_type']??'independent'),
             'birth_date'=>Birthdays::normalize($input['birth_date']??''),'phone'=>\ASCLA\Core\Domain\Phone::normalize($input['phone']??''),'phone_visibility'=>\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']??'private'),
             'membership'=>Membership::validate($input),
             'send_invite'=>!array_key_exists('send_invite',$input)||rest_sanitize_boolean($input['send_invite']),
@@ -161,9 +170,13 @@ final class Administration
             'first_name'=>$profile['first_name']??$user->first_name,
             'last_name'=>$profile['last_name']??$user->last_name,
             'professional_requests'=>ProfessionalChanges::pending($id),
+            ...array_intersect_key($profile,array_flip(array_merge(Profiles::TEXT,array_keys(Profiles::TERMS)))),
+            'profile_revision'=>(int)($profile['revision']??0),
             'position'=>$profile['position']??'',
             'company'=>$profile['company']??'',
             'member_type'=>$profile['member_type']??'',
+            'member_type_code'=>MemberTypes::code((string)($profile['member_type']??'')),
+            ...self::permissions($id),
             'birth_date'=>$profile['birth_date']??'',
             'phone'=>$profile['phone']??'','phone_visibility'=>$profile['phone_visibility']??'private',
             'photo_url'=>Profiles::card($id)['photo_url'],
@@ -194,9 +207,13 @@ final class Administration
         Access::require(Access::hasText($first.$last),'Indica al menos un nombre o apellido.',400);
         $membership=Membership::validate($input,$id);
         $previousProfile=(array)get_user_meta($id,'_ascla_profile',true)+['first_name'=>$user->first_name,'last_name'=>$user->last_name,'phone_visibility'=>'private'];
+        if (array_key_exists('profile_revision',$input)) {
+            $revision=FormRules::bounded($input['profile_revision'],0,PHP_INT_MAX);
+            Access::require($revision===(int)($previousProfile['revision']??0),'El perfil cambió mientras lo editabas. Cierra y vuelve a abrir Editar usuario para cargar los datos actuales.',409);
+        }
         $phone=\ASCLA\Core\Domain\Phone::normalize($input['phone']??($previousProfile['phone']??''));
         $phoneVisibility=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']??($previousProfile['phone_visibility']??'private'));
-        $profile=$previousProfile;
+        $profile=Profiles::details($previousProfile,$input);
         $profile['first_name']=$first;$profile['last_name']=$last;
         $profile['phone']=$phone;$profile['phone_visibility']=$phoneVisibility;
         foreach (['position','company'] as $field) {
@@ -205,23 +222,25 @@ final class Administration
                 ProfileValidation::validateRequired([$field=>$profile[$field]]);
             }
         }
-        $profile['member_type']=Access::text($input['member_type']??($previousProfile['member_type']??''),200);
+        $profile=MemberTypes::profile($profile,$input,$id);
         $profile['birth_date']=Birthdays::normalize($input['birth_date']??($previousProfile['birth_date']??''));
         $changed=ProfessionalChanges::changed($previousProfile,$profile);
+        if ($email!==$user->user_email) { $changed[]='email'; }
         if ($changed) { ProfileValidation::validateRequired(array_intersect_key($profile,array_flip($changed))); }
         $profile['revision']=(int)($profile['revision']??0)+1;
-        $save=static function()use($id,$user,$email,$first,$last,$role,$profile,$membership,$permissionPlan): void {
+        $save=static function()use($id,$user,$email,$first,$last,$role,$profile,$previousProfile,$input,$membership,$permissionPlan): void {
             $display=trim($first.' '.$last)?:$user->display_name;
-            $result=wp_update_user(['ID'=>$id,'user_email'=>$email,'first_name'=>$first,'last_name'=>$last,'display_name'=>$display]);
-            Access::require(!is_wp_error($result),is_wp_error($result)?$result->get_error_message():'No se pudo actualizar la cuenta.',400);
+            WordPressWrites::user(['ID'=>$id,'user_email'=>$email,'first_name'=>$first,'last_name'=>$last,'display_name'=>$display]);
             AccountPermissions::apply($id,$permissionPlan);
             Membership::apply($id,$membership);
+            if (array_key_exists('interests',$input)) { AutomaticInterests::manual($id,(array)($previousProfile['interests']??[]),(array)$profile['interests']); }
             WordPressWrites::meta('user',$id,'_ascla_profile',$profile);
             WordPressWrites::bumpProfileRevision();
             Audit::record('member_updated',$id,'role='.$role);
         };
         if ($changed) { ProfessionalChanges::apply($id,absint($input['professional_request_id']??0),$changed,$save); }
         else { $save(); }
+        \ASCLA\Core\Repositories\Transaction::afterCommit(static fn()=>Access::member($id)?Matching::refreshBatch($id):null);
         Birthdays::celebrate($id);
         return self::user($id);
     }

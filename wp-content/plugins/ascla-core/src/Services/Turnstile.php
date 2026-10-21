@@ -512,7 +512,7 @@ final class TurnstileState
         if (!in_array($flow, ['login', 'recovery'], true)) { return; }
         $expiry = time() + self::ATTEMPT_TTL;
         $payload = $flow . '|' . $key . '|' . $expiry . '|' . TurnstileTrust::shortHash(TurnstileTrust::clientIp());
-        $value = $key . '.' . $expiry . '.' . TurnstileTrust::sign($payload);
+        $value = TurnstileCookie::seal(self::hintCookie($flow),$key . '.' . $expiry . '.' . TurnstileTrust::sign($payload));
         TurnstileTrust::cookie(self::hintCookie($flow), $value, $expiry);
         $_COOKIE[self::hintCookie($flow)] = $value;
     }
@@ -521,7 +521,7 @@ final class TurnstileState
     {
         $key='';
         if (in_array($flow,['login','recovery'],true)) {
-            $raw=(string)($_COOKIE[self::hintCookie($flow)]??'');
+            $raw=TurnstileCookie::open(self::hintCookie($flow),(string)($_COOKIE[self::hintCookie($flow)]??''));
             $parts=explode('.',$raw);
             if (count($parts)===3) {
                 [$candidate,$expiry,$signature]=$parts;
@@ -556,7 +556,7 @@ final class TurnstileTrust
 
     public static function trusted(): bool
     {
-        $raw=(string)($_COOKIE[self::TRUST_COOKIE]??'');
+        $raw=TurnstileCookie::open(self::TRUST_COOKIE,(string)($_COOKIE[self::TRUST_COOKIE]??''));
         $parts=$raw===''?[]:explode('.',$raw);
         $valid=count($parts)===4;
         if ($valid) {
@@ -581,7 +581,7 @@ final class TurnstileTrust
     {
         $expiry = time() + self::TRUST_TTL;
         $payload = $expiry . '.' . self::shortHash(self::clientIp()) . '.' . self::shortHash(self::userAgent());
-        $value = $payload . '.' . self::sign($payload);
+        $value = TurnstileCookie::seal(self::TRUST_COOKIE,$payload . '.' . self::sign($payload));
         self::cookie(self::TRUST_COOKIE, $value, $expiry);
         $_COOKIE[self::TRUST_COOKIE] = $value;
     }

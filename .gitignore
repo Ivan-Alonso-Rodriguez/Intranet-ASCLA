@@ -6,6 +6,7 @@ bloc.txt
 !/dist/.gitkeep
 /tmp/
 /node_modules/
+/.pnpm-store/
 /vendor/
 /coverage/
 /test-results/
@@ -34,6 +35,7 @@ __pycache__/
 !/docs/evidence/release-1.10.6/
 !/docs/evidence/release-1.10.7/
 !/docs/evidence/release-1.10.8/
+!/docs/evidence/release-1.10.9/
 /docs/evidence/release-*/*
 !/docs/evidence/release-1.10.5/package.json
 !/docs/evidence/release-1.10.6/acceptance.json
@@ -64,6 +66,7 @@ __pycache__/
 !/docs/evidence/release-1.10.8/automatic108-qa.json
 !/docs/evidence/release-1.10.8/automatic108.json
 !/docs/evidence/release-1.10.8/contact-layout108.json
+!/docs/evidence/release-1.10.8/contact-inbox108.json
 !/docs/evidence/release-1.10.8/comment-count108.json
 !/docs/evidence/release-1.10.8/connections-panel108.json
 !/docs/evidence/release-1.10.8/events108.json
@@ -74,6 +77,10 @@ __pycache__/
 !/docs/evidence/release-1.10.8/follow-removal108.json
 !/docs/evidence/release-1.10.8/follow-removal108-junit.xml
 !/docs/evidence/release-1.10.8/layout108.json
+!/docs/evidence/release-1.10.8/load108.json
+!/docs/evidence/release-1.10.8/directory-phone108.json
+!/docs/evidence/release-1.10.8/usability-rag108.json
+!/docs/evidence/release-1.10.8/ai-privacy108.json
 !/docs/evidence/release-1.10.8/learning108-qa.json
 !/docs/evidence/release-1.10.8/learning108.json
 !/docs/evidence/release-1.10.8/mailinput108-junit.xml
@@ -85,6 +92,19 @@ __pycache__/
 !/docs/evidence/release-1.10.8/micro-admin108-junit.xml
 !/docs/evidence/release-1.10.8/package.json
 !/docs/evidence/release-1.10.8/privacy108.json
+!/docs/evidence/release-1.10.8/profile-directory108.json
 !/docs/evidence/release-1.10.8/public-qa.json
 !/docs/evidence/release-1.10.8/zoominput108-junit.xml
 !/docs/evidence/release-1.10.8/zoominput108.json
+
+!/docs/evidence/release-1.10.8/admin-edit108.json
+
+!/docs/evidence/release-1.10.8/statistics-layout108.json
+!/docs/evidence/release-1.10.8/micro-invitations108.json
+
+!/docs/evidence/release-1.10.9/package.json
+!/docs/evidence/release-1.10.9/release109.json
+!/docs/evidence/release-1.10.9/statistics-width109.json
+!/docs/evidence/release-1.10.9/security109.json
+!/docs/evidence/release-1.10.9/youtube-csp109.json
+!/docs/evidence/release-1.10.9/profile-editorial109.json

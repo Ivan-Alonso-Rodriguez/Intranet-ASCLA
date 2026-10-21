@@ -49,7 +49,7 @@ final class AdminUserManagementTest extends TestCase
             'last_name'=>'Pérez',
             'position'=>'Especialista',
             'company'=>'ASCLA Demo',
-            'member_type'=>'Asociado titular',
+            'member_type'=>'company',
             'send_invite'=>false,
         ]);
         self::assertSame(200,$response->get_status());
@@ -95,10 +95,9 @@ final class AdminUserManagementTest extends TestCase
 
     public function testAdministratorEditsCommunityUserInsideAscla(): void
     {
-        wp_set_current_user($this->member);
-        $request=\ASCLA\Core\Services\Content::save('contact',['title'=>'Cambio profesional','body'=>'Solicito actualizar Cargo y Empresa.']);
-        $this->posts[]=$request['id'];ascla_test_support_state($request['id'],$this->admin);
         wp_set_current_user($this->admin);
+        $catalog=\ASCLA\Core\Services\Profiles::catalogs();
+        $interest=(int)$catalog['interest'][0]['id'];
         $detail=$this->api('GET','admin/users/'.$this->member);
         self::assertSame(200,$detail->get_status());
         self::assertSame('member_',$prefix=substr($detail->get_data()['login'],0,7));
@@ -106,13 +105,19 @@ final class AdminUserManagementTest extends TestCase
         $newEmail='updated_'.bin2hex(random_bytes(4)).'@example.invalid';
         $response=$this->api('POST','admin/users/'.$this->member,[
             'email'=>$newEmail,
-            'professional_request_id'=>$request['id'],
             'role'=>'ascla_executive',
             'first_name'=>'Ana María',
             'last_name'=>'Actualizada',
             'position'=>'Gerente',
             'company'=>'ASCLA Perú',
-            'member_type'=>'Asociado titular',
+            'member_type'=>'company',
+            'phone'=>'+51 987 654 321','birth_date'=>'1990-02-03',
+            'country'=>'Perú','city'=>'Lima','bio'=>'Biografía actualizada','experience'=>'Experiencia actualizada',
+            'linkedin'=>'https://www.linkedin.com/in/ascla-prueba','twitter'=>'https://x.com/ascla_prueba','website'=>'https://example.invalid',
+            'interests'=>[$interest],'industries'=>[(int)$catalog['industry'][0]['id']],'goals'=>[(int)$catalog['goal'][0]['id']],
+            'areas'=>[(int)$catalog['area'][0]['id']],'languages'=>[(int)$catalog['language'][0]['id']],
+            'learn'=>[(int)$catalog['area'][0]['id']],'help'=>[],'connect_topics'=>[$interest],
+            'directory'=>false,'hidden'=>['position'],'microevents'=>false,
         ]);
         self::assertSame(200,$response->get_status());
         $user=get_userdata($this->member);
@@ -121,6 +126,45 @@ final class AdminUserManagementTest extends TestCase
         $profile=(array)get_user_meta($this->member,'_ascla_profile',true);
         self::assertSame('Ana María',$profile['first_name']);
         self::assertSame('Gerente',$profile['position']);
+        foreach (['country'=>'Perú','city'=>'Lima','bio'=>'Biografía actualizada','experience'=>'Experiencia actualizada','phone'=>'+51987654321','birth_date'=>'1990-02-03'] as $key=>$value) {
+            self::assertSame($value,$profile[$key]);self::assertSame($value,$response->get_data()[$key]);
+        }
+        self::assertSame([$interest],$profile['interests']);self::assertSame([$interest],$response->get_data()['connect_topics']);
+        self::assertSame('https://www.linkedin.com/in/ascla-prueba',$profile['linkedin']);
+        self::assertTrue($profile['directory'],'Administrative details cannot alter personal consent.');
+        self::assertArrayNotHasKey('hidden',$profile);
+        self::assertArrayNotHasKey('microevents',$profile);
+    }
+
+    public function testInvalidDetailsOrStaleEditorDoNotPartiallyUpdateTheAccount(): void
+    {
+        wp_set_current_user($this->admin);
+        $before=\ASCLA\Core\Services\Administration::user($this->member);
+        $profile=get_user_meta($this->member,'_ascla_profile',true);
+        foreach ([['website'=>'javascript:alert(1)'],['country'=>'Invented country'],['interests'=>[PHP_INT_MAX]],['profile_revision'=>99]] as $invalid) {
+            $response=$this->api('POST','admin/users/'.$this->member,$invalid+['email'=>'invalid_'.bin2hex(random_bytes(4)).'@example.invalid','role'=>'ascla_executive','first_name'=>'Changed','last_name'=>'Demo']);
+            self::assertSame(isset($invalid['profile_revision'])?409:400,$response->get_status());
+            self::assertSame($profile,get_user_meta($this->member,'_ascla_profile',true));
+            self::assertSame($before['email'],get_userdata($this->member)->user_email);
+            self::assertSame(['ascla_member'],get_userdata($this->member)->roles);
+        }
+    }
+
+    public function testFailedProfileWriteRollsBackAccountAndInterestExclusions(): void
+    {
+        wp_set_current_user($this->admin);
+        $before=\ASCLA\Core\Services\Administration::user($this->member);
+        $profile=get_user_meta($this->member,'_ascla_profile',true);
+        $fail=fn($check,$id,$key)=>$id===$this->member && $key==='_ascla_profile'?false:$check;
+        add_filter('update_user_metadata',$fail,10,3);
+        try {
+            $response=$this->api('POST','admin/users/'.$this->member,['email'=>'rollback_'.bin2hex(random_bytes(4)).'@example.invalid','role'=>'ascla_executive','first_name'=>'Changed','last_name'=>'Demo','interests'=>[]]);
+            self::assertSame(500,$response->get_status());
+            self::assertSame($profile,get_user_meta($this->member,'_ascla_profile',true));
+            self::assertSame($before['email'],get_userdata($this->member)->user_email);
+            self::assertSame(['ascla_member'],get_userdata($this->member)->roles);
+            self::assertSame('',get_user_meta($this->member,'_ascla_interest_choices',true));
+        } finally { remove_filter('update_user_metadata',$fail,10); }
     }
 
     public function testOnlyAdministratorCanUseUserManagementEndpoints(): void

@@ -117,12 +117,12 @@ final class ReleaseCompletionTest extends TestCase
         $sonar=file_get_contents($root.'/sonar-project.properties');
         $docs=file_get_contents($root.'/README.md');
         $history=file_get_contents($root.'/VERSION_HISTORY.md');
-        self::assertMatchesRegularExpression('/Version:\s*1\.10\.8/', $plugin);
-        self::assertStringContainsString("define('ASCLA_VERSION', '1.10.8');", $plugin);
-        self::assertMatchesRegularExpression('/Stable tag:\s*1\.10\.8/', $readme);
-        self::assertStringContainsString('sonar.projectVersion=1.10.8', $sonar);
-        self::assertStringContainsString('Versión actual: 1.10.8 · esquema 15', $docs);
-        self::assertStringContainsString('**Versión actual:** `1.10.8`', $history);
+        self::assertMatchesRegularExpression('/Version:\s*1\.10\.9/', $plugin);
+        self::assertStringContainsString("define('ASCLA_VERSION', '1.10.9');", $plugin);
+        self::assertMatchesRegularExpression('/Stable tag:\s*1\.10\.9/', $readme);
+        self::assertStringContainsString('sonar.projectVersion=1.10.9', $sonar);
+        self::assertStringContainsString('Versión actual: 1.10.9 · esquema 15', $docs);
+        self::assertStringContainsString('**Versión actual:** `1.10.9`', $history);
         self::assertSame(15, \ASCLA\Core\Database\Installer::SCHEMA_VERSION);
     }
     public function testSqlRankingAndRosterReturnPagesWithoutLosingTotals():void

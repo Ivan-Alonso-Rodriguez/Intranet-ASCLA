@@ -48,7 +48,9 @@ final class MicroEligibility
             Access::require($post->post_type==='ascla_event' && !empty($before['micro']),'Seleccione una propuesta de microevento.',400);
             self::proposal($id);
             $meta=(array)get_post_meta($id,'_ascla',true);
-            return ['item'=>Content::serialize(get_post($id)),'candidates'=>count((array)($meta['invitees']??[])),
+            $item=Content::serialize(get_post($id));
+            MicroInvitations::apply($item,$id,$meta);
+            return ['item'=>$item,'candidates'=>count((array)($meta['invitees']??[])),
                 'removed'=>count(array_diff((array)($before['invitees']??[]),(array)($meta['invitees']??[])))];
         });
     }

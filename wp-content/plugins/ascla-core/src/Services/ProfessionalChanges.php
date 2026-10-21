@@ -3,21 +3,30 @@ namespace ASCLA\Core\Services;
 
 use ASCLA\Core\Repositories\Store;
 
-/** A member's active Contact request authorizes one administrative professional update. */
+/** Administrative profile edits are audited; an optional Contact request remains single-use. */
 final class ProfessionalChanges
 {
     public const FIELDS=['first_name','last_name','position','company','birth_date','phone','phone_visibility'];
 
     public static function changed(array $before,array $after): array
     {
-        return array_values(array_filter(self::FIELDS,static fn($key)=>($before[$key]??'')!==($after[$key]??'')));
+        $fields=array_unique(array_merge(self::FIELDS,Profiles::TEXT,array_keys(Profiles::TERMS)));
+        return array_values(array_filter($fields,static fn($key)=>($before[$key]??'')!==($after[$key]??'')));
+    }
+
+    private static function record(int $member,array $fields,array $context): void
+    {
+        // Keep each record within the existing audit varchar(255), without private values.
+        foreach (array_chunk(array_values($fields),5) as $chunk) {
+            Audit::changes('professional_profile_updated',$member,[],['profile_fields'=>$chunk],$context);
+        }
     }
 
     public static function boot(): void
     {
         add_action('user_profile_update_errors',static function($errors,$update,$user): void {
             if ($update && self::nativeChange((int)$user->ID,(array)$user)) {
-                $errors->add('ascla_profile_request','Los datos personales del asociado se editan desde ASCLA mediante una solicitud de Contacto.');
+                $errors->add('ascla_profile_request','Los datos personales del asociado se editan desde ASCLA.');
             }
         },10,3);
     }
@@ -55,7 +64,11 @@ final class ProfessionalChanges
     public static function apply(int $member,int $request,array $fields,callable $save): void
     {
         Access::require(current_user_can('ascla_manage') && current_user_can('edit_user',$member));
-        Access::require($request>0,'Selecciona una solicitud del asociado en Contacto para cambiar sus datos personales o profesionales.',403);
+        if (!$request) {
+            $save();
+            self::record($member,$fields,['kind'=>'administration']);
+            return;
+        }
         Store::atomic('contact:'.$request,static function()use($member,$request,$fields,$save){
             clean_post_cache($request);
             $post=get_post($request);
@@ -64,7 +77,7 @@ final class ProfessionalChanges
             $record=['member'=>$member,'actor'=>get_current_user_id(),'at'=>gmdate('c'),'fields'=>array_values($fields)];
             // Separate metadata cannot be overwritten by a member editing their original request.
             \ASCLA\Core\Repositories\WordPressWrites::meta('post',$request,'_ascla_professional_change',$record);
-            Audit::record('professional_profile_updated',$member,'request='.$request.'; fields='.implode(',',$fields));
+            self::record($member,$fields,['kind'=>'contact','post_id'=>$request]);
         });
     }
 }

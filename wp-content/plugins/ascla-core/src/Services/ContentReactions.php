@@ -13,6 +13,7 @@ final class ContentReactions
         global $wpdb;
         $kind=$comment?'comment_like':'like';
         $rows=$wpdb->get_results($wpdb->prepare('SELECT reason,COUNT(*) AS total,SUM(user_id=%d) AS mine FROM '.Store::table('relations').' WHERE target_id=%d AND kind=%s GROUP BY reason',get_current_user_id(),$id,$kind),ARRAY_A)?:[];
+        if ($wpdb->last_error!=='') { throw new \ASCLA\Core\Repositories\RepositoryException('No se pudieron consultar las reacciones.'); }
         $counts=array_fill_keys(self::TYPES,0);$mine='';
         foreach ($rows as $row) {
             $type=in_array($row['reason'],self::TYPES,true)?$row['reason']:'like';

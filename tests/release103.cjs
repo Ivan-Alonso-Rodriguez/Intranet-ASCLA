@@ -52,7 +52,7 @@ async function login(browser,user) {
       assert.equal((await api(member,'profiles/me',{first_name:'',last_name:'',position:'',company:''})).status,400);
       await member.screenshot({path:path.join(root,'test-results/release103-required.png'),fullPage:true});
     });
-    await test('Administrator needs a Contact request selected in the editor',async()=>{
+    await test('Administrator edits directly and can link an optional Contact request',async()=>{
       await navigate(admin,'administracion');
       await admin.locator('.admin-tabs [data-tab="usuarios"]').click();
       const search=admin.locator('[data-form="admin-filter"][data-area="users"] [name="q"]');
@@ -60,8 +60,8 @@ async function login(browser,user) {
       await search.press('Enter');
       await admin.locator('[data-action="user-edit"][data-id="'+fixtures.member.id+'"]').click();
       const form=admin.locator('[data-form="admin-user-edit"]');
-      assert.equal(await form.locator('[name="position"]').evaluate(el=>el.readOnly),true);
-      assert.equal(await form.locator('[name="professional_request_id"] option').count(),1);
+      assert.equal(await form.locator('[name="position"]').evaluate(el=>el.readOnly),false);
+      assert.equal(await form.locator('[name="professional_request_id"]').count(),0);
       await admin.locator('.modal-top [data-action="close"]').click();
       await navigate(member,'contacto');
       const contact=member.locator('[data-form="contact"]');
@@ -71,11 +71,13 @@ async function login(browser,user) {
       await contact.getByRole('button',{name:'Enviar solicitud',exact:true}).click();
       const request=(await (await sent).json());
       await admin.locator('[data-action="user-edit"][data-id="'+fixtures.member.id+'"]').click();
+      await form.locator('.admin-edit-section > summary').filter({hasText:'Vincular una consulta de Contacto'}).click();
       await form.locator('[name="professional_request_id"]').selectOption(String(request.id));
       assert.equal(await form.locator('[name="position"]').evaluate(el=>el.readOnly),false);
       assert.match(await form.locator('[data-professional-request-preview]').textContent(),/Gerente QA103/);
       await form.locator('[name="position"]').fill('Gerente QA103');
       await form.locator('[name="company"]').fill('Empresa QA103');
+      if (!await form.locator('[name="member_type"]').inputValue()) await form.locator('[name="member_type"]').selectOption('independent');
       await admin.screenshot({path:path.join(root,'test-results/release103-request.png'),fullPage:true});
       const updated=admin.waitForResponse(r=>r.url().includes('/admin/users/'+fixtures.member.id)&&r.request().method()==='POST');
       await form.getByRole('button',{name:'Guardar cambios',exact:true}).click();

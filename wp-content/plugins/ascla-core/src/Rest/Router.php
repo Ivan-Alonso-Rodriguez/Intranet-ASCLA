@@ -53,12 +53,12 @@ final class RouterRoutes
 {
     public static function community(): void
     {
-        Router::route('/bootstrap','GET',static fn()=>['me'=>Profiles::visible(get_current_user_id()),'profile_completion'=>Profiles::completion(get_current_user_id()),'profile_review'=>\ASCLA\Core\Services\ProfileReview::status(get_current_user_id()),'can_create'=>array_combine(array_keys(\ASCLA\Core\Domain\Catalog::TYPES),array_map([Content::class,'canCreate'],array_keys(\ASCLA\Core\Domain\Catalog::TYPES))),'birthday'=>\ASCLA\Core\Services\Birthdays::info(get_current_user_id()),'catalogs'=>Profiles::catalogs(),'support_categories'=>\ASCLA\Core\Services\SupportCategories::all(),'admin_area'=>current_user_can('ascla_admin_area'),'moderator'=>current_user_can('ascla_moderate'),'executive'=>current_user_can('ascla_publish'),'admin'=>current_user_can('ascla_manage'),'demo'=>Settings::get()['demo'],'ai_mode'=>Knowledge::provider()->mode(),'google_connected'=>\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='','password_min_length'=>Settings::get()['password_min_length'],'notification_cursor'=>Notifications::latestId()]);
+        Router::route('/bootstrap','GET',[\ASCLA\Core\Services\Bootstrap::class,'get']);
         Router::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
         Router::route('/profiles','GET',static fn($r)=>Profiles::directory($r->get_params()));
         Router::route('/locations/countries','GET',static fn()=>Locations::countries());
         Router::route('/locations/cities','GET',static fn($r)=>Locations::cities((string)$r['country'],(string)($r['q']??''),rest_sanitize_boolean($r['exact']??false)));
-        Router::route('/profiles/review','POST',static fn($r)=>\ASCLA\Core\Services\ProfileReview::respond((string)$r['decision']),'ascla_write');
+        Router::route('/profiles/review','POST',static fn($r)=>\ASCLA\Core\Services\ProfileReview::forClient(\ASCLA\Core\Services\ProfileReview::respond((string)$r['decision'])),'ascla_write');
         Router::route('/profiles/me','POST',static fn($r)=>Profiles::save($r->get_json_params()?:[]),'ascla_write');
         Router::route('/interests/learned','GET',static fn()=>\ASCLA\Core\Services\LearnedInterests::get());
         Router::route('/items/(?P<id>\d+)/reading','POST',static fn($r)=>\ASCLA\Core\Services\LearnedInterests::start((int)$r['id']),'ascla_write');
@@ -157,6 +157,8 @@ final class RouterRoutes
         },'ascla_manage');
         Router::route('/admin/users','GET',static fn($r)=>\ASCLA\Core\Services\Administration::users($r->get_params()),'ascla_manage');
         Router::route('/admin/allies','GET',static fn($r)=>\ASCLA\Core\Services\Allies::listing($r->get_params()),'ascla_manage');
+        Router::route('/admin/editorial/(?P<type>gallery|resource)','GET',static fn($r)=>\ASCLA\Core\Services\EditorialRegistry::listing($r['type'],$r->get_params()),'ascla_admin_area');
+        Router::route('/admin/editorial/(?P<type>gallery|resource)/(?P<id>\d+)/history','GET',static fn($r)=>\ASCLA\Core\Services\EditorialRegistry::history($r['type'],(int)$r['id']),'ascla_admin_area');
         Router::route('/admin/allies/(?P<id>\d+)/status','POST',static fn($r)=>\ASCLA\Core\Services\Allies::changeStatus((int)$r['id'],Access::text($r['state']??'',20)),'ascla_manage');
         Router::route('/admin/allies/(?P<id>\d+)/history','GET',static fn($r)=>\ASCLA\Core\Services\Allies::history((int)$r['id']),'ascla_manage');
         Router::route('/admin/users','POST',static fn($r)=>\ASCLA\Core\Services\Administration::createUser($r->get_json_params()?:[]),'ascla_manage');
@@ -199,7 +201,7 @@ final class RouterRoutes
         Router::route('/admin/deliveries/(?P<id>\d+)/retry','POST',static fn($r)=>\ASCLA\Core\Jobs\Deliveries::retry((int)$r['id']),'ascla_manage');
         Router::route('/settings','GET',static fn()=>Settings::status(),'ascla_manage');
         Router::route('/settings','POST',static fn($r)=>Settings::save($r->get_json_params()?:[]),'ascla_manage');
-        Router::route('/admin','GET',static fn()=>RouterAdmin::build(),'ascla_admin_area');
+        Router::route('/admin','GET',static fn($r)=>RouterAdmin::build(Access::text($r['section']??'',30)),'ascla_admin_area');
         Router::route('/admin/reports/(?P<id>\d+)','DELETE',static fn($r)=>\ASCLA\Core\Services\Reports::remove((int)$r['id']),'ascla_moderate');
         Router::route('/admin/contact/(?P<id>\d+)','DELETE',static fn($r)=>\ASCLA\Core\Services\Administration::deleteContact((int)$r['id']),'ascla_publish');
         Router::route('/admin/reports/(?P<id>\d+)/review','POST',static fn($r)=>Content::reviewReport((int)$r['id'],(string)($r['reason']??'')),'ascla_moderate');
@@ -216,23 +218,26 @@ final class RouterRoutes
 
 final class RouterAdmin
 {
-    public static function build(): array
+    public static function build(string $section=''): array
     {
+        Access::require(in_array($section,['','resumen','moderacion','trabajos','logs'],true),'Sección no válida.',400);
+        $overview=$section==='' || $section==='resumen';
+        $moderation=$section==='' || $section==='moderacion';
         $moderator=current_user_can('ascla_moderate');$admin=current_user_can('ascla_manage');
-        $pending=self::pending();
-        $comments=self::comments($moderator);
-        $jobs=self::jobs($admin);
-        $reports=self::reports($moderator,$admin);
-        $audit=self::audit($admin);
-        return ['pending'=>$pending,'comments'=>$comments,'reports'=>$reports,'jobs'=>$jobs,'audit'=>$audit,'counts'=>['members'=>count(get_users(['capability'=>'ascla_access','fields'=>'ID'])),'pending'=>count($pending)]];
+        $pending=$overview || $moderation?self::pending($section==='resumen'):[];
+        $comments=$moderation?self::comments($moderator):[];
+        $jobs=$overview || $section==='trabajos'?self::jobs($admin):[];
+        $reports=$overview || $moderation?self::reports($moderator,$admin):[];
+        $audit=$section==='' || $section==='logs'?self::audit($admin):[];
+        return ['pending'=>$pending,'comments'=>$comments,'reports'=>$reports,'jobs'=>$jobs,'audit'=>$audit,'counts'=>['members'=>$overview?count(get_users(['capability'=>'ascla_access','fields'=>'ID'])):0,'pending'=>count($pending)]];
     }
 
-    private static function pending(): array
+    private static function pending(bool $summary=false): array
     {
         $pending=[];
         foreach (\ASCLA\Core\Domain\Catalog::TYPES as $key=>$label) {
             foreach (get_posts(['post_type'=>'ascla_'.$key,'post_status'=>['pending','draft'],'numberposts'=>50]) as $post) {
-                if (Content::canRead($post)) { $pending[]=Content::serialize($post); }
+                if (Content::canRead($post)) { $pending[]=$summary?['id'=>(int)$post->ID]:Content::serialize($post); }
             }
         }
         return $pending;

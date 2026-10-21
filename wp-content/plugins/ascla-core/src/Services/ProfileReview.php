@@ -35,6 +35,11 @@ final class ProfileReview
         }
         return self::status($id);
     }
+    /** The browser needs decisions and reminder settings, not precise internal review dates. */
+    public static function forClient(array $state): array
+    {
+        return array_intersect_key($state,array_flip(['due','incomplete','snooze_days']));
+    }
     public static function confirmed(int $id): void
     {
         \ASCLA\Core\Repositories\WordPressWrites::meta('user',$id,'_ascla_profile_review',['confirmed_at'=>time(),'snoozed_until'=>0]);

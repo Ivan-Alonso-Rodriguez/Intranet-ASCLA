@@ -30,7 +30,7 @@ $initials=implode('',array_map(static fn($word)=>mb_substr($word,0,1),array_slic
 <div class="header-right"><?php if($settings['demo']): ?><span class="demo-badge">DEMO MODE</span><?php endif; ?>
 <form class="header-language" method="post" action="" aria-label="<?php echo esc_attr(Language::text('Cambiar idioma','Change language')); ?>">
 <label class="screen-reader-text" for="ascla-app-language"><?php echo esc_html(Language::text('Idioma','Language')); ?></label>
-<select id="ascla-app-language" name="_ascla_locale" aria-label="<?php echo esc_attr(Language::text('Idioma','Language')); ?>" onchange="this.form.requestSubmit()"><?php foreach(Language::SUPPORTED as $locale=>$name): ?><option value="<?php echo esc_attr($locale); ?>" <?php selected(Language::current(),$locale); ?>><?php echo esc_html($name); ?></option><?php endforeach; ?></select>
+<select id="ascla-app-language" name="_ascla_locale" aria-label="<?php echo esc_attr(Language::text('Idioma','Language')); ?>" data-admin-language-select><?php foreach(Language::SUPPORTED as $locale=>$name): ?><option value="<?php echo esc_attr($locale); ?>" <?php selected(Language::current(),$locale); ?>><?php echo esc_html($name); ?></option><?php endforeach; ?></select>
 <input type="hidden" name="_ascla_change_language" value="1"><?php wp_nonce_field('ascla_change_language','_ascla_language_nonce'); ?>
 <noscript><button type="submit" class="btn small"><?php echo esc_html(Language::text('Cambiar','Change')); ?></button></noscript>
 </form>

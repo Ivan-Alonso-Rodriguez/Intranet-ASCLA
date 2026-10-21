@@ -11,6 +11,8 @@ Abre el [Bruno Run Dashboard](dashboard.html) para revisar resultados, peticione
 
 La URL de QA, los usuarios y los IDs están en **Configuración → Vars**. Para autenticar, el ejecutor del repositorio genera un entorno temporal a partir de `test-results/playwright-usuarios.json`. En Bruno de escritorio puedes usar un entorno privado con `claveAsociado`, `claveAna`, `claveBruno`, `claveCarla` y `claveAdministrador`; el asociado de integración es Ana y ambas claves deben corresponder a ella. Ese entorno no se publica. La sesión y el nonce de cada actor se obtienen automáticamente y se mantienen en memoria.
 
+La colección se actualizó el **19 de octubre** para el acceso protegido del paquete 1.10.9 vigente: antes de cada login obtiene su formulario, conserva su cookie y envía su nonce. Los GET de preparación del pre-script no son peticiones adicionales definidas en la colección. Usa el plugin actualizado; no elimines esta protección para ejecutar las pruebas. Los reportes publicados conservan su ejecución del 16 de octubre y no certifican esta modificación posterior de la colección.
+
 ## Integración: endpoints del backend
 
 Son **18 peticiones y 26 comprobaciones**. Las rutas REST de la tabla parten de `/wp-json/ascla/v1`.

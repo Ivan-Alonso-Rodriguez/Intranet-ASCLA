@@ -56,7 +56,7 @@ Desde la raíz del repositorio en PowerShell:
 .\scripts\playwright-usuarios-prueba.ps1 -Visible
 ```
 
-Los accesos ya preparados están en `test-results/playwright-usuarios.json`, fuera de Git. En otro equipo sigue el [apartado de accesos](../README.md#variables-y-accesos) y prepara Node.js, las dependencias del repositorio, Microsoft Edge y los binarios compatibles de Playwright. El [ejecutor](../../scripts/run-playwright-test-users.cjs) usa los [recorridos de interfaz](../../tests/acceptance-ui.cjs).
+Prepara primero `test-results/playwright-usuarios.json` siguiendo el [apartado de accesos](../README.md#variables-y-accesos); ese archivo privado no se distribuye con Git. Necesitas Node.js, las dependencias del repositorio, Microsoft Edge y los binarios compatibles de Playwright. El [ejecutor](../../scripts/run-playwright-test-users.cjs) usa los [recorridos de interfaz](../../tests/acceptance-ui.cjs).
 
 Para una fixture local explícita, usa `-Fixture test-results/playwright-usuarios-local.json`. Este archivo lo genera `tests/shared-test-users-fixture.php` por CLI en un WordPress local ya instalado; no se distribuyen sus contraseñas.
 
@@ -72,7 +72,7 @@ Cada ejecución utiliza una carpeta distinta en `test-results/playwright-usuario
 - Reportes JSON y JUnit, copia de las fuentes y huellas SHA-256.
 - Estado de limpieza separado del resultado de las pruebas.
 
-La carpeta `aprobadas/` conserva el lote vigente del **16 de octubre de 2026**, ejecutado en **WordPress local aislado con el código actualizado**, con cuentas sintéticas Ana, Bruno, Carla y Administrador: **5 recorridos aprobados, 11 videos y 11 capturas**. [Abrir la última ejecución](dashboard.html).
+La carpeta `aprobadas/` conserva el lote del **16 de octubre de 2026**, ejecutado en **WordPress local aislado con el código de esa fecha**, con cuentas sintéticas Ana, Bruno, Carla y Administrador: **5 recorridos aprobados, 11 videos y 11 capturas**. No acredita los cambios posteriores de 1.10.9. [Abrir la última ejecución](dashboard.html).
 
 Solo se publica la última ejecución. Se coloca en `aprobadas/` o `fallidas/` según su resultado; al actualizar se retira la anterior junto con sus videos y reportes. Si la nueva ejecución falla, conserva su diagnóstico y evidencias. La evidencia local actual no acredita que se haya actualizado el servidor.
 

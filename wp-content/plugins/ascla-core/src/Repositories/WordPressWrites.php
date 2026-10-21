@@ -25,7 +25,7 @@ final class WordPressWrites
         $result=wp_update_user($data);
         if (is_wp_error($result) || (int)$result<=0) { throw new RepositoryException(self::FAILED); }
         $stored=get_userdata((int)$result);
-        foreach (['first_name','last_name','display_name'] as $field) {
+        foreach (['first_name','last_name','display_name','user_email'] as $field) {
             if (array_key_exists($field,$data) && (!$stored || (string)$stored->$field!==(string)$data[$field])) {
                 throw new RepositoryException(self::FAILED);
             }

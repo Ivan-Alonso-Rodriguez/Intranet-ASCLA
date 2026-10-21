@@ -1,0 +1,10 @@
+# Rule ID<TAB>FAIL, WARN or IGNORE<TAB>review reason. Unlisted non-informational alerts fail.
+# No vulnerabilities are ignored. INFO alerts remain in the native reports.
+10020	FAIL	ASCLA HTML must prevent embedding by other origins.
+10021	FAIL	HTML, API and static assets require nosniff.
+10038	FAIL	ASCLA HTML requires an enforced Content Security Policy.
+10055	FAIL	The CSP must not rely on broad or unsafe script/style sources.
+10202	FAIL	Forms require their actual WordPress anti-CSRF tokens.
+40012	FAIL	Reflected cross-site scripting is unacceptable.
+40014	FAIL	Persistent cross-site scripting is unacceptable.
+40018	FAIL	SQL injection is unacceptable.

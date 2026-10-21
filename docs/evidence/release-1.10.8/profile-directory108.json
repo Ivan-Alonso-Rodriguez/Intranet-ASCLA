@@ -1,0 +1,157 @@
+{
+  "date": "2026-10-17T05:31:36.719Z",
+  "version": "1.10.8",
+  "schema": 15,
+  "baseline_commit": "877568c3fe16695ca3ede931ef5f1de911539ffa",
+  "scope": "Disposable local WordPress. Existing PHP regressions and real browser/REST checks. No remote installation, new coverage, Quality Gate or UAT acceptance claim.",
+  "decision": {
+    "member_types": [
+      "Independiente",
+      "Empresa asociada"
+    ],
+    "assigned_by": "administration",
+    "corporate_account_grouping": false,
+    "corporate_seat_limit": false
+  },
+  "phpunit": {
+    "tests": 682,
+    "assertions": 7625,
+    "failures": 0,
+    "errors": 0,
+    "coverage_collected": false,
+    "source_snapshot": "current-7",
+    "current_php_sources_match": true
+  },
+  "portable_checks": 49,
+  "browser": {
+    "checks": [
+      "Se conserva el inicio administrativo, un logo y la navegación superior del último pull",
+      "El administrador guarda su perfil sin casillas sociales ni error checked y el cambio persiste",
+      "Nombre, cargo, empresa, biografía y los tres grupos mínimos muestran el indicador obligatorio",
+      "Desde Directorio abre Actividad e intereses y vuelve sin perder la vista ni habilitar networking administrativo",
+      "Administración asigna Empresa asociada desde el Directorio con solo dos tipos y regresa al listado",
+      "La API rechaza tipos arbitrarios y conserva el tipo administrativo anterior",
+      "Gestión conserva suspensión y reactivación reales, y la confirmación de eliminación existente",
+      "El asociado ve el tipo asignado pero no puede alterarlo ni forzándolo por REST",
+      "El Directorio del asociado usa Conectar y Pendiente; cancelar sigue disponible en su menú y funciona"
+    ],
+    "errors": [],
+    "scans": [
+      {
+        "name": "profile-admin-required-desktop",
+        "violations": []
+      },
+      {
+        "name": "profile-admin-required-mobile",
+        "violations": []
+      },
+      {
+        "name": "directory-admin-desktop",
+        "violations": []
+      },
+      {
+        "name": "directory-admin-mobile",
+        "violations": []
+      },
+      {
+        "name": "directory-member-desktop",
+        "violations": []
+      },
+      {
+        "name": "directory-member-mobile",
+        "violations": []
+      }
+    ],
+    "views": [
+      "profile-admin-required-desktop.png",
+      "profile-admin-required-mobile.png",
+      "directory-admin-desktop.png",
+      "directory-admin-mobile.png",
+      "directory-member-desktop.png",
+      "directory-member-mobile.png"
+    ],
+    "scope": "Disposable local WordPress; real UI and REST, no external deployment or coverage",
+    "source_snapshot": "current-8"
+  },
+  "package": {
+    "sha256": "bc4ad3bba76f2560f9217c73b18750a5500ad8aed2bfd3785e989018e0f87af3",
+    "files": 189,
+    "production_sources_match_browser_snapshot": true
+  },
+  "last_ui_adjustment": "Administrative actions are limited to Directory. Browser repeated after this JavaScript-only guard; PHP sources unchanged.",
+  "coverage_reports_unchanged": true,
+  "artifacts": {
+    "php/phpunit.log": {
+      "path": "test-results/profile-directory108-20261017T052548Z-2463/phpunit.log",
+      "sha256": "398c4178f4c141b284100f13c547ff0ef2c464d1c6fd20bcb76a2447d66c4c39"
+    },
+    "php/junit.xml": {
+      "path": "test-results/profile-directory108-20261017T052548Z-2463/junit.xml",
+      "sha256": "e6cafaf0a8c541ab1d26a6ba70b46d9185a3a542b065b0cd44748f814f327355"
+    },
+    "php/coverage-before.sha256": {
+      "path": "test-results/profile-directory108-20261017T052548Z-2463/coverage-before.sha256",
+      "sha256": "1ffb945d05462735dd93a1e2ced23a30d856af26eaa4c7bb4b08cd57c311e329"
+    },
+    "php/coverage-after.sha256": {
+      "path": "test-results/profile-directory108-20261017T052548Z-2463/coverage-after.sha256",
+      "sha256": "1ffb945d05462735dd93a1e2ced23a30d856af26eaa4c7bb4b08cd57c311e329"
+    },
+    "php/cleanup.log": {
+      "path": "test-results/profile-directory108-20261017T052548Z-2463/cleanup.log",
+      "sha256": "8d6dae56f4173cea7fd93b0a9c3297bc8fee4111914b9e81ac6ce3a05425e1c7"
+    },
+    "browser/sanity.log": {
+      "path": "test-results/profile-directory108-20261017T052709Z-2874/sanity.log",
+      "sha256": "8755860c11c8d3f9a1de749e02b68760d94f38c5cd87cadef867e4a455591434"
+    },
+    "browser/browser.log": {
+      "path": "test-results/profile-directory108-20261017T052709Z-2874/browser.log",
+      "sha256": "32741a298a4ec8bc9c35e1a3e5179f9c0e34c58a44d0f4376ebdc6d870958170"
+    },
+    "browser/profile-directory108.json": {
+      "path": "test-results/profile-directory108-20261017T052709Z-2874/profile-directory108.json",
+      "sha256": "46546c4ac68ef007f8d981890843ca23285deb8f87a0a97c1bda85badbe2c55e"
+    },
+    "browser/fixture-cleanup.log": {
+      "path": "test-results/profile-directory108-20261017T052709Z-2874/fixture-cleanup.log",
+      "sha256": "ae10dc1a0e784b43e73dbf9dc7cf25d314f518b09788c900cb19c293d9ace29a"
+    },
+    "browser/coverage-before.sha256": {
+      "path": "test-results/profile-directory108-20261017T052709Z-2874/coverage-before.sha256",
+      "sha256": "1ffb945d05462735dd93a1e2ced23a30d856af26eaa4c7bb4b08cd57c311e329"
+    },
+    "browser/coverage-after.sha256": {
+      "path": "test-results/profile-directory108-20261017T052709Z-2874/coverage-after.sha256",
+      "sha256": "1ffb945d05462735dd93a1e2ced23a30d856af26eaa4c7bb4b08cd57c311e329"
+    },
+    "browser/cleanup.log": {
+      "path": "test-results/profile-directory108-20261017T052709Z-2874/cleanup.log",
+      "sha256": "8d2afe11c6e6c43421639fb7a6345c6db84a92c0a11a8f0402ffc3aa6fc36e56"
+    },
+    "browser/profile-admin-required-desktop.png": {
+      "path": "test-results/profile-directory108-20261017T052709Z-2874/profile-admin-required-desktop.png",
+      "sha256": "c968048dcc4b0a03ed81b4c8b43546cc049f1dc0db59043d184c34def2595d23"
+    },
+    "browser/profile-admin-required-mobile.png": {
+      "path": "test-results/profile-directory108-20261017T052709Z-2874/profile-admin-required-mobile.png",
+      "sha256": "bd0196b80a12cf9fe94dde37e6c8ec1f303a22e81bba9d84a7dc7da2ae0852ff"
+    },
+    "browser/directory-admin-desktop.png": {
+      "path": "test-results/profile-directory108-20261017T052709Z-2874/directory-admin-desktop.png",
+      "sha256": "7a7c3f05c762dcd38017a70c28ad56cd149bcd98f045364dd37b69fd0d77d817"
+    },
+    "browser/directory-admin-mobile.png": {
+      "path": "test-results/profile-directory108-20261017T052709Z-2874/directory-admin-mobile.png",
+      "sha256": "a6da7f383378d6f83846e46bc2b94ff4d86c48b81716e9523e5be61b59cca891"
+    },
+    "browser/directory-member-desktop.png": {
+      "path": "test-results/profile-directory108-20261017T052709Z-2874/directory-member-desktop.png",
+      "sha256": "58da60f8eaa29cb2ae859a2fad542b28a923618e197ec55be220eda8a8853f45"
+    },
+    "browser/directory-member-mobile.png": {
+      "path": "test-results/profile-directory108-20261017T052709Z-2874/directory-member-mobile.png",
+      "sha256": "2c01ec661db9a3a9d6d6266bd9ac2e0b725a0b6ded5ea993c60456f9d9a7a7e5"
+    }
+  }
+}

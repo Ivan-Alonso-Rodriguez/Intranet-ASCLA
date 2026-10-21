@@ -64,7 +64,7 @@ final class DemoSeed
         if (is_wp_error($uid)) { throw new ServiceException('No se pudo crear un usuario demo.'); }
         update_user_meta($uid,'_ascla_demo',true);
         [$first,$last]=explode(' ',$name,2);wp_set_current_user($uid);
-        $fields=['first_name'=>$first,'last_name'=>$last,'position'=>self::POSITIONS[$i%3],'company'=>self::COMPANIES[$i%9].' (ficticia)','country'=>self::COUNTRIES[$i%6],'city'=>self::CITIES[$i%6],'member_type'=>'Asociado demo','bio'=>'Perfil ficticio para explorar la comunidad. Me interesa compartir experiencias y aprender sobre gobierno corporativo.','experience'=>'Experiencia ficticia en coordinación de juntas, seguimiento de acuerdos y gestión de riesgos.','directory'=>true,'networking'=>true,'microevents'=>true];
+        $fields=['first_name'=>$first,'last_name'=>$last,'position'=>self::POSITIONS[$i%3],'company'=>self::COMPANIES[$i%9].' (ficticia)','country'=>self::COUNTRIES[$i%6],'city'=>self::CITIES[$i%6],'bio'=>'Perfil ficticio para explorar la comunidad. Me interesa compartir experiencias y aprender sobre gobierno corporativo.','experience'=>'Experiencia ficticia en coordinación de juntas, seguimiento de acuerdos y gestión de riesgos.','directory'=>true,'networking'=>true,'microevents'=>true];
         foreach (Profiles::TERMS as $key=>$tax) {
             $list=$catalogs[$tax];$fields[$key]=[(int)$list[$i%count($list)]['id'],(int)$list[($i+1)%count($list)]['id']];
         }

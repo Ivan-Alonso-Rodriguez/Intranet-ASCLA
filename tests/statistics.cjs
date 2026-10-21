@@ -3,7 +3,9 @@ const {chromium}=require('playwright'),{execFileSync}=require('node:child_proces
 const assert=require('node:assert/strict'),fs=require('node:fs');
 const base=process.env.ASCLA_SITE_URL || 'http://localhost:8088',results=[],errors=[];
 const ephemeral=process.env.ASCLA_E2E_EPHEMERAL==='1';
-const {startCoverage,stopCoverage}=require('./helpers/browser.cjs');
+const {startCoverage,stopCoverage}=process.env.ASCLA_SKIP_COVERAGE==='1'
+ ? {startCoverage:async()=>{},stopCoverage:async()=>{}}
+ : require('./helpers/browser.cjs');
 const fixture=input=>ephemeral ? (input.action==='setup' ? JSON.parse(fs.readFileSync(process.env.ASCLA_STATISTICS_FIXTURE || 'test-results/statistics-fixture.json','utf8')) : {}) : JSON.parse(execFileSync('docker',['compose','exec','-T','wordpress','php','/opt/ascla-tests/statistics-fixture.php'],{input:JSON.stringify(input),encoding:'utf8'}));
 async function api(p,path,method='GET',body,nonce=true){return p.evaluate(async({path,method,body,nonce})=>{const r=await fetch(ASCLA.api+path,{method,headers:{'Content-Type':'application/json',...(nonce?{'X-WP-Nonce':nonce===true?ASCLA.nonce:nonce}:{})},...(body?{body:JSON.stringify(body)}:{})});return {status:r.status,data:await r.json()};},{path,method,body,nonce});}
 async function test(name,fn){await fn();results.push({name,status:'passed'});console.log('PASS '+name);}
@@ -26,7 +28,7 @@ async function runStatistics(){let f,browser,page;const coverage=[];
    await test(u.role+': acceso al menú y vistas',async()=>{
     assert.equal(await page.locator('.admin-tabs [data-tab="estadisticas"]').count(),publisher?1:0);
     if(!publisher){assert.equal(await page.locator('.stats-tabs').count(),0);return;}
-    await page.locator('[data-stats-form="filter"]').waitFor();await page.locator('[data-stats-form="filter"] [name="topic"]').selectOption(String(f.topic));await page.locator('[data-stats-form="filter"] button').click();await page.locator('.stats-table').first().waitFor();
+    await page.locator('[data-stats-form="filter"]').waitFor();await page.locator('[data-stats-form="filter"] [name="topic"]').selectOption(String(f.topic));await page.locator('[data-stats-form="filter"] button:not([type])').click();await page.locator('.stats-table').first().waitFor();
     for(const section of ['users','topics','trends','ai','overview']){await page.locator(`[data-stats-action="section"][data-section="${section}"]`).click();await page.locator('#stats-view .stats-section').first().waitFor();}
    });
    if(u.role==='ascla_executive')assert.match(await page.locator('#admin-panel h2').innerText(),/Community statistics/);
@@ -41,6 +43,7 @@ async function runStatistics(){let f,browser,page;const coverage=[];
     });
     await test('Vista previa CSV, corrección manual y cierre de asistencia',async()=>{
      await page.locator(`[data-stats-action="roster"][data-id="${f.events[0]}"]`).click();await page.locator('.stats-roster').waitFor();
+     await page.locator('[data-stats-workflow="csv"] > summary').click();
      const stamp=m=>new Date(Date.parse(f.eventStart)+m*60000).toISOString().replace('.000Z','Z');
      const csv=`Name,User Email,Join Time,Leave Time,Duration (Minutes)\nAsociado,${f.users[3].email},${stamp(0)},${stamp(20)},20\nEjecutivo,${f.users[1].email},${stamp(0)},${stamp(30)},30\nEjecutivo,${f.users[1].email},${stamp(20)},${stamp(45)},25\nEjecutivo,${f.users[1].email},${stamp(20)},${stamp(45)},25\nExterno,external@example.invalid,${stamp(0)},${stamp(10)},10\n`;
      await page.locator('[data-stats-form="csv"] input[type="file"]').setInputFiles({name:'zoom.csv',mimeType:'text/csv',buffer:Buffer.from(csv)});
@@ -67,15 +70,17 @@ async function runStatistics(){let f,browser,page;const coverage=[];
      await page.screenshot({path:'test-results/forms-reviewed.png',fullPage:true});
     });
     await test('Reportes: revisar antes de eliminar y conservar la publicación',async()=>{
-     await page.locator('.admin-tabs [data-tab="moderacion"]').click();await page.locator(`[data-action="report-reviewed"][data-id="${f.report}"]`).waitFor();assert.equal(await page.locator(`[data-action="admin-delete"][data-kind="report"][data-id="${f.report}"]`).count(),0);
+     await page.locator('.admin-tabs [data-tab="moderacion"]').click();await page.locator('[data-moderation-view="reportes"]').click();await page.locator(`[data-action="report-reviewed"][data-id="${f.report}"]`).waitFor();assert.equal(await page.locator(`[data-action="admin-delete"][data-kind="report"][data-id="${f.report}"]`).count(),0);
      assert.equal((await api(page,'admin/reports/'+f.report,'DELETE',{})).status,409);
      await page.locator(`[data-action="report-reviewed"][data-id="${f.report}"]`).click();
      const review=page.locator('[data-form="review-decision"]');await review.locator('[name="reason"]').fill('Reporte comprobado; se conserva la publicación.');await review.getByRole('button',{name:'Guardar decisión',exact:true}).click();await review.waitFor({state:'detached'});
+     await page.locator('.moderation-history > summary').click();
      await page.locator(`[data-action="admin-delete"][data-kind="report"][data-id="${f.report}"]`).click();await page.locator('[data-action="admin-delete-confirm"]').click();await page.locator('.modal-backdrop').waitFor({state:'detached'});
      assert.equal((await api(page,'items/'+f.hub)).status,200);assert.equal((await api(page,'admin/reports/'+f.report,'DELETE',{})).status,404);
     });
     await test('Solicitudes: archivar conserva el contenido y el historial',async()=>{
      await page.locator('.admin-tabs [data-tab="solicitudes"]').click();await page.locator(`[data-contact="${f.closed}"]`).waitFor();assert.equal(await page.locator(`[data-contact="${f.open}"] [data-action="admin-delete"]`).count(),0);
+     await page.locator(`[data-contact="${f.closed}"] .support-ticket-details > summary`).click();
      await page.locator(`[data-contact="${f.closed}"] [data-action="admin-delete"]`).click();await page.locator('[data-action="admin-delete-confirm"]').click();await page.locator('.modal-backdrop').waitFor({state:'detached'});
      assert.equal((await api(page,'items/'+f.closed)).status,200);assert.equal((await api(page,'admin/contact/'+f.open,'DELETE',{})).status,409);
     });

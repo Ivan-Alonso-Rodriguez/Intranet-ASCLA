@@ -52,6 +52,7 @@ final class ProfileDirectory
         // Administrators can inspect private data on the individual administrative form,
         // but a directory search must not infer it from membership in a result set.
         foreach ((array)($raw['hidden']??[]) as $field) { unset($data[$field]); }
+        if (in_array('member_type',(array)($raw['hidden']??[]),true)) { unset($data['member_type_code']); }
         if (in_array('photo_id',(array)($raw['hidden']??[]),true)) { $data['photo_url']=''; }
         unset($data['phone'],$data['birth_date'],$data['email'],$data['phone_visibility']);
         $data['name']=Profiles::publicName($id);$data['terms']=Profiles::labels($data);

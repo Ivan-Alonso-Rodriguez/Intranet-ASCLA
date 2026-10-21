@@ -48,6 +48,7 @@ final class ConversationRequests
             $state['blocked']=(bool)$blockRows;
             foreach ($blockRows as $block) { if ((int)$block['user_id']===$me) { $state['blocked_by_me']=true; } }
             $connected=$valid && Connections::areConnected($me,$id);
+            if ($connected) { $state['state']='connected';$state['request_id']=0; }
             $state['can_message']=$valid && !$state['blocked'] && ($connected || $state['state']==='allowed');
             if (self::requestAvailable($valid,$connected,$state)) {
                 $other=Profiles::raw($id);$state['can_request']=!empty($mine['networking']) && !empty($other['networking']) && !empty($other['directory']);

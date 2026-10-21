@@ -59,7 +59,7 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  await ok(admin,moderation,{decision:'reject',reason:'Oculto para revisión de contexto'});
  assert.ok(!(await ok(reader.page,'items/'+topic.id+'/comments')).some(c=>c.id===comment.id));
  assert.equal((await api(reader.page,'comments/'+comment.id+'/reaction',{active:true})).status,404);
- await goto(admin,'administracion/?section=moderacion');await admin.locator('[data-action="comment-moderate"][data-id="'+comment.id+'"][data-decision="approve"]').click();
+ await goto(admin,'administracion/?section=moderacion');await admin.locator('[data-moderation-view="comentarios"]').click();await admin.locator('[data-action="comment-moderate"][data-id="'+comment.id+'"][data-decision="approve"]').click();
  let decisionForm=admin.locator('[data-form="review-decision"]');assert.equal(await decisionForm.locator('[name="reason"]').getAttribute('required'),'');await decisionForm.locator('[name="reason"]').fill('Contexto revisado, comentario permitido');
  await Promise.all([admin.waitForResponse(r=>r.url().endsWith('/'+moderation)&&r.request().method()==='POST'&&r.status()===200),decisionForm.locator('button[type="submit"],button:not([type])').click()]);
  assert.ok((await ok(reader.page,'items/'+topic.id+'/comments')).some(c=>c.id===comment.id));
@@ -71,7 +71,7 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  assert.equal((await api(admin,'admin/reports/'+report.id,null,'DELETE')).status,409);
  assert.equal((await api(admin,'admin/reports/'+report.id+'/review',{})).status,400);
  assert.equal((await api(reader.page,'admin/reports/'+report.id+'/review',{reason:'Sin permisos'})).status,403);
- await goto(admin,'administracion/?section=moderacion');await admin.locator('[data-action="report-reviewed"][data-id="'+report.id+'"]').click();decisionForm=admin.locator('[data-form="review-decision"]');await decisionForm.locator('[name="reason"]').fill('Reporte evaluado; el comentario cumple las normas');
+ await goto(admin,'administracion/?section=moderacion');await admin.locator('[data-moderation-view="reportes"]').click();await admin.locator('[data-action="report-reviewed"][data-id="'+report.id+'"]').click();decisionForm=admin.locator('[data-form="review-decision"]');await decisionForm.locator('[name="reason"]').fill('Reporte evaluado; el comentario cumple las normas');
  await Promise.all([admin.waitForResponse(r=>r.url().endsWith('/admin/reports/'+report.id+'/review')&&r.request().method()==='POST'&&r.status()===200),decisionForm.locator('button[type="submit"],button:not([type])').click()]);
  decisionAudit=(await ok(admin,'admin')).audit.find(row=>row.action==='report_reviewed'&&Number(row.object_id)===Number(report.id));decisionDiff=JSON.parse(decisionAudit.detail);assert.equal(decisionDiff.state.before,'pending');assert.equal(decisionDiff.state.after,'reviewed');assert.equal(decisionDiff.reason.after,'Reporte evaluado; el comentario cumple las normas');assert.equal(decisionDiff.context.target_id,comment.id);assert.equal(Number(decisionAudit.actor_id),decisionDiff.reviewed_by.after);assert.ok(decisionDiff.reviewed_at.after);
  await ok(admin,'admin/reports/'+report.id,null,'DELETE');

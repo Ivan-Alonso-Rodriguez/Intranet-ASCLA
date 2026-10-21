@@ -47,6 +47,20 @@ final class ProfileDirectoryReviewTest extends TestCase
         self::assertSame([],array_intersect(array_column($one['items'],'id'),array_column($two['items'],'id')));
         self::assertArrayNotHasKey('_rank',$one['items'][0]);
     }
+    public function testBrowserBootstrapAndReviewResponsesOmitInternalDatesWithoutChangingTheirSchedule(): void
+    {
+        $id=$this->users[0];$before=ProfileReview::status($id);
+        $bootstrap=\ASCLA\Core\Services\Bootstrap::get();
+        self::assertSame($before['due'],$bootstrap['profile_review']['due']);
+        self::assertSame($before['incomplete'],$bootstrap['profile_review']['incomplete']);
+        self::assertArrayNotHasKey('confirmed_at',$bootstrap['profile_review']);
+        self::assertArrayNotHasKey('next_at',$bootstrap['profile_review']);
+        \ASCLA\Core\Rest\Router::routes();$request=new WP_REST_Request('POST','/ascla/v1/profiles/review');$request->set_header('Content-Type','application/json');$request->set_body(wp_json_encode(['decision'=>'snooze']));
+        $response=rest_get_server()->dispatch($request);self::assertSame(200,$response->get_status());$body=$response->get_data();
+        self::assertFalse($body['due']);self::assertSame(7,$body['snooze_days']);
+        self::assertArrayNotHasKey('confirmed_at',$body);self::assertArrayNotHasKey('next_at',$body);
+        $internal=ProfileReview::status($id);self::assertSame($before['confirmed_at'],$internal['confirmed_at']);self::assertGreaterThan(time(),$internal['next_at']);
+    }
     public function testMultipleFiltersMatchAnyWithinEachGroupAndRankByOverlap(): void
     {
         $cat=Profiles::catalogs();$industries=array_map('intval',array_column(array_slice($cat['industry'],0,2),'id'));$areas=array_map('intval',array_column(array_slice($cat['area'],0,2),'id'));

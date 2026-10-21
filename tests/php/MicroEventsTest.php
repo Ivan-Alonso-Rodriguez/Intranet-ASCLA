@@ -204,4 +204,52 @@ final class MicroEventsTest extends TestCase
         self::assertSame($meta,get_post_meta($id,'_ascla',true));self::assertSame($history,get_post_meta($id,'_ascla_micro_history',true));
         self::assertNotFalse(wp_next_scheduled('ascla_publish_content',[$id,$at]));
     }
+
+    public function testAdministrationCanInspectSelectedPeopleBeforeInvitationsExistWithoutChangingTheProposal(): void
+    {
+        $id=$this->proposal();$meta=get_post_meta($id,'_ascla',true);$history=get_post_meta($id,'_ascla_micro_history',true);
+        $person=$meta['invitees'][0];$profile=get_user_meta($person,'_ascla_profile',true);
+        $profile['hidden']=['first_name','last_name'];update_user_meta($person,'_ascla_profile',$profile);
+        $detail=Events::detail($id);$roster=$detail['micro_invitations'];
+        self::assertFalse($roster['created']);self::assertSame($meta['invitees'],array_column($roster['items'],'id'));
+        self::assertSame(array_fill(0,count($meta['invitees']),'selected'),array_column($roster['items'],'status'));
+        self::assertSame(get_userdata($person)->display_name,$roster['items'][0]['name']);
+        self::assertSame($meta,get_post_meta($id,'_ascla',true));self::assertSame($history,get_post_meta($id,'_ascla_micro_history',true));
+        self::assertSame(0,Store::count('registrations','event_id=%d',[$id]));
+        self::assertArrayNotHasKey('micro_invitations',Content::serialize(get_post($id)));
+        self::assertSame($roster,MicroEligibility::review($id)['item']['micro_invitations']);
+    }
+
+    public function testSelectedRosterTracksRealRsvpSeparatelyFromPeopleJoiningThePublicEvent(): void
+    {
+        $id=$this->proposal();Content::moderate($id,'approve','Revisado');$this->publish($id);$meta=get_post_meta($id,'_ascla',true);
+        wp_set_current_user($meta['invitees'][0]);Events::register($id,'accepted');
+        wp_set_current_user($meta['invitees'][1]);Events::register($id,'declined');wp_set_current_user($this->users[0]);
+        $outsider=array_values(array_diff($this->users,$meta['invitees']))[0];
+        Store::insert('registrations',['event_id'=>$id,'user_id'=>$outsider,'status'=>'accepted','created_at'=>current_time('mysql',true)]);
+        $roster=Events::detail($id)['micro_invitations'];$statuses=array_column($roster['items'],'status','id');
+        self::assertTrue($roster['created']);self::assertCount(count($meta['invitees']),$roster['items']);
+        self::assertArrayNotHasKey($outsider,$statuses);self::assertSame('accepted',$statuses[$meta['invitees'][0]]);
+        self::assertSame('declined',$statuses[$meta['invitees'][1]]);self::assertSame('invited',$statuses[$meta['invitees'][2]]);
+        $meta['public_at']=time()-1;update_post_meta($id,'_ascla',$meta);
+        foreach (array_slice($this->users,1) as $uid) {
+            wp_set_current_user($uid);self::assertArrayNotHasKey('micro_invitations',Events::detail($id));
+        }
+        wp_set_current_user($this->users[0]);
+        $deleted=$meta['invitees'][2];wp_delete_user($deleted);
+        $items=array_column(Events::detail($id)['micro_invitations']['items'],null,'id');
+        self::assertFalse($items[$deleted]['available']);self::assertSame('',$items[$deleted]['name']);
+        self::assertSame('invited',$items[$deleted]['status']);
+    }
+
+    public function testCancelledAndEmptySelectionsDoNotClaimInvitationsWereSent(): void
+    {
+        $id=$this->proposal();$detail=Events::cancel($id,'Propuesta cancelada antes de publicar.');
+        self::assertFalse($detail['micro_invitations']['created']);
+        self::assertSame(['not_invited'],array_unique(array_column($detail['micro_invitations']['items'],'status')));
+        $meta=get_post_meta($id,'_ascla',true);$meta['invitees']=[];update_post_meta($id,'_ascla',$meta);
+        self::assertSame([],Events::detail($id)['micro_invitations']['items']);
+        $meta['micro']=false;update_post_meta($id,'_ascla',$meta);
+        self::assertArrayNotHasKey('micro_invitations',Events::detail($id));
+    }
 }

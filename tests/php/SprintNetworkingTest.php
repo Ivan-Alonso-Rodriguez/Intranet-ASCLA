@@ -25,9 +25,10 @@ final class SprintNetworkingTest extends TestCase
             $r=$input['task']==='microagenda'?['title'=>'Conversación sobre supervisión','theme'=>'supervisión','objective'=>'Explorar preguntas de supervisión','duration_minutes'=>30,'agenda'=>[['minutes'=>10,'topic'=>'Experiencias'],['minutes'=>20,'topic'=>'Preguntas compartidas']],'icebreaker'=>'¿Qué pregunta traes?','closing_question'=>'¿Qué sigue?']:['explanation'=>'Explicación devuelta por el proveedor.','text'=>'Mensaje devuelto por el proveedor.','conversation_proposal'=>'Pregunta propuesta por el proveedor.'];
             return ['response'=>['code'=>200],'headers'=>[],'body'=>wp_json_encode(['candidates'=>[['content'=>['parts'=>[['text'=>wp_json_encode($r)]]],'finishReason'=>'STOP']]])];
         };add_filter('pre_http_request',$this->http,10,3);
-        $before=Store::count('messages','1=1',[]);$m=Matching::between($this->users[0],$this->users[1]);self::assertSame('Google Gemini · API real',$m['mode']);self::assertSame('Explicación devuelta por el proveedor.',$m['explanation']);
-        $intro=Matching::intro($this->users[1]);self::assertSame('Mensaje devuelto por el proveedor.',$intro['text']);self::assertFalse($intro['sent']);self::assertSame($before,Store::count('messages','1=1',[]));
-        $agenda=NetworkingAI::agenda($this->users);self::assertSame(30,$agenda['duration_minutes']);self::assertSame(['matching','intro','microagenda'],$tasks);
+        wp_set_current_user($this->users[1]);
+        $before=Store::count('messages','1=1',[]);$m=Matching::between($this->users[1],$this->users[2]);self::assertSame('Google Gemini · API real',$m['mode']);self::assertSame('Explicación devuelta por el proveedor.',$m['explanation']);
+        $intro=Matching::intro($this->users[2]);self::assertSame('Mensaje devuelto por el proveedor.',$intro['text']);self::assertFalse($intro['sent']);self::assertSame($before,Store::count('messages','1=1',[]));
+        $agenda=NetworkingAI::agenda(array_slice($this->users,1));self::assertSame(30,$agenda['duration_minutes']);self::assertSame(['matching','intro','microagenda'],$tasks);
     }
     public function testBlockedPairsAreNeverGroupedAndNobodyIsLost(): void {
         $profiles=array_map(static fn($id)=>['id'=>$id],range(1,18));$blocked=['1:2'=>true,'3:4'=>true,'7:8'=>true];$plan=GroupPlanner::plan($profiles,[],0,$blocked);$ids=$plan['waiting'];
@@ -71,6 +72,34 @@ final class SprintNetworkingTest extends TestCase
         wp_update_post(['ID'=>$id,'post_status'=>'draft']);
         self::assertSame([],Knowledge::storedAnswer($saved)['sources']);
         self::assertStringNotContainsString('35 %',Knowledge::storedAnswer($saved)['answer']);
+    }
+    public function testVideoKeepsPublicReferencesEvenWhenTheyMatchMemberNamesAndCleansLegacyLabels(): void {
+        wp_update_user(['ID'=>$this->users[1],'display_name'=>'Michael Porter']);
+        $profile=(array)get_user_meta($this->users[1],'_ascla_profile',true);$profile['company']='Banco Mundial';update_user_meta($this->users[1],'_ascla_profile',$profile);
+        $transcript='Se citan Michael Porter, Banco Mundial, Balanced Scorecard, ISO 37000 y COSO ERM. Persona Confidencial compartió una idea.';
+        $id=wp_insert_post(['post_type'=>'ascla_resource','post_title'=>'Referencias públicas y supervisión','post_content'=>$transcript,'post_status'=>'publish','post_author'=>$this->users[0]]);$this->posts[]=$id;
+        update_post_meta($id,'_ascla',['chatham'=>true,'identities'=>'Persona Confidencial','transcript'=>$transcript,'duration_seconds'=>180]);
+        $provider=new class implements \ASCLA\Core\Integrations\AIProviderInterface {
+            public array $received=[];
+            public function mode(): string { return 'Local fixture'; }
+            public function generate(string $task,array $context): array {
+                $this->received=$context;
+                return ['summary'=>'La identidad reservada explicó ISO 37000 y Balanced Scorecard con Michael Porter y Banco Mundial.',
+                    'technical_note'=>'COSO ERM y la Ley General de Sociedades orientan el seguimiento.',
+                    'frameworks'=>['Balanced Scorecard','identidad reservada'],'norms'=>['ISO 37000'],'concepts'=>['COSO ERM']];
+            }
+        };
+        Knowledge::multimedia($id,$provider);
+        foreach(['Michael Porter','Banco Mundial','Balanced Scorecard','ISO 37000'] as $reference)self::assertStringContainsString($reference,$provider->received['transcript']);
+        self::assertStringNotContainsString('Persona Confidencial',$provider->received['transcript']);
+        $meta=get_post_meta($id,'_ascla',true);
+        self::assertStringNotContainsString('identidad reservada',$meta['summary']);self::assertStringContainsString('Michael Porter',$meta['summary']);
+        self::assertSame(['Balanced Scorecard'],$meta['frameworks']);self::assertSame('scoped-attribution-v2',$meta['redaction']['policy']);
+        self::assertSame($transcript,$meta['transcript']);self::assertSame($transcript,get_post($id)->post_content);
+        $meta['summary']='Identidad reservada: se comentó ISO 37000.';update_post_meta($id,'_ascla',$meta);
+        wp_set_current_user($this->users[1]);$view=\ASCLA\Core\Services\Content::serialize(\ASCLA\Core\Services\Content::get($id));
+        self::assertStringNotContainsString('Identidad reservada',$view['meta']['summary']);self::assertStringContainsString('ISO 37000',$view['meta']['summary']);
+        self::assertSame($meta,get_post_meta($id,'_ascla',true));
     }
     public function testUnavailableOrInvalidAgendaProviderFallsBackWithoutBlockingTheGroup(): void {
         Settings::save(['ai_model'=>'gemini-offline-'.bin2hex(random_bytes(5))]);

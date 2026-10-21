@@ -112,7 +112,7 @@ def main():
     rows = [r for group in matrix['requirements'].values() for r in group]
     expected = render_matrix(matrix)
     if args.write_matrix:
-        (ROOT / 'requirements/ascla-analysis.md').write_text(expected, encoding='utf-8')
+        (ROOT / 'requirements/ascla-analysis.md').write_text(expected, encoding='utf-8', newline='\n')
     errors = []
     found = {p.relative_to(ROOT).as_posix() for p in [*ROOT.glob('*.md'), *(ROOT / 'docs').rglob('*.md'), *(ROOT / 'requirements').rglob('*.md'), *(ROOT / 'pruebas').rglob('*.md')]}
     if found != set(DOCUMENTS):

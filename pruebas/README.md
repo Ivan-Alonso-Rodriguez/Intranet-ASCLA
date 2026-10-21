@@ -2,9 +2,11 @@
 
 Esta carpeta reúne la entrega de pruebas para GitHub: colección Bruno con variables, explicación de los flujos, dashboard de resultados y evidencias de Playwright. Los resultados identifican su fecha y entorno; la fecha de preparación de esta carpeta no equivale a otra ejecución.
 
-## Resultado actualizado
+## Última ejecución publicada: 16 de octubre de 2026
 
-La revisión del **16 de octubre de 2026** se ejecutó en un **WordPress local aislado con el código actualizado**: **58/58 peticiones y 105/105 comprobaciones de Bruno**, más **5/5 recorridos de Playwright con 11 videos y 11 capturas**. Incluye las nuevas reglas del administrador. El asistente usa el proveedor mock local. Esta carpeta guarda únicamente la última ejecución de cada herramienta; esta revisión no instala el plugin en el servidor publicado.
+La revisión del **16 de octubre de 2026** se ejecutó en un **WordPress local aislado con el código de esa fecha**: **58/58 peticiones y 105/105 comprobaciones de Bruno**, más **5/5 recorridos de Playwright con 11 videos y 11 capturas**. Incluye las reglas del administrador comprobadas en esa etapa. El asistente usa el proveedor mock local. Esta carpeta guarda únicamente la última ejecución de cada herramienta; no certifica los cambios posteriores de 1.10.9 ni instala el plugin en el servidor publicado.
+
+El **19 de octubre** se actualizan la colección importable, su ZIP y los ejecutores para obtener la cookie y el nonce del nuevo formulario de acceso. Los reportes, videos y fuentes de sus ejecuciones del 16 de octubre se conservan sin reescribirlos; no se presentan como una nueva ejecución de seguridad. El [manual ZAP](../MANUAL_QA_UAT.md#zap) describe esa validación independiente.
 
 ## Abrir la entrega
 
@@ -35,7 +37,7 @@ pruebas/
 
 La copia de GitHub incluye las variables de configuración y los IDs obtenidos del servidor. Las contraseñas están vacías: se cargan desde un entorno privado; las cookies y los nonces se mantienen en memoria. Así el ZIP puede versionarse sin publicar accesos.
 
-En el equipo donde se preparó la entrega ya existe `test-results/playwright-usuarios.json` con los accesos autorizados. En otro equipo, copia [acceso.example.json](acceso.example.json) a esa ruta privada y completa las contraseñas por el canal interno del equipo. El archivo privado y las dependencias locales permanecen ignorados por Git. No copies el ZIP privado anterior con contraseñas dentro de esta carpeta.
+Antes de ejecutar, crea `test-results/` si no existe y copia [acceso.example.json](acceso.example.json) a `test-results/playwright-usuarios.json`. Completa los accesos autorizados por el canal interno del equipo y comprueba URL, usuarios e IDs del entorno elegido. El archivo privado y las dependencias locales permanecen ignorados por Git; no se presupone que existan en otro checkout. No copies ZIP con contraseñas dentro de esta carpeta.
 
 ## Base documental y trazabilidad
 

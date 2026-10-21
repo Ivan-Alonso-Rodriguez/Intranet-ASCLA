@@ -63,7 +63,7 @@ EOF_ENV
     PROJECT="${ASCLA_TEST_PROJECT:?Indica el proyecto Docker de QA con ASCLA_TEST_PROJECT}"
     ENV_FILE="${ASCLA_TEST_ENV_FILE:?Indica el archivo privado de QA con ASCLA_TEST_ENV_FILE}"
     if [[ ! "$PROJECT" =~ ^ascla[_-].*qa ]] || [ ! -f "$ENV_FILE" ]; then echo 'Proyecto o archivo QA no válido.'; exit 1; fi
-    dc exec -T wordpress php -r 'require "/var/www/html/wp-load.php"; if (!defined("ASCLA_VERSION") || ASCLA_VERSION!=="1.10.8") exit(1);' || { echo 'QA debe tener activo ASCLA Core 1.10.8.'; exit 1; }
+    dc exec -T wordpress php -r 'require "/var/www/html/wp-load.php"; if (!defined("ASCLA_VERSION") || ASCLA_VERSION!=="1.10.9") exit(1);' || { echo 'QA debe tener activo ASCLA Core 1.10.9.'; exit 1; }
     ;;
   remote)
     INPUT_FIXTURE="${ASCLA_TEST_FIXTURE:?Indica el JSON privado descargado desde Herramientas > ASCLA QA}"

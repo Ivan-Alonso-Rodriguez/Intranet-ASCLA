@@ -53,6 +53,8 @@ services:
       - ./README.md:/opt/ascla-project/README.md:ro
       - ./VERSION_HISTORY.md:/opt/ascla-project/VERSION_HISTORY.md:ro
       - ./config/uploads.ini:/usr/local/etc/php/conf.d/ascla-uploads.ini:ro
+      - ./config/security.ini:/usr/local/etc/php/conf.d/ascla-security.ini:ro
+      - ./config/security.conf:/etc/apache2/conf-enabled/ascla-security.conf:ro
     depends_on:
       db: {condition: service_healthy}
       mailpit: {condition: service_started}
