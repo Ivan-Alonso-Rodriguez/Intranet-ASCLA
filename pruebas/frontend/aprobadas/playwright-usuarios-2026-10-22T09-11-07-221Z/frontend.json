@@ -1,0 +1,83 @@
+{
+  "date": "2026-10-22T09:14:02.101Z",
+  "results": [
+    {
+      "name": "perfil",
+      "status": "passed",
+      "videos": [
+        "videos/perfil/page@4bf56f526f7aaf443ecce0bcbbc2b7a6.webm"
+      ],
+      "screenshots": [
+        "perfil-0-passed.png"
+      ],
+      "ms": 12098
+    },
+    {
+      "name": "conexion-chat-bloqueo",
+      "status": "passed",
+      "videos": [
+        "videos/conexion-chat-bloqueo/page@e6ae6c47361ff1aba711b5e8b29de357.webm",
+        "videos/conexion-chat-bloqueo/page@7a1930903f3361bb3ae2acde10e27645.webm"
+      ],
+      "screenshots": [
+        "conexion-chat-bloqueo-0-passed.png",
+        "conexion-chat-bloqueo-1-passed.png"
+      ],
+      "ms": 31616
+    },
+    {
+      "name": "borrador-publicacion-inscripcion",
+      "status": "passed",
+      "videos": [
+        "videos/borrador-publicacion-inscripcion/page@a937dabadb4649ed7f01d844a7a6bccc.webm",
+        "videos/borrador-publicacion-inscripcion/page@36660548e57f26cce98374522f18a10b.webm"
+      ],
+      "screenshots": [
+        "borrador-publicacion-inscripcion-0-passed.png",
+        "borrador-publicacion-inscripcion-1-passed.png"
+      ],
+      "ms": 33225
+    },
+    {
+      "name": "aforo-lista-espera-notificacion",
+      "status": "passed",
+      "videos": [
+        "videos/aforo-lista-espera-notificacion/page@301e9e931e3b53895ebef98169949672.webm",
+        "videos/aforo-lista-espera-notificacion/page@71c5f6ce97da1729b60352012cd60137.webm",
+        "videos/aforo-lista-espera-notificacion/page@e4bd5d996ec620eae1f0ff012f9b1366.webm"
+      ],
+      "screenshots": [
+        "aforo-lista-espera-notificacion-0-passed.png",
+        "aforo-lista-espera-notificacion-1-passed.png",
+        "aforo-lista-espera-notificacion-2-passed.png"
+      ],
+      "ms": 44106
+    },
+    {
+      "name": "suspension-reactivacion-acceso",
+      "status": "passed",
+      "videos": [
+        "videos/suspension-reactivacion-acceso/page@babb31e5d2fd144f3a9ab05082a6da2e.webm",
+        "videos/suspension-reactivacion-acceso/page@dadada32722df3f452ad1c5827db93b9.webm",
+        "videos/suspension-reactivacion-acceso/page@013831db7c33b640b4bb69f8b2a64ef4.webm"
+      ],
+      "screenshots": [
+        "suspension-reactivacion-acceso-0-passed.png",
+        "suspension-reactivacion-acceso-1-passed.png",
+        "suspension-reactivacion-acceso-2-passed.png"
+      ],
+      "ms": 27147
+    },
+    {
+      "name": "asistente-ia",
+      "status": "passed",
+      "videos": [
+        "videos/asistente-ia/page@0b8e539d7625baff44597f42bd85239d.webm"
+      ],
+      "screenshots": [
+        "asistente-ia-0-passed.png"
+      ],
+      "ms": 18023
+    }
+  ]
+}

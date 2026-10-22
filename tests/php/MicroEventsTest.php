@@ -48,7 +48,7 @@ final class MicroEventsTest extends TestCase
         self::assertSame([$id],$result['events']);self::assertSame('pending',get_post_status($id));
         self::assertTrue(Settings::get()['micro_approval']);self::assertSame(0,Store::count('registrations','event_id=%d',[$id]));
         wp_update_post(['ID'=>$id,'post_status'=>'publish']);self::assertSame('pending',get_post_status($id));
-        $this->reject(fn()=>Content::moderate($id,'approve','Aprobar'),403);
+        wp_set_current_user($this->users[2]);$this->reject(fn()=>Content::moderate($id,'approve','Aprobar'),404);
         wp_set_current_user($this->users[0]);$approved=Content::moderate($id,'approve','Agenda revisada');
         self::assertSame('ascla_hidden',$approved['status']);self::assertFalse($approved['meta']['invited']);
         self::assertSame(0,Store::count('registrations','event_id=%d',[$id]));
@@ -169,6 +169,7 @@ final class MicroEventsTest extends TestCase
     public function testConsentChangesAfterReviewCannotBeApprovedAndOnlyAdministrationMayReconcileOrCancel(): void
     {
         wp_set_current_user($this->users[1]);$id=$this->proposal();
+        self::assertIsArray(MicroEligibility::review($id));wp_set_current_user($this->users[2]);
         $this->reject(fn()=>MicroEligibility::review($id),403);$this->reject(fn()=>Events::cancel($id,'No corresponde'),403);
         wp_set_current_user($this->users[0]);MicroEligibility::review($id);$meta=get_post_meta($id,'_ascla',true);
         $uid=$meta['invitees'][0];$profile=get_user_meta($uid,'_ascla_profile',true);$profile['microevents']=false;update_user_meta($uid,'_ascla_profile',$profile);
@@ -232,7 +233,8 @@ final class MicroEventsTest extends TestCase
         self::assertArrayNotHasKey($outsider,$statuses);self::assertSame('accepted',$statuses[$meta['invitees'][0]]);
         self::assertSame('declined',$statuses[$meta['invitees'][1]]);self::assertSame('invited',$statuses[$meta['invitees'][2]]);
         $meta['public_at']=time()-1;update_post_meta($id,'_ascla',$meta);
-        foreach (array_slice($this->users,1) as $uid) {
+        wp_set_current_user($this->users[1]);self::assertArrayHasKey('micro_invitations',Events::detail($id));
+        foreach (array_slice($this->users,2) as $uid) {
             wp_set_current_user($uid);self::assertArrayNotHasKey('micro_invitations',Events::detail($id));
         }
         wp_set_current_user($this->users[0]);

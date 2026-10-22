@@ -26,7 +26,7 @@ final class CapabilityHierarchyTest extends TestCase
         $levels=[
             'ascla_member'=>[false,false,false],
             'ascla_moderator'=>[true,false,false],
-            'ascla_executive'=>[true,true,false],
+            'ascla_executive'=>[true,true,true],
             'administrator'=>[true,true,true],
         ];
         foreach($levels as $role=>[$moderate,$publish,$manage]){
@@ -40,7 +40,8 @@ final class CapabilityHierarchyTest extends TestCase
             self::assertSame($moderate,$data['moderator']);self::assertSame($publish,$data['executive']);self::assertSame($manage,$data['admin']);self::assertSame($moderate,$data['admin_area']);
             foreach(['forum','topic','hub','contact'] as $type){self::assertTrue($data['can_create'][$type]);}
             foreach(['event','gallery','resource'] as $type){self::assertSame($publish,$data['can_create'][$type]);}
-            foreach(['admin'=>$moderate,'admin/contacts'=>$publish,'admin/users'=>$manage,'settings'=>$manage] as $route=>$allowed){
+            self::assertSame($role==='administrator',$data['configure']);
+            foreach(['admin'=>$moderate,'admin/contacts'=>$publish,'admin/users'=>$manage,'settings'=>$role==='administrator'] as $route=>$allowed){
                 self::assertSame($allowed?200:403,$this->api($route)->get_status(),$role.' '.$route);
             }
         }
@@ -48,16 +49,17 @@ final class CapabilityHierarchyTest extends TestCase
     public function testUpgradeUpdatesExistingRolesEvenWhenPluginVersionIsAlready110(): void
     {
         $id=$this->user('ascla_executive');$role=get_role('ascla_executive');
-        $role->remove_cap('ascla_moderate');$role->add_cap('external_custom_permission');
+        $role->remove_cap('ascla_moderate');$role->remove_cap('ascla_manage');$role->add_cap('external_custom_permission');
         get_role('ascla_member')->add_cap('ascla_manage');
         update_user_meta($id,'hierarchy_preserved','existing profile');
         $before=get_userdata($id);$before->add_cap('individual_custom_permission');
         $hash=$before->user_pass;$roles=$before->roles;
-        update_option('ascla_version',ASCLA_VERSION);delete_option(Roles::OPTION);
+        update_option('ascla_version',ASCLA_VERSION);update_option(Roles::OPTION,1);
         wp_set_current_user($id);self::assertFalse(current_user_can('ascla_moderate'));
         try{
             Installer::upgrade();
             self::assertTrue(current_user_can('ascla_moderate'),'Current session is refreshed after migration');
+            self::assertTrue(current_user_can('ascla_manage'));self::assertFalse(current_user_can('ascla_configure'));
             self::assertFalse(get_role('ascla_member')->has_cap('ascla_manage'));
             self::assertTrue(current_user_can('external_custom_permission'));self::assertTrue(current_user_can('individual_custom_permission'));
             $after=get_userdata($id);self::assertSame($hash,$after->user_pass);self::assertSame($roles,$after->roles);
@@ -69,7 +71,7 @@ final class CapabilityHierarchyTest extends TestCase
     public function testRolePromotionAndDemotionApplyWithoutChangingIdentity(): void
     {
         $id=$this->user('ascla_member');$user=get_userdata($id);$hash=$user->user_pass;
-        foreach(['ascla_moderator'=>[true,false,false],'ascla_executive'=>[true,true,false],'administrator'=>[true,true,true],'ascla_member'=>[false,false,false]] as $role=>$expected){
+        foreach(['ascla_moderator'=>[true,false,false],'ascla_executive'=>[true,true,true],'administrator'=>[true,true,true],'ascla_member'=>[false,false,false]] as $role=>$expected){
             $user->set_role($role);wp_set_current_user(0);wp_set_current_user($id);
             self::assertSame($expected,[current_user_can('ascla_moderate'),current_user_can('ascla_publish'),current_user_can('ascla_manage')]);
             self::assertSame($hash,get_userdata($id)->user_pass);

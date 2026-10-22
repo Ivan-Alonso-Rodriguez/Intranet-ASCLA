@@ -13,6 +13,8 @@ final class Settings
         if (!array_key_exists('ai_provider',$stored)) { $settings['ai_provider']=($settings['ai_mode']??'mock')==='real'?'gemini':'mock'; }
         $settings['ai_mode']=$settings['ai_provider']==='mock'?'mock':'real';
         $settings['micro_approval']=true;
+        // Fixed twelve-card pages also apply to installations with an older stored size.
+        $settings['directory_page_size']=ProfileDirectory::PAGE_SIZE;
         $settings['support_categories']=SupportCategories::all();
         return $settings;
     }

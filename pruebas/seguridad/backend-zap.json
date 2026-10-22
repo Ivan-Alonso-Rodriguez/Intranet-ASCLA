@@ -1,12 +1,12 @@
 {
   "format": "ascla-public-zap-summary-v1",
   "kind": "backend",
-  "date": "2026-10-20T03:25:07.058685+00:00",
+  "date": "2026-10-22T09:11:27.133208+00:00",
   "status": "PASS",
   "tool": {
     "name": "ZAP",
     "version": "2.17.0",
-    "generated": "Tue, 20 Oct 2026 03:25:02"
+    "generated": "Thu, 22 Oct 2026 09:11:22"
   },
   "scope": [
     "/wp-json/ascla/v1/bootstrap",

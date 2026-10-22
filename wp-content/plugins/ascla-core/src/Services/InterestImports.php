@@ -83,7 +83,7 @@ final class InterestImports
             $row=self::editable($id,$rowId);$p=$row['payload'];$decision=Access::text($input['decision']??'',20);Access::require(in_array($decision,['accept','ignore'],true),'Decisión no válida.',400);
             if($decision==='ignore'){ImportRecords::save($row,'ignored',$p,(int)$row['user_id']);return self::detail($id,(int)($input['page']??1));}
             $uid=(int)$row['user_id'];if(!empty($input['email'])){[$uid]=InterestImportAccounts::resolve(['email'=>Access::text($input['email'],200),'code'=>'']);$p['matched_manually']=true;}
-            Access::require($uid>0 && user_can($uid,'ascla_access') && current_user_can('edit_user',$uid),'Selecciona un usuario ASCLA válido.',400);
+            Access::require($uid>0 && user_can($uid,'ascla_access') && Access::canManageAccount('edit_user',$uid),'Selecciona un usuario ASCLA válido.',400);
             Access::require(is_array($input['topics']??null),'Selecciona los intereses revisados.',400);$topics=InterestCatalog::validate($input['topics']);
             Access::require(count($topics)<=self::MAX_FORM_INTERESTS,'Selecciona como máximo 3 intereses provenientes del formulario.',400);
             $acknowledged=FormRules::boolean($input['acknowledge']??false);
@@ -159,7 +159,7 @@ final class InterestImports
         $uid=(int)$row['user_id'];$p=$row['payload'];clean_user_cache($uid);
         $valid=InterestCatalog::validate($p['topics']);
         $error='';
-        if (!user_can($uid,'ascla_access') || !current_user_can('edit_user',$uid) || !hash_equals($p['profile_hash'],InterestImportAccounts::fingerprint($uid))) {
+        if (!user_can($uid,'ascla_access') || !Access::canManageAccount('edit_user',$uid) || !hash_equals($p['profile_hash'],InterestImportAccounts::fingerprint($uid))) {
             $error='El perfil cambió o ya no tienes permiso. Revisa la fila.';
         } elseif (count($valid)>self::MAX_FORM_INTERESTS) {
             $error='La fila aprobada supera el máximo de 3 intereses provenientes del formulario.';

@@ -73,7 +73,7 @@ final class AdministratorRoleTest extends TestCase
     }
     public function testMembersAndEditorialRolesKeepTheirNetworking(): void
     {
-        foreach (['ascla_member','ascla_moderator','ascla_executive'] as $role) {
+        foreach (['ascla_member','ascla_moderator'] as $role) {
             $id=$this->users[$role];self::assertTrue(Access::networkingMember($id));self::assertTrue(Profiles::raw($id)['directory']);
             self::assertSame(Catalog::url('intranet'),App::homeUrl($id));
         }
@@ -88,6 +88,8 @@ final class AdministratorRoleTest extends TestCase
         self::assertSame($home,Login::redirect(admin_url(),'',$admin));
         self::assertSame($home,Login::redirect(Catalog::url('intranet'),Catalog::url('intranet'),$admin));
         self::assertSame(admin_url(),Login::redirect(admin_url(),admin_url(),$admin));
+        $executive=get_userdata($this->users['ascla_executive']);
+        self::assertSame($home,App::homeUrl((int)$executive->ID));self::assertSame($home,Login::redirect(admin_url(),admin_url(),$executive));
         $member=get_userdata($this->users['ascla_member']);
         self::assertSame(Catalog::url('intranet'),Login::redirect(Catalog::url('intranet'),'',$member));
     }

@@ -765,6 +765,9 @@ msgstr "Search requests"
 msgid "Buscar un evento en el selector"
 msgstr "Find an event in the list"
 
+msgid "Buscar usuarios"
+msgstr "Search users"
+
 msgid "COMUNIDAD DE ASOCIADOS"
 msgstr "MEMBER COMMUNITY"
 
@@ -1194,6 +1197,9 @@ msgstr "Configure an OpenAI API Key."
 msgid "Configuración"
 msgstr "Settings"
 
+msgid "Configurar ASCLA"
+msgstr "Configure ASCLA"
+
 msgid "Confirma"
 msgstr "Confirm"
 
@@ -1343,6 +1349,9 @@ msgstr "Content"
 
 msgid "Contenido alineado con tus intereses"
 msgstr "Content aligned with your interests"
+
+msgid "Contenido enviado a la papelera."
+msgstr "Content moved to the trash."
 
 msgid "Contenido explícito"
 msgstr "Explicit content"
@@ -1616,6 +1625,9 @@ msgstr "Report this post"
 
 msgid "Denuncia este comentario"
 msgstr "Report this comment"
+
+msgid "Desactivar"
+msgstr "Deactivate"
 
 msgid "Desactivar aprendizaje"
 msgstr "Disable learning"
@@ -1943,6 +1955,9 @@ msgstr "Delete saved DeepSeek API key"
 
 msgid "Eliminar OpenAI API Key guardada"
 msgstr "Delete saved OpenAI API Key"
+
+msgid "Eliminar aliado"
+msgstr "Delete ally"
 
 msgid "Eliminar archivo"
 msgstr "Delete file"
@@ -2462,6 +2477,9 @@ msgstr "Manage ASCLA<br>securely."
 
 msgid "Gestionar cuentas y configuración"
 msgstr "Manage accounts and settings"
+
+msgid "Gestionar la administración ASCLA"
+msgstr "Manage ASCLA administration"
 
 msgid "Gestionar mis conexiones"
 msgstr "Manage my connections"
@@ -2984,6 +3002,9 @@ msgstr "The start date cannot be later than the end date. Choose up to 366 days.
 
 msgid "La fecha inicial no puede ser posterior a la fecha final."
 msgstr "The start date cannot be later than the end date."
+
+msgid "La ficha se enviará a la papelera y dejará de aparecer en el catálogo y en el registro de aliados."
+msgstr "The record will be moved to the trash and will no longer appear in the catalog or ally registry."
 
 msgid "La ficha volverá a estar visible para los asociados en el catálogo de aliados."
 msgstr "The record will be visible to members again in the partner catalogue."
@@ -3758,6 +3779,9 @@ msgstr "Name, position, company, or experience…"
 
 msgid "Nombre, tipo de convenio o descripción…"
 msgstr "Name, agreement type or description…"
+
+msgid "Nombre, usuario, correo, cargo, empresa o experiencia…"
+msgstr "Name, username, email, position, company or experience…"
 
 msgid "Nombres y apellidos"
 msgstr "First and last names"

@@ -31,29 +31,39 @@ vars:pre-request {
   preguntaAsistente: ¿Qué eventos próximos hay en ASCLA?
   @number
   consultasTrabajoAsistente: 2
-  respuestaAsistente: 
+  perfilEmpresaOriginal:
+  perfilBiografiaOriginal:
+  perfilBioNueva:
+  @number
+  eventoPublicacionId: 0
+  tituloEventoPublicacion:
+  inicioPublicacion:
+  finPublicacion:
+  @number
+  avisoCupoId: 0
+  respuestaAsistente:
   usuarioAna: prueba.ascla.ana
-  claveAna: 
-  sesionAna: 
-  nonceAna: 
+  claveAna:
+  sesionAna:
+  nonceAna:
   usuarioBruno: prueba.ascla.bruno
-  claveBruno: 
-  sesionBruno: 
-  nonceBruno: 
+  claveBruno:
+  sesionBruno:
+  nonceBruno:
   usuarioCarla: prueba.ascla.carla
-  claveCarla: 
-  sesionCarla: 
-  nonceCarla: 
+  claveCarla:
+  sesionCarla:
+  nonceCarla:
   usuarioAdministrador: AdministradorASCLA
-  claveAdministrador: 
-  sesionAdministrador: 
-  nonceAdministrador: 
+  claveAdministrador:
+  sesionAdministrador:
+  nonceAdministrador:
   usuarioAsociado: prueba.ascla.ana
   @number
   idAsociado: 37
-  claveAsociado: 
-  sesionAsociado: 
-  nonceAsociado: 
+  claveAsociado:
+  sesionAsociado:
+  nonceAsociado:
 }
 
 script:pre-request {
@@ -79,7 +89,7 @@ script:pre-request {
 }
 
 docs {
-  Colección publicable: integración API y cuatro flujos E2E de ASCLA.
+  Colección publicable: integración API y seis flujos E2E compartidos con Playwright de ASCLA.
   Variables de URL, usuarios e IDs incluidas. Las contraseñas se cargan desde un entorno privado y las sesiones se mantienen solo en memoria.
   Ejecutar con scripts/run-publishable-backend.cjs desde el repositorio; usa el acceso privado ya preparado. No incluir ese archivo en Git.
   Cada inicio de sesión obtiene su cookie y nonce; cada respuesta guarda los IDs utilizados por las peticiones siguientes.

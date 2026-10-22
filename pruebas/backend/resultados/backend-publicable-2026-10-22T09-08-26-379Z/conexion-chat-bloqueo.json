@@ -1,0 +1,531 @@
+[
+  {
+    "iterationIndex": 0,
+    "results": [
+      {
+        "test": {
+          "filename": "flujos-e2e\\02-conexion-chat-bloqueo\\01-iniciar-sesion-ana.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "responseTime": 823,
+          "duration": 823,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "fKUCktNQc5XTd0-Q9zdQE"
+          },
+          {
+            "description": "Sesión y nonce propios de Ana",
+            "status": "pass",
+            "uid": "MCZ0N-2IUYsVodRhnXAb2"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 3.0222779,
+        "name": "01. Iniciar sesión como Ana",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\02-conexion-chat-bloqueo\\01-iniciar-sesion-ana",
+        "path": "flujos-e2e\\02-conexion-chat-bloqueo\\01-iniciar-sesion-ana",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\02-conexion-chat-bloqueo\\02-iniciar-sesion-bruno.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "responseTime": 794,
+          "duration": 794,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "yfK7_tqDUbEDDjU5mbTsY"
+          },
+          {
+            "description": "Sesión y nonce propios de Bruno",
+            "status": "pass",
+            "uid": "0SgpranqCBnJxROLJPlNk"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 2.7448307,
+        "name": "02. Iniciar sesión como Bruno",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\02-conexion-chat-bloqueo\\02-iniciar-sesion-bruno",
+        "path": "flujos-e2e\\02-conexion-chat-bloqueo\\02-iniciar-sesion-bruno",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\02-conexion-chat-bloqueo\\03-ana-solicita-conexion-con-bruno.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/relations",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/relations",
+          "responseTime": 773,
+          "duration": 773,
+          "size": 309
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "KFwusG-GSbegwP651gqDY"
+          },
+          {
+            "description": "Solicitud pendiente con ID real",
+            "status": "pass",
+            "uid": "Vm6KOBSQfHmkqipdM_2Wi"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.9627017,
+        "name": "03. Ana solicita conexión con Bruno",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\02-conexion-chat-bloqueo\\03-ana-solicita-conexion-con-bruno",
+        "path": "flujos-e2e\\02-conexion-chat-bloqueo\\03-ana-solicita-conexion-con-bruno",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\02-conexion-chat-bloqueo\\04-bruno-acepta-la-solicitud-obtenida.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/connections/178/respond",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/connections/178/respond",
+          "responseTime": 735,
+          "duration": 735,
+          "size": 261
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "Z9UyOsFX4WZMdt2vZYh9m"
+          },
+          {
+            "description": "Conexión confirmada",
+            "status": "pass",
+            "uid": "vpSvcx-vYwYuafBkw2hiD"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8537403,
+        "name": "04. Bruno acepta la solicitud obtenida",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\02-conexion-chat-bloqueo\\04-bruno-acepta-la-solicitud-obtenida",
+        "path": "flujos-e2e\\02-conexion-chat-bloqueo\\04-bruno-acepta-la-solicitud-obtenida",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\02-conexion-chat-bloqueo\\05-ana-comprueba-que-puede-escribir.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/38",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/38",
+          "responseTime": 728,
+          "duration": 728,
+          "size": 1151
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "19hPyClkdSvzHKC7XfzAV"
+          },
+          {
+            "description": "La conexión habilita los mensajes",
+            "status": "pass",
+            "uid": "Wd0PeZ7NvIpAIu_IKiH57"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8553168,
+        "name": "05. Ana comprueba que puede escribir",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\02-conexion-chat-bloqueo\\05-ana-comprueba-que-puede-escribir",
+        "path": "flujos-e2e\\02-conexion-chat-bloqueo\\05-ana-comprueba-que-puede-escribir",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\02-conexion-chat-bloqueo\\06-ana-abre-la-conversacion.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/conversations",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/conversations",
+          "responseTime": 745,
+          "duration": 745,
+          "size": 142
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "WMEHa9RjgobtpgT6mFoVn"
+          },
+          {
+            "description": "Conversación con ID real",
+            "status": "pass",
+            "uid": "WwT_Aj3Qlx3ZZXHKV03-J"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.9306752,
+        "name": "06. Ana abre la conversación",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\02-conexion-chat-bloqueo\\06-ana-abre-la-conversacion",
+        "path": "flujos-e2e\\02-conexion-chat-bloqueo\\06-ana-abre-la-conversacion",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\02-conexion-chat-bloqueo\\07-ana-envia-un-mensaje.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/conversations/21/messages",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/conversations/21/messages",
+          "responseTime": 751,
+          "duration": 751,
+          "size": 152
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "G6OUV-zsz6NMNnrRChcRV"
+          },
+          {
+            "description": "El servidor conserva el texto enviado",
+            "status": "pass",
+            "uid": "Q0ti3kTrf0wq4oErQordC"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.9298862,
+        "name": "07. Ana envía un mensaje",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\02-conexion-chat-bloqueo\\07-ana-envia-un-mensaje",
+        "path": "flujos-e2e\\02-conexion-chat-bloqueo\\07-ana-envia-un-mensaje",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\02-conexion-chat-bloqueo\\08-bruno-lee-el-mensaje-exacto.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/conversations/21/messages",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/conversations/21/messages",
+          "responseTime": 713,
+          "duration": 713,
+          "size": 5108
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "xH7DHnyT2s5PGGkIyU9UZ"
+          },
+          {
+            "description": "El destinatario recibe el mensaje de esta ejecución",
+            "status": "pass",
+            "uid": "TzRooybXbcy8eNisJ9NDW"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.827101,
+        "name": "08. Bruno lee el mensaje exacto",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\02-conexion-chat-bloqueo\\08-bruno-lee-el-mensaje-exacto",
+        "path": "flujos-e2e\\02-conexion-chat-bloqueo\\08-bruno-lee-el-mensaje-exacto",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\02-conexion-chat-bloqueo\\09-bruno-bloquea-a-ana.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/relations",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/relations",
+          "responseTime": 716,
+          "duration": 716,
+          "size": 15
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "iN-NH86KOAdNMPadn8k_t"
+          },
+          {
+            "description": "Bloqueo activo",
+            "status": "pass",
+            "uid": "HB63QnceYE-VAwYLhBVQ6"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8431504,
+        "name": "09. Bruno bloquea a Ana",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\02-conexion-chat-bloqueo\\09-bruno-bloquea-a-ana",
+        "path": "flujos-e2e\\02-conexion-chat-bloqueo\\09-bruno-bloquea-a-ana",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\02-conexion-chat-bloqueo\\10-el-bloqueo-impide-escribir.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/conversations/21/messages",
+          "headers": {}
+        },
+        "response": {
+          "status": 404,
+          "statusText": "Not Found",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/conversations/21/messages",
+          "responseTime": 749,
+          "duration": 749,
+          "size": 89
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 404",
+            "status": "pass",
+            "uid": "drCg_9bhiTLSvEXZ5P6UI"
+          },
+          {
+            "description": "El servidor oculta la conversación bloqueada",
+            "status": "pass",
+            "uid": "I9J2Ovb0ghhdCA8y1SE_b"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8674139,
+        "name": "10. El bloqueo impide escribir",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\02-conexion-chat-bloqueo\\10-el-bloqueo-impide-escribir",
+        "path": "flujos-e2e\\02-conexion-chat-bloqueo\\10-el-bloqueo-impide-escribir",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\02-conexion-chat-bloqueo\\11-bruno-desbloquea-a-ana.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/relations",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/relations",
+          "responseTime": 705,
+          "duration": 705,
+          "size": 16
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "hXdP6A-X2rkd84HfeSB0q"
+          },
+          {
+            "description": "Bloqueo retirado",
+            "status": "pass",
+            "uid": "4Z_2LvbSrxePu2i9TzOkJ"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8219224,
+        "name": "11. Bruno desbloquea a Ana",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\02-conexion-chat-bloqueo\\11-bruno-desbloquea-a-ana",
+        "path": "flujos-e2e\\02-conexion-chat-bloqueo\\11-bruno-desbloquea-a-ana",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\02-conexion-chat-bloqueo\\12-desbloquear-no-restaura-la-conexion.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/38",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/38",
+          "responseTime": 716,
+          "duration": 716,
+          "size": 979
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "9-2RL3eRGP4aQcSuh4mRc"
+          },
+          {
+            "description": "La relación termina sin permiso de mensajería",
+            "status": "pass",
+            "uid": "vFbI0F2EqDCTH7cnYRBPL"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8402335,
+        "name": "12. Desbloquear no restaura la conexión",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\02-conexion-chat-bloqueo\\12-desbloquear-no-restaura-la-conexion",
+        "path": "flujos-e2e\\02-conexion-chat-bloqueo\\12-desbloquear-no-restaura-la-conexion",
+        "iterationIndex": 0
+      }
+    ],
+    "summary": {
+      "totalRequests": 12,
+      "passedRequests": 12,
+      "failedRequests": 0,
+      "errorRequests": 0,
+      "skippedRequests": 0,
+      "skippedByBail": 0,
+      "totalAssertions": 0,
+      "passedAssertions": 0,
+      "failedAssertions": 0,
+      "totalTests": 24,
+      "passedTests": 24,
+      "failedTests": 0,
+      "totalPreRequestTests": 0,
+      "passedPreRequestTests": 0,
+      "failedPreRequestTests": 0,
+      "totalPostResponseTests": 0,
+      "passedPostResponseTests": 0,
+      "failedPostResponseTests": 0
+    }
+  }
+]

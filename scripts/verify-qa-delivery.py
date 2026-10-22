@@ -35,6 +35,11 @@ class Links(HTMLParser):
 
 
 def main():
+    contract = read(ROOT / 'tests/qa-flow-contract.json')
+    signature = lambda data: [(flow['id'], flow['folder'], flow['requests'], flow['checks']) for flow in data['flows']]
+    expected_flows = {flow['id'] for flow in contract['flows']}
+    expected_totals = [contract['integration']['requests'] + sum(flow['requests'] for flow in contract['flows']),
+                       contract['integration']['checks'] + sum(flow['checks'] for flow in contract['flows'])]
     manifest = read(DELIVERY / 'manifest.json')
     present = {p.relative_to(DELIVERY).as_posix(): p
                for p in DELIVERY.rglob('*') if p.is_file() and p.name != 'manifest.json'}
@@ -56,7 +61,7 @@ def main():
             require(archive.read(name) == path.read_bytes(), 'ZIP content mismatch: ' + name)
         requests = [n for n in expected if n.endswith('.bru')
                     and Path(n).name not in ('collection.bru', 'folder.bru')]
-        require(len(requests) == 58, 'Expected 58 executable Bruno requests.')
+        require(len(requests) == expected_totals[0], 'The collection differs from the shared flow contract.')
 
     collection = (source / 'collection.bru').read_text(encoding='utf-8')
     for match in re.finditer(r'^\s+((?:clave|sesion|nonce)\w+):([^\n]*)$', collection, re.M):
@@ -89,15 +94,22 @@ def main():
 
     source_backend = read(DELIVERY / 'backend/resultados' / provenance['backend']['run'] / 'summary.json')
     groups = [r for r in source_backend['results'] if r['name'] != 'runner']
-    require(len(groups) == 5, 'Expected integration plus four business flows.')
+    require({group['name'] for group in groups} == expected_flows | {'integracion'},
+            'Bruno must execute integration and the same six flows as Playwright.')
     totals = [0, 0]
     for group in groups:
         report = read(DELIVERY / 'backend/resultados' / provenance['backend']['run']
                       / (group['name'] + '.json'))[0]
         require(report['summary'] == group['summary'], 'Bruno summary differs from native JSON.')
+        definition = next(flow for flow in [contract['integration'], *contract['flows']]
+                          if flow['id'] == group['name'])
+        require([report['summary']['totalRequests'], report['summary']['totalTests']]
+                == [definition['requests'], definition['checks']],
+                'A Bruno flow differs from the shared definition: ' + group['name'])
         totals[0] += report['summary']['totalRequests']
         totals[1] += report['summary']['totalTests']
-    require(totals == [58, 105], 'Unexpected backend scope; review counts and documentation.')
+    require(totals == expected_totals, 'Unexpected backend scope; review the shared contract.')
+    require(signature(source_backend['flow_contract']) == signature(contract), 'Bruno used a different flow contract.')
 
     require(provenance.get('retention') == 'latest-only' and 'historical_frontend' not in provenance,
             'Only the latest evidence may be published.')
@@ -112,21 +124,25 @@ def main():
                         for p in (DELIVERY / 'frontend' / category).iterdir()]
     require(frontend_entries == [folder], 'Old frontend evidence remains in pruebas/.')
     report = read(folder / 'frontend.json')
-    expected_flows = {
-        'perfil', 'conexion-chat-bloqueo', 'borrador-publicacion-inscripcion',
-        'aforo-lista-espera-notificacion', 'suspension-reactivacion-acceso',
-    }
-    require(len(report['results']) == 5
+    require(len(report['results']) == len(expected_flows)
             and {case['name'] for case in report['results']} == expected_flows,
-            'Expected the five important frontend journeys.')
+            'Playwright must execute exactly the same six business flows as Bruno.')
     require(all(case['status'] in ('passed', 'failed') for case in report['results']),
             'A frontend journey has no final result.')
     failed = any(case['status'] == 'failed' for case in report['results'])
     require(record['category'] == ('fallidas' if failed else 'aprobadas'),
             'The latest run category differs from its actual result.')
     meta = read(folder / 'summary.json')
+    require(signature(meta['flow_contract']) == signature(contract), 'Playwright used a different flow contract.')
     require(meta['cleanup']['status'] == 'passed' and meta['cleanup']['carla_active'],
             'The dedicated accounts were not restored successfully.')
+    shared = read(DELIVERY / 'flujos.json')
+    require({flow['id'] for flow in shared['flows']} == expected_flows,
+            'The comparison table does not contain the same six flows.')
+    for flow in shared['flows']:
+        require(flow['bruno'] == next(group['status'] for group in groups if group['name'] == flow['id'])
+                and flow['playwright'] == next(case['status'] for case in report['results'] if case['name'] == flow['id']),
+                'The comparison table differs from its original reports.')
     for case in report['results']:
         require(case['videos'] and case['screenshots'], 'A journey lacks video or screenshot evidence.')
         if case['status'] == 'failed':
@@ -179,7 +195,76 @@ def main():
                     'Raw HTTP evidence in a public security summary: ' + artifact.name)
 
     private = ROOT / 'test-results/playwright-usuarios.json'
-    private_files = [private, ROOT / 'test-results/playwright-usuarios-local.json']
+    refresh_folder = DELIVERY / 'actualizacion'
+    refresh = read(refresh_folder / 'resumen.json')
+    recent = read(refresh_folder / 'latest-ui.json')
+    remote_headers = read(refresh_folder / 'remote-csp-validation.json')
+    remote_browser = read(refresh_folder / 'remote-browser-security.json')
+    require(refresh['target'] == 'https://wordpress.ingsoftware.lat'
+            and refresh['latest_ui']['tests'] == len(recent['results']) == 14
+            and len({case['name'] for case in recent['results']}) == 14,
+            'The recent regression scope is incomplete or duplicated.')
+    require(refresh['latest_ui']['passed'] == sum(case['status'] == 'passed' for case in recent['results'])
+            and recent['cleanup']['status'] == 'passed'
+            and recent['cleanup']['removed'] == recent['cleanup']['owned_content'],
+            'The recent regression result or cleanup differs from its source.')
+    require(refresh['security']['headers']['checks'] == len(remote_headers['validaciones']) == 20
+            and refresh['security']['headers']['passed'] == sum(check['cumple'] for check in remote_headers['validaciones'])
+            and refresh['security']['headers']['status'] == remote_headers['estado'],
+            'The remote header finding was changed or concealed.')
+    require(refresh['security']['browser']['views'] == len(remote_browser['responses'])
+            and refresh['security']['browser']['status'] == remote_browser['status'],
+            'The remote browser checks differ from their source.')
+    defense = read(security_folder / 'sustento.json')
+    exposure = read(refresh_folder / 'server-exposure.json')
+    local_csp = read(security_folder / 'csp-validation.json')
+    local_sources = read(security_folder / 'source-manifest.json')
+    source_copies = {p.relative_to(security_folder / 'sources').as_posix(): p
+                     for p in (security_folder / 'sources').rglob('*') if p.is_file()}
+    expected_sources = {name: digest for name, digest in local_sources['files'].items()
+                        if not name.startswith('wp-content/plugins/')}
+    require(local_sources['source_sha256'] == defense['local']['source_sha256']
+            and set(source_copies) == set(expected_sources),
+            'The local security source bundle differs from the executed manifest.')
+    for name, copy in source_copies.items():
+        require(hashlib.sha256(copy.read_bytes()).hexdigest() == expected_sources[name],
+                'A published local security test differs from the executed source: ' + name)
+    require(defense['local']['csp_checks'] == len(local_csp['validaciones']) == 20
+            and defense['local']['csp_passed'] == sum(item['cumple'] for item in local_csp['validaciones'])
+            and defense['published']['csp_passed'] == sum(item['cumple'] for item in remote_headers['validaciones'])
+            and defense['published']['status'] == remote_headers['estado']
+            and defense['published']['http_date'] == remote_headers['fecha'],
+            'The security explanation misrepresents the two HTTP results.')
+    require(defense['published']['exposure_status'] == exposure['status']
+            and defense['published']['exposure_routes'] == len(exposure['results']) == 5
+            and exposure['status'] == ('PASS' if all(item['version_hidden'] for item in exposure['results']) else 'FAIL')
+            and all(item['version_hidden'] == (not bool(re.search(r'[a-z][a-z-]*/\d', item['server'] or '', re.I)))
+                    for item in exposure['results']),
+            'The hosting exposure finding differs from the public responses.')
+    for scan in defense['local']['scans']:
+        recorded = read(security_folder / (scan['kind'] + '-zap.json'))
+        require(all(scan[key] == recorded[key] for key in
+                    ('status', 'authenticated_before', 'authenticated_after', 'active_complete',
+                     'active_strength', 'active_request_count', 'risk_counts'))
+                and scan['completed_active_rules'] == len(recorded['completed_active_rules']),
+                'The security explanation changes ZAP completion or findings.')
+    for item in defense['references']:
+        evidence = (DELIVERY / item['file']).resolve()
+        require(evidence.is_relative_to(DELIVERY.resolve()) and evidence.is_file()
+                and hashlib.sha256(evidence.read_bytes()).hexdigest() == item['sha256'],
+                'The security explanation references changed evidence.')
+    require(refresh['security']['active_zap_rerun']['status'] == security_summary['status']
+            and refresh['security']['active_zap_rerun']['date'] == security_summary['date'],
+            'The new local ZAP result is not identified separately.')
+    for case in [*recent['results'], remote_browser]:
+        require(case['videos'] and case['screenshots'], 'A recent check lacks visual evidence.')
+        for media in case['videos'] + case['screenshots']:
+            artifact = (refresh_folder / media).resolve()
+            require(artifact.is_relative_to(refresh_folder.resolve()) and artifact.is_file()
+                    and artifact.stat().st_size > 1000, 'Missing or invalid recent visual evidence.')
+
+    private_files = [private, ROOT / 'test-results/playwright-usuarios-local.json',
+                     ROOT / 'test-results/qa-refresh-20261022/private-provided-access.json']
     secrets = [a['password'].encode() for file in private_files if file.is_file() for a in read(file)['actors'].values()]
     personal_path = re.compile(r'(?i:[a-z]:[\\/]+Users[\\/]+)|/Users/[^/\s]+/|/home/[^/\s]+/')
     checked_links = 0
@@ -216,8 +301,8 @@ def main():
     require(len(attributes) == 3 * len(names)
             and all(value == b'unset' for value in attributes[2::3]),
             'Git newline conversion could invalidate evidence hashes or ZIP contents.')
-    print(f'QA delivery OK: {len(names)} files, 58 Bruno requests, 105 checks, '
-          f'five frontend journeys, ZAP/CSP evidence, 103 CP identifiers, latest execution only '
+    print(f'QA delivery OK: {len(names)} files, {totals[0]} Bruno requests, {totals[1]} checks, '
+          f'{len(expected_flows)} shared frontend/backend flows, ZAP/CSP evidence, 103 CP identifiers, latest execution only '
           f'and {checked_links} local HTML links verified.')
 
 

@@ -1,12 +1,12 @@
 {
   "format": "ascla-public-zap-summary-v1",
   "kind": "frontend",
-  "date": "2026-10-20T03:25:07.058685+00:00",
+  "date": "2026-10-22T09:11:27.133208+00:00",
   "status": "PASS",
   "tool": {
     "name": "ZAP",
     "version": "2.17.0",
-    "generated": "Tue, 20 Oct 2026 03:22:25"
+    "generated": "Thu, 22 Oct 2026 09:09:26"
   },
   "scope": [
     "/login/",
@@ -45,7 +45,7 @@
       "id": "40026",
       "name": "Cross Site Scripting (DOM Based)",
       "status": "Complete",
-      "requests": 4681
+      "requests": 4676
     },
     {
       "id": "6",
@@ -81,7 +81,7 @@
       "id": "20017",
       "name": "Source Code Disclosure - CVE-2012-1823",
       "status": "Complete",
-      "requests": 52
+      "requests": 51
     },
     {
       "id": "20018",
@@ -354,7 +354,7 @@
       "requests": 10
     }
   ],
-  "active_request_count": 30996,
+  "active_request_count": 30990,
   "client_spider_limit_seconds": 60,
   "not_applicable_active_rules": [
     {
@@ -456,16 +456,12 @@
       "name": "Modern Web Application",
       "risk": 0,
       "confidence": 2,
-      "count": 5,
+      "count": 4,
       "description": "The application appears to be a modern web application. If you need to explore it automatically then the Client Spider may well be more effective than the standard one.",
       "solution": "This is an informational alert and so no changes are required.",
       "locations": [
         {
-          "path": "/eventos/",
-          "method": "GET"
-        },
-        {
-          "path": "/foros/",
+          "path": "/directorio/",
           "method": "GET"
         },
         {

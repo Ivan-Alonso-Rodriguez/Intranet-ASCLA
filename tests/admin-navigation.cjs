@@ -45,7 +45,7 @@ async function test(name,action){try{await action();results.push({name,status:'p
   member=await login('Asociado');
   await test('El asociado conserva su inicio y el administrador queda fuera del directorio',async()=>{
    assert.equal(new URL(member.url()).pathname,'/intranet/');const result=await api(member,'profiles?q=Prueba');assert.equal(result.status,200);
-   const ids=result.data.items.map(item=>Number(item.id));assert.ok(!ids.includes(fixture.actors.Administrador.id));assert.ok(ids.includes(fixture.actors.Moderador.id));assert.ok(ids.includes(fixture.actors.Ejecutivo.id));
+   const ids=result.data.items.map(item=>Number(item.id));assert.ok(!ids.includes(fixture.actors.Administrador.id));assert.ok(ids.includes(fixture.actors.Moderador.id));assert.ok(!ids.includes(fixture.actors.Ejecutivo.id));
    assert.equal((await api(member,'profiles/'+fixture.actors.Administrador.id)).status,404);
    await member.goto(fixture.base+'/directorio/?q=Prueba');await member.locator('.directory-view').waitFor();
    assert.equal(await member.locator('.member-card [data-id="'+fixture.actors.Administrador.id+'"]').count(),0);

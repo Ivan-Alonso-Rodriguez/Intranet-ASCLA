@@ -95,15 +95,15 @@ final class ProfileEditorial109Test extends TestCase
         self::assertEmpty(get_post_meta($id,'_ascla_publish_timestamp',true));
         self::assertArrayNotHasKey('publish_at',get_post_meta($id,'_ascla',true));
     }
-    public function testExecutiveRegistryAndStateChangesAreLimitedToAuthorizedContent(): void
+    public function testExecutiveRegistryAndStateChangesIncludeOtherEditorsContent(): void
     {
         wp_set_current_user($this->users[1]);$id=$this->create('resource');
         wp_set_current_user($this->users[2]);
-        self::assertNotContains($id,array_column(EditorialRegistry::listing('resource',[])['items'],'id'));
-        self::assertSame(403,$this->api('POST','items/'.$id.'/moderate',['decision'=>'hide','reason'=>'No autorizado'])->get_status());
-        self::assertSame(404,$this->api('GET','admin/editorial/resource/'.$id.'/history')->get_status());
+        self::assertContains($id,array_column(EditorialRegistry::listing('resource',[])['items'],'id'));
+        self::assertSame(200,$this->api('POST','items/'.$id.'/moderate',['decision'=>'hide','reason'=>'Retiro administrativo'])->get_status());
+        self::assertSame(200,$this->api('GET','admin/editorial/resource/'.$id.'/history')->get_status());
         wp_set_current_user($this->users[1]);
-        self::assertSame(200,$this->api('POST','items/'.$id.'/moderate',['decision'=>'hide','reason'=>'Retiro del autor'])->get_status());
+        self::assertSame(200,$this->api('POST','items/'.$id.'/moderate',['decision'=>'approve','reason'=>'Revisión del autor'])->get_status());
     }
     public function testActiveConnectionOverridesLegacyPendingConversationRequest(): void
     {

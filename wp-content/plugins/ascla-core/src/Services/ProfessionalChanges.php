@@ -63,7 +63,7 @@ final class ProfessionalChanges
 
     public static function apply(int $member,int $request,array $fields,callable $save): void
     {
-        Access::require(current_user_can('ascla_manage') && current_user_can('edit_user',$member));
+        Access::require(Access::canManageAccount('edit_user',$member));
         if (!$request) {
             $save();
             self::record($member,$fields,['kind'=>'administration']);

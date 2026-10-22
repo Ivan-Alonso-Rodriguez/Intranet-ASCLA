@@ -51,11 +51,12 @@ module.exports=async function({fixture,out}) {
   try {
     await scenario('perfil',async login=>{
       const page=await login(fixture.actors.profile?'profile':'ui_a');await visit(page,'perfil/');
-      const company=await page.locator('[name=company]').inputValue();const bio='QA: biografía conservada '+fixture.prefix;
+      const company=await page.locator('[name=company]').inputValue(),originalBio=await page.locator('[name=bio]').inputValue();const bio='QA: biografía conservada '+fixture.prefix;
       await page.locator('[name=bio]').fill(bio);await page.getByRole('button',{name:'Guardar perfil',exact:true}).click();await page.getByRole('status').filter({hasText:'Perfil actualizado'}).waitFor();
       await page.reload();await page.locator('[name=bio]').waitFor();assert.equal(await page.locator('[name=bio]').inputValue(),bio);
       await page.locator('[name=company]').fill('');await page.getByRole('button',{name:'Guardar perfil',exact:true}).click();assert.equal(await page.locator('[name=company]').evaluate(input=>input.validity.valid),false);
       await page.locator('[name=company]').fill(company);await page.reload();await page.locator('[name=company]').waitFor();assert.equal(await page.locator('[name=company]').inputValue(),company);assert.equal(await page.locator('[name=bio]').inputValue(),bio);
+      await page.locator('[name=bio]').fill(originalBio);await page.getByRole('button',{name:'Guardar perfil',exact:true}).click();await page.getByRole('status').filter({hasText:'Perfil actualizado'}).waitFor();
     });
     await scenario(fixture.sharedAccounts?'conexion-chat-bloqueo':'conexion-chat-historial',async login=>{
       const a=await login('ui_a'),b=await login('ui_b');const target=fixture.actors.ui_b.id;
@@ -199,6 +200,15 @@ module.exports=async function({fixture,out}) {
         await changeAccess(false);
         const restored=await login('profile');await visit(restored,'perfil/');await restored.locator('[name=bio]').waitFor();
         assert.equal(await restored.locator('[name=bio]').inputValue(),originalBio);
+      });
+      await scenario('asistente-ia',async login=>{
+        const page=await login('ui_a');await visit(page,'asistente/');await page.locator('[data-action="assistant-new"]').click();
+        const question='¿Qué eventos próximos hay en ASCLA?',form=page.locator('[data-form="ask"]');await form.locator('[name=question]').fill(question);
+        const [created]=await Promise.all([page.waitForResponse(r=>r.url().endsWith('/ask')&&r.request().method()==='POST'),form.getByRole('button',{name:'Enviar pregunta',exact:true}).click()]);
+        assert.equal(created.status(),200);const job=await created.json(),submitted=created.request().postDataJSON();assert.ok(Number(job.id)>0);assert.equal(job.status,'pending');assert.equal(submitted.question,question);assert.ok(submitted.thread);
+        const answer=page.locator('#assistant-job-'+job.id+' .assistant-message-copy');await answer.waitFor({timeout:140000});const text=await answer.innerText();assert.ok(text.trim());
+        const mode=await page.locator('#assistant-job-'+job.id+' .assistant-message-meta small').innerText();fixture.onAssistantCompleted?.({id:job.id,thread:submitted.thread,mode});
+        await page.reload();await page.locator('#assistant-job-'+job.id+' .assistant-message-copy').waitFor();assert.equal(await page.locator('#assistant-job-'+job.id+' .assistant-message-copy').innerText(),text);assert.equal(await page.locator('.assistant-message.user .assistant-message-copy').filter({hasText:question}).count(),1);
       });
     }
   } finally {await browser.close();}

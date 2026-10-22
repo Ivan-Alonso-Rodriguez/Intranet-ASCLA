@@ -42,9 +42,9 @@ final class EditorialPrivacyTest extends TestCase
     {
         foreach([$this->users[0],$this->users[1]] as $id){wp_set_current_user($id);$view=Content::serialize(Content::get($this->post));
             self::assertStringContainsString('Persona Prueba',$view['body']);self::assertArrayHasKey('transcript',$view['meta']);}
-        // A publisher who does not own this resource is also a reader.
+        // Executive now has the same editorial access as administration.
         wp_update_post(['ID'=>$this->post,'post_author'=>$this->users[0]]);wp_set_current_user($this->users[1]);
-        $view=Content::serialize(Content::get($this->post));self::assertArrayNotHasKey('transcript',$view['meta']);self::assertStringNotContainsString('Persona Prueba',$view['body']);
+        $view=Content::serialize(Content::get($this->post));self::assertArrayHasKey('transcript',$view['meta']);self::assertStringContainsString('Persona Prueba',$view['body']);
         $meta=get_post_meta($this->post,'_ascla',true);$meta['chatham']=false;update_post_meta($this->post,'_ascla',$meta);
         wp_set_current_user($this->users[3]);$view=Content::serialize(Content::get($this->post));
         self::assertStringContainsString('Persona Prueba',$view['body']);self::assertArrayNotHasKey('transcript',$view['meta']);

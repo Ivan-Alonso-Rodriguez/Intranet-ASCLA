@@ -4,17 +4,17 @@ namespace ASCLA\Core\Domain;
 /** Owns the cumulative role definition and its non-destructive WordPress migration. */
 final class Roles
 {
-    public const VERSION=1;
+    public const VERSION=2;
     public const OPTION='ascla_roles_version';
-    private const CAPABILITIES=['ascla_access','ascla_write','ascla_admin_area','ascla_moderate','ascla_publish','ascla_manage'];
+    private const CAPABILITIES=['ascla_access','ascla_write','ascla_admin_area','ascla_moderate','ascla_publish','ascla_manage','ascla_configure'];
 
     public static function capabilities(): array
     {
         $member=['read'=>true,'ascla_access'=>true,'ascla_write'=>true];
         $moderator=$member+['ascla_admin_area'=>true,'ascla_moderate'=>true];
-        $executive=$moderator+['ascla_publish'=>true];
+        $executive=$moderator+['ascla_publish'=>true,'ascla_manage'=>true];
         return ['ascla_member'=>$member,'ascla_moderator'=>$moderator,
-            'ascla_executive'=>$executive,'administrator'=>$executive+['ascla_manage'=>true]];
+            'ascla_executive'=>$executive,'administrator'=>$executive+['ascla_configure'=>true]];
     }
 
     public static function sync(): void

@@ -4,6 +4,38 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+### Renovación de evidencias en el QA publicado del 22 de octubre de 2026
+
+Se añade la [guía de sustento de seguridad](pruebas/seguridad/sustento.html), con evidencias por conclusión, comparación de los 20 controles, guion de exposición y corrección concreta para el operador del hosting. La recomprobación conserva 19/20 en QA y documenta la versión expuesta en cinco respuestas públicas; el acceso recibido permite administrar WordPress, sin acceso al servidor. Esta actualización no altera el plugin ni convierte el pendiente en aprobado.
+
+La publicación incorpora las [fuentes de las pruebas locales](pruebas/seguridad/fuentes.html), su manifiesto de 209 archivos y ocho copias con sus huellas de ejecución. Los reportes ZAP/CSP/navegador locales se incluyen junto con las evidencias remotas, manteniendo separados sus entornos y fechas. Se sincronizan los ocho Markdown mantenidos y las referencias de la matriz, sin cambiar estados de cumplimiento ni datos históricos.
+
+Se renueva `pruebas/` con **81 peticiones/149 comprobaciones Bruno y seis recorridos Playwright aprobados en el QA publicado**, más **14 controles recientes aprobados**, con videos y capturas. La comparación de archivos públicos identifica JavaScript y CSS de la última versión; la API/UI contrasta el comportamiento del servidor. El asistente devuelve Google Gemini · API real. La seguridad remota registra seis controles aprobados en 42 vistas y **19/20 controles HTTP**, con versión de Apache expuesta como pendiente. El ZAP activo se ejecuta por separado en HTTPS aislado y conserva su propio resultado. La [entrega](pruebas/actualizacion/index.html) diferencia suites, fechas y límites, sin cambiar CP ni presentar una nueva UAT.
+
+### Directorio de cuatro columnas y tres filas del 22 de octubre de 2026
+
+El Directorio pagina cada doce perfiles y usa cuatro columnas en escritorio, dos en tableta y una en móvil. La paginación conserva filtros y orden. Los tamaños antiguos se normalizan a doce y Configuración muestra el tamaño fijo. Validación local: **40 pruebas PHP/255 aserciones**, **tres controles de navegador** y **49 controles portables**, registrados en la [evidencia de esta revisión](docs/evidence/release-1.10.9/directory-grid109.json).
+
+### Lista de Foros y biblioteca integrada del 22 de octubre de 2026
+
+Por solicitud del responsable, Foros vuelve a usar una sola lista de contenido para foros y publicaciones, sin Explorar foros. Los filtros y la paginación se aplican al conjunto, incluyendo el alcance propio en Mis temas y Mis borradores. Archivos abre directamente la biblioteca en el panel administrativo, con buscador, propietario, apertura y eliminación confirmada. Cancelar y eliminar conservan el contexto; una última página vacía retrocede automáticamente. Los botones Ver perfil, Conectar y Enviar mensaje usan el mismo espacio de 12 px.
+
+Validación dirigida local: **74 pruebas PHP/631 aserciones**, **seis controles de navegador** y controles portables del paquete. La [evidencia de esta revisión](docs/evidence/release-1.10.9/layout-ui109.json) identifica su ZIP; las suites y evidencias anteriores mantienen su propio alcance y fecha.
+
+### Paridad administrativa de Ejecutivo del 22 de octubre de 2026
+
+Ejecutivo ASCLA recibe la misma gestión de ASCLA que Administrador, incluido el inicio administrativo y las secciones de usuarios, importaciones, archivos, aliados e historial. Queda fuera de la participación en Directorio, conexiones y microeventos, igual que la cuenta administrativa. Configuración y Administrar WordPress siguen siendo exclusivos del Administrador; las rutas de configuración rechazan al Ejecutivo.
+
+Se separa `ascla_configure` de `ascla_manage` y se actualizan los roles existentes mediante la migración de capacidades versión 2. La gestión de cuentas permanece limitada a las rutas comunitarias de ASCLA, sin conceder capacidades nativas de WordPress al Ejecutivo. Se conservan las restricciones individuales y la autorización de la Junta para acumular roles. Validación local: **740 pruebas PHP/8.296 aserciones**, **cinco controles de navegador** y **49 controles portables** aprobados. La [evidencia de esta etapa](docs/evidence/release-1.10.9/executive-admin109.json) conserva resultados y huella del paquete; no renueva evidencias de ZAP ni UAT.
+
+### Ajustes de administración y perfil del 22 de octubre de 2026
+
+El registro de Aliados conserva Ver ficha y Editar; el menú de tres puntos reúne Activar/Desactivar y Eliminar. Cambiar el estado conserva la ficha; eliminar requiere confirmación y la envía a la papelera. Se retiran Tareas de IA y su contador del panel administrativo. Administrador ASCLA deja de mostrar los accesos a Directorio, Mensajería y Contacto; los roles comunitarios los conservan.
+
+El tipo de asociado se muestra arriba a la derecha en la cabecera del perfil, con adaptación móvil. Usuarios e intereses incorpora país y selección múltiple de industria, interés y área de conocimiento, junto con rol y acceso. La búsqueda incluye nombre, usuario, correo y datos profesionales; los filtros se aplican antes de paginar, también para cuentas suspendidas o fuera del Directorio público. Se corrige la construcción de URL para conservar todos los valores seleccionados. Registro e historial queda junto a Nueva galería.
+
+Validación dirigida local: **38 pruebas PHP/335 aserciones** y **nueve controles de navegador**, incluidos filtros múltiples con enlaces permanentes y `rest_route`. El [resumen de evidencia](docs/evidence/release-1.10.9/admin-ui109.json) identifica el paquete; no renueva cobertura, ZAP ni UAT.
+
 ### Correcciones UI/UX del 21 de octubre de 2026 — #573 a #576
 
 Hub, foros y temas, Galería, Centro de Conocimiento, Eventos y Aliados permiten guardar borradores incompletos. Al cerrar una creación con cambios se ofrece guardarla como borrador. Cada sección dispone de **Mis borradores**; en Foros reúne foros y temas propios. Al guardar desde las secciones de contenido se abre esa vista. Los listados de Comunidad, próximos eventos y eventos anteriores muestran contenido publicado; **Mis publicaciones** incluye también los eventos propios sin fecha. Publicar mantiene las validaciones, los permisos y las restricciones de los metadatos.

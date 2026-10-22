@@ -55,7 +55,7 @@ final class RoleApprovals
     /** Technical accounts remain managed by WordPress; their Board decision can still be recorded. */
     public static function register(int $id,array $input): array
     {
-        Access::require(Access::member() && current_user_can('ascla_manage') && current_user_can('edit_user',$id));
+        Access::require(Access::member() && Access::canManageAccount('edit_user',$id));
         Access::require((bool)get_userdata($id),'Usuario no encontrado.',404);
         $roles=$input['roles']??null;
         Access::require(is_array($roles) && array_is_list($roles),'Roles de cuenta no válidos.',400);

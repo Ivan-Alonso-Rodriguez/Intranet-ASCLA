@@ -7,7 +7,7 @@ use ASCLA\Core\Repositories\WordPressWrites;
 /** Individual WordPress capabilities may restrict, but never exceed, the assigned role. */
 final class AccountPermissions
 {
-    public const LABELS=['ascla_access'=>'Acceder a ASCLA','ascla_write'=>'Crear contenido y enviar mensajes','ascla_admin_area'=>'Acceder al área de administración','ascla_moderate'=>'Moderar contenido e interacciones','ascla_publish'=>'Publicar contenido editorial y gestionar eventos','ascla_manage'=>'Gestionar cuentas y configuración'];
+    public const LABELS=['ascla_access'=>'Acceder a ASCLA','ascla_write'=>'Crear contenido y enviar mensajes','ascla_admin_area'=>'Acceder al área de administración','ascla_moderate'=>'Moderar contenido e interacciones','ascla_publish'=>'Publicar contenido editorial y gestionar eventos','ascla_manage'=>'Gestionar la administración ASCLA','ascla_configure'=>'Configurar ASCLA'];
 
     public static function boot(): void
     {

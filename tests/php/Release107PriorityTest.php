@@ -71,7 +71,7 @@ final class Release107PriorityTest extends TestCase
         ]);
         $public=$this->post('resource','Publicación abierta',$identity.' es una referencia públicamente autorizada.',['chatham'=>false]);
         $original=get_post($private)->post_content;
-        foreach ([$this->users[2],$this->users[3],$this->users[4]] as $reader) {
+        foreach ([$this->users[2],$this->users[3]] as $reader) {
             wp_set_current_user($reader);
             $found=Content::listing('resource',['q'=>$identity,'per_page'=>1]);
             self::assertSame([$public],array_column($found['items'],'id'));
@@ -80,7 +80,7 @@ final class Release107PriorityTest extends TestCase
             $author=get_userdata($this->users[1])->display_name;
             self::assertContains($private,array_column(Content::listing('resource',['q'=>$author])['items'],'id'));
         }
-        foreach ([$this->users[0],$this->users[1]] as $editor) {
+        foreach ([$this->users[0],$this->users[1],$this->users[4]] as $editor) {
             wp_set_current_user($editor);
             self::assertContains($private,array_column(Content::listing('resource',['q'=>$identity])['items'],'id'));
         }

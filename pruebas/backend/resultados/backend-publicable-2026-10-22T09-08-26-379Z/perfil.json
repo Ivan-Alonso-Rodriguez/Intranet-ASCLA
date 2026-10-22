@@ -1,0 +1,321 @@
+[
+  {
+    "iterationIndex": 0,
+    "results": [
+      {
+        "test": {
+          "filename": "flujos-e2e\\01-perfil\\01-login-carla.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "responseTime": 841,
+          "duration": 841,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "-TuYtA0jbY7cEcu1Ch_8T"
+          },
+          {
+            "description": "Sesión y nonce propios de Carla",
+            "status": "pass",
+            "uid": "kw3c1USoSJ0Ff24dG8T3K"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 3.5779511,
+        "name": "01. Iniciar sesión como Carla",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\01-perfil\\01-login-carla",
+        "path": "flujos-e2e\\01-perfil\\01-login-carla",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\01-perfil\\02-perfil-original.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/39",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/39",
+          "responseTime": 823,
+          "duration": 823,
+          "size": 1398
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "kiwYjB-yRg5B7u3XEKK-y"
+          },
+          {
+            "description": "Validación: 02. Consultar Empresa y biografía originales",
+            "status": "pass",
+            "uid": "WRoJPaYd2J4EvCbvTLE5A"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 1.0082328,
+        "name": "02. Consultar Empresa y biografía originales",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\01-perfil\\02-perfil-original",
+        "path": "flujos-e2e\\01-perfil\\02-perfil-original",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\01-perfil\\03-guardar-biografia.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/me",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/me",
+          "responseTime": 874,
+          "duration": 874,
+          "size": 980
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "94qbYKMffpTa0pPal4Wpd"
+          },
+          {
+            "description": "Validación: 03. Guardar biografía de prueba",
+            "status": "pass",
+            "uid": "sOMFLr2ryLIxZqWtPdnab"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 1.0097186,
+        "name": "03. Guardar biografía de prueba",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\01-perfil\\03-guardar-biografia",
+        "path": "flujos-e2e\\01-perfil\\03-guardar-biografia",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\01-perfil\\04-persistencia.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/39",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/39",
+          "responseTime": 882,
+          "duration": 882,
+          "size": 1371
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "Az1lMiWXaRCovAi-bAJZ5"
+          },
+          {
+            "description": "Validación: 04. Recargar perfil y comprobar persistencia",
+            "status": "pass",
+            "uid": "a1J4O3MOt8r4Nwx53pzBS"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 1.0089734,
+        "name": "04. Recargar perfil y comprobar persistencia",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\01-perfil\\04-persistencia",
+        "path": "flujos-e2e\\01-perfil\\04-persistencia",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\01-perfil\\05-empresa-obligatoria.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/me",
+          "headers": {}
+        },
+        "response": {
+          "status": 400,
+          "statusText": "Bad Request",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/me",
+          "responseTime": 720,
+          "duration": 720,
+          "size": 113
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 400",
+            "status": "pass",
+            "uid": "Nuo3TbkCQHTMBMHC2NXo_"
+          },
+          {
+            "description": "Validación: 05. Rechazar Empresa vacía",
+            "status": "pass",
+            "uid": "h4ssvd4iUJGOaR9iGSehV"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8545489,
+        "name": "05. Rechazar Empresa vacía",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\01-perfil\\05-empresa-obligatoria",
+        "path": "flujos-e2e\\01-perfil\\05-empresa-obligatoria",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\01-perfil\\06-conservacion.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/39",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/39",
+          "responseTime": 755,
+          "duration": 755,
+          "size": 1371
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "xbpc1lldebNcazChlvnpj"
+          },
+          {
+            "description": "Validación: 06. Conservar los datos tras el rechazo",
+            "status": "pass",
+            "uid": "fEzdzhQwVpUACgzFF82wm"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8675819,
+        "name": "06. Conservar los datos tras el rechazo",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\01-perfil\\06-conservacion",
+        "path": "flujos-e2e\\01-perfil\\06-conservacion",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\01-perfil\\07-restaurar-biografia.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/me",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/me",
+          "responseTime": 847,
+          "duration": 847,
+          "size": 1007
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "OpqncxIy5V7p5_bDVGi-8"
+          },
+          {
+            "description": "Validación: 07. Restaurar la biografía de la cuenta dedicada",
+            "status": "pass",
+            "uid": "wUNVnyF4c9munQmr0Ye3I"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.977398,
+        "name": "07. Restaurar la biografía de la cuenta dedicada",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\01-perfil\\07-restaurar-biografia",
+        "path": "flujos-e2e\\01-perfil\\07-restaurar-biografia",
+        "iterationIndex": 0
+      }
+    ],
+    "summary": {
+      "totalRequests": 7,
+      "passedRequests": 7,
+      "failedRequests": 0,
+      "errorRequests": 0,
+      "skippedRequests": 0,
+      "skippedByBail": 0,
+      "totalAssertions": 0,
+      "passedAssertions": 0,
+      "failedAssertions": 0,
+      "totalTests": 14,
+      "passedTests": 14,
+      "failedTests": 0,
+      "totalPreRequestTests": 0,
+      "passedPreRequestTests": 0,
+      "failedPreRequestTests": 0,
+      "totalPostResponseTests": 0,
+      "passedPostResponseTests": 0,
+      "failedPostResponseTests": 0
+    }
+  }
+]

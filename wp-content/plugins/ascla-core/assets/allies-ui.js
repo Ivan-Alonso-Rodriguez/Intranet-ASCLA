@@ -69,7 +69,9 @@
     }
     function registryRow(p){
       const targetState=state(p)==='active'?'inactive':'active';
-      return `<article class="ally-registry-row" data-ally-record="${p.id}"><div class="ally-registry-logo">${logoMarkup(p)}</div><div class="ally-registry-name"><h3>${E(p.title)}</h3><p>${text(p.meta.alliance_type||'Alianza institucional')}</p></div>${label(p)}<div class="form-actions">${btn('Ver ficha','item',("data-id=\"" + (p.id) + "\""),'small')}${btn('Editar','editor',("data-id=\"" + (p.id) + "\" data-type=\"ally\""),'small')}${action(text(targetState==='active'?'Activar':'Retirar'),'status',("data-id=\"" + (p.id) + "\" data-state=\"" + (targetState) + "\" data-name=\"" + (E(p.title)) + "\""),targetState==='active'?'small primary':'small ghost danger')}</div></article>`;
+      const attrs=`data-id="${Number(p.id)}" data-name="${E(p.title)}"`;
+      const menu=`<details class="overflow-menu ally-registry-menu"><summary aria-label="${text('Más opciones')} · ${E(p.title)}" title="${text('Más opciones')}">${I('more')}</summary><div class="overflow-popover">${action(text(targetState==='active'?'Activar':'Desactivar'),'status',`${attrs} data-state="${targetState}"`,'overflow-item')}${action(text('Eliminar'),'delete',attrs,'overflow-item danger')}</div></details>`;
+      return `<article class="ally-registry-row" data-ally-record="${p.id}"><div class="ally-registry-logo">${logoMarkup(p)}</div><div class="ally-registry-name"><h3>${E(p.title)}</h3><p>${text(p.meta.alliance_type||'Alianza institucional')}</p></div>${label(p)}<div class="form-actions">${btn('Ver ficha','item',("data-id=\"" + (p.id) + "\""),'small')}${btn('Editar','editor',("data-id=\"" + (p.id) + "\" data-type=\"ally\""),'small')}${menu}</div></article>`;
     }
     function registryPagination(list){
       if(list.pages<=1)return "";
@@ -92,6 +94,10 @@
     root.addEventListener('click',async event=>{
       const control=event.target.closest('[data-allies-action]');if(!control||control.disabled)return;
       const key=control.dataset.alliesAction;
+      control.closest('.overflow-menu')?.removeAttribute('open');
+      if(key==='delete'){
+        modal(T('Eliminar aliado'),`<p><strong>${E(control.dataset.name)}</strong></p><p>${text('La ficha se enviará a la papelera y dejará de aparecer en el catálogo y en el registro de aliados.')}</p><div class="form-actions">${btn('Cancelar','close')}${action(text('Eliminar aliado'),'confirm-delete',`data-id="${Number(control.dataset.id)}"`,'danger primary')}</div>`);return;
+      }
       if(key==='status'){
         const inactive=control.dataset.state==='inactive';
         modal(T(inactive?'Retirar aliado del catálogo':'Activar aliado en el catálogo'),`<p><strong>${E(control.dataset.name)}</strong></p><p>${text(inactive?'Dejará de estar visible para los asociados. Su información y su historial se conservarán.':'La ficha volverá a estar visible para los asociados en el catálogo de aliados.')}</p><div class="form-actions">${btn('Cancelar','close')}${action(text(inactive?'Retirar del catálogo':'Activar aliado'),'confirm',("data-id=\"" + (Number(control.dataset.id)) + "\" data-state=\"" + (control.dataset.state) + "\""),'primary')}</div>`);return;
@@ -100,6 +106,7 @@
       try{
         if(key==='page'){filters={...filters,page:Number(control.dataset.page)};await registry(registryPanel);}
         if(key==='confirm'){await api(`admin/allies/${Number(control.dataset.id)}/status`,{state:control.dataset.state});closeModal();toast(T(control.dataset.state==='inactive'?'Aliado retirado del catálogo. Su registro se conserva.':'Aliado activo en el catálogo.'));await afterChange();}
+        if(key==='confirm-delete'){await api(`items/${Number(control.dataset.id)}`,{},'DELETE');closeModal();toast(T('Contenido enviado a la papelera.'));await afterChange();}
       }catch(error){if(error.name!=='AbortError')toast(error.message);}finally{control.disabled=false;}
     });
     return {catalog,detail,editorMarkup,registry};

@@ -55,10 +55,10 @@ final class Administration
         $community=(bool)array_intersect($user->roles,self::COMMUNITY_ROLES);
         return [
             'technical_admin'=>$technical,
-            'can_edit'=>$community && !$technical && $id!==get_current_user_id() && current_user_can('edit_user',$id),
-            'can_delete'=>$community && !$technical && $id!==get_current_user_id() && current_user_can('delete_user',$id),
+            'can_edit'=>$community && !$technical && $id!==get_current_user_id() && Access::canManageAccount('edit_user',$id),
+            'can_delete'=>$community && !$technical && $id!==get_current_user_id() && Access::canManageAccount('delete_user',$id),
             'can_suspend'=>$community && !$technical && $id!==get_current_user_id(),
-            'can_record_role_approval'=>current_user_can('edit_user',$id),
+            'can_record_role_approval'=>Access::canManageAccount('edit_user',$id),
         ];
     }
 
@@ -69,9 +69,14 @@ final class Administration
         Access::require($role===''||isset(wp_roles()->roles[$role]),'Rol no válido.',400);
         Access::require(in_array($state,['','active','suspended','expired'],true),self::INVALID_STATUS,400);
         $page=max(1,min(10000,(int)($filter['page']??1)));$args=['number'=>20,'paged'=>$page,'orderby'=>'display_name','order'=>'ASC'];
-        if($q!=='') {$args['search']='*'.str_replace('*','',$q).'*';$args['search_columns']=['user_login','user_email','display_name'];}
         if($role!=='') {$args['role']=$role; }
         if($state!=='') { $args['meta_query']=Membership::filter($state); }
+        // Filter the complete administrative scope before pagination, including
+        // suspended accounts and profiles that opted out of the public directory.
+        if($q!=='' || !empty($filter['country']) || !empty($filter['industries']) || !empty($filter['interests']) || !empty($filter['areas'])) {
+            $ids=self::filteredUserIds($args,$filter,$q);
+            $args['include']=$ids?:[0];
+        }
         $query=new \WP_User_Query($args);$items=[];
         foreach($query->get_results() as $user) {
             $id=(int)$user->ID;$card=Profiles::card($id);
@@ -97,9 +102,42 @@ final class Administration
             'total'=>$query->get_total(),
             'pages'=>(int)ceil($query->get_total()/20),
             'roles'=>$roles,
-            'can_create'=>current_user_can('create_users'),
+            'can_create'=>Access::canManageAccount('create_users'),
             'create_roles'=>self::communityRoles(),
         ];
+    }
+
+    private static function normalizeSearch(string $value): string
+    {
+        return mb_strtolower(trim(preg_replace('/\s+/u',' ',remove_accents($value))));
+    }
+
+    private static function filteredUserIds(array $args,array $filter,string $query): array
+    {
+        $query=self::normalizeSearch($query);$country=self::normalizeSearch(Access::text($filter['country']??'',120));
+        $selected=[];
+        foreach(['industries','interests','areas'] as $key) {
+            $selected[$key]=array_values(array_unique(array_filter(array_map('absint',(array)($filter[$key]??[])))));
+        }
+        $args['number']=200;$args['count_total']=false;unset($args['paged']);$offset=0;$ids=[];
+        do {
+            $args['offset']=$offset;$users=(new \WP_User_Query($args))->get_results();$offset+=200;
+            foreach($users as $user) {
+                $profile=(array)get_user_meta($user->ID,'_ascla_profile',true);
+                if($country!=='' && self::normalizeSearch((string)($profile['country']??''))!==$country) { continue; }
+                foreach($selected as $key=>$values) {
+                    if($values && !array_intersect($values,(array)($profile[$key]??[]))) { continue 2; }
+                }
+                if($query!=='') {
+                    $values=[$user->display_name,$user->user_login,$user->user_email,$user->first_name,$user->last_name];
+                    foreach(['first_name','last_name','position','company','bio','experience'] as $key) { $values[]=$profile[$key]??''; }
+                    $values[]=wp_json_encode(Profiles::labels($profile),JSON_UNESCAPED_UNICODE);
+                    if(!str_contains(self::normalizeSearch(implode(' ',$values)),$query)) { continue; }
+                }
+                $ids[]=(int)$user->ID;
+            }
+        } while(count($users)===200);
+        return $ids;
     }
 
     private static function createUserLocked(array $account): array
@@ -135,7 +173,7 @@ final class Administration
 
     public static function createUser(array $input): array
     {
-        Access::require(current_user_can('ascla_manage')&&current_user_can('create_users'),'No puedes crear cuentas.',403);Access::limit('admin_user_create',12,300);
+        Access::require(Access::canManageAccount('create_users'),'No puedes crear cuentas.',403);Access::limit('admin_user_create',12,300);
         $loginInput=trim(Access::text($input['login']??'',60));$login=sanitize_user($loginInput,true);
         Access::require($login!==''&&$login===$loginInput&&validate_username($login),'Use un nombre de usuario válido, sin espacios ni caracteres especiales no permitidos.',400);
         Access::require(!username_exists($login),'Ese nombre de usuario ya está registrado.',409);
@@ -194,7 +232,7 @@ final class Administration
     {
         clean_user_cache($id);
         $user=self::editableMember($id);
-        Access::require(current_user_can('edit_user',$id),'No puedes editar esta cuenta.',403);
+        Access::require(Access::canManageAccount('edit_user',$id),'No puedes editar esta cuenta.',403);
         $email=sanitize_email(Access::text($input['email']??'',100));
         Access::require($email!==''&&is_email($email),'Correo electrónico no válido.',400);
         $existing=email_exists($email);
@@ -248,12 +286,12 @@ final class Administration
     public static function deleteUser(int $id): array
     {
         $target=self::editableMember($id);
-        Access::require(current_user_can('delete_user',$id),'No puedes eliminar esta cuenta.',403);
+        Access::require(Access::canManageAccount('delete_user',$id),'No puedes eliminar esta cuenta.',403);
         $actor=get_current_user_id();
         $login=$target->user_login;
         return Store::atomic('profile-interests:'.$id,static function()use($id,$actor,$login){
             clean_user_cache($id);self::editableMember($id);
-            Access::require(current_user_can('delete_user',$id),'No puedes eliminar esta cuenta.',403);
+            Access::require(Access::canManageAccount('delete_user',$id),'No puedes eliminar esta cuenta.',403);
             require_once ABSPATH.'wp-admin/includes/user.php';
             $deleted=wp_delete_user($id,$actor);
             Access::require($deleted===true,'No se pudo eliminar la cuenta.',500);

@@ -1,0 +1,733 @@
+[
+  {
+    "iterationIndex": 0,
+    "results": [
+      {
+        "test": {
+          "filename": "integracion\\01-login-a.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "responseTime": 942,
+          "duration": 942,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Inicio de sesión a",
+            "status": "pass",
+            "uid": "lm3WzgVWLrGiyu0_iMQGj"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 3.0195983,
+        "name": "01. Iniciar sesión como asociado",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\01-login-a",
+        "path": "integracion\\01-login-a",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\02-nonce-a.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/intranet/",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/intranet/",
+          "responseTime": 1029,
+          "duration": 1029,
+          "size": 54190
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Sesión autenticada a",
+            "status": "pass",
+            "uid": "Xu2AHtSV4GNjQL7EhabVg"
+          },
+          {
+            "description": "Nonce REST disponible",
+            "status": "pass",
+            "uid": "83iBNl5YL7g0EmEYtXyJM"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 1.2082978,
+        "name": "02. Obtener protección de la sesión",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\02-nonce-a",
+        "path": "integracion\\02-nonce-a",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\03-identity.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/bootstrap",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/bootstrap",
+          "responseTime": 739,
+          "duration": 739,
+          "size": 3136
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Identidad correcta",
+            "status": "pass",
+            "uid": "ikSamogb5mhKbtohfR2_A"
+          },
+          {
+            "description": "La sesión pertenece al asociado de prueba",
+            "status": "pass",
+            "uid": "-QY9Pt4klf6qhu2xBa9zt"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8685928,
+        "name": "03. Verificar identidad del asociado",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\03-identity",
+        "path": "integracion\\03-identity",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\04-anonymous-directory.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles",
+          "headers": {}
+        },
+        "response": {
+          "status": 401,
+          "statusText": "Unauthorized",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles",
+          "responseTime": 690,
+          "duration": 690,
+          "size": 106
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Directorio rechaza visitantes sin sesión",
+            "status": "pass",
+            "uid": "StCLqI-7EqsG_Sy1Ol1Qg"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8062997,
+        "name": "04. Rechazar acceso sin sesión",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\04-anonymous-directory",
+        "path": "integracion\\04-anonymous-directory",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\05-admin-denied.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/admin/users",
+          "headers": {}
+        },
+        "response": {
+          "status": 403,
+          "statusText": "Forbidden",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/admin/users",
+          "responseTime": 706,
+          "duration": 706,
+          "size": 106
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Asociado no accede a administración",
+            "status": "pass",
+            "uid": "bDbvAUzDvySrgChAmx2qO"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8216259,
+        "name": "05. Rechazar administración sin permiso",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\05-admin-denied",
+        "path": "integracion\\05-admin-denied",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\06-profile-before.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/37",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/37",
+          "responseTime": 743,
+          "duration": 743,
+          "size": 1236
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Perfil disponible",
+            "status": "pass",
+            "uid": "om1tTu_rHMvssOVQ6rPUl"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.9266865,
+        "name": "06. Consultar empresa actual",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\06-profile-before",
+        "path": "integracion\\06-profile-before",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\07-invalid-profile.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/me",
+          "headers": {}
+        },
+        "response": {
+          "status": 400,
+          "statusText": "Bad Request",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/me",
+          "responseTime": 710,
+          "duration": 710,
+          "size": 113
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "El error identifica Empresa",
+            "status": "pass",
+            "uid": "NPteAvKEak5-HOCn8yyIp"
+          },
+          {
+            "description": "Empresa obligatoria se valida en servidor",
+            "status": "pass",
+            "uid": "bk4indQZGTEp-1TxCF9LO"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8237327,
+        "name": "07. Rechazar empresa vacía",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\07-invalid-profile",
+        "path": "integracion\\07-invalid-profile",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\08-profile-preserved.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/37",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/37",
+          "responseTime": 744,
+          "duration": 744,
+          "size": 1236
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Perfil se vuelve a consultar",
+            "status": "pass",
+            "uid": "Mit0BcrImSHypof69n4Zp"
+          },
+          {
+            "description": "El rechazo conserva la empresa",
+            "status": "pass",
+            "uid": "ZfMk0tdlgbkwA5l0l3gCA"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8647735,
+        "name": "08. Comprobar que la empresa se conserva",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\08-profile-preserved",
+        "path": "integracion\\08-profile-preserved",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\09-directory-page.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles?page=1",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles?page=1",
+          "responseTime": 1026,
+          "duration": 1026,
+          "size": 12204
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Directorio paginado",
+            "status": "pass",
+            "uid": "F5RbMTWBBXrQJzWEovJXz"
+          },
+          {
+            "description": "El directorio muestra doce perfiles por página y calcula las páginas",
+            "status": "pass",
+            "uid": "wvgwBOYO6t_vBbZbe1q0T"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 1.1457452,
+        "name": "09. Consultar directorio por páginas",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\09-directory-page",
+        "path": "integracion\\09-directory-page",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\10-invalid-date-range.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/content/event?after=2099-12-31&before=2020-01-01",
+          "headers": {}
+        },
+        "response": {
+          "status": 400,
+          "statusText": "Bad Request",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/content/event?after=2099-12-31&before=2020-01-01",
+          "responseTime": 732,
+          "duration": 732,
+          "size": 114
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Rango de fechas invertido rechazado",
+            "status": "pass",
+            "uid": "hwR1APSP9_83cravCnh3U"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8462781,
+        "name": "10. Rechazar fechas invertidas",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\10-invalid-date-range",
+        "path": "integracion\\10-invalid-date-range",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\11-login-administrador.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "responseTime": 853,
+          "duration": 853,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "3znzgfzjp7YRBF7uDR2v_"
+          },
+          {
+            "description": "Sesión y nonce propios de Administrador",
+            "status": "pass",
+            "uid": "XihOJ6hPRF-WLukK-_rgD"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 3.7356134,
+        "name": "11. Iniciar sesión como Administrador",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\11-login-administrador",
+        "path": "integracion\\11-login-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\12-inicio-administrador.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/intranet/",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/intranet/",
+          "responseTime": 724,
+          "duration": 724,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "LAYrfi-pz7iP6lBXhA6yZ"
+          },
+          {
+            "description": "El inicio redirige al panel administrativo",
+            "status": "pass",
+            "uid": "wg3Qrvl9KNucq08zF9SHo"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8619918,
+        "name": "12. Inicio del administrador en su panel",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\12-inicio-administrador",
+        "path": "integracion\\12-inicio-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\13-directorio-sin-administrador.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles?page=1",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles?page=1",
+          "responseTime": 1019,
+          "duration": 1019,
+          "size": 12204
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "Y5o8R1Ea0jiAjtO7IJyOO"
+          },
+          {
+            "description": "El directorio incluye a Ana y excluye al administrador en todas las páginas",
+            "status": "pass",
+            "uid": "-rbVhK0Va6mwuMOjpIS3L"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 2.0348905,
+        "name": "13. Directorio completo sin cuentas de administración",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\13-directorio-sin-administrador",
+        "path": "integracion\\13-directorio-sin-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\14-perfil-administrador-oculto.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/9",
+          "headers": {}
+        },
+        "response": {
+          "status": 404,
+          "statusText": "Not Found",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/profiles/9",
+          "responseTime": 710,
+          "duration": 710,
+          "size": 78
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 404",
+            "status": "pass",
+            "uid": "mu9VOpINVPcVYuCJ2Dq38"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.828233,
+        "name": "14. El asociado no consulta al administrador como contacto",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\14-perfil-administrador-oculto",
+        "path": "integracion\\14-perfil-administrador-oculto",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\15-conexion-hacia-administrador.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/relations",
+          "headers": {}
+        },
+        "response": {
+          "status": 400,
+          "statusText": "Bad Request",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/relations",
+          "responseTime": 727,
+          "duration": 727,
+          "size": 81
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 400",
+            "status": "pass",
+            "uid": "hZIVPpcusLf9HKEgixsT-"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8590299,
+        "name": "15. Rechazar conexión hacia administración",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\15-conexion-hacia-administrador",
+        "path": "integracion\\15-conexion-hacia-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\16-chat-hacia-administrador.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/conversation-requests",
+          "headers": {}
+        },
+        "response": {
+          "status": 400,
+          "statusText": "Bad Request",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/conversation-requests",
+          "responseTime": 738,
+          "duration": 738,
+          "size": 81
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 400",
+            "status": "pass",
+            "uid": "HaGAfiZDtiX-Ytv0teWgd"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8539288,
+        "name": "16. Rechazar solicitud de conversación hacia administración",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\16-chat-hacia-administrador",
+        "path": "integracion\\16-chat-hacia-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\17-conexion-desde-administrador.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/relations",
+          "headers": {}
+        },
+        "response": {
+          "status": 403,
+          "statusText": "Forbidden",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/relations",
+          "responseTime": 725,
+          "duration": 725,
+          "size": 78
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 403",
+            "status": "pass",
+            "uid": "32Dgg97czL868tX_AGQI0"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8543119,
+        "name": "17. Rechazar conexión desde administración",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\17-conexion-desde-administrador",
+        "path": "integracion\\17-conexion-desde-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\18-chat-desde-administrador.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/conversation-requests",
+          "headers": {}
+        },
+        "response": {
+          "status": 403,
+          "statusText": "Forbidden",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/conversation-requests",
+          "responseTime": 729,
+          "duration": 729,
+          "size": 78
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 403",
+            "status": "pass",
+            "uid": "x7QbIVco7q2cGZFFNISrh"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8467017,
+        "name": "18. Rechazar solicitud de conversación desde administración",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\integracion\\18-chat-desde-administrador",
+        "path": "integracion\\18-chat-desde-administrador",
+        "iterationIndex": 0
+      }
+    ],
+    "summary": {
+      "totalRequests": 18,
+      "passedRequests": 18,
+      "failedRequests": 0,
+      "errorRequests": 0,
+      "skippedRequests": 0,
+      "skippedByBail": 0,
+      "totalAssertions": 0,
+      "passedAssertions": 0,
+      "failedAssertions": 0,
+      "totalTests": 26,
+      "passedTests": 26,
+      "failedTests": 0,
+      "totalPreRequestTests": 0,
+      "passedPreRequestTests": 0,
+      "failedPreRequestTests": 0,
+      "totalPostResponseTests": 0,
+      "passedPostResponseTests": 0,
+      "failedPostResponseTests": 0
+    }
+  }
+]

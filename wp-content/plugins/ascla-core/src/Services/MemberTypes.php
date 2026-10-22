@@ -29,7 +29,7 @@ final class MemberTypes
         // Reposting a visible label is not a classification change. Preserve unknown
         // legacy values when their public projection is empty, rather than clearing them.
         if ($value===$previous || ($code===self::code($previous) && ($code!=='' || $value===''))) { return $profile; }
-        Access::require(current_user_can('ascla_manage') && current_user_can('edit_user',$id),'Solo administración puede establecer el tipo de asociado.',403);
+        Access::require(Access::canManageAccount('edit_user',$id),'Solo administración puede establecer el tipo de asociado.',403);
         $profile['member_type']=self::selected($value);
         return $profile;
     }

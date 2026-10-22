@@ -1,0 +1,521 @@
+[
+  {
+    "iterationIndex": 0,
+    "results": [
+      {
+        "test": {
+          "filename": "flujos-e2e\\03-borrador-publicacion-inscripcion\\01-login-administrador.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "responseTime": 838,
+          "duration": 838,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "eWj6qm5Ce7PYFyEv6gu5d"
+          },
+          {
+            "description": "Sesión y nonce propios de Administrador",
+            "status": "pass",
+            "uid": "-FyY-vBWD9HH6D0i0fM7L"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 3.7837072000000003,
+        "name": "01. Iniciar sesión como Administrador",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\03-borrador-publicacion-inscripcion\\01-login-administrador",
+        "path": "flujos-e2e\\03-borrador-publicacion-inscripcion\\01-login-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\03-borrador-publicacion-inscripcion\\02-login-ana.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-login.php",
+          "responseTime": 819,
+          "duration": 819,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "To_LyKurOS4-yN9vhH9u1"
+          },
+          {
+            "description": "Sesión y nonce propios de Ana",
+            "status": "pass",
+            "uid": "SVrL_zdnyrumE_Odt9OWW"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 2.7370172,
+        "name": "02. Iniciar sesión como Ana",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\03-borrador-publicacion-inscripcion\\02-login-ana",
+        "path": "flujos-e2e\\03-borrador-publicacion-inscripcion\\02-login-ana",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\03-borrador-publicacion-inscripcion\\03-borrador-incompleto.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/content/event",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/content/event",
+          "responseTime": 762,
+          "duration": 762,
+          "size": 562
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "Mz8wVbHDTjv7PcqDse0t1"
+          },
+          {
+            "description": "Validación: 03. Crear un borrador sin descripción ni fechas",
+            "status": "pass",
+            "uid": "nd7KLd2DgeE_czu5WAqSN"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.9595607,
+        "name": "03. Crear un borrador sin descripción ni fechas",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\03-borrador-publicacion-inscripcion\\03-borrador-incompleto",
+        "path": "flujos-e2e\\03-borrador-publicacion-inscripcion\\03-borrador-incompleto",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\03-borrador-publicacion-inscripcion\\04-borrador-privado.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/items/479",
+          "headers": {}
+        },
+        "response": {
+          "status": 404,
+          "statusText": "Not Found",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/items/479",
+          "responseTime": 729,
+          "duration": 729,
+          "size": 81
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 404",
+            "status": "pass",
+            "uid": "vNyka_5MMAla_xs55D3Kp"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8523219,
+        "name": "04. El asociado no puede abrir el borrador",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\03-borrador-publicacion-inscripcion\\04-borrador-privado",
+        "path": "flujos-e2e\\03-borrador-publicacion-inscripcion\\04-borrador-privado",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\03-borrador-publicacion-inscripcion\\05-publicacion-invalida.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/content/event/479",
+          "headers": {}
+        },
+        "response": {
+          "status": 400,
+          "statusText": "Bad Request",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/content/event/479",
+          "responseTime": 788,
+          "duration": 788,
+          "size": 90
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 400",
+            "status": "pass",
+            "uid": "_DeQaij9Bez_F0zLL0ff5"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.9119547,
+        "name": "05. Publicar incompleto exige los campos obligatorios",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\03-borrador-publicacion-inscripcion\\05-publicacion-invalida",
+        "path": "flujos-e2e\\03-borrador-publicacion-inscripcion\\05-publicacion-invalida",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\03-borrador-publicacion-inscripcion\\06-borrador-conservado.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/items/479",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/items/479",
+          "responseTime": 748,
+          "duration": 748,
+          "size": 562
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "39xiKMxIhIbEl6XBv_tHY"
+          },
+          {
+            "description": "Validación: 06. El rechazo conserva el borrador",
+            "status": "pass",
+            "uid": "_NGLkS8d2lb9mwFrPv340"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8657259,
+        "name": "06. El rechazo conserva el borrador",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\03-borrador-publicacion-inscripcion\\06-borrador-conservado",
+        "path": "flujos-e2e\\03-borrador-publicacion-inscripcion\\06-borrador-conservado",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\03-borrador-publicacion-inscripcion\\07-publicar-evento.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/content/event/479",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/content/event/479",
+          "responseTime": 764,
+          "duration": 764,
+          "size": 726
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "gnf2fUa4fgS3wx7rLKu9t"
+          },
+          {
+            "description": "Validación: 07. Publicar con fecha, hora y cupo válidos",
+            "status": "pass",
+            "uid": "epWDwxrmZLiWESUKfc7jc"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8799773,
+        "name": "07. Publicar con fecha, hora y cupo válidos",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\03-borrador-publicacion-inscripcion\\07-publicar-evento",
+        "path": "flujos-e2e\\03-borrador-publicacion-inscripcion\\07-publicar-evento",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\03-borrador-publicacion-inscripcion\\08-fechas-persistentes.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/items/479",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/items/479",
+          "responseTime": 851,
+          "duration": 851,
+          "size": 726
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "cNY1OwkUVQfOJLVVXyWm4"
+          },
+          {
+            "description": "Validación: 08. Reabrir el evento y comprobar sus fechas",
+            "status": "pass",
+            "uid": "pCtbjPIx9VYTRq4uzzuhG"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.9747701,
+        "name": "08. Reabrir el evento y comprobar sus fechas",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\03-borrador-publicacion-inscripcion\\08-fechas-persistentes",
+        "path": "flujos-e2e\\03-borrador-publicacion-inscripcion\\08-fechas-persistentes",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\03-borrador-publicacion-inscripcion\\09-inscripcion.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/events/479/register",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/events/479/register",
+          "responseTime": 743,
+          "duration": 743,
+          "size": 1413
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "_25oATYyRMOowABAzhgPZ"
+          },
+          {
+            "description": "Validación: 09. Ana confirma su inscripción",
+            "status": "pass",
+            "uid": "l4H7CFxgX6zpFNbCm9eel"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8551572,
+        "name": "09. Ana confirma su inscripción",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\03-borrador-publicacion-inscripcion\\09-inscripcion",
+        "path": "flujos-e2e\\03-borrador-publicacion-inscripcion\\09-inscripcion",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\03-borrador-publicacion-inscripcion\\10-inscripcion-persistente.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/events/479",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/events/479",
+          "responseTime": 748,
+          "duration": 748,
+          "size": 1413
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "oNsPg-KX0MxBArkLXThMU"
+          },
+          {
+            "description": "Validación: 10. Recargar y comprobar la inscripción",
+            "status": "pass",
+            "uid": "WMzOWhYG4Ux9mBdMaKCD3"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8781957,
+        "name": "10. Recargar y comprobar la inscripción",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\03-borrador-publicacion-inscripcion\\10-inscripcion-persistente",
+        "path": "flujos-e2e\\03-borrador-publicacion-inscripcion\\10-inscripcion-persistente",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\03-borrador-publicacion-inscripcion\\11-cancelar-evento.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/events/479/cancel",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/events/479/cancel",
+          "responseTime": 738,
+          "duration": 738,
+          "size": 1228
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "Q_9-T4yC9mprEiAjQYkAA"
+          },
+          {
+            "description": "Validación: 11. Cancelar el evento ficticio",
+            "status": "pass",
+            "uid": "9C2gwp1UDjPQ-pRYzKwGS"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8663513,
+        "name": "11. Cancelar el evento ficticio",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\03-borrador-publicacion-inscripcion\\11-cancelar-evento",
+        "path": "flujos-e2e\\03-borrador-publicacion-inscripcion\\11-cancelar-evento",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\03-borrador-publicacion-inscripcion\\12-cancelacion-persistente.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/events/479",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "https://wordpress.ingsoftware.lat/wp-json/ascla/v1/events/479",
+          "responseTime": 754,
+          "duration": 754,
+          "size": 1322
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "qvwt-Aduedch3FY3pKbqe"
+          },
+          {
+            "description": "Validación: 12. Comprobar el cierre del evento",
+            "status": "pass",
+            "uid": "jjf31uA43-BusUxBLnpTf"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.8684896,
+        "name": "12. Comprobar el cierre del evento",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-10-22T09-08-26-379Z\\.coleccion-ejecucion\\flujos-e2e\\03-borrador-publicacion-inscripcion\\12-cancelacion-persistente",
+        "path": "flujos-e2e\\03-borrador-publicacion-inscripcion\\12-cancelacion-persistente",
+        "iterationIndex": 0
+      }
+    ],
+    "summary": {
+      "totalRequests": 12,
+      "passedRequests": 12,
+      "failedRequests": 0,
+      "errorRequests": 0,
+      "skippedRequests": 0,
+      "skippedByBail": 0,
+      "totalAssertions": 0,
+      "passedAssertions": 0,
+      "failedAssertions": 0,
+      "totalTests": 22,
+      "passedTests": 22,
+      "failedTests": 0,
+      "totalPreRequestTests": 0,
+      "passedPreRequestTests": 0,
+      "failedPreRequestTests": 0,
+      "totalPostResponseTests": 0,
+      "passedPostResponseTests": 0,
+      "failedPostResponseTests": 0
+    }
+  }
+]

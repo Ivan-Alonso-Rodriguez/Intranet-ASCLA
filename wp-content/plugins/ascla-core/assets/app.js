@@ -176,7 +176,9 @@
     } else {
       url.pathname += route;
     }
-    new URLSearchParams(query).forEach((value, key) => url.searchParams.set(key, value));
+    const params = new URLSearchParams(query);
+    for (const key of new Set(params.keys())) url.searchParams.delete(key);
+    params.forEach((value, key) => url.searchParams.append(key, value));
     return url.href;
   }
   let youtubeIframeApiPromise = null;
@@ -834,7 +836,7 @@
     if (root.querySelector(".ascla-sidebar")) { refreshNotifications(); return; }
     const p = S.boot.me;
     const homeUrl = S.boot.admin ? C.adminUrl : C.pages.intranet.url;
-    const links = navOrder.map((k) => {const adminHome=S.boot.admin&&k==='intranet';return `<a class="nav-link ${(adminHome?S.page==='admin':S.page===k) ? "active" : ""}" href="${E(adminHome?homeUrl:C.pages[k].url)}">${I(adminHome?'settings':pageIcon[k])}<span>${E(adminHome?T('Administración'):C.pages[k].label)}</span></a>`;}).join("");
+    const links = navOrder.filter(k=>!S.boot.admin||!['directorio','mensajeria','contacto'].includes(k)).map((k) => {const adminHome=S.boot.admin&&k==='intranet';return `<a class="nav-link ${(adminHome?S.page==='admin':S.page===k) ? "active" : ""}" href="${E(adminHome?homeUrl:C.pages[k].url)}">${I(adminHome?'settings':pageIcon[k])}<span>${E(adminHome?T('Administración'):C.pages[k].label)}</span></a>`;}).join("");
     const adminLink = S.boot.admin_area && !S.boot.admin ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}${E(T("Administración"))}</a>` : "";
     root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(homeUrl)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></a><div class="brand-sub">${E(T("COMUNIDAD DE ASOCIADOS"))}</div><nav aria-label="${E(T("Navegación principal"))}">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}${E(T("Cerrar sesión"))}</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(homeUrl)}" aria-label="${E(T("ASCLA inicio"))}"><img class="brand-logo-normal" src="${E(C.logo)}" alt="ASCLA"><img class="brand-logo-inverse" src="${E(C.logoWhite || C.logo)}" alt="" aria-hidden="true"></a>${btn(I("menu"), "menu", ("aria-label=\"" + (E(T("Abrir navegación"))) + "\""), "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="${E(T("Buscar en ASCLA"))}" placeholder="${E(T("Buscar en tu comunidad…"))}" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${C.page === "admin" ? adminLanguageControl() + btn(themeIcons(), "theme-menu", ("aria-label=\"" + (E(T("Apariencia"))) + "\""), "icon-button theme-button") : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", ("aria-label=\"" + (E(T("Notificaciones"))) + "\""), "icon-button")}<a class="header-profile" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || T("Comunidad ASCLA"))}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap" tabindex="-1"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || T("Administración"))}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · ${E(T("Conectamos conocimiento, fortalecemos la gobernanza."))}${S.boot.demo ? " · " + E(T("Datos ficticios de demostración.")) : ""}</div></main></div>`;
     refreshNotifications();
@@ -1241,7 +1243,7 @@
   }
   function feedCard(p) {
     const editorialState = p.status === "publish" ? "" : status(p.status);
-    return `<article class="card feed-card"><div class="feed-top">${avatar({ name: p.author.name })}<div><strong>${E(p.author.name)}</strong><small>${date(p.date)} · Comunidad ASCLA</small></div><span class="feed-editorial-state">${editorialState}</span></div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(p.body.slice(0, 450))}${p.body.length > 450 ? "…" : ""}</p>${UI.attachments(p, true)}${p.tags.length ? ("<div class=\"tag-row\">" + (p.tags.map((t) => ("<span class=\"tag\">" + (E(t.name)) + "</span>")).join("")) + "</div>") : ""}<div class="feed-actions">${btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (p.id) + "\" data-active=\"" + (!p.liked) + "\" aria-label=\"" + (E(T("Me gusta") + " " + p.reactions)) + "\""))}${btn(I("hub") + (" <span data-comment-count=\"" + (Number(p.id)) + "\">" + (E(commentCountText(p.comments))) + "</span>"), "item", ("data-id=\"" + (p.id) + "\""))}${btn(I("arrow") + " " + T("Ver conversación"), "item", ("data-id=\"" + (p.id) + "\""))}</div></article>`;
+    return `<article class="card feed-card" data-content-id="${Number(p.id)}" data-content-type="${E(p.type)}"><div class="feed-top">${avatar({ name: p.author.name })}<div><strong>${E(p.author.name)}</strong><small>${date(p.date)} · Comunidad ASCLA</small></div><span class="feed-editorial-state">${editorialState}</span></div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(p.body.slice(0, 450))}${p.body.length > 450 ? "…" : ""}</p>${UI.attachments(p, true)}${p.tags.length ? ("<div class=\"tag-row\">" + (p.tags.map((t) => ("<span class=\"tag\">" + (E(t.name)) + "</span>")).join("")) + "</div>") : ""}<div class="feed-actions">${btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (p.id) + "\" data-active=\"" + (!p.liked) + "\" aria-label=\"" + (E(T("Me gusta") + " " + p.reactions)) + "\""))}${btn(I("hub") + (" <span data-comment-count=\"" + (Number(p.id)) + "\">" + (E(commentCountText(p.comments))) + "</span>"), "item", ("data-id=\"" + (p.id) + "\""))}${btn(I("arrow") + " " + T("Ver conversación"), "item", ("data-id=\"" + (p.id) + "\""))}</div></article>`;
   }
   function pager(list) {
     const perPage = Number(list.per_page || 0);
@@ -1257,7 +1259,7 @@
   function directoryPager(list) {
     const page = Math.max(1, Number(list.page || 1));
     const pages = Math.max(1, Number(list.pages || 1));
-    const perPage = Number(list.per_page || 15);
+    const perPage = Number(list.per_page || 12);
     const total = Math.max(0, Number(list.total || 0));
     const startItem = total ? ((page - 1) * perPage) + 1 : 0;
     const endItem = total ? Math.min(total, startItem + Number(list.items?.length || 0) - 1) : 0;
@@ -1279,16 +1281,16 @@
       + "</nav>";
     return `<div class="directory-pagination"><div class="directory-pagination-summary"><span><strong>${perPage}</strong> ${E(T('por página'))} · ${E(T('Mostrando'))} ${startItem}–${endItem} ${E(T('de'))} ${total}</span></div>${controls}</div>`;
   }
-  function directoryQuery() {
+  function directoryQuery(filter = S.filter) {
     const query = new URLSearchParams();
-    for (const [key, value] of Object.entries(S.filter)) {
+    for (const [key, value] of Object.entries(filter)) {
       if (Array.isArray(value)) value.forEach(item => query.append(key+"[]",item));
       else query.set(key,value);
     }
     return query;
   }
-  function directoryTermFilter(name, label, terms) {
-    const rawSelected=S.filter[name];
+  function directoryTermFilter(name, label, terms, filter = S.filter) {
+    const rawSelected=filter[name];
     const selected=new Set((Array.isArray(rawSelected) ? rawSelected : [rawSelected]).filter(value => value != null).map(String));
     const options = terms.map(term => '<label class="directory-option"><input type="checkbox" name="'+name+'" value="'+Number(term.id)+'" '+(selected.has(String(term.id))?'checked':'')+'><span>'+E(term.name)+'</span></label>').join('');
     return '<details class="directory-facet"><summary>'+E(T(label))+' <span class="directory-facet-count" data-facet-count>'+selected.size+'</span>'+I('chevron')+'</summary><div class="directory-facet-options" role="group" aria-label="'+E(T(label))+'">'+options+'</div></details>';
@@ -1573,9 +1575,9 @@
       profileTabs() +
       `<form class="card profile-tab-form" data-form="profile" data-guard-unsaved><p class="profile-required-note">${requiredMark()} ${E(T("Los campos marcados son obligatorios. En Intereses, elige al menos un sector, un interés y un objetivo."))}</p>
         <section class="profile-tab-panel" id="profile-panel-info" data-profile-panel="info" role="tabpanel" aria-labelledby="profile-tab-info">
-          <div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small profile-photo-button">${I("edit")} ${E(T("Cambiar fotografía"))}<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">${E(T("JPG, PNG o WebP. Podrás mover, ampliar y recortar antes de guardar; ASCLA optimiza la imagen automáticamente."))}</div></div></div>
+          <div class="profile-summary">${avatar(p, "xl")}<div class="profile-summary-person"><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small profile-photo-button">${I("edit")} ${E(T("Cambiar fotografía"))}<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">${E(T("JPG, PNG o WebP. Podrás mover, ampliar y recortar antes de guardar; ASCLA optimiza la imagen automáticamente."))}</div></div>${profileMemberType(p)}</div>
           <div class="form-section">${E(T("Información personal y profesional"))}</div>
-          <div class="form-grid">${["first_name", "last_name", "position", "company"].map((k) => field(k, profileLabels[k], p[k] || "", "text", 'required maxlength="200"')).join("")}${profileLocationFields(p)}${profileMemberType(p)}${profileBirthdayField(p)}${profilePhoneFields(p)}${["linkedin", "twitter"].map((k) => field(k, profileLabels[k], p[k] || "", "url", 'maxlength="200"')).join("")}<div class="full profile-website-field">${field("website", profileLabels.website, p.website || "", "url", 'maxlength="200"')}</div><div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'required maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>
+          <div class="form-grid">${["first_name", "last_name", "position", "company"].map((k) => field(k, profileLabels[k], p[k] || "", "text", 'required maxlength="200"')).join("")}${profileLocationFields(p)}${profileBirthdayField(p)}${profilePhoneFields(p)}${["linkedin", "twitter"].map((k) => field(k, profileLabels[k], p[k] || "", "url", 'maxlength="200"')).join("")}<div class="full profile-website-field">${field("website", profileLabels.website, p.website || "", "url", 'maxlength="200"')}</div><div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'required maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>
         </section>
         <section class="profile-tab-panel" id="profile-panel-interests" data-profile-panel="interests" role="tabpanel" aria-labelledby="profile-tab-interests" hidden>
           ${profileKnowledge(p)}
@@ -1677,11 +1679,6 @@
     const draftsButton = canWrite ? btn('Mis borradores', 'filter-drafts', '', 'tab ' + (S.filter.drafts ? 'active' : '')) : '';
     return `<div class="tabs">${allButton}${pastButton}${mineButton}${draftsButton}${commentsButton}</div>`;
   }
-  function listingForumDirectory(type, forums) {
-    if (type !== "topic" || S.filter.mine || S.filter.drafts || !forums.length) return "";
-    const cards = forums.map(f => `<article class="card forum-card" data-forum-id="${Number(f.id)}"><div class="forum-card-heading"><span class="forum-card-icon" aria-hidden="true">${I('chat')}</span><div><span class="eyebrow">${E(T('Foro'))}</span><h3>${E(f.name)}</h3></div></div><p class="detail-body">${E(f.body.slice(0, 220))}${f.body.length > 220 ? '…' : ''}</p><div class="forum-card-footer"><small>${E(f.author.name)} · ${date(f.date)}</small>${btn(T('Ver foro') + ' ' + I('arrow'), 'item', 'data-id="' + Number(f.id) + '"', 'small primary')}</div></article>`).join('');
-    return `<section class="forum-directory" aria-label="${E(T('Explorar foros'))}"><div class="section-top"><h2>${E(T('Explorar foros'))}</h2><span class="tag">${forums.length}</span></div><p class="private-note">${E(T('Elige un foro para conocer su tema y participar en la conversación.'))}</p><div class="cards two forum-cards">${cards}</div></section>`;
-  }
   function listingDrafts(items) {
     const cards = items.map(p => `<article class="card draft-card" data-draft-id="${Number(p.id)}"><div class="section-top">${status('draft')}<span class="tag">${E(T(typeLabel[p.type] || p.type))}</span></div><h3>${E(p.title)}</h3><p class="detail-body">${E(p.body.slice(0,160))}</p><div class="form-actions">${btn('Continuar borrador', 'editor', 'data-type="' + E(p.type) + '" data-id="' + Number(p.id) + '"', 'primary small')}</div></article>`).join('');
     return `<section class="draft-list"><h2>${E(T('Mis borradores'))}</h2><p class="private-note">${E(T('Aquí encontrarás tus borradores, separados del contenido publicado.'))}</p><div class="cards two">${cards}</div>${items.length ? '' : empty('No tienes borradores guardados', 'Puedes guardar contenido incompleto y retomarlo desde aquí.')}</section>`;
@@ -1704,10 +1701,10 @@
     if (type==='topic' && S.filter.comments) { await ownComments();return; }
     const params = {...S.filter};
     delete params.drafts;
+    if (type === "topic") params.include_forums = 1;
     if (S.filter.drafts) {
       Object.assign(params, {mine:1, status:'draft'});
       delete params.past; delete params.after; delete params.before;
-      if (type === 'topic') params.include_forums = 1;
     } else if (!S.filter.mine) {
       params.status = 'publish';
       if (type === 'event') params.past = S.filter.past || 0;
@@ -1738,11 +1735,10 @@
     let actions=listingCreateAction(type, canWrite);
     if (canWrite && ['gallery','resource'].includes(type)) {
       const target=C.adminUrl+(C.adminUrl.includes('?')?'&':'?')+'section=contenidos&type='+type;
-      actions='<a class="btn" data-native href="'+E(target)+'">'+E(T('Registro e historial'))+'</a>'+actions;
+      actions='<div class="page-heading-actions"><a class="btn" data-native href="'+E(target)+'">'+E(T('Registro e historial'))+'</a>'+actions+'</div>';
     }
-    const forumDirectory = listingForumDirectory(type, forums);
-    const results = S.filter.drafts ? listingDrafts(items) : forumDirectory + (forumDirectory && items.length ? `<h2 class="forum-topics-heading">${E(T('Conversaciones recientes'))}</h2>` : '') + listingItems(type, items) + (forumDirectory ? '' : listingEmpty(items));
-    content().innerHTML = heading(...labels[type], actions) + filtersHtml + listingTabs(type, canWrite) + results + (forumDirectory && !items.length ? '' : pager(list));
+    const results = S.filter.drafts ? listingDrafts(items) : listingItems(type, items) + listingEmpty(items);
+    content().innerHTML = heading(...labels[type], actions) + filtersHtml + listingTabs(type, canWrite) + results + pager(list);
   }
   async function ownComments() {
     const list=await api('comments/mine?'+new URLSearchParams(S.filter));
@@ -2282,15 +2278,20 @@
     const dialog = modal((id ? "Editar " : "Crear ") + typeLabel[type], formMarkup, true);
     syncEditorRequirements(dialog.querySelector('[data-form="editor"]'));
   }
-  async function files(page = 1, q = "", scope = S.files?.scope || "mine", owner = S.files?.owner || 0) {
+  async function files(page = 1, q = "", scope = S.files?.scope || "mine", owner = S.files?.owner || 0, inline = S.page === "admin" && S.adminTab === "archivos" && scope === "all") {
     const previousScope = S.files?.scope || "";
     scope = scope === "all" && S.boot.admin ? "all" : "mine";
     if (previousScope && previousScope !== scope) owner = 0;
     owner = scope === "all" ? Math.max(0, Number(owner) || 0) : Number(S.boot.me.id);
+    const panel = inline ? document.getElementById("admin-panel") : null;
     const list = await api("media?" + new URLSearchParams({page, q, scope, owner: scope === "all" ? owner : 0}));
+    if (inline && !panel?.isConnected) return;
+    if (page > Math.max(1, Number(list.pages))) return files(Math.max(1, Number(list.pages)), q, scope, owner, inline);
     S.files = {page, q, scope, owner: Number(list.owner || owner || 0)};
     const ownerFilter = scope === "all" ? `<div class="field"><label for="file-owner">${E(T("Usuario propietario"))}</label><select id="file-owner" name="owner"><option value="0">${E(T("Todos los usuarios"))}</option>${(list.owners || []).map(u => ("<option value=\"" + (Number(u.id)) + "\" " + (Number(S.files.owner)===Number(u.id)?"selected":"") + ">" + (E(u.name)) + " · " + (E(u.email)) + "</option>")).join("")}</select></div>` : "";
-    modal(scope === "all" ? "Archivos de la comunidad" : "Mis archivos", `<form data-form="file-search" class="filters file-library-filters"><div class="field"><label for="file-query">${E(T("Buscar archivos"))}</label><input id="file-query" name="q" aria-label="${E(T("Buscar archivos"))}" placeholder="${E(T("Buscar por nombre…"))}" value="${E(q)}"></div>${ownerFilter}<button class="btn">${E(T("Buscar"))}</button></form><p class="private-note">${list.total} ${E(T("archivos"))} · ${E(T("La eliminación es permanente y retira sus referencias."))}</p><div class="file-library">${list.items.map(m => ("<article class=\"file-row\" data-file=\"" + (m.id) + "\"><div>" + (I(m.mime.startsWith('image/') ? 'gallery' : 'book')) + "<strong>" + (E(m.name)) + "</strong><small>" + (E(m.author)) + " · " + (Math.ceil((m.stored_size || m.size) / 1024)) + " KB" + (m.has_master ? " · " + E(T("incluye copia maestra optimizada")) : "") + " · " + (date(m.date)) + "</small></div><div class=\"form-actions\"><a class=\"btn small\" href=\"" + (E(m.url)) + "\" target=\"_blank\" rel=\"noopener\">" + (E(T("Abrir archivo"))) + "</a>" + (btn("Eliminar archivo", "delete-media", ("data-id=\"" + (m.id) + "\" data-name=\"" + (E(m.name)) + "\" data-library=\"true\""), "danger small")) + "</div></article>")).join("") || empty("No hay archivos")}</div><div class="pagination">${btn("Anterior", "files", ("data-page=\"" + (page-1) + "\" " + (page<=1?'disabled':'') + ""))}<span>${page} / ${list.pages}</span>${btn("Siguiente", "files", ("data-page=\"" + (page+1) + "\" " + (page>=list.pages?'disabled':'') + ""))}</div>`, true);
+    const markup = `<form data-form="file-search" class="filters file-library-filters"><div class="field"><label for="file-query">${E(T("Buscar archivos"))}</label><input id="file-query" name="q" aria-label="${E(T("Buscar archivos"))}" placeholder="${E(T("Buscar por nombre…"))}" value="${E(q)}"></div>${ownerFilter}<button class="btn">${E(T("Buscar"))}</button></form><p class="private-note">${list.total} ${E(T("archivos"))} · ${E(T("La eliminación es permanente y retira sus referencias."))}</p><div class="file-library">${list.items.map(m => ("<article class=\"file-row\" data-file=\"" + (m.id) + "\"><div>" + (I(m.mime.startsWith('image/') ? 'gallery' : 'book')) + "<strong>" + (E(m.name)) + "</strong><small>" + (E(m.author)) + " · " + (Math.ceil((m.stored_size || m.size) / 1024)) + " KB" + (m.has_master ? " · " + E(T("incluye copia maestra optimizada")) : "") + " · " + (date(m.date)) + "</small></div><div class=\"form-actions\"><a class=\"btn small\" href=\"" + (E(m.url)) + "\" target=\"_blank\" rel=\"noopener\">" + (E(T("Abrir archivo"))) + "</a>" + (btn("Eliminar archivo", "delete-media", ("data-id=\"" + (m.id) + "\" data-name=\"" + (E(m.name)) + "\" data-library=\"true\""), "danger small")) + "</div></article>")).join("") || empty("No hay archivos")}</div><div class="pagination">${btn("Anterior", "files", ("data-page=\"" + (page-1) + "\" " + (page<=1?'disabled':'') + ""))}<span>${page} / ${list.pages}</span>${btn("Siguiente", "files", ("data-page=\"" + (page+1) + "\" " + (page>=list.pages?'disabled':'') + ""))}</div>`;
+    if (inline) panel.innerHTML = `<div class="admin-section-heading"><div><span class="eyebrow">${E(T('BIBLIOTECA PRIVADA'))}</span><h2>${E(T('Archivos de la comunidad'))}</h2><p>${E(T('Consulta los archivos privados de todos los asociados y elimina los que corresponda.'))}</p></div></div><section class="card file-library-panel">${markup}</section>`;
+    else modal(scope === "all" ? "Archivos de la comunidad" : "Mis archivos", markup, true);
   }
   function confirmDeletion(kind, id, {post = 0, title = "", library = false, forum = false, conversation = 0} = {}) {
     const descriptions = {
@@ -2299,7 +2300,7 @@
       message: 'El mensaje se eliminará de esta conversación para ambos participantes.',
     };
     const description = descriptions[kind] || 'El contenido dejará de estar disponible en la comunidad.';
-    modal(T(kind==='report'?'Confirmar eliminación':'Archivar solicitud'), `<p class="detail-body">${E(title)}</p><p>${E(T(description))}</p>${forum?'<p>Los temas de este foro se conservarán en la lista general.</p>':''}<div class="form-actions">${btn('Cancelar','delete-cancel',("data-kind=\"" + (kind) + "\" data-id=\"" + (id) + "\" data-post=\"" + (post) + "\" data-library=\"" + (library) + "\" data-conversation=\"" + (conversation) + "\""))}${btn('Eliminar','delete-confirm',("data-kind=\"" + (kind) + "\" data-id=\"" + (id) + "\" data-post=\"" + (post) + "\" data-library=\"" + (library) + "\" data-conversation=\"" + (conversation) + "\""),'danger primary')}</div>`);
+    modal(T('Confirmar eliminación'), `<p class="detail-body">${E(title)}</p><p>${E(T(description))}</p>${forum?'<p>Los temas de este foro se conservarán en la lista general.</p>':''}<div class="form-actions">${btn('Cancelar','delete-cancel',("data-kind=\"" + (kind) + "\" data-id=\"" + (id) + "\" data-post=\"" + (post) + "\" data-library=\"" + (library) + "\" data-conversation=\"" + (conversation) + "\""))}${btn('Eliminar','delete-confirm',("data-kind=\"" + (kind) + "\" data-id=\"" + (id) + "\" data-post=\"" + (post) + "\" data-library=\"" + (library) + "\" data-conversation=\"" + (conversation) + "\""),'danger primary')}</div>`);
   }
   async function inviteMembers(id, page = 1, query = "") {
     if (!S.invite || S.invite.id !== id) S.invite = { id, selected: new Set() };
@@ -2995,11 +2996,14 @@
     return `<article class="admin-user" data-admin-user="${u.id}"><div class="admin-user-person">${avatar(u)}<div><h3>${E(u.name)}</h3><span>@${E(u.login)}</span>${u.email ? ("<a href=\"mailto:" + (E(u.email)) + "\">" + (E(u.email)) + "</a>") : ("<small>" + (E(T("Correo no registrado"))) + "</small>")}</div></div><div class="admin-user-access">${roleBadges}<span class="request-status ${accessClass}">${accessLabel}</span>${technicalBadge}<small>Registro: ${date(u.registered)}</small></div><div class="admin-user-actions">${actions}</div></article>`;
   }
   async function adminUsers(panel) {
-    const f=S.adminFilters.users,list=await api('admin/users?'+new URLSearchParams(f));
+    const f=S.adminFilters.users,list=await api('admin/users?'+directoryQuery(f));
     const roles=Object.fromEntries(list.roles.map(r=>[r.id,r.name]));
     const createAction = list.can_create ? btn(I('plus')+' Añadir usuario','user-create',("data-roles=\"" + (E(JSON.stringify(list.create_roles||[]))) + "\""),'primary') : '';
     const userCards = list.items.map(u => adminUserCard(u, roles)).join('') || empty('No encontramos usuarios','Prueba otro nombre o cambia los filtros.');
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PERSONAS Y ACCESOS</span><h2>${E(T('Usuarios e intereses'))}</h2><p>${E(T('Busca un asociado y abre Actividad e intereses para conocer su participación en la comunidad.'))}</p></div>${createAction}</div><form class="filters admin-filters" data-form="admin-filter" data-area="users"><input name="q" aria-label="Buscar usuarios" placeholder="Nombre, usuario o correo…" value="${E(f.q||'')}">${select('role','Rol',[['','Todos los roles'],...list.roles.map(r=>[r.id,r.name])],f.role||'')}${select('state','Acceso',[['','Todos'],['active','Activo'],['suspended','Suspendido'],['expired','Vencido']],f.state||'')}<button class="btn primary">${I('search')} Buscar</button></form><p class="private-note">${list.total} usuarios encontrados</p><div class="admin-users">${userCards}</div>${adminPager(list,'users')}`;
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PERSONAS Y ACCESOS</span><h2>${E(T('Usuarios e intereses'))}</h2><p>${E(T('Busca un asociado y abre Actividad e intereses para conocer su participación en la comunidad.'))}</p></div>${createAction}</div>${adminUserFilters(list.roles,f)}<p class="private-note">${list.total} usuarios encontrados</p><div class="admin-users">${userCards}</div>${adminPager(list,'users')}`;
+  }
+  function adminUserFilters(roles, f) {
+    return `<form class="card directory-search admin-user-filters" data-form="admin-filter" data-area="users" role="search" aria-label="${E(T('Buscar usuarios'))}"><div class="directory-search-row"><div class="field"><label for="admin-user-search">${E(T('Buscar usuarios'))}</label><input type="search" id="admin-user-search" name="q" maxlength="100" placeholder="${E(T('Nombre, usuario, correo, cargo, empresa o experiencia…'))}" value="${E(f.q||'')}"></div><div class="field"><label for="admin-user-country">${E(T('País'))}</label><input type="search" id="admin-user-country" name="country" maxlength="120" placeholder="${E(T('Todos los países'))}" value="${E(f.country||'')}"></div><button class="btn primary">${I('search')} ${E(T('Buscar'))}</button>${btn('Limpiar filtros','admin-users-reset','','ghost')}</div><div class="directory-facets">${directoryTermFilter('industries','Industria',S.boot.catalogs.industry,f)}${directoryTermFilter('interests','Interés',S.boot.catalogs.interest,f)}${directoryTermFilter('areas','Área de conocimiento',S.boot.catalogs.area,f)}<span class="private-note">${E(T('Puedes elegir varias opciones en cada filtro.'))}</span></div><div class="form-grid admin-user-access-filters">${select('role','Rol',[['','Todos los roles'],...roles.map(r=>[r.id,r.name])],f.role||'')}${select('state','Acceso',[['','Todos'],['active','Activo'],['suspended','Suspendido'],['expired','Vencido']],f.state||'')}</div></form>`;
   }
   function adminPendingRow(p) {
     let badges = "";
@@ -3123,13 +3127,13 @@
     if (S.boot.admin || S.boot.executive) tabs.push(["solicitudes", "Consultas de Contacto", "contact"]);
     if (S.boot.admin || S.boot.executive) tabs.push(["contenidos", "Galerías y recursos", "gallery"]);
     if (S.boot.admin) tabs.push(["importar", "Importar intereses", "book"], ["usuarios", "Usuarios e intereses", "users"], ["archivos", "Archivos", "book"],['aliados','Aliados','ally']);
-    tabs.push(["trabajos", "Tareas de IA", "spark"]);
     if (S.boot.admin || S.boot.executive) tabs.push(["microeventos", "Encuentros", "calendar"]);
-    if (S.boot.admin) tabs.push(["logs", "Historial de cambios", "clock"], ["configuracion", "Configuración", "settings"]);
+    if (S.boot.admin) tabs.push(["logs", "Historial de cambios", "clock"]);
+    if (S.boot.configure) tabs.push(["configuracion", "Configuración", "settings"]);
     return tabs;
   }
   function adminShell(tabs, tab) {
-    const groups=[['Vista general',['resumen','estadisticas']],['Comunidad',['usuarios','solicitudes','importar']],['Contenido',['moderacion','contenidos','archivos','microeventos','aliados']],['Herramientas',['trabajos','logs','configuracion']]];
+    const groups=[['Vista general',['resumen','estadisticas']],['Comunidad',['usuarios','solicitudes','importar']],['Contenido',['moderacion','contenidos','archivos','microeventos','aliados']],['Herramientas',['logs','configuracion']]];
     const navigation=groups.map(([group,keys])=>{
       const entries=tabs.filter(([key])=>keys.includes(key));
       if(!entries.length) return '';
@@ -3139,7 +3143,7 @@
     return `<div class="admin-workspace admin-workspace-v108"><header class="admin-hero"><div class="admin-hero-main"><div class="admin-hero-copy"><span class="eyebrow">${E(T("GESTIÓN DE LA COMUNIDAD"))}</span><h1>${E(T("Administración ASCLA"))}</h1><p>${E(T("Personas, contenido y atención en un mismo lugar."))}</p></div></div><div class="admin-hero-actions">${S.boot.admin?'':link('intranet',E(T('Ver intranet'))+' '+I('arrow'),'ghost admin-intranet-link')}${wordpress}</div></header><div class="admin-workspace-body"><nav class="admin-tabs" aria-label="${E(T("Secciones de administración"))}">${navigation}</nav><section id="admin-panel" class="admin-panel" aria-live="polite"></section></div></div>`;
   }
   function adminOverview(panel,d) {
-    const metrics=[[d.counts.members,'Cuentas ASCLA','users','usuarios'],[d.pending.length,'Borradores y pendientes','shield','moderacion'],[d.reports.filter(r=>!r.reviewed).length,'Reportes por revisar','bell','moderacion'],[d.jobs.filter(j=>['pending','processing'].includes(j.status)).length,'Tareas en curso','spark','trabajos']];
+    const metrics=[[d.counts.members,'Cuentas ASCLA','users','usuarios'],[d.pending.length,'Borradores y pendientes','shield','moderacion'],[d.reports.filter(r=>!r.reviewed).length,'Reportes por revisar','bell','moderacion']];
     const cards=[['usuarios','users','Conoce a tu comunidad','Consulta intereses y actividad de cada asociado, o administra sus cuentas.','Explorar usuarios'],['moderacion','shield','Revisa el contenido','Atiende publicaciones, comentarios pendientes y reportes de la comunidad.','Revisar publicaciones'],['solicitudes','contact','Atiende las solicitudes','Responde consultas y gestiona las solicitudes recibidas en Contacto.','Ver solicitudes'],['estadisticas','calendar','Mide la participación','Consulta inscripciones, asistencias y tendencias por tema y período.','Ver estadísticas'],['microeventos','hub','Organiza los encuentros','Revisa propuestas y prepara círculos de conversación.','Ver encuentros']].filter(([key])=>adminTabs().some(([tab])=>tab===key));
     panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T('TU ESPACIO DE TRABAJO'))}</span><h2>${E(T('¿Qué quieres gestionar hoy?'))}</h2><p>${E(T('Empieza por una tarea o explora la actividad de tu comunidad.'))}</p></div>${btn(I('clock')+' '+E(T('Actualizar')),'admin-refresh','','small')}</div><div class="admin-overview">${metrics.map(([n,label,icon,target])=>btn(("<span class=\"stat-icon\">" + (I(icon)) + "</span><span class=\"admin-stat-copy\"><strong>" + (n) + "</strong><small>" + (E(T(label))) + "</small></span>"),'admin-tab',("data-tab=\"" + (target) + "\""),'admin-stat')).join('')}</div><p class="private-note admin-count-scope">${E(T('Los contadores muestran los elementos disponibles en cada sección.'))}</p><div class="admin-task-grid">${cards.map(([key,icon,title,description,action])=>("<article class=\"card admin-task-card\"><span class=\"admin-task-icon\">" + (I(icon)) + "</span><h3>" + (E(T(title))) + "</h3><p>" + (E(T(description))) + "</p>" + (btn(E(T(action))+' '+I('arrow'),'admin-tab',("data-tab=\"" + (key) + "\""),'ghost')) + "</article>")).join('')}</div><div class="admin-help-note">${I('shield')}<p>${E(T('Las acciones de cuenta y moderación mantienen sus permisos, confirmaciones e historial de auditoría.'))}</p></div>`;
   }
@@ -3167,9 +3171,8 @@
     await interestImports.load(panel);
   }
   async function adminUsersTab(panel) { if (S.boot.admin) await adminUsers(panel); }
-  function adminFilesTab(panel) {
-    if (!S.boot.admin) return;
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T('BIBLIOTECA PRIVADA'))}</span><h2>${E(T('Archivos de la comunidad'))}</h2><p>${E(T('Consulta los archivos privados de todos los asociados y elimina los que corresponda.'))}</p></div></div><div class="card admin-feature-card"><div class="admin-feature-icon">${I('book')}</div><div><h3>${E(T('Biblioteca administrativa'))}</h3><p class="detail-body">${E(T('Busca por archivo o propietario y revisa el material privado almacenado en ASCLA.'))}</p></div>${btn('Administrar archivos','files','data-scope="all"','primary')}</div>`;
+  async function adminFilesTab(_panel) {
+    if (S.boot.admin) await files(1, "", "all", 0, true);
   }
   function adminModerationTab(panel, d) {
     panel.innerHTML=adminModeration(d);
@@ -3213,7 +3216,7 @@
     const latest=auditRows[0]?.created_at||'';
     panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T("ACTIVIDAD REGISTRADA"))}</span><h2>${E(T("Historial de cambios"))}</h2><p>Este registro ayuda a entender qué cambios importantes ocurrieron en ASCLA, quién los realizó y sobre qué elemento actuaron.</p></div><span class="admin-total">${auditRows.length} registros</span></div><div class="audit-guide"><article>${I('clock')}<div><strong>¿Qué registra?</strong><p>Acciones relevantes como cambios de configuración, moderación, accesos, reportes, archivos e integraciones.</p></div></article><article>${I('users')}<div><strong>¿Para qué sirve?</strong><p>Permite revisar el historial cuando necesitas saber quién hizo un cambio o investigar un problema.</p></div></article><article>${I('shield')}<div><strong>¿Qué no guarda?</strong><p>No almacena contraseñas ni el contenido de mensajes privados. Solo registra metadatos de la acción.</p></div></article></div><div class="audit-summary"><article class="audit-summary-card"><span class="audit-summary-icon">${I('clock')}</span><div><small>Acciones registradas</small><strong>${auditRows.length}</strong></div></article><article class="audit-summary-card"><span class="audit-summary-icon">${I('users')}</span><div><small>Personas identificadas</small><strong>${auditActors}</strong></div></article><article class="audit-summary-card wide"><span class="audit-summary-icon">${I('shield')}</span><div><small>Última actividad</small><strong>${latest?E(date(latest,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'Sin actividad'}</strong></div></article></div><div class="card audit-card"><div class="audit-card-head"><div><h3>Historial de actividad</h3><p class="private-note">Los eventos más recientes aparecen primero. “Elemento” identifica el registro afectado cuando corresponde.</p></div><span class="audit-privacy">${I('shield')} Registro protegido</span></div><div class="table-wrap"><table class="data-table audit-table"><thead><tr><th>Cuándo</th><th>Qué ocurrió</th><th>Quién</th><th>Elemento</th><th>Detalle técnico</th></tr></thead><tbody>${auditRows.map(a=>("<tr><td><time class=\"audit-time\" datetime=\"" + (E(a.created_at)) + "\" title=\"" + (E(a.created_at)) + "\">" + (E(date(a.created_at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))) + "</time></td><td><span class=\"audit-action\">" + (E(adminAuditActionName(a.action))) + "</span></td><td><span class=\"audit-actor\">" + (E(a.actor_name||'Sistema')) + "</span></td><td><span class=\"audit-object\">" + (a.object_id?'#'+Number(a.object_id):'—') + "</span></td><td class=\"audit-detail\">" + (E(a.detail||'—')) + "</td></tr>")).join('')||'<tr><td colspan="5"><div class="audit-empty">No hay acciones registradas todavía.</div></td></tr>'}</tbody></table></div></div>`;
   }
-  async function adminSettingsTab(panel) { if (S.boot.admin) await settings(panel); }
+  async function adminSettingsTab(panel) { if (S.boot.configure) await settings(panel); }
   const ADMIN_TAB_HANDLERS = {
     contenidos: panel=>adminEditorialRegistry(panel),
     aliados: panel=>alliesUI().registry(panel),
@@ -3316,7 +3319,7 @@
     const google=settingsSection('calendar','Google OAuth','Credenciales para que cada asociado conecte servicios autorizados de Google desde su cuenta.',`<div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert settings-code-alert"><span>URI de redirección</span><code>${E(s.google_redirect)}</code></div><p class="private-note">Cada asociado conecta su calendario desde Perfil. YouTube se conecta desde IA y trabajos.</p>`);
     const social=settingsSection('contact','Social Listening','Estado de conectores sociales y restricciones de integración externa.',`<div class="alert">LinkedIn y X permanecen en DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; ASCLA no realiza scraping ni envía respuestas externas.</div>`);
     const legal=settingsSection('book','Identidad y propiedad intelectual','Texto institucional mostrado en las áreas correspondientes de la intranet.',`${field("copyright", "Propiedad intelectual", s.copyright)}`);
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PREFERENCIAS Y SERVICIOS</span><h2>Configuración</h2><p>Gestiona las reglas de comunidad, recomendaciones, seguridad e integraciones. Cada bloque agrupa opciones relacionadas para evitar configuraciones ambiguas.</p></div><span class="admin-config-status">${I('shield')} Cambios protegidos</span></div><form class="admin-settings" data-form="settings" data-guard-unsaved><div class="settings-grid">${participation}${settingsSection("mail","Categorías de Contacto","Opciones vigentes del formulario de solicitudes.",field("support_categories","Una categoría por línea",(s.support_categories || []).join("\n"),"textarea",'required rows="6"'))}${settingsSection("users","Perfiles y directorio","Frecuencia de revisión y tamaño de los resultados.", '<div class="form-grid">'+field("profile_review_days","Revisar el perfil cada (días)",s.profile_review_days,"number",'min="1" max="730" required')+field("profile_snooze_days","Posponer avisos durante (días)",s.profile_snooze_days,"number",'min="1" max="30" required')+field("directory_page_size","Perfiles por página",s.directory_page_size,"number",'min="5" max="100" required')+"</div>"+profileCompletionSettings(s))}${matching}${social}${serverSecretsStatus(s)}${security}${ai}${google}${legal}${mailSettings(s)}</div><div class="settings-savebar"><div><strong>Configuración de ASCLA</strong><span>Los cambios se aplican al guardar.</span></div><button class="btn primary">Guardar configuración</button></div></form><form class="card section-gap demo-settings-card" data-form="demo"><div class="admin-feature-icon">${I('spark')}</div><div><h2>Preparar datos de demostración</h2><p class="private-note">Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes.</p>${field("password", "Contraseña para nuevas cuentas demo", "", "password", 'required minlength="12" autocomplete="new-password"')}</div><button class="btn">Crear / completar demo</button></form>`;
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PREFERENCIAS Y SERVICIOS</span><h2>Configuración</h2><p>Gestiona las reglas de comunidad, recomendaciones, seguridad e integraciones. Cada bloque agrupa opciones relacionadas para evitar configuraciones ambiguas.</p></div><span class="admin-config-status">${I('shield')} Cambios protegidos</span></div><form class="admin-settings" data-form="settings" data-guard-unsaved><div class="settings-grid">${participation}${settingsSection("mail","Categorías de Contacto","Opciones vigentes del formulario de solicitudes.",field("support_categories","Una categoría por línea",(s.support_categories || []).join("\n"),"textarea",'required rows="6"'))}${settingsSection("users","Perfiles y directorio","Frecuencia de revisión y tamaño de los resultados.", '<div class="form-grid">'+field("profile_review_days","Revisar el perfil cada (días)",s.profile_review_days,"number",'min="1" max="730" required')+field("profile_snooze_days","Posponer avisos durante (días)",s.profile_snooze_days,"number",'min="1" max="30" required')+field("directory_page_size","Perfiles por página",s.directory_page_size,"number",'min="12" max="12" readonly')+"</div>"+profileCompletionSettings(s))}${matching}${social}${serverSecretsStatus(s)}${security}${ai}${google}${legal}${mailSettings(s)}</div><div class="settings-savebar"><div><strong>Configuración de ASCLA</strong><span>Los cambios se aplican al guardar.</span></div><button class="btn primary">Guardar configuración</button></div></form><form class="card section-gap demo-settings-card" data-form="demo"><div class="admin-feature-icon">${I('spark')}</div><div><h2>Preparar datos de demostración</h2><p class="private-note">Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes.</p>${field("password", "Contraseña para nuevas cuentas demo", "", "password", 'required minlength="12" autocomplete="new-password"')}</div><button class="btn">Crear / completar demo</button></form>`;
     const settingsForm=panel.querySelector('[data-form="settings"]');
     syncAIProvider(settingsForm);
     bindServerSecrets(settingsForm,s);
@@ -3597,7 +3600,7 @@
   }
   async function cancelDeletionAction(b, id) {
     if (b.dataset.kind === 'message') closeModal();
-    else if (b.dataset.library === 'true') await files(S.files.page, S.files.q, S.files.scope, S.files.owner || 0);
+    else if (b.dataset.library === 'true') { closeModal(); await files(S.files.page, S.files.q, S.files.scope, S.files.owner || 0); }
     else if (Number(b.dataset.post)) await item(Number(b.dataset.post));
     else if (b.dataset.kind === 'content') await item(id);
     else closeModal();
@@ -4034,7 +4037,10 @@
     }
   }
   async function handleClickActions43(a, b, id, _event) {
-    if (a === "user-delete-confirm") {
+    if (a === 'admin-users-reset') {
+      S.adminFilters.users={};await adminUsers(document.getElementById('admin-panel'));
+    }
+    else if (a === "user-delete-confirm") {
       const result=await api('admin/users/'+id,null,'DELETE'); closeModal(); toast(result.message||'Usuario eliminado.'); await refreshManagedUsers();
     }
     else if (a === "admin-tab") {
@@ -4198,7 +4204,7 @@
     { test: (a) => (a === "admin-page") || (a === "user-access"), run: handleClickActions40 },
     { test: (a) => (a === "user-status") || (a === "user-create"), run: handleClickActions41 },
     { test: (a) => (a === "user-insights") || (a === "user-edit") || (a === "user-delete") || (a === "directory-manage"), run: handleClickActions42 },
-    { test: (a) => (a === "user-delete-confirm") || (a === "admin-tab"), run: handleClickActions43 },
+    { test: (a) => (a === "user-delete-confirm") || (a === "admin-tab") || (a === "admin-users-reset"), run: handleClickActions43 },
     { test: (a) => (a === "admin-refresh") || (a === "moderate"), run: handleClickActions44 },
     { test: (a) => (a === "comment-moderate") || (a === "contact-status"), run: handleClickActions45 },
     { test: (a) => (a === "generate") || (a === "event-invite"), run: handleClickActions46 },
@@ -4575,6 +4581,10 @@ root.addEventListener("click", async (event) => {
       await refreshManagedUsers();
     }
     else if (action === "admin-filter") {
+      if(form.dataset.area==='users') {
+        const values=new FormData(form);
+        for(const key of ['industries','interests','areas']) data[key]=values.getAll(key);
+      }
       const area=form.dataset.area; S.adminFilters[area]={...data,page:1}; await (area==='users'?adminUsers:adminContacts)(document.getElementById('admin-panel'));
     }
   }

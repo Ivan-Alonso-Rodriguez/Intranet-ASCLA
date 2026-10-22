@@ -4,7 +4,7 @@ namespace ASCLA\Core\Services;
 /** Review decisions belong to the member and persist across browsers and sessions. */
 final class ProfileReview
 {
-    public const DEFAULTS=['profile_review_days'=>180,'profile_snooze_days'=>7,'directory_page_size'=>15];
+    public const DEFAULTS=['profile_review_days'=>180,'profile_snooze_days'=>7,'directory_page_size'=>ProfileDirectory::PAGE_SIZE];
     public static function settings(array &$data,array $input): void
     {
         foreach (['profile_review_days','profile_snooze_days','directory_page_size'] as $key) {

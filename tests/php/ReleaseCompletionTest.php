@@ -36,11 +36,11 @@ final class ReleaseCompletionTest extends TestCase
     public function testPhonePrivacyEditClearAndNoAiExposure():void
     {
         $uid=$this->users[1];wp_set_current_user($uid);Profiles::save(ascla_test_profile(['phone'=>'+51 999 123 456']));self::assertSame('+51999123456',Profiles::visible($uid)['phone']);self::assertArrayNotHasKey('phone',Profiles::matchingProfile($uid));self::assertStringNotContainsString('999',wp_json_encode(Profiles::networkingContext($uid)));
-        foreach([2,3] as $i){wp_set_current_user($this->users[$i]);self::assertArrayNotHasKey('phone',Profiles::visible($uid));$this->rejected(403,fn()=>Profiles::save(['phone'=>'+51 900 000 000'],$uid));}
+        foreach([3] as $i){wp_set_current_user($this->users[$i]);self::assertArrayNotHasKey('phone',Profiles::visible($uid));$this->rejected(403,fn()=>Profiles::save(['phone'=>'+51 900 000 000'],$uid));}
         wp_set_current_user($uid);Profiles::save(['phone_visibility'=>'members']);self::assertSame('private',Profiles::raw($uid)['phone_visibility']);
         $legacy=Profiles::raw($uid);$legacy['phone_visibility']='members';$legacy['hidden']=['company','position'];update_user_meta($uid,'_ascla_profile',$legacy);
-        foreach([2,3] as $i){wp_set_current_user($this->users[$i]);$visible=Profiles::visible($uid);foreach(['phone','company','position'] as $field)self::assertArrayNotHasKey($field,$visible);self::assertFalse(ASCLA\Core\Services\Content::canCreate('ally'));}
-        wp_set_current_user($uid);Profiles::save(['directory'=>false]);foreach([2,3] as $i){wp_set_current_user($this->users[$i]);$this->rejected(404,fn()=>Profiles::visible($uid));}
+        foreach([3] as $i){wp_set_current_user($this->users[$i]);$visible=Profiles::visible($uid);foreach(['phone','company','position'] as $field)self::assertArrayNotHasKey($field,$visible);self::assertFalse(ASCLA\Core\Services\Content::canCreate('ally'));}
+        wp_set_current_user($uid);Profiles::save(['directory'=>false]);foreach([3] as $i){wp_set_current_user($this->users[$i]);$this->rejected(404,fn()=>Profiles::visible($uid));}
         wp_set_current_user($this->users[0]);Profiles::save(['phone'=>'','phone_visibility'=>'private'],$uid);self::assertSame('',Profiles::visible($uid)['phone']);
         foreach([51999123456,'999123456','0051999123456','+0123456789','+1234567','+1234567890123456','<script>1234567</script>',[]] as $value)$this->rejected(400,fn()=>Profiles::save(['phone'=>$value],$uid));
     }
@@ -98,7 +98,7 @@ final class ReleaseCompletionTest extends TestCase
     public function testBatchProgressPaginationAndAccessChecks():void
     {
         $i=$this->start(array_fill(0,55,[$this->email(),'','','']));$id=(int)$i['id'];$i=InterestImports::process($id);self::assertSame('processing',$i['status']);self::assertSame(5,$i['counts']['pending']);self::assertCount(20,$i['rows']);$i=InterestImports::process($id);self::assertSame('review',$i['status']);self::assertCount(15,InterestImports::detail($id,3)['rows']);
-        foreach([1,2,3] as $n){wp_set_current_user($this->users[$n]);$this->rejected(403,fn()=>InterestImports::detail($id));$r=new WP_REST_Request('POST','/ascla/v1/admin/interest-imports/'.$id.'/confirm');self::assertSame(403,rest_do_request($r)->get_status());}
+        foreach([1,3] as $n){wp_set_current_user($this->users[$n]);$this->rejected(403,fn()=>InterestImports::detail($id));$r=new WP_REST_Request('POST','/ascla/v1/admin/interest-imports/'.$id.'/confirm');self::assertSame(403,rest_do_request($r)->get_status());}
     }
     public function testSessionUnionThresholdAndExplicitDateFormats():void
     {

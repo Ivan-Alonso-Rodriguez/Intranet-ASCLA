@@ -1,5 +1,5 @@
 {
-  "prepared_on": "2026-10-16",
+  "prepared_on": "2026-10-22",
   "basis": "IDs y descripciones de las matrices CU/CP y RF/CP del plan y tablas RN/RF del análisis. La relación de evidencia es una evaluación de los scripts y reportes de esta entrega; no representa aceptación integral de los documentos.",
   "sources": [
     {
@@ -31,110 +31,6 @@
         "CP-101"
       ]
     },
-    "01-conexion-y-bloqueo": {
-      "requirements": [
-        "RF-017",
-        "RF-018",
-        "RF-020",
-        "RF-026",
-        "RF-029",
-        "RF-031",
-        "RF-034",
-        "RF-035"
-      ],
-      "rules": [
-        "RN-007",
-        "RN-009",
-        "RN-010"
-      ],
-      "cases": [
-        "CP-024",
-        "CP-025",
-        "CP-032",
-        "CP-033",
-        "CP-035",
-        "CP-036"
-      ]
-    },
-    "02-evento-con-cupo": {
-      "requirements": [
-        "RF-047",
-        "RF-049",
-        "RF-055",
-        "RF-056",
-        "RF-057",
-        "RF-058",
-        "RF-059",
-        "RF-060",
-        "RF-061",
-        "RF-062"
-      ],
-      "rules": [
-        "RN-017",
-        "RN-018",
-        "RN-020"
-      ],
-      "cases": [
-        "CP-047",
-        "CP-049",
-        "CP-051",
-        "CP-052",
-        "CP-053",
-        "CP-055",
-        "CP-056",
-        "CP-059",
-        "CP-061"
-      ]
-    },
-    "03-suspension-y-reactivacion": {
-      "requirements": [
-        "RF-088",
-        "RF-089",
-        "RF-090",
-        "RF-091",
-        "RF-133",
-        "RF-135"
-      ],
-      "rules": [
-        "RN-023",
-        "RN-036"
-      ],
-      "cases": [
-        "CP-005",
-        "CP-009",
-        "CP-010"
-      ]
-    },
-    "04-asistente-ia": {
-      "requirements": [
-        "RF-166",
-        "RF-167",
-        "RF-168"
-      ],
-      "rules": [
-        "RN-022",
-        "RN-042"
-      ],
-      "cases": [
-        "CP-070",
-        "CP-071",
-        "CP-072"
-      ]
-    },
-    "perfil": {
-      "requirements": [
-        "RF-002",
-        "RF-004"
-      ],
-      "rules": [
-        "RN-001",
-        "RN-031"
-      ],
-      "cases": [
-        "CP-011",
-        "CP-013"
-      ]
-    },
     "conexion-chat-bloqueo": {
       "requirements": [
         "RF-017",
@@ -156,25 +52,6 @@
         "CP-033",
         "CP-035",
         "CP-038"
-      ]
-    },
-    "borrador-publicacion-inscripcion": {
-      "requirements": [
-        "RF-047",
-        "RF-048",
-        "RF-049",
-        "RF-055"
-      ],
-      "rules": [
-        "RN-016",
-        "RN-017",
-        "RN-036"
-      ],
-      "cases": [
-        "CP-047",
-        "CP-048",
-        "CP-049",
-        "CP-051"
       ]
     },
     "aforo-lista-espera-notificacion": {
@@ -226,6 +103,55 @@
         "CP-005",
         "CP-009",
         "CP-010"
+      ]
+    },
+    "asistente-ia": {
+      "requirements": [
+        "RF-166",
+        "RF-167",
+        "RF-168"
+      ],
+      "rules": [
+        "RN-022",
+        "RN-042"
+      ],
+      "cases": [
+        "CP-070",
+        "CP-071",
+        "CP-072"
+      ]
+    },
+    "perfil": {
+      "requirements": [
+        "RF-002",
+        "RF-004"
+      ],
+      "rules": [
+        "RN-001",
+        "RN-031"
+      ],
+      "cases": [
+        "CP-011",
+        "CP-013"
+      ]
+    },
+    "borrador-publicacion-inscripcion": {
+      "requirements": [
+        "RF-047",
+        "RF-048",
+        "RF-049",
+        "RF-055"
+      ],
+      "rules": [
+        "RN-016",
+        "RN-017",
+        "RN-036"
+      ],
+      "cases": [
+        "CP-047",
+        "CP-048",
+        "CP-049",
+        "CP-051"
       ]
     }
   },
@@ -673,7 +599,7 @@
       "description": "Intento de acceso con membresía vencida o suspendida.",
       "status": "parcial",
       "evidence": [
-        "03-suspension-y-reactivacion",
+        "suspension-reactivacion-acceso",
         "suspension-reactivacion-acceso"
       ],
       "scope": "Se rechazan la sesión existente y un login nuevo mientras la cuenta está suspendida. Falta probar membresía vencida.",
@@ -724,7 +650,7 @@
       "description": "Suspensión de cuenta de asociado activo; verificar auditoría.",
       "status": "parcial",
       "evidence": [
-        "03-suspension-y-reactivacion",
+        "suspension-reactivacion-acceso",
         "suspension-reactivacion-acceso"
       ],
       "scope": "Se comprueba la suspensión por API y mediante confirmación en la interfaz; falta consultar la entrada de auditoría.",
@@ -739,7 +665,7 @@
       "description": "Reactivación de cuenta suspendida y restauración de acceso completo.",
       "status": "parcial",
       "evidence": [
-        "03-suspension-y-reactivacion",
+        "suspension-reactivacion-acceso",
         "suspension-reactivacion-acceso"
       ],
       "scope": "Se recuperan acceso e identidad con login nuevo y se conserva la biografía observada antes de suspender; falta contrastar los demás datos históricos.",
@@ -917,7 +843,7 @@
       "description": "Envío exitoso de solicitud de conexión con mensaje de presentación opcional.",
       "status": "escenario_cubierto",
       "evidence": [
-        "01-conexion-y-bloqueo",
+        "conexion-chat-bloqueo",
         "conexion-chat-bloqueo"
       ],
       "scope": "Solicitud con mensaje de presentación e ID obtenido del servidor.",
@@ -932,7 +858,7 @@
       "description": "Aceptación de solicitud de conexión pendiente; habilitación de mensajería.",
       "status": "escenario_cubierto",
       "evidence": [
-        "01-conexion-y-bloqueo",
+        "conexion-chat-bloqueo",
         "conexion-chat-bloqueo"
       ],
       "scope": "Aceptación y habilitación del envío de mensajes.",
@@ -1019,7 +945,7 @@
       "description": "Bloqueo de un asociado; verificar restricción de conexión y mensajería.",
       "status": "parcial",
       "evidence": [
-        "01-conexion-y-bloqueo",
+        "conexion-chat-bloqueo",
         "conexion-chat-bloqueo"
       ],
       "scope": "Se bloquea y rechaza la mensajería; falta intentar otra solicitud de conexión durante el bloqueo y comprobar todas las exclusiones de RN-010.",
@@ -1034,7 +960,7 @@
       "description": "Desbloqueo de un asociado; verificar que la conexión anterior no se restablece automáticamente.",
       "status": "escenario_cubierto",
       "evidence": [
-        "01-conexion-y-bloqueo",
+        "conexion-chat-bloqueo",
         "conexion-chat-bloqueo"
       ],
       "scope": "Desbloqueo sin restaurar la conexión anterior.",
@@ -1061,7 +987,7 @@
       "description": "Envío de mensaje de texto en conversación individual activa.",
       "status": "escenario_cubierto",
       "evidence": [
-        "01-conexion-y-bloqueo",
+        "conexion-chat-bloqueo",
         "conexion-chat-bloqueo"
       ],
       "scope": "Envío de texto y lectura exacta por el destinatario en conversación individual.",
@@ -1076,7 +1002,7 @@
       "description": "Recuperación y presentación del historial ordenado cronológicamente.",
       "status": "parcial",
       "evidence": [
-        "01-conexion-y-bloqueo",
+        "conexion-chat-bloqueo",
         "conexion-chat-bloqueo"
       ],
       "scope": "Se recupera el mensaje exacto; falta una prueba comparativa de orden cronológico con múltiples mensajes.",
@@ -1213,7 +1139,7 @@
       "description": "Creación de evento con título, descripción, fecha, modalidad y aforo máximo.",
       "status": "parcial",
       "evidence": [
-        "02-evento-con-cupo",
+        "aforo-lista-espera-notificacion",
         "borrador-publicacion-inscripcion"
       ],
       "scope": "Se crea evento con datos y aforo; no se recorren todas las combinaciones de temática y modalidad.",
@@ -1242,7 +1168,7 @@
       "description": "Publicación de evento; disponible para la comunidad.",
       "status": "escenario_cubierto",
       "evidence": [
-        "02-evento-con-cupo",
+        "aforo-lista-espera-notificacion",
         "borrador-publicacion-inscripcion",
         "aforo-lista-espera-notificacion"
       ],
@@ -1270,7 +1196,7 @@
       "description": "Confirmación de RSVP a evento con cupos disponibles.",
       "status": "escenario_cubierto",
       "evidence": [
-        "02-evento-con-cupo",
+        "aforo-lista-espera-notificacion",
         "borrador-publicacion-inscripcion",
         "aforo-lista-espera-notificacion"
       ],
@@ -1286,7 +1212,7 @@
       "description": "Cancelación de asistencia confirmada; liberación de cupo.",
       "status": "escenario_cubierto",
       "evidence": [
-        "02-evento-con-cupo",
+        "aforo-lista-espera-notificacion",
         "aforo-lista-espera-notificacion"
       ],
       "scope": "Cancelación de RSVP y liberación de una vacante.",
@@ -1301,7 +1227,7 @@
       "description": "Intento de RSVP a evento sin cupos; ofrecer lista de espera.",
       "status": "escenario_cubierto",
       "evidence": [
-        "02-evento-con-cupo",
+        "aforo-lista-espera-notificacion",
         "aforo-lista-espera-notificacion"
       ],
       "scope": "Rechazo HTTP por aforo completo y registro posterior en espera; la interfaz ofrece solo la espera al llenarse el evento.",
@@ -1328,7 +1254,7 @@
       "description": "Registro en lista de espera con número de turno por fecha y hora.",
       "status": "parcial",
       "evidence": [
-        "02-evento-con-cupo",
+        "aforo-lista-espera-notificacion",
         "aforo-lista-espera-notificacion"
       ],
       "scope": "Se verifica el turno uno de un único asociado en espera; falta comparar el orden de varios asociados.",
@@ -1343,7 +1269,7 @@
       "description": "Liberación de cupo y notificación al primer asociado de la lista de espera.",
       "status": "parcial",
       "evidence": [
-        "02-evento-con-cupo",
+        "aforo-lista-espera-notificacion",
         "aforo-lista-espera-notificacion"
       ],
       "scope": "Se libera un cupo, se ofrece al asociado con turno uno y se verifica su aviso; falta comparar múltiples integrantes en espera.",
@@ -1520,9 +1446,9 @@
       "description": "Envío de consulta en lenguaje natural y recepción de respuesta basada en información autorizada.",
       "status": "parcial",
       "evidence": [
-        "04-asistente-ia"
+        "asistente-ia"
       ],
-      "scope": "El trabajo termina y conserva respuesta/hilo; falta contrastar fundamentación y autorización. El lote actual usa mock local. No acredita OpenAI.",
+      "scope": "El trabajo termina y conserva respuesta/hilo; falta contrastar fundamentación y autorización. El lote actual devuelve Google Gemini · API real en QA publicado. No acredita OpenAI.",
       "source": {
         "document": "plan",
         "table_block": 149
@@ -1534,7 +1460,7 @@
       "description": "Inicio de nueva sesión de conversación con el Asistente IA; restablecimiento de contexto.",
       "status": "parcial",
       "evidence": [
-        "04-asistente-ia"
+        "asistente-ia"
       ],
       "scope": "Se usa un hilo nuevo único; no se contrasta el restablecimiento del contexto de un hilo anterior.",
       "source": {
@@ -1548,7 +1474,7 @@
       "description": "Consulta del historial cronológico de sesiones con el Asistente.",
       "status": "parcial",
       "evidence": [
-        "04-asistente-ia"
+        "asistente-ia"
       ],
       "scope": "Se conserva la pregunta y respuesta del mismo trabajo; falta comprobar cronología de múltiples sesiones.",
       "source": {
@@ -1941,10 +1867,34 @@
     "No equivale a ejecutar los 103 casos ni a aprobar UAT.",
     "CP-058 no está cubierto: no se espera la caducidad de la oferta ni su transferencia al siguiente asociado.",
     "La lista de espera se prueba con una persona; falta comparar la prioridad de varias personas.",
-    "El lote vigente usa mock local. No se acredita la integración específica con OpenAI descrita en RN-022.",
+    "El lote vigente se ejecuta en QA publicado y devuelve Google Gemini · API real. No se acredita la integración específica con OpenAI descrita en RN-022.",
     "La prueba de suspensión observa 403 por nonce revocado; no acredita RNF-005 sobre cierre de sesión/inactividad y HTTP 401.",
-    "No se acreditan carga, disponibilidad, latencia bajo concurrencia, SMTP real, todas las reglas de privacidad ni todos los roles.",
+    "No se acreditan carga, disponibilidad, latencia bajo concurrencia, SMTP real, todas las reglas de privacidad ni todos los escenarios de cada rol.",
     "Los módulos 6 y 8 y otros escenarios del plan no están incluidos en esta selección de integración/E2E.",
-    "Los cambios nuevos de administración se comprobaron en WordPress local aislado; esta evidencia no acredita su instalación en el servidor publicado."
-  ]
+    "Los cambios recientes se comprueban también en el QA publicado mediante 14 controles adicionales, con su propio alcance y sin aumentar los CP únicos del plan."
+  ],
+  "supplementary_evidence": {
+    "report": "actualizacion/index.html",
+    "recent_ui_checks": 14,
+    "remote_security_browser_checks": 6,
+    "remote_security_views": 42,
+    "changes_cp_statuses": false,
+    "note": "Regresión adicional de cambios solicitados; las cifras 12 cubiertos, 17 parciales y 74 no incluidos no se alteran."
+  },
+  "shared_flows": {
+    "source": "flujos.json",
+    "ids": [
+      "perfil",
+      "conexion-chat-bloqueo",
+      "borrador-publicacion-inscripcion",
+      "aforo-lista-espera-notificacion",
+      "suspension-reactivacion-acceso",
+      "asistente-ia"
+    ],
+    "bruno_requests": 81,
+    "bruno_checks": 149,
+    "playwright_journeys": 6,
+    "additional_api_integration_requests": 18,
+    "note": "Los mismos seis flujos de negocio en ambas herramientas; se mantienen los estados de cobertura del plan."
+  }
 }

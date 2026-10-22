@@ -1,0 +1,241 @@
+{
+  "date": "2026-10-22T08:21:15.775Z",
+  "target": "https://wordpress.ingsoftware.lat",
+  "status": "PASS",
+  "mode": "remote-authenticated-read-only",
+  "checks": [
+    "Administrador: sesión segura, módulos con CSP impuesta y permisos REST vigentes",
+    "Ejecutivo: sesión segura, módulos con CSP impuesta y permisos REST vigentes",
+    "Moderador: sesión segura, módulos con CSP impuesta y permisos REST vigentes",
+    "Asociado: sesión segura, módulos con CSP impuesta y permisos REST vigentes",
+    "Directorio anónimo rechazado y login protegido frente a un nonce de otro navegador",
+    "Sin errores JavaScript ni infracciones CSP en las vistas autenticadas revisadas"
+  ],
+  "errors": [],
+  "violations": [],
+  "responses": [
+    {
+      "role": "Administrador",
+      "path": "/perfil/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/eventos/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/hub/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/galeria/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/foros/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/centro-conocimiento/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/asistente/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/aliados/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/administracion/",
+      "status": 200
+    },
+    {
+      "role": "Ejecutivo",
+      "path": "/perfil/",
+      "status": 200
+    },
+    {
+      "role": "Ejecutivo",
+      "path": "/eventos/",
+      "status": 200
+    },
+    {
+      "role": "Ejecutivo",
+      "path": "/hub/",
+      "status": 200
+    },
+    {
+      "role": "Ejecutivo",
+      "path": "/galeria/",
+      "status": 200
+    },
+    {
+      "role": "Ejecutivo",
+      "path": "/foros/",
+      "status": 200
+    },
+    {
+      "role": "Ejecutivo",
+      "path": "/centro-conocimiento/",
+      "status": 200
+    },
+    {
+      "role": "Ejecutivo",
+      "path": "/asistente/",
+      "status": 200
+    },
+    {
+      "role": "Ejecutivo",
+      "path": "/aliados/",
+      "status": 200
+    },
+    {
+      "role": "Ejecutivo",
+      "path": "/administracion/",
+      "status": 200
+    },
+    {
+      "role": "Moderador",
+      "path": "/perfil/",
+      "status": 200
+    },
+    {
+      "role": "Moderador",
+      "path": "/eventos/",
+      "status": 200
+    },
+    {
+      "role": "Moderador",
+      "path": "/hub/",
+      "status": 200
+    },
+    {
+      "role": "Moderador",
+      "path": "/galeria/",
+      "status": 200
+    },
+    {
+      "role": "Moderador",
+      "path": "/foros/",
+      "status": 200
+    },
+    {
+      "role": "Moderador",
+      "path": "/centro-conocimiento/",
+      "status": 200
+    },
+    {
+      "role": "Moderador",
+      "path": "/asistente/",
+      "status": 200
+    },
+    {
+      "role": "Moderador",
+      "path": "/aliados/",
+      "status": 200
+    },
+    {
+      "role": "Moderador",
+      "path": "/directorio/",
+      "status": 200
+    },
+    {
+      "role": "Moderador",
+      "path": "/mensajeria/",
+      "status": 200
+    },
+    {
+      "role": "Moderador",
+      "path": "/contacto/",
+      "status": 200
+    },
+    {
+      "role": "Moderador",
+      "path": "/intranet/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/perfil/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/eventos/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/hub/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/galeria/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/foros/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/centro-conocimiento/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/asistente/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/aliados/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/directorio/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/mensajeria/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/contacto/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/intranet/",
+      "status": 200
+    }
+  ],
+  "screenshots": [
+    "security-administrador.png",
+    "security-ejecutivo.png",
+    "security-moderador.png",
+    "security-asociado.png"
+  ],
+  "videos": [
+    "security-videos/Administrador/page@f9569016513b51843ea5d9acb6024b9d.webm",
+    "security-videos/Ejecutivo/page@94d69f2ca55d4dacaf0a1b442b7341fb.webm",
+    "security-videos/Moderador/page@5e7ea391ceedc9f34fe27381d5f0f062.webm",
+    "security-videos/Asociado/page@1156f6c3dd368edd6c6f1125d1946bfd.webm"
+  ],
+  "active_zap": false
+}

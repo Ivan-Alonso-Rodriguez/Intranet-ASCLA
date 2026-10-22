@@ -1,0 +1,263 @@
+{
+  "date": "2026-10-22T09:10:41.177Z",
+  "target": "https://wordpress.ingsoftware.lat",
+  "mode": "remote-shared-test-users",
+  "deployment": {
+    "checked_at": "2026-10-22T09:08:28.068Z",
+    "target": "https://wordpress.ingsoftware.lat",
+    "version": "1.10.9",
+    "local_reference_package_sha256": "f3430e4f82f34ce29434e7e11ac4bfd3441e3bc64050c9a3f7df7c9e8b9d71a5",
+    "assets": [
+      {
+        "file": "assets/app.js",
+        "local_sha256": "9cfc43300a16588472437559ae60a2d43cbca83d38d539ef9098add8751fc1bf",
+        "deployed_sha256": "9cfc43300a16588472437559ae60a2d43cbca83d38d539ef9098add8751fc1bf",
+        "matches": true
+      },
+      {
+        "file": "assets/app.css",
+        "local_sha256": "619425e488b83a3042420de2b988f802aa661a2f574314603f9ed5b9053465c1",
+        "deployed_sha256": "619425e488b83a3042420de2b988f802aa661a2f574314603f9ed5b9053465c1",
+        "matches": true
+      }
+    ],
+    "scope": "Public JavaScript and CSS match the current local package. Private server-side PHP files were not downloaded; behavior is checked by the executed API/UI tests."
+  },
+  "flow_contract": {
+    "version": 1,
+    "integration": {
+      "id": "integracion",
+      "folder": "integracion",
+      "requests": 18,
+      "checks": 26
+    },
+    "flows": [
+      {
+        "id": "perfil",
+        "title": "Perfil del asociado",
+        "folder": "flujos-e2e/01-perfil",
+        "requests": 7,
+        "checks": 14
+      },
+      {
+        "id": "conexion-chat-bloqueo",
+        "title": "Conexión, chat y bloqueo",
+        "folder": "flujos-e2e/02-conexion-chat-bloqueo",
+        "requests": 12,
+        "checks": 24
+      },
+      {
+        "id": "borrador-publicacion-inscripcion",
+        "title": "Borrador, publicación e inscripción",
+        "folder": "flujos-e2e/03-borrador-publicacion-inscripcion",
+        "requests": 12,
+        "checks": 22
+      },
+      {
+        "id": "aforo-lista-espera-notificacion",
+        "title": "Aforo, lista de espera y notificación",
+        "folder": "flujos-e2e/04-aforo-espera-notificacion",
+        "requests": 19,
+        "checks": 37
+      },
+      {
+        "id": "suspension-reactivacion-acceso",
+        "title": "Suspensión y reactivación",
+        "folder": "flujos-e2e/05-suspension-reactivacion",
+        "requests": 9,
+        "checks": 18
+      },
+      {
+        "id": "asistente-ia",
+        "title": "Consulta al asistente IA",
+        "folder": "flujos-e2e/06-asistente-ia",
+        "requests": 4,
+        "checks": 8
+      }
+    ]
+  },
+  "assistant_provider": "observado en respuesta",
+  "scope": "Integración API adicional y los mismos seis flujos de negocio que Playwright.",
+  "commit": "bff0afa81d57405242d6a29e9c217ae8fd204532",
+  "branch": "development",
+  "working_tree": "uncommitted",
+  "results": [
+    {
+      "name": "integracion",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 18,
+        "passedRequests": 18,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 26,
+        "passedTests": 26,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    },
+    {
+      "name": "perfil",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 7,
+        "passedRequests": 7,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 14,
+        "passedTests": 14,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    },
+    {
+      "name": "conexion-chat-bloqueo",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 12,
+        "passedRequests": 12,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 24,
+        "passedTests": 24,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    },
+    {
+      "name": "borrador-publicacion-inscripcion",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 12,
+        "passedRequests": 12,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 22,
+        "passedTests": 22,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    },
+    {
+      "name": "aforo-lista-espera-notificacion",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 19,
+        "passedRequests": 19,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 37,
+        "passedTests": 37,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    },
+    {
+      "name": "suspension-reactivacion-acceso",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 9,
+        "passedRequests": 9,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 18,
+        "passedTests": 18,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    },
+    {
+      "name": "asistente-ia",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 4,
+        "passedRequests": 4,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 8,
+        "passedTests": 8,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    }
+  ],
+  "cleanup": {
+    "status": "passed",
+    "reactivated": true,
+    "unblocked": true,
+    "events": [
+      479,
+      482
+    ]
+  }
+}

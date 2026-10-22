@@ -52,7 +52,7 @@ final class Membership
     /** Apply after validating the complete administrative form. */
     public static function apply(int $id,array $value): void
     {
-        Access::require(current_user_can('ascla_manage') && current_user_can('edit_user',$id));
+        Access::require(Access::canManageAccount('edit_user',$id));
         Access::require($id!==get_current_user_id() && !user_can($id,'manage_options'),'Cuenta no disponible.',400);
         $before=self::view($id);
         WordPressWrites::meta('user',$id,'_ascla_membership_until',$value['until']);

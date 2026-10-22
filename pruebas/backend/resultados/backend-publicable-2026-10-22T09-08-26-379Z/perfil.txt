@@ -1,0 +1,46 @@
+flujos-e2e\01-perfil\01-login-carla (302 Found) - 841 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Carla
+flujos-e2e\01-perfil\02-perfil-original (200 OK) - 823 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Validación: 02. Consultar Empresa y biografía originales
+flujos-e2e\01-perfil\03-guardar-biografia (200 OK) - 874 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Validación: 03. Guardar biografía de prueba
+flujos-e2e\01-perfil\04-persistencia (200 OK) - 882 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Validación: 04. Recargar perfil y comprobar persistencia
+flujos-e2e\01-perfil\05-empresa-obligatoria (400 Bad Request) - 720 ms
+Tests
+   ✓ Código HTTP esperado: 400
+   ✓ Validación: 05. Rechazar Empresa vacía
+flujos-e2e\01-perfil\06-conservacion (200 OK) - 755 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Validación: 06. Conservar los datos tras el rechazo
+flujos-e2e\01-perfil\07-restaurar-biografia (200 OK) - 847 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Validación: 07. Restaurar la biografía de la cuenta dedicada
+
+📊 Execution Summary
+┌───────────────┬──────────────┐
+│ Metric        │    Result    │
+├───────────────┼──────────────┤
+│ Status        │    ✓ PASS    │
+├───────────────┼──────────────┤
+│ Requests      │ 7 (7 Passed) │
+├───────────────┼──────────────┤
+│ Tests         │    14/14     │
+├───────────────┼──────────────┤
+│ Assertions    │     0/0      │
+├───────────────┼──────────────┤
+│ Duration (ms) │     9304     │
+└───────────────┴──────────────┘
+Wrote html results to repositorio\test-results\backend-publicable-2026-10-22T09-08-26-379Z\perfil.html
+Wrote json results to repositorio\test-results\backend-publicable-2026-10-22T09-08-26-379Z\perfil.json
+Wrote junit results to repositorio\test-results\backend-publicable-2026-10-22T09-08-26-379Z\perfil.xml

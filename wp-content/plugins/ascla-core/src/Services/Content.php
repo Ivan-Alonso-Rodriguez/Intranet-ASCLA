@@ -484,7 +484,7 @@ final class ContentListingQuery
         $status=($mine||current_user_can('ascla_moderate'))?['publish','draft','pending','ascla_rejected','ascla_hidden','private']:['publish'];
         if (!empty($filter['status']) && in_array($filter['status'],$status,true)) { $status=[$filter['status']]; }
         $args=['post_type'=>'ascla_'.$type,'post_status'=>$status,'posts_per_page'=>18,'paged'=>$page,'s'=>Access::text($filter['q']??'',150),'orderby'=>$type==='topic'?'modified':'date','order'=>'DESC'];
-        if ($type==='topic' && $mine && ($filter['status']??'')==='draft' && rest_sanitize_boolean($filter['include_forums']??false)) {
+        if ($type==='topic' && rest_sanitize_boolean($filter['include_forums']??false)) {
             $args['post_type']=['ascla_topic','ascla_forum'];
         }
         self::visibility($args,$type,$filter,$mine);

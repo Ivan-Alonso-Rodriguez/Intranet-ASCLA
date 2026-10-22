@@ -24,6 +24,7 @@ final class Bootstrap
             'moderator'=>current_user_can('ascla_moderate'),
             'executive'=>current_user_can('ascla_publish'),
             'admin'=>current_user_can('ascla_manage'),
+            'configure'=>current_user_can('ascla_configure'),
             'demo'=>$settings['demo'],
             'ai_mode'=>Knowledge::provider()->mode(),
             'google_connected'=>Secrets::get('google_calendar_'.$user)!=='',

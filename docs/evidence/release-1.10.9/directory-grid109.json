@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-22T07:07:57.181705+00:00",
+  "environment": "Disposable local WordPress",
+  "version": "1.10.9",
+  "php": {
+    "tests": 40,
+    "assertions": 255,
+    "errors": 0,
+    "failures": 0
+  },
+  "suite_filter": "ProfileDirectoryReviewTest|AnalysisCompletionFiltersTest|FormIntegrity108Test",
+  "browser": {
+    "checks": 3,
+    "passed": [
+      "Escritorio: doce perfiles distribuidos en cuatro columnas y tres filas, con paginación debajo",
+      "Siguiente muestra el perfil trece sin duplicados; Anterior conserva búsqueda, país y orden",
+      "Doce perfiles por página también en tableta y móvil, sin desbordamiento horizontal"
+    ],
+    "errors": []
+  },
+  "portable_checks": 49,
+  "package_sha256": "f3430e4f82f34ce29434e7e11ac4bfd3441e3bc64050c9a3f7df7c9e8b9d71a5",
+  "package_files": 201,
+  "reports": {
+    "php-junit.xml": "6bb814c22a158a1460f22d04c877f728bd77ae2e742101bb29792d4c16c1cd60",
+    "browser-result.json": "33967b88d3a0758b33c494f741ed5e03cec24a0e70a41083767bfd0e244eeb72"
+  },
+  "regression_sources": [
+    "tests/php/ProfileDirectoryReviewTest.php",
+    "tests/directory-grid.cjs",
+    "tests/directory-grid-fixture.php"
+  ],
+  "scope": [
+    "Twelve profiles per page; desktop four columns and three rows at 1440 and 1280 px.",
+    "Profile thirteen appears on page two, without duplicates; previous page preserves search, country and order.",
+    "Two columns at 1024 px and one at 390 px, without horizontal overflow; pagination remains twelve.",
+    "Legacy stored page sizes resolve to twelve, and settings reject a different size."
+  ],
+  "temporary_environment_removed": true,
+  "temporary_credentials_removed": true,
+  "full_php_suite": false,
+  "coverage_collected": false,
+  "new_zap_scan": false,
+  "remote_deployment": false
+}

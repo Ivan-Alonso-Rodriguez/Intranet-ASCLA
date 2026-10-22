@@ -1,8 +1,22 @@
 # Frontend: E2E de interfaz con Playwright
 
-El [dashboard de Playwright](dashboard.html) muestra únicamente la ejecución publicada más reciente de los cinco flujos principales, con su resultado, videos, capturas y reportes. Los pasos principales usan clics, formularios y navegación reales; las llamadas REST auxiliares solo preparan, verifican identidad y limpian datos propios.
+El [dashboard de Playwright](dashboard.html) muestra únicamente la ejecución publicada más reciente de los seis flujos principales, con su resultado, videos, capturas y reportes. Los pasos principales usan clics, formularios y navegación reales; las llamadas REST auxiliares solo preparan, verifican identidad y limpian datos propios.
 
-## Cinco flujos principales
+El [ZAP local de páginas](../seguridad/frontend-zap.html), los [controles CSP y de navegador](../seguridad/dashboard.html) y sus [fuentes de ejecución](../seguridad/fuentes.html) también forman parte de la entrega. La [guía de sustento](../seguridad/sustento.html) compara 20/20 controles HTTP/CSP locales con 19/20 en QA, sin mezclar estos controles de seguridad con los seis flujos funcionales de Playwright.
+
+<a id="cinco-flujos-principales"></a>
+
+## Los mismos seis flujos que Bruno
+
+| Flujo compartido | Bruno (peticiones / comprobaciones) | Playwright |
+|---|---:|---|
+| Perfil del asociado | 7 / 14 | Mismo flujo desde la interfaz |
+| Conexión, chat y bloqueo | 12 / 24 | Mismo flujo desde la interfaz |
+| Borrador, publicación e inscripción | 12 / 22 | Mismo flujo desde la interfaz |
+| Aforo, lista de espera y notificación | 19 / 37 | Mismo flujo desde la interfaz |
+| Suspensión y reactivación | 9 / 18 | Mismo flujo desde la interfaz |
+| Consulta al asistente IA | 4 / 8 | Mismo flujo desde la interfaz |
+
 
 ### 1. Perfil del asociado — Carla
 
@@ -44,15 +58,25 @@ Carla accede y se consulta su biografía → Administrador busca su cuenta y con
 
 **Utilidad:** comprueba el efecto real de una suspensión sobre la sesión y los nuevos accesos, y que la reactivación devuelve el acceso sin borrar el dato de perfil observado. No acredita la auditoría ni la conservación de todos los datos históricos. El ejecutor intenta reactivar a Carla incluso si una comprobación falla.
 
-## Regresión adicional de borradores, foros y galerías
+### 6. Consulta al asistente IA — Ana
+
+Ana inicia sesión → abre una conversación nueva → envía la misma pregunta que Bruno → observa el trabajo pendiente con ID real → la interfaz espera la respuesta del proveedor → se comprueba texto y modo → se recarga y conserva el mismo hilo y respuesta. Las llamadas HTTP solo se observan para identificar el trabajo; la pregunta se envía con el formulario real. El modo observado se registra en el resumen de la ejecución.
+
+## Regresión reciente del 22 de octubre en el QA publicado
+
+La [revisión de los cambios recientes](../actualizacion/index.html) aprobó **14 controles**, con **16 videos y 16 capturas**: roles administrativos y sus excepciones; filtros de Usuarios e intereses; Directorio de 4 × 3 y sus botones; tipo de asociado en la cabecera; Foros en lista única; portada y cabecera de Galería; biblioteca integrada; menú y ciclo de Aliados; y borradores recuperables en Hub, Foros, Galería, Centro de Conocimiento, Eventos y Aliados. Los nueve contenidos ficticios propios se retiraron a la papelera. Los perfiles y contenidos ajenos no se modificaron en esta regresión.
+
+La revisión de seguridad autenticada añade cuatro videos y cuatro capturas, con seis controles en 42 vistas de Administrador, Ejecutivo, Moderador y Asociado; no registra errores JavaScript ni infracciones CSP. Los controles HTTP señalan por separado la versión de Apache expuesta por el hosting. Estas selecciones adicionales no se cuentan como nuevos CP únicos ni se suman a los seis flujos principales como si fueran la misma suite.
+
+## Antecedente local de borradores, foros y galerías
 
 El [resumen del 21 de octubre](../../docs/evidence/release-1.10.9/drafts-ui109.json) registra diez controles de navegador de [draft-workflow.cjs](../../tests/draft-workflow.cjs): borradores incompletos recuperables en Hub, Foros, Galería, recursos, Eventos y Aliados; validación al publicar y exclusión de Comunidad; eventos sin fecha en Mis publicaciones; tarjetas de foros en escritorio/móvil; portadas de Galería con clic y teclado. La salida no registra errores JavaScript.
 
-Esta regresión local se presenta separada de los cinco flujos y 11 videos publicados del 16 de octubre. Sus capturas y reporte originales permanecen en `test-results/`; el resumen revisado y las fuentes sí se versionan. La [guía de repetición](../../MANUAL_QA_UAT.md#regresion-borradores) explica las cuentas sintéticas, el host local y el acceso privado necesarios. El [dashboard de seguridad](../seguridad/dashboard.html) conserva, por su parte, la validación ZAP/CSP del 19 de octubre. Ninguno acredita cambios instalados en el servidor publicado.
+Esta regresión local conserva su fecha, sus fuentes y sus cifras. La [guía de repetición](../../MANUAL_QA_UAT.md#regresion-borradores) describe su fixture. La validación remota actual, enlazada arriba, comprueba los cambios posteriores; Foros utiliza finalmente una sola lista con sus publicaciones.
 
 ## Comprobaciones del administrador
 
-En los accesos de los cinco flujos se verifica el inicio según el rol y un único logo visible. Las sesiones administrativas abren `/administracion/`, tienen una sola entrada en el menú y muestran las secciones encima del panel. El flujo de publicación también comprueba la redirección desde `/intranet/`, la exclusión del directorio y la ausencia de controles de conexión/chat. Estas comprobaciones forman parte de los cinco recorridos, sin añadir un sexto flujo.
+En los accesos de los seis flujos se verifica el inicio según el rol y un único logo visible. Las sesiones administrativas abren `/administracion/`, tienen una sola entrada en el menú y muestran las secciones encima del panel. El flujo de publicación también comprueba la redirección desde `/intranet/`, la exclusión del directorio y la ausencia de controles de conexión/chat. Estas comprobaciones forman parte de los seis recorridos, sin añadir un sexto flujo.
 
 ## Ejecutar con los usuarios preparados
 
@@ -78,9 +102,9 @@ Cada ejecución utiliza una carpeta distinta en `test-results/playwright-usuario
 - Reportes JSON y JUnit, copia de las fuentes y huellas SHA-256.
 - Estado de limpieza separado del resultado de las pruebas.
 
-La carpeta `aprobadas/` conserva el lote del **16 de octubre de 2026**, ejecutado en **WordPress local aislado con el código de esa fecha**, con cuentas sintéticas Ana, Bruno, Carla y Administrador: **5 recorridos aprobados, 11 videos y 11 capturas**. No acredita los cambios posteriores de 1.10.9. [Abrir la última ejecución](dashboard.html).
+La carpeta `aprobadas/` conserva el lote del **22 de octubre de 2026**, ejecutado en **https://wordpress.ingsoftware.lat**, con Ana, Bruno, Carla y Administrador: **6 recorridos aprobados, 12 videos y 12 capturas**. Se compara el JavaScript y el CSS del despliegue con el paquete local actual. [Abrir la última ejecución](dashboard.html).
 
-De los cinco flujos principales se publica solo el último lote seleccionado. Se coloca en `aprobadas/` o `fallidas/` según su resultado; al actualizar se retira la anterior junto con sus videos y reportes. Si la nueva ejecución falla, conserva su diagnóstico y evidencias. La evidencia local actual no acredita que se haya actualizado el servidor.
+De los seis flujos principales se publica solo el último lote seleccionado. Se coloca en `aprobadas/` o `fallidas/` según su resultado; al actualizar se retira la anterior junto con sus videos y reportes. Si la nueva ejecución falla, conserva su diagnóstico y evidencias. Los 14 controles recientes y la seguridad autenticada se consultan por separado en `actualizacion/`, con sus propios resultados y medios.
 
 ## Actualizar esta entrega
 

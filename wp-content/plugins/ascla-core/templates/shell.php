@@ -17,6 +17,7 @@ $initials=implode('',array_map(static fn($word)=>mb_substr($word,0,1),array_slic
 <a class="brand" href="<?php echo esc_url($homeUrl); ?>" aria-label="<?php echo esc_attr(Language::label('ASCLA inicio')); ?>"><img src="<?php echo esc_url($logoWhite); ?>" alt="ASCLA" width="1608" height="472"></a>
 <div class="brand-sub"><?php echo esc_html(Language::label('COMUNIDAD DE ASOCIADOS')); ?></div><nav aria-label="<?php echo esc_attr(Language::label('Navegación principal')); ?>">
 <?php foreach(Catalog::PAGES as $key=>$label):
+    if($administrator && in_array($key,['directorio','mensajeria','contacto'],true)){continue;}
     $adminHome=$administrator && $key==='intranet';
     $active=$adminHome?$page==='admin':$page===$key;
     $url=$adminHome?$homeUrl:Catalog::url($key);

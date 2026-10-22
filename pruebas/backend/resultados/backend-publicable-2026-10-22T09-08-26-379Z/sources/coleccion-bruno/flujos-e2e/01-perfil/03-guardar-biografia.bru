@@ -1,0 +1,35 @@
+meta {
+  name: 03. Guardar biografía de prueba
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/profiles/me
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionCarla}}
+  X-WP-Nonce: {{nonceCarla}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:pre-request {
+  bru.setCollectionVar("perfilBioNueva","QA: perfil Bruno "+Date.now());req.setBody({bio:bru.getCollectionVar("perfilBioNueva")});
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Validación: 03. Guardar biografía de prueba", function () { expect(res.getBody().bio).to.equal(bru.getCollectionVar("perfilBioNueva")); });
+}

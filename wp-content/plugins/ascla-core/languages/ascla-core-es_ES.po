@@ -765,6 +765,9 @@ msgstr "Buscar solicitudes"
 msgid "Buscar un evento en el selector"
 msgstr "Buscar un evento en el selector"
 
+msgid "Buscar usuarios"
+msgstr "Buscar usuarios"
+
 msgid "COMUNIDAD DE ASOCIADOS"
 msgstr "COMUNIDAD DE ASOCIADOS"
 
@@ -1194,6 +1197,9 @@ msgstr "Configura una OpenAI API Key."
 msgid "Configuración"
 msgstr "Configuración"
 
+msgid "Configurar ASCLA"
+msgstr "Configurar ASCLA"
+
 msgid "Confirma"
 msgstr "Confirma"
 
@@ -1343,6 +1349,9 @@ msgstr "Contenido"
 
 msgid "Contenido alineado con tus intereses"
 msgstr "Contenido alineado con tus intereses"
+
+msgid "Contenido enviado a la papelera."
+msgstr "Contenido enviado a la papelera."
 
 msgid "Contenido explícito"
 msgstr "Contenido explícito"
@@ -1616,6 +1625,9 @@ msgstr "Denuncia esta publicación"
 
 msgid "Denuncia este comentario"
 msgstr "Denuncia este comentario"
+
+msgid "Desactivar"
+msgstr "Desactivar"
 
 msgid "Desactivar aprendizaje"
 msgstr "Desactivar aprendizaje"
@@ -1943,6 +1955,9 @@ msgstr "Eliminar DeepSeek API Key guardada"
 
 msgid "Eliminar OpenAI API Key guardada"
 msgstr "Eliminar OpenAI API Key guardada"
+
+msgid "Eliminar aliado"
+msgstr "Eliminar aliado"
 
 msgid "Eliminar archivo"
 msgstr "Eliminar archivo"
@@ -2462,6 +2477,9 @@ msgstr "Gestiona ASCLA<br>de forma segura."
 
 msgid "Gestionar cuentas y configuración"
 msgstr "Gestionar cuentas y configuración"
+
+msgid "Gestionar la administración ASCLA"
+msgstr "Gestionar la administración ASCLA"
 
 msgid "Gestionar mis conexiones"
 msgstr "Gestionar mis conexiones"
@@ -2984,6 +3002,9 @@ msgstr "La fecha de inicio no puede superar la final. Elige hasta 366 días."
 
 msgid "La fecha inicial no puede ser posterior a la fecha final."
 msgstr "La fecha inicial no puede ser posterior a la fecha final."
+
+msgid "La ficha se enviará a la papelera y dejará de aparecer en el catálogo y en el registro de aliados."
+msgstr "La ficha se enviará a la papelera y dejará de aparecer en el catálogo y en el registro de aliados."
 
 msgid "La ficha volverá a estar visible para los asociados en el catálogo de aliados."
 msgstr "La ficha volverá a estar visible para los asociados en el catálogo de aliados."
@@ -3758,6 +3779,9 @@ msgstr "Nombre, cargo, empresa o experiencia…"
 
 msgid "Nombre, tipo de convenio o descripción…"
 msgstr "Nombre, tipo de convenio o descripción…"
+
+msgid "Nombre, usuario, correo, cargo, empresa o experiencia…"
+msgstr "Nombre, usuario, correo, cargo, empresa o experiencia…"
 
 msgid "Nombres y apellidos"
 msgstr "Nombres y apellidos"

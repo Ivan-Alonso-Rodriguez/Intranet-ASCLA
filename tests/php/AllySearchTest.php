@@ -110,6 +110,7 @@ final class AllySearchTest extends TestCase
     public function testSearchShapeAndRegistryPermissionsAreValidatedOnTheServer(): void
     {
         wp_set_current_user($this->member);$r=new WP_REST_Request('GET','/ascla/v1/content/ally');$r->set_query_params(['type'=>'ally','q'=>['Convenio']]);self::assertSame(400,rest_do_request($r)->get_status());
-        foreach([$this->member,$this->users[3],0] as $user){wp_set_current_user($user);$r=new WP_REST_Request('GET','/ascla/v1/admin/allies');$r->set_query_params(['q'=>'Convenio']);self::assertSame($user?403:401,rest_do_request($r)->get_status());}
+        foreach([$this->member,0] as $user){wp_set_current_user($user);$r=new WP_REST_Request('GET','/ascla/v1/admin/allies');$r->set_query_params(['q'=>'Convenio']);self::assertSame($user?403:401,rest_do_request($r)->get_status());}
+        wp_set_current_user($this->users[3]);self::assertSame(200,rest_do_request(new WP_REST_Request('GET','/ascla/v1/admin/allies'))->get_status());
     }
 }

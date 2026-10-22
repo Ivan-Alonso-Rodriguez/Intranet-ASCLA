@@ -20,11 +20,11 @@ settings {
 }
 tests {
   test("Directorio paginado", function () { expect(res.getStatus()).to.equal(200); });
-  test("El directorio respeta el tamaño configurado y calcula las páginas", function () {
+  test("El directorio muestra doce perfiles por página y calcula las páginas", function () {
     const data = res.getBody();
     expect(data.items).to.be.an("array");
     expect(data.total).to.be.at.least(1);
-    expect(data.per_page).to.be.within(5, 100);
+    expect(data.per_page).to.equal(12);
     expect(data.page).to.equal(1);
     expect(data.pages).to.equal(Math.max(1, Math.ceil(data.total / data.per_page)));
     expect(data.items.length).to.equal(Math.min(data.total, data.per_page));

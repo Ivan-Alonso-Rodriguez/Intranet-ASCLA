@@ -9,6 +9,18 @@ final class Access
         return user_can($id,'ascla_manage') || user_can($id,'manage_options');
     }
     public static function networkingMember(int $id=0): bool { return self::member($id) && !self::isAdministrator($id); }
+    /** Community account operations never grant native WordPress user capabilities. */
+    public static function canManageAccount(string $operation,int $id=0): bool
+    {
+        if (!current_user_can('ascla_manage') || !in_array($operation,['create_users','edit_user','delete_user'],true)) { return false; }
+        if (current_user_can($operation,$id)) { return true; }
+        $roles=RoleApprovals::effective(AccountPermissions::roles(get_current_user_id()),get_current_user_id());
+        if (!in_array('ascla_executive',$roles,true)) { return false; }
+        if ($operation==='create_users') { return true; }
+        $target=get_userdata($id);
+        return $target && ($operation==='edit_user' || $id!==get_current_user_id()) && !user_can($id,'manage_options')
+            && (bool)array_intersect($target->roles,['ascla_member','ascla_moderator','ascla_executive']);
+    }
     /** Ejecutivo (ascla_publish) or Administrator (ascla_manage): the two roles allowed to publish and manage events, session recordings and technical resources. */
     public static function canPublish(): bool { return current_user_can('ascla_manage') || current_user_can('ascla_publish'); }
     public static function require(bool $condition,string $message='Acceso no autorizado.',int $code=403): void

@@ -4,9 +4,10 @@ namespace ASCLA\Core\Services;
 /** Search and ranking use only the attributes exposed in directory results. */
 final class ProfileDirectory
 {
+    public const PAGE_SIZE=12;
     public static function search(array $filter=[]): array
     {
-        $page=max(1,(int)($filter['page']??1));$perPage=Settings::get()['directory_page_size'];
+        $page=max(1,(int)($filter['page']??1));$perPage=self::PAGE_SIZE;
         $query=self::normalize(Access::text($filter['q']??'',120));$results=[];$offset=0;
         do {
             $users=get_users(['number'=>200,'offset'=>$offset,'orderby'=>'display_name','order'=>'ASC','capability'=>'ascla_access']);$offset+=200;

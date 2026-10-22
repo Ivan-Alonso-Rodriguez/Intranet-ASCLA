@@ -292,7 +292,7 @@ final class Login
         $fallback = App::homeUrl((int)$user->ID);
         $target = wp_validate_redirect($requested, $fallback);
         if (Access::isAdministrator((int)$user->ID)) {
-            if ($requested!=='' && str_starts_with($target,admin_url())) { return $target; }
+            if ($requested!=='' && str_starts_with($target,admin_url()) && user_can($user,'manage_options')) { return $target; }
             if ($requested==='' || url_to_postid($target)===url_to_postid(Catalog::url('intranet'))) { return $fallback; }
         }
         if(user_can($user,'ascla_admin_area') && str_starts_with($target,admin_url())){

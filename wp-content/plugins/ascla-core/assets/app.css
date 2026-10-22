@@ -312,6 +312,15 @@
   margin-top: 7px !important;
   font-size: 13px;
 }
+.page-heading-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: auto;
+  max-width: 100%;
+}
 .eyebrow {
   font-size: 10px;
   text-transform: uppercase;
@@ -518,10 +527,11 @@
 }
 .member-card-signal .connection-state.compact svg { width: 12px; height: 12px; }
 .member-card-actions {
+  --member-action-gap: 12px;
   width: 100%;
   margin-top: auto;
   display: grid;
-  gap: 12px;
+  gap: var(--member-action-gap);
 }
 .member-card .avatar {
   margin: 2px 0 12px;
@@ -601,14 +611,17 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  gap: var(--member-action-gap, 12px);
 }
 .member-card .connection-actions {
   width: 100%;
   display: grid;
-  gap: 8px;
+  gap: var(--member-action-gap, 12px);
   align-items: stretch;
 }
 .member-card .connection-actions .btn { margin-top: 0; }
+.member-card-actions .conversation-request-actions { margin: 0; gap: var(--member-action-gap); }
+.member-card-actions .btn { margin: 0; }
 .member-card .connection-state { justify-self: center; }
 .member-card .connection-controls .private-note {
   min-height: 30px;
@@ -1500,6 +1513,13 @@
 .profile-summary h2 {
   margin-bottom: 6px !important;
 }
+.profile-summary-person { flex: 1; }
+#ascla-root .profile-summary > .profile-member-type { flex: 0 1 240px; margin: 0 0 0 auto; align-self: flex-start; }
+.admin-user-access-filters { margin-top: 18px; }
+@media(max-width:640px) {
+  #ascla-root .profile-summary { flex-wrap: wrap; }
+  #ascla-root .profile-summary > .profile-member-type { flex-basis: 100%; }
+}
 .profile-detail-grid {
   display: grid;
   grid-template-columns: 250px minmax(0, 1fr);
@@ -2309,16 +2329,6 @@ output.view-loading{display:block}
 #ascla-root .file-row>div:first-child{min-width:0;display:grid;gap:7px;overflow-wrap:anywhere}
 #ascla-root .file-row small{color:var(--muted)}
 #ascla-root .file-row svg{width:24px;height:24px}
-#ascla-root .forum-directory{margin:16px 0}
-#ascla-root .forum-directory h2{margin:0;font-size:20px}
-#ascla-root .forum-card{display:flex;flex-direction:column;gap:16px;min-width:0}
-#ascla-root .forum-card-heading{display:flex;align-items:flex-start;gap:14px}
-#ascla-root .forum-card-heading h3{margin:4px 0 0;overflow-wrap:anywhere}
-#ascla-root .forum-card-icon{display:grid;place-items:center;flex:0 0 44px;height:44px;border-radius:12px;color:var(--blue);background:var(--blue-soft)}
-#ascla-root .forum-card .detail-body{margin:0;flex:1;overflow-wrap:anywhere}
-#ascla-root .forum-card-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px}
-#ascla-root .forum-card-footer small{color:var(--muted)}
-#ascla-root .forum-topics-heading{font-size:20px;margin:28px 0 16px}
 #ascla-root .draft-card{display:flex;flex-direction:column;gap:12px;min-width:0}
 #ascla-root .draft-card h3{margin:0;overflow-wrap:anywhere}
 #ascla-root .draft-card .detail-body{flex:1;margin:0;overflow-wrap:anywhere}
@@ -3201,7 +3211,7 @@ html[data-ascla-theme="dark"] #ascla-root .header-brand .brand-logo-inverse { di
 #ascla-root .admin-hero-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 #ascla-root .admin-hero .btn{background:rgba(8,38,57,.2);color:#fff;border-color:rgba(255,255,255,.28);backdrop-filter:blur(8px);}
 #ascla-root .admin-hero .btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.45)}
-#ascla-root .admin-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:18px;}
+#ascla-root .admin-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-bottom:18px;}
 #ascla-root .admin-stat{position:relative;display:grid;grid-template-columns:44px minmax(0,1fr) 18px;align-items:center;gap:12px;background:#fff;border:1px solid #dde8ef;border-radius:16px;padding:18px;text-align:left;cursor:pointer;color:#17344a;box-shadow:0 7px 20px rgba(20,63,91,.045);transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease;}
 #ascla-root .admin-stat:hover{transform:translateY(-2px);border-color:#83b8cf;background:#fff;box-shadow:0 12px 30px rgba(20,74,103,.09);}
 #ascla-root .admin-stat .stat-icon{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,#e9f6fb,#dceef7);color:#146f96;}
@@ -4316,15 +4326,17 @@ html[data-ascla-theme="dark"] #ascla-root .recommendation-low-match p{color:#d8c
 }
 #ascla-root .directory-results-heading{margin-bottom:4px;flex-wrap:wrap}
 #ascla-root .directory-visibility-note{margin:0 0 20px}
-#ascla-root .cards.directory{grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));align-items:stretch}
+#ascla-root .cards.directory{grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch}
 #ascla-root .directory .member-card{padding:22px;min-width:0}
 #ascla-root .directory .member-card h3{font-size:16px}
 #ascla-root .directory .member-card .role,#ascla-root .directory .member-card .company{font-size:13px;overflow-wrap:anywhere}
 #ascla-root .directory .member-card .connection-controls{min-height:0}
 @media(max-width:1100px){
+  #ascla-root .cards.directory{grid-template-columns:repeat(2,minmax(0,1fr))}
   #ascla-root .directory-search-row{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
 }
 @media(max-width:640px){
+  #ascla-root .cards.directory{grid-template-columns:minmax(0,1fr)}
   #ascla-root .directory-search,#ascla-root .directory-view .connections-panel{padding:16px}
   #ascla-root .directory-search-row{grid-template-columns:minmax(0,1fr)}
   #ascla-root .directory-facet{flex-basis:100%;max-width:none}

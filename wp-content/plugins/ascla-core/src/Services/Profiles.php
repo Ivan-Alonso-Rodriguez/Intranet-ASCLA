@@ -184,7 +184,7 @@ final class Profiles
     private static function savePhoneFields(array $data,array $input,int $id): array
     {
         if (!array_key_exists('phone',$input) && !array_key_exists('phone_visibility',$input)) { return $data; }
-        Access::require(Access::member() && ($id===get_current_user_id() || (current_user_can('ascla_manage') && current_user_can('edit_user',$id))));
+        Access::require(Access::member() && ($id===get_current_user_id() || Access::canManageAccount('edit_user',$id)));
         if (array_key_exists('phone',$input)) { $data['phone']=\ASCLA\Core\Domain\Phone::normalize($input['phone']); }
         if (array_key_exists('phone_visibility',$input)) { $data['phone_visibility']=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']); }
         return $data;

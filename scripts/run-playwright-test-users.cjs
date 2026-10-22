@@ -2,6 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {execFileSync}=require('node:child_process');
 const root=path.resolve(__dirname,'..'),args=process.argv.slice(2);
+const contract=require('../tests/qa-flow-contract.json');
 const option=name=>{const i=args.indexOf(name);return i<0?null:args[i+1];};
 const access=JSON.parse(fs.readFileSync(path.resolve(option('--fixture')||path.join(root,'test-results/playwright-usuarios.json')),'utf8'));
 const mode=require('./qa-access.cjs')(access);
@@ -11,7 +12,7 @@ fs.mkdirSync(out,{recursive:true});
 const secrets=Object.values(access.actors).map(actor=>actor.password);
 const redact=value=>secrets.reduce((text,secret)=>text.split(secret).join('[contraseña omitida]'),String(value));
 const E=value=>String(value??'').replace(/\u001b\[[0-?]*[ -/]*[@-~]/g,'').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g,'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const events=[];let admin,bruno,results=[],cleanup={status:'pending'},failure=false;
+const events=[],assistant=[];let admin,bruno,deployment,results=[],cleanup={status:'pending'},failure=false;
 const fixture={base,prefix,directoryQuery:'Prueba ASCLA',sharedAccounts:true,headless:!args.includes('--headed'),browser_channel:access.browser_channel||'msedge',actors:{admin:access.actors.Administrador,ui_a:access.actors.Ana,ui_b:access.actors.Bruno,profile:access.actors.Carla},onEventCreated(event){if(!Number.isInteger(event.id)||event.id<1||![' Evento de interfaz',' Evento de aforo'].some(suffix=>event.title===prefix+suffix))throw Error('Evento de prueba inesperado.');events.push(event);fs.writeFileSync(path.join(out,'created-events.json'),JSON.stringify(events,null,2)+'\n');}};
 async function login(actor){
   const session=await require('./native-login.cjs')(base,actor);
@@ -25,6 +26,8 @@ async function api(route,session,body){
 }
 function ok(result,label){if(result.status!==200)throw Error(label+': HTTP '+result.status+'; '+(result.data?.message||'respuesta inesperada'));return result.data;}
 async function prepare(){
+  fixture.onAssistantCompleted=observation=>assistant.push(observation);
+  deployment=await require('./qa-target-provenance.cjs')(base);
   admin=await login(access.actors.Administrador);if(!admin.admin)throw Error('La cuenta de administración no tiene los permisos de ASCLA.');
   const carla=ok(await api('/admin/users/'+access.actors.Carla.id,admin),'Verificar cuenta dedicada de Carla');
   if(carla.login!==access.actors.Carla.login)throw Error('La identidad de Carla no corresponde a la cuenta dedicada.');
@@ -34,7 +37,8 @@ async function prepare(){
   if(state.retry_at)throw Error('La pareja tiene un período de espera activo; no se omite esa regla.');
   if(state.state!=='none'||state.blocked){for(const active of [true,false])ok(await api('/relations',bruno,{target:access.actors.Ana.id,kind:'block',active}),'Preparar la pareja dedicada');}
   const sources=path.join(out,'sources');fs.mkdirSync(sources,{recursive:true});
-  for(const [from,name] of [[path.join(root,'tests/acceptance-ui.cjs'),'acceptance-ui.cjs'],[__filename,'run-playwright-test-users.cjs'],[path.join(__dirname,'qa-access.cjs'),'qa-access.cjs'],[path.join(__dirname,'native-login.cjs'),'native-login.cjs']]){
+  fs.copyFileSync(path.join(root,'tests/qa-flow-contract.json'),path.join(sources,'qa-flow-contract.json'));
+  for(const [from,name] of [[path.join(root,'tests/acceptance-ui.cjs'),'acceptance-ui.cjs'],[__filename,'run-playwright-test-users.cjs'],[path.join(__dirname,'qa-access.cjs'),'qa-access.cjs'],[path.join(__dirname,'native-login.cjs'),'native-login.cjs'],[path.join(__dirname,'qa-target-provenance.cjs'),'qa-target-provenance.cjs']]){
     const bytes=fs.readFileSync(from);if(secrets.some(secret=>bytes.includes(Buffer.from(secret))))throw Error('Credenciales inesperadas en las fuentes.');fs.writeFileSync(path.join(sources,name),bytes);
   }
 }
@@ -60,16 +64,17 @@ function render(meta){
   const flow={perfil:'Login de Carla → editar biografía → guardar → recargar → comprobar persistencia → rechazar Empresa vacía → conservar datos anteriores.','conexion-chat-bloqueo':'Login de Ana y Bruno → solicitar conexión → aceptar → enviar y leer mensaje → bloquear → comprobar que no puede iniciar un chat → desbloquear → comprobar que la conexión no se restaura.','borrador-publicacion-inscripcion':'Login de Administrador y Ana → crear borrador → validar campos obligatorios → publicar → comprobar fechas → inscribirse → recargar y comprobar inscripción → cancelar el evento de prueba.'};
   flow['aforo-lista-espera-notificacion']='Crear evento con un cupo → Ana confirma → Bruno entra en espera → Ana cancela → cupo ofrecido → abrir notificación del evento → confirmar vacante → cancelar evento.';
   flow['suspension-reactivacion-acceso']='Carla accede → Administrador suspende → sesión anterior pierde acceso → nuevo login rechazado → Administrador reactiva → login nuevo válido → biografía conservada.';
+  names['asistente-ia']='Asistente IA · Ana';flow['asistente-ia']='Ana abre una conversación nueva → envía la pregunta → trabajo pendiente con ID real → la interfaz espera su respuesta → recarga → se conserva el mismo hilo y respuesta.';
   const cards=meta.results.map(result=>`<section><h2>${E(names[result.name]||result.name)}</h2><p class="${result.status}">${result.status==='passed'?'Aprobado':'Falló'} · ${(Number(result.ms||0)/1000).toFixed(1)} s</p><p>${E(flow[result.name]||'')}</p>${result.error?'<pre>'+E(result.error)+'</pre>':''}<div class="media">${(result.videos||[]).map((video,index)=>`<article><h3>Sesión ${index+1}</h3><video controls preload="metadata" src="${E(video)}"${result.screenshots?.[index]?' poster="'+E(result.screenshots[index])+'"':''}></video>${result.screenshots?.[index]?'<p><a href="'+E(result.screenshots[index])+'">Abrir captura</a></p>':''}</article>`).join('')}</div></section>`).join('');
   fs.writeFileSync(path.join(out,'index.html'),`<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ASCLA · Playwright con usuarios de prueba</title><style>body{font:17px/1.6 system-ui;margin:0;background:#f1f5f9;color:#153047}main{max-width:1100px;margin:30px auto;padding:28px}section{background:white;border-radius:14px;padding:24px;margin:20px 0}h1{font-size:30px}.passed{color:#167144;font-weight:bold}.failed,pre{color:#b52929}.media{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}video{width:100%;background:#101820}pre{white-space:pre-wrap;font-size:14px}a{color:#145aa2}small{color:#526a7c}</style><main><h1>Playwright con usuarios de prueba</h1><p>Destino: <a href="${base}">${base}</a> · ${new Intl.DateTimeFormat('es-PE',{timeZone:'America/Lima',dateStyle:'medium',timeStyle:'short'}).format(new Date(meta.date))} (Lima)</p><p><strong>${meta.results.filter(r=>r.status==='passed').length}/${meta.results.filter(r=>r.name!=='runner').length} recorridos aprobados</strong> · ${meta.results.reduce((n,r)=>n+(r.videos||[]).length,0)} videos</p><p>Carla: perfil y suspensión/reactivación. Ana y Bruno: conexión y chat. Administrador y Ana: publicación. Administrador, Ana y Bruno: aforo y espera. Las cuentas se conservan; el ejecutor prepara la pareja y cierra sus propios eventos mediante REST. Las acciones principales de cada recorrido se realizan desde la interfaz.</p>${cards}<section><h2>Procedencia y estado final</h2><p>Playwright ${E(meta.tools.playwright)} · ${E(meta.browser_channel)} · ${E(meta.mode)}</p><p>Limpieza: ${E(meta.cleanup.status)}. ${meta.cleanup.error?E(meta.cleanup.error):'Cuentas conservadas, Carla activa, pareja desbloqueada y eventos propios cancelados.'}</p><p><a href="summary.json">Resumen JSON</a> · <a href="frontend.xml">JUnit</a> · <a href="evidence-manifest.json">Huellas de las evidencias</a></p><small>Los videos y capturas se guardan tanto al aprobar como al fallar. Las fuentes utilizadas están en sources/. Este reporte corresponde al destino y modo registrados en esta ejecución.</small></section></main></html>`);
 }
 (async()=>{
-  try{await prepare();results=await require(path.join(out,'sources/acceptance-ui.cjs'))({fixture,out});if(results.length!==5||results.some(result=>result.status!=='passed'))failure=true;}
+  try{await prepare();results=await require(path.join(out,'sources/acceptance-ui.cjs'))({fixture,out});if(results.length!==contract.flows.length||contract.flows.some(flow=>!results.some(result=>result.name===flow.id&&result.status==='passed')))failure=true;}
   catch(error){failure=true;results.push({name:'runner',status:'failed',error:redact(error.message),videos:[],screenshots:[]});console.error(redact(error.message));}
   finally{
     try{cleanup=await restore();}catch(error){failure=true;cleanup={status:'failed',error:redact(error.message)};}
     let commit=null,branch=null,workingTree=null;try{commit=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();branch=execFileSync('git',['branch','--show-current'],{cwd:root,encoding:'utf8'}).trim();workingTree=execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}).trim()?'uncommitted':'clean';}catch{}
-    const meta={date:new Date().toISOString(),target:base,mode,browser_channel:fixture.browser_channel,tools:{node:process.version,playwright:require('playwright/package.json').version},commit,branch,working_tree:workingTree,actors:Object.fromEntries(Object.entries(access.actors).map(([name,actor])=>[name,{id:actor.id,login:actor.login}])),results,cleanup};
+    const meta={date:new Date().toISOString(),target:base,mode,deployment,flow_contract:contract,assistant,browser_channel:fixture.browser_channel,tools:{node:process.version,playwright:require('playwright/package.json').version},commit,branch,working_tree:workingTree,actors:Object.fromEntries(Object.entries(access.actors).map(([name,actor])=>[name,{id:actor.id,login:actor.login}])),results,cleanup};
     fs.writeFileSync(path.join(out,'summary.json'),JSON.stringify(meta,null,2)+'\n');
     fs.writeFileSync(path.join(out,'frontend.xml'),'<testsuites><testsuite name="ASCLA UI usuarios de prueba" tests="'+results.length+'" failures="'+results.filter(r=>r.status!=='passed').length+'">'+results.map(r=>'<testcase name="'+E(r.name)+'" time="'+Number(r.ms||0)/1000+'">'+(r.error?'<failure>'+E(r.error)+'</failure>':'')+'</testcase>').join('')+'</testsuite></testsuites>');
     render(meta);

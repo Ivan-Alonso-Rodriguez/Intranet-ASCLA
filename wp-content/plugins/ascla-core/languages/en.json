@@ -2011,5 +2011,13 @@
   "evento": "event",
   "recurso": "resource",
   "galería": "gallery",
-  "aliado": "ally"
+  "aliado": "ally",
+  "Nombre, usuario, correo, cargo, empresa o experiencia…": "Name, username, email, position, company or experience…",
+  "Eliminar aliado": "Delete ally",
+  "La ficha se enviará a la papelera y dejará de aparecer en el catálogo y en el registro de aliados.": "The record will be moved to the trash and will no longer appear in the catalog or ally registry.",
+  "Buscar usuarios": "Search users",
+  "Contenido enviado a la papelera.": "Content moved to the trash.",
+  "Desactivar": "Deactivate",
+  "Gestionar la administración ASCLA": "Manage ASCLA administration",
+  "Configurar ASCLA": "Configure ASCLA"
 }
