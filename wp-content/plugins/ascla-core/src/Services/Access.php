@@ -14,6 +14,10 @@ final class Access
     {
         if (!current_user_can('ascla_manage') || !in_array($operation,['create_users','edit_user','delete_user'],true)) { return false; }
         if (current_user_can($operation,$id)) { return true; }
+        return self::executiveAccountPermission($operation,$id);
+    }
+    private static function executiveAccountPermission(string $operation,int $id): bool
+    {
         $roles=RoleApprovals::effective(AccountPermissions::roles(get_current_user_id()),get_current_user_id());
         if (!in_array('ascla_executive',$roles,true)) { return false; }
         if ($operation==='create_users') { return true; }

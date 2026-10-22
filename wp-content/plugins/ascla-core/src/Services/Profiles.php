@@ -157,7 +157,7 @@ final class Profiles
             $value=Access::text($input[$field],in_array($field,['bio','experience'],true)?3000:200);
             if (in_array($field,['linkedin','twitter','website'],true) && $value!=='') {
                 Access::require((bool)filter_var($value,FILTER_VALIDATE_URL) && in_array(wp_parse_url($value,PHP_URL_SCHEME),['https','http'],true),'URL no válida.',400);
-                if ($field!=='website') { self::validateSocialLink($field,$value); }
+                if ($field!=='website') { ProfileValidation::validateSocialLink($field,$value); }
                 $value=esc_url_raw($value);
             }
             if ($field==='country' && $value!=='' && $value!==(string)($data['country']??'')) {
@@ -168,17 +168,6 @@ final class Profiles
             $data[$field]=$value;
         }
         return $data;
-    }
-
-    private static function validateSocialLink(string $field,string $value): void
-    {
-        $url=wp_parse_url($value);$host=strtolower($url['host']??'');
-        $domains=$field==='linkedin'?['linkedin.com']:['x.com','twitter.com'];
-        $allowed=false;
-        foreach ($domains as $domain) { $allowed=$allowed || $host===$domain || str_ends_with($host,'.'.$domain); }
-        $defaultPort=($url['scheme']??'')==='https'?443:80;
-        Access::require($allowed && !isset($url['user']) && !isset($url['pass']) && (!isset($url['port']) || $url['port']===$defaultPort),
-            $field==='linkedin'?'Introduce un enlace de linkedin.com.':'Introduce un enlace de x.com o twitter.com.',400);
     }
 
     private static function savePhoneFields(array $data,array $input,int $id): array

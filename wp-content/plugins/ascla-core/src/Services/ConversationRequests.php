@@ -46,7 +46,7 @@ final class ConversationRequests
             $valid=$id!==$me && Access::networkingMember($me) && Access::networkingMember($id);
             $blockRows=$valid?Store::rows('relations',"kind='block' AND ((user_id=%d AND target_id=%d) OR (user_id=%d AND target_id=%d))",[$me,$id,$id,$me],''):[];
             $state['blocked']=(bool)$blockRows;
-            foreach ($blockRows as $block) { if ((int)$block['user_id']===$me) { $state['blocked_by_me']=true; } }
+            if (array_filter($blockRows,static fn($block)=>(int)$block['user_id']===$me)) { $state['blocked_by_me']=true; }
             $connected=$valid && Connections::areConnected($me,$id);
             if ($connected) { $state['state']='connected';$state['request_id']=0; }
             $state['can_message']=$valid && !$state['blocked'] && ($connected || $state['state']==='allowed');

@@ -14,17 +14,29 @@ final class EntityRedactor
         $role='(?:ponente|orador(?:a)?|director(?:a)?|gerente|president(?:e|a)|secretari[oa]|señor(?:a)?|doctor(?:a)?)';
         $organization='(?i:empresa|compañía|compania|organización|organizacion|corporación|corporacion|universidad|fundación|fundacion|banco|grupo)\h+'.$name;
         $speech='(?i:intervino|explicó|explico|afirmó|afirmo|señaló|señalo|indicó|indico|compartió|compartio|presentó|presento|describió|describio|respondió|respondio|comentó|comento|dijo|habló|hablo|expuso|aprobó|aprobo|propuso)';
+        $rolePrefix='/(?i:\b'.$role.'\h+';
         $patterns=[
             '/[\p{L}\p{N}.+_-]+@[\p{L}\p{N}.-]+\.[\p{L}]{2,}/u',
             '~(?i:\b(?:contacto|contact|perfil|profile|correo|email))\h*:\h*[^\r\n]{0,180}?(https?://[^\s<>]+)~u',
-            '/(?i:\b'.$role.'\h+)('.$name.')/u',
-            '/(?i:\b'.$role.'\h+(?:de|en)\h+)('.$name.')/u',
-            '/(?i:\b'.$role.'\h+)'.$name.'\h+(?i:de|en)\h+('.$organization.')/u',
+            $rolePrefix.')('.$name.')/u',
+            $rolePrefix.'(?:de|en)\h+)('.$name.')/u',
+            $rolePrefix.')'.$name.'\h+(?i:de|en)\h+('.$organization.')/u',
             '/(?<!\p{L})(?<person>'.$word.'(?:\h+'.$word.'){1,3})\h+(?i:de|del|en)\h+(?<organization>'.$organization.')(?=\h+'.$speech.')/u',
             '/(?i:\b(?:en|desde)\h+)('.$organization.')(?=\h+(?i:trabajamos|hicimos|aplicamos|tomamos|implementamos|decidimos))/u',
             '/^\h*((?i:orador(?:a)?|ponente)\h+'.$name.'):\h*/mu',
         ];
         $public=array_map('mb_strtolower',['COSO ERM','API REAL','ASCLA','Círculo ASCLA','Chatham House','Centro de Conocimiento','Gobierno Corporativo','Inteligencia Artificial','Gestión de Riesgos','Gobierno de IA','Secretaría Corporativa']);
+        $entities=array_merge($entities,self::patternEntities($text,$patterns,$public));
+        preg_match_all('~https?://[^\s<>]+~iu',$text,$urls);
+        foreach($urls[0] as $url){
+            // Public documents and video links remain usable; personal/profile and credential links do not.
+            if(self::privateUrl($url)){ $entities[]=$url; }
+        }
+        return array_values(array_unique($entities));
+    }
+    private static function patternEntities(string $text,array $patterns,array $public): array
+    {
+        $entities=[];
         foreach($patterns as $pattern){
             preg_match_all($pattern,$text,$matches,PREG_SET_ORDER);
             foreach($matches as $match){
@@ -32,12 +44,12 @@ final class EntityRedactor
                 foreach($values as $value){$value=trim($value);if(!in_array(mb_strtolower($value),$public,true)){ $entities[]=$value; }}
             }
         }
-        preg_match_all('~https?://[^\s<>]+~iu',$text,$urls);
-        foreach($urls[0] as $url){
-            // Public documents and video links remain usable; personal/profile and credential links do not.
-            if(preg_match('~/(?:perfil|profiles?|usuarios?|users?|miembros?|members?|author|autor)(?:[/?#]|$)|[?&](?:access_token|token|session|password|auth|email)=~iu',$url)){ $entities[]=$url; }
-        }
-        return array_values(array_unique($entities));
+        return $entities;
+    }
+    private static function privateUrl(string $url): bool
+    {
+        return (bool)preg_match('~/(?:perfil|profile|profiles|usuario|usuarios|user|users|miembro|miembros|member|members|author|autor)(?:[/?#]|$)~iu',$url)
+            || (bool)preg_match('~[?&](?:access_token|token|session|password|auth|email)=~iu',$url);
     }
     public static function redactEntities(string $text,array $entities): string
     {
@@ -89,6 +101,13 @@ final class EntityRedactor
         $text=preg_replace_callback('/(^|[.!?]\h+|\n\h*)se\h+/u',static fn($m)=>$m[1].'Se ',$text)??$text;
         return trim($text);
     }
+    public static function meaningfulValue(mixed $value): bool
+    {
+        if (!is_string($value)) { return true; }
+        $plain=mb_strtolower(remove_accents(trim($value," \t\n\r\0\x0B.,;:–—-")));
+        return $plain!=='' && !in_array($plain,['participante','participantes','dato reservado','identidad reservada','informacion reservada','una persona','persona'],true);
+    }
+
     public static function cleanTree(mixed $value): mixed
     {
         if(is_array($value)){ return array_map([self::class,'cleanTree'],$value); }

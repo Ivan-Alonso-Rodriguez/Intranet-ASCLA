@@ -117,17 +117,24 @@ final class SecurityHeaders
     private static function integrity(string $tag,string $url,string $element): string
     {
         if (!self::$active) { return $tag; }
-        $site=wp_parse_url(site_url('/'));$asset=wp_parse_url($url);
-        if (($asset['host']??'')!==($site['host']??'') || ($asset['port']??null)!==($site['port']??null)) { return $tag; }
-        $base=(string)($site['path']??'/');$path=rawurldecode((string)($asset['path']??''));
-        if (!str_starts_with($path,$base) || str_contains($path,"\0") || preg_match('~(?:^|/)\.\.(?:/|$)~',$path)) { return $tag; }
-        $file=realpath(ABSPATH.substr($path,strlen($base)));
-        if (!$file || !str_starts_with(wp_normalize_path($file),wp_normalize_path(ABSPATH)) || !in_array(strtolower(pathinfo($file,PATHINFO_EXTENSION)),['js','css'],true)) { return $tag; }
+        $file=self::localAssetFile($url);
+        if ($file===null) { return $tag; }
         static $hashes=[];
         $hash=$hashes[$file]??=base64_encode(hash_file('sha384',$file,true));
         $html=new \WP_HTML_Tag_Processor($tag);
         if ($html->next_tag($element)) { $html->set_attribute('integrity','sha384-'.$hash);$html->set_attribute('crossorigin','anonymous'); }
         return $html->get_updated_html();
+    }
+
+    private static function localAssetFile(string $url): ?string
+    {
+        $site=wp_parse_url(site_url('/'));$asset=wp_parse_url($url);
+        if (($asset['host']??'')!==($site['host']??'') || ($asset['port']??null)!==($site['port']??null)) { return null; }
+        $base=(string)($site['path']??'/');$path=rawurldecode((string)($asset['path']??''));
+        if (!str_starts_with($path,$base) || str_contains($path,"\0") || preg_match('~(?:^|/)\.\.(?:/|$)~',$path)) { return null; }
+        $file=realpath(ABSPATH.substr($path,strlen($base)));
+        $allowed=$file && str_starts_with(wp_normalize_path($file),wp_normalize_path(ABSPATH)) && in_array(strtolower(pathinfo($file,PATHINFO_EXTENSION)),['js','css'],true);
+        return $allowed?$file:null;
     }
 
     /** Preserve WordPress cookie names, values, paths and expirations; add explicit browser restrictions. */
@@ -136,16 +143,20 @@ final class SecurityHeaders
         $headers=headers_list();$cookies=[];
         foreach ($headers as $line) {
             if (!str_starts_with(strtolower($line),'set-cookie:')) { continue; }
-            if (preg_match('/^Set-Cookie:\s*(?:wordpress_[^=]*|ascla_[^=]*|wp_lang)=/i',$line)) {
-                if (!preg_match('/;\s*SameSite=/i',$line)) { $line.='; SameSite=Lax'; }
-                if (!preg_match('/;\s*HttpOnly(?:;|$)/i',$line)) { $line.='; HttpOnly'; }
-                if (is_ssl() && !preg_match('/;\s*Secure(?:;|$)/i',$line)) { $line.='; Secure'; }
-            }
-            $cookies[]=$line;
+            $cookies[]=self::restrictCookie($line);
         }
         if (!$cookies) { return; }
         header_remove('Set-Cookie');
         foreach ($cookies as $line) { header($line,false); }
+    }
+
+    private static function restrictCookie(string $line): string
+    {
+        if (!preg_match('/^Set-Cookie:\s*(?:wordpress_[^=]*|ascla_[^=]*|wp_lang)=/i',$line)) { return $line; }
+        if (!preg_match('/;\s*SameSite=/i',$line)) { $line.='; SameSite=Lax'; }
+        if (!preg_match('/;\s*HttpOnly(?:;|$)/i',$line)) { $line.='; HttpOnly'; }
+        if (is_ssl() && !preg_match('/;\s*Secure(?:;|$)/i',$line)) { $line.='; Secure'; }
+        return $line;
     }
 
     public static function rest($response,$server,\WP_REST_Request $request)

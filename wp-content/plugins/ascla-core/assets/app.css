@@ -2252,7 +2252,6 @@ output.view-loading{display:block}
 
 
 
-
 #ascla-root .admin-hero>div:last-child{display:flex;gap:10px;flex-wrap:wrap}
 
 #ascla-root .eyebrow{font-size:10px;letter-spacing:1.6px;font-weight:700;color:var(--blue)}
@@ -2261,11 +2260,7 @@ output.view-loading{display:block}
 
 
 
-
-
-
 #ascla-root .admin-tab svg{width:17px;height:17px}
-
 
 
 
@@ -3146,7 +3141,6 @@ html[data-ascla-theme="light"] #ascla-root .hero-art { opacity: .5; }
 
 html[data-ascla-theme="dark"] #ascla-root .completion-ring::after { background: #17222d; }
 
-
 /* v1.9.18 · LinkedIn-style location autocomplete and dual ASCLA branding */
 #ascla-root .location-combobox { position:relative; z-index:3; }
 #ascla-root .location-combobox.is-open { z-index:24; }
@@ -3179,7 +3173,6 @@ html[data-ascla-theme="dark"] #ascla-root .location-input-wrap > input:disabled{
 
 @media(max-width:1190px) and (min-width:761px){#ascla-root .brand{width:168px;height:50px}}
 
-
 /* v1.9.19 · autofill isolation and transparent dual-brand treatment */
 #ascla-root .header-brand{width:150px;height:48px;background:transparent !important;border-radius:0;padding:0 !important;box-sizing:border-box;}
 #ascla-root .header-brand .brand-logo-inverse { display:none; }
@@ -3187,7 +3180,6 @@ html[data-ascla-theme="dark"] #ascla-root .header-brand .brand-logo-normal { dis
 html[data-ascla-theme="dark"] #ascla-root .header-brand .brand-logo-inverse { display:block; }
 #ascla-root .brand{width:198px;height:58px;aspect-ratio:auto;margin-bottom:18px;}
 #ascla-root .brand-sub { padding-top:2px; margin-top:2px; }
-
 
 /* v1.9.20 · Administración visual refresh + language control */
 .ascla-admin .ascla-header{position:sticky;top:32px;z-index:90;box-shadow:0 1px 0 rgba(20,63,91,.08),0 8px 24px rgba(19,57,80,.05)}
@@ -3203,9 +3195,7 @@ html[data-ascla-theme="dark"] #ascla-root .header-brand .brand-logo-inverse { di
 #ascla-root .admin-hero::after{content:"";position:absolute;z-index:-1;width:330px;height:330px;border:1px solid rgba(255,255,255,.13);border-radius:50%;right:-120px;top:-185px;box-shadow:0 0 0 54px rgba(255,255,255,.04),0 0 0 108px rgba(255,255,255,.025)}
 
 
-
 #ascla-root .admin-hero-copy{min-width:0}
-
 
 #ascla-root .admin-hero .eyebrow{color:#bce9f7;}
 #ascla-root .admin-hero-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
@@ -3374,7 +3364,6 @@ html[data-ascla-theme="dark"] #ascla-root .turnstile-protection-options>strong{c
   #ascla-root .demo-settings-card{grid-template-columns:44px minmax(0,1fr)}
   #ascla-root .demo-settings-card>.btn{grid-column:1/-1;width:100%}
 }
-
 
 /* v1.9.22 · Configuración, auditoría y estados oscuros */
 #ascla-root .status.accepted{color:#23765e;background:#e5f6ee;border:1px solid #c4eadb}
@@ -3557,7 +3546,6 @@ html[data-ascla-theme="dark"] #ascla-root .chat-request-banner.outgoing { backgr
   .chat-title-actions { width: 100%; justify-content: flex-start; }
 }
 
-
 /* Messaging 1.9.32: separate message requests and group information menu */
 .chat-sidebar-tabs {
   display: grid;
@@ -3626,7 +3614,6 @@ html[data-ascla-theme="dark"] #ascla-root .chat-request-banner.outgoing { backgr
 .group-info-section { margin-top: 18px; }
 .group-info-section h4 { margin: 0 0 9px; font-size: 12px; }
 
-
 .group-info-member:last-child { border-bottom: 0; }
 .group-info-member > div { min-width: 0; flex: 1; }
 .group-info-member strong, .group-info-member small { display: block; }
@@ -3641,7 +3628,6 @@ html[data-ascla-theme="dark"] #ascla-root .request-pill { background: #3b321c; c
   .chat-sidebar-tabs { grid-template-columns: 1fr 1fr; }
   .group-info-head { align-items: flex-start; }
 }
-
 
 /* Messaging 1.9.33: cleaner authorized state and richer group member actions */
 .conversation-request-actions-authorized {
@@ -3876,7 +3862,6 @@ html[data-ascla-theme="dark"] #ascla-root .admin-user-invite-box .check{color:#d
 html[data-ascla-theme="dark"] #ascla-root .admin-user-invite-box p{color:#9fb3be}
 @media(max-width:640px){#ascla-root .admin-user-create-head{align-items:flex-start}}
 
-
 /* ASCLA 1.9.48 · cumpleaños privado y celebración en la comunidad */
 .birthday-privacy-note{display:flex;align-items:flex-start;gap:8px;margin-top:-2px}.birthday-privacy-note svg{width:16px;height:16px;flex:0 0 auto;margin-top:2px;color:#3483ad}.hero.hero-birthday{position:relative;overflow:hidden;background:linear-gradient(132deg,#173f67 0%,#176a91 58%,#2584a2 100%)}.hero.hero-birthday:before,.hero.hero-birthday:after{content:"";position:absolute;border-radius:50%;background:#ffffff12;pointer-events:none}.hero.hero-birthday:before{width:190px;height:190px;right:4%;top:-72px}.hero.hero-birthday:after{width:120px;height:120px;right:26%;bottom:-62px}.birthday-celebration{position:relative;overflow:hidden;text-align:center;padding:26px 24px 22px;border:1px solid #dceaf3;border-radius:18px;background:linear-gradient(155deg,#f8fcff 0%,#eef8fc 58%,#fffaf0 100%)}.birthday-celebration .birthday-emblem{width:72px;height:72px;margin:0 auto 13px;display:grid;place-items:center;border-radius:22px;background:#fff;box-shadow:0 10px 28px #1a628523;font-size:36px}.birthday-celebration h3{margin:0 0 8px;color:#193f60;font-size:22px}.birthday-celebration p{max-width:520px;margin:0 auto;color:#587084;line-height:1.65}.birthday-signature{margin-top:15px;color:#1d6f96;font-weight:700}.birthday-confetti span{position:absolute;width:8px;height:18px;border-radius:4px;background:#2c8bb3;transform:rotate(18deg)}.birthday-confetti span:nth-child(1){left:8%;top:16%;background:#e5a93f;transform:rotate(-28deg)}.birthday-confetti span:nth-child(2){left:20%;top:7%;background:#5aa678;transform:rotate(38deg)}.birthday-confetti span:nth-child(3){right:15%;top:10%;background:#cf6d80;transform:rotate(22deg)}.birthday-confetti span:nth-child(4){right:6%;top:28%;background:#6e7fc0;transform:rotate(-38deg)}.birthday-confetti span:nth-child(5){left:10%;bottom:13%;background:#8d74b9;transform:rotate(54deg)}html[data-ascla-theme="dark"] .birthday-celebration{border-color:#314757;background:linear-gradient(155deg,#172631,#13222c 58%,#28251d 100%)}html[data-ascla-theme="dark"] .birthday-celebration h3{color:#e6f4fb}html[data-ascla-theme="dark"] .birthday-celebration p{color:#a9bdca}@media(max-width:640px){.birthday-celebration{padding:22px 16px 18px}.birthday-celebration h3{font-size:19px}}
 
@@ -3921,14 +3906,13 @@ html[data-ascla-theme="dark"] #ascla-root .live-toast-close:hover,html[data-ascl
 /* Administrative participation dashboard (1.10.1). */
 #ascla-root .stats-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:end;margin:22px 0}
 #ascla-root .stats-filters .field{min-width:0;margin:0}
-#ascla-root .stats-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}
-#ascla-root .stats-coverage{display:flex;flex-direction:column;gap:5px;padding:16px 20px;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:12px;background:var(--surface);margin-bottom:20px}
+
 #ascla-root .stats-coverage span{color:var(--muted);font-size:13px}
 #ascla-root .stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-#ascla-root .stats-metric{display:flex;flex-direction:column;gap:10px;margin:0;padding:20px}
+
 #ascla-root .stats-metric>span{font-size:13px;font-weight:600;color:var(--muted)}
 #ascla-root .stats-metric>strong{font-size:32px;line-height:1.2;color:var(--ink)}
-#ascla-root .stats-metric>small{font-size:12px;color:var(--muted);line-height:1.5}
+
 #ascla-root .stats-section{margin-top:20px;min-width:0}
 #ascla-root .stats-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
 #ascla-root .stats-table small{display:block;margin-top:5px;color:var(--muted);font-size:12px;font-weight:400}
@@ -3943,15 +3927,14 @@ html[data-ascla-theme="dark"] #ascla-root .live-toast-close:hover,html[data-ascl
 #ascla-root .stats-bar{display:grid;grid-template-columns:minmax(120px,1fr) 2fr 40px;gap:16px;align-items:center;font-size:13px}
 #ascla-root .stats-bar>div{height:10px;background:var(--blue-soft);border-radius:6px;overflow:hidden}
 #ascla-root .stats-bar i{display:block;height:100%;background:var(--blue);border-radius:6px}
-#ascla-root .stats-ai-summary{display:flex;flex-wrap:wrap;gap:20px;margin:22px 0;padding:16px;border:1px solid var(--line);border-radius:12px}
-#ascla-root .stats-ai-summary strong{color:var(--ink)}
+
 #ascla-root .stats-roster .card{margin:16px 0;padding:18px}
 #ascla-root .stats-manual-fields{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:end}
 #ascla-root .stats-manual-fields>.btn{grid-column:1/-1;justify-self:start}
-#ascla-root .stats-attendance-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:300px}
+
 #ascla-root .stats-attendance-row input{width:86px}
 #ascla-root .stats-attendance-row select{width:140px}
-#ascla-root .stats-complete{display:grid;gap:16px;margin-top:22px;padding:18px;border:1px solid var(--line);border-radius:12px}
+
 #ascla-root #stats-csv-preview{max-height:440px;overflow:auto;margin-top:15px}
 @media(max-width:1100px){#ascla-root .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:680px){#ascla-root .stats-filters,#ascla-root .stats-manual-fields{grid-template-columns:1fr}#ascla-root .stats-grid{gap:10px}#ascla-root .stats-metric{padding:15px}#ascla-root .stats-metric>strong{font-size:26px}#ascla-root .stats-tabs .btn{flex:1 1 44%;font-size:12px}#ascla-root .stats-bar{grid-template-columns:120px 1fr 30px;gap:8px}#ascla-root .stats-section{padding:16px}}
@@ -4048,7 +4031,6 @@ html[data-ascla-theme="dark"] #ascla-root .directory-pagination-summary select {
     flex-direction: column;
   }
 }
-
 
 /* Profile tabs: split the editing experience into focused, shorter sections. */
 #ascla-root .profile-tabs{
@@ -4327,7 +4309,7 @@ html[data-ascla-theme="dark"] #ascla-root .recommendation-low-match p{color:#d8c
 #ascla-root .directory-results-heading{margin-bottom:4px;flex-wrap:wrap}
 #ascla-root .directory-visibility-note{margin:0 0 20px}
 #ascla-root .cards.directory{grid-template-columns:repeat(4,minmax(0,1fr));align-items:stretch}
-#ascla-root .directory .member-card{padding:22px;min-width:0}
+
 #ascla-root .directory .member-card h3{font-size:16px}
 #ascla-root .directory .member-card .role,#ascla-root .directory .member-card .company{font-size:13px;overflow-wrap:anywhere}
 #ascla-root .directory .member-card .connection-controls{min-height:0}
@@ -4691,7 +4673,7 @@ html[data-ascla-theme="dark"] #ascla-root .ally-state-active { color:#8ed8b6; ba
 #ascla-root .profile-summary>div{min-width:0;max-width:100%;overflow-wrap:anywhere}
 #ascla-root .directory-admin-actions{display:grid;gap:6px;width:100%}
 #ascla-root .directory-admin-actions .btn{margin:0;width:100%}
-#ascla-root .directory .member-card{min-height:0}
+#ascla-root .directory .member-card{padding:22px;min-width:0;min-height:0}
 #ascla-root .connection-pending{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:36px;padding-left:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--muted)}
 #ascla-root .connection-sent{display:inline-flex;align-items:center;gap:6px;font-size:11px;line-height:1.35;text-align:left}
 #ascla-root .connection-sent svg{width:14px;height:14px;flex-shrink:0;color:var(--blue)}
@@ -4828,7 +4810,7 @@ html[data-ascla-theme="dark"] #ascla-root .support-status-filter.active,html[dat
 #ascla-root .stats-filter-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
 #ascla-root .stats-filter-footer p{margin:0}
 #ascla-root [data-stats-error]:not([hidden]){margin-top:14px;padding:12px;border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:8px;font-size:13px}
-#ascla-root .stats-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:24px 0 18px}
+#ascla-root .stats-tabs{flex-wrap:wrap;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:24px 0 18px}
 #ascla-root .stats-view-button{display:flex;align-items:start;gap:10px;text-align:left;padding:15px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);min-width:0}
 #ascla-root .stats-view-button:hover{border-color:var(--blue)}
 #ascla-root .stats-view-button.selected{background:var(--blue-soft);border-color:var(--blue)}
@@ -4837,7 +4819,7 @@ html[data-ascla-theme="dark"] #ascla-root .support-status-filter.active,html[dat
 #ascla-root .stats-view-button small{display:block;font-size:11px;line-height:1.5;color:var(--muted);margin-top:5px}
 #ascla-root .stats-view-icon{flex-shrink:0;color:var(--blue)}
 #ascla-root .stats-view-icon svg{width:19px;height:19px}
-#ascla-root .stats-coverage{display:grid;grid-template-columns:minmax(0,1fr) minmax(100px,180px) auto;align-items:center;gap:20px;border-left:1px solid var(--line);padding:18px 20px;margin-bottom:28px;background:var(--surface)}
+#ascla-root .stats-coverage{flex-direction:column;border:1px solid var(--line);border-radius:12px;display:grid;grid-template-columns:minmax(0,1fr) minmax(100px,180px) auto;align-items:center;gap:20px;border-left:1px solid var(--line);padding:18px 20px;margin-bottom:28px;background:var(--surface)}
 #ascla-root .stats-coverage-copy{display:flex;align-items:center;gap:12px;min-width:0}
 #ascla-root .stats-coverage-copy strong{font-size:13px}
 #ascla-root .stats-coverage-copy p{font-size:12px;color:var(--muted);margin:5px 0 0}
@@ -4851,14 +4833,14 @@ html[data-ascla-theme="dark"] #ascla-root .support-status-filter.active,html[dat
 #ascla-root .stats-view-intro p,#ascla-root .stats-subheading p{margin:7px 0 0;color:var(--muted);font-size:13px}
 #ascla-root .stats-grid.stats-primary{grid-template-columns:repeat(4,minmax(0,1fr))}
 #ascla-root .stats-grid.stats-secondary{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:14px}
-#ascla-root .stats-metric{gap:12px;padding:20px;box-shadow:none;min-width:0}
+#ascla-root .stats-metric{display:flex;flex-direction:column;margin:0;gap:12px;padding:20px;box-shadow:none;min-width:0}
 #ascla-root .stats-metric-label{display:flex;align-items:center;gap:9px;color:var(--ink);font-size:12px;font-weight:600}
 #ascla-root .stats-metric-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;border-radius:10px;background:var(--blue-soft);color:var(--blue)}
 #ascla-root .stats-metric-icon svg{width:18px;height:18px}
 #ascla-root .stats-primary .stats-metric>strong{font-size:34px;letter-spacing:-1px}
 #ascla-root .stats-secondary .stats-metric>strong{font-size:26px}
 #ascla-root .stats-secondary .stats-metric-icon{width:28px;height:28px}
-#ascla-root .stats-metric>small{font-size:12px;line-height:1.6}
+#ascla-root .stats-metric>small{color:var(--muted);font-size:12px;line-height:1.6}
 #ascla-root .stats-community{margin-top:30px}
 #ascla-root .stats-subheading h3,#ascla-root .stats-subheading h4{margin:0;font-size:16px}
 #ascla-root .stats-help{margin:18px 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
@@ -4897,9 +4879,9 @@ html[data-ascla-theme="dark"] #ascla-root .support-status-filter.active,html[dat
 #ascla-root .stats-ai-callout>div{flex:1;min-width:0}
 #ascla-root .stats-ai-callout strong{font-size:14px}
 #ascla-root .stats-ai-callout p{font-size:12px;line-height:1.6;color:var(--muted);margin:6px 0 0}
-#ascla-root .stats-ai-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+#ascla-root .stats-ai-summary{flex-wrap:wrap;margin:22px 0;padding:16px;border:1px solid var(--line);border-radius:12px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 #ascla-root .stats-ai-summary>div{display:grid;gap:5px}
-#ascla-root .stats-ai-summary strong{font-size:24px}
+#ascla-root .stats-ai-summary strong{color:var(--ink);font-size:24px}
 #ascla-root .stats-ai-summary span{font-size:12px;color:var(--muted)}
 #ascla-root .stats-roster-heading h3{margin:0 0 10px;font-size:18px}
 #ascla-root .stats-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;list-style:none;counter-reset:stats-step;padding:0;margin:22px 0}
@@ -4920,7 +4902,7 @@ html[data-ascla-theme="dark"] #ascla-root .support-status-filter.active,html[dat
 #ascla-root .stats-definitions{display:grid;gap:14px;margin:0}
 #ascla-root .stats-definitions dt{font-size:13px;font-weight:600;color:var(--ink)}
 #ascla-root .stats-definitions dd{font-size:12px;margin:4px 0 0}
-#ascla-root .stats-complete{background:var(--blue-soft);gap:14px}
+#ascla-root .stats-complete{display:grid;margin-top:22px;padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--blue-soft);gap:14px}
 #ascla-root .stats-complete h4{margin:0;font-size:16px}
 #ascla-root .stats-complete p{font-size:12px;line-height:1.6;margin:0}
 #ascla-root .stats-complete>.btn{justify-self:start}
@@ -4931,7 +4913,7 @@ html[data-ascla-theme="dark"] #ascla-root .support-status-filter.active,html[dat
 #ascla-root .stats-completion-done p{font-size:12px;margin:6px 0 0;color:var(--muted)}
 #ascla-root .stats-threshold{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin-top:14px}
 #ascla-root .stats-threshold>.field{margin:0;max-width:200px}
-#ascla-root .stats-attendance-row{align-items:end}
+#ascla-root .stats-attendance-row{display:flex;gap:8px;flex-wrap:wrap;min-width:300px;align-items:end}
 #ascla-root .stats-attendance-row>label{display:grid;gap:5px;font-size:11px;color:var(--muted)}
 #ascla-root .stats-attendance-row select,#ascla-root .stats-attendance-row input{min-height:38px;padding:8px 10px;border:1px solid var(--control-border);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;font-size:12px}
 #ascla-root .stats-attendance-row>small{padding-bottom:9px}

@@ -215,11 +215,7 @@ final class ContentPublishing
         }
         foreach (['frameworks','norms','concepts','tags','conclusions'] as $field) {
             if (!isset($meta[$field]) || !is_array($meta[$field])) { continue; }
-            $meta[$field]=array_values(array_filter($meta[$field],static function($value){
-                if (!is_string($value)) { return true; }
-                $plain=mb_strtolower(remove_accents(trim($value," \t\n\r\0\x0B.,;:–—-")));
-                return $plain!=='' && !in_array($plain,['participante','participantes','dato reservado','identidad reservada','informacion reservada','una persona','persona'],true);
-            }));
+            $meta[$field]=array_values(array_filter($meta[$field],[\ASCLA\Core\Domain\EntityRedactor::class,'meaningfulValue']));
         }
         if ($post->post_type!=='ascla_resource' || empty($meta['video_id'])) { return $meta; }
         foreach (['summary','technical_note'] as $field) {

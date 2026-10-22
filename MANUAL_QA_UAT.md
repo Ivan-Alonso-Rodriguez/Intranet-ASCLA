@@ -124,6 +124,8 @@ Cuando la terminal solicite el token de ASCLA-QA, pégalo allí y pulsa Enter. L
 
 El script exige rama `qa`, checkout limpio, reportes presentes y `coverage/source-revision` igual al commit actual. Ejecuta SonarScanner en Docker con la configuración de [sonar-project.properties](sonar-project.properties), importa cobertura PHP/JavaScript y espera el Quality Gate hasta cinco minutos. No ejecuta pruebas contra WordPress ni despliega.
 
+El directorio de trabajo del scanner se conserva en `.scannerwork/`, ignorado por Git. Su `report-task.txt` permite recuperar el identificador de procesamiento y consultar el análisis exacto después de que Docker retire el contenedor. Conserva ese archivo con el log privado y registra la revisión; no atribuyas el estado de otro análisis a esta ejecución.
+
 ### Leer y guardar el resultado
 
 1. Abre el enlace al análisis que devuelve el scanner y verifica **ASCLA-QA**, fecha y revisión analizada.

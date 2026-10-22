@@ -286,23 +286,6 @@ final class Login
 
     public static function redirect(string $redirect, string $requested, $user): string
     {
-        if (!$user instanceof \WP_User || !user_can($user, 'ascla_access')) {
-            return $redirect;
-        }
-        $fallback = App::homeUrl((int)$user->ID);
-        $target = wp_validate_redirect($requested, $fallback);
-        if (Access::isAdministrator((int)$user->ID)) {
-            if ($requested!=='' && str_starts_with($target,admin_url()) && user_can($user,'manage_options')) { return $target; }
-            if ($requested==='' || url_to_postid($target)===url_to_postid(Catalog::url('intranet'))) { return $fallback; }
-        }
-        if(user_can($user,'ascla_admin_area') && str_starts_with($target,admin_url())){
-            parse_str((string)wp_parse_url($target,PHP_URL_QUERY),$query);
-            $page=is_string($query['page']??null)?sanitize_key($query['page']):'';
-            return App::adminUrl($page!==''?['page'=>$page]:[]);
-        }
-        // Only ASCLA page IDs may receive member redirects, including query-string permalinks.
-        $pageId = url_to_postid($target);
-        return $pageId && in_array($pageId, array_map('intval', get_option('ascla_pages', [])), true)
-            ? $target : $fallback;
+        return LoginRedirect::resolve($redirect,$requested,$user);
     }
 }

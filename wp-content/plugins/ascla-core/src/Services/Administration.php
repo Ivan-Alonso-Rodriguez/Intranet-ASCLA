@@ -124,20 +124,27 @@ final class Administration
             $args['offset']=$offset;$users=(new \WP_User_Query($args))->get_results();$offset+=200;
             foreach($users as $user) {
                 $profile=(array)get_user_meta($user->ID,'_ascla_profile',true);
-                if($country!=='' && self::normalizeSearch((string)($profile['country']??''))!==$country) { continue; }
-                foreach($selected as $key=>$values) {
-                    if($values && !array_intersect($values,(array)($profile[$key]??[]))) { continue 2; }
-                }
-                if($query!=='') {
-                    $values=[$user->display_name,$user->user_login,$user->user_email,$user->first_name,$user->last_name];
-                    foreach(['first_name','last_name','position','company','bio','experience'] as $key) { $values[]=$profile[$key]??''; }
-                    $values[]=wp_json_encode(Profiles::labels($profile),JSON_UNESCAPED_UNICODE);
-                    if(!str_contains(self::normalizeSearch(implode(' ',$values)),$query)) { continue; }
-                }
-                $ids[]=(int)$user->ID;
+                if(self::userMatchesFilters($user,$profile,$country,$selected,$query)) { $ids[]=(int)$user->ID; }
             }
         } while(count($users)===200);
         return $ids;
+    }
+
+    private static function userMatchesFilters(\WP_User $user,array $profile,string $country,array $selected,string $query): bool
+    {
+        if($country!=='' && self::normalizeSearch((string)($profile['country']??''))!==$country) { return false; }
+        foreach($selected as $key=>$values) {
+            if($values && !array_intersect($values,(array)($profile[$key]??[]))) { return false; }
+        }
+        return $query==='' || str_contains(self::userSearchText($user,$profile),$query);
+    }
+
+    private static function userSearchText(\WP_User $user,array $profile): string
+    {
+        $values=[$user->display_name,$user->user_login,$user->user_email,$user->first_name,$user->last_name];
+        foreach(['first_name','last_name','position','company','bio','experience'] as $key) { $values[]=$profile[$key]??''; }
+        $values[]=wp_json_encode(Profiles::labels($profile),JSON_UNESCAPED_UNICODE);
+        return self::normalizeSearch(implode(' ',$values));
     }
 
     private static function createUserLocked(array $account): array
@@ -254,12 +261,7 @@ final class Administration
         $profile=Profiles::details($previousProfile,$input);
         $profile['first_name']=$first;$profile['last_name']=$last;
         $profile['phone']=$phone;$profile['phone_visibility']=$phoneVisibility;
-        foreach (['position','company'] as $field) {
-            $profile[$field]=Access::text($input[$field]??($previousProfile[$field]??''),200);
-            if ($profile[$field]!==($previousProfile[$field]??'')) {
-                ProfileValidation::validateRequired([$field=>$profile[$field]]);
-            }
-        }
+        $profile=self::professionalFields($profile,$previousProfile,$input);
         $profile=MemberTypes::profile($profile,$input,$id);
         $profile['birth_date']=Birthdays::normalize($input['birth_date']??($previousProfile['birth_date']??''));
         $changed=ProfessionalChanges::changed($previousProfile,$profile);
@@ -281,6 +283,15 @@ final class Administration
         \ASCLA\Core\Repositories\Transaction::afterCommit(static fn()=>Access::member($id)?Matching::refreshBatch($id):null);
         Birthdays::celebrate($id);
         return self::user($id);
+    }
+
+    private static function professionalFields(array $profile,array $previousProfile,array $input): array
+    {
+        foreach (['position','company'] as $field) {
+            $profile[$field]=Access::text($input[$field]??($previousProfile[$field]??''),200);
+            if ($profile[$field]!==($previousProfile[$field]??'')) { ProfileValidation::validateRequired([$field=>$profile[$field]]); }
+        }
+        return $profile;
     }
 
     public static function deleteUser(int $id): array

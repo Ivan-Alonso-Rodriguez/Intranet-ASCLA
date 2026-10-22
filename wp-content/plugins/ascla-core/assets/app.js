@@ -683,19 +683,26 @@
       countryInput.focus();
       throw new Error(T("Selecciona un país de la lista de sugerencias."));
     }
-    countryValue.value = country ? country.es : (countryChanged ? '' : countryInput.value.trim());
+    countryValue.value = selectedCountryValue(country, countryChanged, countryInput.value.trim());
     if (!countryInput.value.trim()) cityValue.value = '';
     if (cityInput.value.trim() && country && (cityChanged || countryChanged)) {
-      const result = await loadCitySuggestions(form, true);
-      if (result?.available && !result.exact) {
-        cityInput.focus();
-        throw new Error(T("Selecciona una ciudad real de las sugerencias para el país elegido."));
-      }
-      cityValue.value = '';
-      if (result?.available === false || result?.exact) cityValue.value = cityInput.value.trim();
+      await validateChangedCity(form, cityInput, cityValue);
     } else if (!cityInput.value.trim()) {
       cityValue.value = '';
     }
+  }
+  function selectedCountryValue(country, changed, value) {
+    if (country) return country.es;
+    return changed ? '' : value;
+  }
+  async function validateChangedCity(form, input, value) {
+    const result = await loadCitySuggestions(form, true);
+    if (result?.available && !result.exact) {
+      input.focus();
+      throw new Error(T("Selecciona una ciudad real de las sugerencias para el país elegido."));
+    }
+    value.value = '';
+    if (result?.available === false || result?.exact) value.value = input.value.trim();
   }
   function maybeBirthdayGreeting() {
     const birthday = S.boot?.birthday;
@@ -836,7 +843,14 @@
     if (root.querySelector(".ascla-sidebar")) { refreshNotifications(); return; }
     const p = S.boot.me;
     const homeUrl = S.boot.admin ? C.adminUrl : C.pages.intranet.url;
-    const links = navOrder.filter(k=>!S.boot.admin||!['directorio','mensajeria','contacto'].includes(k)).map((k) => {const adminHome=S.boot.admin&&k==='intranet';return `<a class="nav-link ${(adminHome?S.page==='admin':S.page===k) ? "active" : ""}" href="${E(adminHome?homeUrl:C.pages[k].url)}">${I(adminHome?'settings':pageIcon[k])}<span>${E(adminHome?T('Administración'):C.pages[k].label)}</span></a>`;}).join("");
+    const links = navOrder.filter(k=>!S.boot.admin||!['directorio','mensajeria','contacto'].includes(k)).map(k => {
+      const adminHome=S.boot.admin && k==='intranet';
+      const active=adminHome ? S.page==='admin' : S.page===k;
+      const url=adminHome ? homeUrl : C.pages[k].url;
+      const icon=adminHome ? 'settings' : pageIcon[k];
+      const label=adminHome ? T('Administración') : C.pages[k].label;
+      return `<a class="nav-link ${active ? 'active' : ''}" href="${E(url)}">${I(icon)}<span>${E(label)}</span></a>`;
+    }).join('');
     const adminLink = S.boot.admin_area && !S.boot.admin ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}${E(T("Administración"))}</a>` : "";
     root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(homeUrl)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></a><div class="brand-sub">${E(T("COMUNIDAD DE ASOCIADOS"))}</div><nav aria-label="${E(T("Navegación principal"))}">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}${E(T("Cerrar sesión"))}</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(homeUrl)}" aria-label="${E(T("ASCLA inicio"))}"><img class="brand-logo-normal" src="${E(C.logo)}" alt="ASCLA"><img class="brand-logo-inverse" src="${E(C.logoWhite || C.logo)}" alt="" aria-hidden="true"></a>${btn(I("menu"), "menu", ("aria-label=\"" + (E(T("Abrir navegación"))) + "\""), "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="${E(T("Buscar en ASCLA"))}" placeholder="${E(T("Buscar en tu comunidad…"))}" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${C.page === "admin" ? adminLanguageControl() + btn(themeIcons(), "theme-menu", ("aria-label=\"" + (E(T("Apariencia"))) + "\""), "icon-button theme-button") : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", ("aria-label=\"" + (E(T("Notificaciones"))) + "\""), "icon-button")}<a class="header-profile" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || T("Comunidad ASCLA"))}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap" tabindex="-1"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || T("Administración"))}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · ${E(T("Conectamos conocimiento, fortalecemos la gobernanza."))}${S.boot.demo ? " · " + E(T("Datos ficticios de demostración.")) : ""}</div></main></div>`;
     refreshNotifications();
@@ -1301,12 +1315,13 @@
   async function directory() {
     const list = await api("profiles?" + directoryQuery());
     S.list = list;
+    const connections = S.boot.me.community_participant===false ? '' : '<section class="card connections-panel" id="connections-panel" aria-label="'+E(T('Mis conexiones'))+'"></section>';
     content().innerHTML =
       heading(
         "Tu red profesional",
         "Conecta con quienes comparten tus retos, intereses y conocimientos.",
       ) +
-      `<div class="directory-view">${directoryFilters()}${S.boot.me.community_participant===false?'':`<section class="card connections-panel" id="connections-panel" aria-label="${E(T('Mis conexiones'))}"></section>`}<div class="section-top directory-results-heading"><h2>${list.total} ${E(T('perfiles en la comunidad'))}</h2>${link('perfil','Editar mi perfil','ghost small')}</div><p class="directory-visibility-note private-note">${E(T('Se muestran miembros activos que han elegido aparecer en el directorio.'))}</p><div class="cards directory">${list.items.map(memberCard).join('')}</div>${list.items.length ? '' : empty('No encontramos perfiles','Prueba con otro nombre, país o interés.')}${directoryPager(list)}</div>`;
+      `<div class="directory-view">${directoryFilters()}${connections}<div class="section-top directory-results-heading"><h2>${list.total} ${E(T('perfiles en la comunidad'))}</h2>${link('perfil','Editar mi perfil','ghost small')}</div><p class="directory-visibility-note private-note">${E(T('Se muestran miembros activos que han elegido aparecer en el directorio.'))}</p><div class="cards directory">${list.items.map(memberCard).join('')}</div>${list.items.length ? '' : empty('No encontramos perfiles','Prueba con otro nombre, país o interés.')}${directoryPager(list)}</div>`;
     await refreshConnectionsPanel();
   }
   async function member(id) {
@@ -1667,7 +1682,7 @@
     return `<fieldset class="content-date-range"><legend>${E(T(label))}</legend><label>${E(T("Desde fecha"))}<input type="date" name="after" value="${E(S.filter.after || "")}"></label><label>${E(T("Hasta fecha"))}<input type="date" name="before" value="${E(S.filter.before || "")}"></label></fieldset>`;
   }
   function listingTabs(type, canWrite) {
-    const allLabel = type === "event" ? "Próximos eventos" : type === "ally" ? "Catálogo" : "Comunidad";
+    const allLabel = {event: "Próximos eventos", ally: "Catálogo"}[type] || "Comunidad";
     const allButton = btn(allLabel, "filter-all", "", "tab " + (!S.filter.mine && !S.filter.drafts && !S.filter.past && !S.filter.comments ? "active" : ""));
     const pastClass = S.filter.past ? "active" : "";
     const mineClass = S.filter.mine && !S.filter.drafts ? "active" : "";
@@ -1676,7 +1691,8 @@
     const commentsClass=S.filter.comments?'active':'';
     const mineButton = type !== 'ally' && (canWrite || type==='topic') ? btn(mineLabel, "filter-mine", "", "tab " + mineClass) : "";
     const commentsButton=type==='topic'?btn('Mis comentarios','filter-comments','','tab '+commentsClass):'';
-    const draftsButton = canWrite ? btn('Mis borradores', 'filter-drafts', '', 'tab ' + (S.filter.drafts ? 'active' : '')) : '';
+    const draftsClass = S.filter.drafts ? 'active' : '';
+    const draftsButton = canWrite ? btn('Mis borradores', 'filter-drafts', '', 'tab ' + draftsClass) : '';
     return `<div class="tabs">${allButton}${pastButton}${mineButton}${draftsButton}${commentsButton}</div>`;
   }
   function listingDrafts(items) {
@@ -1696,9 +1712,7 @@
     const emptyText = S.filter.q ? "Prueba una búsqueda diferente." : "Comparte un aporte o vuelve pronto para ver novedades.";
     return empty("Aún no hay contenido aquí", emptyText);
   }
-  async function listing() {
-    const type = typeByPage[S.page];
-    if (type==='topic' && S.filter.comments) { await ownComments();return; }
+  function listingQuery(type) {
     const params = {...S.filter};
     delete params.drafts;
     if (type === "topic") params.include_forums = 1;
@@ -1712,6 +1726,12 @@
       delete params.past;
     }
     if(type==='ally' && !S.filter.drafts){params.status='publish';params.mine=false;}
+    return params;
+  }
+  async function listing() {
+    const type = typeByPage[S.page];
+    if (type==='topic' && S.filter.comments) { await ownComments();return; }
+    const params = listingQuery(type);
     const [list, authors, forums] = await Promise.all([
       api("content/" + type + "?" + new URLSearchParams(params)),
       type === "resource" ? api("resource-authors") : [],
@@ -1898,7 +1918,8 @@
     if (roster.created) help="Consulta el estado actual de cada persona seleccionada. Una invitación no confirma su asistencia.";
     else if (d.meta.cancelled) help="Esta convocatoria fue cancelada. No se enviarán nuevas invitaciones.";
     const rows=people.map(person=>`<li class="micro-invitee"><span class="micro-invitee-icon" aria-hidden="true">${I("users")}</span><span class="micro-invitee-name">${E(person.available?person.name:T("Cuenta no disponible"))}</span><span class="micro-invitee-status ${person.status==='accepted'?'is-confirmed':''}">${E(T(labels[person.status] || "Estado no disponible"))}</span></li>`).join("");
-    return `<section class="micro-invitations" aria-label="${E(T("Personas seleccionadas para el microevento"))}"><div class="micro-invitations-heading"><h3>${E(T("Personas seleccionadas para el microevento"))}</h3><span class="tag">${people.length}</span></div><p class="private-note">${E(T(help))}</p>${rows?`<ul class="micro-invitee-list">${rows}</ul>`:`<p class="private-note">${E(T("Esta propuesta no tiene personas seleccionadas."))}</p>`}<p class="micro-invitations-privacy">${I("shield")} ${E(T("Solo visible para administración."))}</p></section>`;
+    const peopleMarkup=rows ? '<ul class="micro-invitee-list">'+rows+'</ul>' : '<p class="private-note">'+E(T("Esta propuesta no tiene personas seleccionadas."))+'</p>';
+    return `<section class="micro-invitations" aria-label="${E(T("Personas seleccionadas para el microevento"))}"><div class="micro-invitations-heading"><h3>${E(T("Personas seleccionadas para el microevento"))}</h3><span class="tag">${people.length}</span></div><p class="private-note">${E(T(help))}</p>${peopleMarkup}<p class="micro-invitations-privacy">${I("shield")} ${E(T("Solo visible para administración."))}</p></section>`;
   }
   async function openContentReview(id) {
     const reason = root.querySelector(`[data-form="moderate"][data-id="${Number(id)}"] [name="reason"]`)?.value || "";
@@ -2181,28 +2202,35 @@
     panel.hidden = input.value !== 'scheduled';
     panel.querySelector('input').required = !panel.hidden;
   }
+  function syncEditorInput(form, input, incompleteAllowed) {
+    if (input.name === 'publish_at') return;
+    if (input.required) input.dataset.editorRequired = 'true';
+    if (!input.dataset.editorRequired) return;
+    input.required = !incompleteAllowed;
+    const mark = input.id ? form.querySelector('label[for="' + input.id + '"] .required-mark') : null;
+    if (mark) mark.hidden = incompleteAllowed;
+    if (incompleteAllowed && requiredTextErrors.has(input)) {
+      input.setCustomValidity("");
+      requiredTextErrors.delete(input);
+    }
+  }
+  function editorPrimaryLabel(form, status, fallback) {
+    if (form.dataset.type === 'event') {
+      const labels = {draft: "Guardar borrador", scheduled: "Programar evento", pending: "Enviar a revisión"};
+      const defaultLabel = Number(form.dataset.id) ? "Guardar evento" : "Publicar evento";
+      return labels[status] || defaultLabel;
+    }
+    return status === 'draft' ? 'Guardar borrador' : fallback;
+  }
   function syncEditorRequirements(form) {
     if (form?.dataset.form !== "editor") return;
     const status = form.elements.status?.value || "draft";
     const incompleteAllowed = status === "draft";
-    for (const input of form.querySelectorAll('input,textarea,select')) {
-      if (input.name === 'publish_at') continue;
-      if (input.required) input.dataset.editorRequired = 'true';
-      if (!input.dataset.editorRequired) continue;
-      input.required = !incompleteAllowed;
-      const mark = input.id ? form.querySelector('label[for="' + input.id + '"] .required-mark') : null;
-      if (mark) mark.hidden = incompleteAllowed;
-      if (incompleteAllowed && requiredTextErrors.has(input)) {
-        input.setCustomValidity("");
-        requiredTextErrors.delete(input);
-      }
-    }
+    for (const input of form.querySelectorAll('input,textarea,select')) syncEditorInput(form, input, incompleteAllowed);
     const submit = form.querySelector("[data-editor-primary]");
     if (submit) {
       submit.dataset.editorLabel ||= submit.textContent;
-      const labels = {draft: "Guardar borrador", scheduled: "Programar evento", pending: "Enviar a revisión"};
-      const label = form.dataset.type === 'event' ? labels[status] || (Number(form.dataset.id) ? "Guardar evento" : "Publicar evento") : status === 'draft' ? 'Guardar borrador' : submit.dataset.editorLabel;
-      submit.textContent = T(label);
+      submit.textContent = T(editorPrimaryLabel(form, status, submit.dataset.editorLabel));
     }
     const draftAction = form.querySelector('[data-editor-draft]');
     if (draftAction) draftAction.hidden = status === "draft";
@@ -2278,6 +2306,12 @@
     const dialog = modal((id ? "Editar " : "Crear ") + typeLabel[type], formMarkup, true);
     syncEditorRequirements(dialog.querySelector('[data-form="editor"]'));
   }
+  function fileOwnerFilter(list, scope) {
+    return scope === "all" ? `<div class="field"><label for="file-owner">${E(T("Usuario propietario"))}</label><select id="file-owner" name="owner"><option value="0">${E(T("Todos los usuarios"))}</option>${(list.owners || []).map(u => ("<option value=\"" + (Number(u.id)) + "\" " + (Number(S.files.owner)===Number(u.id)?"selected":"") + ">" + (E(u.name)) + " · " + (E(u.email)) + "</option>")).join("")}</select></div>` : "";
+  }
+  function fileLibraryPager(page, pages) {
+    return `<div class="pagination">${btn("Anterior", "files", ("data-page=\"" + (page-1) + "\" " + (page<=1?'disabled':'') + ""))}<span>${page} / ${pages}</span>${btn("Siguiente", "files", ("data-page=\"" + (page+1) + "\" " + (page>=pages?'disabled':'') + ""))}</div>`;
+  }
   async function files(page = 1, q = "", scope = S.files?.scope || "mine", owner = S.files?.owner || 0, inline = S.page === "admin" && S.adminTab === "archivos" && scope === "all") {
     const previousScope = S.files?.scope || "";
     scope = scope === "all" && S.boot.admin ? "all" : "mine";
@@ -2288,8 +2322,8 @@
     if (inline && !panel?.isConnected) return;
     if (page > Math.max(1, Number(list.pages))) return files(Math.max(1, Number(list.pages)), q, scope, owner, inline);
     S.files = {page, q, scope, owner: Number(list.owner || owner || 0)};
-    const ownerFilter = scope === "all" ? `<div class="field"><label for="file-owner">${E(T("Usuario propietario"))}</label><select id="file-owner" name="owner"><option value="0">${E(T("Todos los usuarios"))}</option>${(list.owners || []).map(u => ("<option value=\"" + (Number(u.id)) + "\" " + (Number(S.files.owner)===Number(u.id)?"selected":"") + ">" + (E(u.name)) + " · " + (E(u.email)) + "</option>")).join("")}</select></div>` : "";
-    const markup = `<form data-form="file-search" class="filters file-library-filters"><div class="field"><label for="file-query">${E(T("Buscar archivos"))}</label><input id="file-query" name="q" aria-label="${E(T("Buscar archivos"))}" placeholder="${E(T("Buscar por nombre…"))}" value="${E(q)}"></div>${ownerFilter}<button class="btn">${E(T("Buscar"))}</button></form><p class="private-note">${list.total} ${E(T("archivos"))} · ${E(T("La eliminación es permanente y retira sus referencias."))}</p><div class="file-library">${list.items.map(m => ("<article class=\"file-row\" data-file=\"" + (m.id) + "\"><div>" + (I(m.mime.startsWith('image/') ? 'gallery' : 'book')) + "<strong>" + (E(m.name)) + "</strong><small>" + (E(m.author)) + " · " + (Math.ceil((m.stored_size || m.size) / 1024)) + " KB" + (m.has_master ? " · " + E(T("incluye copia maestra optimizada")) : "") + " · " + (date(m.date)) + "</small></div><div class=\"form-actions\"><a class=\"btn small\" href=\"" + (E(m.url)) + "\" target=\"_blank\" rel=\"noopener\">" + (E(T("Abrir archivo"))) + "</a>" + (btn("Eliminar archivo", "delete-media", ("data-id=\"" + (m.id) + "\" data-name=\"" + (E(m.name)) + "\" data-library=\"true\""), "danger small")) + "</div></article>")).join("") || empty("No hay archivos")}</div><div class="pagination">${btn("Anterior", "files", ("data-page=\"" + (page-1) + "\" " + (page<=1?'disabled':'') + ""))}<span>${page} / ${list.pages}</span>${btn("Siguiente", "files", ("data-page=\"" + (page+1) + "\" " + (page>=list.pages?'disabled':'') + ""))}</div>`;
+    const ownerFilter = fileOwnerFilter(list, scope);
+    const markup = `<form data-form="file-search" class="filters file-library-filters"><div class="field"><label for="file-query">${E(T("Buscar archivos"))}</label><input id="file-query" name="q" aria-label="${E(T("Buscar archivos"))}" placeholder="${E(T("Buscar por nombre…"))}" value="${E(q)}"></div>${ownerFilter}<button class="btn">${E(T("Buscar"))}</button></form><p class="private-note">${list.total} ${E(T("archivos"))} · ${E(T("La eliminación es permanente y retira sus referencias."))}</p><div class="file-library">${list.items.map(m => ("<article class=\"file-row\" data-file=\"" + (m.id) + "\"><div>" + (I(m.mime.startsWith('image/') ? 'gallery' : 'book')) + "<strong>" + (E(m.name)) + "</strong><small>" + (E(m.author)) + " · " + (Math.ceil((m.stored_size || m.size) / 1024)) + " KB" + (m.has_master ? " · " + E(T("incluye copia maestra optimizada")) : "") + " · " + (date(m.date)) + "</small></div><div class=\"form-actions\"><a class=\"btn small\" href=\"" + (E(m.url)) + "\" target=\"_blank\" rel=\"noopener\">" + (E(T("Abrir archivo"))) + "</a>" + (btn("Eliminar archivo", "delete-media", ("data-id=\"" + (m.id) + "\" data-name=\"" + (E(m.name)) + "\" data-library=\"true\""), "danger small")) + "</div></article>")).join("") || empty("No hay archivos")}</div>${fileLibraryPager(page, list.pages)}`;
     if (inline) panel.innerHTML = `<div class="admin-section-heading"><div><span class="eyebrow">${E(T('BIBLIOTECA PRIVADA'))}</span><h2>${E(T('Archivos de la comunidad'))}</h2><p>${E(T('Consulta los archivos privados de todos los asociados y elimina los que corresponda.'))}</p></div></div><section class="card file-library-panel">${markup}</section>`;
     else modal(scope === "all" ? "Archivos de la comunidad" : "Mis archivos", markup, true);
   }
@@ -2820,13 +2854,21 @@
       return '<li><strong>'+E(label)+'</strong><span>'+E(h.actor || "")+' · '+date(h.at)+'</span>'+(h.response?'<p class="detail-body">'+E(h.response)+'</p>':'')+'</li>';
     }).join("")+'</ol></details>';
   }
+  function supportAssignment(p, staff) {
+    if (!S.boot.admin) return '';
+    const expanded=p.redacted?'open':'';
+    return '<details class="support-assignment" '+expanded+'><summary>'+E(T('Cambiar responsable'))+'</summary><form data-form="contact-assign" data-id="'+p.id+'">'+select("assignee","Responsable",[[0,"Sin responsable"],...staff.map(u=>[u.id,u.name])],p.assignee)+'<button class="btn small">'+E(T("Asignar responsable"))+'</button></form></details>';
+  }
+  function supportReply(p, state, next) {
+    if (!p.can_handle || state === 'closed') return '';
+    return '<section class="support-reply"><h3>'+E(T('Responder y actualizar estado'))+'</h3><form data-form="contact-update" data-id="'+p.id+'">'+field("response","Respuesta al asociado","","textarea",'rows="3" maxlength="10000"')+'<div class="support-reply-actions">'+select("status","Estado",[[state,requestLabels[state]],...(next?[[next,requestLabels[next]]]:[])],next || state)+'<button class="btn primary">'+E(T("Guardar atención"))+'</button></div></form></section>';
+  }
   function supportCard(p, staff) {
     const state = p.meta.request_status || "open";
     const next = {open:"progress", progress:"resolved", resolved:"closed"}[state];
     const responsible = p.can_handle ? T('Asignada a ti') : staff.find(u=>Number(u.id)===Number(p.assignee))?.name || T('Sin responsable');
-    const assignment = S.boot.admin ? '<details class="support-assignment" '+(p.redacted?'open':'')+'><summary>'+E(T('Cambiar responsable'))+'</summary><form data-form="contact-assign" data-id="'+p.id+'">'+select("assignee","Responsable",[[0,"Sin responsable"],...staff.map(u=>[u.id,u.name])],p.assignee)+'<button class="btn small">'+E(T("Asignar responsable"))+'</button></form></details>' : "";
-    const edit = p.can_handle && state !== "closed"
-      ? '<section class="support-reply"><h3>'+E(T('Responder y actualizar estado'))+'</h3><form data-form="contact-update" data-id="'+p.id+'">'+field("response","Respuesta al asociado","","textarea",'rows="3" maxlength="10000"')+'<div class="support-reply-actions">'+select("status","Estado",[[state,requestLabels[state]],...(next?[[next,requestLabels[next]]]:[])],next || state)+'<button class="btn primary">'+E(T("Guardar atención"))+'</button></div></form></section>' : "";
+    const assignment = supportAssignment(p, staff);
+    const edit = supportReply(p, state, next);
     const body = p.redacted ? '<div class="support-reserved">'+I('shield')+'<p>'+E(T("Contenido reservado al asociado y al responsable asignado."))+'</p></div>'
       : '<section class="support-message"><h3>'+E(T('Mensaje del asociado'))+'</h3><p class="request-body">'+E(p.body)+'</p></section>'+supportHistory(p)+edit;
     const archive = p.can_delete ? btn("Archivar solicitud","admin-delete",'data-kind="contact" data-id="'+p.id+'"',"small") : "";
@@ -3063,7 +3105,8 @@
       return `<h3>${E(T('Contenido reportado por la comunidad'))}</h3><p class="moderation-help">${E(T('Abre el contenido para comprobar el motivo. Marca el reporte como revisado cuando termines; esto no elimina la publicación ni el comentario.'))}</p>${pending.map(adminReportCard).join('') || empty('No hay reportes por revisar.')}${history}`;
     }
     const pending=d.pending.filter(p=>p.status==='pending'),drafts=d.pending.filter(p=>p.status==='draft');
-    const saved=drafts.length?`<details class="moderation-history" ${pending.length?'':'open'}><summary>${E(T('Borradores guardados'))} <span>${drafts.length}</span></summary><p class="moderation-help">${E(T('Están sin publicar y aún se pueden editar. No son solicitudes de aprobación.'))}</p>${moderationTable(drafts)}</details>`:'';
+    const expanded=pending.length?'':'open';
+    const saved=drafts.length?`<details class="moderation-history" ${expanded}><summary>${E(T('Borradores guardados'))} <span>${drafts.length}</span></summary><p class="moderation-help">${E(T('Están sin publicar y aún se pueden editar. No son solicitudes de aprobación.'))}</p>${moderationTable(drafts)}</details>`:'';
     return `<h3>${E(T('Publicaciones por aprobar'))}</h3><p class="moderation-help">${E(T('Abre una publicación para revisar el texto y decidir si se publica.'))}</p>${pending.length?moderationTable(pending):empty('No hay publicaciones por aprobar.')}${saved}`;
   }
   let statisticsPanel, interestImports, memberInsights, alliesView;
@@ -3080,15 +3123,23 @@
           && domains.some(domain=>url.hostname===domain || url.hostname.endsWith('.'+domain));
       } catch { valid=false; }
     }
-    input.setCustomValidity(valid?'':T(input.name==='linkedin'?'Introduce un enlace de linkedin.com.':'Introduce un enlace de x.com o twitter.com.'));
+    const message=input.name==='linkedin'?'Introduce un enlace de linkedin.com.':'Introduce un enlace de x.com o twitter.com.';
+    input.setCustomValidity(valid?'':T(message));
+  }
+  function editorialStateButton(p) {
+    if (!p.can_moderate || p.meta.publish_at || !['publish','ascla_hidden'].includes(p.status)) return '';
+    return btn(T(p.status==='publish'?'Ocultar':'Volver a publicar'),'editorial-state','data-id="'+p.id+'"','small '+(p.status==='publish'?'ghost danger':'primary'));
+  }
+  function editorialRegistryPager(list) {
+    if (list.pages<=1) return '';
+    return '<div class="admin-pager">'+btn(T('Anterior'),'editorial-page','data-page="'+(list.page-1)+'" '+(list.page===1?'disabled':''),'small')+'<span>'+list.page+' / '+list.pages+'</span>'+btn(T('Siguiente'),'editorial-page','data-page="'+(list.page+1)+'" '+(list.page===list.pages?'disabled':''),'small')+'</div>';
   }
   async function adminEditorialRegistry(panel) {
     const type=S.editorialType||'gallery',filter=S.editorialFilters||{};
     const list=await api('admin/editorial/'+type+'?'+new URLSearchParams(filter));
     if (!panel.isConnected) return;
     const rows=list.items.map(p=>{
-      const change=p.can_moderate && !p.meta.publish_at && ['publish','ascla_hidden'].includes(p.status)
-        ?btn(T(p.status==='publish'?'Ocultar':'Volver a publicar'),'editorial-state','data-id="'+p.id+'"','small '+(p.status==='publish'?'ghost danger':'primary')):'';
+      const change=editorialStateButton(p);
       const edit=p.can_edit?btn(T('Editar'),'editor','data-id="'+p.id+'" data-type="'+p.type+'"','small'):'';
       const state=p.meta.publish_at && p.status==='ascla_hidden'?status('scheduled'):status(p.status);
       return '<article class="ally-registry-row editorial-registry-row" data-editorial-record="'+p.id+'"><span class="ally-registry-logo">'+I(type==='gallery'?'gallery':'book')+'</span><div class="ally-registry-name"><h3>'+E(p.title)+'</h3><p>'+E(p.author.name)+' · '+date(p.date)+'</p></div>'+state+'<div class="form-actions">'+btn(T('Ver'),'item','data-id="'+p.id+'"','small')+edit+btn(T('Historial'),'editorial-history','data-id="'+p.id+'"','small')+change+'</div></article>';
@@ -3101,7 +3152,7 @@
       select('status','Estado',[['','Todos los estados'],['publish','Publicado'],['ascla_hidden','Oculto / programado'],['draft','Borrador'],['pending','Pendiente de revisión'],['ascla_rejected','Rechazado']],filter.status||'')+
       '<button class="btn primary" type="submit">'+E(T('Buscar'))+'</button></form><p class="private-note">'+Number(list.total)+' '+E(T('registros'))+'</p>'+
       (rows||empty('No hay contenido en esta vista','Prueba otro estado o modifica la búsqueda.'))+
-      (list.pages>1?'<div class="admin-pager">'+btn(T('Anterior'),'editorial-page','data-page="'+(list.page-1)+'" '+(list.page===1?'disabled':''),'small')+'<span>'+list.page+' / '+list.pages+'</span>'+btn(T('Siguiente'),'editorial-page','data-page="'+(list.page+1)+'" '+(list.page===list.pages?'disabled':''),'small')+'</div>':'');
+      editorialRegistryPager(list);
   }
   async function editorialAction(action,id) {
     const p=await api('items/'+id);
@@ -3372,14 +3423,8 @@
     content().innerHTML = '<div class="view-loading" role="status"><span class="loading-dot"></span> Cargando sección…</div>';
     content().setAttribute('aria-busy', 'true');
     try {
-      if (S.page === "intranet") await dashboard();
-      else if (S.page === "directorio") await directory();
-      else if (S.page === "perfil") await profile();
-      else if (S.page === "mensajeria") await messages();
-      else if (S.page === "asistente") await assistant();
-      else if (S.page === "contacto") await contact();
-      else if (S.page === "admin") await admin();
-      else await listing();
+      const views={intranet:dashboard,directorio:directory,perfil:profile,mensajeria:messages,asistente:assistant,contacto:contact,admin};
+      await (views[S.page] || listing)();
     } catch (e) {
       if (e.name === "AbortError" || version !== S.viewVersion) return;
       if (e.status === 401 || e.code === "rest_cookie_invalid_nonce") { location.assign(location.href); return; }
@@ -3916,24 +3961,29 @@
     if (a === "page") {
       S.filter.page = b.dataset.page;
       await render();
-      const title = content().querySelector("h1");
-      if (title) { title.tabIndex = -1; title.focus({preventScroll:true}); title.scrollIntoView({block:"start"}); }
+      focusPageHeading();
     }
     else if (a === "filter-reset") {
       S.filter = S.page==='foros' && S.filter.comments ? {comments:1} : {};
       await render();
     }
     else if (a.startsWith("filter-")) {
-      S.filter = {
-      ...S.filter, page: 1,
-      mine: a === "filter-mine" ? 1 : "",
-      drafts: a === "filter-drafts" ? 1 : "",
-      past: a === "filter-past" ? 1 : "",
-      comments: a === "filter-comments" ? 1 : "",
-      };
-      if (S.filter.drafts) { S.filter.mine = 1; delete S.filter.after; delete S.filter.before; }
+      selectListingTab(a);
       await render();
     }
+  }
+  function focusPageHeading() {
+    const title = content().querySelector("h1");
+    if (title) { title.tabIndex = -1; title.focus({preventScroll:true}); title.scrollIntoView({block:"start"}); }
+  }
+  function selectListingTab(action) {
+    S.filter = {...S.filter, page: 1,
+      mine: action === "filter-mine" ? 1 : "",
+      drafts: action === "filter-drafts" ? 1 : "",
+      past: action === "filter-past" ? 1 : "",
+      comments: action === "filter-comments" ? 1 : "",
+    };
+    if (S.filter.drafts) { S.filter.mine = 1; delete S.filter.after; delete S.filter.before; }
   }
   async function handleClickActions34(a, b, _id, _event) {
     if (a === "calendar-prev" || a === "calendar-next") {
@@ -4234,11 +4284,14 @@ root.addEventListener("click", async (event) => {
       if (['connect','connection-respond','connection-remove-confirm','conversation-request-respond','conversation-request-cancel'].includes(a) && [404,409].includes(e.status)) { await refreshOpenConnection(); await refreshConnectionsPanel(); }
       if (e.name !== "AbortError") toast(e.message);
     } finally {
-      b.disabled = false;
-      if (S.actionFocus === b) S.actionFocus = null;
-      if (b.isConnected && document.activeElement === document.body && !b.closest('[inert]')) b.focus();
+      finishActionControl(b);
     }
   });
+  function finishActionControl(control) {
+    control.disabled = false;
+    if (S.actionFocus === control) S.actionFocus = null;
+    if (control.isConnected && document.activeElement === document.body && !control.closest('[inert]')) control.focus();
+  }
   async function handleSubmitActions01(action, _form, data, _submit, _event) {
     if (action === "global-search") {
       const url = new URL(C.pages["centro-conocimiento"].url, location.href);
@@ -4638,22 +4691,14 @@ root.addEventListener("click", async (event) => {
     { test: (action) => (action === "board-approval") || (action === "admin-user-edit") || (action === "admin-filter"), run: handleSubmitActions11 },
     { test: (action) => (action === "settings") || (action === "demo"), run: handleSubmitActions12 },
   ];
-root.addEventListener("submit", async (event) => {
-    const form = event.target.closest("[data-form]");
-    if (!form) return;
-    event.preventDefault();
+  function validSocialLinks(form) {
     for (const input of form.querySelectorAll('[data-social-link]')) {
       validateSocialLinkInput(input);
-      if (!input.checkValidity()) { input.reportValidity();return; }
+      if (!input.checkValidity()) { input.reportValidity();return false; }
     }
-    const action = form.dataset.form,
-      data = formData(form),
-      submit = form.querySelector("button[type=submit],button:not([type])"),
-      saveAndLeave = S.pendingUnsavedSaveForm === form && !!S.pendingUnsavedResolver;
-    if (action==='editorial-filter') {
-      S.editorialType=data.type;S.editorialFilters={q:data.q,status:data.status,page:1};
-      await adminEditorialRegistry(document.getElementById('admin-panel'));return;
-    }
+    return true;
+  }
+  function validRequiredText(form, saveAndLeave) {
     const invalidText = [...form.querySelectorAll('textarea[required],input[required]')].find(field =>
       (field.tagName === "TEXTAREA" || ["text", "search", "email", "url", "tel", "password"].includes(field.type))
       && !/[^\s\p{Z}\p{Cf}\p{Cc}]/u.test(field.value));
@@ -4663,8 +4708,24 @@ root.addEventListener("submit", async (event) => {
       invalidText.reportValidity();
       invalidText.focus();
       if (saveAndLeave) { S.pendingUnsavedSaveForm = null; resolveUnsavedExit(false); }
-      return;
+      return false;
     }
+    return true;
+  }
+root.addEventListener("submit", async (event) => {
+    const form = event.target.closest("[data-form]");
+    if (!form) return;
+    event.preventDefault();
+    if (!validSocialLinks(form)) return;
+    const action = form.dataset.form,
+      data = formData(form),
+      submit = form.querySelector("button[type=submit],button:not([type])"),
+      saveAndLeave = S.pendingUnsavedSaveForm === form && !!S.pendingUnsavedResolver;
+    if (action==='editorial-filter') {
+      S.editorialType=data.type;S.editorialFilters={q:data.q,status:data.status,page:1};
+      await adminEditorialRegistry(document.getElementById('admin-panel'));return;
+    }
+    if (!validRequiredText(form, saveAndLeave)) return;
     if (submit) submit.disabled = true;
     try {
       const actionHandler = HANDLESUBMITACTIONS_DISPATCH.find((entry) => entry.test(action));

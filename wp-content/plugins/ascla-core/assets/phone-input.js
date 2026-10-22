@@ -74,7 +74,7 @@ export function setup(form, {T, I, locale}) {
       const next = countries.find(country => country.code === select.value);
       const previous = match(input.value, selected?.code);
       if (!next) { paint(previous); return; }
-      if (input.value && previous && previous.dial !== next.dial) input.value = input.value.replace(new RegExp('^\\+' + previous.dial), '+' + next.dial);
+      if (input.value && previous && previous.dial !== next.dial) input.value = input.value.replace(new RegExp(String.raw`^\+` + previous.dial), '+' + next.dial);
       paint(next);
       input.dispatchEvent(new Event('input', {bubbles:true}));
     });

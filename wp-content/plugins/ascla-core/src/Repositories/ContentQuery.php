@@ -73,6 +73,11 @@ final class ContentQuery
             $direction = rest_sanitize_boolean($filter['past'] ?? false) ? 'DESC' : 'ASC';
             $args['orderby'] = ['meta_value' => $direction, 'ID' => $direction];
         }
+        return self::monthFilters($args,$filter);
+    }
+
+    private static function monthFilters(array $args,array $filter): array
+    {
         if (!empty($filter['month'])) {
             $month = Access::text($filter['month'], 7);
             Access::require((bool)preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month), 'Mes no válido.', 400);

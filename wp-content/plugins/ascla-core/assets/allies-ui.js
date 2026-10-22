@@ -18,7 +18,8 @@
     function catalog(list,filter,admin,{tabs='',drafts=null}={}){
       const registryUrl=C.adminUrl+(C.adminUrl.includes('?')?'&':'?')+'section=aliados';
       const controls=admin?`<div class="form-actions"><a class="btn" data-native href="${E(registryUrl)}">${I('settings')}${text('Registro de aliados')}</a>${btn(I('plus')+' '+text('Crear aliado'),'editor','data-type="ally"','primary')}</div>`:'';
-      return `<header class="ally-catalog-header"><div><span class="eyebrow">${text('ALIANZAS INSTITUCIONALES')}</span><h1>${text('Nuestros aliados')}</h1><p>${text('Conoce las organizaciones que colaboran con ASCLA y los beneficios para nuestra comunidad.')}</p></div>${controls}</header><form class="filters ally-catalog-search" data-form="filters" role="search" aria-label="${text('Buscar aliados')}"><label class="field"><span>${text('Buscar aliados')}</span><input type="search" name="q" maxlength="150" value="${E(filter.q||'')}" placeholder="${text('Nombre, tipo de convenio o descripción…')}"></label><button class="btn primary">${I('search')} ${text('Buscar')}</button>${btn('Limpiar filtros','filter-reset','','ghost')}</form>${tabs}${drafts !== null ? drafts : `<p class="private-note">${list.total} ${text('alianzas en el catálogo')}</p><div class="ally-cards">${list.items.map(card).join('')}</div>`}${drafts === null && !list.items.length?("<div class=\"card ally-empty\"><h2>" + (text('No encontramos aliados')) + "</h2><p>" + (text('Prueba otro nombre o tipo de convenio, o limpia la búsqueda.')) + "</p></div>"):''}`;
+      const catalogContent=drafts !== null ? drafts : `<p class="private-note">${list.total} ${text('alianzas en el catálogo')}</p><div class="ally-cards">${list.items.map(card).join('')}</div>`;
+      return `<header class="ally-catalog-header"><div><span class="eyebrow">${text('ALIANZAS INSTITUCIONALES')}</span><h1>${text('Nuestros aliados')}</h1><p>${text('Conoce las organizaciones que colaboran con ASCLA y los beneficios para nuestra comunidad.')}</p></div>${controls}</header><form class="filters ally-catalog-search" data-form="filters" role="search" aria-label="${text('Buscar aliados')}"><label class="field"><span>${text('Buscar aliados')}</span><input type="search" name="q" maxlength="150" value="${E(filter.q||'')}" placeholder="${text('Nombre, tipo de convenio o descripción…')}"></label><button class="btn primary">${I('search')} ${text('Buscar')}</button>${btn('Limpiar filtros','filter-reset','','ghost')}</form>${tabs}${catalogContent}${drafts === null && !list.items.length?("<div class=\"card ally-empty\"><h2>" + (text('No encontramos aliados')) + "</h2><p>" + (text('Prueba otro nombre o tipo de convenio, o limpia la búsqueda.')) + "</p></div>"):''}`;
     }
     const excerpt=(value,limit)=>E(value.slice(0,limit))+(value.length>limit?'…':'');
     function contactDetails(m){
@@ -70,7 +71,8 @@
     function registryRow(p){
       const targetState=state(p)==='active'?'inactive':'active';
       const attrs=`data-id="${Number(p.id)}" data-name="${E(p.title)}"`;
-      const menu=`<details class="overflow-menu ally-registry-menu"><summary aria-label="${text('Más opciones')} · ${E(p.title)}" title="${text('Más opciones')}">${I('more')}</summary><div class="overflow-popover">${action(text(targetState==='active'?'Activar':'Desactivar'),'status',`${attrs} data-state="${targetState}"`,'overflow-item')}${action(text('Eliminar'),'delete',attrs,'overflow-item danger')}</div></details>`;
+      const statusAttrs=attrs+' data-state="'+targetState+'"';
+      const menu=`<details class="overflow-menu ally-registry-menu"><summary aria-label="${text('Más opciones')} · ${E(p.title)}" title="${text('Más opciones')}">${I('more')}</summary><div class="overflow-popover">${action(text(targetState==='active'?'Activar':'Desactivar'),'status',statusAttrs,'overflow-item')}${action(text('Eliminar'),'delete',attrs,'overflow-item danger')}</div></details>`;
       return `<article class="ally-registry-row" data-ally-record="${p.id}"><div class="ally-registry-logo">${logoMarkup(p)}</div><div class="ally-registry-name"><h3>${E(p.title)}</h3><p>${text(p.meta.alliance_type||'Alianza institucional')}</p></div>${label(p)}<div class="form-actions">${btn('Ver ficha','item',("data-id=\"" + (p.id) + "\""),'small')}${btn('Editar','editor',("data-id=\"" + (p.id) + "\" data-type=\"ally\""),'small')}${menu}</div></article>`;
     }
     function registryPagination(list){
@@ -91,17 +93,19 @@
       event.preventDefault();filters={...Object.fromEntries(new FormData(event.target)),page:1};
       try{await registry(registryPanel);}catch(error){if(error.name!=='AbortError')toast(error.message);}
     });
+    function confirmDelete(control){
+      modal(T('Eliminar aliado'),`<p><strong>${E(control.dataset.name)}</strong></p><p>${text('La ficha se enviará a la papelera y dejará de aparecer en el catálogo y en el registro de aliados.')}</p><div class="form-actions">${btn('Cancelar','close')}${action(text('Eliminar aliado'),'confirm-delete','data-id="'+Number(control.dataset.id)+'"','danger primary')}</div>`);
+    }
+    function confirmStatus(control){
+      const inactive=control.dataset.state==='inactive';
+      modal(T(inactive?'Retirar aliado del catálogo':'Activar aliado en el catálogo'),`<p><strong>${E(control.dataset.name)}</strong></p><p>${text(inactive?'Dejará de estar visible para los asociados. Su información y su historial se conservarán.':'La ficha volverá a estar visible para los asociados en el catálogo de aliados.')}</p><div class="form-actions">${btn('Cancelar','close')}${action(text(inactive?'Retirar del catálogo':'Activar aliado'),'confirm',("data-id=\"" + (Number(control.dataset.id)) + "\" data-state=\"" + (control.dataset.state) + "\""),'primary')}</div>`);
+    }
     root.addEventListener('click',async event=>{
       const control=event.target.closest('[data-allies-action]');if(!control||control.disabled)return;
       const key=control.dataset.alliesAction;
       control.closest('.overflow-menu')?.removeAttribute('open');
-      if(key==='delete'){
-        modal(T('Eliminar aliado'),`<p><strong>${E(control.dataset.name)}</strong></p><p>${text('La ficha se enviará a la papelera y dejará de aparecer en el catálogo y en el registro de aliados.')}</p><div class="form-actions">${btn('Cancelar','close')}${action(text('Eliminar aliado'),'confirm-delete',`data-id="${Number(control.dataset.id)}"`,'danger primary')}</div>`);return;
-      }
-      if(key==='status'){
-        const inactive=control.dataset.state==='inactive';
-        modal(T(inactive?'Retirar aliado del catálogo':'Activar aliado en el catálogo'),`<p><strong>${E(control.dataset.name)}</strong></p><p>${text(inactive?'Dejará de estar visible para los asociados. Su información y su historial se conservarán.':'La ficha volverá a estar visible para los asociados en el catálogo de aliados.')}</p><div class="form-actions">${btn('Cancelar','close')}${action(text(inactive?'Retirar del catálogo':'Activar aliado'),'confirm',("data-id=\"" + (Number(control.dataset.id)) + "\" data-state=\"" + (control.dataset.state) + "\""),'primary')}</div>`);return;
-      }
+      if(key==='delete'){confirmDelete(control);return;}
+      if(key==='status'){confirmStatus(control);return;}
       control.disabled=true;
       try{
         if(key==='page'){filters={...filters,page:Number(control.dataset.page)};await registry(registryPanel);}

@@ -4,6 +4,12 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+### Correcciones de mantenibilidad para ASCLA-QA del 22 de octubre de 2026
+
+Se revisan las 57 incidencias nuevas y la incidencia antigua del análisis de ASCLA-QA. Se separan validaciones, permisos y generación de vistas; se extrae la resolución de destinos de acceso; se centraliza la validación de enlaces sociales y se simplifican condiciones, plantillas y expresiones regulares. Los selectores CSS duplicados se consolidan conservando sus declaraciones efectivas. El fallo al cifrar una cookie de desafío usa una excepción específica. Se conserva el identificador del procesamiento de SonarQube fuera de Git.
+
+La corrección se prepara en `development` y se promueve a `qa` siguiendo el Manual QA. La aprobación se acredita únicamente con la ejecución completa de pruebas y el nuevo análisis de la revisión promovida; las reglas, exclusiones y umbrales de calidad permanecen sin cambios. Las evidencias publicadas anteriormente mantienen su fecha, paquete y entorno originales.
+
 ### Preparación de cobertura para SonarQube del 22 de octubre de 2026
 
 La preparación de PHPUnit instala PCOV 1.0.12 desde su archivo oficial con SHA-256 fijado y comprueba que la extensión esté cargada. Resuelve el bloqueo de metadatos REST de PECL antes de ejecutar las pruebas; conserva las verificaciones de cobertura, revisión limpia y Quality Gate. Esta corrección del ejecutor no modifica el plugin ni acredita por sí misma un análisis de SonarQube.
