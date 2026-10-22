@@ -4,6 +4,10 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+### Preparación de cobertura para SonarQube del 22 de octubre de 2026
+
+La preparación de PHPUnit instala PCOV 1.0.12 desde su archivo oficial con SHA-256 fijado y comprueba que la extensión esté cargada. Resuelve el bloqueo de metadatos REST de PECL antes de ejecutar las pruebas; conserva las verificaciones de cobertura, revisión limpia y Quality Gate. Esta corrección del ejecutor no modifica el plugin ni acredita por sí misma un análisis de SonarQube.
+
 ### Renovación de evidencias en el QA publicado del 22 de octubre de 2026
 
 Se añade la [guía de sustento de seguridad](pruebas/seguridad/sustento.html), con evidencias por conclusión, comparación de los 20 controles, guion de exposición y corrección concreta para el operador del hosting. La recomprobación conserva 19/20 en QA y documenta la versión expuesta en cinco respuestas públicas; el acceso recibido permite administrar WordPress, sin acceso al servidor. Esta actualización no altera el plugin ni convierte el pendiente en aprobado.
