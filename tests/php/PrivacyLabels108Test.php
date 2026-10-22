@@ -27,9 +27,9 @@ final class PrivacyLabels108Test extends TestCase
     {
         $original=get_post_meta($this->post,'_ascla',true);wp_set_current_user($this->users[$index]);$view=Content::serialize(Content::get($this->post));
         self::assertSame($this->visible,$view['title']);self::assertSame($this->visible,$view['meta']['agenda_ai']['title']);
-        if($index>0)self::assertStringNotContainsString('Juan Pérez',wp_json_encode($view));
+        if($index>1)self::assertStringNotContainsString('Juan Pérez',wp_json_encode($view));
         $detail=Events::detail($this->post);parse_str(parse_url($detail['google_url'],PHP_URL_QUERY),$calendar);self::assertSame($this->visible,$calendar['text']);
-        if($index>0)self::assertStringNotContainsString('Juan Pérez',$calendar['location']);
+        if($index>1)self::assertStringNotContainsString('Juan Pérez',$calendar['location']);
         self::assertSame($this->legacy,get_post($this->post)->post_title);self::assertSame($original,get_post_meta($this->post,'_ascla',true));
     }
     public function testAuthoredTitlesAndLiteralUsesOfTheWordAreNotRewritten(): void

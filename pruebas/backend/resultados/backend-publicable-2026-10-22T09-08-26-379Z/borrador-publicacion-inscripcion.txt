@@ -1,0 +1,64 @@
+flujos-e2e\03-borrador-publicacion-inscripcion\01-login-administrador (302 Found) - 838 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Administrador
+flujos-e2e\03-borrador-publicacion-inscripcion\02-login-ana (302 Found) - 819 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Ana
+flujos-e2e\03-borrador-publicacion-inscripcion\03-borrador-incompleto (200 OK) - 762 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Validación: 03. Crear un borrador sin descripción ni fechas
+flujos-e2e\03-borrador-publicacion-inscripcion\04-borrador-privado (404 Not Found) - 729 ms
+Tests
+   ✓ Código HTTP esperado: 404
+flujos-e2e\03-borrador-publicacion-inscripcion\05-publicacion-invalida (400 Bad Request) - 788 ms
+Tests
+   ✓ Código HTTP esperado: 400
+flujos-e2e\03-borrador-publicacion-inscripcion\06-borrador-conservado (200 OK) - 748 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Validación: 06. El rechazo conserva el borrador
+flujos-e2e\03-borrador-publicacion-inscripcion\07-publicar-evento (200 OK) - 764 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Validación: 07. Publicar con fecha, hora y cupo válidos
+flujos-e2e\03-borrador-publicacion-inscripcion\08-fechas-persistentes (200 OK) - 851 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Validación: 08. Reabrir el evento y comprobar sus fechas
+flujos-e2e\03-borrador-publicacion-inscripcion\09-inscripcion (200 OK) - 743 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Validación: 09. Ana confirma su inscripción
+flujos-e2e\03-borrador-publicacion-inscripcion\10-inscripcion-persistente (200 OK) - 748 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Validación: 10. Recargar y comprobar la inscripción
+flujos-e2e\03-borrador-publicacion-inscripcion\11-cancelar-evento (200 OK) - 738 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Validación: 11. Cancelar el evento ficticio
+flujos-e2e\03-borrador-publicacion-inscripcion\12-cancelacion-persistente (200 OK) - 754 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Validación: 12. Comprobar el cierre del evento
+
+📊 Execution Summary
+┌───────────────┬────────────────┐
+│ Metric        │     Result     │
+├───────────────┼────────────────┤
+│ Status        │     ✓ PASS     │
+├───────────────┼────────────────┤
+│ Requests      │ 12 (12 Passed) │
+├───────────────┼────────────────┤
+│ Tests         │     22/22      │
+├───────────────┼────────────────┤
+│ Assertions    │      0/0       │
+├───────────────┼────────────────┤
+│ Duration (ms) │     15433      │
+└───────────────┴────────────────┘
+Wrote html results to repositorio\test-results\backend-publicable-2026-10-22T09-08-26-379Z\borrador-publicacion-inscripcion.html
+Wrote json results to repositorio\test-results\backend-publicable-2026-10-22T09-08-26-379Z\borrador-publicacion-inscripcion.json
+Wrote junit results to repositorio\test-results\backend-publicable-2026-10-22T09-08-26-379Z\borrador-publicacion-inscripcion.xml

@@ -1,0 +1,33 @@
+meta {
+  name: 07. Bruno no puede sobrepasar el aforo
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/events/{{eventoCupoId}}/register
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionBruno}}
+  X-WP-Nonce: {{nonceBruno}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "accepted"
+  }
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 409", function () { expect(res.getStatus()).to.equal(409); });
+  test("El rechazo se debe a falta de cupos", function () { expect(res.getBody().message).to.include("cupos"); });
+}

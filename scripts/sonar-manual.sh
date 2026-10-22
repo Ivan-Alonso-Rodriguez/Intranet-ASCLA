@@ -48,5 +48,6 @@ docker run --rm \
   "-Dsonar.projectKey=$project" \
   "-Dsonar.projectName=$project" \
   "-Dsonar.scm.revision=$head" \
+  -Dsonar.working.directory=/usr/src/.scannerwork \
   -Dsonar.qualitygate.wait=true \
   -Dsonar.qualitygate.timeout=300

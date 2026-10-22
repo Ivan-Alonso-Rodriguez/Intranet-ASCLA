@@ -42,7 +42,8 @@ final class MemberInsightsTest extends TestCase
     }
     public function testOnlyActiveAdministratorsCanReadInsightsIncludingTheirOwnAccount(): void
     {
-        foreach(array_slice($this->users,1) as $id) { wp_set_current_user($id);self::assertSame(403,$this->api()->get_status()); }
+        foreach([$this->users[1],$this->users[3]] as $id) { wp_set_current_user($id);self::assertSame(403,$this->api()->get_status()); }
+        wp_set_current_user($this->users[2]);self::assertSame(200,$this->api()->get_status());
         wp_set_current_user(0);self::assertSame(401,$this->api()->get_status());
         wp_set_current_user($this->admin);self::assertSame(200,$this->api()->get_status());self::assertSame(200,$this->api([], $this->admin)->get_status());
         self::assertSame(404,$this->api([],PHP_INT_MAX)->get_status());

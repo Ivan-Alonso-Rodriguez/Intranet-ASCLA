@@ -11,7 +11,7 @@ final class FormIntegrity108Test extends TestCase
     protected function setUp(): void
     {
         $this->settings=Settings::get();
-        foreach (['administrator','ascla_member','ascla_member'] as $role) {
+        foreach (['administrator','ascla_member','ascla_member','ascla_member'] as $role) {
             $name='forms108_'.bin2hex(random_bytes(5));
             $id=wp_insert_user(['user_login'=>$name,'user_email'=>$name.'@example.invalid','user_pass'=>wp_generate_password(28),'role'=>$role,'first_name'=>'José','last_name'=>'Prueba']);
             $this->users[]=$id;update_user_meta($id,'_ascla_profile',ascla_test_profile(['first_name'=>'José','last_name'=>'Prueba','position'=>'Analista','company'=>'ASCLA']));
@@ -95,8 +95,9 @@ final class FormIntegrity108Test extends TestCase
     }
     public function testGroupTitleAndMalformedMembersCannotModifyAConversation(): void
     {
-        foreach([$this->member,$this->friend] as $uid){wp_set_current_user($this->admin);$request=Connections::request($uid);wp_set_current_user($uid);Connections::respond($request['request_id'],'accept');}
-        wp_set_current_user($this->admin);$group=Messaging::createGroup('Grupo original',[(string)$this->member,$this->friend]);$this->groups[]=$group['id'];
+        $owner=$this->users[3];
+        foreach([$this->member,$this->friend] as $uid){wp_set_current_user($owner);$request=Connections::request($uid);wp_set_current_user($uid);Connections::respond($request['request_id'],'accept');}
+        wp_set_current_user($owner);$group=Messaging::createGroup('Grupo original',[(string)$this->member,$this->friend]);$this->groups[]=$group['id'];
         self::assertSame(400,$this->api('conversations/'.$group['id'].'/group',['title'=>"\u{200D}\u{2060}",'description'=>'Must not change'])->get_status());self::assertSame('Grupo original',Messaging::conversation($group['id'])['title']);
         self::assertSame(400,$this->api('conversations/group',['title'=>'Valid','users'=>[$this->member.'suffix',$this->friend]])->get_status());
         self::assertCount(3,Store::rows('participants','conversation_id=%d',[$group['id']],''));

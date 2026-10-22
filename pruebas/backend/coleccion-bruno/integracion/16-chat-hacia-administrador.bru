@@ -1,0 +1,31 @@
+meta {
+  name: 16. Rechazar solicitud de conversación hacia administración
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/conversation-requests
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAsociado}}
+  X-WP-Nonce: {{nonceAsociado}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"target": {{idAdministrador}}, "body": "Presentación de prueba de permisos."}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 400", function () { expect(res.getStatus()).to.equal(400); });
+
+}

@@ -10,7 +10,7 @@ final class ProfileDirectoryReviewTest extends TestCase
     {
         $this->settings=Settings::get();$this->prefix='Revision'.bin2hex(random_bytes(4));
         Settings::save(ProfileReview::DEFAULTS);
-        foreach (range(0,6) as $n) {
+        foreach (range(0,12) as $n) {
             $id=wp_insert_user(['user_login'=>'review_'.bin2hex(random_bytes(5)),'user_pass'=>wp_generate_password(32),'role'=>'ascla_member']);$this->users[]=$id;
             wp_set_current_user($id);Profiles::save(ascla_test_profile(['first_name'=>$this->prefix,'last_name'=>'Persona '.$n,'networking'=>false]));
         }
@@ -35,17 +35,47 @@ final class ProfileDirectoryReviewTest extends TestCase
         self::assertFalse(ProfileReview::respond('snooze')['due']);
         Profiles::save(['bio'=>'Información profesional vigente']);self::assertFalse(ProfileReview::status($id)['incomplete']);
     }
-    public function testExactNamePrecedesSubstringAndPaginationUsesSetting(): void
+    public function testExactNamePrecedesSubstringAndPaginationUsesTwelveProfilesDespiteLegacySetting(): void
     {
         $exact=$this->users[3];wp_set_current_user($exact);Profiles::save(['first_name'=>$this->prefix,'last_name'=>'Exacto']);
         wp_set_current_user($this->users[1]);Profiles::save(['first_name'=>'A '.$this->prefix,'last_name'=>'Exacto']);
         wp_set_current_user($this->users[0]);
         $results=Profiles::directory(['q'=>mb_strtoupper($this->prefix.' Exacto')]);
         self::assertSame($exact,$results['items'][0]['id']);self::assertCount(2,$results['items']);
-        Settings::save(['directory_page_size'=>5]);$one=Profiles::directory(['q'=>$this->prefix]);$two=Profiles::directory(['q'=>$this->prefix,'page'=>2]);
-        self::assertSame(7,$one['total']);self::assertSame(5,$one['per_page']);self::assertCount(5,$one['items']);self::assertCount(2,$two['items']);
+        update_option('ascla_settings',array_merge(Settings::get(),['directory_page_size'=>15]),false);
+        self::assertSame(12,Settings::get()['directory_page_size']);
+        $one=Profiles::directory(['q'=>$this->prefix]);$two=Profiles::directory(['q'=>$this->prefix,'page'=>2]);
+        self::assertSame(13,$one['total']);self::assertSame(12,$one['per_page']);self::assertSame(2,$one['pages']);self::assertSame(2,$two['page']);self::assertCount(12,$one['items']);self::assertCount(1,$two['items']);
         self::assertSame([],array_intersect(array_column($one['items'],'id'),array_column($two['items'],'id')));
         self::assertArrayNotHasKey('_rank',$one['items'][0]);
+        $last=Profiles::directory(['q'=>$this->prefix,'page'=>99]);self::assertSame(2,$last['page']);self::assertSame($two['items'],$last['items']);
+        $empty=Profiles::directory(['q'=>'NoMatch'.$this->prefix,'page'=>2]);self::assertSame(0,$empty['total']);self::assertSame(1,$empty['page']);self::assertSame(1,$empty['pages']);self::assertSame([],$empty['items']);
+        self::assertSame(12,Settings::save(['directory_page_size'=>12])['directory_page_size']);
+    }
+    public function testSettingsCannotChangeTheTwelveProfilePageSize(): void
+    {
+        foreach ([5,13,100] as $size) {
+            try { Settings::save(['directory_page_size'=>$size]);self::fail('Directory page size changed'); }
+            catch (ASCLA\Core\Rest\ApiException $e) { self::assertSame(400,$e->getCode()); }
+            self::assertSame(12,Settings::get()['directory_page_size']);
+        }
+        \ASCLA\Core\Rest\Router::routes();$request=new WP_REST_Request('GET','/ascla/v1/profiles');$request->set_param('q',$this->prefix);$request->set_param('page',2);$request->set_param('per_page',100);
+        $response=rest_get_server()->dispatch($request);self::assertSame(200,$response->get_status());$body=$response->get_data();
+        self::assertSame(12,$body['per_page']);self::assertSame(13,$body['total']);self::assertSame(2,$body['page']);self::assertCount(1,$body['items']);
+    }
+    public function testBrowserBootstrapAndReviewResponsesOmitInternalDatesWithoutChangingTheirSchedule(): void
+    {
+        $id=$this->users[0];$before=ProfileReview::status($id);
+        $bootstrap=\ASCLA\Core\Services\Bootstrap::get();
+        self::assertSame($before['due'],$bootstrap['profile_review']['due']);
+        self::assertSame($before['incomplete'],$bootstrap['profile_review']['incomplete']);
+        self::assertArrayNotHasKey('confirmed_at',$bootstrap['profile_review']);
+        self::assertArrayNotHasKey('next_at',$bootstrap['profile_review']);
+        \ASCLA\Core\Rest\Router::routes();$request=new WP_REST_Request('POST','/ascla/v1/profiles/review');$request->set_header('Content-Type','application/json');$request->set_body(wp_json_encode(['decision'=>'snooze']));
+        $response=rest_get_server()->dispatch($request);self::assertSame(200,$response->get_status());$body=$response->get_data();
+        self::assertFalse($body['due']);self::assertSame(7,$body['snooze_days']);
+        self::assertArrayNotHasKey('confirmed_at',$body);self::assertArrayNotHasKey('next_at',$body);
+        $internal=ProfileReview::status($id);self::assertSame($before['confirmed_at'],$internal['confirmed_at']);self::assertGreaterThan(time(),$internal['next_at']);
     }
     public function testMultipleFiltersMatchAnyWithinEachGroupAndRankByOverlap(): void
     {

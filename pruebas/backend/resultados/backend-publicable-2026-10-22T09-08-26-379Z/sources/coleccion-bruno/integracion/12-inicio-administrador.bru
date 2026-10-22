@@ -1,0 +1,26 @@
+meta {
+  name: 12. Inicio del administrador en su panel
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{base}}/intranet/
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAdministrador}}
+  X-WP-Nonce: {{nonceAdministrador}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 302", function () { expect(res.getStatus()).to.equal(302); });
+  test("El inicio redirige al panel administrativo", function () { expect(res.getHeader("location")).to.equal(bru.getCollectionVar("base")+"/administracion/"); });
+}

@@ -8,7 +8,7 @@ final class RequestValidation
     private const TEXT=['title','body','description','message','reason','detail','decision','kind','status','q','country','name','email','login','role','membership_status','membership_until','first_name','last_name','position','company','member_type','bio','experience','phone','phone_visibility','birth_date','linkedin','twitter','website','current_password','new_password','confirm_password','board_reference','board_date'];
     private const BOOLEANS=['active','reviewed','suspended','board_confirmed','directory','networking','microevents','demo','moderation_required','moderate_comments','chatham_default','micro_enabled','micro_approval','turnstile_enabled','turnstile_login','turnstile_recovery','turnstile_public','send_invite','complete','acknowledge','enabled','reset'];
     private const IDS=['target','parent','photo_id','professional_request_id','assignee','resource_id','conversation_id','user_id','last','page','per_page'];
-    private const FILTERS=['mine','past','recommended','micro'];
+    private const FILTERS=['mine','past','recommended','micro','include_forums'];
     private const LISTS=['users','media_ids','interest','category','tag','topics','tag_names','assigned_roles','interests','areas','industries','goals','languages','learn','help','connect_topics','hidden','profile_completion_extra'];
     private const INVALID_FORMAT='Formato de solicitud no válido.';
 

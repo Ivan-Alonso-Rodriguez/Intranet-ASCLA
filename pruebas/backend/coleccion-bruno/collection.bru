@@ -1,0 +1,97 @@
+meta {
+  name: Pruebas ASCLA
+}
+
+vars:pre-request {
+  base: https://wordpress.ingsoftware.lat
+  @number
+  idAna: 37
+  @number
+  idBruno: 38
+  @number
+  idCarla: 39
+  idAdministrador: 9
+  @number
+  solicitudBloqueoId: 138
+  @number
+  conversacionBloqueoId: 21
+  @number
+  mensajeBloqueoId: 58
+  @number
+  eventoCupoId: 348
+  @number
+  trabajoAsistenteId: 210
+  estadoTrabajoAsistente: completed
+  modoAsistente: Google Gemini · API real
+  empresaAnterior: Comunidad ASCLA
+  textoMensajeBloqueo: Mensaje de la prueba de bloqueo 2026-10-16T07:29:42.434Z
+  @number
+  avisosAntesDelCupo: 8
+  hiloAsistente: ascla_prueba_1792135834795
+  preguntaAsistente: ¿Qué eventos próximos hay en ASCLA?
+  @number
+  consultasTrabajoAsistente: 2
+  perfilEmpresaOriginal:
+  perfilBiografiaOriginal:
+  perfilBioNueva:
+  @number
+  eventoPublicacionId: 0
+  tituloEventoPublicacion:
+  inicioPublicacion:
+  finPublicacion:
+  @number
+  avisoCupoId: 0
+  respuestaAsistente:
+  usuarioAna: prueba.ascla.ana
+  claveAna:
+  sesionAna:
+  nonceAna:
+  usuarioBruno: prueba.ascla.bruno
+  claveBruno:
+  sesionBruno:
+  nonceBruno:
+  usuarioCarla: prueba.ascla.carla
+  claveCarla:
+  sesionCarla:
+  nonceCarla:
+  usuarioAdministrador: AdministradorASCLA
+  claveAdministrador:
+  sesionAdministrador:
+  nonceAdministrador:
+  usuarioAsociado: prueba.ascla.ana
+  @number
+  idAsociado: 37
+  claveAsociado:
+  sesionAsociado:
+  nonceAsociado:
+}
+
+script:pre-request {
+  // Contraseñas desde un entorno privado; cookies y nonces solo en memoria.
+  for (const actor of ["Asociado","Ana","Bruno","Carla","Administrador"]) {
+    const name="clave"+actor;
+    const value=bru.getEnvVar(name);
+    if(value) bru.setVar(name,value);
+  }
+  await bru.cookies.jar().deleteCookies(bru.getCollectionVar("base")+"/");
+  if (String(req.getMethod()).toUpperCase() === "POST" && req.getUrl().includes("/wp-login.php")) {
+    const form = await bru.sendRequest({method:"GET",url:bru.interpolate("{{base}}")+"/wp-login.php"});
+    const nonce = String(form.data).match(/name="_ascla_native_login_nonce"\s+value="([^"]+)"/);
+    if (form.status !== 200 || !nonce) throw Error("No se pudo preparar el formulario de acceso protegido");
+    const cookies = form.headers["set-cookie"] || [];
+    const cookie = (Array.isArray(cookies)?cookies:[cookies]).flatMap(value=>value.split(/,(?=\s*[^;,=\s]+=)/)).map(value=>value.trim().split(";")[0]).join("; ");
+    if (!cookie.includes("ascla_login_guest=")) throw Error("Falta la cookie del formulario protegido");
+    req.setHeader("Cookie",cookie);
+    req.setBody(req.getBody().map(field=>field.name==="_ascla_native_login_nonce"?{...field,value:nonce[1]}:field));
+    bru.setVar("asclaAccessCookie",cookie);
+    bru.setVar("asclaAccessNonce",nonce[1]);
+  }
+}
+
+docs {
+  Colección publicable: integración API y seis flujos E2E compartidos con Playwright de ASCLA.
+  Variables de URL, usuarios e IDs incluidas. Las contraseñas se cargan desde un entorno privado y las sesiones se mantienen solo en memoria.
+  Ejecutar con scripts/run-publishable-backend.cjs desde el repositorio; usa el acceso privado ya preparado. No incluir ese archivo en Git.
+  Cada inicio de sesión obtiene su cookie y nonce; cada respuesta guarda los IDs utilizados por las peticiones siguientes.
+  Rechazos esperados: bloqueo 404; suspensión con sesión revocada 403; aforo o cancelación 409.
+}

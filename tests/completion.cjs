@@ -77,7 +77,9 @@ async function runJobs() {
     await member.locator('.modal [data-action=close]').click(); await member.locator('[data-action=calendar-next]').click();
     await member.locator('[data-action=calendar-prev]').click(); checks.push('Monthly agenda and day details remain navigable');
 
-    await admin.goto(resource.url); await admin.locator('[data-action=video-metadata]').click(); await admin.locator('#video-job-result').waitFor(); await runJobs();
+    await admin.goto(resource.url);
+    assert.equal(await admin.locator('[data-action=video-metadata]').count(), 0);
+    assert.equal((await request(admin, 'items/' + resource.id)).meta.duration_seconds, 210);
     await admin.locator('.video-metadata').filter({ hasText: '3 min 30 s' }).waitFor({ timeout: 60000 });
     await admin.locator('.modal [data-action=editor]').click(); await admin.locator('[name=duration_seconds]').fill('215'); await admin.locator('[name=tag_names]').fill('qz-completa, qz-revisada');
     await Promise.all([admin.waitForResponse(r => r.url().includes('/content/resource/') && r.request().method() === 'POST'), admin.locator('[data-form=editor] button:not([type])').click()]);

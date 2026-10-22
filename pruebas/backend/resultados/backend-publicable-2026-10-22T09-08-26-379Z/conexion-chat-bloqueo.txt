@@ -1,0 +1,66 @@
+flujos-e2e\02-conexion-chat-bloqueo\01-iniciar-sesion-ana (302 Found) - 823 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Ana
+flujos-e2e\02-conexion-chat-bloqueo\02-iniciar-sesion-bruno (302 Found) - 794 ms
+Tests
+   ✓ Código HTTP esperado: 302
+   ✓ Sesión y nonce propios de Bruno
+flujos-e2e\02-conexion-chat-bloqueo\03-ana-solicita-conexion-con-bruno (200 OK) - 773 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Solicitud pendiente con ID real
+flujos-e2e\02-conexion-chat-bloqueo\04-bruno-acepta-la-solicitud-obtenida (200 OK) - 735 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Conexión confirmada
+flujos-e2e\02-conexion-chat-bloqueo\05-ana-comprueba-que-puede-escribir (200 OK) - 728 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ La conexión habilita los mensajes
+flujos-e2e\02-conexion-chat-bloqueo\06-ana-abre-la-conversacion (200 OK) - 745 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Conversación con ID real
+flujos-e2e\02-conexion-chat-bloqueo\07-ana-envia-un-mensaje (200 OK) - 751 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ El servidor conserva el texto enviado
+flujos-e2e\02-conexion-chat-bloqueo\08-bruno-lee-el-mensaje-exacto (200 OK) - 713 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ El destinatario recibe el mensaje de esta ejecución
+flujos-e2e\02-conexion-chat-bloqueo\09-bruno-bloquea-a-ana (200 OK) - 716 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Bloqueo activo
+flujos-e2e\02-conexion-chat-bloqueo\10-el-bloqueo-impide-escribir (404 Not Found) - 749 ms
+Tests
+   ✓ Código HTTP esperado: 404
+   ✓ El servidor oculta la conversación bloqueada
+flujos-e2e\02-conexion-chat-bloqueo\11-bruno-desbloquea-a-ana (200 OK) - 705 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ Bloqueo retirado
+flujos-e2e\02-conexion-chat-bloqueo\12-desbloquear-no-restaura-la-conexion (200 OK) - 716 ms
+Tests
+   ✓ Código HTTP esperado: 200
+   ✓ La relación termina sin permiso de mensajería
+
+📊 Execution Summary
+┌───────────────┬────────────────┐
+│ Metric        │     Result     │
+├───────────────┼────────────────┤
+│ Status        │     ✓ PASS     │
+├───────────────┼────────────────┤
+│ Requests      │ 12 (12 Passed) │
+├───────────────┼────────────────┤
+│ Tests         │     24/24      │
+├───────────────┼────────────────┤
+│ Assertions    │      0/0       │
+├───────────────┼────────────────┤
+│ Duration (ms) │     14499      │
+└───────────────┴────────────────┘
+Wrote html results to repositorio\test-results\backend-publicable-2026-10-22T09-08-26-379Z\conexion-chat-bloqueo.html
+Wrote json results to repositorio\test-results\backend-publicable-2026-10-22T09-08-26-379Z\conexion-chat-bloqueo.json
+Wrote junit results to repositorio\test-results\backend-publicable-2026-10-22T09-08-26-379Z\conexion-chat-bloqueo.xml

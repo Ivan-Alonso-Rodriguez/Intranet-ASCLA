@@ -10,7 +10,7 @@ final class MicroGeneration108Test extends TestCase
     protected function setUp(): void
     {
         $this->settings=Settings::get();$this->history=get_option('ascla_group_history',[]);
-        foreach (['administrator','ascla_member','ascla_member','ascla_member'] as $role) {
+        foreach (['administrator','ascla_member','ascla_member','ascla_member','ascla_member'] as $role) {
             $login='microgen_'.bin2hex(random_bytes(5));$id=wp_insert_user(['user_login'=>$login,'user_email'=>$login.'@example.invalid','user_pass'=>wp_generate_password(32),'role'=>$role]);$this->users[]=$id;
             update_user_meta($id,'_ascla_profile',ascla_test_profile(['microevents'=>true,'directory'=>false,'networking'=>false]));
         }
@@ -35,6 +35,7 @@ final class MicroGeneration108Test extends TestCase
     public function testFourEligibleMembersWithACommonInterestCanCreateAndRepeatWithoutDuplicates(): void
     {
         $result=$this->create();self::assertCount(1,$result['events']);self::assertSame([],$result['waiting']);
+        self::assertNotContains($this->users[0],get_post_meta($result['events'][0],'_ascla',true)['invitees']);
         self::assertFalse($result['reused']);self::assertSame('ready',$result['diagnostics']['reason']);self::assertSame(4,$result['diagnostics']['max_shared_interest']);
         $again=$this->create();self::assertTrue($again['reused']);self::assertSame($result['events'],$again['events']);
     }
@@ -61,7 +62,7 @@ final class MicroGeneration108Test extends TestCase
     }
     public function testBlocksExplainIncompatibilityWithoutBypassingThem(): void
     {
-        $id=Store::insert('relations',['user_id'=>$this->users[0],'target_id'=>$this->users[1],'kind'=>'block','created_at'=>current_time('mysql',true)]);
+        $id=Store::insert('relations',['user_id'=>$this->users[1],'target_id'=>$this->users[2],'kind'=>'block','created_at'=>current_time('mysql',true)]);
         $result=$this->create();self::assertSame([],$result['events']);self::assertSame('incompatible_group',$result['diagnostics']['reason']);self::assertSame(1,$result['diagnostics']['blocked_pairs']);
         Store::delete('relations',['id'=>$id]);self::assertCount(1,$this->create()['events']);
     }

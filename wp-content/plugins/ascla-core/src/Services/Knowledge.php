@@ -36,6 +36,7 @@ final class Knowledge
     /** Revalidate saved answers against the currently readable, reviewed evidence. */
     public static function storedAnswer(array $result): array
     {
+        $result=EntityRedactor::cleanTree($result);
         $originalIds=array_values(array_unique(array_filter(array_map('intval',$result['grounding']['context_source_ids']??array_column($result['sources']??[],'id')),static fn($id)=>$id>0)));
         if (!$originalIds) {
             $grounding=$result['grounding']??[];$usable=!empty($grounding['live_context_used']) || !empty($grounding['conversation_only']);
@@ -113,7 +114,7 @@ final class Knowledge
         // Never infer the video length from captions. If YouTube cannot verify it, keep it unknown and do not create timed capsules.
         if ($durationSeconds<=0) { $durationSeconds=0; }
 
-        $result=$ai->generate('multimedia',['source_id'=>$id,'transcript'=>$transcript,'chatham'=>!empty($meta['chatham']),'duration_seconds'=>$durationSeconds]);
+        $result=EntityRedactor::cleanTree($ai->generate('multimedia',['source_id'=>$id,'transcript'=>$transcript,'chatham'=>!empty($meta['chatham']),'duration_seconds'=>$durationSeconds]));
         if (!empty($meta['chatham'])) { $result=EntityRedactor::tree($result,$identities); }
         $result=Grounding::multimedia($result,$transcript);
         $summary=self::naturalizeVideoLanguage(Access::text($result['summary']??'',15000));
@@ -165,7 +166,7 @@ final class Knowledge
             'ai_topics'=>$autoTopics,
             'ai_topic_ids'=>$topicIds,
             'grounding'=>$result['grounding'],
-            'redaction'=>['policy'=>'pre-and-post-entities-v1','review_required'=>false],
+            'redaction'=>['policy'=>'scoped-attribution-v2','review_required'=>false],
             'duration_seconds'=>$durationSeconds,
             'capsule_policy'=>['duration_seconds'=>$durationSeconds,'max_capsules'=>\ASCLA\Core\Domain\Transcript::capsuleLimit($durationSeconds)],
             'generated_at'=>current_datetime()->format(DATE_ATOM),
@@ -242,10 +243,7 @@ final class Knowledge
         update_post_meta($id,'_ascla',$meta);
         $identities=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];
         if (!empty($meta['chatham'])) {
-            foreach (get_users(['capability'=>'ascla_access']) as $user) {
-                $p=(array)get_user_meta($user->ID,'_ascla_profile',true);
-                $identities[]=$user->display_name; $identities[]=$p['company']??'';
-            }
+            // Membership alone does not make a public citation or institution confidential.
             $transcript=Anonymizer::redact($transcript,$identities);
         }
         return [$transcript,$videoMode,$identities];
@@ -329,10 +327,11 @@ final class KnowledgeAnswer
     public static function run(string $question,array $history): array
     {
         $question=Access::text($question,2000);
-        $tokens=\ASCLA\Core\Repositories\KnowledgeSearch::tokens($question);
-        [$ranked,$protected,$identities]=self::ranked($tokens);
         $history=self::history($history);
         $contextQuestion=self::contextQuestion($question,$history);
+        // RAG retrieves the current follow-up topic before sending authorized evidence to the model.
+        $tokens=\ASCLA\Core\Repositories\KnowledgeSearch::tokens($contextQuestion);
+        [$ranked,$protected,$identities]=self::ranked($tokens);
         $context=AssistantContext::build($contextQuestion);
         $protected=$protected || $context['protected'];
         $identities=array_values(array_unique(array_merge($identities,$context['identities'])));
@@ -385,8 +384,13 @@ final class KnowledgeAnswer
     private static function contextQuestion(string $question,array $history): string
     {
         if (!$history || !self::followUp($question)) { return $question; }
-        $last=end($history);
-        return $question.' '.Access::text($last['question']??'',1000);
+        $topic=[];
+        foreach (array_reverse($history) as $turn) {
+            $previous=Access::text($turn['question']??'',1000);
+            $topic[]=$previous;
+            if (!self::followUp($previous)) { break; }
+        }
+        return $question.' '.implode(' ',array_reverse($topic));
     }
 
     private static function sources(array $context,array $ranked): array
@@ -405,8 +409,9 @@ final class KnowledgeAnswer
     {
         $references=array_column($sources,'title');
         $inputQuestion=$protected?EntityRedactor::redact($question,$identities,$references):$question;
+        $history=EntityRedactor::cleanTree($history);
         if ($protected) { $history=EntityRedactor::tree($history,$identities,$references); }
-        $result=Knowledge::provider()->generate('answer',['question'=>$inputQuestion,'sources'=>$sources,'live_context'=>$context['live'],'history'=>$history]);
+        $result=EntityRedactor::cleanTree(Knowledge::provider()->generate('answer',['question'=>$inputQuestion,'sources'=>$sources,'live_context'=>$context['live'],'history'=>$history]));
         if ($protected) { $result=EntityRedactor::tree($result,$identities,$references); }
         $verified=Grounding::answer($result,$sources);
         $verified['grounding']['live_context_used']=!empty($context['answerable']);
@@ -431,7 +436,8 @@ final class KnowledgeAnswer
     {
         $plain=mb_strtolower(remove_accents(trim($question)));
         if (mb_strlen($plain)>120) { return false; }
-        return (bool)preg_match('/^(?:y|pero|entonces)\b/u',$plain)
+        return (bool)preg_match('/^[¿¡\s]*(?:y|pero|entonces|amplia|detalla)\b/u',$plain)
+            || (bool)preg_match('/\bmas (?:detalles|informacion)\b/u',$plain)
             || (bool)preg_match('/\b(?:cual|cuales|cuando|hora|donde|virtual|presencial|ese|esa|eso|este|esta|primero|primera|segundo|segunda|tambien)\b/u',$plain)
             || (bool)preg_match('/\b(?:more|which|when|where|what time|that one|the first|the second)\b/u',$plain);
     }

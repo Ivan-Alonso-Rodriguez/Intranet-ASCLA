@@ -1,0 +1,30 @@
+meta {
+  name: 05. La cuenta suspendida pierde el acceso
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/bootstrap
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionCarla}}
+  X-WP-Nonce: {{nonceCarla}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 403", function () { expect(res.getStatus()).to.equal(403); });
+  test("La sesión anterior dejó de ser válida", function () { expect(res.getBody().code).to.equal("rest_cookie_invalid_nonce"); });
+}
+
+docs {
+  La suspensión destruye las sesiones existentes. Se espera 403 por nonce de la sesión revocada; la reactivación necesita iniciar sesión de nuevo.
+}

@@ -1,16 +1,69 @@
 # Historial de versiones — Intranet ASCLA
 
-**Versión actual:** `1.10.8` · **Esquema:** `15`.
+**Versión actual:** `1.10.9` · **Esquema:** `15`.
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+### Correcciones de mantenibilidad para ASCLA-QA del 22 de octubre de 2026
+
+Se revisan las 57 incidencias nuevas y la incidencia antigua del análisis de ASCLA-QA. Se separan validaciones, permisos y generación de vistas; se extrae la resolución de destinos de acceso; se centraliza la validación de enlaces sociales y se simplifican condiciones, plantillas y expresiones regulares. Los selectores CSS duplicados se consolidan conservando sus declaraciones efectivas. El fallo al cifrar una cookie de desafío usa una excepción específica. Se conserva el identificador del procesamiento de SonarQube fuera de Git.
+
+La corrección se prepara en `development` y se promueve a `qa` siguiendo el Manual QA. La aprobación se acredita únicamente con la ejecución completa de pruebas y el nuevo análisis de la revisión promovida; las reglas, exclusiones y umbrales de calidad permanecen sin cambios. Las evidencias publicadas anteriormente mantienen su fecha, paquete y entorno originales.
+
+### Preparación de cobertura para SonarQube del 22 de octubre de 2026
+
+La preparación de PHPUnit instala PCOV 1.0.12 desde su archivo oficial con SHA-256 fijado y comprueba que la extensión esté cargada. Resuelve el bloqueo de metadatos REST de PECL antes de ejecutar las pruebas; conserva las verificaciones de cobertura, revisión limpia y Quality Gate. Esta corrección del ejecutor no modifica el plugin ni acredita por sí misma un análisis de SonarQube.
+
+La validación posterior detecta scripts agrupados sin nonce en el acceso nativo. El plugin los imprime individualmente con las protecciones de WordPress, conserva CSP estricta y añade una regresión de carga e inyección bloqueada. Se corrigen contrastes en afinidad/chat/carga y nombres accesibles de Galería/chat. Los tests antiguos se adaptan al inicio administrativo, roles comunitarios y Guardar borrador, con las mismas comprobaciones funcionales. El nuevo paquete se identifica mediante su manifiesto; las evidencias ZAP/API/UI anteriores conservan sus propias revisiones y no representan otra ejecución sobre estos ajustes.
+
+### Renovación de evidencias en el QA publicado del 22 de octubre de 2026
+
+Se añade la [guía de sustento de seguridad](pruebas/seguridad/sustento.html), con evidencias por conclusión, comparación de los 20 controles, guion de exposición y corrección concreta para el operador del hosting. La recomprobación conserva 19/20 en QA y documenta la versión expuesta en cinco respuestas públicas; el acceso recibido permite administrar WordPress, sin acceso al servidor. Esta actualización no altera el plugin ni convierte el pendiente en aprobado.
+
+La publicación incorpora las [fuentes de las pruebas locales](pruebas/seguridad/fuentes.html), su manifiesto de 209 archivos y ocho copias con sus huellas de ejecución. Los reportes ZAP/CSP/navegador locales se incluyen junto con las evidencias remotas, manteniendo separados sus entornos y fechas. Se sincronizan los ocho Markdown mantenidos y las referencias de la matriz, sin cambiar estados de cumplimiento ni datos históricos.
+
+Se renueva `pruebas/` con **81 peticiones/149 comprobaciones Bruno y seis recorridos Playwright aprobados en el QA publicado**, más **14 controles recientes aprobados**, con videos y capturas. La comparación de archivos públicos identifica JavaScript y CSS de la última versión; la API/UI contrasta el comportamiento del servidor. El asistente devuelve Google Gemini · API real. La seguridad remota registra seis controles aprobados en 42 vistas y **19/20 controles HTTP**, con versión de Apache expuesta como pendiente. El ZAP activo se ejecuta por separado en HTTPS aislado y conserva su propio resultado. La [entrega](pruebas/actualizacion/index.html) diferencia suites, fechas y límites, sin cambiar CP ni presentar una nueva UAT.
+
+### Directorio de cuatro columnas y tres filas del 22 de octubre de 2026
+
+El Directorio pagina cada doce perfiles y usa cuatro columnas en escritorio, dos en tableta y una en móvil. La paginación conserva filtros y orden. Los tamaños antiguos se normalizan a doce y Configuración muestra el tamaño fijo. Validación local: **40 pruebas PHP/255 aserciones**, **tres controles de navegador** y **49 controles portables**, registrados en la [evidencia de esta revisión](docs/evidence/release-1.10.9/directory-grid109.json).
+
+### Lista de Foros y biblioteca integrada del 22 de octubre de 2026
+
+Por solicitud del responsable, Foros vuelve a usar una sola lista de contenido para foros y publicaciones, sin Explorar foros. Los filtros y la paginación se aplican al conjunto, incluyendo el alcance propio en Mis temas y Mis borradores. Archivos abre directamente la biblioteca en el panel administrativo, con buscador, propietario, apertura y eliminación confirmada. Cancelar y eliminar conservan el contexto; una última página vacía retrocede automáticamente. Los botones Ver perfil, Conectar y Enviar mensaje usan el mismo espacio de 12 px.
+
+Validación dirigida local: **74 pruebas PHP/631 aserciones**, **seis controles de navegador** y controles portables del paquete. La [evidencia de esta revisión](docs/evidence/release-1.10.9/layout-ui109.json) identifica su ZIP; las suites y evidencias anteriores mantienen su propio alcance y fecha.
+
+### Paridad administrativa de Ejecutivo del 22 de octubre de 2026
+
+Ejecutivo ASCLA recibe la misma gestión de ASCLA que Administrador, incluido el inicio administrativo y las secciones de usuarios, importaciones, archivos, aliados e historial. Queda fuera de la participación en Directorio, conexiones y microeventos, igual que la cuenta administrativa. Configuración y Administrar WordPress siguen siendo exclusivos del Administrador; las rutas de configuración rechazan al Ejecutivo.
+
+Se separa `ascla_configure` de `ascla_manage` y se actualizan los roles existentes mediante la migración de capacidades versión 2. La gestión de cuentas permanece limitada a las rutas comunitarias de ASCLA, sin conceder capacidades nativas de WordPress al Ejecutivo. Se conservan las restricciones individuales y la autorización de la Junta para acumular roles. Validación local: **740 pruebas PHP/8.296 aserciones**, **cinco controles de navegador** y **49 controles portables** aprobados. La [evidencia de esta etapa](docs/evidence/release-1.10.9/executive-admin109.json) conserva resultados y huella del paquete; no renueva evidencias de ZAP ni UAT.
+
+### Ajustes de administración y perfil del 22 de octubre de 2026
+
+El registro de Aliados conserva Ver ficha y Editar; el menú de tres puntos reúne Activar/Desactivar y Eliminar. Cambiar el estado conserva la ficha; eliminar requiere confirmación y la envía a la papelera. Se retiran Tareas de IA y su contador del panel administrativo. Administrador ASCLA deja de mostrar los accesos a Directorio, Mensajería y Contacto; los roles comunitarios los conservan.
+
+El tipo de asociado se muestra arriba a la derecha en la cabecera del perfil, con adaptación móvil. Usuarios e intereses incorpora país y selección múltiple de industria, interés y área de conocimiento, junto con rol y acceso. La búsqueda incluye nombre, usuario, correo y datos profesionales; los filtros se aplican antes de paginar, también para cuentas suspendidas o fuera del Directorio público. Se corrige la construcción de URL para conservar todos los valores seleccionados. Registro e historial queda junto a Nueva galería.
+
+Validación dirigida local: **38 pruebas PHP/335 aserciones** y **nueve controles de navegador**, incluidos filtros múltiples con enlaces permanentes y `rest_route`. El [resumen de evidencia](docs/evidence/release-1.10.9/admin-ui109.json) identifica el paquete; no renueva cobertura, ZAP ni UAT.
+
+### Correcciones UI/UX del 21 de octubre de 2026 — #573 a #576
+
+Hub, foros y temas, Galería, Centro de Conocimiento, Eventos y Aliados permiten guardar borradores incompletos. Al cerrar una creación con cambios se ofrece guardarla como borrador. Cada sección dispone de **Mis borradores**; en Foros reúne foros y temas propios. Al guardar desde las secciones de contenido se abre esa vista. Los listados de Comunidad, próximos eventos y eventos anteriores muestran contenido publicado; **Mis publicaciones** incluye también los eventos propios sin fecha. Publicar mantiene las validaciones, los permisos y las restricciones de los metadatos.
+
+Los foros se presentan en tarjetas visibles con descripción, autor y acceso a la conversación. Las portadas de Galería abren su contenido mediante clic o teclado. Se actualizan los textos de interfaz en español e inglés.
+
+Validación local: **76 pruebas PHP y 859 aserciones**, más **10 controles de navegador** sobre las seis secciones, la recuperación de eventos sin fecha, las tarjetas en móvil y las portadas de galerías. Las fuentes de regresión están en [DraftWorkflowTest.php](tests/php/DraftWorkflowTest.php) y [draft-workflow.cjs](tests/draft-workflow.cjs); el [resumen revisado](docs/evidence/release-1.10.9/drafts-ui109.json) conserva los resultados y la huella del ZIP de 201 archivos. Son pruebas dirigidas y no una nueva suite completa. Las evidencias de seguridad anteriores conservan su fecha y alcance; no se repite ZAP ni se acredita despliegue remoto o UAT en esta etapa.
+
 ## Resumen de versiones
 
-> Ordenado de la versión más reciente a la más antigua. La versión vigente del proyecto es **1.10.8**.
+> Ordenado de la versión más reciente a la más antigua. La versión vigente del proyecto es **1.10.9**.
 
 | Versión | Enfoque principal | Estado |
 |---|---|---|
-| 1.10.8 | Filtros/paginación de eventos, asistencia y validación estricta de entrada | **Actual** |
+| 1.10.9 | Carga, perfil, Directorio, administración, IA, retiro editorial y seguridad/ZAP | **Actual** |
+| 1.10.8 | Filtros/paginación de eventos, asistencia y validación estricta de entrada | Anterior |
 | 1.10.7 | Directorio, programación editorial, microeventos, Contacto, reacciones, gettext y transacciones | Anterior |
 | 1.10.6 | Adecuación al análisis ASCLA, cierre QA, seguridad, membresías y auditoría esquema 14 | Anterior |
 | 1.10.5 | CU009 en Inicio: recomendaciones semanales, explicables y reversibles | Anterior |
@@ -84,7 +137,113 @@ El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y prueba
 
 ---
 
+## 1.10.9 — Mejoras del 17 al 21 de octubre de 2026
+
+Revisión documental del 21 de octubre: se conservan ocho Markdown con funciones definidas, rutas relativas y evidencias permitidas por Git. Se corrigen referencias al paquete vigente y a la preparación de accesos privados, se sincroniza la matriz y se distinguen los resultados históricos de las fuentes posteriores. Esta revisión no ejecuta nuevas pruebas de producto ni genera cobertura.
+
+El ajuste de perfil y retiro editorial valida los dominios de LinkedIn/X, presenta «Individual» sin cambiar los códigos existentes y da prioridad a conexiones activas sobre solicitudes antiguas de chat. Galerías y recursos incorporan retiro a Oculto, registro histórico y republicación, conservando datos y permisos. La [evidencia específica](docs/evidence/release-1.10.9/profile-editorial109.json) incluye la limpieza autorizada de resultados antiguos y conserva la separación entre verificaciones nuevas e históricas.
+
+El 20 de octubre se elimina «Actualizar datos de YouTube» del detalle de recursos; la obtención de metadatos y duración continúa automáticamente al guardar o procesar. La CSP usa nonce y `strict-dynamic`, sin permisos generales de scripts para YouTube, ytimg, Cloudflare o el propio dominio. El cargador oficial conserva su nonce y las directivas de marcos permiten los reproductores. La [validación específica](docs/evidence/release-1.10.9/youtube-csp109.json) corresponde a este ajuste; el ZAP completo mencionado debajo conserva el paquete y las fuentes de su ejecución anterior.
+
+El 19 de octubre se añade el [endurecimiento y análisis ZAP](COMPLIANCE.md#estado): CSP con nonce, cookies y formularios de acceso protegidos por navegador, CORS restringido, SRI local y configuración de Apache/PHP. El [manual](MANUAL_QA_UAT.md#zap) permite repetir spiders, escaneo activo de páginas/API y validación CSP independiente sin Jenkins. Se conserva la versión 1.10.9 y no se genera cobertura. Las evidencias detallan el alcance local y no certifican automáticamente el hosting publicado.
+
+El navegador deja de recibir las fechas internas exactas de revisión del perfil. Los plazos y las decisiones permanecen en el servidor; los avisos conservan su estado y funcionamiento. Los clientes Bruno y HTTP obtienen la cookie y el nonce del formulario protegido, y la regresión conserva la exclusión de administradores técnicos del Directorio.
+
+Las cookies propias del control de intentos y confianza de Turnstile protegen su contenido con cifrado autenticado AES-256-GCM. Conservan caducidad, firma, vínculo con el navegador y límites de intentos; la transición admite las cookies firmadas anteriores hasta su vencimiento. No cambia el formato de las cookies de autenticación de WordPress.
+
+La [ejecución final de seguridad](docs/evidence/release-1.10.9/security109.json) aprueba las páginas y la API locales con 52 reglas aplicables completas por análisis y **cero alertas altas, medias o bajas**; conserva las informativas y declara Log4Shell/Java no aplicable al entorno PHP. CSP, navegador, 708 pruebas PHP y las regresiones de integración/E2E también aprueban. El ejecutor rechaza reglas pendientes, fallos del navegador o pérdida de sesión; los archivos de cobertura permanecen intactos. La configuración de Apache/PHP sigue requiriendo instalación en el hosting por separado.
+
+Consolida todos los cambios de esta jornada: carga de los 13 módulos, guardado del perfil administrativo, tipo de asociado gestionado por administración, Directorio y teléfono con banderas, lenguaje claro, RAG y privacidad contextual, Consultas de Contacto, edición administrativa de asociados, estadísticas e invitados de microeventos. Conserva el esquema 15 y las decisiones del usuario.
+
+El [manifiesto de 1.10.9](docs/evidence/release-1.10.9/package.json) identifica el ZIP vigente. La [verificación de versión](docs/evidence/release-1.10.9/release109.json) distingue la renumeración de las pruebas funcionales anteriores. Las etapas que indican la etiqueta provisional 1.10.8 se probaron durante el día antes de renumerar; sus versiones, hashes y cifras se conservan como registro histórico. Se agrupan en 1.10.9 sin presentar esas ejecuciones como pruebas nuevas.
+
+### Corrección de 1.10.9: ancho de las vistas de Estadísticas
+
+Retira en Estadísticas el máximo de 520 px que los estilos nativos de formularios de WordPress asignan a la clase card. Filtros y vistas utilizan el ancho disponible; Participación conserva sus seis columnas y el desplazamiento se mantiene dentro de la tabla cuando falta espacio en móvil. El ajuste queda limitado al panel de estadísticas y conserva cálculos, permisos y esquema 15. La [evidencia local](docs/evidence/release-1.10.9/statistics-width109.json) reproduce el límite con el CSS anterior y comprueba el ajuste con esa misma regla.
+
+### Ajuste del 17 de octubre: personas seleccionadas para microeventos
+
+Administración puede consultar los nombres del grupo elegido y el estado de invitación o respuesta desde la ficha y la revisión. Distingue selección previa a publicar, invitaciones sin responder y confirmaciones reales. La lista se mantiene separada de las inscripciones abiertas a la comunidad y se limita al permiso administrativo. Actualizar candidatos refleja la convocatoria vigente; consultar la ficha no la modifica. Conserva el historial de cancelación y maneja cuentas que ya no existen. Versión 1.10.8, esquema 15; sin despliegue remoto ni cobertura nueva. La [evidencia local](docs/evidence/release-1.10.8/micro-invitations108.json) documenta 42 pruebas PHP/545 aserciones, 14 recorridos de regresión, nueve controles nuevos y el ZIP verificado.
+
+### Ajuste del 17 de octubre: estadísticas comprensibles y registro guiado
+
+Reorganiza las estadísticas en cinco vistas con su propósito, indicadores explicados y cifras agrupadas por alcance. Aclara personas frente a asistencias, la base de las tasas, filtros, períodos comparados, fuentes de intereses y función de la IA. Los detalles avanzados se despliegan al necesitarlos. El registro de asistencia guía registro/revisión/confirmación y distingue guardar una persona, revisar un CSV y verificar toda la lista. Los errores de filtro conservan el formulario y la navegación entre vistas mantiene el foco de teclado.
+
+La [evidencia](docs/evidence/release-1.10.8/statistics-layout108.json) recoge validación local y ZIP 1.10.8, esquema 15. Cálculos y permisos del servidor conservados; sin nueva cobertura ni instalación remota. La mejora visual no cambia los estados ni porcentajes de la matriz del análisis.
+
+### Ajuste del 17 de octubre: edición completa del asociado por administración
+
+Editar usuario habilita los datos personales y profesionales sin exigir una consulta de Contacto. Añade ubicación, biografía, experiencia, enlaces y los ocho grupos de intereses y objetivos, organizados en secciones desplegables. Contacto sigue disponible como referencia opcional de uso único. Los cambios conservan preferencias personales, validan persistencia, se guardan de forma transaccional y registran actor/usuario/campos sin valores privados. Un formulario desactualizado devuelve conflicto para evitar sobrescrituras.
+
+Por instrucción expresa del usuario, RN-001 y RN-032 quedan como Ajustado por decisión del usuario, conservando los requisitos originales. Versión 1.10.8 y esquema 15. La [evidencia local](docs/evidence/release-1.10.8/admin-edit108.json) delimita pruebas y ZIP; sin despliegue remoto ni cobertura nueva.
+
+### Ajuste del 17 de octubre: privacidad contextual de la IA
+
+- Se conservan autores citados, instituciones, términos técnicos, normas y documentos públicos. La detección se limita a identidades declaradas, atribuciones de oradores/afiliaciones y contactos o enlaces privados en contenido protegido; llevar mayúsculas no basta para ocultar un término.
+- Gemini, OpenAI y DeepSeek reciben instrucciones coherentes con esa distinción. Respuestas, historial y campos generados retiran identidad reservada y expresan las intervenciones sin esa etiqueta. La pertenencia de alguien al Directorio no reserva automáticamente todas las menciones de su nombre o empresa.
+- Se preservan las fuentes originales, permisos y RAG. Los resúmenes antiguos no recuperan automáticamente nombres ya omitidos; requieren regeneración desde una fuente autorizada. No se ejecuta regeneración masiva ni se recogen nuevas coberturas.
+- Validación local: 691 pruebas PHP/7.845 aserciones en la regresión completa y 59 casos dirigidos/3.084 aserciones tras extender la limpieza al decodificador común; son ejecuciones solapadas. Pasan 49 controles portables y dos recorridos de navegador. La [evidencia](docs/evidence/release-1.10.8/ai-privacy108.json) identifica cada instantánea y los transportes interceptados. ZIP 1.10.8 de 196 archivos verificado, esquema 15; cuatro reportes de cobertura intactos y entornos temporales retirados.
+
+### Ajuste del 17 de octubre: bandeja de Consultas de Contacto
+
+- Se sustituyen las tarjetas con todos los formularios abiertos por resúmenes desplegables y filtros compactos por estado, incluida la vista Todas. La búsqueda conserva el estado elegido.
+- Mensaje, historial, respuesta y reasignación se muestran al abrir una consulta. Guardar mantiene abierto el caso; cerrar el resumen conserva el texto escrito mientras permanezca en la misma bandeja. Las consultas de otro responsable mantienen su asunto y contenido privados.
+- Se conservan las transiciones ordenadas, la respuesta obligatoria al resolver y la confirmación de archivo con historial. Diseño adaptable a ambos temas y móvil, con traducciones ES/EN.
+- Validación selectiva: cinco pruebas PHP/38 aserciones, 49 controles portables y siete de navegador aprobados. Cuatro vistas de escritorio/móvil en ambos temas sin desbordamiento ni infracciones automáticas WCAG A/AA; filtro seleccionado visible también en modo oscuro. La [evidencia](docs/evidence/release-1.10.8/contact-inbox108.json) conserva la procedencia de cada lote. ZIP 1.10.8 de 196 archivos verificado, esquema 15, catálogos con 1.836 mensajes por idioma. Sin recoger cobertura; entornos temporales retirados.
+
+### Ajuste del 17 de octubre: lenguaje claro, revisión de contenido y RAG
+
+- Revisar contenido distingue Publicaciones, Comentarios y Reportes recibidos. Borradores y reportes ya atendidos se consultan aparte; se mantienen las decisiones, motivos y permisos existentes. En móvil, las publicaciones se distribuyen en bloques legibles en lugar de comprimir las columnas.
+- La navegación diferencia consultas de Contacto, tareas de IA, encuentros e historial de cambios. Las tareas muestran nombres legibles. Crear evento aclara publicación, descripción, asistentes, lista de espera y avisos sin modificar los selectores de fecha/hora ni el flujo de borrador del último pull.
+- Perfil retira las dos ayudas de ubicación solicitadas y el encabezado del grupo; el indicador queda en País/región. Se conserva la validación de ubicaciones existente y el teléfono adopta el aviso privado con escudo de Fecha de nacimiento.
+- Se verifica el RAG léxico del Asistente y se corrige la recuperación de fuentes en preguntas de seguimiento encadenadas. Las pruebas recorren Gemini, OpenAI y DeepSeek con HTTP interceptado, fuentes autorizadas, exclusión de borradores ajenos/material sin revisar e identidades reservadas. Un hilo nuevo no reutiliza el tema anterior. No se añaden servicios ni credenciales.
+- Validación local: 688 pruebas PHP/7.749 aserciones, incluidas seis pruebas RAG/117 aserciones; 49 controles portables y ocho de navegador aprobados. Cuatro vistas de escritorio/móvil en ambos temas sin desbordamiento ni infracciones automáticas WCAG A/AA. La [evidencia](docs/evidence/release-1.10.8/usability-rag108.json) registra el origen de cada ejecución y el ajuste final de catálogos, con 1.826 mensajes por idioma. ZIP 1.10.8 de 196 archivos verificado; esquema 15. Entornos temporales retirados y cobertura anterior sin cambios.
+
+### Ajuste del 17 de octubre: tarjetas de Directorio y teléfono con banderas
+
+- Se alinean las acciones de las tarjetas y se sustituye el aviso largo de espera por la fecha de disponibilidad en la fila de conexión. Mientras dure la espera no se ofrece Conectar.
+- La solicitud enviada dispone de Cancelar a la vista, conservando su confirmación; se retiran la insignia Pendiente y los tres puntos de esa acción.
+- Perfil y el editor administrativo usan un selector de país con banderas locales, prefijos y reconocimiento de códigos de área compartidos. El teléfono continúa siendo opcional y privado; administración necesita la autorización de Contacto vigente para editarlo. Cambiar la bandera no altera la residencia.
+- El componente se descarga solo cuando se abre un formulario de teléfono. Se empaquetan los datos y banderas de intl-tel-input 29.5.3 con licencia MIT; ante un fallo de carga se conserva el campo internacional original.
+- Validación selectiva: 59 pruebas PHP/432 aserciones, 49 controles portables y ocho controles de navegador aprobados; ocho vistas de escritorio/móvil en ambos temas sin desbordamiento ni infracciones automáticas WCAG A/AA. La [evidencia](docs/evidence/release-1.10.8/directory-phone108.json) registra los reportes, capturas, limpieza y el ZIP de 196 archivos. Sin recoger cobertura ni modificar sus cuatro reportes anteriores; no se repite ni se atribuye a esta etapa la suite completa anterior. Continúan versión 1.10.8 y esquema 15.
+
+### Optimización del 17 de octubre: carga de todos los módulos
+
+- Los 13 módulos reciben su arranque autorizado en el HTML privado y conservan el respaldo REST. La cabecera y la primera apertura de Perfil reutilizan los datos recién construidos en esa petición.
+- Se agrupan GET simultáneos idénticos dentro de la vista, sin conservar respuestas entre visitas o usuarios. Errores, escrituras y navegación invalidan esa reutilización. La navegación queda disponible durante la carga y las respuestas anteriores no sustituyen la vista nueva.
+- Recursos/autores y temas/foros cargan en paralelo; las notificaciones dejan de retrasar los detalles. Las bandejas administrativas independientes no consultan el resumen completo.
+- Los contadores de reacciones de publicaciones y comentarios usan una consulta en lugar de tres. Las recomendaciones serializan únicamente la página solicitada, manteniendo el ranking y la paginación completos.
+- Se conservan versión 1.10.8 y esquema 15, las reglas de privacidad, permisos, sesiones e intereses y las pruebas sin recogida de cobertura.
+- Validación: 682 pruebas PHP/7.625 aserciones, 49 controles portables, siete controles de carga/navegación y nueve de perfil/Directorio aprobados; seis vistas sin infracciones automáticas WCAG A/AA. La comparación local comprende 78 navegaciones: el promedio de las medianas por módulo baja de 452,2 a 351,7 ms (22,2 %). No acredita velocidad del hosting, carga simultánea ni latencia de proveedores. La [evidencia](docs/evidence/release-1.10.8/load108.json) registra método, resultados de los 13 módulos y huellas; el [manifiesto provisional](docs/evidence/release-1.10.8/package.json) corresponde al último paquete anterior a la renumeración, no a esa instantánea de 190 archivos. Los cuatro reportes de cobertura anteriores permanecen intactos.
+
+### Ajuste del 17 de octubre: perfil y Directorio
+
+- Se integra el último `development` (`877568c`) mediante avance directo, conservando el inicio y la separación del administrador técnico, la navegación, el logo único y la entrega de Bruno/Playwright. Los cambios locales anteriores se respaldan antes de integrar.
+- El guardado propio tolera las casillas sociales ausentes en el perfil administrativo; conserva las restricciones de participación del servidor. Se marcan los campos obligatorios y se explican los mínimos de ubicación y temas.
+- Administración asigna **Individual** o **Empresa asociada** mediante un selector; el asociado solo consulta el tipo. La API rechaza cambios no autorizados y tipos nuevos arbitrarios. Los valores heredados se conservan hasta su clasificación administrativa. El alcance confirmado es solo el tipo, sin agrupación de cuentas ni cupo empresarial.
+- Las fichas de Directorio simplifican la solicitud enviada a **Pendiente**, con cancelación en un menú. Administración abre desde allí **Actividad e intereses** o la gestión de la cuenta, con los permisos, confirmaciones y autorizaciones existentes.
+- Se corrige el desbordamiento del correo en el perfil móvil. La preparación demo no asigna tipos libres ni modifica una clasificación administrativa existente. Las regresiones antiguas de grupos, mensajería y afinidad usan asociados separados del administrador.
+- Validación: 682 pruebas PHP/7.625 aserciones, 49 portables y nueve controles de navegador aprobados; seis vistas sin desbordamiento ni infracciones automáticas WCAG A/AA. Sin recoger cobertura ni modificar sus reportes anteriores. El [resumen de evidencia](docs/evidence/release-1.10.8/profile-directory108.json) conserva el alcance y las huellas; esa entrega incluía 189 archivos; el [manifiesto provisional](docs/evidence/release-1.10.8/package.json) conserva el último paquete anterior a la renumeración 1.10.9.
+- Se mantienen versión 1.10.8 y esquema 15. La instalación del plugin sigue siendo manual y los estados de la matriz no se elevan por estos ajustes.
+
 ## 1.10.8 — Formularios y continuidad del Documento de Análisis y Diseño
+
+### Preparación de development del 16 de octubre
+
+- Se unifica la entrega vigente de Bruno en `pruebas/backend/coleccion-bruno/`: 18 peticiones de integración y cuatro flujos de negocio, 58 peticiones y 105 comprobaciones en total. Playwright conserva cinco recorridos con 11 videos y 11 capturas del último lote local aprobado.
+- `pruebas/` publica solo la última ejecución por herramienta. Se actualizan el manual, los pasos de exposición y la instalación de herramientas; se mantienen las fuentes y metadatos originales de las evidencias.
+- Se retiran tres scripts sustituidos y la copia duplicada de los cuatro flujos. El `Jenkinsfile` se conserva por solicitud del responsable como referencia opcional. La suite complementaria con cuentas temporales permanece activa para sus escenarios propios.
+- Los accesos privados, dependencias y ZIP con contraseñas permanecen fuera de Git. Se conserva versión 1.10.8 y esquema 15; preparar el commit no despliega el plugin ni aprueba UAT.
+- Se completa en el catálogo JSON la traducción del aviso de administración ya presente en gettext. La revisión pasa 49 controles portables, sintaxis de los 16 PHP pendientes y las verificaciones de documentación, paquete y evidencias.
+
+### Ajuste del 16 de octubre: administración e identidad visual
+
+- Se muestra un solo logo en escritorio y las secciones de administración pasan a la parte superior del contenido.
+- El administrador inicia en su panel ASCLA y conserva el acceso técnico explícito a WordPress.
+- Las cuentas administrativas quedan fuera del directorio, recomendaciones y microeventos, y no pueden enviar ni recibir solicitudes de conexión o conversación. Se conservan los datos anteriores y los permisos de gestión.
+- Las regresiones separan al administrador que configura la comunidad de los asociados que participan en las pruebas de networking y microeventos. La verificación local y el ZIP actualizado no equivalen a instalarlo en el sitio publicado.
+
+- **Integración y E2E para presentación UAT, 15 de octubre:** las pruebas se ejecutan independientemente de Jenkins. Se repiten Bruno y Playwright desde `uat`, con base `c525b99`: 10 peticiones/15 comprobaciones de integración, 23/38 de flujos HTTP y tres recorridos de interfaz aprobados, con cinco videos y cinco capturas. El recorrido existente de conexiones abre con un clic real el mensaje de presentación desplegable antes de leerlo y aceptar la solicitud específica. Se conserva el primer intento fallido con su video; no se omiten comprobaciones ni se añaden casos. Los reportes nuevos identifican rama y versión local; su guía remota usa rutas relativas. El [manual](MANUAL_QA_UAT.md#exponer-pruebas) explica la exposición y la integración de ramas con historial divergente. El [resumen verificable](docs/evidence/release-1.10.8/uat-acceptance108.json) declara los ajustes sin commit y la limpieza. Sin nueva cobertura, cambios del core, reconstrucción del ZIP ni instalación remota; se conserva versión 1.10.8 y esquema 15.
 
 - **Corrección de incidencias SonarQube, 15 de octubre:** análisis local con SonarQube Community 26.9.0.129388. La instantánea del commit `88bbad3` reproduce las 137 incidencias exportadas de ASCLA-QA; la instantánea corregida obtiene cero. Se simplifican condiciones, plantillas y funciones; se separan transporte de Calendar, resolución de cuentas de Forms, excepciones de entrega y compatibilidad de estadísticas de caché. Se conserva la interfaz esperada por WordPress y se mantienen permisos, validaciones y privacidad. No se añaden casos ni se cambian reglas, exclusiones o umbrales; las regresiones utilizan las pruebas existentes sin recoger cobertura. El resultado local no acredita el Quality Gate publicado ni un despliegue. Se conservan versión 1.10.8, esquema 15 y estados de la matriz.
   Validación: 677 pruebas PHP/7.565 aserciones, 49 controles portables y doce recorridos de navegador con 110 controles aprobados; 148 estados axe registrados sin infracciones automáticas ni desbordamiento. Se ajusta una aserción existente al mensaje actual de perfil vacío. El [resumen verificable](docs/evidence/release-1.10.8/sonar-fixes108.json) conserva huellas de los reportes nativos, las repeticiones por idioma y cron del entorno de prueba y la comprobación de que los cuatro artefactos originales de cobertura siguen intactos. ZIP reconstruido y verificado: 188 archivos, 1.355.916 bytes; su hash está en el [manifiesto](docs/evidence/release-1.10.8/package.json). Instalación manual y Quality Gate remoto pendientes.

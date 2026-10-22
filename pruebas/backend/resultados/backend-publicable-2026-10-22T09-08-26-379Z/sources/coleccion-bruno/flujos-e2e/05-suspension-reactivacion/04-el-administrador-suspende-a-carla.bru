@@ -1,0 +1,33 @@
+meta {
+  name: 04. El administrador suspende a Carla
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/admin/member/{{idCarla}}
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAdministrador}}
+  X-WP-Nonce: {{nonceAdministrador}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "suspended": true
+  }
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("La suspensión se aplica a la cuenta de prueba", function () { expect(Number(res.getBody().id)).to.equal(Number(bru.getCollectionVar("idCarla")));expect(res.getBody().suspended).to.equal(true); });
+}

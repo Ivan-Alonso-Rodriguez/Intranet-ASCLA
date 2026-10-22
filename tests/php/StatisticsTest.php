@@ -98,8 +98,8 @@ final class StatisticsTest extends TestCase
     {
         $future=$this->event(3);$cancelled=$this->event(-2,['cancelled'=>true]);$private=$this->event(-2,['micro'=>true,'invitees'=>[$this->users[3]]]);
         self::assertSame(409,$this->api('POST','admin/attendance/'.$future,['email'=>$this->email(3),'status'=>'present'])->get_status());self::assertSame(409,$this->api('GET','admin/attendance/'.$cancelled)->get_status());
-        wp_set_current_user($this->users[1]);self::assertSame(404,$this->api('GET','admin/attendance/'.$private)->get_status());
-        $ids=array_column(Statistics::dashboard($this->filter)['options']['events'],'id');self::assertNotContains($private,$ids);self::assertNotContains($future,$ids);self::assertNotContains($cancelled,$ids);
+        wp_set_current_user($this->users[1]);self::assertSame(200,$this->api('GET','admin/attendance/'.$private)->get_status());
+        $ids=array_column(Statistics::dashboard($this->filter)['options']['events'],'id');self::assertContains($private,$ids);self::assertNotContains($future,$ids);self::assertNotContains($cancelled,$ids);
         self::assertSame(400,$this->api('POST','admin/attendance/'.$this->events[0],['email'=>$this->email(3),'status'=>'present','minutes'=>61])->get_status());
     }
     public function testPeriodsUseLocalCalendarAndRejectInvalidOrUnboundedRanges():void

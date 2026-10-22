@@ -6,7 +6,7 @@
     if(source==='zoom')return 'Zoom';
     return 'Sin verificar';
   }
-  globalThis.ASCLAStatistics = ({root, api, E, T, modal, closeModal, toast, date}) => {
+  globalThis.ASCLAStatistics = ({root, api, E, T, I, modal, closeModal, toast, date}) => {
     let panel, data, filters = {}, section = "overview", insights, roster, preview, csv = "", page = 1;
     let generation = 0, zoomOptions={}, eventPage=1;
     const label = text => E(T(text));
@@ -19,8 +19,11 @@
       ].forEach(key=>{value=value.split(key).join(T(key));});
       return E(value);
     };
-    const number = value => value === null || value === undefined ? "—" : new Intl.NumberFormat().format(value);
-    const percent = value => value === null ? "—" : number(value) + "%";
+    const locale=globalThis.ASCLA.locale;
+    const number = value => value === null || value === undefined ? "—" : new Intl.NumberFormat(locale).format(value);
+    const percent = value => value === null || value === undefined ? T('Sin datos') : number(value) + "%";
+    const day = value => new Intl.DateTimeFormat(locale,{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));
+    const range = (from,to) => E(day(from))+' — '+E(day(to));
     const action = (text, key, attrs = "", cls = "") => `<button type="button" class="btn ${cls}" data-stats-action="${key}" ${attrs}>${label(text)}</button>`;
     const note = text => `<p class="private-note">${label(text)}</p>`;
     const cell = value => `<td>${value}</td>`;
@@ -31,9 +34,9 @@
       const bodyHtml = rows.length
         ? rows.join("")
         : `<tr><td colspan="${headers.length}">${label("No hay datos para este período.")}</td></tr>`;
-      return `<div class="table-wrap" tabindex="0"><table class="data-table stats-table"><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table></div>`;
+      return `<p class="stats-table-hint">${label('Desliza la tabla para ver todas las columnas.')}</p><div class="table-wrap" tabindex="0" role="region" aria-label="${E(headers.map(T).join(' · '))}"><table class="data-table stats-table"><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table></div>`;
     };
-    const tabs = [["overview","Estadísticas"],["users","Usuarios que más asisten"],["topics","Temas de mayor interés"],["trends","Tendencias"],["ai","IA y tendencias"]];
+    const tabs = [['overview','Resumen','La comunidad de un vistazo','users'],['users','Participación','Quiénes asisten a los eventos','calendar'],['topics','Intereses','Los temas que reúnen a la comunidad','heart'],['trends','Comparar períodos','Qué cambió respecto al período anterior','clock'],['ai','Temas con IA','Agrupar eventos por su contenido','spark']];
     const metrics = {events:"Eventos finalizados",registrations:"Inscripciones confirmadas",attendees:"Asistentes únicos",attendances:"Asistencias verificadas",recurring:"Usuarios recurrentes"};
     const attendanceStates=[['unknown','Sin verificar'],['present','Asistió'],['partial','Asistencia parcial'],['absent','No asistió'],['review','Revisión manual']];
     const attendanceOptions=status=>attendanceStates.map(([key,text])=>{
@@ -42,11 +45,12 @@
     }).join('');
     const delta = n => {
       if(n===null)return `<span class="stats-change">${label("Sin base previa")}</span>`;
+      if(n===0)return `<span class="stats-change">${label('Sin cambios')}</span>`;
       let cls='';
       if(n>0)cls='up';
       else if(n<0)cls='down';
-      const sign=n>0?'+':'';
-      return `<span class="stats-change ${cls}">${sign}${number(n)}%</span>`;
+      const direction=n>0?'Aumentó':'Disminuyó';
+      return `<span class="stats-change ${cls}">${n>0?'↑':'↓'} ${number(Math.abs(n))}%${small(label(direction))}</span>`;
     };
     const select = (name, title, options, value) => {
       const optionsHtml=options.map(o=>{
@@ -56,14 +60,27 @@
       return `<label class="field"><span>${label(title)}</span><select name="${name}"><option value="0">${label("Todos")}</option>${optionsHtml}</select></label>`;
     };
     const pagerAttrs = (pageNumber, disabled, extra='') => 'data-page="'+pageNumber+'" '+(disabled?'disabled':'')+(extra?' '+extra:'');
+    const help = (title,body) => `<details class="stats-help"><summary>${label(title)}</summary><div>${body}</div></details>`;
+    const intro = (title,text) => `<div class="stats-view-intro"><h3>${label(title)}</h3><p>${label(text)}</p></div>`;
+    const metric = (key,title,value,hint,icon='users') => `<article class="card stats-metric" data-stat="${key}"><div class="stats-metric-label"><span class="stats-metric-icon" aria-hidden="true">${I(icon)}</span><span>${label(title)}</span></div><strong>${E(value)}</strong><small>${label(hint)}</small></article>`;
+    function coverage() {
+      const s=data.summary,remaining=s.events-s.complete_events;
+      const message=s.events?'Las tasas solo se calculan con listas verificadas. Las demás cifras pueden incluir registros parciales.':'Prueba otras fechas o quita los filtros para encontrar eventos finalizados.';
+      return `<div class="stats-coverage"><div class="stats-coverage-copy"><span class="stats-metric-icon" aria-hidden="true">${I('check')}</span><div><strong>${number(s.complete_events)} ${label('de')} ${number(s.events)} ${label('listas de asistencia verificadas')}</strong><p>${label(message)}</p></div></div><div class="stats-coverage-progress"><progress value="${s.complete_events}" max="${Math.max(1,s.events)}" aria-label="${label('Listas de asistencia verificadas')}"></progress><span>${number(remaining)} ${label('por revisar')}</span></div>${action('Revisar asistencias','show-events',s.events?'':'disabled','small')}</div>`;
+    }
     function render() {
       if(!panel?.isConnected || !data)return;
       const p=data.period;
-      const tabsHtml=tabs.map(([key,title])=>{
-        const attrs='data-section="'+key+'" aria-pressed="'+(section===key)+'"';
-        return action(title,'section',attrs,section===key?'primary':'');
-      }).join('');
-      panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${label("PARTICIPACIÓN E INTERESES")}</span><h2>${label("Estadísticas de la comunidad")}</h2><p>${label("Consulta la participación y registra la asistencia de los eventos finalizados.")}</p></div><span class="tag">${E(p.timezone)}</span></div><form data-stats-form="filter" class="stats-filters"><label class="field"><span>${label("Desde")}</span><input required type="date" name="from" value="${E(p.from)}"></label><label class="field"><span>${label("Hasta")}</span><input required type="date" name="to" value="${E(p.to)}"></label>${select('topic','Tema',data.options.topics,filters.topic)}${select('category','Categoría',data.options.categories,filters.category)}<label class="field"><span>${label('Buscar evento')}</span><input name="event_search" value="${E(filters.event_search||'')}" placeholder="${label('Filtrar las primeras 100 opciones')}"></label>${select('event','Evento',data.options.events,filters.event)}<button class="btn primary">${label("Aplicar filtros")}</button></form><nav class="stats-tabs" aria-label="${label("Vistas de estadísticas")}">${tabsHtml}</nav><div class="stats-coverage" role="status"><strong>${number(data.summary.complete_events)} / ${number(data.summary.events)} ${label("eventos con registro completo")}</strong><span>${label("Las inscripciones no acreditan asistencia. Las tasas usan únicamente registros completos.")}</span></div><div id="stats-view"></div>`;
+      const tabsHtml=tabs.map(([key,title,description,icon])=>`<button type="button" class="stats-view-button ${section===key?'selected':''}" data-stats-action="section" data-section="${key}" aria-pressed="${section===key}" aria-controls="stats-view"><span class="stats-view-icon" aria-hidden="true">${I(icon)}</span><span><strong>${label(title)}</strong><small>${label(description)}</small></span></button>`).join('');
+      const advanced=Number(filters.category)||Number(filters.event)||filters.event_search;
+      const eventHint=number(data.options.events_total)+' '+label('eventos encontrados. El selector incluye el período elegido y el anterior. Busca por título si no aparece el evento: se muestran hasta 100 coincidencias. Elige una opción para filtrar las cifras.');
+      panel.innerHTML=`<div class="admin-section-heading stats-title"><div><span class="eyebrow">${label('PARTICIPACIÓN E INTERESES')}</span><h2>${label('Estadísticas de la comunidad')}</h2><p>${label('Conoce la participación, descubre intereses y revisa la asistencia de tus eventos.')}</p></div><span class="stats-period-tag">${I('calendar')} ${number(p.days)} ${label('días')}</span></div>
+        <form data-stats-form="filter" class="card stats-filter-card"><div class="stats-filter-heading"><div><h3>${label('¿Qué período quieres consultar?')}</h3><p>${label('Se incluyen los eventos que finalizaron entre estas fechas. Máximo 366 días.')}</p></div><span class="private-note">${label('Zona horaria')}: ${E(p.timezone)}</span></div>
+          <div class="stats-filters"><label class="field"><span>${label('Desde')}</span><input required type="date" name="from" value="${E(p.from)}"></label><label class="field"><span>${label('Hasta')}</span><input required type="date" name="to" value="${E(p.to)}"></label>${select('topic','Tema',data.options.topics,filters.topic)}<button class="btn primary">${I('search')} ${label('Aplicar filtros')}</button></div>
+          <details class="stats-advanced" ${advanced?'open':''}><summary>${label('Filtrar por categoría o evento')}${advanced?` <span class="tag">${label('Hay filtros adicionales')}</span>`:''}</summary><div class="stats-advanced-grid">${select('category','Categoría',data.options.categories,filters.category)}<label class="field"><span>${label('Buscar un evento en el selector')}</span><input name="event_search" value="${E(filters.event_search||'')}" maxlength="100" placeholder="${label('Escribe parte del título')}"></label>${select('event','Evento',data.options.events,filters.event)}<p class="private-note full">${eventHint}</p></div></details>
+          <div class="stats-filter-footer"><p>${label('Mostrando')}: <strong>${range(p.from,p.to)}</strong></p>${action('Quitar filtros','clear-filters','title="'+label('Conserva las fechas y quita tema, categoría y evento.')+'"','ghost small')}</div><div data-stats-error role="alert" hidden></div>
+        </form>
+        <nav class="stats-tabs" aria-label="${label('Vistas de estadísticas')}">${tabsHtml}</nav>${coverage()}<div id="stats-view"></div>`;
       const view=panel.querySelector('#stats-view');
       if(section==='overview') overview(view);
       else if(section==='users') users(view);
@@ -72,42 +89,62 @@
       else ai(view);
     }
     function renderEventRow(e) {
-      const title=E(e.title)+small(E(date(e.end)));
-      const attrs='data-id="'+e.id+'"';
-      return row([title,number(e.registered),number(e.attended),label(e.complete?'Completo':'Por completar'),action('Registrar asistencia','roster',attrs,'small')]);
+      const title=`<strong>${E(e.title)}</strong>`+small(E(date(e.end)));
+      const state=`<span class="stats-state ${e.complete?'complete':'pending'}">${I(e.complete?'check':'clock')}${label(e.complete?'Lista verificada':'Por revisar')}</span>`;
+      return row([title,number(e.registered),number(e.attended),state,action(e.complete?'Ver o corregir lista':'Revisar asistencia','roster','data-id="'+e.id+'"','small')]);
     }
     function overview(view) {
       const s=data.summary;
-      const cards=[['Usuarios ASCLA',number(s.users),'Cuentas actuales, incluidas las suspendidas.'],['Usuarios nuevos',number(s.new_users),'Altas en el período seleccionado.'],['Usuarios con actividad registrada',number(s.active_users),'Personas con acciones en el registro de actividad.'],['Eventos finalizados',number(s.events),'Eventos publicados y no cancelados.'],['Inscripciones confirmadas',number(s.registrations),'Reservas aceptadas en los eventos del período.'],['Asistencias verificadas',number(s.attendances),'Una asistencia por persona y evento.'],['Asistentes únicos',number(s.attendees),'Personas con al menos una asistencia.'],['Tasa de asistencia',percent(s.rate),'Inscritos que asistieron / inscritos de eventos con registro completo.'],['Promedio por evento',number(s.average),'Asistentes por evento con registro completo.'],['Usuarios recurrentes',number(s.recurring),'Personas que asistieron a dos o más eventos.']];
-      const cardsHtml=cards.map(([title,value,hint])=>`<article class="card stats-metric"><span>${label(title)}</span><strong>${value}</strong><small>${label(hint)}</small></article>`).join('');
-      const eventTable=table(['Evento','Inscripciones','Asistencias','Registro','Acciones'],data.events.map(renderEventRow));
+      const primary=[
+        ['events','Eventos finalizados',number(s.events),'Eventos publicados y no cancelados que terminaron en el período.','calendar'],
+        ['attendees','Personas que asistieron',number(s.attendees),'Cada persona cuenta una sola vez, aunque haya asistido a varios eventos.','users'],
+        ['attendances','Asistencias registradas',number(s.attendances),'Una asistencia por persona y evento. Solo incluye el estado Asistió.','check'],
+        ['rate','Asistencia de inscritos',percent(s.rate),'Porcentaje de inscritos que asistieron, solo en listas verificadas.','calendar']
+      ].map(args=>metric(...args)).join('');
+      const secondary=[
+        ['registrations','Inscripciones confirmadas',number(s.registrations),'Reservas aceptadas; una inscripción no confirma que la persona asistió.','calendar'],
+        ['average','Promedio de asistentes',number(s.average),'Promedio por evento con lista verificada. Sin listas verificadas no se calcula.','users'],
+        ['recurring','Personas que regresan',number(s.recurring),'Asistieron a dos o más eventos durante el período elegido.','heart']
+      ].map(args=>metric(...args)).join('');
+      const community=[
+        ['users','Cuentas ASCLA',number(s.users),'Cuentas con acceso asignado a ASCLA; incluye membresías suspendidas.','users'],
+        ['new_users','Nuevas cuentas',number(s.new_users),'Cuentas creadas durante las fechas elegidas.','users'],
+        ['active_users','Cuentas con actividad',number(s.active_users),'Cuentas con acciones en el historial. No es un contador de visitas.','clock']
+      ].map(args=>metric(...args)).join('');
+      const guide=help('Cómo leer estos indicadores',`<div class="stats-explainer"><div><strong>${label('Persona o asistencia')}</strong><p>${label('Si una persona asiste a varios eventos, aparece una vez en personas y una vez por evento en asistencias.')}</p></div><div><strong>${label('¿Por qué aparece Sin datos?')}</strong><p>${label('La tasa necesita inscritos con una lista verificada. El promedio necesita al menos una lista verificada. Sin esa base, no se muestra un cero.')}</p></div></div>`);
+      const eventTable=table(['Evento','Inscripciones','Asistencias','Estado de la lista','Acciones'],data.events.map(renderEventRow));
       const previous=action('Anterior','event-page',pagerAttrs(eventPage-1,eventPage===1));
       const next=action('Siguiente','event-page',pagerAttrs(eventPage+1,eventPage*20>=data.events_total));
-      view.innerHTML=`<div class="stats-grid">${cardsHtml}</div>${note('Los indicadores de usuarios abarcan toda la comunidad. Los filtros de evento, tema y categoría se aplican a participación.')}<section class="card stats-section"><div class="stats-heading"><div><h3>${label('Registro de asistencia')}</h3>${note('Importa un CSV de Zoom o registra asistentes manualmente. Completa el registro cuando hayas verificado toda la lista.')}</div></div>${eventTable}<div class="admin-pager">${previous}<span>${eventPage} / ${Math.max(1,Math.ceil(data.events_total/20))}</span>${next}</div></section>`;
+      view.innerHTML=`${intro('¿Cómo participa la comunidad?','Estas cifras corresponden a los eventos del período y a los filtros aplicados.')}<div class="stats-grid stats-primary">${primary}</div><div class="stats-grid stats-secondary">${secondary}</div>${guide}
+        <section class="stats-community"><div class="stats-subheading"><h3>${label('La comunidad en cifras')}</h3><p>${label('Este bloque no cambia al filtrar por evento, tema o categoría. Las nuevas cuentas y la actividad sí usan las fechas elegidas.')}</p></div><div class="stats-grid stats-secondary">${community}</div></section>
+        <section class="card stats-section" id="stats-attendance"><div class="stats-heading"><div><h3 tabindex="-1">${label('Registro de asistencia')}</h3><p>${label('Abre un evento, registra o importa sus asistentes y verifica la lista al terminar.')}</p></div><span class="tag">${number(data.events_total)} ${label('eventos')}</span></div>${eventTable}<div class="admin-pager">${previous}<span>${eventPage} / ${Math.max(1,Math.ceil(data.events_total/20))}</span>${next}</div></section>`;
     }
     function renderUserRow(u) {
-      const user=E(u.name)+small('#'+u.id);
-      const rate=percent(u.rate)+small(number(u.eligible)+' '+label('inscripciones con registro completo'));
-      const minutes=number(u.minutes)+small(u.duration_known+' / '+u.attended+' '+label('con duración'));
-      const last=u.last_attendance?E(date(u.last_attendance)):'—';
-      return row([user,number(u.registered),number(u.attended),rate,minutes,last,label(u.recurring?'Recurrente':'Ocasional')]);
+      const last=u.last_attendance?label('Última asistencia')+': '+E(date(u.last_attendance)):label('Todavía no registra asistencias');
+      const user=`<strong>${E(u.name)}</strong>`+small(last);
+      const rate=E(percent(u.rate))+small(number(u.eligible)+' '+label('inscripciones con lista verificada'));
+      const minutes=number(u.minutes)+small(number(u.duration_known)+' / '+number(u.attended)+' '+label('asistencias con duración conocida'));
+      const recurrence=`<span class="stats-state ${u.recurring?'complete':''}">${label(u.recurring?'Regresa a los eventos':'Participación ocasional')}</span>`;
+      return row([user,number(u.registered),number(u.attended),rate,minutes,recurrence]);
     }
     function users(view) {
       const pages=Math.max(1,Math.ceil(data.ranking_total/20));page=data.ranking_page;
-      const rankingTable=table(['Usuario','Eventos inscritos','Eventos asistidos','Tasa de asistencia','Minutos registrados','Última asistencia','Recurrencia'],data.ranking.map(renderUserRow));
+      const rankingTable=table(['Persona','Inscripciones','Asistencias','Asistencia de inscritos','Minutos registrados','Frecuencia'],data.ranking.map(renderUserRow));
       const previous=action('Anterior','page',pagerAttrs(page-1,page===1));
       const next=action('Siguiente','page',pagerAttrs(page+1,page===pages));
-      view.innerHTML=`<section class="card stats-section"><h3>${label('Usuarios que más asisten')}</h3>${note('Ordenados por asistencias verificadas. La tasa usa sus inscripciones en eventos con registro completo; asistir sin inscripción no aumenta esa tasa.')}<p class="private-note">${label('La duración muestra solo los minutos disponibles. Estos datos no modifican roles ni permisos.')}</p>${rankingTable}<div class="admin-pager">${previous}<span>${page} / ${pages} · ${number(data.ranking_total)} ${label('usuarios')}</span>${next}</div></section>`;
+      view.innerHTML=`<section class="card stats-section">${intro('¿Quiénes participan más?','Personas inscritas o con asistencia registrada, ordenadas por cantidad de asistencias.')}${note('La tasa usa sus inscripciones en listas verificadas. Asistir sin inscripción no aumenta esa tasa.')}<div class="stats-reading-note">${I('users')}<p>${label('Regresa a los eventos significa que asistió al menos a dos. Los minutos solo suman duraciones conocidas; estos datos no cambian roles ni permisos.')}</p></div>${rankingTable}<div class="admin-pager">${previous}<span>${page} / ${pages} · ${number(data.ranking_total)} ${label('personas')}</span>${next}</div></section>`;
     }
     function renderTopicRow(t) {
       return row([E(t.name),number(t.declared),number(t.profile),number(t.forms),number(t.content),number(t.events),number(t.registrations),number(t.attendees),number(t.attendances)]);
     }
     function topics(view) {
       const max=Math.max(1,...data.topics.map(t=>t.attendances));
-      const bars=data.topics.filter(t=>t.attendances>0).slice(0,6).map(t=>`<div class="stats-bar"><span>${E(t.name)}</span><div><i style="width:${Math.round(t.attendances*100/max)}%"></i></div><strong>${number(t.attendances)}</strong></div>`).join('');
-      const topicTable=table(['Tema','Interés declarado · usuarios','Perfil','Forms','Contenido publicado','Eventos','Inscripciones','Participación real · personas','Asistencias'],data.topics.map(renderTopicRow));
-      const indexNote=data.index_complete?'':note('El índice de perfiles históricos se está actualizando. Los conteos declarados todavía son parciales.');
-      view.innerHTML=`<section class="card stats-section"><h3>${label('Temas de mayor interés')}</h3>${note('Interés declarado: selección actual en los perfiles, independiente del período. Participación real: asistencia verificada a eventos vinculados al tema.')}<div class="stats-bars">${bars}</div>${topicTable}${note('Una persona puede interesarse en varios temas y un evento puede tener varios temas; las filas no se suman como personas únicas.')}${note('Fuentes: perfiles y Forms revisados (personas únicas, sin sumar duplicados), publicaciones por tema del período, inscripciones y asistencia verificada. Los filtros de evento y categoría afectan a participación, no al interés declarado ni al contenido publicado.')}${indexNote}</section>`;
+      const bars=data.topics.filter(t=>t.attendances>0).slice(0,6).map(t=>`<div class="stats-bar"><span>${E(t.name)}</span><div aria-hidden="true"><progress max="100" value="${Math.round(t.attendances*100/max)}"></progress></div><strong>${number(t.attendances)}</strong></div>`).join('');
+      const chart=bars?`<div class="stats-chart"><h4>${label('Temas con más asistencias')}</h4><p>${label('Cada barra muestra asistencias, no personas distintas.')}</p><div class="stats-bars">${bars}</div></div>`:note('Aún no hay asistencias para mostrar en el gráfico.');
+      const topicTable=table(['Tema','Personas con interés guardado','Eventos','Personas que asistieron','Asistencias'],data.topics.map(t=>row([`<strong>${E(t.name)}</strong>`,number(t.declared),number(t.events),number(t.attendees),number(t.attendances)])));
+      const sources=table(['Tema','Personas con interés guardado','Perfil','Forms','Contenido publicado','Eventos','Inscripciones','Personas que asistieron','Asistencias'],data.topics.map(renderTopicRow));
+      const indexNote=data.index_complete?'':`<div class="stats-reading-note">${I('clock')}<p>${label('El índice de perfiles históricos se está actualizando. Los conteos declarados todavía son parciales.')}</p></div>`;
+      view.innerHTML=`<section class="card stats-section">${intro('¿Qué temas reúnen a la comunidad?','Compara los intereses guardados con la asistencia real a eventos.')}<div class="stats-explainer"><div><strong>${label('Intereses guardados')}</strong><p>${label('Selecciones actuales de los perfiles y Forms revisados. No dependen de las fechas elegidas.')}</p></div><div><strong>${label('Participación en eventos')}</strong><p>${label('Asistencias del período a eventos con ese tema. Cambia con los filtros aplicados.')}</p></div></div>${chart}${topicTable}${help('Ver fuentes y cifras de cada tema',sources+note('Perfil y Forms cuentan personas por fuente; una misma persona puede estar en ambas. El total de intereses guardados elimina duplicados. El contenido publicado usa las fechas, pero no el filtro de evento o categoría.'))}${note('Una persona y un evento pueden estar en varios temas. No sumes las filas como si fueran personas distintas.')}${indexNote}</section>`;
     }
     function renderTrendRow(t) {
       return row([label(metrics[t.metric]),number(t.current),number(t.previous),delta(t.change)]);
@@ -118,37 +155,47 @@
     function trends(view) {
       const p=data.period;
       const currentNote=p.includes_today?note('El período actual incluye hoy y todavía puede cambiar.'):'';
-      const trendsTable=table(['Indicador','Actual','Anterior','Variación'],data.trends.map(renderTrendRow));
-      const topicsTable=table(['Tema','Asistencias actuales','Asistencias anteriores','Variación'],data.topics.map(renderTopicTrendRow));
-      view.innerHTML=`<section class="card stats-section"><h3>${label('Tendencias')}</h3><p>${E(p.from)} — ${E(p.to)} · ${label('comparado con')} ${E(p.previous_from)} — ${E(p.previous_to)}</p>${note('Se comparan períodos consecutivos de igual número de días. Sin una base previa positiva no se calcula un porcentaje de crecimiento.')}${currentNote}<p class="stats-source">${label('Registros completos: actual / anterior')} <strong>${data.summary.complete_events}/${data.summary.events} · ${data.previous.complete_events}/${data.previous.events}</strong></p>${note('Las diferencias reflejan los registros disponibles; una cobertura incompleta puede cambiar la comparación.')}${trendsTable}<h3>${label('Evolución por tema')}</h3>${topicsTable}${note('El interés declarado es una foto actual del perfil: no se presenta como una tendencia histórica.')}</section>`;
+      const trendsTable=table(['Indicador','Período elegido','Período anterior','Cambio'],data.trends.map(renderTrendRow));
+      const topicsTable=table(['Tema','Asistencias actuales','Asistencias anteriores','Cambio'],data.topics.map(renderTopicTrendRow));
+      view.innerHTML=`<section class="card stats-section">${intro('¿Qué cambió entre períodos?','Se comparan dos períodos consecutivos con la misma cantidad de días.')}<div class="stats-period-comparison"><div><span>${label('Período elegido')}</span><strong>${range(p.from,p.to)}</strong><small>${number(data.summary.complete_events)} / ${number(data.summary.events)} ${label('listas verificadas')}</small></div><div><span>${label('Período anterior')}</span><strong>${range(p.previous_from,p.previous_to)}</strong><small>${number(data.previous.complete_events)} / ${number(data.previous.events)} ${label('listas verificadas')}</small></div></div>${currentNote}${note('Las listas pendientes pueden cambiar la comparación. Aumentó o Disminuyó describe la diferencia; no es una evaluación de desempeño.')}${trendsTable}${help('Cómo se calcula el cambio',note('Cambio porcentual = (valor actual − valor anterior) / valor anterior × 100. Sin un valor anterior positivo, un aumento se muestra como Sin base previa. Si ambos son cero, se muestra Sin cambios.'))}<h4>${label('Evolución por tema')}</h4>${topicsTable}${note('Los intereses del perfil reflejan su estado actual; no se usan para inventar una evolución histórica.')}</section>`;
     }
     function renderAiRow(g) {
       return row([E(g.name),number(g.events),number(g.previous_events),number(g.attendances),number(g.previous_attendances),delta(g.change)]);
     }
     function ai(view) {
-      if(!insights){view.innerHTML=note('Cargando clasificación de temas…');return;}
+      if(!insights){view.innerHTML=`<section class="card stats-section" aria-live="polite">${intro('Temas con IA','La IA propone grupos de eventos; las cifras siguen viniendo de registros reales.')}${note('Cargando clasificación de temas…')}</section>`;return;}
       const s=insights;
-      const providerText=s.provider==='mock'?'Clasificación local por palabras clave · modo demostración':'Clasificación semántica con el proveedor de IA configurado';
-      const analyzeAttrs=s.pending?'':'disabled';
-      const pendingNote=s.pending?note('La comparación refleja solo los eventos analizados. Continúa la clasificación para completar la cobertura.'):'';
-      const aiTable=table(['Tema sugerido','Eventos actuales','Eventos anteriores','Asistencias actuales','Asistencias anteriores','Variación'],s.groups.map(renderAiRow));
-      const last=s.last?`<p class="private-note">${label('Última clasificación')}: ${E(date(s.last))}</p>`:'';
-      view.innerHTML=`<section class="card stats-section"><div class="stats-heading"><div><h3>${label('IA y tendencias')}</h3><p>${label(providerText)}</p></div>${action('Clasificar siguientes 30 eventos','analyze',analyzeAttrs,'primary')}</div>${note('Se envían únicamente títulos depurados y el catálogo de temas al proveedor configurado. Se excluyen microeventos privados y sesiones Chatham House. No se envían correos, perfiles ni listas de asistencia.')}${note('La clasificación es una propuesta y no cambia los temas publicados. Las cifras se calculan con los registros guardados, nunca con respuestas de IA.')}<div class="stats-ai-summary"><span><strong>${s.classified} / ${s.eligible}</strong> ${label('eventos analizados')}</span><span><strong>${s.pending}</strong> ${label('pendientes')}</span><span><strong>${s.unclassified}</strong> ${label('sin tema sugerido')}</span><span><strong>${s.excluded}</strong> ${label('excluidos por privacidad')}</span></div>${pendingNote}${aiTable}${last}</section>`;
+      const providerText=s.provider==='mock'?'Modo demostración: clasificación local por palabras clave.':'Se usará el proveedor de IA configurado por administración.';
+      const aiTable=table(['Tema sugerido','Eventos actuales','Eventos anteriores','Asistencias actuales','Asistencias anteriores','Cambio'],s.groups.map(renderAiRow));
+      const stats=[['Analizados',s.classified],['Por analizar',s.pending],['Sin tema sugerido',s.unclassified],['Excluidos por privacidad',s.excluded]].map(([title,value])=>`<div><strong>${number(value)}</strong><span>${label(title)}</span></div>`).join('');
+      const last=s.last?note('Última clasificación')+`<p>${E(date(s.last))}</p>`:'';
+      view.innerHTML=`<section class="card stats-section">${intro('Agrupa los eventos por temas similares','La IA propone grupos de eventos; las cifras siguen viniendo de registros reales.')}<div class="stats-ai-callout"><span class="stats-metric-icon" aria-hidden="true">${I('spark')}</span><div><strong>${label(s.pending?'Hay eventos pendientes de analizar':'El análisis está al día')}</strong><p>${label(providerText)}</p><p>${label('El botón analiza hasta 30 eventos pendientes. La propuesta no cambia los temas publicados.')}</p></div>${action(s.pending?'Analizar temas pendientes':'Sin eventos pendientes','analyze',s.pending?'':'disabled','primary')}</div><div class="stats-ai-summary">${stats}</div>${s.pending?note('La comparación incluye solo los eventos analizados. Completa el análisis para contar con más información.'):''}${aiTable}${help('Qué información utiliza la IA',note('Se envían únicamente títulos depurados y el catálogo de temas al proveedor configurado. Se excluyen microeventos privados y sesiones Chatham House. No se envían correos, perfiles ni listas de asistencia.')+note('Las cifras se calculan con registros guardados. La IA no inventa asistencias ni porcentajes.'))}${last}</section>`;
     }
     async function load(target=panel) {
       panel=target;const ticket=++generation;
-      panel.innerHTML=note('Cargando estadísticas…');
+      if(!panel.querySelector('[data-stats-form="filter"]'))panel.innerHTML=note('Cargando estadísticas…');
+      panel.setAttribute('aria-busy','true');
       try {
         const result=await api('admin/statistics?'+new URLSearchParams({...filters,page,event_page:eventPage}));
         if(ticket!==generation || !panel.isConnected)return;
         data=result;filters={...data.filters,from:data.period.from,to:data.period.to};insights=null;render();
         if(section==='ai')await loadInsights();
-      } catch(error) {if(ticket===generation && panel?.isConnected)panel.innerHTML=`<div class="card" role="alert">${E(error.message)} ${action('Reintentar','reload')}</div>`;}
+      } catch(error) {
+        if(ticket!==generation || !panel?.isConnected)return;
+        const alert=panel.querySelector('[data-stats-error]');
+        if(alert){alert.hidden=false;alert.textContent=error.message;filters={...data.filters,from:data.period.from,to:data.period.to};}
+        else panel.innerHTML=`<div class="card" role="alert">${E(error.message)} ${action('Reintentar','reload')}</div>`;
+      } finally {if(ticket===generation && panel?.isConnected)panel.removeAttribute('aria-busy');}
     }
     async function loadInsights() {
-      const ticket=generation,result=await api('admin/statistics/topics?'+new URLSearchParams(filters));
-      if(ticket!==generation || section!=='ai' || !panel?.isConnected)return;
-      insights=result;render();
+      const ticket=generation;
+      try {
+        const result=await api('admin/statistics/topics?'+new URLSearchParams(filters));
+        if(ticket!==generation || section!=='ai' || !panel?.isConnected)return;
+        insights=result;render();
+      } catch(error) {
+        if(ticket===generation && section==='ai' && panel?.isConnected)panel.querySelector('#stats-view').innerHTML=`<section class="card stats-section" role="alert"><p>${E(error.message)}</p>${action('Reintentar','reload-insights')}</section>`;
+      }
     }
     function renderSessions(sessions) {
       if(!sessions.length)return '';
@@ -157,19 +204,27 @@
     }
     function renderRosterRow(u) {
       const identity=E(u.name)+small(E(u.email));
-      const attendanceForm=`<form data-stats-form="row" data-user="${u.id}" class="stats-attendance-row"><label><span class="screen-reader-text">${label('Asistencia')}</span><select name="status" aria-label="${label('Asistencia')}">${attendanceOptions(u.status)}</select></label><label><span class="screen-reader-text">${label('Minutos')}</span><input name="minutes" type="number" min="0" max="${roster.max_minutes}" step="1" value="${u.minutes??''}" placeholder="${label('Minutos')}" aria-label="${label('Minutos')}"></label><button class="btn small">${label('Guardar')}</button><small>${label(attendanceSource(u.source))}</small></form>`;
-      const attendance=attendanceForm+small(percent(u.percent)+' '+reason(u.review_reason))+renderSessions(u.sessions);
+      const attendanceForm=`<form data-stats-form="row" data-user="${u.id}" class="stats-attendance-row"><label><span>${label('Asistencia')}</span><select name="status" aria-label="${label('Asistencia')}">${attendanceOptions(u.status)}</select></label><label><span>${label('Minutos')}</span><input name="minutes" type="number" min="0" max="${roster.max_minutes}" step="1" value="${u.minutes??''}" placeholder="${label('Minutos')}" aria-label="${label('Minutos')}"></label><button class="btn small">${label('Guardar')}</button><small>${label(attendanceSource(u.source))}</small></form>`;
+      const duration=u.percent==null?label('Duración no registrada'):E(percent(u.percent))+' '+label('del tiempo del evento');
+      const attendance=attendanceForm+small(duration)+(u.review_reason?small(reason(u.review_reason)):'')+renderSessions(u.sessions);
       return row([identity,label(u.registered?'Inscrito':'Sin inscripción'),attendance]);
     }
     function showRoster(value) {
       roster=value;preview=null;csv='';
-      const peopleTable=table(['Usuario','Inscripción','Asistencia y duración'],roster.people.map(renderRosterRow));
+      const peopleTable=table(['Persona','Inscripción','Asistencia y duración'],roster.people.map(renderRosterRow));
       const previous=action('Anterior','roster-page',pagerAttrs(roster.page-1,roster.page===1));
       const next=action('Siguiente','roster-page',pagerAttrs(roster.page+1,roster.page>=roster.pages));
       const completion=roster.complete
-        ? action('Reabrir registro','reopen','','ghost')
-        : `<form data-stats-form="complete" class="stats-complete"><label class="check"><input required name="confirm" type="checkbox"><span>${label('He verificado toda la lista. Los inscritos sin marcar se contarán como ausentes al calcular la tasa.')}</span></label><button class="btn primary">${label('Confirmar registro completo')}</button></form>`;
-      const body=`<div class="stats-roster"><h3>${E(roster.title)}</h3><p class="stats-source">${label(roster.complete?'Registro completo':'Registro por completar')}</p>${note('Los cambios reabren el registro para que puedas verificarlo antes de volver a completarlo.')}<p>${label('Confirmados')}: ${roster.summary.present} · ${label('Parciales')}: ${roster.summary.partial} · ${label('Revisión manual')}: ${roster.summary.review} · ${label('Ausentes')}: ${roster.summary.absent} · ${label('Tasa')}: ${percent(roster.summary.rate)}</p><form data-stats-form="threshold" class="form-actions"><label>${label('Permanencia mínima (%)')} <input name="threshold" type="number" min="1" max="100" value="${roster.threshold}" required></label><button class="btn">${label('Guardar umbral')}</button></form>${action('Historial de CSV','zoom-history')}<div id="stats-zoom-history"></div><form data-stats-form="csv" class="card"><h4>${label('Importar CSV de Zoom')}</h4><label class="field"><span>${label('Archivo CSV · UTF-8 · hasta 512 KB')}</span><input type="file" name="file" accept=".csv,text/csv" required></label><div class="form-grid"><label class="field"><span>${label('Zona horaria del CSV')}</span><input name="timezone" value="${E(data.period.timezone)}" required></label><label class="field"><span>${label('Formato de fecha del CSV')}</span><select name="date_format"><option value="ymd">AAAA-MM-DD / ISO 8601</option><option value="dmy">DD/MM/AAAA</option><option value="mdy">MM/DD/AAAA</option></select></label></div>${note('Se identifica por correo, se agrupan reconexiones y se conservan las correcciones manuales. Primero verás una vista previa.')}<button class="btn">${label('Revisar CSV')}</button><div id="stats-csv-preview" aria-live="polite"></div></form><form data-stats-form="manual" class="card"><h4>${label('Registrar manualmente')}</h4><div class="stats-manual-fields"><label class="field"><span>${label('Correo del usuario ASCLA')}</span><input name="email" type="email" required maxlength="100"></label><label class="field"><span>${label('Asistencia')}</span><select name="status">${attendanceOptions('present')}</select></label><label class="field"><span>${label('Minutos conectados · opcional')}</span><input name="minutes" type="number" min="0" max="${roster.max_minutes}" step="1"></label><button class="btn primary">${label('Guardar asistencia')}</button></div></form><h4>${label('Participantes e inscritos')}</h4>${peopleTable}<div class="admin-pager">${previous}<span>${roster.page} / ${roster.pages} · ${roster.total}</span>${next}</div>${completion}</div>`;
+        ? `<div class="stats-completion-done">${I('check')}<div><strong>${label('Esta lista ya está verificada')}</strong><p>${label('Se utiliza para calcular la tasa de asistencia. Si corriges un dato, tendrás que verificarla otra vez.')}</p></div>${action('Volver a revisar la lista','reopen','','small')}</div>`
+        : `<form data-stats-form="complete" class="stats-complete"><h4>${label('3. Finaliza la revisión')}</h4><p>${label('Los inscritos sin una marca de asistencia se contarán como ausentes al calcular la tasa. Comprueba la lista antes de confirmar.')}</p><label class="check"><input required name="confirm" type="checkbox"><span>${label('He revisado toda la lista y confirmo que está completa.')}</span></label><button class="btn primary">${label('Confirmar lista verificada')}</button></form>`;
+      const states=help('Qué significa cada estado',`<dl class="stats-definitions"><div><dt>${label('Asistió')}</dt><dd>${label('Cuenta como asistencia en los indicadores.')}</dd></div><div><dt>${label('Asistencia parcial')}</dt><dd>${label('Se registra su participación, pero no cuenta como Asistió.')}</dd></div><div><dt>${label('Sin verificar / Revisión manual')}</dt><dd>${label('Falta confirmar la evidencia. Revisa estos casos antes de cerrar la lista.')}</dd></div><div><dt>${label('No asistió')}</dt><dd>${label('Se conserva como ausencia, sin sumar una asistencia.')}</dd></div></dl>`);
+      const summary=[['Asistió',roster.summary.present],['Asistencia parcial',roster.summary.partial],['Revisión manual',roster.summary.review],['No asistió',roster.summary.absent]].map(([title,value])=>`<div><strong>${number(value)}</strong><span>${label(title)}</span></div>`).join('');
+      const body=`<div class="stats-roster"><div class="stats-roster-heading"><h3>${E(roster.title)}</h3><span class="stats-state ${roster.complete?'complete':'pending'}">${label(roster.complete?'Lista verificada':'Revisión pendiente')}</span></div><ol class="stats-steps"><li><strong>${label('Registra')}</strong><span>${label('Añade personas o importa Zoom.')}</span></li><li><strong>${label('Revisa')}</strong><span>${label('Comprueba estados y duración.')}</span></li><li><strong>${label('Confirma')}</strong><span>${label('Verifica la lista al terminar.')}</span></li></ol><div class="stats-roster-summary">${summary}</div>
+        <details class="stats-workflow" data-stats-workflow="manual" open><summary>${label('1. Añadir o corregir una persona')}</summary><div><p>${label('Usa el correo de su cuenta ASCLA. Si ya está en la lista, se actualizará su registro.')}</p><form data-stats-form="manual"><div class="stats-manual-fields"><label class="field"><span>${label('Correo del usuario ASCLA')}</span><input name="email" type="email" required maxlength="100"></label><label class="field"><span>${label('Asistencia')}</span><select name="status">${attendanceOptions('present')}</select></label><label class="field"><span>${label('Minutos conectados · opcional')}</span><input name="minutes" type="number" min="0" max="${roster.max_minutes}" step="1"></label><button class="btn primary">${label('Guardar asistencia')}</button></div></form></div></details>
+        <details class="stats-workflow" data-stats-workflow="csv"><summary>${label('O importar participantes desde Zoom')}</summary><div><form data-stats-form="csv"><p>${label('Carga el CSV, revisa la vista previa y confirma la importación. Cargar el archivo todavía no guarda asistencias.')}</p><label class="field"><span>${label('Archivo CSV · UTF-8 · hasta 512 KB')}</span><input type="file" name="file" accept=".csv,text/csv" required></label><div class="form-grid"><label class="field"><span>${label('Zona horaria del CSV')}</span><input name="timezone" value="${E(data.period.timezone)}" required></label><label class="field"><span>${label('Formato de fecha del CSV')}</span><select name="date_format"><option value="ymd">AAAA-MM-DD / ISO 8601</option><option value="dmy">DD/MM/AAAA</option><option value="mdy">MM/DD/AAAA</option></select></label></div>${note('Se identifica por correo, se agrupan reconexiones y se conservan las correcciones manuales. Primero verás una vista previa.')}<button class="btn">${label('Revisar archivo antes de importar')}</button><div id="stats-csv-preview" aria-live="polite"></div></form><div class="stats-history-action">${action('Ver importaciones anteriores','zoom-history')}</div><div id="stats-zoom-history"></div></div></details>
+        <div class="stats-subheading"><h4>${label('2. Revisa participantes e inscritos')}</h4><p>${label('Puedes corregir el estado y los minutos de cada persona. Guarda cada fila que modifiques.')}</p></div>${peopleTable}<div class="admin-pager">${previous}<span>${roster.page} / ${roster.pages} · ${roster.total}</span>${next}</div>${states}${completion}
+        ${help('Opciones del registro de Zoom',`<p>${label('El porcentaje mínimo de permanencia decide si una conexión de Zoom cuenta como asistencia completa o parcial. Las correcciones manuales se conservan.')}</p><form data-stats-form="threshold" class="stats-threshold"><label class="field"><span>${label('Permanencia mínima (%)')}</span><input name="threshold" type="number" min="1" max="100" value="${roster.threshold}" required></label><button class="btn">${label('Guardar criterio de Zoom')}</button></form>`)}
+      </div>`;
       modal(T('Registro de asistencia'),body,true);
     }
     function renderPreviewMatchedRow(u) {
@@ -226,7 +281,14 @@
     async function handleStatsAction(b) {
       const key=b.dataset.statsAction;
       switch(key){
-        case 'section': section=b.dataset.section;render();if(section==='ai')await loadInsights();break;
+        case 'section': {
+          const selected=b.dataset.section;section=selected;render();if(section==='ai')await loadInsights();
+          if(section===selected && panel?.isConnected)panel.querySelector('[data-section="'+selected+'"]').focus({preventScroll:true});
+          break;
+        }
+        case 'clear-filters': filters={from:data.period.from,to:data.period.to};page=1;eventPage=1;await load();break;
+        case 'show-events': section='overview';render();panel.querySelector('#stats-attendance h3').focus();panel.querySelector('#stats-attendance').scrollIntoView({block:'start'});break;
+        case 'reload-insights': await loadInsights();break;
         case 'reload': await load();break;
         case 'page': page=Number(b.dataset.page);await load();break;
         case 'event-page': eventPage=Number(b.dataset.page);await load();break;
@@ -254,7 +316,11 @@
       const button=form.querySelector('button[type="submit"],button:not([type])');
       void perform(button,async()=>{
         const values=Object.fromEntries(new FormData(form)),key=form.dataset.statsForm;
-        if(key==='filter'){filters=values;page=1;eventPage=1;await load();}
+        if(key==='filter'){
+          const days=(Date.parse(values.to)-Date.parse(values.from))/86400000+1;
+          if(days<1 || days>366)throw new Error(T('La fecha de inicio no puede superar la final. Elige hasta 366 días.'));
+          filters=values;page=1;eventPage=1;await load();
+        }
         else if(key==='csv'){
           preview=null;root.querySelector('#stats-csv-preview').innerHTML='';
           const file=form.elements.file.files[0];if(!file || file.size>524288)throw new Error(T('El CSV debe ocupar como máximo 512 KB.'));

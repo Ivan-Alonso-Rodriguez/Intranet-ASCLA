@@ -1,0 +1,251 @@
+{
+  "date": "2026-10-22T09:14:04.500Z",
+  "target": "https://wordpress.ingsoftware.lat",
+  "mode": "remote-shared-test-users",
+  "deployment": {
+    "checked_at": "2026-10-22T09:11:08.678Z",
+    "target": "https://wordpress.ingsoftware.lat",
+    "version": "1.10.9",
+    "local_reference_package_sha256": "f3430e4f82f34ce29434e7e11ac4bfd3441e3bc64050c9a3f7df7c9e8b9d71a5",
+    "assets": [
+      {
+        "file": "assets/app.js",
+        "local_sha256": "9cfc43300a16588472437559ae60a2d43cbca83d38d539ef9098add8751fc1bf",
+        "deployed_sha256": "9cfc43300a16588472437559ae60a2d43cbca83d38d539ef9098add8751fc1bf",
+        "matches": true
+      },
+      {
+        "file": "assets/app.css",
+        "local_sha256": "619425e488b83a3042420de2b988f802aa661a2f574314603f9ed5b9053465c1",
+        "deployed_sha256": "619425e488b83a3042420de2b988f802aa661a2f574314603f9ed5b9053465c1",
+        "matches": true
+      }
+    ],
+    "scope": "Public JavaScript and CSS match the current local package. Private server-side PHP files were not downloaded; behavior is checked by the executed API/UI tests."
+  },
+  "flow_contract": {
+    "version": 1,
+    "integration": {
+      "id": "integracion",
+      "folder": "integracion",
+      "requests": 18,
+      "checks": 26
+    },
+    "flows": [
+      {
+        "id": "perfil",
+        "title": "Perfil del asociado",
+        "folder": "flujos-e2e/01-perfil",
+        "requests": 7,
+        "checks": 14,
+        "steps": [
+          "Iniciar sesión",
+          "Guardar biografía válida",
+          "Recargar y comprobar persistencia",
+          "Rechazar Empresa vacía",
+          "Conservar datos válidos",
+          "Restaurar biografía original"
+        ]
+      },
+      {
+        "id": "conexion-chat-bloqueo",
+        "title": "Conexión, chat y bloqueo",
+        "folder": "flujos-e2e/02-conexion-chat-bloqueo",
+        "requests": 12,
+        "checks": 24,
+        "steps": [
+          "Ana solicita conexión",
+          "Bruno acepta",
+          "Abrir chat",
+          "Enviar y leer el mensaje exacto",
+          "Bloquear e impedir escritura",
+          "Desbloquear sin restaurar la conexión"
+        ]
+      },
+      {
+        "id": "borrador-publicacion-inscripcion",
+        "title": "Borrador, publicación e inscripción",
+        "folder": "flujos-e2e/03-borrador-publicacion-inscripcion",
+        "requests": 12,
+        "checks": 22,
+        "steps": [
+          "Guardar borrador incompleto",
+          "Exigir campos para publicar",
+          "Publicar con fecha, hora y cupo",
+          "Reabrir y comprobar fechas",
+          "Inscribirse y comprobar persistencia",
+          "Cancelar evento propio"
+        ]
+      },
+      {
+        "id": "aforo-lista-espera-notificacion",
+        "title": "Aforo, lista de espera y notificación",
+        "folder": "flujos-e2e/04-aforo-espera-notificacion",
+        "requests": 19,
+        "checks": 37,
+        "steps": [
+          "Crear evento con un cupo",
+          "Ana confirma",
+          "Bruno entra en espera",
+          "Ana cancela y libera cupo",
+          "Comprobar oferta y abrir notificación",
+          "Comprobar aviso leído",
+          "Bruno confirma vacante sin sobrepasar aforo",
+          "Cancelar evento"
+        ]
+      },
+      {
+        "id": "suspension-reactivacion-acceso",
+        "title": "Suspensión y reactivación",
+        "folder": "flujos-e2e/05-suspension-reactivacion",
+        "requests": 9,
+        "checks": 18,
+        "steps": [
+          "Carla tiene acceso",
+          "Administrador suspende",
+          "Sesión revocada y acceso denegado",
+          "Administrador reactiva",
+          "Nuevo login permitido",
+          "Perfil conservado"
+        ]
+      },
+      {
+        "id": "asistente-ia",
+        "title": "Consulta al asistente IA",
+        "folder": "flujos-e2e/06-asistente-ia",
+        "requests": 4,
+        "checks": 8,
+        "steps": [
+          "Abrir conversación nueva",
+          "Enviar pregunta",
+          "Recibir trabajo pendiente con ID real",
+          "Esperar la respuesta del proveedor",
+          "Comprobar pregunta y respuesta",
+          "Recargar y conservar hilo"
+        ]
+      }
+    ]
+  },
+  "assistant": [
+    {
+      "id": 248,
+      "thread": "chat_c3bfcf7f-a94d-474e-9181-fddac348f9a7",
+      "mode": "Google Gemini · API real"
+    }
+  ],
+  "browser_channel": "msedge",
+  "tools": {
+    "node": "v24.19.0",
+    "playwright": "1.62.1"
+  },
+  "commit": "bff0afa81d57405242d6a29e9c217ae8fd204532",
+  "branch": "development",
+  "working_tree": "uncommitted",
+  "actors": {
+    "Administrador": {
+      "id": 9,
+      "login": "AdministradorASCLA"
+    },
+    "Ana": {
+      "id": 37,
+      "login": "prueba.ascla.ana"
+    },
+    "Bruno": {
+      "id": 38,
+      "login": "prueba.ascla.bruno"
+    },
+    "Carla": {
+      "id": 39,
+      "login": "prueba.ascla.carla"
+    }
+  },
+  "results": [
+    {
+      "name": "perfil",
+      "status": "passed",
+      "videos": [
+        "videos/perfil/page@4bf56f526f7aaf443ecce0bcbbc2b7a6.webm"
+      ],
+      "screenshots": [
+        "perfil-0-passed.png"
+      ],
+      "ms": 12098
+    },
+    {
+      "name": "conexion-chat-bloqueo",
+      "status": "passed",
+      "videos": [
+        "videos/conexion-chat-bloqueo/page@e6ae6c47361ff1aba711b5e8b29de357.webm",
+        "videos/conexion-chat-bloqueo/page@7a1930903f3361bb3ae2acde10e27645.webm"
+      ],
+      "screenshots": [
+        "conexion-chat-bloqueo-0-passed.png",
+        "conexion-chat-bloqueo-1-passed.png"
+      ],
+      "ms": 31616
+    },
+    {
+      "name": "borrador-publicacion-inscripcion",
+      "status": "passed",
+      "videos": [
+        "videos/borrador-publicacion-inscripcion/page@a937dabadb4649ed7f01d844a7a6bccc.webm",
+        "videos/borrador-publicacion-inscripcion/page@36660548e57f26cce98374522f18a10b.webm"
+      ],
+      "screenshots": [
+        "borrador-publicacion-inscripcion-0-passed.png",
+        "borrador-publicacion-inscripcion-1-passed.png"
+      ],
+      "ms": 33225
+    },
+    {
+      "name": "aforo-lista-espera-notificacion",
+      "status": "passed",
+      "videos": [
+        "videos/aforo-lista-espera-notificacion/page@301e9e931e3b53895ebef98169949672.webm",
+        "videos/aforo-lista-espera-notificacion/page@71c5f6ce97da1729b60352012cd60137.webm",
+        "videos/aforo-lista-espera-notificacion/page@e4bd5d996ec620eae1f0ff012f9b1366.webm"
+      ],
+      "screenshots": [
+        "aforo-lista-espera-notificacion-0-passed.png",
+        "aforo-lista-espera-notificacion-1-passed.png",
+        "aforo-lista-espera-notificacion-2-passed.png"
+      ],
+      "ms": 44106
+    },
+    {
+      "name": "suspension-reactivacion-acceso",
+      "status": "passed",
+      "videos": [
+        "videos/suspension-reactivacion-acceso/page@babb31e5d2fd144f3a9ab05082a6da2e.webm",
+        "videos/suspension-reactivacion-acceso/page@dadada32722df3f452ad1c5827db93b9.webm",
+        "videos/suspension-reactivacion-acceso/page@013831db7c33b640b4bb69f8b2a64ef4.webm"
+      ],
+      "screenshots": [
+        "suspension-reactivacion-acceso-0-passed.png",
+        "suspension-reactivacion-acceso-1-passed.png",
+        "suspension-reactivacion-acceso-2-passed.png"
+      ],
+      "ms": 27147
+    },
+    {
+      "name": "asistente-ia",
+      "status": "passed",
+      "videos": [
+        "videos/asistente-ia/page@0b8e539d7625baff44597f42bd85239d.webm"
+      ],
+      "screenshots": [
+        "asistente-ia-0-passed.png"
+      ],
+      "ms": 18023
+    }
+  ],
+  "cleanup": {
+    "status": "passed",
+    "unblocked": true,
+    "carla_active": true,
+    "events_cancelled": [
+      484,
+      487
+    ]
+  }
+}

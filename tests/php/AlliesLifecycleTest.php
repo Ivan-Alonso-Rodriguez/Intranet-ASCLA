@@ -44,13 +44,24 @@ final class AlliesLifecycleTest extends TestCase
         self::assertSame(200,$this->api('POST','admin/allies/'.$id.'/status',['state'=>'active'])->get_status());self::assertSame('publish',get_post_status($id));
         self::assertSame($id,Content::serialize(Content::get($id))['id']);self::assertSame('active',Allies::history($id)[0]['to']);self::assertSame('inactive',Allies::history($id)[1]['to']);
     }
+    public function testOnlyAdministratorCanSendAnAllyToTrashAndRegistryExcludesIt(): void
+    {
+        $id=$this->ally();
+        foreach([$this->member] as $actor) {
+            wp_set_current_user($actor);self::assertSame(403,$this->api('DELETE','items/'.$id)->get_status());
+        }
+        wp_set_current_user($this->admin);
+        self::assertSame(200,$this->api('DELETE','items/'.$id)->get_status());self::assertSame('trash',get_post_status($id));
+        self::assertNotContains($id,array_column($this->api('GET','admin/allies')->get_data()['items'],'id'));
+    }
     public function testMembersCannotFindOrReadInactiveAlliesEvenWhenTheyAreLegacyAuthors(): void
     {
         $title='Ally '.bin2hex(random_bytes(5));$id=$this->ally('inactive',[],$title);wp_update_post(['ID'=>$id,'post_author'=>$this->member]);
         wp_set_current_user($this->member);
         foreach(['items/'.$id,'items/'.$id.'/comments'] as $route) { self::assertSame(404,$this->api('GET',$route)->get_status()); }
         self::assertSame(0,$this->api('GET','content/ally',['q'=>$title,'mine'=>1,'status'=>'ascla_hidden'])->get_data()['total']);
-        foreach([$this->member,$this->executive] as $user){wp_set_current_user($user);foreach(['admin/allies','admin/allies/'.$id.'/history'] as $route) self::assertSame(403,$this->api('GET',$route)->get_status());self::assertSame(403,$this->api('POST','admin/allies/'.$id.'/status',['state'=>'active'])->get_status());}
+        wp_set_current_user($this->member);foreach(['admin/allies','admin/allies/'.$id.'/history'] as $route) self::assertSame(403,$this->api('GET',$route)->get_status());self::assertSame(403,$this->api('POST','admin/allies/'.$id.'/status',['state'=>'active'])->get_status());
+        wp_set_current_user($this->executive);self::assertSame(200,$this->api('GET','admin/allies')->get_status());
         wp_set_current_user(0);self::assertSame(401,$this->api('GET','admin/allies')->get_status());
     }
     public function testEveryAdministratorCanReadAndEditDraftsAndInactiveRecordsFromOtherAdministrators(): void

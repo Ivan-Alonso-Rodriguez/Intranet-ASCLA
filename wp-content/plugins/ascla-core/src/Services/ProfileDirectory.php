@@ -4,9 +4,10 @@ namespace ASCLA\Core\Services;
 /** Search and ranking use only the attributes exposed in directory results. */
 final class ProfileDirectory
 {
+    public const PAGE_SIZE=12;
     public static function search(array $filter=[]): array
     {
-        $page=max(1,(int)($filter['page']??1));$perPage=Settings::get()['directory_page_size'];
+        $page=max(1,(int)($filter['page']??1));$perPage=self::PAGE_SIZE;
         $query=self::normalize(Access::text($filter['q']??'',120));$results=[];$offset=0;
         do {
             $users=get_users(['number'=>200,'offset'=>$offset,'orderby'=>'display_name','order'=>'ASC','capability'=>'ascla_access']);$offset+=200;
@@ -38,7 +39,7 @@ final class ProfileDirectory
 
     private static function eligibleCandidate(int $id): bool
     {
-        if (!Access::member($id) || Messaging::blocked(get_current_user_id(),$id)) { return false; }
+        if (!Access::networkingMember($id) || Messaging::blocked(get_current_user_id(),$id)) { return false; }
         $raw=Profiles::raw($id);
         // Directory inclusion is independent of profile completion. Recommendations
         // still require the minimum fields; visibility and membership remain mandatory.
@@ -52,6 +53,7 @@ final class ProfileDirectory
         // Administrators can inspect private data on the individual administrative form,
         // but a directory search must not infer it from membership in a result set.
         foreach ((array)($raw['hidden']??[]) as $field) { unset($data[$field]); }
+        if (in_array('member_type',(array)($raw['hidden']??[]),true)) { unset($data['member_type_code']); }
         if (in_array('photo_id',(array)($raw['hidden']??[]),true)) { $data['photo_url']=''; }
         unset($data['phone'],$data['birth_date'],$data['email'],$data['phone_visibility']);
         $data['name']=Profiles::publicName($id);$data['terms']=Profiles::labels($data);

@@ -1,0 +1,26 @@
+meta {
+  name: 04. Recargar perfil y comprobar persistencia
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/profiles/{{idCarla}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionCarla}}
+  X-WP-Nonce: {{nonceCarla}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Validación: 04. Recargar perfil y comprobar persistencia", function () { expect(res.getBody().bio).to.equal(bru.getCollectionVar("perfilBioNueva"));expect(res.getBody().company).to.equal(bru.getCollectionVar("perfilEmpresaOriginal")); });
+}

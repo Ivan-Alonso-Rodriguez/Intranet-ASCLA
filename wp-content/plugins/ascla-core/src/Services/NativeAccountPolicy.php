@@ -15,7 +15,7 @@ final class NativeAccountPolicy
             if (array_key_exists($source,$input)) { $input[$target]=$input[$source]; }
         }
         if (ProfessionalChanges::nativeChange($id,$input)) {
-            return new \WP_Error('ascla_profile_request','Usa una solicitud de Contacto para modificar datos del asociado.',['status'=>403]);
+            return new \WP_Error('ascla_profile_request','Edita los datos del asociado desde Usuarios e intereses en ASCLA.',['status'=>403]);
         }
         $request['id']=$id;
         $checked=CredentialPolicy::restValidation((object)$input,$request);

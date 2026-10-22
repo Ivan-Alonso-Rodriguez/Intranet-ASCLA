@@ -13,6 +13,7 @@ final class Matching
     public static function between(int $a,int $b,bool $explain=true,bool $includeParticipation=true): array
     {
         $left=Profiles::raw($a);$right=Profiles::raw($b);
+        Access::require(Access::networkingMember($a) && Access::networkingMember($b),'Las cuentas de administración no participan en networking.',400);
         Access::require($a!==$b && !empty($left['networking']) && !empty($right['networking']) && !empty($right['directory']) && !Messaging::blocked($a,$b),'Active networking; ambos perfiles deben aceptar participar.',400);
         foreach ((array)$left['hidden'] as $field) { unset($left[$field]); }
         foreach ((array)$right['hidden'] as $field) { unset($right[$field]); }

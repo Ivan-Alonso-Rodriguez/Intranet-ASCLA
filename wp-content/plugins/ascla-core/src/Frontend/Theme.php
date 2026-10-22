@@ -32,6 +32,6 @@ JS;
 
     public static function printScript(): void
     {
-        echo '<script id="ascla-theme-bootstrap">'.self::script().'</script>';
+        wp_print_inline_script_tag(self::script(),['id'=>'ascla-theme-bootstrap']);
     }
 }

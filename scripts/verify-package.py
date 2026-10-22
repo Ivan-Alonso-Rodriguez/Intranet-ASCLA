@@ -38,5 +38,5 @@ with zipfile.ZipFile(root/'dist/ascla-core.zip') as archive:
     if previous and {k:v for k,v in previous.items() if k!='date'}=={k:v for k,v in report.items() if k!='date'}:
         report['date']=previous['date']
     if previous!=report:
-        manifest.write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
+        manifest.write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8',newline='\n')
     print(json.dumps({k:v for k,v in report.items() if k!='production_hashes'},indent=2))

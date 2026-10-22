@@ -12,7 +12,7 @@ final class InterestImportAccounts
         $id=0;
         if($byCode){$id=(int)$byCode[0];}
         elseif($byEmail){$id=(int)$byEmail->ID;}
-        if(!$id || !user_can($id,'ascla_access') || !current_user_can('edit_user',$id)) {return [0,'Usuario no encontrado o sin permiso de edición.']; }
+        if(!$id || !user_can($id,'ascla_access') || !Access::canManageAccount('edit_user',$id)) {return [0,'Usuario no encontrado o sin permiso de edición.']; }
         return [$id,($code!=='' && !$byCode)?'Código no encontrado; coincidencia por correo.':''];
     }
     public static function profile(int $id): array { return (array)get_user_meta($id,'_ascla_profile',true); }

@@ -44,7 +44,12 @@ final class Profiles
     {
         $user=get_userdata($id); Access::require($user && Access::member($id),'Perfil no encontrado.',404);
         $data=(array)get_user_meta($id,'_ascla_profile',true);
-        return array_merge(['id'=>$id,'name'=>$user->display_name,'first_name'=>$user->first_name,'last_name'=>$user->last_name,'birth_date'=>'','phone'=>'','phone_visibility'=>'private','directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[],'revision'=>0],$data,['id'=>$id,'name'=>$user->display_name]);
+        $profile=array_merge(['id'=>$id,'name'=>$user->display_name,'first_name'=>$user->first_name,'last_name'=>$user->last_name,'birth_date'=>'','phone'=>'','phone_visibility'=>'private','directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[],'revision'=>0],$data,['id'=>$id,'name'=>$user->display_name]);
+        $profile['community_participant']=!Access::isAdministrator($id);
+        if (!$profile['community_participant']) {
+            $profile['directory']=false;$profile['networking']=false;$profile['microevents']=false;
+        }
+        return $profile;
     }
     public static function visible(int $id): array
     {
@@ -53,6 +58,9 @@ final class Profiles
         $own=$id===get_current_user_id();
         Access::require($own||current_user_can('ascla_manage')||!empty($data['directory']),'Perfil no disponible.',404);
         $data=self::applyVisibility($data,$id,$own);
+        $data['member_type_code']=MemberTypes::code((string)($data['member_type']??''));
+        $data['member_type']=\ASCLA\Core\Frontend\Language::label(MemberTypes::OPTIONS[$data['member_type_code']]??'');
+        if (current_user_can('ascla_manage')) { $data['administration']=Administration::permissions($id); }
         unset($data['revision']);
         $data['photo_url']=!empty($data['photo_id'])?Media::profilePhotoUrl((int)$data['photo_id'],$id):'';
         if ($own) {
@@ -117,10 +125,9 @@ final class Profiles
     {
         $old=self::raw($id);
         ProfileValidation::validateRequired($input);
-        $data=self::saveTextFields($old,$input);
+        $data=self::details(MemberTypes::profile($old,$input,$id),$input);
         $data=self::savePhoneFields($data,$input,$id);
         if (array_key_exists('birth_date',$input)) { $data['birth_date']=Birthdays::normalize($input['birth_date']); }
-        $data=self::saveTermFields($data,$input);
         $missing=ProfileRequirements::missing($data);
         Access::require(!$missing,'Completa los campos obligatorios: '.implode(', ',$missing).'.',400);
         $data=self::savePreferenceFields($data,$input,$id);
@@ -137,13 +144,20 @@ final class Profiles
         return self::visible($id);
     }
 
+    /** Shared, allowlisted details; account access and personal consent are handled separately. */
+    public static function details(array $data,array $input): array
+    {
+        return self::saveTermFields(self::saveTextFields($data,$input),$input);
+    }
+
     private static function saveTextFields(array $data,array $input): array
     {
-        foreach (self::TEXT as $field) {
+        foreach (array_diff(self::TEXT,['member_type']) as $field) {
             if (!array_key_exists($field,$input)) { continue; }
             $value=Access::text($input[$field],in_array($field,['bio','experience'],true)?3000:200);
             if (in_array($field,['linkedin','twitter','website'],true) && $value!=='') {
                 Access::require((bool)filter_var($value,FILTER_VALIDATE_URL) && in_array(wp_parse_url($value,PHP_URL_SCHEME),['https','http'],true),'URL no válida.',400);
+                if ($field!=='website') { ProfileValidation::validateSocialLink($field,$value); }
                 $value=esc_url_raw($value);
             }
             if ($field==='country' && $value!=='' && $value!==(string)($data['country']??'')) {
@@ -159,7 +173,7 @@ final class Profiles
     private static function savePhoneFields(array $data,array $input,int $id): array
     {
         if (!array_key_exists('phone',$input) && !array_key_exists('phone_visibility',$input)) { return $data; }
-        Access::require(Access::member() && ($id===get_current_user_id() || (current_user_can('ascla_manage') && current_user_can('edit_user',$id))));
+        Access::require(Access::member() && ($id===get_current_user_id() || Access::canManageAccount('edit_user',$id)));
         if (array_key_exists('phone',$input)) { $data['phone']=\ASCLA\Core\Domain\Phone::normalize($input['phone']); }
         if (array_key_exists('phone_visibility',$input)) { $data['phone_visibility']=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']); }
         return $data;

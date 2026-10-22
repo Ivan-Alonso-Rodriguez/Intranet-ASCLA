@@ -176,7 +176,10 @@ final class ContentLifecycleTest extends TestCase
         wp_set_current_user($this->users[2]);
         self::assertSame(404,$this->api('GET','items/'.$id)->get_status());
         self::assertSame(403,$this->api('POST','content/event',$base+['meta'=>[]])->get_status());
-        self::assertSame(400,$this->api('POST','content/hub',['title'=>'','body'=>'','status'=>'draft'])->get_status());
+        $hub=$this->api('POST','content/hub',['title'=>'','body'=>'','status'=>'draft']);
+        self::assertSame(200,$hub->get_status());$this->posts[]=$hub->get_data()['id'];
+        self::assertSame('draft',$hub->get_data()['status']);
+        self::assertSame(400,$this->api('POST','content/hub',['title'=>'','body'=>'','status'=>'publish'])->get_status());
     }
     public function testMicroeventDraftAllowsMissingDeadlineWithoutWeakeningIntegerValidation():void
     {

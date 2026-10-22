@@ -16,7 +16,7 @@ final class ProfileLoadingTest extends TestCase
     protected function setUp(): void
     {
         $this->settings=Settings::get();$this->secret=Secrets::get('ai_key');
-        foreach(['administrator','ascla_member'] as $i=>$role){
+        foreach(['ascla_member','ascla_member'] as $i=>$role){
             $id=wp_insert_user(['user_login'=>'profile_loading_'.bin2hex(random_bytes(6)),'user_pass'=>wp_generate_password(30),'role'=>$role]);
             self::assertIsInt($id);$this->users[]=$id;wp_set_current_user($id);
             Profiles::save(ascla_test_profile(['first_name'=>'Prueba','last_name'=>'Perfil '.$i,'position'=>'Directora','bio'=>'Biografía original','experience'=>'Experiencia original','networking'=>true,'directory'=>true,'hidden'=>[]]));

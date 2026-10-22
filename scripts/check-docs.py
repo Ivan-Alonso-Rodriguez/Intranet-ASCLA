@@ -1,4 +1,4 @@
-"""Validate the five maintained Markdown files and their Git-publishable targets.
+"""Validate the maintained project/QA delivery Markdown and Git-publishable targets.
 
 Run --write-matrix after editing requirements/ascla-analysis.json.
 Uses only Python's standard library and read-only Git commands.
@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCUMENTS = (
     'README.md', 'MANUAL_QA_UAT.md', 'COMPLIANCE.md', 'VERSION_HISTORY.md',
     'requirements/ascla-analysis.md',
+    'pruebas/README.md', 'pruebas/backend/README.md', 'pruebas/frontend/README.md',
 )
 RETIRED = (
     'BUGFIXES_QA.md', 'ACCESSIBILITY.md', 'ADMINISTRACION.md', 'ALIADOS.md',
@@ -111,9 +112,9 @@ def main():
     rows = [r for group in matrix['requirements'].values() for r in group]
     expected = render_matrix(matrix)
     if args.write_matrix:
-        (ROOT / 'requirements/ascla-analysis.md').write_text(expected, encoding='utf-8')
+        (ROOT / 'requirements/ascla-analysis.md').write_text(expected, encoding='utf-8', newline='\n')
     errors = []
-    found = {p.relative_to(ROOT).as_posix() for p in [*ROOT.glob('*.md'), *(ROOT / 'docs').rglob('*.md'), *(ROOT / 'requirements').rglob('*.md')]}
+    found = {p.relative_to(ROOT).as_posix() for p in [*ROOT.glob('*.md'), *(ROOT / 'docs').rglob('*.md'), *(ROOT / 'requirements').rglob('*.md'), *(ROOT / 'pruebas').rglob('*.md')]}
     if found != set(DOCUMENTS):
         errors.append('Markdown inventory differs: ' + repr(sorted(found.symmetric_difference(DOCUMENTS))))
     if len(rows) != 302 or len({r['id'] for r in rows}) != 302 or sum('pdf_priority' in r for r in rows) != 240:
@@ -163,7 +164,7 @@ def main():
                 errors.append(f'{name}: missing anchor {target}')
     ignored_targets = ignored(publishable)
     errors += [f'Linked/versioned documentation target is ignored by Git: {name}' for name in sorted(ignored_targets)]
-    private = {'.env', '.env.audit', 'test-results/access.private.json', 'dist/ascla-core.zip', 'coverage/junit.xml', 'secrets/private.json', 'wp-content/uploads/private.pdf', 'ascla-qa-access.json'}
+    private = {'.env', '.env.audit', 'test-results/access.private.json', 'test-results/playwright-usuarios.json', 'dist/ascla-core.zip', 'coverage/junit.xml', 'secrets/private.json', 'wp-content/uploads/private.pdf', 'ascla-qa-access.json'}
     errors += [f'Private/generated path no longer ignored: {name}' for name in sorted(private - ignored(private))]
     if ignored(['.env.example']):
         errors.append('.env.example must remain publishable.')

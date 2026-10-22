@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<testsuites>
+  <testsuite name="01. Iniciar sesión como Ana" file="flujos-e2e\06-asistente-ia\01-iniciar-sesion-ana.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:39.323" hostname="DESKTOP-VJV2FMV" time="2.884">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\06-asistente-ia\01-iniciar-sesion-ana" time="1.442"/>
+    <testcase name="Sesión y nonce propios de Ana" status="pass" classname="flujos-e2e\06-asistente-ia\01-iniciar-sesion-ana" time="1.442"/>
+  </testsuite>
+  <testsuite name="02. Ana realiza una pregunta en un hilo nuevo" file="flujos-e2e\06-asistente-ia\02-ana-realiza-una-pregunta-en-un-hilo-nuevo.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:39.324" hostname="DESKTOP-VJV2FMV" time="0.911">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\06-asistente-ia\02-ana-realiza-una-pregunta-en-un-hilo-nuevo" time="0.455"/>
+    <testcase name="Se crea un trabajo pendiente con ID real" status="pass" classname="flujos-e2e\06-asistente-ia\02-ana-realiza-una-pregunta-en-un-hilo-nuevo" time="0.455"/>
+  </testsuite>
+  <testsuite name="03. Esperar el procesamiento real del trabajo" file="flujos-e2e\06-asistente-ia\03-esperar-el-procesamiento-real-del-trabajo.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:39.324" hostname="DESKTOP-VJV2FMV" time="8.276">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\06-asistente-ia\03-esperar-el-procesamiento-real-del-trabajo" time="4.138"/>
+    <testcase name="Trabajo completado con respuesta y contexto correctos" status="pass" classname="flujos-e2e\06-asistente-ia\03-esperar-el-procesamiento-real-del-trabajo" time="4.138"/>
+  </testsuite>
+  <testsuite name="04. El hilo conserva la pregunta y la respuesta" file="flujos-e2e\06-asistente-ia\04-el-hilo-conserva-la-pregunta-y-la-respuesta.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:39.324" hostname="DESKTOP-VJV2FMV" time="0.823">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\06-asistente-ia\04-el-hilo-conserva-la-pregunta-y-la-respuesta" time="0.411"/>
+    <testcase name="El hilo contiene el trabajo completado de esta ejecución" status="pass" classname="flujos-e2e\06-asistente-ia\04-el-hilo-conserva-la-pregunta-y-la-respuesta" time="0.411"/>
+  </testsuite>
+</testsuites>

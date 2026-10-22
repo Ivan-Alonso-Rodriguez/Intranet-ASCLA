@@ -1,0 +1,145 @@
+{
+  "date": "2026-10-17T23:41:23.209476+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "scope": "Administrative visibility of selected microevent invitees with actual RSVP states. Disposable local WordPress, synthetic users, local mock agenda generation; real REST, approval, publication and RSVP. No remote deployment, external notification delivery verification or coverage collection.",
+  "run": "test-results/micro-invitations108-20261017T233856Z-12794",
+  "source_snapshot": "current-32",
+  "production_matches_tested_snapshot": true,
+  "production_changes": [
+    "wp-content/plugins/ascla-core/assets/app.css",
+    "wp-content/plugins/ascla-core/assets/app.js",
+    "wp-content/plugins/ascla-core/languages/ascla-core-en_US.mo",
+    "wp-content/plugins/ascla-core/languages/ascla-core-en_US.po",
+    "wp-content/plugins/ascla-core/languages/ascla-core-es_ES.mo",
+    "wp-content/plugins/ascla-core/languages/ascla-core-es_ES.po",
+    "wp-content/plugins/ascla-core/languages/en.json",
+    "wp-content/plugins/ascla-core/src/Services/EventDetailBuilder.php",
+    "wp-content/plugins/ascla-core/src/Services/MicroEligibility.php",
+    "wp-content/plugins/ascla-core/src/Services/MicroInvitations.php"
+  ],
+  "php": {
+    "tests": 42,
+    "assertions": 545,
+    "failures": 0,
+    "errors": 0
+  },
+  "php_filter": "Micro|EventParticipation|EventReminders|EventFilters108|EventPagination108",
+  "portable_checks": 49,
+  "browser_regression": {
+    "scope": "Disposable local WordPress; actual proposal generation, candidate reconciliation, approval, publication, RSVP, rescheduling and cancellation; no remote deployment",
+    "checks": [
+      "CancelaciÃ³n institucional alineada en escritorio/mÃ³vil y ambos temas, con motivo guardado",
+      "La propuesta pendiente se cancela con motivo obligatorio y conserva su historial",
+      "La convocatoria aprobada permite actualizar candidatos sin aprobar dos veces ni perder una programaciÃ³n vÃ¡lida",
+      "La propuesta aprobada y programada tambiÃ©n permite cancelar y retira su programaciÃ³n",
+      "Revisar actualiza candidatos incompletos o sin consentimiento sin bloquear un grupo que aÃºn cumple el mÃ­nimo",
+      "Actualizar candidatos conserva el motivo escrito y no duplica el cambio",
+      "Un grupo que queda bajo el mÃ­nimo se cancela al revisar, con explicaciÃ³n y sin ofrecer aprobar",
+      "Aprobar conserva la propuesta sin publicar ni inscribir y ofrece Editar y publicar",
+      "Publicar envÃ­a las invitaciones al grupo real y retira la moderaciÃ³n genÃ©rica del microevento publicado",
+      "Un asociado invitado confirma voluntariamente desde la ficha",
+      "Reprogramar exige motivo y cambia la asistencia confirmada a pendiente de reconfirmaciÃ³n",
+      "Cancelar el microevento publicado conserva las inscripciones, impide nuevas confirmaciones y muestra el motivo",
+      "La actualizaciÃ³n administrativa de candidatos no estÃ¡ disponible para el rol Ejecutivo",
+      "Las nuevas acciones y decisiones tambiÃ©n se traducen al inglÃ©s"
+    ],
+    "views": [
+      "micro-flow108-regular-desktop-dark.png",
+      "micro-flow108-regular-mobile-light.png",
+      "micro-flow108-proposal-desktop-light.png",
+      "micro-flow108-proposal-mobile-dark.png"
+    ],
+    "scans": [
+      {
+        "name": "regular-desktop-dark",
+        "violations": []
+      },
+      {
+        "name": "regular-mobile-light",
+        "violations": []
+      },
+      {
+        "name": "proposal-desktop-light",
+        "violations": []
+      },
+      {
+        "name": "proposal-mobile-dark",
+        "violations": []
+      }
+    ],
+    "errors": []
+  },
+  "browser_invitations": {
+    "scope": "Disposable local WordPress; real selection, approval, publication and RSVP; no remote deployment or external transport verification",
+    "checks": [
+      "La ficha pendiente identifica a las personas reales seleccionadas y aclara que aÃºn no se las invitÃ³",
+      "La lista se adapta a escritorio y mÃ³vil de 360 px en ambos temas sin desbordamiento ni incidencias automÃ¡ticas WCAG A/AA",
+      "La revisiÃ³n muestra los nombres antes de aprobar la convocatoria",
+      "Actualizar candidatos tambiÃ©n actualiza la lista visible y retira a quienes dejaron de cumplir las condiciones",
+      "Aprobar no afirma un envÃ­o; publicar crea las invitaciones reales y muestra quiÃ©n no respondiÃ³",
+      "Aceptar y rechazar desde cuentas invitadas se refleja en la lista administrativa con estados reales",
+      "Los asociados y el rol Ejecutivo no reciben la lista administrativa de nombres",
+      "Cancelar antes de publicar conserva la selecciÃ³n sin presentarla como invitaciones enviadas",
+      "Los tÃ­tulos, ayudas y estados de la lista se traducen al inglÃ©s"
+    ],
+    "views": [
+      "micro-invitations108-desktop-light.png",
+      "micro-invitations108-desktop-dark.png",
+      "micro-invitations108-mobile-light.png",
+      "micro-invitations108-mobile-dark.png",
+      "micro-invitations108-responses-desktop.png"
+    ],
+    "scans": [
+      {
+        "name": "desktop-light",
+        "width": 1440,
+        "theme": "light",
+        "violations": []
+      },
+      {
+        "name": "desktop-dark",
+        "width": 1440,
+        "theme": "dark",
+        "violations": []
+      },
+      {
+        "name": "mobile-light",
+        "width": 360,
+        "theme": "light",
+        "violations": []
+      },
+      {
+        "name": "mobile-dark",
+        "width": 390,
+        "theme": "dark",
+        "violations": []
+      },
+      {
+        "name": "responses-desktop",
+        "width": 1440,
+        "theme": "light",
+        "violations": []
+      }
+    ],
+    "errors": []
+  },
+  "permission_scope": "Only ascla_manage receives micro_invitations in event detail and candidate review. Public/general serialization omits the projection; member and executive responses and UI do not expose it.",
+  "data_scope": "Current selected IDs remain separate from open public registrations. Unpublished selection is not labelled as sent. Registration states are read from the database; unavailable accounts retain their selected ID and safely omit the name.",
+  "cleanup": "Owned fixtures and isolated Docker database/WordPress volumes removed; temporary environment file removed.",
+  "coverage_collected": false,
+  "existing_coverage_unchanged": true,
+  "package": {
+    "version": "1.10.8",
+    "sha256": "5cb8cfdd14ce6feb84d1bea675724a81786e6624997802f40dd891e1ec14cd60",
+    "bytes": 1544903,
+    "files": 197,
+    "crc_valid": true,
+    "source_bytes_match": true
+  },
+  "limitations": [
+    "Does not certify delivery by external mail or Google Calendar.",
+    "The list reflects current proposal selection; it does not reconstruct candidates removed by earlier eligibility reviews.",
+    "Automated checks on rendered views are not a full accessibility or UAT certification."
+  ]
+}

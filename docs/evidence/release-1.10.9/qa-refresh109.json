@@ -1,0 +1,258 @@
+{
+  "date": "2026-10-22T09:20:01.410903+00:00",
+  "version": "1.10.9",
+  "target": "https://wordpress.ingsoftware.lat",
+  "package_reference_sha256": "f3430e4f82f34ce29434e7e11ac4bfd3441e3bc64050c9a3f7df7c9e8b9d71a5",
+  "deployment_verification": "Public JavaScript and CSS match the local package; private PHP files are verified by observed API/UI behavior, not by downloading them.",
+  "shared_flows": [
+    "perfil",
+    "conexion-chat-bloqueo",
+    "borrador-publicacion-inscripcion",
+    "aforo-lista-espera-notificacion",
+    "suspension-reactivacion-acceso",
+    "asistente-ia"
+  ],
+  "bruno": {
+    "requests": 81,
+    "checks": 149,
+    "passed": true,
+    "source_run": "backend-publicable-2026-10-22T09-08-26-379Z",
+    "cleanup": {
+      "status": "passed",
+      "reactivated": true,
+      "unblocked": true,
+      "events": [
+        479,
+        482
+      ]
+    }
+  },
+  "playwright": {
+    "journeys": 6,
+    "passed": 6,
+    "videos": 12,
+    "screenshots": 12,
+    "source_run": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+    "assistant": [
+      {
+        "id": 248,
+        "thread": "chat_c3bfcf7f-a94d-474e-9181-fddac348f9a7",
+        "mode": "Google Gemini · API real"
+      }
+    ],
+    "cleanup": {
+      "status": "passed",
+      "unblocked": true,
+      "carla_active": true,
+      "events_cancelled": [
+        484,
+        487
+      ]
+    }
+  },
+  "recent_ui": {
+    "checks": 14,
+    "passed": 14,
+    "videos": 16,
+    "screenshots": 16,
+    "cleanup": {
+      "status": "passed",
+      "owned_content": 9,
+      "removed": 9,
+      "method": "Owned test posts moved to trash; unrelated content and user profiles preserved."
+    }
+  },
+  "remote_security": {
+    "http_checks": 20,
+    "http_passed": 19,
+    "http_status": "FAIL",
+    "pending": "Hosting exposes Apache version in the Server header.",
+    "browser_checks": 6,
+    "browser_views": 42,
+    "browser_status": "PASS"
+  },
+  "local_zap": {
+    "date": "2026-10-22T09:11:27.133208+00:00",
+    "status": "PASS",
+    "phases": [
+      {
+        "phase": "frontend",
+        "status": "PASS",
+        "risk_counts": {
+          "0": 9,
+          "1": 0,
+          "2": 0,
+          "3": 0
+        },
+        "error": null,
+        "scope": [
+          "https://ascla-zap109-20261022085111-1008.test/login/",
+          "https://ascla-zap109-20261022085111-1008.test/intranet/",
+          "https://ascla-zap109-20261022085111-1008.test/perfil/",
+          "https://ascla-zap109-20261022085111-1008.test/eventos/",
+          "https://ascla-zap109-20261022085111-1008.test/hub/",
+          "https://ascla-zap109-20261022085111-1008.test/galeria/",
+          "https://ascla-zap109-20261022085111-1008.test/foros/",
+          "https://ascla-zap109-20261022085111-1008.test/directorio/",
+          "https://ascla-zap109-20261022085111-1008.test/centro-conocimiento/",
+          "https://ascla-zap109-20261022085111-1008.test/asistente/",
+          "https://ascla-zap109-20261022085111-1008.test/aliados/",
+          "https://ascla-zap109-20261022085111-1008.test/mensajeria/",
+          "https://ascla-zap109-20261022085111-1008.test/contacto/",
+          "https://ascla-zap109-20261022085111-1008.test/administracion/"
+        ],
+        "findings": [
+          {
+            "id": "10111",
+            "risk": 0,
+            "name": "Authentication Request Identified",
+            "classification": "INFO",
+            "reason": "Unlisted alert: security gate uses actual risk level.",
+            "instances": 1
+          },
+          {
+            "id": "10029",
+            "risk": 0,
+            "name": "Cookie Poisoning",
+            "classification": "INFO",
+            "reason": "Unlisted alert: security gate uses actual risk level.",
+            "instances": 1
+          },
+          {
+            "id": "10058",
+            "risk": 0,
+            "name": "GET for POST",
+            "classification": "INFO",
+            "reason": "Unlisted alert: security gate uses actual risk level.",
+            "instances": 1
+          },
+          {
+            "id": "120000-2",
+            "risk": 0,
+            "name": "Information Disclosure - Information in Browser sessionStorage",
+            "classification": "INFO",
+            "reason": "Unlisted alert: security gate uses actual risk level.",
+            "instances": 1
+          },
+          {
+            "id": "10027",
+            "risk": 0,
+            "name": "Information Disclosure - Suspicious Comments",
+            "classification": "INFO",
+            "reason": "Unlisted alert: security gate uses actual risk level.",
+            "instances": 5
+          },
+          {
+            "id": "10109",
+            "risk": 0,
+            "name": "Modern Web Application",
+            "classification": "INFO",
+            "reason": "Unlisted alert: security gate uses actual risk level.",
+            "instances": 4
+          },
+          {
+            "id": "10112",
+            "risk": 0,
+            "name": "Session Management Response Identified",
+            "classification": "INFO",
+            "reason": "Unlisted alert: security gate uses actual risk level.",
+            "instances": 2
+          },
+          {
+            "id": "10104",
+            "risk": 0,
+            "name": "User Agent Fuzzer",
+            "classification": "INFO",
+            "reason": "Unlisted alert: security gate uses actual risk level.",
+            "instances": 3
+          },
+          {
+            "id": "10031",
+            "risk": 0,
+            "name": "User Controllable HTML Element Attribute (Potential XSS)",
+            "classification": "INFO",
+            "reason": "Unlisted alert: security gate uses actual risk level.",
+            "instances": 7
+          }
+        ]
+      },
+      {
+        "phase": "backend",
+        "status": "PASS",
+        "risk_counts": {
+          "0": 1,
+          "1": 0,
+          "2": 0,
+          "3": 0
+        },
+        "error": null,
+        "scope": [
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/bootstrap",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/profiles",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/profiles/24",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/content/hub",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/content/topic",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/content/resource",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/content/event",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/content/gallery",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/content/ally",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/locations/countries",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/locations/cities",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/recommendations",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/interests/learned",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/notifications",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/admin/users",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/admin/users/24",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/admin/users/24/insights",
+          "https://ascla-zap109-20261022085111-1008.test/wp-json/ascla/v1/settings"
+        ],
+        "findings": [
+          {
+            "id": "10104",
+            "risk": 0,
+            "name": "User Agent Fuzzer",
+            "classification": "INFO",
+            "reason": "Unlisted alert: security gate uses actual risk level.",
+            "instances": 3
+          }
+        ]
+      },
+      {
+        "phase": "CSP",
+        "status": "PASS"
+      },
+      {
+        "phase": "Browser",
+        "status": "PASS"
+      },
+      {
+        "phase": "Source consistency",
+        "status": "PASS",
+        "changed": []
+      }
+    ],
+    "environment_removed": true,
+    "credentials_removed": true
+  },
+  "delivery": "pruebas/index.html",
+  "full_php_suite": false,
+  "coverage_collected": false,
+  "quality_gate_executed": false,
+  "jenkins_zap_integration": false,
+  "uat_accepted": false,
+  "notes": [
+    "Bruno and Playwright execute the same six business flows; API integration and visual regression are explicitly separate.",
+    "103 CP coverage counts remain unchanged; no new universal security or semantic AI claim."
+  ],
+  "remote_header_recheck": {
+    "date": "2026-10-22T09:45:43.256Z",
+    "http_date": "2026-10-22T09:41:10.563Z",
+    "http_passed": 19,
+    "http_checks": 20,
+    "http_status": "FAIL",
+    "server_exposure_routes": 5,
+    "hosting_access": "WordPress administration only; no SSH, hosting panel or Jenkins access provided.",
+    "remediation": "Apply config/security.conf at the Apache server and rerun both independent HTTP verifiers.",
+    "explanation": "pruebas/seguridad/sustento.html"
+  }
+}

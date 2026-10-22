@@ -92,7 +92,7 @@ $asclaAdminContext=false;
     </form>
 </div>
 
-<script>
+<script nonce="<?php echo esc_attr(\ASCLA\Core\Frontend\SecurityHeaders::nonce()); ?>">
 (function(){
   var button=document.querySelector('.wp-hide-pw');
   var input=document.getElementById('user_pass');

@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "integration": {
+    "id": "integracion",
+    "folder": "integracion",
+    "requests": 18,
+    "checks": 26
+  },
+  "flows": [
+    {
+      "id": "perfil",
+      "title": "Perfil del asociado",
+      "folder": "flujos-e2e/01-perfil",
+      "requests": 7,
+      "checks": 14
+    },
+    {
+      "id": "conexion-chat-bloqueo",
+      "title": "Conexión, chat y bloqueo",
+      "folder": "flujos-e2e/02-conexion-chat-bloqueo",
+      "requests": 12,
+      "checks": 24
+    },
+    {
+      "id": "borrador-publicacion-inscripcion",
+      "title": "Borrador, publicación e inscripción",
+      "folder": "flujos-e2e/03-borrador-publicacion-inscripcion",
+      "requests": 12,
+      "checks": 22
+    },
+    {
+      "id": "aforo-lista-espera-notificacion",
+      "title": "Aforo, lista de espera y notificación",
+      "folder": "flujos-e2e/04-aforo-espera-notificacion",
+      "requests": 19,
+      "checks": 37
+    },
+    {
+      "id": "suspension-reactivacion-acceso",
+      "title": "Suspensión y reactivación",
+      "folder": "flujos-e2e/05-suspension-reactivacion",
+      "requests": 9,
+      "checks": 18
+    },
+    {
+      "id": "asistente-ia",
+      "title": "Consulta al asistente IA",
+      "folder": "flujos-e2e/06-asistente-ia",
+      "requests": 4,
+      "checks": 8
+    }
+  ]
+}

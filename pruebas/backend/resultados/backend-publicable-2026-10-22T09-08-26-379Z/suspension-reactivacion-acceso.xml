@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<testsuites>
+  <testsuite name="01. Iniciar sesión como Administrador" file="flujos-e2e\05-suspension-reactivacion\01-iniciar-sesion-administrador.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:25.215" hostname="DESKTOP-VJV2FMV" time="3.795">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\05-suspension-reactivacion\01-iniciar-sesion-administrador" time="1.897"/>
+    <testcase name="Sesión y nonce propios de Administrador" status="pass" classname="flujos-e2e\05-suspension-reactivacion\01-iniciar-sesion-administrador" time="1.897"/>
+  </testsuite>
+  <testsuite name="02. Iniciar sesión como Carla" file="flujos-e2e\05-suspension-reactivacion\02-iniciar-sesion-carla.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:25.215" hostname="DESKTOP-VJV2FMV" time="2.782">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\05-suspension-reactivacion\02-iniciar-sesion-carla" time="1.391"/>
+    <testcase name="Sesión y nonce propios de Carla" status="pass" classname="flujos-e2e\05-suspension-reactivacion\02-iniciar-sesion-carla" time="1.391"/>
+  </testsuite>
+  <testsuite name="03. Carla tiene acceso antes de la suspensión" file="flujos-e2e\05-suspension-reactivacion\03-carla-tiene-acceso-antes-de-la-suspension.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:25.215" hostname="DESKTOP-VJV2FMV" time="0.836">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\05-suspension-reactivacion\03-carla-tiene-acceso-antes-de-la-suspension" time="0.418"/>
+    <testcase name="La identidad corresponde a Carla" status="pass" classname="flujos-e2e\05-suspension-reactivacion\03-carla-tiene-acceso-antes-de-la-suspension" time="0.418"/>
+  </testsuite>
+  <testsuite name="04. El administrador suspende a Carla" file="flujos-e2e\05-suspension-reactivacion\04-el-administrador-suspende-a-carla.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:25.215" hostname="DESKTOP-VJV2FMV" time="0.881">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\05-suspension-reactivacion\04-el-administrador-suspende-a-carla" time="0.440"/>
+    <testcase name="La suspensión se aplica a la cuenta de prueba" status="pass" classname="flujos-e2e\05-suspension-reactivacion\04-el-administrador-suspende-a-carla" time="0.440"/>
+  </testsuite>
+  <testsuite name="05. La cuenta suspendida pierde el acceso" file="flujos-e2e\05-suspension-reactivacion\05-la-cuenta-suspendida-pierde-el-acceso.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:25.215" hostname="DESKTOP-VJV2FMV" time="0.940">
+    <testcase name="Código HTTP esperado: 403" status="pass" classname="flujos-e2e\05-suspension-reactivacion\05-la-cuenta-suspendida-pierde-el-acceso" time="0.470"/>
+    <testcase name="La sesión anterior dejó de ser válida" status="pass" classname="flujos-e2e\05-suspension-reactivacion\05-la-cuenta-suspendida-pierde-el-acceso" time="0.470"/>
+  </testsuite>
+  <testsuite name="06. El administrador reactiva a Carla" file="flujos-e2e\05-suspension-reactivacion\06-el-administrador-reactiva-a-carla.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:25.215" hostname="DESKTOP-VJV2FMV" time="0.966">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\05-suspension-reactivacion\06-el-administrador-reactiva-a-carla" time="0.483"/>
+    <testcase name="Cuenta de prueba reactivada" status="pass" classname="flujos-e2e\05-suspension-reactivacion\06-el-administrador-reactiva-a-carla" time="0.483"/>
+  </testsuite>
+  <testsuite name="07. Reactivar no revive la sesión revocada" file="flujos-e2e\05-suspension-reactivacion\07-reactivar-no-revive-la-sesion-revocada.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:25.215" hostname="DESKTOP-VJV2FMV" time="0.808">
+    <testcase name="Código HTTP esperado: 403" status="pass" classname="flujos-e2e\05-suspension-reactivacion\07-reactivar-no-revive-la-sesion-revocada" time="0.404"/>
+    <testcase name="La sesión antigua sigue rechazada" status="pass" classname="flujos-e2e\05-suspension-reactivacion\07-reactivar-no-revive-la-sesion-revocada" time="0.404"/>
+  </testsuite>
+  <testsuite name="08. Iniciar sesión como Carla" file="flujos-e2e\05-suspension-reactivacion\08-iniciar-sesion-carla.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:25.215" hostname="DESKTOP-VJV2FMV" time="2.863">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\05-suspension-reactivacion\08-iniciar-sesion-carla" time="1.431"/>
+    <testcase name="Sesión y nonce propios de Carla" status="pass" classname="flujos-e2e\05-suspension-reactivacion\08-iniciar-sesion-carla" time="1.431"/>
+  </testsuite>
+  <testsuite name="09. Carla recupera el acceso con una sesión nueva" file="flujos-e2e\05-suspension-reactivacion\09-carla-recupera-el-acceso-con-una-sesion-nueva.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:25.215" hostname="DESKTOP-VJV2FMV" time="0.859">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\05-suspension-reactivacion\09-carla-recupera-el-acceso-con-una-sesion-nueva" time="0.430"/>
+    <testcase name="Identidad y acceso recuperados" status="pass" classname="flujos-e2e\05-suspension-reactivacion\09-carla-recupera-el-acceso-con-una-sesion-nueva" time="0.430"/>
+  </testsuite>
+</testsuites>

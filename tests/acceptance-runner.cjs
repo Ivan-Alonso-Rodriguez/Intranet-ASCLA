@@ -7,7 +7,7 @@ const remote=process.env.ASCLA_ACCEPTANCE_MODE==='remote';
 if(remote){
  const target=new URL(process.env.ASCLA_TEST_SITE_URL||'https://wordpress.ingsoftware.lat/');
  if(target.username||target.password||target.search||target.hash||target.pathname!=='/'||(!((target.protocol==='https:'&&target.hostname==='wordpress.ingsoftware.lat')||(process.env.ASCLA_E2E_EPHEMERAL==='1'&&target.protocol==='http:'&&/^ascla[_-]/.test(target.hostname)))))throw Error('Use the configured WordPress QA URL');
- if(new URL(fixture.base).origin!==target.origin||fixture.origin!=='ascla-qa-tools'||fixture.core_version!=='1.10.8'||!/^ascla_qa_[a-f0-9]{10}_$/.test(fixture.prefix||''))throw Error('Download a fresh QA access file from this site');
+ if(new URL(fixture.base).origin!==target.origin||fixture.origin!=='ascla-qa-tools'||fixture.core_version!=='1.10.9'||!/^ascla_qa_[a-f0-9]{10}_$/.test(fixture.prefix||''))throw Error('Download a fresh QA access file from this site');
  for(const name of ['admin','a','b','ui_a','ui_b'])if(!fixture.actors[name]?.login?.startsWith(fixture.prefix)||!Number.isInteger(fixture.actors[name]?.id)||typeof fixture.actors[name]?.password!=='string')throw Error('Synthetic QA accounts are required');
  fixture.base=target.origin;
 }
@@ -23,6 +23,11 @@ let tools,cleanup,sourceReady=false;
 (async()=>{
 try {
  provenance.snapshot(root,out,{recorded:true,secrets:Object.values(fixture.actors).map(a=>a.password)});sourceReady=true;tools=provenance.tooling();
+ const native=await require('../scripts/native-login.cjs')(fixture.base,fixture.actors.admin);
+ const identityResponse=await fetch(fixture.base+'/wp-json/ascla/v1/bootstrap',{headers:{Cookie:native.cookie,'X-WP-Nonce':native.nonce},signal:AbortSignal.timeout(30000)});
+ const identity=await identityResponse.json();
+ if(identityResponse.status!==200||!identity.admin||Number(identity.me?.id)!==fixture.actors.admin.id)throw Error('El cliente HTTP no conservó la identidad del formulario protegido.');
+ summaries.push({name:'native-login-client',status:'passed',tests:1});
  for(const group of ['integration','business-e2e']) {
   const start=Date.now();const run=spawnSync(process.env.BRU_BIN||'bru',['run',group,'--env-file',privateEnv,'--disable-cookies','--bail','--reporter-json',path.join(out,group+'.json'),'--reporter-junit',path.join(out,group+'.xml'),'--reporter-html',path.join(out,group+'.bruno.html'),'--reporter-skip-all-headers','--reporter-skip-body'],{cwd:path.join(out,'sources/bruno'),encoding:'utf8',maxBuffer:4*1024*1024});
   const log=(run.stdout||'')+(run.stderr||'');
@@ -46,7 +51,7 @@ try {
  if(remote){try{const copy=path.join(out,'sources/acceptance-remote-cleanup.cjs');cleanup=await require(fs.existsSync(copy)?copy:'./acceptance-remote-cleanup.cjs')(fixture);fs.writeFileSync(path.join(out,'cleanup.log'),'QA helper: temporary batch removed.\n');}catch(error){failure=true;cleanup={status:'failed',message:'Use Tools > ASCLA QA to clean the active batch.'};summaries.push({name:'runner',status:'failed',error:'Remote cleanup was not confirmed. Use WordPress Tools > ASCLA QA.'});fs.writeFileSync(path.join(out,'cleanup.log'),cleanup.message+'\n');}}
  fs.rmSync(privateEnv,{force:true});
  const git=args=>execFileSync('git',['-c','safe.directory='+root,...args],{cwd:root,encoding:'utf8'}).trim();
- const metadata={date:new Date().toISOString(),target:fixture.base,target_version:fixture.core_version||null,target_version_recorded_at:fixture.issued_at||null,source_capture:sourceReady?'execution':'failed',mode:remote?'remote':process.env.ASCLA_ACCEPTANCE_MODE||'ephemeral',tools,cleanup,commit:git(['rev-parse','HEAD']),working_tree:git(['status','--porcelain'])?'uncommitted':'clean',results:summaries};
+ const metadata={date:new Date().toISOString(),target:fixture.base,target_version:fixture.core_version||null,target_version_recorded_at:fixture.issued_at||null,source_capture:sourceReady?'execution':'failed',mode:remote?'remote':process.env.ASCLA_ACCEPTANCE_MODE||'ephemeral',tools,cleanup,commit:git(['rev-parse','HEAD']),branch:git(['branch','--show-current']),working_tree:git(['status','--porcelain'])?'uncommitted':'clean',results:summaries};
  fs.writeFileSync(path.join(out,'summary.json'),JSON.stringify(metadata,null,2));
  provenance.manifest(out,{recorded:true});
  require('./acceptance-report.cjs').render(out);

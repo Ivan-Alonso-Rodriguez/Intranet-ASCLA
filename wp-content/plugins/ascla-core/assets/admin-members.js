@@ -1,7 +1,7 @@
 /* Read-only member evidence. The server owns permissions, privacy, totals and pagination. */
 (() => {
   'use strict';
-  globalThis.ASCLAMembers = ({root, api, E, T, date, I, avatar, back, toast}) => {
+  globalThis.ASCLAMembers = ({root, api, E, T, date, I, avatar, back, toast, backLabel=()=>'Volver a usuarios'}) => {
     const labels={publications:'Publicaciones',comments:'Comentarios',likes:'Me gusta',registrations:'Inscripciones vigentes',attendances:'Asistencias registradas'};
     const icons={publications:'book',comments:'hub',likes:'heart',registrations:'calendar',attendances:'check'};
     const actions={publications:'Publicó',comments:'Comentó en',likes:'Le gusta',registrations:'Se inscribió en',attendances:'Asistencia registrada en'};
@@ -12,7 +12,7 @@
     const button=(label,action,attrs='',cls='')=>`<button type="button" class="btn ${cls}" data-member-action="${action}" ${attrs}>${label}</button>`;
     const chips=values=>values.map(value=>`<span class="member-interest-chip">${E(value)}</span>`).join('');
     const formatted=value=>value?E(date(value,{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})):text('Sin actividad publicada');
-    const backButton=()=>button(I('arrow')+text('Volver a usuarios'),'back','','member-back');
+    const backButton=()=>button(I('arrow')+text(backLabel()),'back','','member-back');
 
     function render(d) {
       const u=d.user;

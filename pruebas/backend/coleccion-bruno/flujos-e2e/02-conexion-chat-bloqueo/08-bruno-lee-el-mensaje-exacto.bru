@@ -1,0 +1,26 @@
+meta {
+  name: 08. Bruno lee el mensaje exacto
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/conversations/{{conversacionBloqueoId}}/messages
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionBruno}}
+  X-WP-Nonce: {{nonceBruno}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("El destinatario recibe el mensaje de esta ejecución", function () { expect(res.getBody().items.some(m=>Number(m.id)===Number(bru.getCollectionVar("mensajeBloqueoId"))&&m.body===bru.getCollectionVar("textoMensajeBloqueo"))).to.equal(true); });
+}

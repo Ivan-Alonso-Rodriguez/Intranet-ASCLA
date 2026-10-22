@@ -6,7 +6,7 @@ const env=Object.fromEntries(fs.readFileSync(process.env.ASCLA_ENV_FILE||root+'/
 const checks=[],errors=[],users=[],posts=[];let browser,admin;
 async function api(page,route,body,method){return page.evaluate(async({route,body,method})=>{const url=route.startsWith('native:')?ASCLA.api.replace(/ascla\/v1\/?$/,'wp/v2/')+route.slice(7):ASCLA.api+route;const r=await fetch(url,{method:method||(body?'POST':'GET'),headers:{'X-WP-Nonce':ASCLA.nonce,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});return{status:r.status,body:await r.json()};},{route,body,method});}
 async function ok(page,route,body,method){const r=await api(page,route,body,method);assert.ok(r.status>=200&&r.status<300,route+': '+r.status+' '+r.body.message);return r.body;}
-async function login(name,password){const context=await browser.newContext({viewport:{width:1440,height:1000}}),p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(base+'/wp-login.php');await p.locator('#user_login').fill(name);await p.locator('#user_pass').fill(password);await Promise.all([p.waitForNavigation({waitUntil:'domcontentloaded'}),p.locator('#wp-submit').click()]);await p.goto(base+'/intranet/');await p.locator('.hero').waitFor();await p.keyboard.press('Escape');return p;}
+async function login(name,password){const context=await browser.newContext({viewport:{width:1440,height:1000}}),p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(base+'/wp-login.php');await p.locator('#user_login').fill(name);await p.locator('#user_pass').fill(password);await Promise.all([p.waitForNavigation({waitUntil:'domcontentloaded'}),p.locator('#wp-submit').click()]);await p.goto(base+'/intranet/');await require('./helpers/browser.cjs').waitForHome(p);await p.keyboard.press('Escape');return p;}
 async function goto(p,route){await p.bringToFront();await p.goto(base+'/'+route);await p.locator('#page-content h1').waitFor();if(!new URL(p.url()).searchParams.has('item'))await p.keyboard.press('Escape');}
 function pass(name){checks.push(name);console.log('PASS '+name);}
 (async()=>{try{
@@ -59,7 +59,7 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  await ok(admin,moderation,{decision:'reject',reason:'Oculto para revisión de contexto'});
  assert.ok(!(await ok(reader.page,'items/'+topic.id+'/comments')).some(c=>c.id===comment.id));
  assert.equal((await api(reader.page,'comments/'+comment.id+'/reaction',{active:true})).status,404);
- await goto(admin,'administracion/?section=moderacion');await admin.locator('[data-action="comment-moderate"][data-id="'+comment.id+'"][data-decision="approve"]').click();
+ await goto(admin,'administracion/?section=moderacion');await admin.locator('[data-moderation-view="comentarios"]').click();await admin.locator('[data-action="comment-moderate"][data-id="'+comment.id+'"][data-decision="approve"]').click();
  let decisionForm=admin.locator('[data-form="review-decision"]');assert.equal(await decisionForm.locator('[name="reason"]').getAttribute('required'),'');await decisionForm.locator('[name="reason"]').fill('Contexto revisado, comentario permitido');
  await Promise.all([admin.waitForResponse(r=>r.url().endsWith('/'+moderation)&&r.request().method()==='POST'&&r.status()===200),decisionForm.locator('button[type="submit"],button:not([type])').click()]);
  assert.ok((await ok(reader.page,'items/'+topic.id+'/comments')).some(c=>c.id===comment.id));
@@ -71,7 +71,7 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  assert.equal((await api(admin,'admin/reports/'+report.id,null,'DELETE')).status,409);
  assert.equal((await api(admin,'admin/reports/'+report.id+'/review',{})).status,400);
  assert.equal((await api(reader.page,'admin/reports/'+report.id+'/review',{reason:'Sin permisos'})).status,403);
- await goto(admin,'administracion/?section=moderacion');await admin.locator('[data-action="report-reviewed"][data-id="'+report.id+'"]').click();decisionForm=admin.locator('[data-form="review-decision"]');await decisionForm.locator('[name="reason"]').fill('Reporte evaluado; el comentario cumple las normas');
+ await goto(admin,'administracion/?section=moderacion');await admin.locator('[data-moderation-view="reportes"]').click();await admin.locator('[data-action="report-reviewed"][data-id="'+report.id+'"]').click();decisionForm=admin.locator('[data-form="review-decision"]');await decisionForm.locator('[name="reason"]').fill('Reporte evaluado; el comentario cumple las normas');
  await Promise.all([admin.waitForResponse(r=>r.url().endsWith('/admin/reports/'+report.id+'/review')&&r.request().method()==='POST'&&r.status()===200),decisionForm.locator('button[type="submit"],button:not([type])').click()]);
  decisionAudit=(await ok(admin,'admin')).audit.find(row=>row.action==='report_reviewed'&&Number(row.object_id)===Number(report.id));decisionDiff=JSON.parse(decisionAudit.detail);assert.equal(decisionDiff.state.before,'pending');assert.equal(decisionDiff.state.after,'reviewed');assert.equal(decisionDiff.reason.after,'Reporte evaluado; el comentario cumple las normas');assert.equal(decisionDiff.context.target_id,comment.id);assert.equal(Number(decisionAudit.actor_id),decisionDiff.reviewed_by.after);assert.ok(decisionDiff.reviewed_at.after);
  await ok(admin,'admin/reports/'+report.id,null,'DELETE');

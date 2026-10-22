@@ -1,0 +1,195 @@
+{
+  "date": "2026-10-15T21:00:57.528Z",
+  "version": "1.10.8",
+  "schema": 15,
+  "status": "passed",
+  "scope": "Existing integration and E2E suites executed from UAT against disposable local WordPress and MariaDB. No public deployment or Jenkins execution claim.",
+  "branch": "uat",
+  "commit": "c525b995599e4946f79a6276fbfc370be1e2d434",
+  "working_tree": "uncommitted",
+  "mode": "ephemeral",
+  "target": "http://ascla_acceptance_qa_20261015t210002z_22050-wordpress",
+  "tools": {
+    "node": "v24.18.1",
+    "bruno": "4.2.1",
+    "playwright": "1.62.1"
+  },
+  "report": "test-results/acceptance-20261015T210002Z-22050/index.html",
+  "backend_integration": {
+    "requests": 10,
+    "checks": 15,
+    "status": "passed",
+    "source": "tests/http/integration"
+  },
+  "backend_e2e": {
+    "requests": 23,
+    "checks": 38,
+    "status": "passed",
+    "source": "tests/http/business-e2e",
+    "flows": [
+      "connection, acceptance, conversation, message, disconnection, preserved history and rejected new messages",
+      "draft, publication, registration, rescheduling and reconfirmation"
+    ]
+  },
+  "frontend_e2e": {
+    "source": "tests/acceptance-ui.cjs",
+    "journeys": [
+      {
+        "name": "perfil",
+        "status": "passed",
+        "videos": 1,
+        "screenshots": 1
+      },
+      {
+        "name": "conexion-chat-historial",
+        "status": "passed",
+        "videos": 2,
+        "screenshots": 2
+      },
+      {
+        "name": "borrador-publicacion-inscripcion",
+        "status": "passed",
+        "videos": 2,
+        "screenshots": 2
+      }
+    ],
+    "videos": 5,
+    "screenshots": 5
+  },
+  "initial_attempt": {
+    "report": "test-results/acceptance-20261015T205747Z-21769/index.html",
+    "working_tree": "clean",
+    "ui_passed": 2,
+    "ui_failed": 1,
+    "finding": "The connection introduction is now inside a closed disclosure. The existing browser case waited for its text without opening it.",
+    "resolution": "Click the actual introduction summary in the requesting member row, assert the visible message, then accept that specific connection. No test or assertion removed.",
+    "native_summary": {
+      "path": "test-results/acceptance-20261015T205747Z-21769/summary.json",
+      "sha256": "e80135d02f6f8b2256796061568a29183e90fab97cb8129a938ff1d134903bef"
+    }
+  },
+  "evidence_integrity": {
+    "verified_files": 61,
+    "all_hashes_match": true
+  },
+  "native_artifacts": [
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/summary.json",
+      "sha256": "94d214fd167c2287fd51d2cf2e9f64698e9c16a1809d96b18bdc79b90e2e1648"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/integration.json",
+      "sha256": "36fdacb95821f171670f39507495c0c18b651017af9956f090fb9030fe155eff"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/integration.xml",
+      "sha256": "b47e94b1e5bc9d7bc8eb117091412be6bf3f47a370acb0c80de49cc83b2667dd"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/business-e2e.json",
+      "sha256": "1721235835589e76ee02c4d8d788b2489c3e6d0498913e6a535910c85006c9e9"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/business-e2e.xml",
+      "sha256": "77c3de3d96b92d4ff44b4f7d033e76319d37bcd3f9edfaa000609b04cd5e227d"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/frontend.json",
+      "sha256": "f036745fd76f083cdb5a345e3537e2bdf33ae628b18d2e8b9e5e1c4cedf26020"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/frontend.xml",
+      "sha256": "e6ed5ac480c258d7fa5cdf45508f69ec42cd0f4add8a0cf4bc93f56b2a512f48"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/sources.json",
+      "sha256": "7c1fd9c7918a2aaf1c911b98a32110d16af7dc3382cb70c4aaf29c21773174cb"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/evidence-manifest.json",
+      "sha256": "fa81dce573327320c0e791c56895aaf5da37aff5e3a2b3a29ec3ef12c4c16e60"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/bruno-collection.zip",
+      "sha256": "0a3a304d888857ddfd1fbdff892460752fbb24aac648f1d639823a3660d25fab"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/cleanup.log",
+      "sha256": "d4eda772288303650e8b559d7f2631d757f6dd912bb47bac952e6d3a7e0afcf9"
+    }
+  ],
+  "media": [
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/videos/perfil/page@1f67b9dbe15158b3e442d46e52f43dae.webm",
+      "sha256": "963386fc376d62ca6f57ea211dd264cd43153679ddbcad0a0cb2b2cf333f5b36"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/perfil-0-passed.png",
+      "sha256": "bbe50fba0d63c03d9dfc74e0ead644a1926dc3350a7407084aafe15b67ae70b8"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/videos/conexion-chat-historial/page@3c163dedfc6eed28b2b1b33c75019bba.webm",
+      "sha256": "4cfddee451a2c6bdb89dfb591e1bdff664ad9c8d977bf53ce016c75f671a7821"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/videos/conexion-chat-historial/page@c1c75a33f62a05283908402852ea77c0.webm",
+      "sha256": "29bdb3dd039cab4042b153a7ea964e7864a3c6382a047d1e2f216cb7544eeae7"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/conexion-chat-historial-0-passed.png",
+      "sha256": "0105f21da42cd9da720640a351a6120f985346d720fdcef4003a71cee4b3bef5"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/conexion-chat-historial-1-passed.png",
+      "sha256": "8af4c38f5f6dd704a4edba67fd3b5268a1b38e665416d64c73a1ccaefc70de44"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/videos/borrador-publicacion-inscripcion/page@fe9f2e8027436235c3e06c6d01452870.webm",
+      "sha256": "109cb40c46226adab413b5e1440f5f2c0a5a78a1c0eaad09a909ee2b89da028d"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/videos/borrador-publicacion-inscripcion/page@d432de66294a3491960f9970094f8957.webm",
+      "sha256": "3b4ff66274afbe2bd00b37af69ee235ba2c7030d5730650c81bd6ea7782e7076"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/borrador-publicacion-inscripcion-0-passed.png",
+      "sha256": "12ebd5e3bc220908763a732455bd68af19561ad245611849a14c7734dda509c5"
+    },
+    {
+      "path": "test-results/acceptance-20261015T210002Z-22050/borrador-publicacion-inscripcion-1-passed.png",
+      "sha256": "cdd46daeb83b3abef938fa03abcd84173d2cd5216b4424afb09c43d36072c3fe"
+    }
+  ],
+  "source_sha256": {
+    "tests/acceptance-fixture.php": "949879dbac2c0041c00933a0ecda2ddbc708b5cb65f00191c5f1d72702f95c76",
+    "tests/acceptance-ui.cjs": "b7c0c25a84e80c996b424bd8196e65d3dfc3b2e4c51751015678b9f29ee09e09",
+    "tests/acceptance-runner.cjs": "8c303e8ce3cf1228b4d6d5679acfb57b3b0b131ccabb5f059d0a934e4d7e6c4b",
+    "tests/acceptance-report.cjs": "041327c953b39f077a764e23571ac00cd52c3c60b9a740cc58947ba15ba421aa",
+    "scripts/acceptance-tests.sh": "f4d9ef213b51cf854717d3acfce2de4ed240bc724f5711050713d1663bf7d309"
+  },
+  "coverage": {
+    "collected": false,
+    "original_artifacts_unchanged": true,
+    "original_sha256": {
+      "source-revision": "5e9488a9dd2e9101025ac5963ac77c71771b7b8bc6d0ac170896e53374b6fa39",
+      "clover.xml": "2008bce81b5693cc82662820d8ff8aa19004cdacc082295365e906b6b9d90709",
+      "junit.xml": "bea4733ddbfab15f29230c5b08f1c7aac5a9586fc4ad87c7ea4ad503c47440ae",
+      "lcov.info": "c68411ab949218a79986a9548e775a364d0535dfe58cb248f65389e8523adb10"
+    }
+  },
+  "fixtures_removed": true,
+  "disposable_containers_and_volumes_removed": true,
+  "package_unchanged": {
+    "version": "1.10.8",
+    "sha256": "435c1e6e8382604b1cf28e945164320f37c59f901b523f2fb40319fdb434c674",
+    "bytes": 1355916,
+    "installed_for_this_run": false
+  },
+  "limitations": [
+    "The runner changes were uncommitted during the successful run, as the native metadata records; executable sources were captured with SHA-256 hashes.",
+    "Local WordPress only. To evaluate the installed public site, upload the reviewed package and use a fresh QA helper access batch in remote mode.",
+    "These are selected business flows, not exhaustive coverage of the analysis document or a substitute for testers and UAT approval.",
+    "Jenkins is independent of the tests and was not configured or executed. No new test cases or coverage were added.",
+    "Native evidence, videos and screenshots remain ignored local artifacts; share the complete report folder after reviewing its contents."
+  ]
+}

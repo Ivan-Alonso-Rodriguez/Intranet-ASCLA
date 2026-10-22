@@ -54,7 +54,7 @@ final class SupportRequestsTest extends TestCase
         $this->deny(fn()=>SupportRequests::change($id,'progress'),403);
         wp_set_current_user($this->users[2]);self::assertSame(200,$this->api('GET','items/'.$id)->get_status());
         self::assertSame('progress',SupportRequests::change($id,'progress')['meta']['request_status']);
-        self::assertSame(403,$this->api('POST','admin/contact/'.$id.'/assign',['assignee'=>$this->users[0]])->get_status());
+        self::assertSame(200,$this->api('POST','admin/contact/'.$id.'/assign',['assignee'=>$this->users[0]])->get_status());
         update_user_meta($this->users[2],'_ascla_suspended',true);
         self::assertFalse(SupportRequests::canHandle($id));
     }

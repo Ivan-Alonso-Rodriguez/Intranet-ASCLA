@@ -18,7 +18,7 @@ final class Release103RegressionTest extends TestCase
     {
         $this->saved=['settings'=>Settings::get(),'server'=>$_SERVER,'request'=>$_REQUEST,'cookies'=>$_COOKIE,'post'=>$_POST,'get'=>$_GET,'pagenow'=>$GLOBALS['pagenow']??''];
         $this->password=wp_generate_password(28);
-        foreach (['administrator','ascla_member','ascla_executive','ascla_moderator','ascla_member'] as $role) {
+        foreach (['administrator','ascla_member','ascla_executive','ascla_moderator','ascla_member','ascla_member'] as $role) {
             $login='release103_'.bin2hex(random_bytes(6));
             $id=wp_insert_user(['user_login'=>$login,'user_email'=>$login.'@example.invalid','user_pass'=>$this->password,'role'=>$role,'first_name'=>'Ana','last_name'=>'Prueba']);
             $this->users[]=$id;
@@ -149,15 +149,18 @@ final class Release103RegressionTest extends TestCase
         return $extra+['email'=>get_userdata($this->member)->user_email,'role'=>'ascla_member','first_name'=>'Ana','last_name'=>'Prueba','position'=>'Gerente','company'=>'ASCLA Perú'];
     }
 
-    public function testProfessionalEditWithoutRequestDoesNotChangeAnyAccountData(): void
+    public function testAdministratorCanEditProfessionalDataWithoutAContactRequest(): void
     {
-        $before=get_user_meta($this->member,'_ascla_profile',true);
         $email=get_userdata($this->member)->user_email;
         $response=$this->api('POST','admin/users/'.$this->member,$this->editPayload(['email'=>'changed-'.bin2hex(random_bytes(4)).'@example.invalid','role'=>'ascla_executive']));
-        self::assertSame(403,$response->get_status());
-        self::assertSame($before,get_user_meta($this->member,'_ascla_profile',true));
-        self::assertSame($email,get_userdata($this->member)->user_email);
-        self::assertSame(['ascla_member'],get_userdata($this->member)->roles);
+        self::assertSame(200,$response->get_status());
+        self::assertSame('Gerente',Profiles::raw($this->member)['position']);
+        self::assertNotSame($email,get_userdata($this->member)->user_email);
+        self::assertSame(['ascla_executive'],get_userdata($this->member)->roles);
+        $audit=Store::rows('audit','object_id=%d AND action=%s',[$this->member,'professional_profile_updated'],'ORDER BY id DESC LIMIT 1')[0];
+        self::assertSame($this->admin,(int)$audit['actor_id']);
+        self::assertContains('position',json_decode($audit['detail'],true)['profile_fields']['after']);
+        self::assertStringNotContainsString('Gerente',$audit['detail'],'Audit stores field names, not private values.');
     }
 
     public function testUnchangedProfessionalFieldsNeedNoRequest(): void
@@ -212,12 +215,12 @@ final class Release103RegressionTest extends TestCase
         $raw=Profiles::raw($this->member);$raw+=['city'=>'Lima','bio'=>'Perfil mínimo de prueba','interests'=>[(int)$catalog['interest'][0]['id']],'industries'=>[(int)$catalog['industry'][0]['id']],'goals'=>[(int)$catalog['goal'][0]['id']]];update_user_meta($this->member,'_ascla_profile',$raw);
         $hidden=Profiles::raw($this->member);$hidden['hidden']=['position'];$hidden['position']='SecretPosition103';
         update_user_meta($this->member,'_ascla_profile',$hidden);
-        $empty=Profiles::raw($this->executive);$empty['position']='';update_user_meta($this->executive,'_ascla_profile',$empty);
+        $empty=Profiles::raw($this->users[5]);$empty['position']='';update_user_meta($this->users[5],'_ascla_profile',$empty);
         wp_set_current_user($this->viewer);
         $results=Profiles::directory(['q'=>'MIEMBRO ASCLA']);
         $ids=array_column($results['items'],'id');
         self::assertContains($this->member,$ids);
-        self::assertContains($this->executive,$ids,'Both an empty and a hidden position use the visible fallback; completeness does not exclude active members.');
+        self::assertContains($this->users[5],$ids,'Both an empty and a hidden position use the visible fallback; completeness does not exclude active members.');
         self::assertNotContains($this->moderator,$ids);
         self::assertSame(0,Profiles::directory(['q'=>'SecretPosition103'])['total']);
         self::assertArrayNotHasKey('position',Profiles::visible($this->member));
@@ -253,7 +256,7 @@ final class Release103RegressionTest extends TestCase
                 self::assertSame($this->executive,(int)get_post($id)->post_author);
                 self::assertSame('pending',get_post_status($id));
                 self::assertSame(0,Store::count('registrations','event_id=%d',[$id]));
-                self::assertSame(403,$this->api('POST','items/'.$id.'/moderate',['decision'=>'approve','reviewed'=>true])->get_status());
+                self::assertTrue(Content::serialize(Content::get($id))['can_moderate']);
                 $meta=get_post_meta($id,'_ascla',true);
                 $saved=Content::save('event',['title'=>'Propuesta revisada','body'=>'Agenda para revisar','status'=>'publish','meta'=>$meta],$id);
                 self::assertSame('pending',$saved['status']);

@@ -26,10 +26,10 @@ final class EventRemindersTest extends TestCase
         EventReminders::send($p['id'],1);EventReminders::send($p['id'],1);
         self::assertSame(1,Store::count('notifications',"user_id=%d AND kind='event_reminder'",[$this->users[2]]));self::assertSame(0,Store::count('notifications',"user_id=%d AND kind='event_reminder'",[$this->users[3]]));
     }
-    public function testExecutiveCannotChangeReminderPolicyAndInvalidDateIsRejected(): void
+    public function testExecutiveCanManageEventRemindersAndInvalidDateIsRejected(): void
     {
         wp_set_current_user($this->users[1]);
-        try{Content::save('event',['title'=>'Evento','body'=>'Contenido','status'=>'draft','meta'=>['start'=>gmdate('c',time()+3*DAY_IN_SECONDS),'end'=>gmdate('c',time()+4*DAY_IN_SECONDS),'reminder_hours'=>[9]]]);self::fail('Executive changed policy');}catch(ASCLA\Core\Rest\ApiException $e){self::assertSame(403,$e->getCode());}
+        $saved=Content::save('event',['title'=>'Evento','body'=>'Contenido','status'=>'draft','meta'=>['start'=>gmdate('c',time()+3*DAY_IN_SECONDS),'end'=>gmdate('c',time()+4*DAY_IN_SECONDS),'reminder_hours'=>[9]]]);$this->event=$saved['id'];self::assertSame([9],$saved['meta']['reminder_hours']);
         try{ASCLA\Core\Services\ContentMeta::eventDate('2027-02-30T10:00:00Z');self::fail('Invalid calendar date accepted');}catch(ASCLA\Core\Rest\ApiException $e){self::assertSame(400,$e->getCode());}
     }
 }

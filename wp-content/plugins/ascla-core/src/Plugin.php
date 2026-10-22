@@ -21,6 +21,8 @@ final class Plugin
         add_filter('posts_search',[Repositories\ContentQuery::class,'search'],10,2);
         add_filter('posts_where',[Repositories\ContentQuery::class,'draftVisibility'],10,2);
         Frontend\App::boot();
+        Frontend\SecurityHeaders::boot();
+        Frontend\LoginCsrf::boot();
         Services\Turnstile::boot();
         Services\Membership::boot();
         Services\CredentialPolicy::boot();

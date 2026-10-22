@@ -67,9 +67,17 @@ final class ContentQuery
             $args['meta_query'][]=['key'=>'_ascla_modality','value'=>$modality];
         }
         if (rest_sanitize_boolean($filter['micro']??false)) { $args['meta_query'][]=['key'=>'_ascla_micro','value'=>'1']; }
-        $args['meta_key'] = '_ascla_start';
-        $direction = rest_sanitize_boolean($filter['past'] ?? false) ? 'DESC' : 'ASC';
-        $args['orderby'] = ['meta_value' => $direction, 'ID' => $direction];
+        // Own publications and undated drafts must not require a start-date meta row.
+        if (!rest_sanitize_boolean($filter['mine']??false) || array_key_exists('past',$filter)) {
+            $args['meta_key'] = '_ascla_start';
+            $direction = rest_sanitize_boolean($filter['past'] ?? false) ? 'DESC' : 'ASC';
+            $args['orderby'] = ['meta_value' => $direction, 'ID' => $direction];
+        }
+        return self::monthFilters($args,$filter);
+    }
+
+    private static function monthFilters(array $args,array $filter): array
+    {
         if (!empty($filter['month'])) {
             $month = Access::text($filter['month'], 7);
             Access::require((bool)preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month), 'Mes no válido.', 400);

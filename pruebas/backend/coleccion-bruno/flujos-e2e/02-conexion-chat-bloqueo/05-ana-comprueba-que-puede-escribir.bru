@@ -1,0 +1,26 @@
+meta {
+  name: 05. Ana comprueba que puede escribir
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/profiles/{{idBruno}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAna}}
+  X-WP-Nonce: {{nonceAna}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("La conexión habilita los mensajes", function () { expect(res.getBody().connection.state).to.equal("connected");expect(res.getBody().connection.can_message).to.equal(true); });
+}

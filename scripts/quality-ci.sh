@@ -90,9 +90,15 @@ dc exec -T -u 0 wordpress sh -c '
   if ! php -m | grep -qi "^pcov$"; then
     apt-get update
     apt-get install -y --no-install-recommends $PHPIZE_DEPS
-    pecl install pcov
+    # Install the official release archive directly: PECL REST metadata can be unavailable.
+    curl -fsSL --retry 3 --connect-timeout 15 --max-time 120 \
+      https://pecl.php.net/get/pcov-1.0.12.tgz -o /tmp/ascla-pcov-1.0.12.tgz
+    echo "23255c8c9335a9636ccb743f5302436a97a582a0bbde9869485be911bbc15da8  /tmp/ascla-pcov-1.0.12.tgz" | sha256sum -c -
+    pecl install /tmp/ascla-pcov-1.0.12.tgz
     docker-php-ext-enable pcov
+    rm -f /tmp/ascla-pcov-1.0.12.tgz
   fi
+  php --ri pcov >/dev/null
   test -f /tmp/phpunit.phar || curl -fsSL https://phar.phpunit.de/phpunit-11.phar -o /tmp/phpunit.phar
 '
 
@@ -147,6 +153,7 @@ docker run --rm --ipc=host \
     cd /work
     export NODE_PATH=/tmp/ascla-node/node_modules
     node tests/manual-workflow.cjs
+    node tests/native-login-security.cjs
     node tests/e2e.cjs
     node tests/editorial107.cjs
     node tests/analysis-filters107.cjs

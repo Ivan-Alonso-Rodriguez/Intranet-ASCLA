@@ -16,6 +16,7 @@ final class EventDetailBuilder
         self::registration($item,$id,$meta);
         self::calendar($item,$post,$meta);
         self::audience($item,$id);
+        MicroInvitations::apply($item,$id,$meta);
     }
 
     private static function registration(array &$item,int $id,array $meta): void

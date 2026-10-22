@@ -1,0 +1,46 @@
+meta {
+  name: 04. Iniciar sesión como Carla
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base}}/wp-login.php
+  body: formUrlEncoded
+  auth: none
+}
+
+headers {
+  Content-Type: application/x-www-form-urlencoded
+  Cookie: {{asclaAccessCookie}}
+}
+
+body:form-urlencoded {
+  log: {{usuarioCarla}}
+  pwd: {{claveCarla}}
+  testcookie: 1
+  _ascla_native_login_nonce: {{asclaAccessNonce}}
+  redirect_to: {{base}}/intranet/
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:post-response {
+  if (res.getStatus() === 302) {
+    const cookies = res.getHeader("set-cookie") || [];
+    const session = (Array.isArray(cookies) ? cookies : [cookies]).map(value => value.split(";")[0]).join("; ");
+    bru.setVar("sesionCarla", session);
+    const page = await bru.sendRequest({method:"GET",url:bru.getCollectionVar("base")+"/intranet/",headers:{Cookie:session}});
+    const match = String(page.data).match(/var ASCLA\s*=\s*(\{[\s\S]*?\});/);
+    if (!match) throw Error("No se pudo obtener el nonce de Carla");
+    bru.setVar("nonceCarla", JSON.parse(match[1]).nonce);
+  }
+}
+
+tests {
+  test("Código HTTP esperado: 302", function () { expect(res.getStatus()).to.equal(302); });
+  test("Sesión y nonce propios de Carla", function () { expect(bru.getVar("sesionCarla")).to.be.a("string").and.not.empty;expect(bru.getVar("nonceCarla")).to.be.a("string").and.not.empty; });
+}

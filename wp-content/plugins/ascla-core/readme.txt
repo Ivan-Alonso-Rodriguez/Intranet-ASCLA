@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.10.8
+Stable tag: 1.10.9
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -10,7 +10,23 @@ ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
 
+= 1.10.9 =
+* Retira el botón de actualización de YouTube y conserva la obtención automática de metadatos y duración.
+* Restringe scripts con nonce y strict-dynamic, sin permisos generales de YouTube, ytimg o Cloudflare.
+* Consolida los cambios del 17 de octubre de 2026 y conserva el esquema 15.
+* Acelera el arranque y la navegación de los módulos con datos autorizados, consultas agrupadas y contadores agregados.
+* Corrige el guardado del perfil administrativo y limita el tipo de asociado a Independiente o Empresa asociada, establecido por administración.
+* Simplifica Directorio, alinea sus tarjetas y añade teléfono internacional con banderas y aviso privado.
+* Aclara navegación, moderación y formularios, y simplifica Consultas de Contacto con filtros e historial desplegable.
+* Permite editar los datos e intereses del asociado desde administración, con validación, revisión de cambios simultáneos y auditoría.
+* Reorganiza las estadísticas con indicadores explicados, cinco vistas y registro de asistencia guiado.
+* Mejora la recuperación RAG en repreguntas y conserva referencias públicas en la IA sin divulgar identidades reservadas.
+* Muestra a administración las personas seleccionadas para microeventos y su estado de invitación o respuesta.
+* Actualiza las comprobaciones y herramientas de QA para Core 1.10.9; conserva las evidencias históricas y no recoge cobertura nueva.
+
 = 1.10.8 =
+* Inicia la cuenta administrativa en Administración ASCLA y la excluye del networking, directorio, recomendaciones y microeventos, también con relaciones heredadas.
+* Muestra un solo logo y dispone las secciones administrativas encima del contenido, con un único panel lateral.
 * Valida campos SMTP y borrado explícito de credenciales; conserva contraseñas válidas, espacios y el valor 0 sin exponerlos en respuestas.
 * Rechaza identificadores mal formados y campos obligatorios compuestos únicamente por caracteres invisibles.
 * Valida los pesos de afinidad y los enteros administrativos sin recortar ni convertir silenciosamente entradas inválidas.

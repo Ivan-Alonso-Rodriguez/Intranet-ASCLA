@@ -31,7 +31,7 @@ final class EventPagination108Test extends TestCase
     {
         return Content::listing('event',$filter+['q'=>$this->query,'past'=>0]);
     }
-    public static function readers(): array{return [['ascla_executive',1],['ascla_moderator',2],['ascla_member',3]];}
+    public static function readers(): array{return [['ascla_moderator',2],['ascla_member',3]];}
     #[DataProvider('readers')]
     public function testOnlyReadableEventsCountAndEveryPageIsFilled(string $role,int $index): void
     {
@@ -47,11 +47,12 @@ final class EventPagination108Test extends TestCase
     {
         for($i=0;$i<25;$i++)$this->event('Reserved '.$i,'publish',['micro'=>true,'invitees'=>[],'public_at'=>time()+DAY_IN_SECONDS]);
         $public=$this->event('Public');$invited=$this->event('Invited','publish',['micro'=>true,'invitees'=>[$this->users[3]],'public_at'=>time()+DAY_IN_SECONDS]);
-        $own=$this->event('Own private','publish',['micro'=>true,'invitees'=>[],'public_at'=>time()+DAY_IN_SECONDS],$this->users[1]);
-        $draft=$this->event('Own draft','draft',[],$this->users[1]);
-        wp_set_current_user($this->users[1]);$list=$this->page();self::assertSame(3,$list['total']);self::assertCount(3,$list['items']);self::assertEqualsCanonicalizing([$public,$own,$draft],array_column($list['items'],'id'));
+        $own=$this->event('Own private','publish',['micro'=>true,'invitees'=>[],'public_at'=>time()+DAY_IN_SECONDS],$this->users[2]);
+        $draft=$this->event('Own draft','draft',[],$this->users[2]);
+        wp_set_current_user($this->users[2]);$list=$this->page();self::assertSame(3,$list['total']);self::assertCount(3,$list['items']);self::assertEqualsCanonicalizing([$public,$own,$draft],array_column($list['items'],'id'));
         wp_set_current_user($this->users[3]);$list=$this->page();self::assertSame(2,$list['total']);self::assertEqualsCanonicalizing([$public,$invited],array_column($list['items'],'id'));
         wp_set_current_user($this->users[0]);self::assertSame(28,$this->page()['total'],'Administration retains its management visibility; foreign drafts stay private.');
+        wp_set_current_user($this->users[1]);self::assertSame(28,$this->page()['total'],'Executive shares administrative visibility.');
     }
     public function testEmptyAndPastViewsHaveConsistentPageMetadataAndFalseMeansUpcoming(): void
     {

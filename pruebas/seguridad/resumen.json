@@ -1,0 +1,53 @@
+{
+  "format": "ascla-public-security-summary-v1",
+  "date": "2026-10-22T09:11:27.133208+00:00",
+  "status": "PASS",
+  "environment": "WordPress local HTTPS temporal",
+  "source_sha256": "0b737f5511b599b06f300c3ba17e85d7dd7aa2822f0b1809d1e7246807e8e1a6",
+  "phases": [
+    {
+      "phase": "frontend",
+      "status": "PASS",
+      "risk_counts": {
+        "0": 9,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      }
+    },
+    {
+      "phase": "backend",
+      "status": "PASS",
+      "risk_counts": {
+        "0": 1,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      }
+    },
+    {
+      "phase": "CSP",
+      "status": "PASS"
+    },
+    {
+      "phase": "Browser",
+      "status": "PASS"
+    },
+    {
+      "phase": "Source consistency",
+      "status": "PASS"
+    }
+  ],
+  "pages": 14,
+  "api_get_operations": 18,
+  "csp_checks": 20,
+  "browser_checks": 8,
+  "browser_views": 24,
+  "jenkins_evidence": false,
+  "limitations": [
+    "Ejecución local con la fecha y las fuentes indicadas; publicar esta carpeta no vuelve a ejecutar las pruebas ni acredita el servidor publicado.",
+    "El análisis incluye rutas HTML propias de ASCLA y 18 operaciones GET REST; excluye escrituras, wp-admin nativo, rutas de otros plugins y las integraciones externas reales.",
+    "El escaneo activo utiliza intensidad LOW y el Client Spider limita su navegación a 60 segundos. Log4Shell no aplica al entorno PHP/Apache/MariaDB.",
+    "La integración automática en Jenkins y la configuración del hosting quedan pendientes de acreditar. Este resultado no equivale a aprobar UAT."
+  ]
+}
