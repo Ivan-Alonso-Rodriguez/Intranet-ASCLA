@@ -1,0 +1,101 @@
+{
+  "prepared_at": "2026-10-22T01:01:53.982Z",
+  "date": "2026-10-20T03:25:07.058685+00:00",
+  "status": "PASS",
+  "source_sha256": "cca2085b214059c96d3a44e5df38785774107aea55f1f76c55e4216b63465024",
+  "report": "seguridad/dashboard.html",
+  "retention": "latest-only",
+  "note": "Copias derivadas y revisadas; los HTML/JSON nativos completos permanecen privados. Se preservan las fechas, los estados y los conteos originales.",
+  "sources": [
+    {
+      "source_relative": "test-results/security-latest/security-summary.json",
+      "source_sha256": "846d86f29adb0e8a6c25cf0faf7e45c752cd778648720390f61ad2aaf2945176"
+    },
+    {
+      "source_relative": "test-results/security-latest/source-manifest.json",
+      "source_sha256": "92a1fc938059e77c9fd015fa3de62a40796d49185cbdd368ce98ce9183fba569"
+    },
+    {
+      "source_relative": "test-results/security-latest/csp-validation.json",
+      "source_sha256": "ee0cf819a3e33e318a4f4eeb17a0dcbc89de8a1cf1eac26c5b9250a12b327ff1"
+    },
+    {
+      "source_relative": "test-results/security-latest/browser-security.json",
+      "source_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1"
+    },
+    {
+      "source_relative": "test-results/security-latest/frontend-result.json",
+      "source_sha256": "142e2b51057a27447b433fcf644cc8cd70cb08f6777fc33db1631a30b07cbbc6"
+    },
+    {
+      "source_relative": "test-results/security-latest/frontend-zap.json",
+      "source_sha256": "4bc086fe3a0c5c4d47f6535b950f437cc69338ce01c20eea48523d0e2774a180"
+    },
+    {
+      "source_relative": "test-results/security-latest/backend-result.json",
+      "source_sha256": "314d1905ab8dc8c7285402c25e37bd165277f259e3278e51cb7854d18d0d2a0f"
+    },
+    {
+      "source_relative": "test-results/security-latest/backend-zap.json",
+      "source_sha256": "27a0ab17e6fa6eb8e80791e578c32b384a163c332b164acb5cc3478fc081c1f2"
+    }
+  ],
+  "files": [
+    {
+      "published": "seguridad/frontend-zap.json",
+      "published_sha256": "e67d5c1af41e4667e73f88ce6011eed309105386e4867c316e2b4908ca2a7be6",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/frontend-zap.json",
+      "source_sha256": "4bc086fe3a0c5c4d47f6535b950f437cc69338ce01c20eea48523d0e2774a180"
+    },
+    {
+      "published": "seguridad/frontend-zap.html",
+      "published_sha256": "27aa2355245a81d43821debd8d493e60056d9d5e373b933d6622966979189ea0",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/frontend-zap.json",
+      "source_sha256": "4bc086fe3a0c5c4d47f6535b950f437cc69338ce01c20eea48523d0e2774a180"
+    },
+    {
+      "published": "seguridad/backend-zap.json",
+      "published_sha256": "b617914a68cbe40cfb73e286c2f04f199615cb543d1ea19c5b02b79d251ec0f3",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/backend-zap.json",
+      "source_sha256": "27a0ab17e6fa6eb8e80791e578c32b384a163c332b164acb5cc3478fc081c1f2"
+    },
+    {
+      "published": "seguridad/backend-zap.html",
+      "published_sha256": "f299aba3c635ea3ab82b3bde87ec1241a5f499c56ee717832ae265afdf31f7ce",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/backend-zap.json",
+      "source_sha256": "27a0ab17e6fa6eb8e80791e578c32b384a163c332b164acb5cc3478fc081c1f2"
+    },
+    {
+      "published": "seguridad/resumen.json",
+      "published_sha256": "170943a55753b1ea05176fcef1639cb8eb900a34d9f1f1151be77749c66fd67e",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/security-summary.json",
+      "source_sha256": "846d86f29adb0e8a6c25cf0faf7e45c752cd778648720390f61ad2aaf2945176"
+    },
+    {
+      "published": "seguridad/csp-validation.json",
+      "published_sha256": "ee0cf819a3e33e318a4f4eeb17a0dcbc89de8a1cf1eac26c5b9250a12b327ff1",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/csp-validation.json",
+      "source_sha256": "ee0cf819a3e33e318a4f4eeb17a0dcbc89de8a1cf1eac26c5b9250a12b327ff1"
+    },
+    {
+      "published": "seguridad/browser-security.json",
+      "published_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/browser-security.json",
+      "source_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1"
+    },
+    {
+      "published": "seguridad/dashboard.html",
+      "published_sha256": "e3734399d5a26b7f6a937c487334498b80e57ac91d15d828605fcaab65f0b683",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/security-summary.json",
+      "source_sha256": "846d86f29adb0e8a6c25cf0faf7e45c752cd778648720390f61ad2aaf2945176"
+    }
+  ]
+}

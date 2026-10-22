@@ -405,6 +405,9 @@ msgstr "Aprobar permite elegir después la fecha de publicación. No inscribe au
 msgid "Aprobar propuesta"
 msgstr "Aprobar propuesta"
 
+msgid "Aquí encontrarás tus borradores, separados del contenido publicado."
+msgstr "Aquí encontrarás tus borradores, separados del contenido publicado."
+
 msgid "Aquí recibirás mensajes, invitaciones y respuestas del asistente."
 msgstr "Aquí recibirás mensajes, invitaciones y respuestas del asistente."
 
@@ -924,6 +927,9 @@ msgstr "Categorías de Contacto"
 msgid "Categorías de Contacto (una por línea)"
 msgstr "Categorías de Contacto (una por línea)"
 
+msgid "Catálogo"
+msgstr "Catálogo"
+
 msgid "Catálogo preparado."
 msgstr "Catálogo preparado."
 
@@ -1362,6 +1368,9 @@ msgstr "Contenidos por revisar"
 msgid "Continuar"
 msgstr "Continuar"
 
+msgid "Continuar borrador"
+msgstr "Continuar borrador"
+
 msgid "Continuar mi sesión"
 msgstr "Continuar mi sesión"
 
@@ -1382,6 +1391,9 @@ msgstr "Conversaciones"
 
 msgid "Conversaciones que quieres iniciar"
 msgstr "Conversaciones que quieres iniciar"
+
+msgid "Conversaciones recientes"
+msgstr "Conversaciones recientes"
 
 msgid "Conversaciones solicitadas"
 msgstr "Conversaciones solicitadas"
@@ -1907,6 +1919,9 @@ msgstr "Elige qué avisos opcionales quieres recibir también en tu correo. Por 
 
 msgid "Elige qué quieres revisar. Cada sección muestra las acciones disponibles para tu rol."
 msgstr "Elige qué quieres revisar. Cada sección muestra las acciones disponibles para tu rol."
+
+msgid "Elige un foro para conocer su tema y participar en la conversación."
+msgstr "Elige un foro para conocer su tema y participar en la conversación."
 
 msgid "Elige una fecha de inicio anterior al fin y un período de hasta 366 días."
 msgstr "Elige una fecha de inicio anterior al fin y un período de hasta 366 días."
@@ -3363,6 +3378,9 @@ msgstr "Minutos registrados"
 msgid "Mis archivos"
 msgstr "Mis archivos"
 
+msgid "Mis borradores"
+msgstr "Mis borradores"
+
 msgid "Mis comentarios"
 msgstr "Mis comentarios"
 
@@ -3701,6 +3719,9 @@ msgstr "No se puede cancelar durante la aplicación."
 
 msgid "No tienes avisos pendientes"
 msgstr "No tienes avisos pendientes"
+
+msgid "No tienes borradores guardados"
+msgstr "No tienes borradores guardados"
 
 msgid "No tienes conexiones confirmadas."
 msgstr "No tienes conexiones confirmadas."
@@ -4361,6 +4382,9 @@ msgstr "Puedes elegir varias opciones en cada filtro."
 
 msgid "Puedes elegir varias opciones."
 msgstr "Puedes elegir varias opciones."
+
+msgid "Puedes guardar contenido incompleto y retomarlo desde aquí."
+msgstr "Puedes guardar contenido incompleto y retomarlo desde aquí."
 
 msgid "Puedes guardar directamente. Si vinculas una solicitud, quedará registrada con este cambio y se utilizará una sola vez."
 msgstr "Puedes guardar directamente. Si vinculas una solicitud, quedará registrada con este cambio y se utilizará una sola vez."
@@ -5625,6 +5649,9 @@ msgstr "Ver eventos del día"
 msgid "Ver ficha"
 msgstr "Ver ficha"
 
+msgid "Ver foro"
+msgstr "Ver foro"
+
 msgid "Ver fuentes y cifras de cada tema"
 msgstr "Ver fuentes y cifras de cada tema"
 
@@ -5775,6 +5802,9 @@ msgstr "actualizadas"
 msgid "aforo completo"
 msgstr "aforo completo"
 
+msgid "aliado"
+msgstr "aliado"
+
 msgid "aliados registrados"
 msgstr "aliados registrados"
 
@@ -5859,6 +5889,9 @@ msgstr "este comentario"
 msgid "estás al día"
 msgstr "estás al día"
 
+msgid "evento"
+msgstr "evento"
+
 msgid "eventos"
 msgstr "eventos"
 
@@ -5885,6 +5918,12 @@ msgstr "filas duplicadas omitidas"
 
 msgid "filas sin asociar"
 msgstr "filas sin asociar"
+
+msgid "foro"
+msgstr "foro"
+
+msgid "galería"
+msgstr "galería"
 
 msgid "high"
 msgstr "high"
@@ -5967,6 +6006,12 @@ msgstr "por revisar"
 msgid "posición"
 msgstr "posición"
 
+msgid "publicación"
+msgstr "publicación"
+
+msgid "recurso"
+msgstr "recurso"
+
 msgid "registrados"
 msgstr "registrados"
 
@@ -6005,6 +6050,9 @@ msgstr "sin tema sugerido"
 
 msgid "solicitudes recibidas"
 msgstr "solicitudes recibidas"
+
+msgid "tema"
+msgstr "tema"
 
 msgid "tu correo registrado"
 msgstr "tu correo registrado"

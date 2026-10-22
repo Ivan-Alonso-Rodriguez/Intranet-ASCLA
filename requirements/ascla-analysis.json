@@ -356,8 +356,8 @@
         "page": 18,
         "requirement": "Participación en foros Los miembros activos podrán crear temas de foro, consultar conversaciones y publicar comentarios. El autor podrá administrar su contenido dentro de las condiciones permitidas y el Moderador podrá retirar contenido que incumpla las normas.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Repositories/ContentQuery.php; tests/php/RoleWorkflowTest.php; tests/editorial107.cjs",
-        "note": "Los asociados activos crean temas y comentarios publicados directamente; los temas admiten categorías. Propiedad, edición y moderación posterior se comprueban en servidor. Me gusta es la única reacción disponible por decisión del usuario."
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Repositories/ContentQuery.php; tests/php/RoleWorkflowTest.php; tests/editorial107.cjs; tests/php/DraftWorkflowTest.php; tests/draft-workflow.cjs; docs/evidence/release-1.10.9/drafts-ui109.json",
+        "note": "Los asociados activos crean temas y comentarios publicados directamente; los temas admiten categorías. Propiedad, edición y moderación posterior se comprueban en servidor. Me gusta es la única reacción disponible por decisión del usuario. Se añade una vista propia de borradores y tarjetas visibles para explorar foros publicados, sin alterar los permisos de participación."
       },
       {
         "id": "RN-045",
@@ -933,8 +933,8 @@
         "page": 51,
         "requirement": "El sistema debe permitir a los roles autorizados modificar los datos de un evento mientras este se encuentre en estado borrador o publicado.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/assets/app.js; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/ContentMeta.php; tests/php/ContentLifecycleTest.php; tests/acceptance-ui.cjs; tests/event-editor108.cjs",
-        "note": "Edición de borradores y publicados con permisos vigentes. El borrador admite datos incompletos, incluidos microeventos, y conserva las validaciones de valores presentes; publicar/programar/enviar a revisión exige mínimos completos. Guardado al salir, fechas y reapertura comprobados en navegador; regresiones PHP incluidas.",
+        "evidence": "wp-content/plugins/ascla-core/assets/app.js; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/ContentMeta.php; tests/php/ContentLifecycleTest.php; tests/acceptance-ui.cjs; tests/event-editor108.cjs; tests/php/DraftWorkflowTest.php; tests/draft-workflow.cjs; docs/evidence/release-1.10.9/drafts-ui109.json",
+        "note": "Edición de borradores y publicados con permisos vigentes. El borrador admite datos incompletos, incluidos microeventos, y conserva las validaciones de valores presentes; publicar/programar/enviar a revisión exige mínimos completos. Guardado al salir, fechas y reapertura comprobados en navegador; regresiones PHP incluidas. La regresión del 21 de octubre verifica además Mis borradores y Mis publicaciones con eventos propios sin fecha.",
         "pdf_priority": "MUST HAVE"
       },
       {
@@ -2067,8 +2067,8 @@
         "page": 61,
         "requirement": "El sistema debe permitir al asociado crear temas de discusión en los foros habilitados, registrando título, contenido y categoría temática.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Repositories/ContentQuery.php; tests/php/RoleWorkflowTest.php; tests/editorial107.cjs",
-        "note": "Los asociados activos crean temas y comentarios publicados directamente; los temas admiten categorías. Propiedad, edición y moderación posterior se comprueban en servidor. Me gusta es la única reacción disponible por decisión del usuario.",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Repositories/ContentQuery.php; tests/php/RoleWorkflowTest.php; tests/editorial107.cjs; tests/php/DraftWorkflowTest.php; tests/draft-workflow.cjs; docs/evidence/release-1.10.9/drafts-ui109.json",
+        "note": "Los asociados activos crean temas y comentarios publicados directamente; los temas admiten categorías. Propiedad, edición y moderación posterior se comprueban en servidor. Me gusta es la única reacción disponible por decisión del usuario. Guardar explícitamente como borrador mantiene el tema sin publicar; Foros reúne borradores propios de foros y temas.",
         "pdf_priority": "MUST HAVE"
       },
       {
@@ -2148,8 +2148,8 @@
         "page": 62,
         "requirement": "El sistema debe permitir al asociado abrir una galería seleccionada y visualizar su colección de fotografías autorizadas.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Repositories/ContentQuery.php; wp-content/plugins/ascla-core/src/Services/Media.php",
-        "note": "Catálogos, filtros, galerías y reproducción privada existentes. Validar disponibilidad de enlaces externos aparte.",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Repositories/ContentQuery.php; wp-content/plugins/ascla-core/src/Services/Media.php; tests/php/DraftWorkflowTest.php; tests/draft-workflow.cjs; docs/evidence/release-1.10.9/drafts-ui109.json",
+        "note": "Catálogos, filtros, galerías y reproducción privada existentes. Validar disponibilidad de enlaces externos aparte. La portada abre la misma galería autorizada con clic y teclado, comprobado en la regresión UI/UX del 21 de octubre.",
         "pdf_priority": "MUST HAVE"
       },
       {
@@ -2184,8 +2184,8 @@
         "page": 62,
         "requirement": "El sistema debe permitir a los roles autorizados crear galerías registrando título, descripción, fecha, imagen de portada y archivos visuales asociados.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/ContentMeta.php",
-        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204).",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/ContentMeta.php; tests/php/DraftWorkflowTest.php; tests/draft-workflow.cjs; docs/evidence/release-1.10.9/drafts-ui109.json",
+        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204). La preparación admite borradores incompletos; los requisitos de publicación se conservan.",
         "pdf_priority": "MUST HAVE"
       },
       {
@@ -2193,8 +2193,8 @@
         "page": 62,
         "requirement": "El sistema debe permitir a los roles autorizados modificar los metadatos o el contenido visual de una galería existente.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/ContentMeta.php",
-        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204).",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/ContentMeta.php; tests/php/DraftWorkflowTest.php; tests/draft-workflow.cjs; docs/evidence/release-1.10.9/drafts-ui109.json",
+        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204). Los borradores propios se recuperan para continuar su edición desde Mis borradores.",
         "pdf_priority": "MUST HAVE"
       },
       {
@@ -2202,8 +2202,8 @@
         "page": 62,
         "requirement": "El sistema debe permitir transicionar el estado editorial de una galería entre Borrador, Pendiente de revisión y Publicado.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/ContentMeta.php",
-        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204).",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/ContentMeta.php; tests/php/DraftWorkflowTest.php; tests/draft-workflow.cjs; docs/evidence/release-1.10.9/drafts-ui109.json",
+        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204). Guardar un borrador incompleto no publica; publicar o enviar a revisión exige los mínimos.",
         "pdf_priority": "MUST HAVE"
       },
       {
@@ -2238,8 +2238,8 @@
         "page": 63,
         "requirement": "El sistema debe permitir transicionar el estado editorial de un recurso de conocimiento entre Borrador, Pendiente de revisión y Publicado",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/ContentMeta.php",
-        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204).",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/ContentMeta.php; tests/php/DraftWorkflowTest.php; tests/draft-workflow.cjs; docs/evidence/release-1.10.9/drafts-ui109.json",
+        "note": "Gestión editorial y estado ascla_hidden; programación futura añadida en ContentSchedule (RF-202–204). Los recursos admiten preparación incompleta y recuperación; publicar o enviar a revisión conserva sus validaciones.",
         "pdf_priority": "MUST HAVE"
       },
       {

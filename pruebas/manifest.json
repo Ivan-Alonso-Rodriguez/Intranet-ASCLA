@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21T05:29:17.478762+00:00",
+  "generated_at": "2026-10-22T02:07:35.511302+00:00",
   "algorithm": "SHA-256",
   "files": {
     "acceso.example.json": "970aa0559f0d5fad7c16321e1165ec6fe45e743a863af850b20749ea8fc9d3f4",
@@ -71,7 +71,7 @@
     "backend/coleccion-bruno/integracion/folder.bru": "b64d61bdd904634cf7035491cce55799e97af8b03fb4baa636f193f6482dfa33",
     "backend/coleccion-bruno.zip": "96c03171cd4f4fa911616a11ad00e336656f11c7c5b9fce7be0e51feb73df427",
     "backend/dashboard.html": "317963e6b15cd5992593f31be694e6d104a653a223fd780facf6102d52084680",
-    "backend/README.md": "6eb5893153949801a464e6d0e1eb5933abcf7a94f022607789090e02974dfffb",
+    "backend/README.md": "16054325b6551a36a8b35c521d0336ec8d85e03cbd856d73663b53dccaf57dd3",
     "backend/resultados/backend-publicable-2026-10-16T19-07-56-042Z/01-conexion-y-bloqueo.html": "493d229e5507bb342e431307e51c61b93c020eff734d44fce3572c2656c74a22",
     "backend/resultados/backend-publicable-2026-10-16T19-07-56-042Z/01-conexion-y-bloqueo.json": "ebba6cf0061c76487e23e1c51c3fdbcab17140a86bcb8512ac61af0582e9abd7",
     "backend/resultados/backend-publicable-2026-10-16T19-07-56-042Z/01-conexion-y-bloqueo.txt": "a341cb7f1fde668458bb8b200d10b9b0545f81ed589ef2a187d44fb8d68012f7",
@@ -192,13 +192,20 @@
     "frontend/aprobadas/playwright-usuarios-2026-10-16T19-09-45-273Z/videos/suspension-reactivacion-acceso/page@6b02c499957a546f10acdc89fb3853a3.webm": "ac3218231bf8093859f5eb015361c40c98c589e6392ff7b35147d51e56233c98",
     "frontend/aprobadas/playwright-usuarios-2026-10-16T19-09-45-273Z/videos/suspension-reactivacion-acceso/page@f95b91b9186056c73b316e707117c618.webm": "27c2a8eaefb79ee27d345a04e2d199b299a305a1f1aeb4630a007dd10555351f",
     "frontend/dashboard.html": "8dcdd8f976e74a5f36ed41ccb8dbd602b0c021eec1ec9da33f23da4dfe07d33c",
-    "frontend/README.md": "554c8dc3e4bd272f6fb9c2515a6a9c08fbd62b06f45cf53899452b3ebf69bb86",
-    "index.html": "3c043eed1487aff89c92a3507200e34aeafcbcc1a4bc31eafc14fe26da937568",
-    "procedencia.json": "f066871d9a9da42c17da34dc37487fbf265f470daaf5ef08319bf4103901f21b",
-    "README.md": "4accbc511107930a52785e198eb354070ffbbbcdf63c233f6bec50036edaab8f",
+    "frontend/README.md": "c53475c812d3b0e5296c722aaf7db08de622bf78c9e1cfab865b72a47201dab6",
+    "index.html": "824f91aeec4321af5f74e8c89f57c50f3b3c3bb4195383e342e9b68a92d47a38",
+    "procedencia.json": "2617d7e39bd879b2e2e5dd6eeb256ae57a78032dece4ba4ebbf0908e9db76573",
+    "README.md": "8f1281113e6c1d98cd1dd3e062c5bc3e13035e0d3df54fda1d3b39a7bbc4cef1",
     "referencias.json": "be5d9318189f11d5009a1667d38a4b7bfdabf028938ba81c623f1c4780743852",
+    "seguridad/backend-zap.html": "f299aba3c635ea3ab82b3bde87ec1241a5f499c56ee717832ae265afdf31f7ce",
+    "seguridad/backend-zap.json": "b617914a68cbe40cfb73e286c2f04f199615cb543d1ea19c5b02b79d251ec0f3",
+    "seguridad/browser-security.json": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1",
+    "seguridad/csp-validation.json": "ee0cf819a3e33e318a4f4eeb17a0dcbc89de8a1cf1eac26c5b9250a12b327ff1",
+    "seguridad/dashboard.html": "e3734399d5a26b7f6a937c487334498b80e57ac91d15d828605fcaab65f0b683",
+    "seguridad/frontend-zap.html": "27aa2355245a81d43821debd8d493e60056d9d5e373b933d6622966979189ea0",
+    "seguridad/frontend-zap.json": "e67d5c1af41e4667e73f88ce6011eed309105386e4867c316e2b4908ca2a7be6",
+    "seguridad/procedencia.json": "5191dcceed87f3df0395681126607d62800c69bc3afb1330a6fc2a66eaea5944",
+    "seguridad/resumen.json": "170943a55753b1ea05176fcef1639cb8eb900a34d9f1f1151be77749c66fd67e",
     "trazabilidad.json": "afc6ba95fcdcb3ae4f9de174424b26f312a8c65aeb7e8b7920ae49f7186c3564"
-  },
-  "collection_updated_at": "2026-10-19",
-  "note": "The importable collection and its ZIP now obtain the browser-bound login nonce/cookie. Original report/video/source execution metadata remains unchanged; this inventory update is not a new execution of those reports."
+  }
 }

@@ -1,0 +1,386 @@
+{
+  "format": "ascla-public-zap-summary-v1",
+  "kind": "backend",
+  "date": "2026-10-20T03:25:07.058685+00:00",
+  "status": "PASS",
+  "tool": {
+    "name": "ZAP",
+    "version": "2.17.0",
+    "generated": "Tue, 20 Oct 2026 03:25:02"
+  },
+  "scope": [
+    "/wp-json/ascla/v1/bootstrap",
+    "/wp-json/ascla/v1/profiles",
+    "/wp-json/ascla/v1/profiles/24",
+    "/wp-json/ascla/v1/content/hub",
+    "/wp-json/ascla/v1/content/topic",
+    "/wp-json/ascla/v1/content/resource",
+    "/wp-json/ascla/v1/content/event",
+    "/wp-json/ascla/v1/content/gallery",
+    "/wp-json/ascla/v1/content/ally",
+    "/wp-json/ascla/v1/locations/countries",
+    "/wp-json/ascla/v1/locations/cities",
+    "/wp-json/ascla/v1/recommendations",
+    "/wp-json/ascla/v1/interests/learned",
+    "/wp-json/ascla/v1/notifications",
+    "/wp-json/ascla/v1/admin/users",
+    "/wp-json/ascla/v1/admin/users/24",
+    "/wp-json/ascla/v1/admin/users/24/insights",
+    "/wp-json/ascla/v1/settings"
+  ],
+  "phases": [
+    "openapi-import",
+    "active-scan",
+    "passive-scan"
+  ],
+  "risk_counts": {
+    "0": 1,
+    "1": 0,
+    "2": 0,
+    "3": 0
+  },
+  "authenticated_before": true,
+  "authenticated_after": true,
+  "active_complete": true,
+  "active_strength": "LOW",
+  "completed_active_rules": [
+    {
+      "id": "40026",
+      "name": "Cross Site Scripting (DOM Based)",
+      "status": "Complete",
+      "requests": 96
+    },
+    {
+      "id": "6",
+      "name": "Path Traversal",
+      "status": "Complete",
+      "requests": 164
+    },
+    {
+      "id": "7",
+      "name": "Remote File Inclusion",
+      "status": "Complete",
+      "requests": 115
+    },
+    {
+      "id": "10045",
+      "name": "Source Code Disclosure - /WEB-INF Folder",
+      "status": "Complete",
+      "requests": 156
+    },
+    {
+      "id": "10048",
+      "name": "Remote Code Execution - Shell Shock",
+      "status": "Complete",
+      "requests": 46
+    },
+    {
+      "id": "20015",
+      "name": "Heartbleed OpenSSL Vulnerability",
+      "status": "Complete",
+      "requests": 3
+    },
+    {
+      "id": "20017",
+      "name": "Source Code Disclosure - CVE-2012-1823",
+      "status": "Complete",
+      "requests": 26
+    },
+    {
+      "id": "20018",
+      "name": "Remote Code Execution - CVE-2012-1823",
+      "status": "Complete",
+      "requests": 54
+    },
+    {
+      "id": "20019",
+      "name": "External Redirect",
+      "status": "Complete",
+      "requests": 69
+    },
+    {
+      "id": "40009",
+      "name": "Server Side Include",
+      "status": "Complete",
+      "requests": 92
+    },
+    {
+      "id": "40012",
+      "name": "Cross Site Scripting (Reflected)",
+      "status": "Complete",
+      "requests": 115
+    },
+    {
+      "id": "40014",
+      "name": "Cross Site Scripting (Persistent)",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "40018",
+      "name": "SQL Injection",
+      "status": "Complete",
+      "requests": 161
+    },
+    {
+      "id": "40019",
+      "name": "SQL Injection - MySQL (Time Based)",
+      "status": "Complete",
+      "requests": 138
+    },
+    {
+      "id": "40020",
+      "name": "SQL Injection - Hypersonic SQL (Time Based)",
+      "status": "Complete",
+      "requests": 138
+    },
+    {
+      "id": "40021",
+      "name": "SQL Injection - Oracle (Time Based)",
+      "status": "Complete",
+      "requests": 69
+    },
+    {
+      "id": "40022",
+      "name": "SQL Injection - PostgreSQL (Time Based)",
+      "status": "Complete",
+      "requests": 69
+    },
+    {
+      "id": "40027",
+      "name": "SQL Injection - MsSQL (Time Based)",
+      "status": "Complete",
+      "requests": 138
+    },
+    {
+      "id": "40045",
+      "name": "Spring4Shell",
+      "status": "Complete",
+      "requests": 67
+    },
+    {
+      "id": "40048",
+      "name": "Remote Code Execution (React2Shell)",
+      "status": "Complete",
+      "requests": 1
+    },
+    {
+      "id": "90019",
+      "name": "Server Side Code Injection",
+      "status": "Complete",
+      "requests": 184
+    },
+    {
+      "id": "90020",
+      "name": "Remote OS Command Injection",
+      "status": "Complete",
+      "requests": 207
+    },
+    {
+      "id": "90021",
+      "name": "XPath Injection",
+      "status": "Complete",
+      "requests": 69
+    },
+    {
+      "id": "90023",
+      "name": "XML External Entity Attack",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "90024",
+      "name": "Generic Padding Oracle",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "90034",
+      "name": "Cloud Metadata Potentially Exposed",
+      "status": "Complete",
+      "requests": 13
+    },
+    {
+      "id": "90035",
+      "name": "Server Side Template Injection",
+      "status": "Complete",
+      "requests": 125
+    },
+    {
+      "id": "90036",
+      "name": "Server Side Template Injection (Blind)",
+      "status": "Complete",
+      "requests": 276
+    },
+    {
+      "id": "90037",
+      "name": "Remote OS Command Injection (Time Based)",
+      "status": "Complete",
+      "requests": 138
+    },
+    {
+      "id": "0",
+      "name": "Directory Browsing",
+      "status": "Complete",
+      "requests": 27
+    },
+    {
+      "id": "10106",
+      "name": "HTTP Only Site",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "30001",
+      "name": "Buffer Overflow",
+      "status": "Complete",
+      "requests": 23
+    },
+    {
+      "id": "30002",
+      "name": "Format String Error",
+      "status": "Complete",
+      "requests": 69
+    },
+    {
+      "id": "40003",
+      "name": "CRLF Injection",
+      "status": "Complete",
+      "requests": 161
+    },
+    {
+      "id": "40008",
+      "name": "Parameter Tampering",
+      "status": "Complete",
+      "requests": 161
+    },
+    {
+      "id": "40028",
+      "name": "ELMAH Information Leak",
+      "status": "Complete",
+      "requests": 1
+    },
+    {
+      "id": "40029",
+      "name": "Trace.axd Information Leak",
+      "status": "Complete",
+      "requests": 8
+    },
+    {
+      "id": "40032",
+      "name": ".htaccess Information Leak",
+      "status": "Complete",
+      "requests": 8
+    },
+    {
+      "id": "40034",
+      "name": ".env Information Leak",
+      "status": "Complete",
+      "requests": 8
+    },
+    {
+      "id": "40035",
+      "name": "Hidden File Finder",
+      "status": "Complete",
+      "requests": 52
+    },
+    {
+      "id": "40042",
+      "name": "Spring Actuator Information Leak",
+      "status": "Complete",
+      "requests": 2
+    },
+    {
+      "id": "40044",
+      "name": "Exponential Entity Expansion (Billion Laughs Attack)",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "90017",
+      "name": "XSLT Injection",
+      "status": "Complete",
+      "requests": 54
+    },
+    {
+      "id": "10047",
+      "name": "HTTPS Content Available via HTTP",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "10058",
+      "name": "GET for POST",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "10104",
+      "name": "User Agent Fuzzer",
+      "status": "Complete",
+      "requests": 324
+    },
+    {
+      "id": "40016",
+      "name": "Cross Site Scripting (Persistent) - Prime",
+      "status": "Complete",
+      "requests": 23
+    },
+    {
+      "id": "40017",
+      "name": "Cross Site Scripting (Persistent) - Spider",
+      "status": "Complete",
+      "requests": 27
+    },
+    {
+      "id": "50000",
+      "name": "Script Active Scan Rules",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "90026",
+      "name": "SOAP Action Spoofing",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "90029",
+      "name": "SOAP XML Injection",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "100043",
+      "name": "Swagger UI Secret & Vulnerability Detector",
+      "status": "Complete",
+      "requests": 6
+    }
+  ],
+  "active_request_count": 3686,
+  "not_applicable_active_rules": [
+    {
+      "id": "40043",
+      "name": "Log4Shell",
+      "reason": "The owned application has no Java/Log4j runtime. Java OAST/DNS testing is outside this PHP application scope."
+    }
+  ],
+  "alerts": [
+    {
+      "id": "10104",
+      "name": "User Agent Fuzzer",
+      "risk": 0,
+      "confidence": 2,
+      "count": 3,
+      "description": "Check for differences in response based on fuzzed User Agent (eg. mobile sites, access as a Search Engine Crawler). Compares the response statuscode and the hashcode of the response body with the original response.",
+      "solution": "",
+      "locations": [
+        {
+          "path": "/wp-json/ascla/v1/admin/users/24/insights",
+          "method": "GET"
+        }
+      ]
+    }
+  ],
+  "publication_note": "Resumen publicable del informe nativo. Se omiten cabeceras, cuerpos HTTP, cookies, nonces, payloads y valores de consulta. Se conservan estado y conteos."
+}

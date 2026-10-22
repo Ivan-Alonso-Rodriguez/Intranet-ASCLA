@@ -18,7 +18,7 @@ Los cinco documentos principales tienen un propósito propio:
 | [Historial](VERSION_HISTORY.md) | Evolución por versión; las cifras antiguas conservan su fecha y alcance. |
 | [Matriz](requirements/ascla-analysis.md) | Los 302 requisitos originales, prioridades y trazabilidad. Su fuente editable es el [JSON](requirements/ascla-analysis.json). |
 
-La [entrega de pruebas para GitHub](pruebas/README.md) añade tres MD específicos de la entrega: guía general, [backend](pruebas/backend/README.md) y [frontend](pruebas/frontend/README.md). Incluye la colección Bruno con variables sin secretos, dashboards, videos y el resultado de la última ejecución de cada herramienta, con trazabilidad a los Word de análisis y plan de pruebas.
+La [entrega de pruebas para GitHub](pruebas/README.md) añade tres MD específicos: guía general, [backend](pruebas/backend/README.md) y [frontend](pruebas/frontend/README.md). Reúne Bruno, Playwright y el [dashboard de seguridad](pruebas/seguridad/dashboard.html), con fechas, alcance, procedencia y copias sin datos de sesión. Los lotes publicados de Bruno/Playwright son del 16 de octubre; ZAP/CSP corresponde al 19. La [regresión UI/UX del 21 de octubre](docs/evidence/release-1.10.9/drafts-ui109.json) se documenta por separado.
 
 ## Preparar un entorno local
 
@@ -37,7 +37,7 @@ Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. 
 
 ## Calidad y entrega
 
-El flujo vigente es manual: `development → qa → uat → main`. El [Jenkinsfile](Jenkinsfile) se conserva como referencia opcional para un uso futuro. UAT requiere revisión de testers y autorización del PM. `main` debe estar protegida y recibir los cambios mediante pull request. No se exige cobertura del 100 %.
+El flujo vigente es manual: `development → qa → uat → main`. El [Jenkinsfile](Jenkinsfile) conserva pruebas, SonarQube, Quality Gate y despliegue. La integración solicitada de ZAP y CSP después del despliegue en `qa`, con archivado, retención de un build y limpieza final, sigue pendiente; las ejecuciones locales publicadas no la acreditan. UAT requiere revisión de testers y autorización del PM. `main` debe estar protegida y recibir los cambios mediante pull request. No se exige cobertura del 100 %.
 
 El [manual](MANUAL_QA_UAT.md) indica el orden de ejecución y los resultados esperados. Para una nueva validación completa de QA, `quality-ci.sh` genera los resultados y la cobertura de esa revisión antes de enviarla a [SonarQube](MANUAL_QA_UAT.md#sonarqube). La revisión documental de esta entrega conserva la cobertura existente: no se ejecuta ese generador ni se atribuyen sus reportes a un commit nuevo. El scanner no despliega ni prueba el WordPress publicado.
 
@@ -45,11 +45,13 @@ La [colección Bruno vigente](pruebas/backend/coleccion-bruno) verifica endpoint
 
 La [matriz de cumplimiento](COMPLIANCE.md#estado) distingue código revisado, decisiones del usuario y validaciones pendientes. La aceptación remota existente corresponde al paquete identificado en su propia evidencia; no acredita automáticamente los ZIP posteriores.
 
+Los resultados de la [corrección de borradores, foros y galerías](MANUAL_QA_UAT.md#regresion-borradores) registran 76 pruebas PHP dirigidas, 859 aserciones, diez controles de navegador y 49 controles portables, sobre el ZIP identificado en su resumen. No reemplazan ni actualizan las ejecuciones históricas publicadas.
+
 Las pruebas de seguridad se ejecutan sin Jenkins con `bash scripts/security-tests.sh` en Bash/WSL y Docker Desktop con motor Linux. Preparan WordPress desechable con HTTPS, ejecutan ZAP sobre las páginas ASCLA y 18 operaciones GET de la API, y verifican CSP por separado. El [manual de ZAP](MANUAL_QA_UAT.md#zap) explica alcance, reportes, límites y configuración del servidor. No generan cobertura ni atacan el sitio publicado.
 
 ## Política documental y evidencias
 
-Los cinco MD principales, los tres MD de la entrega y el JSON de requisitos deben viajar con el repositorio. Usa rutas relativas y dominios del proyecto; no incluyas carpetas personales, rutas absolutas de equipos, nombres de dispositivo ni IP privadas. Los ejemplos de loopback son genéricos. `docs/evidence/` contiene únicamente los resúmenes JSON y JUnit revisados y permitidos expresamente por `.gitignore`. Los originales completos y accesos temporales permanecen en `test-results/`, fuera de Git. Por solicitud del responsable, `pruebas/` conserva solo la última ejecución de Bruno y Playwright, sus reportes, videos, capturas y el ZIP de Bruno sin secretos; sus copias registran procedencia y huellas.
+Los cinco MD principales, los tres MD de la entrega y el JSON de requisitos deben viajar con el repositorio. Usa rutas relativas y dominios del proyecto; no incluyas carpetas personales, rutas absolutas de equipos, nombres de dispositivo ni IP privadas. Los ejemplos de loopback son genéricos. `docs/evidence/` contiene únicamente los resúmenes JSON y JUnit revisados y permitidos expresamente por `.gitignore`. Los originales completos y accesos temporales permanecen en `test-results/`, fuera de Git. Por solicitud del responsable, `pruebas/` conserva un lote publicado de la colección Bruno y de los cinco flujos Playwright, además de las copias revisadas de la última validación de seguridad disponible. Los reportes, videos, capturas y ZIP de Bruno registran procedencia y huellas. Los resúmenes de regresiones adicionales se identifican con su propia fecha y paquete en `docs/evidence/`.
 
 Para preparar un commit en `development`, revisa los cambios con `git status --short` y `git diff`, comprueba el paquete y ejecuta las verificaciones de documentación y de la entrega. Los accesos privados, dependencias, cobertura y ZIP con contraseñas permanecen ignorados. El desarrollo se confirma primero en `development` y después se promueve a `qa` para las validaciones y SonarQube.
 

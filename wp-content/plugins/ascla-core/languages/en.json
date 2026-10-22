@@ -1995,5 +1995,21 @@
   "Motivo del cambio": "Reason for change",
   "Registro no válido.": "Invalid registry.",
   "Estado editorial no válido.": "Invalid editorial status.",
-  "Registro no encontrado.": "Record not found."
+  "Registro no encontrado.": "Record not found.",
+  "Mis borradores": "My drafts",
+  "Aquí encontrarás tus borradores, separados del contenido publicado.": "Find your drafts here, separate from published content.",
+  "Continuar borrador": "Continue draft",
+  "No tienes borradores guardados": "You have no saved drafts",
+  "Puedes guardar contenido incompleto y retomarlo desde aquí.": "You can save unfinished content and return to it here.",
+  "Elige un foro para conocer su tema y participar en la conversación.": "Choose a forum to explore its topic and join the conversation.",
+  "Ver foro": "View forum",
+  "Conversaciones recientes": "Recent conversations",
+  "Catálogo": "Catalog",
+  "publicación": "post",
+  "tema": "topic",
+  "foro": "forum",
+  "evento": "event",
+  "recurso": "resource",
+  "galería": "gallery",
+  "aliado": "ally"
 }

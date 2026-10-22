@@ -405,6 +405,9 @@ msgstr "Approval lets you choose the publication date afterwards. It does not au
 msgid "Aprobar propuesta"
 msgstr "Approve proposal"
 
+msgid "Aquí encontrarás tus borradores, separados del contenido publicado."
+msgstr "Find your drafts here, separate from published content."
+
 msgid "Aquí recibirás mensajes, invitaciones y respuestas del asistente."
 msgstr "You will receive messages, invitations, and assistant responses here."
 
@@ -924,6 +927,9 @@ msgstr "Contact categories"
 msgid "Categorías de Contacto (una por línea)"
 msgstr "Contact categories (one per line)"
 
+msgid "Catálogo"
+msgstr "Catalog"
+
 msgid "Catálogo preparado."
 msgstr "Catalog prepared."
 
@@ -1362,6 +1368,9 @@ msgstr "Content to review"
 msgid "Continuar"
 msgstr "Continue"
 
+msgid "Continuar borrador"
+msgstr "Continue draft"
+
 msgid "Continuar mi sesión"
 msgstr "Continue my session"
 
@@ -1382,6 +1391,9 @@ msgstr "Conversations"
 
 msgid "Conversaciones que quieres iniciar"
 msgstr "Conversations you want to start"
+
+msgid "Conversaciones recientes"
+msgstr "Recent conversations"
 
 msgid "Conversaciones solicitadas"
 msgstr "Requested conversations"
@@ -1907,6 +1919,9 @@ msgstr "Choose which optional alerts you also want to receive by email. They are
 
 msgid "Elige qué quieres revisar. Cada sección muestra las acciones disponibles para tu rol."
 msgstr "Choose what to review. Each section shows the actions available for your role."
+
+msgid "Elige un foro para conocer su tema y participar en la conversación."
+msgstr "Choose a forum to explore its topic and join the conversation."
 
 msgid "Elige una fecha de inicio anterior al fin y un período de hasta 366 días."
 msgstr "Choose a start date before the end date and a period of up to 366 days."
@@ -3363,6 +3378,9 @@ msgstr "Recorded minutes"
 msgid "Mis archivos"
 msgstr "My files"
 
+msgid "Mis borradores"
+msgstr "My drafts"
+
 msgid "Mis comentarios"
 msgstr "My comments"
 
@@ -3701,6 +3719,9 @@ msgstr "The import cannot be cancelled while changes are being applied."
 
 msgid "No tienes avisos pendientes"
 msgstr "You have no pending notifications"
+
+msgid "No tienes borradores guardados"
+msgstr "You have no saved drafts"
 
 msgid "No tienes conexiones confirmadas."
 msgstr "You have no confirmed connections yet."
@@ -4361,6 +4382,9 @@ msgstr "You can choose several options in each filter."
 
 msgid "Puedes elegir varias opciones."
 msgstr "You can select multiple options."
+
+msgid "Puedes guardar contenido incompleto y retomarlo desde aquí."
+msgstr "You can save unfinished content and return to it here."
 
 msgid "Puedes guardar directamente. Si vinculas una solicitud, quedará registrada con este cambio y se utilizará una sola vez."
 msgstr "You can save directly. If you link a request, it will be recorded with this change and used only once."
@@ -5625,6 +5649,9 @@ msgstr "View events for day"
 msgid "Ver ficha"
 msgstr "View record"
 
+msgid "Ver foro"
+msgstr "View forum"
+
 msgid "Ver fuentes y cifras de cada tema"
 msgstr "View sources and figures for each topic"
 
@@ -5775,6 +5802,9 @@ msgstr "updated"
 msgid "aforo completo"
 msgstr "full capacity"
 
+msgid "aliado"
+msgstr "ally"
+
 msgid "aliados registrados"
 msgstr "registered partners"
 
@@ -5859,6 +5889,9 @@ msgstr "this comment"
 msgid "estás al día"
 msgstr "you are up to date"
 
+msgid "evento"
+msgstr "event"
+
 msgid "eventos"
 msgstr "events"
 
@@ -5885,6 +5918,12 @@ msgstr "duplicate rows skipped"
 
 msgid "filas sin asociar"
 msgstr "unmatched rows"
+
+msgid "foro"
+msgstr "forum"
+
+msgid "galería"
+msgstr "gallery"
 
 msgid "high"
 msgstr "High"
@@ -5967,6 +6006,12 @@ msgstr "awaiting review"
 msgid "posición"
 msgstr "position"
 
+msgid "publicación"
+msgstr "post"
+
+msgid "recurso"
+msgstr "resource"
+
 msgid "registrados"
 msgstr "recorded"
 
@@ -6005,6 +6050,9 @@ msgstr "without a suggested topic"
 
 msgid "solicitudes recibidas"
 msgstr "incoming requests"
+
+msgid "tema"
+msgstr "topic"
 
 msgid "tu correo registrado"
 msgstr "your registered email"

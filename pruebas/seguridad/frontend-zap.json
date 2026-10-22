@@ -1,0 +1,540 @@
+{
+  "format": "ascla-public-zap-summary-v1",
+  "kind": "frontend",
+  "date": "2026-10-20T03:25:07.058685+00:00",
+  "status": "PASS",
+  "tool": {
+    "name": "ZAP",
+    "version": "2.17.0",
+    "generated": "Tue, 20 Oct 2026 03:22:25"
+  },
+  "scope": [
+    "/login/",
+    "/intranet/",
+    "/perfil/",
+    "/eventos/",
+    "/hub/",
+    "/galeria/",
+    "/foros/",
+    "/directorio/",
+    "/centro-conocimiento/",
+    "/asistente/",
+    "/aliados/",
+    "/mensajeria/",
+    "/contacto/",
+    "/administracion/"
+  ],
+  "phases": [
+    "traditional-spider",
+    "client-spider",
+    "active-scan",
+    "passive-scan"
+  ],
+  "risk_counts": {
+    "0": 9,
+    "1": 0,
+    "2": 0,
+    "3": 0
+  },
+  "authenticated_before": true,
+  "authenticated_after": true,
+  "active_complete": true,
+  "active_strength": "LOW",
+  "completed_active_rules": [
+    {
+      "id": "40026",
+      "name": "Cross Site Scripting (DOM Based)",
+      "status": "Complete",
+      "requests": 4681
+    },
+    {
+      "id": "6",
+      "name": "Path Traversal",
+      "status": "Complete",
+      "requests": 1400
+    },
+    {
+      "id": "7",
+      "name": "Remote File Inclusion",
+      "status": "Complete",
+      "requests": 1000
+    },
+    {
+      "id": "10045",
+      "name": "Source Code Disclosure - /WEB-INF Folder",
+      "status": "Complete",
+      "requests": 174
+    },
+    {
+      "id": "10048",
+      "name": "Remote Code Execution - Shell Shock",
+      "status": "Complete",
+      "requests": 400
+    },
+    {
+      "id": "20015",
+      "name": "Heartbleed OpenSSL Vulnerability",
+      "status": "Complete",
+      "requests": 3
+    },
+    {
+      "id": "20017",
+      "name": "Source Code Disclosure - CVE-2012-1823",
+      "status": "Complete",
+      "requests": 52
+    },
+    {
+      "id": "20018",
+      "name": "Remote Code Execution - CVE-2012-1823",
+      "status": "Complete",
+      "requests": 132
+    },
+    {
+      "id": "20019",
+      "name": "External Redirect",
+      "status": "Complete",
+      "requests": 600
+    },
+    {
+      "id": "40009",
+      "name": "Server Side Include",
+      "status": "Complete",
+      "requests": 800
+    },
+    {
+      "id": "40012",
+      "name": "Cross Site Scripting (Reflected)",
+      "status": "Complete",
+      "requests": 1096
+    },
+    {
+      "id": "40014",
+      "name": "Cross Site Scripting (Persistent)",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "40018",
+      "name": "SQL Injection",
+      "status": "Complete",
+      "requests": 1604
+    },
+    {
+      "id": "40019",
+      "name": "SQL Injection - MySQL (Time Based)",
+      "status": "Complete",
+      "requests": 1200
+    },
+    {
+      "id": "40020",
+      "name": "SQL Injection - Hypersonic SQL (Time Based)",
+      "status": "Complete",
+      "requests": 1200
+    },
+    {
+      "id": "40021",
+      "name": "SQL Injection - Oracle (Time Based)",
+      "status": "Complete",
+      "requests": 600
+    },
+    {
+      "id": "40022",
+      "name": "SQL Injection - PostgreSQL (Time Based)",
+      "status": "Complete",
+      "requests": 600
+    },
+    {
+      "id": "40027",
+      "name": "SQL Injection - MsSQL (Time Based)",
+      "status": "Complete",
+      "requests": 1200
+    },
+    {
+      "id": "40045",
+      "name": "Spring4Shell",
+      "status": "Complete",
+      "requests": 184
+    },
+    {
+      "id": "40048",
+      "name": "Remote Code Execution (React2Shell)",
+      "status": "Complete",
+      "requests": 1
+    },
+    {
+      "id": "90019",
+      "name": "Server Side Code Injection",
+      "status": "Complete",
+      "requests": 1600
+    },
+    {
+      "id": "90020",
+      "name": "Remote OS Command Injection",
+      "status": "Complete",
+      "requests": 1800
+    },
+    {
+      "id": "90021",
+      "name": "XPath Injection",
+      "status": "Complete",
+      "requests": 600
+    },
+    {
+      "id": "90023",
+      "name": "XML External Entity Attack",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "90024",
+      "name": "Generic Padding Oracle",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "90034",
+      "name": "Cloud Metadata Potentially Exposed",
+      "status": "Complete",
+      "requests": 13
+    },
+    {
+      "id": "90035",
+      "name": "Server Side Template Injection",
+      "status": "Complete",
+      "requests": 768
+    },
+    {
+      "id": "90036",
+      "name": "Server Side Template Injection (Blind)",
+      "status": "Complete",
+      "requests": 2400
+    },
+    {
+      "id": "90037",
+      "name": "Remote OS Command Injection (Time Based)",
+      "status": "Complete",
+      "requests": 1200
+    },
+    {
+      "id": "0",
+      "name": "Directory Browsing",
+      "status": "Complete",
+      "requests": 92
+    },
+    {
+      "id": "10106",
+      "name": "HTTP Only Site",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "30001",
+      "name": "Buffer Overflow",
+      "status": "Complete",
+      "requests": 200
+    },
+    {
+      "id": "30002",
+      "name": "Format String Error",
+      "status": "Complete",
+      "requests": 600
+    },
+    {
+      "id": "40003",
+      "name": "CRLF Injection",
+      "status": "Complete",
+      "requests": 1400
+    },
+    {
+      "id": "40008",
+      "name": "Parameter Tampering",
+      "status": "Complete",
+      "requests": 1400
+    },
+    {
+      "id": "40028",
+      "name": "ELMAH Information Leak",
+      "status": "Complete",
+      "requests": 1
+    },
+    {
+      "id": "40029",
+      "name": "Trace.axd Information Leak",
+      "status": "Complete",
+      "requests": 16
+    },
+    {
+      "id": "40032",
+      "name": ".htaccess Information Leak",
+      "status": "Complete",
+      "requests": 15
+    },
+    {
+      "id": "40034",
+      "name": ".env Information Leak",
+      "status": "Complete",
+      "requests": 15
+    },
+    {
+      "id": "40035",
+      "name": "Hidden File Finder",
+      "status": "Complete",
+      "requests": 52
+    },
+    {
+      "id": "40042",
+      "name": "Spring Actuator Information Leak",
+      "status": "Complete",
+      "requests": 2
+    },
+    {
+      "id": "40044",
+      "name": "Exponential Entity Expansion (Billion Laughs Attack)",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "90017",
+      "name": "XSLT Injection",
+      "status": "Complete",
+      "requests": 384
+    },
+    {
+      "id": "10047",
+      "name": "HTTPS Content Available via HTTP",
+      "status": "Complete",
+      "requests": 26
+    },
+    {
+      "id": "10058",
+      "name": "GET for POST",
+      "status": "Complete",
+      "requests": 26
+    },
+    {
+      "id": "10104",
+      "name": "User Agent Fuzzer",
+      "status": "Complete",
+      "requests": 1104
+    },
+    {
+      "id": "40016",
+      "name": "Cross Site Scripting (Persistent) - Prime",
+      "status": "Complete",
+      "requests": 200
+    },
+    {
+      "id": "40017",
+      "name": "Cross Site Scripting (Persistent) - Spider",
+      "status": "Complete",
+      "requests": 92
+    },
+    {
+      "id": "50000",
+      "name": "Script Active Scan Rules",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "90026",
+      "name": "SOAP Action Spoofing",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "90029",
+      "name": "SOAP XML Injection",
+      "status": "Complete",
+      "requests": 0
+    },
+    {
+      "id": "100043",
+      "name": "Swagger UI Secret & Vulnerability Detector",
+      "status": "Complete",
+      "requests": 10
+    }
+  ],
+  "active_request_count": 30996,
+  "client_spider_limit_seconds": 60,
+  "not_applicable_active_rules": [
+    {
+      "id": "40043",
+      "name": "Log4Shell",
+      "reason": "The owned application has no Java/Log4j runtime. Java OAST/DNS testing is outside this PHP application scope."
+    }
+  ],
+  "alerts": [
+    {
+      "id": "10111",
+      "name": "Authentication Request Identified",
+      "risk": 0,
+      "confidence": 3,
+      "count": 1,
+      "description": "The given request has been identified as an authentication request. The 'Other Info' field contains a set of key=value lines which identify any relevant fields. If the request is in a context which has an Authentication Method set to \"Auto-Detect\" then this rule will change the authentication to match the request identified.",
+      "solution": "This is an informational alert rather than a vulnerability and so there is nothing to fix.",
+      "locations": [
+        {
+          "path": "/login/",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "id": "10029",
+      "name": "Cookie Poisoning",
+      "risk": 0,
+      "confidence": 1,
+      "count": 1,
+      "description": "This check looks at user-supplied input in query string parameters and POST data to identify where cookie parameters might be controlled. This is called a cookie poisoning attack, and becomes exploitable when an attacker can manipulate the cookie in various ways. In some cases this will not be exploitable, however, allowing URL parameters to set cookie values is generally considered a bug.",
+      "solution": "Do not allow user input to control cookie names and values. If some query string parameters must be set in cookie values, be sure to filter out semicolon's that can serve as name/value pair delimiters.",
+      "locations": [
+        {
+          "path": "/login/",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "id": "10058",
+      "name": "GET for POST",
+      "risk": 0,
+      "confidence": 3,
+      "count": 1,
+      "description": "A request that was originally observed as a POST was also accepted as a GET. This issue does not represent a security weakness unto itself, however, it may facilitate simplification of other attacks. For example if the original POST is subject to Cross-Site Scripting (XSS), then this finding may indicate that a simplified (GET based) XSS may also be possible.",
+      "solution": "Ensure that only POST is accepted where POST is expected.",
+      "locations": [
+        {
+          "path": "/login/",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "id": "120000-2",
+      "name": "Information Disclosure - Information in Browser sessionStorage",
+      "risk": 0,
+      "confidence": 3,
+      "count": 1,
+      "description": "Information was stored in browser sessionStorage.This is not unusual or necessarily unsafe - this informational alert has been raised to help you get a better understanding of what this app is doing. For more details see the Client tabs - this information was set directly in the browser and will therefore not necessarily appear in this form in any HTTP(S) messages.",
+      "solution": "This is an informational alert and no action is necessary. ",
+      "locations": [
+        {
+          "path": "/perfil/",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "id": "10027",
+      "name": "Information Disclosure - Suspicious Comments",
+      "risk": 0,
+      "confidence": 2,
+      "count": 5,
+      "description": "The response appears to contain suspicious comments which may help an attacker.",
+      "solution": "Remove all comments that return information that may help an attacker and fix any underlying problems they refer to.",
+      "locations": [
+        {
+          "path": "/wp-content/plugins/ascla-core/assets/accessibility.js",
+          "method": "GET"
+        },
+        {
+          "path": "/wp-content/plugins/ascla-core/assets/allies-ui.js",
+          "method": "GET"
+        },
+        {
+          "path": "/wp-content/plugins/ascla-core/assets/app.js",
+          "method": "GET"
+        },
+        {
+          "path": "/wp-content/plugins/ascla-core/assets/interest-imports.js",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "id": "10109",
+      "name": "Modern Web Application",
+      "risk": 0,
+      "confidence": 2,
+      "count": 5,
+      "description": "The application appears to be a modern web application. If you need to explore it automatically then the Client Spider may well be more effective than the standard one.",
+      "solution": "This is an informational alert and so no changes are required.",
+      "locations": [
+        {
+          "path": "/eventos/",
+          "method": "GET"
+        },
+        {
+          "path": "/foros/",
+          "method": "GET"
+        },
+        {
+          "path": "/galeria/",
+          "method": "GET"
+        },
+        {
+          "path": "/hub/",
+          "method": "GET"
+        },
+        {
+          "path": "/perfil/",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "id": "10112",
+      "name": "Session Management Response Identified",
+      "risk": 0,
+      "confidence": 2,
+      "count": 2,
+      "description": "The given response has been identified as containing a session management token. The 'Other Info' field contains a set of header tokens that can be used in the Header Based Session Management Method. If the request is in a context which has a Session Management Method set to \"Auto-Detect\" then this rule will change the session management to use the tokens identified.",
+      "solution": "This is an informational alert rather than a vulnerability and so there is nothing to fix.",
+      "locations": [
+        {
+          "path": "/login/",
+          "method": "GET"
+        },
+        {
+          "path": "/login/",
+          "method": "POST"
+        }
+      ]
+    },
+    {
+      "id": "10104",
+      "name": "User Agent Fuzzer",
+      "risk": 0,
+      "confidence": 2,
+      "count": 3,
+      "description": "Check for differences in response based on fuzzed User Agent (eg. mobile sites, access as a Search Engine Crawler). Compares the response statuscode and the hashcode of the response body with the original response.",
+      "solution": "",
+      "locations": [
+        {
+          "path": "/login/",
+          "method": "GET"
+        },
+        {
+          "path": "/perfil/",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "id": "10031",
+      "name": "User Controllable HTML Element Attribute (Potential XSS)",
+      "risk": 0,
+      "confidence": 1,
+      "count": 7,
+      "description": "This check looks at user-supplied input in query string parameters and POST data to identify where certain HTML attribute values might be controlled. This provides hot-spot detection for XSS (cross-site scripting) that will require further review by a security analyst to determine exploitability.",
+      "solution": "Validate all input and sanitize output it before writing to any HTML attributes.",
+      "locations": [
+        {
+          "path": "/login/",
+          "method": "POST"
+        }
+      ]
+    }
+  ],
+  "publication_note": "Resumen publicable del informe nativo. Se omiten cabeceras, cuerpos HTTP, cookies, nonces, payloads y valores de consulta. Se conservan estado y conteos."
+}

@@ -304,10 +304,16 @@ final class ContentPublishing
             if ($type==='event') { $oldMeta=(array)get_post_meta($id,'_ascla',true);$oldTitle=(string)$post->post_title; }
         }
         $title=trim(Access::text($input['title']??'',200));$body=trim(Access::text($input['body']??'',$type==='contact'?5000:30000));
-        $incompleteEventDraft=$type==='event' && ($input['status']??'')==='draft';
-        Access::require($incompleteEventDraft || (Access::hasText($title) && Access::hasText($body)),'Complete título y contenido.',400);
-        if ($incompleteEventDraft && !Access::hasText($title) && !Access::hasText($body)) { $title='Borrador de evento'; }
-        return ['editor'=>$editor,'publisher'=>$publisher,'old_meta'=>$oldMeta,'old_title'=>$oldTitle,'old_status'=>$id?$post->post_status:null,'old_ally_state'=>$type==='ally'&&$id?Allies::state($post):null,'title'=>$title,'body'=>$body,'meta'=>ContentMeta::sanitize($type,(array)($input['meta']??[]),$id,$incompleteEventDraft)];
+        $incompleteDraft=$type!=='contact' && ($input['status']??'')==='draft';
+        Access::require($incompleteDraft || (Access::hasText($title) && Access::hasText($body)),'Complete título y contenido.',400);
+        if ($incompleteDraft && !Access::hasText($title)) {
+            $title=match($type) {
+                'event'=>'Borrador de evento','forum'=>'Borrador de foro','topic'=>'Borrador de tema',
+                'gallery'=>'Borrador de galería','resource'=>'Borrador de recurso','ally'=>'Borrador de aliado',
+                default=>'Borrador de publicación',
+            };
+        }
+        return ['editor'=>$editor,'publisher'=>$publisher,'old_meta'=>$oldMeta,'old_title'=>$oldTitle,'old_status'=>$id?$post->post_status:null,'old_ally_state'=>$type==='ally'&&$id?Allies::state($post):null,'title'=>$title,'body'=>$body,'meta'=>ContentMeta::sanitize($type,(array)($input['meta']??[]),$id,$incompleteDraft)];
     }
 
     private static function saveTaxonomies(array $input): array
@@ -478,6 +484,9 @@ final class ContentListingQuery
         $status=($mine||current_user_can('ascla_moderate'))?['publish','draft','pending','ascla_rejected','ascla_hidden','private']:['publish'];
         if (!empty($filter['status']) && in_array($filter['status'],$status,true)) { $status=[$filter['status']]; }
         $args=['post_type'=>'ascla_'.$type,'post_status'=>$status,'posts_per_page'=>18,'paged'=>$page,'s'=>Access::text($filter['q']??'',150),'orderby'=>$type==='topic'?'modified':'date','order'=>'DESC'];
+        if ($type==='topic' && $mine && ($filter['status']??'')==='draft' && rest_sanitize_boolean($filter['include_forums']??false)) {
+            $args['post_type']=['ascla_topic','ascla_forum'];
+        }
         self::visibility($args,$type,$filter,$mine);
         self::optionalFilters($args,$type,$filter);
         $recommended=$type==='resource' && rest_sanitize_boolean($filter['recommended']??false);

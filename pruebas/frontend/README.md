@@ -1,6 +1,6 @@
 # Frontend: E2E de interfaz con Playwright
 
-El [dashboard de Playwright](dashboard.html) muestra únicamente la última ejecución, con su resultado, videos, capturas y reportes. Los pasos principales usan clics, formularios y navegación reales; las llamadas REST auxiliares solo preparan, verifican identidad y limpian datos propios.
+El [dashboard de Playwright](dashboard.html) muestra únicamente la ejecución publicada más reciente de los cinco flujos principales, con su resultado, videos, capturas y reportes. Los pasos principales usan clics, formularios y navegación reales; las llamadas REST auxiliares solo preparan, verifican identidad y limpian datos propios.
 
 ## Cinco flujos principales
 
@@ -44,6 +44,12 @@ Carla accede y se consulta su biografía → Administrador busca su cuenta y con
 
 **Utilidad:** comprueba el efecto real de una suspensión sobre la sesión y los nuevos accesos, y que la reactivación devuelve el acceso sin borrar el dato de perfil observado. No acredita la auditoría ni la conservación de todos los datos históricos. El ejecutor intenta reactivar a Carla incluso si una comprobación falla.
 
+## Regresión adicional de borradores, foros y galerías
+
+El [resumen del 21 de octubre](../../docs/evidence/release-1.10.9/drafts-ui109.json) registra diez controles de navegador de [draft-workflow.cjs](../../tests/draft-workflow.cjs): borradores incompletos recuperables en Hub, Foros, Galería, recursos, Eventos y Aliados; validación al publicar y exclusión de Comunidad; eventos sin fecha en Mis publicaciones; tarjetas de foros en escritorio/móvil; portadas de Galería con clic y teclado. La salida no registra errores JavaScript.
+
+Esta regresión local se presenta separada de los cinco flujos y 11 videos publicados del 16 de octubre. Sus capturas y reporte originales permanecen en `test-results/`; el resumen revisado y las fuentes sí se versionan. La [guía de repetición](../../MANUAL_QA_UAT.md#regresion-borradores) explica las cuentas sintéticas, el host local y el acceso privado necesarios. El [dashboard de seguridad](../seguridad/dashboard.html) conserva, por su parte, la validación ZAP/CSP del 19 de octubre. Ninguno acredita cambios instalados en el servidor publicado.
+
 ## Comprobaciones del administrador
 
 En los accesos de los cinco flujos se verifica el inicio según el rol y un único logo visible. Las sesiones administrativas abren `/administracion/`, tienen una sola entrada en el menú y muestran las secciones encima del panel. El flujo de publicación también comprueba la redirección desde `/intranet/`, la exclusión del directorio y la ausencia de controles de conexión/chat. Estas comprobaciones forman parte de los cinco recorridos, sin añadir un sexto flujo.
@@ -74,7 +80,7 @@ Cada ejecución utiliza una carpeta distinta en `test-results/playwright-usuario
 
 La carpeta `aprobadas/` conserva el lote del **16 de octubre de 2026**, ejecutado en **WordPress local aislado con el código de esa fecha**, con cuentas sintéticas Ana, Bruno, Carla y Administrador: **5 recorridos aprobados, 11 videos y 11 capturas**. No acredita los cambios posteriores de 1.10.9. [Abrir la última ejecución](dashboard.html).
 
-Solo se publica la última ejecución. Se coloca en `aprobadas/` o `fallidas/` según su resultado; al actualizar se retira la anterior junto con sus videos y reportes. Si la nueva ejecución falla, conserva su diagnóstico y evidencias. La evidencia local actual no acredita que se haya actualizado el servidor.
+De los cinco flujos principales se publica solo el último lote seleccionado. Se coloca en `aprobadas/` o `fallidas/` según su resultado; al actualizar se retira la anterior junto con sus videos y reportes. Si la nueva ejecución falla, conserva su diagnóstico y evidencias. La evidencia local actual no acredita que se haya actualizado el servidor.
 
 ## Actualizar esta entrega
 

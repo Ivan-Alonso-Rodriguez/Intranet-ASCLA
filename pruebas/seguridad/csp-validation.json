@@ -1,0 +1,87 @@
+{
+  "url": "https://ascla-zap109-20261020025909-16692.test/login/",
+  "fecha": "2026-10-20T02:59:46.094Z",
+  "estado": "PASS",
+  "validaciones": [
+    {
+      "nombre": "Transporte HTTPS",
+      "cumple": true
+    },
+    {
+      "nombre": "HTTP HTML correcto",
+      "cumple": true
+    },
+    {
+      "nombre": "CSP impuesta presente",
+      "cumple": true
+    },
+    {
+      "nombre": "default-src restringido",
+      "cumple": true
+    },
+    {
+      "nombre": "script-src restringido con nonce",
+      "cumple": true
+    },
+    {
+      "nombre": "style-src restringido con nonce",
+      "cumple": true
+    },
+    {
+      "nombre": "Eventos y estilos de atributo bloqueados",
+      "cumple": true
+    },
+    {
+      "nombre": "Sin objetos",
+      "cumple": true
+    },
+    {
+      "nombre": "Base limitada",
+      "cumple": true
+    },
+    {
+      "nombre": "Formularios limitados",
+      "cumple": true
+    },
+    {
+      "nombre": "Protección de marcos",
+      "cumple": true
+    },
+    {
+      "nombre": "Sin sniffing",
+      "cumple": true
+    },
+    {
+      "nombre": "Anticlickjacking",
+      "cumple": true
+    },
+    {
+      "nombre": "Referrer restringido",
+      "cumple": true
+    },
+    {
+      "nombre": "Permisos de navegador definidos",
+      "cumple": true
+    },
+    {
+      "nombre": "Respuesta privada sin caché",
+      "cumple": true
+    },
+    {
+      "nombre": "Sin X-Powered-By",
+      "cumple": true
+    },
+    {
+      "nombre": "Sin versión del servidor",
+      "cumple": true
+    },
+    {
+      "nombre": "HSTS sobre HTTPS",
+      "cumple": true
+    },
+    {
+      "nombre": "Nonce distinto entre respuestas",
+      "cumple": true
+    }
+  ]
+}

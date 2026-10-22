@@ -378,15 +378,16 @@
     if (!form?.isConnected || !modalUnsavedBaselines.has(form)) return false;
     return modalUnsavedBaselines.get(form) !== formSnapshot(form);
   }
-  function canSaveEventAsDraft(form) {
-    return form?.dataset.form === "editor" && form.dataset.type === "event";
+  function canSaveContentAsDraft(form) {
+    return form?.dataset.form === "editor" && form.dataset.type !== "contact"
+      && (!Number(form.dataset.id) || S.edit?.status === "draft");
   }
   function requestModalClose() {
     const backdrop = [...document.querySelectorAll(".modal-backdrop")].find(node => !node.classList.contains("modal-decision-backdrop"));
     const form = backdrop?.querySelector("form[data-guard-modal-unsaved]");
     if (!modalHasUnsavedChanges(form)) { closeModal(); return; }
     S.modalUnsavedForm = form;
-    const saveDraft = canSaveEventAsDraft(form);
+    const saveDraft = canSaveContentAsDraft(form);
     const question = saveDraft ? "Puedes guardar el progreso como borrador antes de salir." : "¿Quieres guardar los cambios antes de cerrar esta ventana?";
     const actions = saveDraft
       ? `${btn(T("Seguir editando"), "modal-unsaved-stay")}${btn(I("check")+" "+T("Guardar como borrador"), "modal-unsaved-save", "", "primary")}${btn(T("Salir sin guardar"), "modal-unsaved-discard", "", "danger")}`
@@ -1659,25 +1660,31 @@
     return `<select name="resource_type" aria-label="${E(T("Tipo de recurso"))}" class="resource-type-filter"><option value="">${E(T("Todos los tipos"))}</option>${options}</select>`;
   }
   function listingDateFilters(type, label='Fecha de publicación') {
+    if (S.filter.drafts) return "";
     if (!["hub", "topic", "gallery", "resource", "event"].includes(type)) return "";
     return `<fieldset class="content-date-range"><legend>${E(T(label))}</legend><label>${E(T("Desde fecha"))}<input type="date" name="after" value="${E(S.filter.after || "")}"></label><label>${E(T("Hasta fecha"))}<input type="date" name="before" value="${E(S.filter.before || "")}"></label></fieldset>`;
   }
   function listingTabs(type, canWrite) {
-    const allLabel = type === "event" ? "Próximos eventos" : "Comunidad";
-    const allButton = btn(allLabel, "filter-all", "", "tab " + (!S.filter.mine && !S.filter.past && !S.filter.comments ? "active" : ""));
+    const allLabel = type === "event" ? "Próximos eventos" : type === "ally" ? "Catálogo" : "Comunidad";
+    const allButton = btn(allLabel, "filter-all", "", "tab " + (!S.filter.mine && !S.filter.drafts && !S.filter.past && !S.filter.comments ? "active" : ""));
     const pastClass = S.filter.past ? "active" : "";
-    const mineClass = S.filter.mine ? "active" : "";
+    const mineClass = S.filter.mine && !S.filter.drafts ? "active" : "";
     const pastButton = type === "event" ? btn("Eventos anteriores", "filter-past", "", "tab " + pastClass) : "";
     const mineLabel=type==='topic'?'Mis temas':"Mis publicaciones";
     const commentsClass=S.filter.comments?'active':'';
-    const mineButton = canWrite || type==='topic' ? btn(mineLabel, "filter-mine", "", "tab " + mineClass) : "";
+    const mineButton = type !== 'ally' && (canWrite || type==='topic') ? btn(mineLabel, "filter-mine", "", "tab " + mineClass) : "";
     const commentsButton=type==='topic'?btn('Mis comentarios','filter-comments','','tab '+commentsClass):'';
-    return `<div class="tabs">${allButton}${pastButton}${mineButton}${commentsButton}</div>`;
+    const draftsButton = canWrite ? btn('Mis borradores', 'filter-drafts', '', 'tab ' + (S.filter.drafts ? 'active' : '')) : '';
+    return `<div class="tabs">${allButton}${pastButton}${mineButton}${draftsButton}${commentsButton}</div>`;
   }
   function listingForumDirectory(type, forums) {
-    if (type !== "topic" || !forums.length) return "";
-    const forumButtons = forums.map(f => btn(E(f.name), "item", 'data-id="' + f.id + '"', "small")).join("");
-    return `<details class="card forum-directory"><summary>${E(T("Explorar foros"))} (${forums.length})</summary><div class="form-actions">${forumButtons}</div></details>`;
+    if (type !== "topic" || S.filter.mine || S.filter.drafts || !forums.length) return "";
+    const cards = forums.map(f => `<article class="card forum-card" data-forum-id="${Number(f.id)}"><div class="forum-card-heading"><span class="forum-card-icon" aria-hidden="true">${I('chat')}</span><div><span class="eyebrow">${E(T('Foro'))}</span><h3>${E(f.name)}</h3></div></div><p class="detail-body">${E(f.body.slice(0, 220))}${f.body.length > 220 ? '…' : ''}</p><div class="forum-card-footer"><small>${E(f.author.name)} · ${date(f.date)}</small>${btn(T('Ver foro') + ' ' + I('arrow'), 'item', 'data-id="' + Number(f.id) + '"', 'small primary')}</div></article>`).join('');
+    return `<section class="forum-directory" aria-label="${E(T('Explorar foros'))}"><div class="section-top"><h2>${E(T('Explorar foros'))}</h2><span class="tag">${forums.length}</span></div><p class="private-note">${E(T('Elige un foro para conocer su tema y participar en la conversación.'))}</p><div class="cards two forum-cards">${cards}</div></section>`;
+  }
+  function listingDrafts(items) {
+    const cards = items.map(p => `<article class="card draft-card" data-draft-id="${Number(p.id)}"><div class="section-top">${status('draft')}<span class="tag">${E(T(typeLabel[p.type] || p.type))}</span></div><h3>${E(p.title)}</h3><p class="detail-body">${E(p.body.slice(0,160))}</p><div class="form-actions">${btn('Continuar borrador', 'editor', 'data-type="' + E(p.type) + '" data-id="' + Number(p.id) + '"', 'primary small')}</div></article>`).join('');
+    return `<section class="draft-list"><h2>${E(T('Mis borradores'))}</h2><p class="private-note">${E(T('Aquí encontrarás tus borradores, separados del contenido publicado.'))}</p><div class="cards two">${cards}</div>${items.length ? '' : empty('No tienes borradores guardados', 'Puedes guardar contenido incompleto y retomarlo desde aquí.')}</section>`;
   }
   function listingItems(type, items) {
     const renderers = {
@@ -1695,18 +1702,28 @@
   async function listing() {
     const type = typeByPage[S.page];
     if (type==='topic' && S.filter.comments) { await ownComments();return; }
-    const params = type === "event" ? { past: 0, ...S.filter } : {...S.filter};
-    if (['gallery','resource'].includes(type) && !S.filter.mine) params.status='publish';
-    if(type==='ally'){params.status='publish';params.mine=false;}
+    const params = {...S.filter};
+    delete params.drafts;
+    if (S.filter.drafts) {
+      Object.assign(params, {mine:1, status:'draft'});
+      delete params.past; delete params.after; delete params.before;
+      if (type === 'topic') params.include_forums = 1;
+    } else if (!S.filter.mine) {
+      params.status = 'publish';
+      if (type === 'event') params.past = S.filter.past || 0;
+    } else {
+      delete params.past;
+    }
+    if(type==='ally' && !S.filter.drafts){params.status='publish';params.mine=false;}
     const [list, authors, forums] = await Promise.all([
       api("content/" + type + "?" + new URLSearchParams(params)),
       type === "resource" ? api("resource-authors") : [],
-      type === "topic" ? allContent("forum").then(items => items.map(p => ({id:p.id,name:p.title}))) : [],
+      type === "topic" ? allContent("forum", {status:'publish'}).then(items => items.map(p => ({...p,name:p.title}))) : [],
     ]);
     S.list = list;
     if (S.filter.page) S.filter.page = list.page;
-    if(type==='ally'){content().innerHTML=alliesUI().catalog(list,S.filter,S.boot.admin)+pager(list);return;}
     const canWrite = !!S.boot.can_create?.[type];
+    if(type==='ally'){content().innerHTML=alliesUI().catalog(list,S.filter,S.boot.admin,{tabs:listingTabs(type,canWrite),drafts:S.filter.drafts?listingDrafts(list.items):null})+pager(list);return;}
     const labels = {
       hub: ["Hub ASCLA", "Ideas, experiencias y conversaciones que nos acercan."],
       topic: ["Foros de la comunidad", "Comparte una pregunta y construyamos respuestas juntos."],
@@ -1723,7 +1740,9 @@
       const target=C.adminUrl+(C.adminUrl.includes('?')?'&':'?')+'section=contenidos&type='+type;
       actions='<a class="btn" data-native href="'+E(target)+'">'+E(T('Registro e historial'))+'</a>'+actions;
     }
-    content().innerHTML = heading(...labels[type], actions) + filtersHtml + listingTabs(type, canWrite) + listingForumDirectory(type, forums) + listingItems(type, items) + listingEmpty(items) + pager(list);
+    const forumDirectory = listingForumDirectory(type, forums);
+    const results = S.filter.drafts ? listingDrafts(items) : forumDirectory + (forumDirectory && items.length ? `<h2 class="forum-topics-heading">${E(T('Conversaciones recientes'))}</h2>` : '') + listingItems(type, items) + (forumDirectory ? '' : listingEmpty(items));
+    content().innerHTML = heading(...labels[type], actions) + filtersHtml + listingTabs(type, canWrite) + results + (forumDirectory && !items.length ? '' : pager(list));
   }
   async function ownComments() {
     const list=await api('comments/mine?'+new URLSearchParams(S.filter));
@@ -1739,7 +1758,10 @@
     return `<article class="card event-card">${cover ? ("<button type=\"button\" class=\"event-card-cover\" data-action=\"item\" data-id=\"" + (Number(p.id)) + "\" aria-label=\"" + (E(T("Ver evento"))) + ": " + (E(p.title)) + "\"><img src=\"" + (E(cover.url)) + "\" alt=\"" + (E(p.title)) + "\" loading=\"lazy\"></button>") : ""}<div class="section-top"><span class="tag">${I("calendar")} ${E(T(p.meta.modality || "Virtual"))}</span>${state}</div><h3>${E(p.title)}</h3><p class="detail-body event-card-description">${E(p.body.slice(0, 160))}</p><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start)}</span><span>${I("clock")} ${time(p.meta.start)}</span></div><div class="form-actions event-card-actions">${p.meta.chatham ? '<span class="tag">Chatham House</span>' : "<span></span>"}${btn("Ver encuentro " + I("arrow"), "item", ("data-id=\"" + (p.id) + "\""), "small primary")}</div></article>`;
   }
   function galleryCard(p) {
-    return `<article class="card resource-card">${p.meta.media_ids?.length ? ("<img src=\"" + (E(C.mediaUrl + p.meta.media_ids[0])) + "\" alt=\"" + (E(p.title)) + "\" class=\"gallery-card-image\">") : ("<div class=\"resource-cover v1\"><div class=\"cover-label\">" + (E(T("ASCLA · ENCUENTROS"))) + "</div><strong>" + (E(p.title)) + "</strong><span class=\"cover-icon\">" + (I("gallery")) + "</span></div>")}<div class="resource-content"><h3>${E(p.title)}</h3><p>${E(p.body.slice(0, 120))}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Ver galería", "item", ("data-id=\"" + (p.id) + "\""), "ghost")}</div></div></article>`;
+    const cover = p.meta.media_ids?.length
+      ? `<img src="${E(C.mediaUrl + p.meta.media_ids[0])}" alt="${E(p.title)}" class="gallery-card-image" loading="lazy">`
+      : `<div class="resource-cover v1"><div class="cover-label">${E(T("ASCLA · ENCUENTROS"))}</div><strong>${E(p.title)}</strong><span class="cover-icon">${I("gallery")}</span></div>`;
+    return `<article class="card resource-card"><button type="button" class="gallery-card-cover" data-action="item" data-id="${Number(p.id)}" aria-label="${E(T('Ver galería'))}: ${E(p.title)}">${cover}</button><div class="resource-content"><h3>${E(p.title)}</h3><p>${E(p.body.slice(0, 120))}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Ver galería", "item", 'data-id="' + Number(p.id) + '"', "ghost")}</div></div></article>`;
   }
   function commentOverflow(c, postId) {
     const items = [];
@@ -2163,14 +2185,17 @@
     panel.hidden = input.value !== 'scheduled';
     panel.querySelector('input').required = !panel.hidden;
   }
-  function syncEventEditorRequirements(form) {
-    if (form?.dataset.form !== "editor" || form.dataset.type !== "event") return;
+  function syncEditorRequirements(form) {
+    if (form?.dataset.form !== "editor") return;
     const status = form.elements.status?.value || "draft";
     const incompleteAllowed = status === "draft";
-    for (const name of ["title", "body", "start_date", "start_time", "end_date", "end_time", "registration_deadline"]) {
-      const input = form.elements[name];
-      if (!input) continue;
+    for (const input of form.querySelectorAll('input,textarea,select')) {
+      if (input.name === 'publish_at') continue;
+      if (input.required) input.dataset.editorRequired = 'true';
+      if (!input.dataset.editorRequired) continue;
       input.required = !incompleteAllowed;
+      const mark = input.id ? form.querySelector('label[for="' + input.id + '"] .required-mark') : null;
+      if (mark) mark.hidden = incompleteAllowed;
       if (incompleteAllowed && requiredTextErrors.has(input)) {
         input.setCustomValidity("");
         requiredTextErrors.delete(input);
@@ -2178,18 +2203,19 @@
     }
     const submit = form.querySelector("[data-editor-primary]");
     if (submit) {
+      submit.dataset.editorLabel ||= submit.textContent;
       const labels = {draft: "Guardar borrador", scheduled: "Programar evento", pending: "Enviar a revisión"};
-      const label = labels[status] || (Number(form.dataset.id) ? "Guardar evento" : "Publicar evento");
+      const label = form.dataset.type === 'event' ? labels[status] || (Number(form.dataset.id) ? "Guardar evento" : "Publicar evento") : status === 'draft' ? 'Guardar borrador' : submit.dataset.editorLabel;
       submit.textContent = T(label);
     }
-    const draftAction = form.querySelector('[data-action="save-event-draft"]');
+    const draftAction = form.querySelector('[data-editor-draft]');
     if (draftAction) draftAction.hidden = status === "draft";
   }
-  function prepareEventDraft(form) {
-    if (form?.dataset.type !== "event") return;
+  function prepareEditorDraft(form) {
+    if (form?.dataset.form !== "editor") return;
     form.elements.status.value = "draft";
     publicationFieldState(form.querySelector('[name="status"]:checked') || form.elements.status);
-    syncEventEditorRequirements(form);
+    syncEditorRequirements(form);
   }
   async function editorExtra(type, p, m) {
     if (type === "event") {
@@ -2228,11 +2254,11 @@
   function editorFormMarkup({type, id, p, m, extra, eventCoverEditor, statusOptions, statusValue, canSchedule, directResourcePublisher}) {
     const statusControl = type === "event" ? eventStatusControl(statusOptions, statusValue) : select("status", "Guardar como", statusOptions, statusValue);
     const publicationControl = canSchedule ? publicationFields(m.publish_at, statusValue === "scheduled") : "";
-    if(type==='ally')return alliesUI().editorMarkup({id,p,m,statusOptions,statusValue,publicationControl});
-    const eventWorkflow = type === "event" ? `<section class="event-editor-status">${statusControl}${publicationControl}<p class="private-note">${E(T("Puedes guardar un borrador aunque todavía falten datos. Para publicar, completa los campos obligatorios."))}</p></section>` : "";
-    const trailingWorkflow = type === "event" ? "" : statusControl + publicationControl;
     const draftVisibility=statusValue === "draft" ? "hidden" : "";
-    const draftAction = type === "event" ? btn(I("check")+" "+T("Guardar como borrador"), "save-event-draft", draftVisibility, "event-draft-action") : "";
+    const draftAction = btn(I("check")+" "+T("Guardar como borrador"), type === 'event' ? 'save-event-draft' : 'save-content-draft', draftVisibility + ' data-editor-draft', "event-draft-action");
+    if(type==='ally')return alliesUI().editorMarkup({id,p,m,statusOptions,statusValue,publicationControl,draftAction});
+    const eventWorkflow = type === "event" ? `<section class="event-editor-status">${statusControl}${publicationControl}<p class="private-note">${E(T("Puedes guardar un borrador aunque todavía falten datos. Para publicar, completa los campos obligatorios."))}</p></section>` : "";
+    const trailingWorkflow = type === "event" ? "" : statusControl + publicationControl + `<p class="private-note">${E(T("Puedes guardar un borrador aunque todavía falten datos. Para publicar, completa los campos obligatorios."))}</p>`;
     return `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", type === "event" ? "Descripción del evento" : "Contenido", p.body, "textarea", 'required maxlength="30000"')}${eventWorkflow}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => ("<label class=\"chip-check\"><input type=\"checkbox\" name=\"interest\" value=\"" + (t.id) + "\" " + (p.tags.some((x) => x.id === t.id) ? "checked" : "") + ">" + (E(t.name)) + "</label>")).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? ("<label class=\"btn small\">" + (I("plus")) + " " + (E(T("Adjuntar imagen o PDF"))) + "<input type=\"file\" data-upload=\"content\" accept=\"image/jpeg,image/png,image/webp,application/pdf\" hidden></label><div id=\"attachments\">" + ((m.media_ids || []).map((mid) => ("<span class=\"attached-file\" data-media=\"" + (mid) + "\">Archivo #" + (mid) + "" + (btn("Quitar", "detach-media", ("data-id=\"" + (mid) + "\""), "ghost small")) + "</span>")).join("")) + "</div><p class=\"private-note\">" + (E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))) + "</p>") : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${trailingWorkflow}${m.generated && directResourcePublisher ? ("<p class=\"private-note\">" + (E(T("Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."))) + "</p>") : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}${draftAction}<button class="btn primary" data-editor-primary>Guardar ${typeLabel[type]}</button></div></form>`;
   }
   async function editor(type, id = 0) {
@@ -2254,7 +2280,7 @@
     const eventCoverEditor = eventCoverEditorMarkup(type, eventCoverFile);
     const formMarkup = editorFormMarkup({type, id, p, m, extra, eventCoverEditor, statusOptions, statusValue, canSchedule, directResourcePublisher});
     const dialog = modal((id ? "Editar " : "Crear ") + typeLabel[type], formMarkup, true);
-    syncEventEditorRequirements(dialog.querySelector('[data-form="editor"]'));
+    syncEditorRequirements(dialog.querySelector('[data-form="editor"]'));
   }
   async function files(page = 1, q = "", scope = S.files?.scope || "mine", owner = S.files?.owner || 0) {
     const previousScope = S.files?.scope || "";
@@ -3448,14 +3474,14 @@
       const guarded = S.modalUnsavedForm;
       closeModalDecision();
       if (guarded?.isConnected) {
-        if (canSaveEventAsDraft(guarded)) prepareEventDraft(guarded);
+        if (canSaveContentAsDraft(guarded)) prepareEditorDraft(guarded);
         guarded.requestSubmit();
       }
     }
-    else if (a === "save-event-draft") {
-      const form = b.closest('form[data-form="editor"][data-type="event"]');
+    else if (a === "save-event-draft" || a === "save-content-draft") {
+      const form = b.closest('form[data-form="editor"]');
       if (!form) return;
-      prepareEventDraft(form);
+      prepareEditorDraft(form);
       form.requestSubmit();
     }
   }
@@ -3898,9 +3924,11 @@
       S.filter = {
       ...S.filter, page: 1,
       mine: a === "filter-mine" ? 1 : "",
+      drafts: a === "filter-drafts" ? 1 : "",
       past: a === "filter-past" ? 1 : "",
       comments: a === "filter-comments" ? 1 : "",
       };
+      if (S.filter.drafts) { S.filter.mine = 1; delete S.filter.after; delete S.filter.before; }
       await render();
     }
   }
@@ -4128,7 +4156,7 @@
   const HANDLECLICKACTIONS_DISPATCH = [
     { test: a => ['micro-archive','micro-archive-tab'].includes(a), run: handleMicroArchive },
     { test: (a) => (a === "close") || (a === "modal-unsaved-stay"), run: handleClickActions01 },
-    { test: (a) => (a === "modal-unsaved-discard") || (a === "modal-unsaved-save") || (a === "save-event-draft"), run: handleClickActions02 },
+    { test: (a) => (a === "modal-unsaved-discard") || (a === "modal-unsaved-save") || (a === "save-event-draft") || (a === "save-content-draft"), run: handleClickActions02 },
     { test: (a) => (a === "profile-review-confirm") || (a === "profile-nudge-later") || (a === "profile-nudge-go"), run: handleClickActions03 },
     { test: (a) => (a === "unsaved-stay") || (a === "unsaved-discard") || (a === "unsaved-save"), run: handleClickActions04 },
     { test: (a) => (a === "theme-menu") || (a === "theme-set"), run: handleClickActions05 },
@@ -4370,6 +4398,7 @@ root.addEventListener("click", async (event) => {
     }
     closeModal();
     toast(type==='ally'&&p.meta.ally_status==='inactive'?'Aliado guardado como inactivo. Su registro se conserva.':editorSavedMessage(p.status, p.meta) + calendarMessage);
+    if (p.status === 'draft' && typeByPage[S.page] === (type === 'forum' ? 'topic' : type)) S.filter = {mine:1, drafts:1, page:1};
     S.boot = await api("bootstrap");
     await render();
   }
@@ -4804,7 +4833,7 @@ root.addEventListener("submit", async (event) => {
     if (reportForm && input.name === "reason") updateReportDetailRequirement(reportForm);
     updateProfilePreference(input);
     publicationFieldState(input);
-    syncEventEditorRequirements(input.closest?.('[data-form="editor"]'));
+    syncEditorRequirements(input.closest?.('[data-form="editor"]'));
     refreshUnsavedGuard(input);
     if (!input.dataset.upload || !input.files?.length) return;
     await handleUploadInput(input);

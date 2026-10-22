@@ -135,6 +135,49 @@ def main():
             require((folder / media).is_file() and (folder / media).stat().st_size > 1000,
                     'Missing or empty media: ' + media)
 
+    security = provenance.get('security', {})
+    security_folder = DELIVERY / 'seguridad'
+    security_summary = read(security_folder / 'resumen.json')
+    require(security.get('report') == 'seguridad/dashboard.html'
+            and security['date'] == security_summary['date']
+            and security['status'] == security_summary['status']
+            and security.get('jenkins_evidence') is False,
+            'Security evidence must preserve its date, result and local scope.')
+    phases = {phase['phase']: phase for phase in security_summary['phases']}
+    for kind in ('frontend', 'backend'):
+        scan = read(security_folder / (kind + '-zap.json'))
+        counts = {str(risk): sum(alert['risk'] == risk for alert in scan['alerts'])
+                  for risk in range(4)}
+        require(counts == scan['risk_counts'] == phases[kind]['risk_counts']
+                and scan['status'] == phases[kind]['status'],
+                'Published ZAP alerts differ from the recorded result: ' + kind)
+        require(all(not urlsplit(location['path']).query
+                    for alert in scan['alerts'] for location in alert['locations']),
+                'A published ZAP location contains query values.')
+    csp = read(security_folder / 'csp-validation.json')
+    require(len(csp['validaciones']) == security_summary['csp_checks']
+            and csp['estado'] == phases['CSP']['status'],
+            'The CSP evidence differs from the recorded result.')
+    if csp['estado'] == 'PASS':
+        require(all(item['cumple'] for item in csp['validaciones']),
+                'A failed CSP check is presented as approved.')
+    security_provenance = read(security_folder / 'procedencia.json')
+    for item in security_provenance['sources']:
+        original = (ROOT / item['source_relative']).resolve()
+        require(original.is_relative_to(ROOT.resolve()), 'Security source outside repository.')
+        if original.is_file():
+            require(hashlib.sha256(original.read_bytes()).hexdigest() == item['source_sha256'],
+                    'The original security source changed: ' + item['source_relative'])
+    for artifact in security_folder.glob('*'):
+        if artifact.suffix not in ('.json', '.html'):
+            continue
+        text = artifact.read_text(encoding='utf-8')
+        require(not re.search(r'nonce-[a-z0-9+/=]{8,}|(?:Cookie|Authorization):\s*\S|PRIVATE KEY', text, re.I),
+                'Session/header material in a public security artifact: ' + artifact.name)
+        if artifact.suffix == '.json':
+            require(not re.search(r'"(?:attack|evidence|requestHeader|responseHeader|requestBody|responseBody)"\s*:', text),
+                    'Raw HTTP evidence in a public security summary: ' + artifact.name)
+
     private = ROOT / 'test-results/playwright-usuarios.json'
     private_files = [private, ROOT / 'test-results/playwright-usuarios-local.json']
     secrets = [a['password'].encode() for file in private_files if file.is_file() for a in read(file)['actors'].values()]
@@ -174,7 +217,7 @@ def main():
             and all(value == b'unset' for value in attributes[2::3]),
             'Git newline conversion could invalidate evidence hashes or ZIP contents.')
     print(f'QA delivery OK: {len(names)} files, 58 Bruno requests, 105 checks, '
-          f'five frontend journeys, 103 CP identifiers, latest execution only '
+          f'five frontend journeys, ZAP/CSP evidence, 103 CP identifiers, latest execution only '
           f'and {checked_links} local HTML links verified.')
 
 

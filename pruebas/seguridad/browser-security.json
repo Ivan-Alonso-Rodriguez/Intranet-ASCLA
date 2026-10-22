@@ -1,0 +1,136 @@
+{
+  "checks": [
+    "El acceso entrega CSP impuesta, nonce distinto por respuesta y HSTS bajo HTTPS",
+    "Administrador: los módulos y el guardado del perfil funcionan con CSP impuesta",
+    "Administrador: cambiar idioma funciona sin eventos en línea",
+    "Asociado: los módulos y el guardado del perfil funcionan con CSP impuesta",
+    "Asociado: cambiar idioma funciona sin eventos en línea",
+    "El acceso nativo permite el formulario propio y rechaza un nonce de otro navegador",
+    "La API conserva autenticación y permisos y no refleja orígenes externos con credenciales",
+    "No se detectan errores JavaScript ni infracciones CSP en los recorridos revisados"
+  ],
+  "errors": [],
+  "violations": [],
+  "responses": [
+    {
+      "role": "Administrador",
+      "path": "/perfil/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/eventos/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/hub/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/galeria/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/foros/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/directorio/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/centro-conocimiento/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/asistente/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/aliados/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/mensajeria/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/contacto/",
+      "status": 200
+    },
+    {
+      "role": "Administrador",
+      "path": "/administracion/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/perfil/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/eventos/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/hub/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/galeria/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/foros/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/directorio/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/centro-conocimiento/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/asistente/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/aliados/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/mensajeria/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/contacto/",
+      "status": 200
+    },
+    {
+      "role": "Asociado",
+      "path": "/intranet/",
+      "status": 200
+    }
+  ]
+}

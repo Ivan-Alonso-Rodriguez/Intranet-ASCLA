@@ -4,6 +4,14 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+### Correcciones UI/UX del 21 de octubre de 2026 — #573 a #576
+
+Hub, foros y temas, Galería, Centro de Conocimiento, Eventos y Aliados permiten guardar borradores incompletos. Al cerrar una creación con cambios se ofrece guardarla como borrador. Cada sección dispone de **Mis borradores**; en Foros reúne foros y temas propios. Al guardar desde las secciones de contenido se abre esa vista. Los listados de Comunidad, próximos eventos y eventos anteriores muestran contenido publicado; **Mis publicaciones** incluye también los eventos propios sin fecha. Publicar mantiene las validaciones, los permisos y las restricciones de los metadatos.
+
+Los foros se presentan en tarjetas visibles con descripción, autor y acceso a la conversación. Las portadas de Galería abren su contenido mediante clic o teclado. Se actualizan los textos de interfaz en español e inglés.
+
+Validación local: **76 pruebas PHP y 859 aserciones**, más **10 controles de navegador** sobre las seis secciones, la recuperación de eventos sin fecha, las tarjetas en móvil y las portadas de galerías. Las fuentes de regresión están en [DraftWorkflowTest.php](tests/php/DraftWorkflowTest.php) y [draft-workflow.cjs](tests/draft-workflow.cjs); el [resumen revisado](docs/evidence/release-1.10.9/drafts-ui109.json) conserva los resultados y la huella del ZIP de 201 archivos. Son pruebas dirigidas y no una nueva suite completa. Las evidencias de seguridad anteriores conservan su fecha y alcance; no se repite ZAP ni se acredita despliegue remoto o UAT en esta etapa.
+
 ## Resumen de versiones
 
 > Ordenado de la versión más reciente a la más antigua. La versión vigente del proyecto es **1.10.9**.

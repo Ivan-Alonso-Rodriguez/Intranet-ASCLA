@@ -225,16 +225,32 @@ Las evidencias quedan en `test-results/admin-role-ui-FECHA/`; los accesos perman
 
 `bash scripts/acceptance-tests.sh` sigue activo para una aceptación aislada: diez peticiones de integración, 23 de negocio y tres recorridos de interfaz, con preparación y limpieza automática de cuentas. Cubre también desconexión con historial y reprogramación de eventos. Sus fuentes están en [tests/http](tests/http); no sustituye los cuatro flujos y cinco recorridos de la entrega vigente. El modo remoto con auxiliar WordPress se explica en la sección 6.
 
+<a id="regresion-borradores"></a>
+
+### Regresión UI/UX de borradores, foros y galerías
+
+El [resumen del 21 de octubre](docs/evidence/release-1.10.9/drafts-ui109.json) identifica el ZIP y la validación dirigida de #573–#576: **76 pruebas PHP/859 aserciones**, **diez controles de navegador** y **49 controles portables**. Esta ejecución local no renueva los cinco flujos publicados del 16 de octubre, la cobertura, ZAP ni UAT.
+
+Para revisar el comportamiento en el entorno autorizado:
+
+1. Como Ejecutivo, crea contenido en Hub, Foros, Galería, Centro de Conocimiento y Eventos. Para crear Aliados, inicia sesión como Administrador. Guarda sin completar todos los campos y comprueba **Mis borradores**. En Foros se reúnen foros y temas; los eventos sin fecha también aparecen en **Mis publicaciones**.
+2. Al cancelar una creación con cambios, comprueba **Seguir editando**, **Guardar como borrador** y **Salir sin guardar**. Reabre el borrador y verifica que el contenido se conserva. Al elegir publicar, los campos obligatorios vuelven a exigirse.
+3. En Comunidad comprueba las tarjetas de los foros publicados, su descripción y acceso; los borradores propios se consultan en su pestaña. Revisa escritorio y móvil.
+4. En Galería abre la portada con clic y con teclado. Ambos deben abrir la misma colección autorizada.
+
+La regresión automatizada está en [DraftWorkflowTest.php](tests/php/DraftWorkflowTest.php) y [draft-workflow.cjs](tests/draft-workflow.cjs). PHPUnit incluye sus casos al ejecutar la suite local. El recorrido adicional de navegador requiere Playwright y el archivo privado `private-access.json` en el directorio indicado por `ASCLA_DRAFT_OUT` (por defecto `test-results/ui573-20261022`). Su [fixture](tests/draft-workflow-fixture.php) solo acepta WordPress local y el host temporal `ascla-ui573.test`; el ejecutor debe resolver ese host en la red Docker de pruebas. No uses cuentas ni datos del servidor publicado. Los accesos se eliminan al retirar el entorno; no se distribuyen en Git.
+
 <a id="exponer-pruebas"></a>
 
-### Cómo exponer los dos primeros puntos
+### Cómo exponer las pruebas publicadas
 
 1. Abre el [dashboard general](pruebas/index.html). Identifica fecha, rama, revisión y destino; aclara que la última ejecución fue local y que el asistente usó mock.
 2. En [Bruno Run Dashboard](pruebas/backend/dashboard.html), muestra las 18 peticiones de integración y los rechazos esperados de acceso y networking administrativo. Los HTTP 400/401/403/404/409 previstos son comprobaciones aprobadas.
 3. Explica los cuatro flujos con las flechas del [README de backend](pruebas/backend/README.md). Muestra un ID obtenido por una petición y utilizado por la siguiente; no son valores inventados.
 4. En el [dashboard de Playwright](pruebas/frontend/dashboard.html), reproduce los cinco recorridos. Son clics y formularios reales; también verifican el inicio administrativo y el logo único.
 5. Muestra JSON/JUnit, las fuentes de esa ejecución, `procedencia.json`, `manifest.json` y el ZIP sin secretos. Las huellas permiten detectar modificaciones, no son una certificación independiente.
-6. Revisa el estado de limpieza. Si la última ejecución falla, enseña el diagnóstico y sus videos sin convertirla en aprobación. `pruebas/` conserva un único lote por herramienta.
+6. Abre el [dashboard de seguridad](pruebas/seguridad/dashboard.html): ZAP páginas/API y CSP local del 19 de octubre. Son copias publicables revisadas; los originales completos permanecen privados. Identifica sus límites y la integración pendiente en Jenkins.
+7. Revisa la [regresión UI/UX](docs/evidence/release-1.10.9/drafts-ui109.json) por separado. Conserva el estado de limpieza y los diagnósticos reales; los conteos de suites distintas no se suman como casos únicos.
 
 El código se confirma en `development` y luego se promueve a `qa` y `uat`. Los reportes conservan la rama real en que se ejecutaron; preparar un commit en otra rama no cambia sus metadatos. La aceptación UAT exige revisión humana posterior.
 
@@ -434,7 +450,7 @@ En Administración → Galerías y recursos, busca una publicación y pulsa Ocul
 
 ## 11. Pruebas de seguridad con ZAP, sin Jenkins
 
-Estas pruebas son independientes de Jenkins. El proyecto es un monolito WordPress: sus páginas y su API se comprueban por separado en la misma instalación temporal. No se utiliza una aplicación Next.js ni se ejecutan ataques contra el WordPress publicado.
+La integración solicitada de ZAP y CSP en Jenkins, después del despliegue en `qa`, sigue pendiente; también faltan archivado, retención de un build y limpieza final. Este procedimiento se ejecuta independientemente de Jenkins. El proyecto es un monolito WordPress: sus páginas y su API se comprueban por separado en la misma instalación temporal. No se utiliza una aplicación Next.js ni se ejecutan ataques contra el WordPress publicado.
 
 ### Preparar y ejecutar
 
@@ -479,6 +495,8 @@ Tras instalar el plugin y aplicar la configuración del servidor, repite las ver
 ```bash
 node scripts/check-security-headers.cjs https://wordpress.ingsoftware.lat/login/ test-results/csp-qa.json
 ```
+
+Para preparar las copias revisadas de una ejecución ya terminada, ejecuta `node scripts/build-security-delivery.cjs` y después los verificadores de entrega y documentación. Publica resúmenes en [pruebas/seguridad](pruebas/seguridad/dashboard.html), actualiza las huellas y enlaza el dashboard general; no vuelve a ejecutar el escaneo ni acredita Jenkins.
 
 Los originales ZAP pueden contener URLs, nonces o cabeceras de sesión: permanecen privados en `test-results/`, ignorado por Git. Comparte únicamente un resumen revisado sin credenciales. Los reportes HTML/JSON y los accesos privados no deben subirse automáticamente a Git.
 

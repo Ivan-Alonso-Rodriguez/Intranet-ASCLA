@@ -86,9 +86,15 @@ Login de Ana → Pregunta en un hilo nuevo → Obtiene el ID del trabajo → Con
 
 **Dependencias reales:** `/ask` devuelve `trabajoAsistenteId`, usado en `/jobs/{id}`. `hiloAsistente` identifica el hilo que debe contener ese trabajo. La espera dura como máximo 120 segundos y falla ante error o vencimiento. El modo de IA se conserva según lo devuelto por el servidor. En el lote actual se procesa la cola real con respuestas del proveedor mock local; no acredita una API externa.
 
+## Regresión PHP adicional del 21 de octubre
+
+La [regresión de borradores](../../docs/evidence/release-1.10.9/drafts-ui109.json) aprobó 76 pruebas PHP dirigidas y 859 aserciones en un WordPress local temporal. Comprueba guardado incompleto en siete tipos de contenido, permisos, validaciones al publicar, eventos propios sin fecha y borradores de foros/temas en una misma vista. Incluye casos de [DraftWorkflowTest.php](../../tests/php/DraftWorkflowTest.php) y regresiones existentes. Son pruebas PHPUnit: no son nuevas peticiones Bruno ni una nueva ejecución de las 105 comprobaciones de esta colección. La revisión no recoge cobertura ni acredita instalación remota.
+
+La [seguridad de la API](../seguridad/backend-zap.html) tiene su propio análisis local del 19 de octubre, limitado a 18 operaciones GET; tampoco reemplaza esta colección.
+
 ## Ejecución y evidencia
 
-La última ejecución corresponde al **WordPress local aislado con el código actualizado**, no a una instalación nueva en el QA publicado. Los cinco grupos aprobaron y la limpieza terminó correctamente. `resultados/` contiene únicamente el lote más reciente. El ZIP importable mantiene la URL y las identidades del QA compartido; para aprobar sus nuevas comprobaciones allí debe estar instalado el plugin actualizado.
+La ejecución publicada del **16 de octubre de 2026** corresponde al **WordPress local aislado con el código de esa fecha**, no a una instalación nueva en el QA publicado. Los cinco grupos aprobaron y la limpieza terminó correctamente. `resultados/` contiene únicamente el lote más reciente. El ZIP importable mantiene la URL y las identidades del QA compartido; para aprobar sus nuevas comprobaciones allí debe estar instalado el plugin actualizado.
 
 Para repetir sobre una fixture local preparada:
 

@@ -2310,7 +2310,26 @@ output.view-loading{display:block}
 #ascla-root .file-row small{color:var(--muted)}
 #ascla-root .file-row svg{width:24px;height:24px}
 #ascla-root .forum-directory{margin:16px 0}
-#ascla-root .forum-directory summary{cursor:pointer;font-weight:600}
+#ascla-root .forum-directory h2{margin:0;font-size:20px}
+#ascla-root .forum-card{display:flex;flex-direction:column;gap:16px;min-width:0}
+#ascla-root .forum-card-heading{display:flex;align-items:flex-start;gap:14px}
+#ascla-root .forum-card-heading h3{margin:4px 0 0;overflow-wrap:anywhere}
+#ascla-root .forum-card-icon{display:grid;place-items:center;flex:0 0 44px;height:44px;border-radius:12px;color:var(--blue);background:var(--blue-soft)}
+#ascla-root .forum-card .detail-body{margin:0;flex:1;overflow-wrap:anywhere}
+#ascla-root .forum-card-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px}
+#ascla-root .forum-card-footer small{color:var(--muted)}
+#ascla-root .forum-topics-heading{font-size:20px;margin:28px 0 16px}
+#ascla-root .draft-card{display:flex;flex-direction:column;gap:12px;min-width:0}
+#ascla-root .draft-card h3{margin:0;overflow-wrap:anywhere}
+#ascla-root .draft-card .detail-body{flex:1;margin:0;overflow-wrap:anywhere}
+#ascla-root .draft-card .form-actions{margin-top:auto}
+#ascla-root .gallery-card-cover{display:block;width:100%;height:190px;flex:0 0 190px;padding:0;border:0;background:var(--bg);color:inherit;text-align:left;cursor:pointer;overflow:hidden}
+#ascla-root .gallery-card-cover .resource-cover{height:190px;min-height:190px}
+#ascla-root .gallery-card-cover img{display:block;transition:transform .18s ease}
+#ascla-root .gallery-card-cover:hover img{transform:scale(1.025)}
+#ascla-root .gallery-card-cover:focus-visible{outline:3px solid var(--blue);outline-offset:-4px}
+@media(prefers-reduced-motion:reduce){#ascla-root .gallery-card-cover img{transition:none}#ascla-root .gallery-card-cover:hover img{transform:none}}
+@media(max-width:640px){#ascla-root .forum-cards{grid-template-columns:minmax(0,1fr)}#ascla-root .forum-card-footer{align-items:flex-start;flex-direction:column}}
 @media(max-width:640px){#ascla-root .file-row{align-items:stretch;flex-direction:column}}
 
 /* Per-user language switcher available inside the intranet. */

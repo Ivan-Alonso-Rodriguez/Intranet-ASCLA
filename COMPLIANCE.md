@@ -2,6 +2,14 @@
 
 Revisión documental: 21 de octubre de 2026. Plugin **1.10.9**, esquema **15**. Este documento describe el estado del código y la evidencia por etapa. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado.
 
+## Borradores, foros y galerías del 21 de octubre de 2026
+
+Se corrigen #573–#576: Hub, foros/temas, Galería, recursos, Eventos y Aliados admiten borradores incompletos y ofrecen guardarlos al cerrar una creación con cambios. Cada sección dispone de **Mis borradores**; Foros reúne sus foros y temas propios. Al guardar desde estas secciones se abre esa vista. **Mis publicaciones** incluye los eventos propios sin fecha; Comunidad, próximos eventos y eventos anteriores muestran publicaciones. Publicar o enviar a revisión conserva sus mínimos, permisos y validación de metadatos.
+
+Los foros tienen tarjetas visibles con descripción, autor y acceso. La portada de Galería abre el contenido con clic o teclado. La [evidencia de esta regresión](docs/evidence/release-1.10.9/drafts-ui109.json) registra **76 pruebas PHP dirigidas/859 aserciones**, **diez controles de navegador** y **49 controles portables** aprobados; no es una nueva suite completa. El ZIP verificado contiene 201 archivos y 2.056 mensajes por idioma; sus fuentes coinciden con el [manifiesto del paquete](docs/evidence/release-1.10.9/package.json). Se retiraron el entorno temporal y sus credenciales. No se genera cobertura ni se repite ZAP; la aceptación remota, UAT y el Quality Gate mantienen sus validaciones pendientes. Los estados y porcentajes de los 302 requisitos no aumentan por esta corrección documental.
+
+Las copias revisadas del [dashboard de seguridad](pruebas/seguridad/dashboard.html) conservan el análisis local del 19 de octubre y omiten datos de sesión. **La integración de ZAP/CSP en Jenkins sobre `qa` sigue pendiente**, incluidos archivado, retención de un build y limpieza del workspace. El Jenkinsfile actual no acredita esos controles.
+
 ## Perfil, mensajería y retiro editorial del 20 de octubre de 2026
 
 LinkedIn solo acepta enlaces de linkedin.com y sus subdominios; X acepta x.com y twitter.com. Se validan en la interfaz y en las escrituras del perfil y de administración, incluyendo dominios parecidos, credenciales en la URL y puertos ajenos al sitio. El sitio personal mantiene su campo independiente. La clasificación se muestra como «Individual» y conserva el código almacenado, sin reclasificar cuentas.
@@ -141,7 +149,7 @@ Por solicitud del responsable se elimina el logo duplicado en escritorio y se co
 
 Las [pruebas del rol](tests/php/AdministratorRoleTest.php) y de [interfaz](tests/admin-navigation.cjs) corresponden a WordPress local aislado. Este ajuste requiere instalar el ZIP actualizado para aparecer en el sitio publicado; las evidencias anteriores mantienen su fecha y alcance.
 
-La [entrega vigente de integración y E2E](pruebas/README.md) aprobó 58 peticiones y 105 comprobaciones de Bruno, más cinco recorridos de Playwright con 11 videos y 11 capturas en WordPress local aislado. Incluye el inicio administrativo, el logo único y el rechazo de solicitudes de conexión/conversación hacia y desde administración. El asistente utiliza mock local. `pruebas/` conserva solo la última ejecución por herramienta; no acredita una nueva instalación remota, cobertura ni aceptación UAT.
+La [entrega vigente de integración y E2E](pruebas/README.md) aprobó 58 peticiones y 105 comprobaciones de Bruno, más cinco recorridos de Playwright con 11 videos y 11 capturas en WordPress local aislado. Incluye el inicio administrativo, el logo único y el rechazo de solicitudes de conexión/conversación hacia y desde administración. El asistente utiliza mock local. `pruebas/` conserva un lote publicado de Bruno y de los cinco flujos Playwright, con su fecha original, más los resúmenes de seguridad. Las regresiones adicionales tienen evidencia separada; no se suman como una nueva ejecución de esa colección ni acreditan instalación remota, cobertura o UAT.
 
 <a id="estado"></a>
 
@@ -171,7 +179,7 @@ Sobre el PDF íntegro, 263/302 (**87,1 %**) están marcados Código revisado. Ex
 - Los ejecutivos pueden crear propuestas de microeventos; otra revisión administrativa debe aprobarlas antes de publicarlas.
 - Administración puede editar directamente los datos del asociado. Contacto queda como referencia opcional de uso único; excepción autorizada a RN-001 y RN-032, con auditoría y preferencias personales conservadas.
 - La única reacción es **Me gusta**. Las reacciones heredadas retiradas se contabilizan de manera compatible y pueden quitarse.
-- El flujo Git y las pruebas vigentes son manuales. El [Jenkinsfile](Jenkinsfile) se conserva como referencia opcional por solicitud del responsable. La instalación de plugins queda a cargo del responsable del entorno.
+- El flujo Git y las pruebas vigentes son manuales. El [Jenkinsfile](Jenkinsfile) conserva las etapas existentes; ZAP y CSP en `qa`, su archivado, la retención de un build y la limpieza final están pendientes. La instalación de plugins queda a cargo del responsable del entorno.
 - El aprendizaje de intereses es automático y respeta las desmarcaciones guardadas del usuario.
 - Administración asigna el tipo Individual o Empresa asociada; por ahora esta clasificación no administra grupos ni cupos empresariales.
 

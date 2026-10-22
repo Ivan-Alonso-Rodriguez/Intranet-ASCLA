@@ -101,6 +101,7 @@ function pruneRuns(relative,keep=[]){
 pruneRuns('backend/resultados',[path.basename(backend)]);
 pruneRuns('backend/fallos');
 for(const category of ['aprobadas','fallidas'])pruneRuns('frontend/'+category,category===front.category?[front.id]:[]);
+require('./build-security-delivery.cjs').publishSecurity({root, source:option('--security')||undefined, refreshManifest:false});
 const manifest={generated_at:new Date().toISOString(),algorithm:'SHA-256',files:{}};
 for(const file of files(out)){if(file===path.join(out,'manifest.json'))continue;if(fs.statSync(file).size>45*1024*1024)throw Error('Archivo demasiado grande para esta entrega: '+rel(file));const bytes=fs.readFileSync(file);if(secrets.some(secret=>bytes.includes(Buffer.from(secret))))throw Error('Contraseña detectada antes de publicar: '+rel(file));manifest.files[rel(file)]=sha(bytes);}
 fs.writeFileSync(path.join(out,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
