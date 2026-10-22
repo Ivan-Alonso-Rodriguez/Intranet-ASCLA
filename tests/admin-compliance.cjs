@@ -25,8 +25,8 @@ module.exports=async({browser,admin,member,base,request,test,login,coverage,root
     }finally{
       await context.close();
       const current=(await request(admin,"admin/users/"+account.id)).body;
-      const restored=await request(admin,"admin/users/"+account.id,{...before,profile_revision:current.profile_revision,membership_status:"active",membership_until:""});
-      assert.equal(restored.status,200);
+      const restored=await request(admin,"admin/users/"+account.id,{...before,member_type:before.member_type||current.member_type,profile_revision:current.profile_revision,membership_status:"active",membership_until:""});
+      assert.equal(restored.status,200,JSON.stringify(restored.body));
     }
     const after=(await request(admin,"admin/users/"+account.id)).body;
     for(const key of ["first_name","last_name","position","company"])assert.equal(after[key],before[key]);
