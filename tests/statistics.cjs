@@ -18,7 +18,7 @@ async function runStatistics(){let f,browser,page;const coverage=[];
    await page.goto(base+'/intranet/');await page.locator('.nav-link').first().waitFor();
    await test(u.role+': estadísticas y asistencia requieren capacidad en REST',async()=>{
     for(const path of ['admin/statistics','admin/statistics/topics','admin/attendance/'+f.events[0]])assert.equal((await api(page,path)).status,publisher?200:403,path);
-    assert.equal((await api(page,'admin/interest-imports')).status,u.role==='administrator'?200:403);
+    assert.equal((await api(page,'admin/interest-imports')).status,publisher?200:403);
     if(!publisher)for(const path of ['admin/attendance/'+f.events[0],`admin/attendance/${f.events[0]}/complete`,`admin/attendance/${f.events[0]}/import`,'admin/statistics/topics'])assert.equal((await api(page,path,'POST',{complete:true})).status,403,path);
     assert.equal((await api(page,`admin/attendance/${f.events[0]}/complete`,'POST',{complete:true},'invalid')).status,403);
     assert.equal((await api(page,`admin/attendance/${f.events[0]}/complete`,'POST',{complete:true},false)).status,401);
