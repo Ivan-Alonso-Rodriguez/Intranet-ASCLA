@@ -21,7 +21,7 @@ async function clickAfterReview(locator){
   if(responseMode==='hold')await new Promise(resolve=>held.push(resolve));
   await route.fulfill({status:responseMode==='error'?503:200,contentType:'application/json',body:JSON.stringify(responseMode==='error'?{message:'Controlled QA failure'}:disabled)}).catch(()=>{});
  });
- await page.goto(base+'/wp-login.php');await page.locator('#user_login').fill('ascla.admin');await page.locator('#user_pass').fill(env.ASCLA_ADMIN_PASSWORD);
+ await page.goto(base+'/wp-login.php');await page.locator('#user_login').fill('demo.asociado');await page.locator('#user_pass').fill(env.ASCLA_DEMO_PASSWORD);
  await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),page.locator('#wp-submit').click()]);
  await page.goto(base+'/intranet/');await page.locator('.hero h1').waitFor({timeout:10000});
  assert.ok(held.length);await page.waitForFunction(()=>!document.querySelector('#page-content').hasAttribute('aria-busy'));await page.keyboard.press('Escape');

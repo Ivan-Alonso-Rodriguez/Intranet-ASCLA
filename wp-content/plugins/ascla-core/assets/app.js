@@ -1756,8 +1756,8 @@
   function galleryCard(p) {
     const cover = p.meta.media_ids?.length
       ? `<img src="${E(C.mediaUrl + p.meta.media_ids[0])}" alt="${E(p.title)}" class="gallery-card-image" loading="lazy">`
-      : `<div class="resource-cover v1"><div class="cover-label">${E(T("ASCLA · ENCUENTROS"))}</div><strong>${E(p.title)}</strong><span class="cover-icon">${I("gallery")}</span></div>`;
-    return `<article class="card resource-card"><button type="button" class="gallery-card-cover" data-action="item" data-id="${Number(p.id)}" aria-label="${E(T('Ver galería'))}: ${E(p.title)}">${cover}</button><div class="resource-content"><h3>${E(p.title)}</h3><p>${E(p.body.slice(0, 120))}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Ver galería", "item", 'data-id="' + Number(p.id) + '"', "ghost")}</div></div></article>`;
+      : `<div class="resource-cover v1"><div class="cover-label" aria-hidden="true">${E(T("ASCLA · ENCUENTROS"))}</div><strong>${E(p.title)}</strong><span class="cover-icon">${I("gallery")}</span></div>`;
+    return `<article class="card resource-card"><button type="button" class="gallery-card-cover" data-action="item" data-id="${Number(p.id)}"><span class="screen-reader-text">${E(T('Ver galería'))}: </span>${cover}</button><div class="resource-content"><h3>${E(p.title)}</h3><p>${E(p.body.slice(0, 120))}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Ver galería", "item", 'data-id="' + Number(p.id) + '"', "ghost")}</div></div></article>`;
   }
   function commentOverflow(c, postId) {
     const items = [];
@@ -2457,9 +2457,9 @@
     const identity = chatIdentity(current);
     let title;
     if (group) {
-      title = `<button type="button" class="chat-profile group-chat-profile group-info-trigger" data-action="group-menu" data-id="${Number(current.id)}" aria-label="${E(T('Abrir información del grupo'))}">${avatar(identity)}<span><strong>${E(identity.name)}</strong><small>${Number(current.member_count || current.members?.length || 0)} participantes · ${E(T('Ver integrantes'))}</small></span></button>`;
+      title = `<button type="button" class="chat-profile group-chat-profile group-info-trigger" data-action="group-menu" data-id="${Number(current.id)}">${avatar(identity)}<span><strong>${E(identity.name)}</strong><small>${Number(current.member_count || current.members?.length || 0)} participantes · ${E(T('Ver integrantes'))}</small></span></button>`;
     } else if (current.other.profile_url) {
-      title = `<button type="button" class="chat-profile chat-profile-button" data-action="member" data-id="${Number(current.other.id)}" aria-label="Ver perfil de ${E(current.other.name)}">${avatar(current.other)}<span><strong>${E(current.other.name)}</strong><small>Ver perfil</small></span></button>`;
+      title = `<button type="button" class="chat-profile chat-profile-button" data-action="member" data-id="${Number(current.other.id)}">${avatar(current.other)}<span><strong>${E(current.other.name)}</strong><small>Ver perfil</small></span></button>`;
     } else {
       title = `<span class="chat-profile">${avatar(current.other)}<strong>${E(current.other.name)}</strong></span>`;
     }

@@ -2,6 +2,12 @@
 
 Revisión documental: 22 de octubre de 2026. Plugin **1.10.9**, esquema **15**. Este documento describe el estado del código y la evidencia por etapa. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado.
 
+## Preparación del análisis SonarQube del 22 de octubre de 2026
+
+Se corrige la impresión de scripts del acceso nativo de WordPress bajo CSP: se desactiva su concatenación únicamente durante el login para que las etiquetas registradas reciban nonce/SRI, conservando la política estricta. La prueba dirigida también verifica el bloqueo de HTML con un script sin nonce. Se ajustan contraste del indicador de afinidad, fechas del chat y estado de carga, y los nombres accesibles de las portadas de Galería y la cabecera del chat.
+
+Las suites de QA distinguen el inicio y las acciones de cada rol, el botón Guardar borrador y el alcance de borradores propios de Eventos. La instalación fijada de PCOV permite generar cobertura nueva sobre un commit limpio. Estos cambios y su paquete posterior deben validarse en esa revisión; no se atribuyen a los reportes ZAP ni a los recorridos remotos anteriores y no acreditan despliegue del hosting, aprobación de Quality Gate ni UAT por sí mismos.
+
 ## Renovación de pruebas sobre el QA publicado del 22 de octubre de 2026
 
 La [guía para sustentar seguridad](pruebas/seguridad/sustento.html) enlaza autenticación, reglas completas, severidades, CSP, videos y huellas. Una nueva lectura pública confirma el mismo pendiente de Apache en cinco rutas. Solo se dispone de administración WordPress, por lo que queda pendiente la intervención del operador del hosting para aplicar `ServerTokens Prod`/`ServerSignature Off` y repetir el chequeo. No se modifica el criterio ni se declara 20/20 en QA.

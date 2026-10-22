@@ -1616,7 +1616,7 @@
 .bubble small {
   display: block;
   font-size: 9px;
-  color: #91a3b2;
+  color: var(--muted);
   margin-top: 7px;
 }
 .chat-compose {
@@ -2139,7 +2139,7 @@
  .header-profile strong { max-width: 130px; }
 }
 
-.view-loading { min-height: min(55vh, 500px); display:flex; align-items:flex-start; gap:12px; padding:36px 0; color:#526078; }
+.view-loading { min-height: min(55vh, 500px); display:flex; align-items:flex-start; gap:12px; padding:36px 0; color:var(--muted); }
 .loading-dot { display:inline-block; width:12px; height:12px; border-radius:50%; background:#147bb5; margin-top:5px; }
 .header-profile.active { color:#116da3; }
 
@@ -4181,7 +4181,7 @@ html[data-ascla-theme="dark"] #ascla-root .directory-pagination-summary select {
 #ascla-root .recommendation-person-top h3{margin:4px 0 2px;font-size:18px}
 #ascla-root .recommendation-person-top p{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #ascla-root .recommendation-avatar{position:relative;flex:0 0 auto}
-#ascla-root .recommendation-avatar .match-score{position:absolute;right:-8px;bottom:-5px;padding:3px 7px;border:2px solid var(--surface);border-radius:20px;background:var(--green);color:#fff;font-size:10px;font-weight:750}
+#ascla-root .recommendation-avatar .match-score{position:absolute;right:-8px;bottom:-5px;padding:3px 7px;border:2px solid var(--surface);border-radius:20px;background:#176b53;color:#fff;font-size:10px;font-weight:750}
 #ascla-root .recommendation-kicker{display:inline-flex;align-items:center;gap:5px;color:var(--blue);font-size:10px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
 #ascla-root .recommendation-kicker svg{width:14px;height:14px}
 #ascla-root .recommendation-reason{margin:18px 0 14px;padding:16px 0 0;border-top:1px solid var(--line)}

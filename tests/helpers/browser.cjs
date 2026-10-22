@@ -15,4 +15,14 @@ async function stopCoverage(page, entries) {
   if (!page || page.isClosed()) return;
   entries.push(...await page.coverage.stopJSCoverage());
 }
-module.exports = {startCoverage, stopCoverage};
+async function waitForHome(page) {
+  await page.locator('#page-content h1').waitFor();
+  const state = await page.evaluate(async () => {
+    const response = await fetch(ASCLA.api + 'bootstrap', {headers: {'X-WP-Nonce': ASCLA.nonce}});
+    if (!response.ok) throw Error('Home bootstrap failed: ' + response.status);
+    return {page: ASCLA.page, administrative: Boolean((await response.json()).admin)};
+  });
+  require('node:assert/strict').equal(state.page, state.administrative ? 'admin' : 'intranet');
+  await page.locator(state.administrative ? '.admin-workspace #admin-panel' : '.hero').waitFor();
+}
+module.exports = {startCoverage, stopCoverage, waitForHome};

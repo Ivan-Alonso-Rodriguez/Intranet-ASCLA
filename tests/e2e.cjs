@@ -38,7 +38,7 @@ async function login(browser, name, password) {
     page.locator("#wp-submit").click(),
   ]);
   await page.goto(base + "/intranet/");
-  await page.locator(".hero").waitFor();
+  await require('./helpers/browser.cjs').waitForHome(page);
   return { context, page };
 }
 async function request(page, route, body, method) {
@@ -453,7 +453,7 @@ async function goto(page, route) {
           r.url().includes("/content/gallery") &&
           r.request().method() === "POST",
       );
-      await a.getByRole("button", { name: "Guardar galería" }).click();
+      await a.getByRole("button", { name: "Guardar borrador", exact: true }).click();
       const gal = await (await save).json();
       fixtures.push(gal.id);
       assert.equal(gal.status, "draft");

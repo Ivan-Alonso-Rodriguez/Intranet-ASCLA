@@ -11,7 +11,7 @@ final class SecurityHeaders
     public static function boot(): void
     {
         add_action('template_redirect',[self::class,'frontend'],0);
-        add_action('login_init',[self::class,'send']);
+        add_action('login_init',[self::class,'nativeLogin']);
         add_filter('wp_script_attributes',[self::class,'attributes']);
         add_filter('wp_inline_script_attributes',[self::class,'attributes']);
         add_filter('wp_inline_style_attributes',[self::class,'attributes']);
@@ -45,6 +45,14 @@ final class SecurityHeaders
     public static function frontend(): void
     {
         if (App::page() || Login::isFrontendPage()) { self::send(); }
+    }
+
+    public static function nativeLogin(): void
+    {
+        // WordPress concatenation prints raw tags outside its nonce attribute filters.
+        // Individual registered scripts retain the dependency order and receive our nonce/SRI.
+        $GLOBALS['concatenate_scripts']=false;
+        self::send();
     }
 
     public static function send(): void

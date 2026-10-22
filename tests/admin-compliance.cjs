@@ -7,7 +7,7 @@ module.exports=async({browser,admin,member,base,request,test,login,coverage,root
     const before=(await request(admin,"admin/users/"+account.id)).body;
     await admin.goto(base+"/administracion/?section=usuarios");
     const search=admin.locator('[data-form="admin-filter"][data-area="users"]');
-    await search.locator('[name="q"]').fill(account.login);await search.locator("button").click();
+    await search.locator('[name="q"]').fill(account.login);await search.getByRole('button',{name:'Buscar',exact:true}).click();
     await admin.locator('[data-action="user-edit"][data-id="'+account.id+'"]').click();
     const form=admin.locator('[data-form="admin-user-edit"]');
     await form.locator('.admin-edit-section > summary').filter({hasText:'Acceso y membresía'}).click();

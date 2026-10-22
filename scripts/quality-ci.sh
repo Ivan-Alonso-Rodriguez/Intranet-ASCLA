@@ -153,6 +153,7 @@ docker run --rm --ipc=host \
     cd /work
     export NODE_PATH=/tmp/ascla-node/node_modules
     node tests/manual-workflow.cjs
+    node tests/native-login-security.cjs
     node tests/e2e.cjs
     node tests/editorial107.cjs
     node tests/analysis-filters107.cjs

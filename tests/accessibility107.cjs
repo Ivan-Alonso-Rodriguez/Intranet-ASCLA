@@ -3,7 +3,7 @@ const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:
 const root=path.resolve(__dirname,'..'),base=process.env.ASCLA_SITE_URL||'http://ascla_audit-wordpress';
 if(process.env.ASCLA_E2E_EPHEMERAL!=='1')throw Error('Disposable environment required');
 const env=Object.fromEntries(fs.readFileSync(process.env.ASCLA_ENV_FILE||root+'/.env.audit','utf8').split(/\r?\n/).filter(v=>v.includes('=')).map(v=>[v.slice(0,v.indexOf('=')),v.slice(v.indexOf('=')+1)]));
-const checks=[],errors=[],scans=[];let browser,page,nativeUrl,originalLocale;
+const checks=[],errors=[],scans=[],originalLocales=new Map();let browser,page,adminPage,memberPage,nativeUrl;
 const routes=['intranet','perfil','eventos','hub','galeria','foros','directorio','centro-conocimiento','asistente','aliados','mensajeria','contacto','administracion'];
 async function api(route,body){return page.evaluate(async({route,body})=>{const r=await fetch(ASCLA.api+route,{method:'POST',headers:{'X-WP-Nonce':ASCLA.nonce,'Content-Type':'application/json'},body:JSON.stringify(body)});return {status:r.status,body:await r.json()};},{route,body});}
 async function changeLocale(locale){
@@ -13,7 +13,7 @@ async function changeLocale(locale){
   const state=await fetch(ASCLA.api.replace(/ascla\/v1\/?$/,'wp/v2/')+'users/me?context=edit',{headers:{'X-WP-Nonce':ASCLA.nonce}});return (await state.json()).locale;
  },locale);assert.equal(actual,locale);
 }
-async function goto(route){await page.goto(base+'/'+route+'/');await page.locator('#page-content h1').waitFor();await page.locator('#page-content[aria-busy="true"]').waitFor({state:'hidden'});await page.keyboard.press('Escape');await page.evaluate(()=>document.fonts.ready);}
+async function goto(route,administrative=false){page=administrative||route==='administracion'?adminPage:memberPage;await page.goto(base+'/'+route+'/');await page.locator('#page-content h1').waitFor();await page.locator('#page-content[aria-busy="true"]').waitFor({state:'hidden'});await page.keyboard.press('Escape');await page.evaluate(()=>document.fonts.ready);}
 async function scan(name){
  await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
  const result=await page.evaluate(async()=>{
@@ -66,30 +66,34 @@ async function trap(selector){
  assert.ok(await page.locator('.ascla-main').evaluate(n=>n.inert));
 }
 (async()=>{try{
- browser=await chromium.launch({headless:true});await nestedAdminDialogs();page=await browser.newPage();page.on('pageerror',e=>errors.push(e.message));
+ browser=await chromium.launch({headless:true});await nestedAdminDialogs();
+ for(const [role,login,password] of [['admin',env.ASCLA_ADMIN_USER||'ascla.admin',env.ASCLA_ADMIN_PASSWORD],['member','demo.asociado',env.ASCLA_DEMO_PASSWORD]]){
+ page=await browser.newPage();page.on('pageerror',e=>errors.push(e.message));
  // Enable interception before navigation; toggling it at the same time as a
  // keyboard activation can race Chromium's native chooser under load.
  page.on('filechooser',()=>{});
- await page.goto(base+'/wp-login.php');await page.locator('#user_login').fill(env.ASCLA_ADMIN_USER||'ascla.admin');await page.locator('#user_pass').fill(env.ASCLA_ADMIN_PASSWORD);
+ await page.goto(base+'/wp-login.php');await page.locator('#user_login').fill(login);await page.locator('#user_pass').fill(password);
  await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),page.locator('#wp-submit').click()]);
- await goto('intranet');nativeUrl=await page.evaluate(()=>ASCLA.api.replace(/ascla\/v1\/?$/,'wp/v2/')+'users/me');
- originalLocale=await page.evaluate(async url=>{const r=await fetch(url+'?context=edit',{headers:{'X-WP-Nonce':ASCLA.nonce}});return (await r.json()).locale;},nativeUrl);assert.ok(typeof originalLocale==='string');
+ await page.goto(base+'/intranet/');await require('./helpers/browser.cjs').waitForHome(page);nativeUrl=await page.evaluate(()=>ASCLA.api.replace(/ascla\/v1\/?$/,'wp/v2/')+'users/me');
+ const originalLocale=await page.evaluate(async url=>{const r=await fetch(url+'?context=edit',{headers:{'X-WP-Nonce':ASCLA.nonce}});return (await r.json()).locale;},nativeUrl);assert.ok(typeof originalLocale==='string');originalLocales.set(page,originalLocale);
  await changeLocale('es_ES');
+ if(role==='admin')adminPage=page;else memberPage=page;
+ }
  for(const theme of ['light','dark']){
-  await page.addInitScript(mode=>localStorage.setItem('ascla-theme',mode),theme);
+  for(const actorPage of [adminPage,memberPage])await actorPage.addInitScript(mode=>localStorage.setItem('ascla-theme',mode),theme);
   for(const width of [360,768,1024]){
-   await page.setViewportSize({width,height:900});
+   for(const actorPage of [adminPage,memberPage])await actorPage.setViewportSize({width,height:900});
    for(const route of routes){await goto(route);await scan(route+' '+theme+' '+width);if(route==='directorio')await page.screenshot({path:root+'/test-results/accessibility-directory-'+theme+'-'+width+'.png',fullPage:true});}
   }
   for(const width of [360,1024]){
-   await page.setViewportSize({width,height:1000});await goto('administracion');
+   await adminPage.setViewportSize({width,height:1000});await goto('administracion');
    const tabs=await page.locator('.admin-tab[data-tab]').evaluateAll(nodes=>nodes.map(n=>n.dataset.tab));
    for(const tab of tabs){await page.locator('.admin-tab[data-tab="'+tab+'"]').click();await page.waitForFunction(key=>document.querySelector('.admin-tab.active')?.dataset.tab===key&&document.querySelector('#admin-panel')?.textContent.trim().length>0,tab);await scan('admin '+tab+' '+theme+' '+width);}
   }
-  await page.setViewportSize({width:360,height:900});
+  for(const actorPage of [adminPage,memberPage])await actorPage.setViewportSize({width:360,height:900});
   let uploadChecked = false;
   for(const [route,type] of [['eventos','event'],['hub','hub'],['galeria','gallery'],['foros','topic'],['centro-conocimiento','resource']]){
-   await goto(route);const button=page.locator('[data-action="editor"][data-type="'+type+'"]');if(await button.count()){
+   await goto(route,['event','resource'].includes(type));const button=page.locator('[data-action="editor"][data-type="'+type+'"]');if(await button.count()){
     await button.first().click();await page.locator('.modal form[data-form="editor"]').waitFor();await scan('editor '+type+' '+theme);await trap('.modal');
     assert.deepEqual(await page.evaluate(()=>{const ids=[...document.querySelectorAll('[id]')].map(n=>n.id);return ids.filter((id,i)=>ids.indexOf(id)!==i);}),[],'duplicate IDs in editor');
     const upload=page.locator('.modal label[role="button"]:has(input[type="file"][hidden])');
@@ -150,6 +154,6 @@ async function trap(selector){
    fs.writeFileSync(root+'/test-results/accessibility107-failure.json',JSON.stringify(state,null,2));
   }
  }finally{
- if(page&&originalLocale!==undefined)await changeLocale(originalLocale);
+ for(const [actorPage,originalLocale] of originalLocales){page=actorPage;await changeLocale(originalLocale).catch(error=>{errors.push(error.message);process.exitCode=1;});}
  fs.writeFileSync(root+'/test-results/accessibility107.json',JSON.stringify({axe:require('axe-core/package.json').version,checks,errors,scans},null,2));if(browser)await browser.close();
 }})();

@@ -37,6 +37,8 @@ Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. 
 
 ## Calidad y entrega
 
+La preparación de QA para SonarQube incorpora la instalación verificada de PCOV, compatibilidad del acceso nativo de WordPress con la CSP estricta y ajustes de accesibilidad detectados por las suites. Los tests comprueban el inicio administrativo o comunitario según el rol y usan cuentas comunitarias para Mensajería y Contacto. La [entrega de pruebas del 22 de octubre](pruebas/index.html) conserva las revisiones y huellas que se ejecutaron entonces; esos reportes no acreditan automáticamente este ajuste posterior ni un nuevo despliegue del hosting.
+
 El flujo vigente es manual: `development → qa → uat → main`. El [Jenkinsfile](Jenkinsfile) conserva pruebas, SonarQube, Quality Gate y despliegue. La integración solicitada de ZAP y CSP después del despliegue en `qa`, con archivado, retención de un build y limpieza final, sigue pendiente; las ejecuciones locales publicadas no la acreditan. UAT requiere revisión de testers y autorización del PM. `main` debe estar protegida y recibir los cambios mediante pull request. No se exige cobertura del 100 %.
 
 El [manual](MANUAL_QA_UAT.md) indica el orden de ejecución y los resultados esperados. Para una nueva validación completa de QA, `quality-ci.sh` genera los resultados y la cobertura de esa revisión antes de enviarla a [SonarQube](MANUAL_QA_UAT.md#sonarqube). La revisión documental de esta entrega conserva la cobertura existente: no se ejecuta ese generador ni se atribuyen sus reportes a un commit nuevo. El scanner no despliega ni prueba el WordPress publicado.

@@ -8,6 +8,8 @@ El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y prueba
 
 La preparación de PHPUnit instala PCOV 1.0.12 desde su archivo oficial con SHA-256 fijado y comprueba que la extensión esté cargada. Resuelve el bloqueo de metadatos REST de PECL antes de ejecutar las pruebas; conserva las verificaciones de cobertura, revisión limpia y Quality Gate. Esta corrección del ejecutor no modifica el plugin ni acredita por sí misma un análisis de SonarQube.
 
+La validación posterior detecta scripts agrupados sin nonce en el acceso nativo. El plugin los imprime individualmente con las protecciones de WordPress, conserva CSP estricta y añade una regresión de carga e inyección bloqueada. Se corrigen contrastes en afinidad/chat/carga y nombres accesibles de Galería/chat. Los tests antiguos se adaptan al inicio administrativo, roles comunitarios y Guardar borrador, con las mismas comprobaciones funcionales. El nuevo paquete se identifica mediante su manifiesto; las evidencias ZAP/API/UI anteriores conservan sus propias revisiones y no representan otra ejecución sobre estos ajustes.
+
 ### Renovación de evidencias en el QA publicado del 22 de octubre de 2026
 
 Se añade la [guía de sustento de seguridad](pruebas/seguridad/sustento.html), con evidencias por conclusión, comparación de los 20 controles, guion de exposición y corrección concreta para el operador del hosting. La recomprobación conserva 19/20 en QA y documenta la versión expuesta en cinco respuestas públicas; el acceso recibido permite administrar WordPress, sin acceso al servidor. Esta actualización no altera el plugin ni convierte el pendiente en aprobado.
