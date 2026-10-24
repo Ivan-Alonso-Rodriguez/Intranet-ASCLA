@@ -7,7 +7,7 @@ from translations import compile_catalogs
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'wp-content/plugins/ascla-core'
 DEST = ROOT / 'dist/ascla-core.zip'
-ALLOWED = {'.php', '.css', '.js', '.png', '.svg', '.webp', '.txt', '.po', '.mo'}
+ALLOWED = {'.php', '.css', '.js', '.mjs', '.png', '.svg', '.webp', '.txt', '.po', '.mo'}
 
 def build():
     compile_catalogs()

@@ -15,7 +15,8 @@ final class Router
     private static function dispatch(\WP_REST_Request $request,callable $callback): mixed
     {
         try {
-            if (strlen((string)$request->get_body())>1048576) { throw new ApiException('Solicitud demasiado grande.',413); }
+            $maxBody=preg_match('~^/ascla/v1/content/resource(?:/\d+)?$~',$request->get_route())?12582912:1048576;
+            if (strlen((string)$request->get_body())>$maxBody) { throw new ApiException('Solicitud demasiado grande.',413); }
             if ($request->get_method()!=='GET') { Access::limit('write',100); }
             RequestValidation::validate($request);
             return rest_ensure_response($callback($request));
@@ -109,14 +110,17 @@ final class RouterRoutes
         Router::route('/events/(?P<id>\d+)','GET',static fn($r)=>Events::detail((int)$r['id']));
         Router::route('/events/(?P<id>\d+)/invite','POST',static fn($r)=>Events::invite((int)$r['id'],(array)$r['users']),'ascla_publish');
         Router::route('/events/(?P<id>\d+)/cancel','POST',static fn($r)=>Events::cancel((int)$r['id'],(string)($r['reason']??'')),'ascla_publish');
+        Router::route('/events/(?P<id>\d+)/reactivate','POST',static fn($r)=>\ASCLA\Core\Services\EventReactivation::run((int)$r['id']),'ascla_publish');
         Router::route('/events/(?P<id>\d+)/candidates','POST',static fn($r)=>\ASCLA\Core\Services\MicroEligibility::review((int)$r['id']),'ascla_manage');
         Router::route('/events/(?P<id>\d+)/archive','POST',static fn($r)=>\ASCLA\Core\Services\MicroArchive::set((int)$r['id'],\ASCLA\Core\Services\FormRules::boolean($r['archived'])),'ascla_manage');
         Router::route('/microevents/diagnostics','GET',static fn()=>\ASCLA\Core\Services\MicroEvents::diagnostics(),'ascla_publish');
         Router::route('/events/(?P<id>\d+)/register','POST',static fn($r)=>Events::register((int)$r['id'],(string)$r['status']),'ascla_write');
+        Router::route('/events/(?P<id>\d+)/calendar-sync','POST',static fn($r)=>\ASCLA\Core\Services\EventCalendar::retry((int)$r['id']),'ascla_write');
     }
 
     public static function notifications(): void
     {        Router::route('/notifications','GET',static fn()=>Notifications::list());
+        Router::route('/notifications','DELETE',static fn($r)=>Notifications::deleteAll((int)$r['through']));
         Router::route('/notifications/feed','GET',static fn($r)=>Notifications::feed($r->get_params()));
         Router::route('/notifications/toasts','GET',static fn($r)=>Notifications::toastFeed((int)($r['after']??0)));
         Router::route('/notifications/summary','GET',static fn()=>Notifications::summary());
@@ -139,11 +143,16 @@ final class RouterRoutes
         Router::route('/assistant/thread','GET',static fn($r)=>Queue::thread((string)($r['thread']??'')));
         Router::route('/jobs/(?P<id>\d+)','GET',static fn($r)=>Queue::get((int)$r['id']));
         Router::route('/jobs/(?P<id>\d+)/retry','POST',static fn($r)=>Queue::retry((int)$r['id']));
+        Router::route('/resources/(?P<id>\d+)/regenerate','POST',static function($r){
+            Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden gestionar recursos.',403);
+            Access::limit('resource_regenerate',5,300);
+            return \ASCLA\Core\Services\VideoPreparation::regenerate((int)$r['id']);
+        },'ascla_admin_area');
         Router::route('/jobs','POST',static function($r) {
-            $kind=(string)$r['kind']; Access::require(in_array($kind,['multimedia','microevents','social','video_metadata'],true),'Tipo de trabajo no válido.',400);
+            $kind=(string)$r['kind']; Access::require(in_array($kind,['transcript','multimedia','microevents','social','video_metadata'],true),'Tipo de trabajo no válido.',400);
             if ($kind==='microevents') { Access::require(Access::canPublish()); }
             if ($kind==='social') { Access::require(current_user_can('ascla_moderate')); }
-            if (in_array($kind,['multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden gestionar recursos.',403); Content::get((int)$r['resource_id']); }
+            if (in_array($kind,['transcript','multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden gestionar recursos.',403); Content::get((int)$r['resource_id']); }
             Access::limit('admin_job',10,300); return Queue::enqueue($kind,['resource_id'=>(int)$r['resource_id']]);
         },'ascla_admin_area');
         Router::route('/ai/test','POST',static function(){

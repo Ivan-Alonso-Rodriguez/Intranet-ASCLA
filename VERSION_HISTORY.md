@@ -1,8 +1,38 @@
 # Historial de versiones — Intranet ASCLA
 
-**Versión actual:** `1.10.9` · **Esquema:** `15`.
+**Versión actual:** `1.11.0` · **Esquema:** `15`.
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
+
+### 1.11.0 — Calendario e interacción
+
+La optimización retira traducciones antiguas sin referencias y funciones de interfaz ya retiradas. Los catálogos compilados omiten las traducciones idénticas al original mediante el comportamiento estándar de gettext, conservando los archivos PO editables y los valores personalizados. Las entradas dinámicas o dudosas se conservan. [Auditoría y validación](docs/evidence/release-1.11.0/code-optimization1110.json).
+
+El resumen generado desarrolla las ideas en varios párrafos, con una extensión orientativa de 220 a 350 palabras cuando la fuente lo permite. «Actualizar resumen y nota» permite regenerar el material sin volver a obtener una transcripción ya guardada; conserva la versión anterior hasta completar el proceso y notifica los errores. La ficha oculta el desplegable de la transcripción y muestra los marcos de trabajo en etiquetas a todo el ancho. [Evidencia de regeneración](docs/evidence/release-1.11.0/summary-refresh1110.json).
+
+Los PDF se abren automáticamente con controles de lectura refinados y sin el panel visible «Texto de la página». Galería oculta el nombre del archivo y amplía las zonas laterales para cambiar de foto. Al publicar un video con Supadata configurado, los subtítulos y el resumen se preparan en segundo plano, sin botones manuales; los fallos generan una notificación. [Evidencia de visores y automatización](docs/evidence/release-1.11.0/readers-auto1110.json).
+
+El resumen de los recursos presenta una estructura editorial con tipografía legible, párrafos separados, conclusiones numeradas, referencias en secciones completas y conceptos en etiquetas. La vista se adapta al tema y al ancho de pantalla; reutiliza los textos guardados sin volver a generarlos. [Evidencia de presentación](docs/evidence/release-1.11.0/summary1110.json).
+
+La obtención de subtítulos públicos incorpora Supadata sin Google OAuth, con prioridad a subtítulos existentes, generación opcional, caché y seguimiento de trabajos largos. El original completo se conserva y puede consultarse en la publicación o utilizarse para generar resumen y nota. [Configuración y límites de Supadata](MANUAL_QA_UAT.md#subtítulos-públicos-de-youtube-con-supadata).
+
+La previsualización de PDF se abre dentro de la publicación, con páginas, zoom, texto para tecnologías de asistencia y descarga. El lector PDF.js 6.4.299 se carga desde archivos locales fijados y con licencia Apache-2.0; no se utilizan visores externos. Se conservan las cabeceras de seguridad y el acceso privado a los archivos. [Evidencia del lector PDF](docs/evidence/release-1.11.0/pdf-preview1110.json).
+
+La revisión de perfiles y Galería compacta los intereses del perfil público, muestra el usuario de acceso solo en Mi perfil, mejora las barras de desplazamiento y cambia la acción de las tarjetas a «Abrir». El editor incorpora búsqueda paginada de eventos y publicación seleccionada por defecto para una galería nueva con permisos. El visor coloca las flechas junto a la fotografía; los adjuntos muestran sus nombres alineados. Eliminar una publicación de Galería retira también sus archivos privados y sus copias maestras sin uso. Notificaciones elimina el contador repetido de la cabecera y usa «notificaciones» en el pie. [Evidencia de esta etapa](docs/evidence/release-1.11.0/gallery-profile1110.json).
+
+Reactivación explícita de eventos cancelados: conserva inscripciones y espera, renueva plazos de cupos ofrecidos, avisa a los participantes y restaura recordatorios y calendario. Los cambios de horario o modalidad durante la cancelación requieren reconfirmación de asistencia. Los eventos finalizados requieren fechas vigentes; los microeventos requieren administración y las propuestas no publicadas vuelven a borrador para revisión. La bandeja de notificaciones presenta cabecera compacta, acciones agrupadas y avisos neutros en ambos temas. [Evidencia de esta etapa](docs/evidence/release-1.11.0/event-reactivation1110.json).
+
+Se recupera la portada predeterminada ilustrada anterior del Centro de Conocimiento, con fondo, título e identidad ASCLA, para recursos sin imagen o cuya miniatura falle. Se mantiene el tamaño y la distribución de las tarjetas nuevas. [Evidencia de esta revisión](docs/evidence/release-1.11.0/knowledge-cover1110.json).
+
+Revisión del visor de Galería y Centro de Conocimiento: fotografía amplia sin recortes, miniaturas, navegación por botones/teclado y acceso al original; los comentarios se conservan al cambiar de imagen. Las tarjetas del Centro de Conocimiento usan dos columnas en escritorio, portadas más grandes, títulos legibles, tipo y duración y una acción destacada, con respaldo si falla la miniatura. [Evidencia de esta etapa](docs/evidence/release-1.11.0/media-knowledge1110.json).
+
+Revisión adicional de Galería y calendario: borradores en tonos neutros y etiquetas como Publicación y Galería con mayúscula inicial; estados de inscripción adaptados a ambos temas y ausencia de la etiqueta interna `none`. Los inscritos sin Google vinculado disponen de la alternativa manual aunque exista una entrega pendiente; el calendario manual incluye el enlace del encuentro solo tras confirmar la inscripción. Galería incorpora portadas amplias, contador de imágenes y acceso por portada, título o botón. [Evidencia y paquete de esta etapa](docs/evidence/release-1.11.0/gallery-calendar1110.json).
+
+Revisión visual del 23 de octubre: las cifras del inicio enlazan a su sección y abren las notificaciones; los estados de publicación, éxito y Chatham House usan grises azulados en ambos temas. Directorio unifica la tipografía de sus acciones y reduce sus separaciones a 9 px. Las tarjetas de eventos destacan la fecha, ordenan horario y ubicación y separan las acciones. La [evidencia visual](docs/evidence/release-1.11.0/visual1110.json) corresponde al paquete actualizado; la evidencia de interacción anterior conserva su SHA original.
+
+La inscripción sincroniza automáticamente el calendario conectado o actualiza la invitación del organizador; la cancelación retira la copia personal y las entregas retrasadas comprueban la participación vigente. Se elimina la duplicidad de botones y el enlace del encuentro requiere inscripción confirmada. Se añaden Enter para enviar mensajes, borrado de todas las notificaciones propias con confirmación, protección de comentarios sin publicar y regreso entre ventanas con estado y foco conservados. Se corrigen selección de texto, casillas, cursores y estilos en ambos temas. El esquema permanece en 15.
+
+Las pruebas locales y sus límites se registran en [la evidencia 1.11.0](docs/evidence/release-1.11.0/usability1110.json); [el manifiesto](docs/evidence/release-1.11.0/package.json) identifica el ZIP. No se reutilizan aprobaciones de SonarQube ni resultados de seguridad remotos de versiones anteriores.
 
 ### Correcciones de mantenibilidad para ASCLA-QA del 22 de octubre de 2026
 

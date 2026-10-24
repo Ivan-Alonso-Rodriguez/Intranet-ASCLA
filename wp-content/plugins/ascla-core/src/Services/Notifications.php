@@ -14,6 +14,7 @@ final class Notifications
         'event',
         'event_updated',
         'event_cancelled',
+        'event_reactivated',
         'event_waitlist_available',
     ];
 
@@ -103,7 +104,8 @@ final class Notifications
     }
     public static function summary(): array
     {
-        return ['unread_total'=>Store::count('notifications','user_id=%d AND read_at IS NULL',[get_current_user_id()])];
+        return ['unread_total'=>Store::count('notifications','user_id=%d AND read_at IS NULL',[get_current_user_id()]),'latest_id'=>self::latestId(),
+            'total_all'=>Store::count('notifications','user_id=%d',[get_current_user_id()])];
     }
     public static function feed(array $filter): array
     {
@@ -132,6 +134,16 @@ final class Notifications
         Access::require($row && (int)$row['user_id']===get_current_user_id(),'Notificación no encontrada.',404);
         Store::delete('notifications',['id'=>$id,'user_id'=>get_current_user_id()]);
         return ['ok'=>true,'deleted'=>$id]+self::summary();
+    }
+    /** A confirmation applies to a snapshot; notices arriving later are preserved. */
+    public static function deleteAll(int $through): array
+    {
+        Access::require($through>0,'Confirma las notificaciones que deseas eliminar.',400);
+        global $wpdb;
+        $table=Store::table('notifications');
+        $deleted=$wpdb->query($wpdb->prepare("DELETE FROM $table WHERE user_id=%d AND id<=%d",get_current_user_id(),$through));
+        if ($deleted===false) { throw new \ASCLA\Core\Repositories\RepositoryException('No se pudieron eliminar las notificaciones.'); }
+        return ['ok'=>true,'deleted'=>$deleted]+self::summary();
     }
     public static function removeProfileNotices(int $user,array $kinds,int $profileId): int
     {

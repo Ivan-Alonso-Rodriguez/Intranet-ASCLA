@@ -12,6 +12,7 @@ async function save(form){const response=admin.waitForResponse(r=>r.url().endsWi
 function pass(name){checks.push(name);console.log('PASS '+name);}
 (async()=>{try{
  browser=await chromium.launch({headless:true});admin=await login('ascla.admin',env.ASCLA_ADMIN_PASSWORD);
+ const zone=(await ok(admin,'native:settings')).timezone || 'UTC';const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  const suffix=crypto.randomBytes(4).toString('hex'),password='J9!sK4#'+crypto.randomBytes(18).toString('base64url'),username='governance_'+suffix;
  member=await ok(admin,'native:users',{username,password,email:username+'@example.invalid',first_name:'Gestión',last_name:suffix,roles:['ascla_member']});member.username=username;member.page=await login(username,password);
  const boot=await ok(member.page,'bootstrap');await ok(member.page,'profiles/me',{first_name:'Gestión',last_name:suffix,position:'Analista',company:'Organización',city:'Lima',bio:'Descripción profesional',industries:[Number(boot.catalogs.industry[0].id)],interests:[Number(boot.catalogs.interest[0].id)],goals:[Number(boot.catalogs.goal[0].id)]});
@@ -28,7 +29,7 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  const pending=await ok(admin,'admin/users/'+member.id);const payload=Object.fromEntries(['email','role','first_name','last_name','position','company','phone','phone_visibility','membership_status','membership_until'].map(k=>[k,pending[k]]));
  assert.equal((await api(admin,'admin/users/'+member.id,{...payload,assigned_roles:['ascla_member','ascla_moderator']})).status,403);
  pass('Elegir varios roles exige autorización en la interfaz y la API rechaza una solicitud sin ella');
- await form.locator('[name="board_reference"]').fill('Acta de Junta 2026-'+suffix);await form.locator('[name="board_date"]').fill(new Date().toISOString().slice(0,10));await form.locator('[name="board_confirmed"]').check();await save(form);
+ await form.locator('[name="board_reference"]').fill('Acta de Junta 2026-'+suffix);await form.locator('[name="board_date"]').fill(today());await form.locator('[name="board_confirmed"]').check();await save(form);
  state=await ok(admin,'admin/users/'+member.id);assert.deepEqual(state.assigned_roles,['ascla_member','ascla_moderator']);assert.ok(state.role_approval.reference.endsWith(suffix));assert.ok(state.role_approval.recorded_by);assert.equal((await api(member.page,'admin')).status,200);
  const audit=(await ok(admin,'admin')).audit.find(row=>row.action==='board_role_authorization'&&Number(row.object_id)===member.id);assert.ok(audit);assert.deepEqual(JSON.parse(audit.detail).role_approval.after,state.role_approval);
  pass('La autorización registra acta, fecha, actor y roles; su alcance y auditoría habilitan moderación');
@@ -38,7 +39,7 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  form=await edit();await form.locator('[name="assigned_roles"][value="ascla_moderator"]').uncheck();await form.locator('[name="permission_ascla_moderate"]').selectOption('');await save(form);state=await ok(admin,'admin/users/'+member.id);assert.deepEqual(state.assigned_roles,['ascla_member']);assert.equal((await api(member.page,'admin')).status,403);
  pass('Reducir a un rol elimina las capacidades adicionales y conserva la evidencia de la Junta');
  await admin.locator('[data-action="board-role-approval"][data-id="'+member.id+'"]').click();const board=admin.locator('[data-form="board-approval"]');await board.waitFor();
- await board.locator('[name="roles"][value="administrator"]').check();await board.locator('[name="roles"][value="ascla_moderator"]').check();await board.locator('[name="board_reference"]').fill('Acta técnica '+suffix);await board.locator('[name="board_date"]').fill(new Date().toISOString().slice(0,10));await board.locator('[name="board_confirmed"]').check();
+ await board.locator('[name="roles"][value="administrator"]').check();await board.locator('[name="roles"][value="ascla_moderator"]').check();await board.locator('[name="board_reference"]').fill('Acta técnica '+suffix);await board.locator('[name="board_date"]').fill(today());await board.locator('[name="board_confirmed"]').check();
  const registered=admin.waitForResponse(r=>r.url().endsWith('/admin/users/'+member.id+'/role-approval')&&r.request().method()==='POST');await board.locator('button:not([type])').click();assert.equal((await registered).status(),200);await board.waitFor({state:'detached'});
  state=await ok(admin,'admin/users/'+member.id);assert.deepEqual(state.assigned_roles,['ascla_member']);assert.deepEqual(state.role_approval.roles,['administrator','ascla_moderator']);
  pass('Registro separado para decisiones sobre los cuatro roles: conserva la cuenta y no asigna privilegios');

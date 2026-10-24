@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.10.9
+Stable tag: 1.11.0
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,25 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.11.0 =
+* Limpieza de traducciones antiguas, código de interfaz retirado y estilos sin uso. Catálogos gettext compactos con los mismos textos y archivos PO editables conservados.
+* Resumen más desarrollado y regeneración editorial con fuente reutilizada y versión previa conservada. Transcripción completa oculta en la ficha; marcos de trabajo en etiquetas a todo el ancho.
+* Subtítulos y resumen automáticos al publicar un video, sin botones manuales; continúa en segundo plano y notifica errores. PDF abierto al entrar, controles refinados y sin texto duplicado; Galería sin nombre de archivo y con zonas laterales amplias para cambiar de foto.
+* Resumen editorial más legible: párrafos, conclusiones numeradas, referencias agrupadas y conceptos compactos; adaptable a móvil y ambos temas sin regenerar contenido.
+* Supadata para subtítulos públicos sin Google OAuth, clave cifrada desde WordPress, caché y trabajos asíncronos. Conserva transcripciones completas, prioriza subtítulos existentes y admite generación opcional.
+* Lector PDF privado integrado con páginas, zoom, texto para tecnologías de asistencia y descarga; PDF.js local con licencia incluida.
+* Perfiles compactos y usuario de acceso en Mi perfil; barras de desplazamiento refinadas, Galería con flechas laterales, eventos relacionados con búsqueda paginada y limpieza de adjuntos al eliminar. Notificaciones sin contador duplicado.
+* Reactivación de eventos cancelados con historial, inscripciones, avisos, recordatorios y calendario. Bandeja de notificaciones renovada y adaptable.
+* Inscripción con sincronización automática de Google Calendar; enlace del encuentro reservado a inscritos.
+* Enter envía mensajes; Shift+Enter conserva el salto de línea.
+* Eliminación de notificaciones por cuenta y confirmación de comentarios sin publicar.
+* Navegación entre ventanas emergentes, selección de texto y ajustes de contraste y alineación.
+* Indicadores del inicio navegables, estados y Chatham House en tonos neutros, botones del Directorio uniformes y nuevas tarjetas de eventos con fecha destacada.
+* Borradores neutros, etiquetas con mayúscula inicial y estados de inscripción adaptados al tema oscuro.
+* Opción manual de Google Calendar para inscritos sin cuenta vinculada, con el enlace del encuentro; Galería con portadas amplias y accesos desde imagen, título y botón.
+* Visor de Galería con imagen amplia sin recortar, miniaturas, controles y acceso al original; Centro de Conocimiento con tarjetas, títulos y portadas más legibles.
+* Restaura la portada predeterminada ilustrada del Centro de Conocimiento cuando no existe fotografía o falla la miniatura.
 
 = 1.10.9 =
 * Retira el botón de actualización de YouTube y conserva la obtención automática de metadatos y duración.

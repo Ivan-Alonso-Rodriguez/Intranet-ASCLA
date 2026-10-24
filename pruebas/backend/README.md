@@ -1,5 +1,7 @@
 # Backend: integración y E2E con Bruno
 
+El código actual prepara Core **1.11.0**. Esta entrega de reportes conserva su ejecución histórica de **1.10.9**; no se ha sustituido con resultados locales nuevos. La validación local de 1.11.0 se identifica en el manifiesto y la evidencia de `docs/evidence/release-1.11.0/`. Para renovar esta carpeta, ejecuta ambos clientes contra el mismo destino y paquete, con los seis flujos de `tests/qa-flow-contract.json`.
+
 Abre el [Bruno Run Dashboard](dashboard.html) para revisar resultados, peticiones, comprobaciones y reportes HTML/JSON/JUnit. La [colección ZIP](coleccion-bruno.zip) y la [carpeta importable](coleccion-bruno) contienen los mismos archivos.
 
 La seguridad dinámica de la API se entrega por separado en el [ZAP local de backend](../seguridad/backend-zap.html), con 18 operaciones GET y sus resultados del 22 de octubre. Consulta las [fuentes de las pruebas locales](../seguridad/fuentes.html) y el [sustento de seguridad](../seguridad/sustento.html) para revisar alcance, autenticación y límites. Estas operaciones ZAP no se suman a las 81 peticiones/149 comprobaciones de Bruno.

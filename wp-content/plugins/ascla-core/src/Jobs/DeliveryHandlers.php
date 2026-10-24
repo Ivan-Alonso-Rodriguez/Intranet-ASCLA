@@ -6,21 +6,24 @@ use ASCLA\Core\Integrations\GoogleOAuth;
 
 final class DeliveryHandlers
 {
-    public static function queueCalendar(int $id): bool
+    public static function queueCalendar(int $id,bool $reactivated=false): bool
     {
         $post=get_post($id);
         if (!$post) { return false; }
+        $queued=false;
         foreach ([absint(get_post_meta($id,'_ascla_google_organizer_user',true)),(int)$post->post_author,get_current_user_id()] as $user) {
-            if (GoogleOAuth::connected($user)) { Deliveries::enqueue('calendar',['id'=>$id]);return true; }
+            if (GoogleOAuth::connected($user)) { Deliveries::enqueue('calendar',['id'=>$id]);$queued=true;break; }
         }
-        return false;
+        // Restore the organizer first, so members receive its invitation instead of duplicate copies.
+        \ASCLA\Core\Services\EventCalendar::queuePersonalUpdates($id,$reactivated);
+        return $queued;
     }
     public static function send(array $row,array $payload): bool
     {
         return match($row['kind']) {
             'cache'=>\ASCLA\Core\Repositories\CacheRecovery::apply($payload),
             'notification'=>DeliveryMail::identified(static fn()=>self::notification((int)$payload['id']),$row['delivery_key']),
-            'calendar'=>self::calendar((int)$payload['id']),
+            'calendar'=>!empty($payload['participation'])?\ASCLA\Core\Services\EventCalendar::deliver((int)$payload['id']):self::calendar((int)$payload['id']),
             'mail'=>self::mail($row,$payload),
             default=>throw new DeliveryException('Entrega no válida.'),
         };

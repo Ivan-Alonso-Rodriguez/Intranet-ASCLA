@@ -192,6 +192,7 @@ final class Events
             wp_clear_scheduled_hook('ascla_event_offers',[$id]);
             $meta['cancelled_at']=current_time('mysql',true);
             $meta['cancelled_by']=get_current_user_id();
+            WordPressWrites::meta('post',$id,'_ascla_cancelled_schedule',array_intersect_key($meta,array_flip(['start','end','modality'])));
             if ($micro) {
                 self::cancelMicroevent($id,$post,$meta,$reason);
             }
@@ -205,7 +206,7 @@ final class Events
             foreach (array_keys($users) as $uid) {
                 Notifications::once(
                     $uid,
-                    'event_cancelled:'.$id,
+                    'event_cancelled:'.$id.':'.(int)get_post_meta($id,'_ascla_event_reactivation_count',true),
                     'event_cancelled',
                     'El evento “'.$post->post_title.'” fue cancelado. Motivo: '.$reason,
                     \ASCLA\Core\Domain\Catalog::url('eventos',['item'=>$id]),
@@ -299,6 +300,7 @@ final class Events
         Store::atomic('event:'.$id,static function()use($id,$status,$user){
             self::registerLocked($id,$status,$user);
             Audit::record('event_registration',$id,$status);
+            EventCalendar::queue($id);
         });
         return self::detail($id);
     }

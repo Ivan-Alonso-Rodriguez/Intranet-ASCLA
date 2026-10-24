@@ -11,13 +11,14 @@ async function goto(p,route,dismiss=true){await p.goto(base+'/'+route);await p.l
 function pass(name){checks.push(name);console.log('PASS '+name);}
 (async()=>{try{
  browser=await chromium.launch({headless:true});admin=await login('ascla.admin',env.ASCLA_ADMIN_PASSWORD);settings=await ok(admin,'settings');
+ const zone=(await ok(admin,'native:settings')).timezone || 'UTC';
  const suffix=crypto.randomBytes(4).toString('hex'),password='J9!sK4#'+crypto.randomBytes(18).toString('base64url');
  const user=await ok(admin,'native:users',{username:'range_'+suffix,password,email:'range_'+suffix+'@example.invalid',first_name:'Fechas',last_name:suffix,roles:['ascla_member']});member={...user,page:await login('range_'+suffix,password)};
  const boot=await ok(member.page,'bootstrap');
  await ok(member.page,'profiles/me',{first_name:'Fechas',last_name:suffix,position:'Analista',company:'Organización',city:'Lima',bio:'Descripción profesional',industries:[Number(boot.catalogs.industry[0].id)],interests:[Number(boot.catalogs.interest[0].id)],goals:[Number(boot.catalogs.goal[0].id)]});
  for(const [type,route] of [['hub','hub/'],['topic','foros/'],['gallery','galeria/']]){
   const post=await ok(admin,'content/'+type,{title:'Rango '+suffix+' '+type,body:'Publicación para comprobar rangos',status:'publish',meta:{chatham:false}});posts.push(post.id);
-  const day=post.date.slice(0,10);await goto(member.page,route);const form=member.page.locator('.content-list-filters');
+  const day=new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(post.date.replace(' ','T')+'Z'));await goto(member.page,route);const form=member.page.locator('.content-list-filters');
   await form.locator('[name="q"]').fill('Rango '+suffix+' '+type);await form.locator('[name="after"]').fill(day);await form.locator('[name="before"]').fill(day);
   const response=member.page.waitForResponse(r=>r.url().includes('/content/'+type+'?')&&r.url().includes('before='+day));
   await form.locator('button:not([type])').first().click();const data=await (await response).json();assert.equal(data.total,1,JSON.stringify(data));assert.equal(data.items[0].id,post.id);

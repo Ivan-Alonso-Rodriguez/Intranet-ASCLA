@@ -210,6 +210,7 @@ final class ContentPublishing
     private static function serializedMeta(\WP_Post $post): array
     {
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
+        if ($post->post_type==='ascla_resource'&&Access::canPublish()) { $meta['video_preparation']=VideoPreparation::status($post->ID); }
         foreach (['summary','technical_note','infographic','moments','excerpts','frameworks','norms','concepts','tags','conclusions','suggested_hub','agenda_ai'] as $field) {
             if (isset($meta[$field])) { $meta[$field]=\ASCLA\Core\Domain\EntityRedactor::cleanTree($meta[$field]); }
         }
@@ -232,8 +233,12 @@ final class ContentPublishing
     {
         [$title,$body,$meta]=EditorialPayload::reader($post,$meta,$title,$body);
         if ($post->post_type==='ascla_ally') { $meta['ally_status']=Allies::state($post,$meta); }
+        if ($post->post_type==='ascla_event' && !Content::canEdit($post)) {
+            $accepted=Store::count('registrations',"event_id=%d AND user_id=%d AND status='accepted'",[$post->ID,get_current_user_id()]);
+            if (!$accepted || !empty($meta['cancelled'])) { unset($meta['url']); }
+        }
         if (!current_user_can('ascla_moderate') && !Access::canPublish()) {
-            unset($meta['transcript'],$meta['identities'],$meta['invitees'],$meta['moderation'],$meta['transcript_error'],$meta['transcript_mode'],$meta['transcript_checked_at']);
+            unset($meta['transcript'],$meta['identities'],$meta['invitees'],$meta['moderation'],$meta['transcript_error'],$meta['transcript_mode'],$meta['transcript_checked_at'],$meta['transcript_video_id'],$meta['transcript_language']);
         }
         if (!empty($meta['micro'])) {
             $meta['micro_state']=get_post_meta($post->ID,'_ascla_micro_state',true)?:'pending';
@@ -333,7 +338,7 @@ final class ContentPublishing
         $postData=['post_type'=>'ascla_'.$context['type'],'post_title'=>$context['title'],'post_content'=>$context['body'],'post_status'=>'draft','post_parent'=>$context['parent'],'comment_status'=>'open'];
         if ($context['id']) { $postData['ID']=$context['id']; } else { $postData['post_author']=get_current_user_id(); }
         $saved=WordPressWrites::post(wp_slash($postData));
-        WordPressWrites::meta('post',$saved,'_ascla',$context['meta']);
+        WordPressWrites::meta('post',$saved,'_ascla',$context['meta'],true);
         foreach ($context['taxonomies'] as $tax=>$ids) { WordPressWrites::terms($saved,$ids,'ascla_'.$tax); }
         if ($context['tag_names']) { self::tags($saved,$context['tag_names']); }
         foreach ($context['meta']['media_ids']??[] as $media) { Media::attach($media,$saved); }
@@ -412,6 +417,7 @@ final class ContentPublishing
             Access::require(self::canDelete($post),'No tienes permisos para eliminar este contenido.',403);
             $meta=(array)get_post_meta($id,'_ascla',true);
             Access::require((bool)wp_trash_post($id),'No se pudo eliminar el contenido.',500);
+            if ($post->post_type==='ascla_gallery') { MediaRemoval::gallery($id); }
             if($post->post_type==='ascla_event' && !empty($meta['micro'])) {
                 MicroEvents::forget($id);
                 Store::delete('registrations',['event_id'=>$id]);

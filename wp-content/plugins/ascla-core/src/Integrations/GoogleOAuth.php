@@ -103,6 +103,9 @@ final class GoogleOAuth
             Access::require(Access::canPublish() && Content::canEdit($post),'No puede sincronizar este evento como organizador.',403);
             return self::syncOrganizerEvent($id,get_current_user_id(),false);
         }
+        if ($operation==='save' && !Content::canEdit($post)) {
+            Access::require(Store::count('registrations',"event_id=%d AND user_id=%d AND status='accepted'",[$id,get_current_user_id()])>0,'Inscríbete antes de guardar este evento en tu calendario.',403);
+        }
         return self::personalCalendar($post,$meta,$operation);
     }
 
@@ -125,7 +128,9 @@ final class GoogleOAuth
             $data=GoogleCalendarTransport::request($token,'PATCH',self::eventsUrl($remote),$body,false,[200,404,410]);
             if (!empty($data['_missing'])) { $remote=''; delete_user_meta($user,$key); }
         }
-        if ($remote==='') { $data=GoogleCalendarTransport::request($token,'POST',self::eventsUrl(),$body,false,[200,201]); }
+        if ($remote==='') {
+            $data=GoogleCalendarTransport::createPersonal($token,$body,$user,$post->ID);
+        }
         $remoteId=sanitize_text_field((string)($data['id']??$remote));
         if ($remoteId==='') { throw new IntegrationException('Google Calendar no devolvió el identificador del evento creado.'); }
         update_user_meta($user,$key,$remoteId); Audit::record('calendar_save',$post->ID);
@@ -257,10 +262,11 @@ final class GoogleOAuth
         $organizerAccount=get_userdata($organizer);
         $organizerEmail=strtolower(trim((string)($organizerAccount->user_email??'')));
         $byEmail=self::existingAttendeeMap($existing,$organizerEmail);
-        foreach (Store::rows('registrations',"event_id=%d AND status IN ('invited','accepted','offered')",[$id],'ORDER BY id ASC') as $row) {
+        foreach (Store::rows('registrations','event_id=%d',[$id],'ORDER BY id ASC') as $row) {
             $account=get_userdata(absint($row['user_id']??0));
             $email=strtolower(trim((string)($account->user_email??'')));
             if (!is_email($email) || $email===$organizerEmail) { continue; }
+            if (!in_array($row['status'],['invited','accepted','offered'],true)) { unset($byEmail[$email]);continue; }
             if (!isset($byEmail[$email])) { $byEmail[$email]=['email'=>$email]; }
         }
         return array_values($byEmail);
@@ -298,7 +304,7 @@ final class GoogleOAuth
             'guestsCanSeeOtherGuests'=>false,
         ];
         if (!empty($meta['url'])) { $body['description'].="\n\nEnlace del encuentro: ".esc_url_raw((string)$meta['url']); }
-        if ($attendees) { $body['attendees']=$attendees; }
+        $body['attendees']=$attendees;
         return $body;
     }
 

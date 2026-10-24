@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="53" assertions="410" errors="0" failures="0" skipped="0" time="14.325610">
+    <testsuite name="EventReactivationTest" file="/opt/ascla-tests/php/EventReactivationTest.php" tests="10" assertions="46" errors="0" failures="0" skipped="0" time="4.319218">
+      <testcase name="testExecutiveReopensAndPreservesRegistrationHistoryAndNotifiesEachCycle" file="/opt/ascla-tests/php/EventReactivationTest.php" line="38" class="EventReactivationTest" classname="EventReactivationTest" assertions="12" time="0.714062"/>
+      <testcase name="testMembersAndModeratorsCannotReactivateAndRestRejectsTheirRequest" file="/opt/ascla-tests/php/EventReactivationTest.php" line="54" class="EventReactivationTest" classname="EventReactivationTest" assertions="5" time="0.332076"/>
+      <testcase name="testPastEventRequiresNewDatesAndKeepsCancellationOnFailure" file="/opt/ascla-tests/php/EventReactivationTest.php" line="65" class="EventReactivationTest" classname="EventReactivationTest" assertions="3" time="0.325439"/>
+      <testcase name="testChangedScheduleDuringCancellationRequiresReconfirmation" file="/opt/ascla-tests/php/EventReactivationTest.php" line="71" class="EventReactivationTest" classname="EventReactivationTest" assertions="3" time="0.454355"/>
+      <testcase name="testOfferedSeatsReceiveFreshDeadlineAndWaitlistNeverOverbooks" file="/opt/ascla-tests/php/EventReactivationTest.php" line="80" class="EventReactivationTest" classname="EventReactivationTest" assertions="4" time="0.514303"/>
+      <testcase name="testPublishedMicroeventRequiresManagementCapabilityAndRestoresLifecycle" file="/opt/ascla-tests/php/EventReactivationTest.php" line="92" class="EventReactivationTest" classname="EventReactivationTest" assertions="4" time="0.339623"/>
+      <testcase name="testUnpublishedMicroeventReturnsToDraftWithoutBypassingReview" file="/opt/ascla-tests/php/EventReactivationTest.php" line="100" class="EventReactivationTest" classname="EventReactivationTest" assertions="3" time="0.335595"/>
+      <testcase name="testExpiredMicroeventRegistrationWindowCannotReopen" file="/opt/ascla-tests/php/EventReactivationTest.php" line="105" class="EventReactivationTest" classname="EventReactivationTest" assertions="2" time="0.333983"/>
+      <testcase name="testReactivationRestoresPersonalGoogleCopyWithNewIdAfterDeletion" file="/opt/ascla-tests/php/EventReactivationTest.php" line="110" class="EventReactivationTest" classname="EventReactivationTest" assertions="5" time="0.481411"/>
+      <testcase name="testOrganizerIsRestoredBeforeConnectedMembersWithoutDuplicatePersonalCopies" file="/opt/ascla-tests/php/EventReactivationTest.php" line="125" class="EventReactivationTest" classname="EventReactivationTest" assertions="5" time="0.488371"/>
+    </testsuite>
+    <testsuite name="GalleryProfile1110Test" file="/opt/ascla-tests/php/GalleryProfile1110Test.php" tests="5" assertions="24" errors="0" failures="0" skipped="0" time="1.040182">
+      <testcase name="testRemovingGalleryDeletesImagesPdfAndUnusedMasterButPreservesOtherFiles" file="/opt/ascla-tests/php/GalleryProfile1110Test.php" line="31" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="8" time="0.238273"/>
+      <testcase name="testSharedMasterSurvivesUntilItsLastGalleryDerivativeIsRemoved" file="/opt/ascla-tests/php/GalleryProfile1110Test.php" line="39" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="5" time="0.228686"/>
+      <testcase name="testUnauthorizedGalleryDeletionPreservesThePostAndItsBytes" file="/opt/ascla-tests/php/GalleryProfile1110Test.php" line="45" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="3" time="0.188477"/>
+      <testcase name="testDatabaseFailureRollsBackGalleryAndFileDeletionTogether" file="/opt/ascla-tests/php/GalleryProfile1110Test.php" line="52" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="4" time="0.193793"/>
+      <testcase name="testUsernameIsAvailableOnlyOnOwnProfile" file="/opt/ascla-tests/php/GalleryProfile1110Test.php" line="62" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="4" time="0.190953"/>
+    </testsuite>
+    <testsuite name="MediaTemporaryTest" file="/opt/ascla-tests/php/MediaTemporaryTest.php" tests="5" assertions="21" errors="0" failures="0" skipped="0" time="0.363721">
+      <testcase name="testTemporaryUploadIsHiddenAndCanBeDiscardedWhenFormIsCancelled" file="/opt/ascla-tests/php/MediaTemporaryTest.php" line="46" class="MediaTemporaryTest" classname="MediaTemporaryTest" assertions="4" time="0.060576"/>
+      <testcase name="testCommittedUploadReturnsToLibraryAndCannotBeDiscardedAsTemporary" file="/opt/ascla-tests/php/MediaTemporaryTest.php" line="56" class="MediaTemporaryTest" classname="MediaTemporaryTest" assertions="4" time="0.059163"/>
+      <testcase name="testAnotherMemberCannotDiscardOrListTheOwnersTemporaryFile" file="/opt/ascla-tests/php/MediaTemporaryTest.php" line="65" class="MediaTemporaryTest" classname="MediaTemporaryTest" assertions="4" time="0.115355"/>
+      <testcase name="testAbandonedCleanupPreservesFreshCommittedAndProfileReferencedFiles" file="/opt/ascla-tests/php/MediaTemporaryTest.php" line="71" class="MediaTemporaryTest" classname="MediaTemporaryTest" assertions="5" time="0.067689"/>
+      <testcase name="testDiscardingACropRemovesItsUnusedTemporaryMaster" file="/opt/ascla-tests/php/MediaTemporaryTest.php" line="79" class="MediaTemporaryTest" classname="MediaTemporaryTest" assertions="4" time="0.060938"/>
+    </testsuite>
+    <testsuite name="NotificationsTest" file="/opt/ascla-tests/php/NotificationsTest.php" tests="14" assertions="138" errors="0" failures="0" skipped="0" time="3.126164">
+      <testcase name="testReactionHasAuthorSubjectAndSafeDestination" file="/opt/ascla-tests/php/NotificationsTest.php" line="42" class="NotificationsTest" classname="NotificationsTest" assertions="9" time="0.197133"/>
+      <testcase name="testOwnCommentDoesNotNotifyOwnPublication" file="/opt/ascla-tests/php/NotificationsTest.php" line="53" class="NotificationsTest" classname="NotificationsTest" assertions="4" time="0.179297"/>
+      <testcase name="testCommentAndReplyNotificationsIdentifyTheAssociate" file="/opt/ascla-tests/php/NotificationsTest.php" line="61" class="NotificationsTest" classname="NotificationsTest" assertions="5" time="0.198225"/>
+      <testcase name="testUnavailableTargetAndChathamNeverExposeOldIdentities" file="/opt/ascla-tests/php/NotificationsTest.php" line="76" class="NotificationsTest" classname="NotificationsTest" assertions="9" time="0.192810"/>
+      <testcase name="testFeedCountsBeyondOneHundredAndReadAllIsOwned" file="/opt/ascla-tests/php/NotificationsTest.php" line="88" class="NotificationsTest" classname="NotificationsTest" assertions="13" time="0.475401"/>
+      <testcase name="testToastFeedShowsOnlyEligibleUnreadAndKeepsNotificationInCenter" file="/opt/ascla-tests/php/NotificationsTest.php" line="103" class="NotificationsTest" classname="NotificationsTest" assertions="12" time="0.194815"/>
+      <testcase name="testUserCanDeleteOnlyOwnNotifications" file="/opt/ascla-tests/php/NotificationsTest.php" line="134" class="NotificationsTest" classname="NotificationsTest" assertions="9" time="0.185250"/>
+      <testcase name="testLegacyLinksRebuildOnCurrentSiteAndUnknownLinksHaveFallback" file="/opt/ascla-tests/php/NotificationsTest.php" line="152" class="NotificationsTest" classname="NotificationsTest" assertions="15" time="0.197909"/>
+      <testcase name="testDirectConversationAndProfileDestinationsCheckAccess" file="/opt/ascla-tests/php/NotificationsTest.php" line="168" class="NotificationsTest" classname="NotificationsTest" assertions="10" time="0.258635"/>
+      <testcase name="testAssignedSupportStaffAndRequesterReceiveStatusNotifications" file="/opt/ascla-tests/php/NotificationsTest.php" line="184" class="NotificationsTest" classname="NotificationsTest" assertions="15" time="0.336333"/>
+      <testcase name="testSavedAnswersHistoryOwnershipAndRevokedSources" file="/opt/ascla-tests/php/NotificationsTest.php" line="233" class="NotificationsTest" classname="NotificationsTest" assertions="11" time="0.188646"/>
+      <testcase name="testEmailPreferencesDefaultActiveAndCanBeChangedPerCategory" file="/opt/ascla-tests/php/NotificationsTest.php" line="244" class="NotificationsTest" classname="NotificationsTest" assertions="9" time="0.169363"/>
+      <testcase name="testMessageEmailIsThrottledPerConversationButInternalNoticesAreNot" file="/opt/ascla-tests/php/NotificationsTest.php" line="257" class="NotificationsTest" classname="NotificationsTest" assertions="8" time="0.184745"/>
+      <testcase name="testNotificationEndpointsRequireAuthentication" file="/opt/ascla-tests/php/NotificationsTest.php" line="280" class="NotificationsTest" classname="NotificationsTest" assertions="9" time="0.167602"/>
+    </testsuite>
+    <testsuite name="ProfileEditorial109Test" file="/opt/ascla-tests/php/ProfileEditorial109Test.php" tests="7" assertions="66" errors="0" failures="0" skipped="0" time="2.938596">
+      <testcase name="testIndividualLabelKeepsExistingStoredCodesAndLegacyLabels" file="/opt/ascla-tests/php/ProfileEditorial109Test.php" line="40" class="ProfileEditorial109Test" classname="ProfileEditorial109Test" assertions="5" time="0.387618"/>
+      <testcase name="testSocialDomainsRejectLookalikesCredentialsAndUnexpectedPortsInBothProfileAndAdminWrites" file="/opt/ascla-tests/php/ProfileEditorial109Test.php" line="46" class="ProfileEditorial109Test" classname="ProfileEditorial109Test" assertions="14" time="0.410236"/>
+      <testcase name="testValidSocialUrlsAndClearingFieldsAreAcceptedWhileWebsiteRemainsIndependent" file="/opt/ascla-tests/php/ProfileEditorial109Test.php" line="61" class="ProfileEditorial109Test" classname="ProfileEditorial109Test" assertions="7" time="0.373687"/>
+      <testcase name="testGalleryAndResourceCanBeHiddenListedAndRepublishedWithoutLosingData" file="/opt/ascla-tests/php/ProfileEditorial109Test.php" line="69" class="ProfileEditorial109Test" classname="ProfileEditorial109Test" assertions="26" time="0.503625"/>
+      <testcase name="testEditorHiddenStatusAndSchedulingCancellationAreSupported" file="/opt/ascla-tests/php/ProfileEditorial109Test.php" line="88" class="ProfileEditorial109Test" classname="ProfileEditorial109Test" assertions="4" time="0.421339"/>
+      <testcase name="testExecutiveRegistryAndStateChangesIncludeOtherEditorsContent" file="/opt/ascla-tests/php/ProfileEditorial109Test.php" line="98" class="ProfileEditorial109Test" classname="ProfileEditorial109Test" assertions="4" time="0.442856"/>
+      <testcase name="testActiveConnectionOverridesLegacyPendingConversationRequest" file="/opt/ascla-tests/php/ProfileEditorial109Test.php" line="108" class="ProfileEditorial109Test" classname="ProfileEditorial109Test" assertions="6" time="0.399236"/>
+    </testsuite>
+    <testsuite name="ProfileLoadingTest" file="/opt/ascla-tests/php/ProfileLoadingTest.php" tests="12" assertions="115" errors="0" failures="0" skipped="0" time="2.537729">
+      <testcase name="testRestCanLoadProfileAndDeterministicAffinityWithoutCallingAI" file="/opt/ascla-tests/php/ProfileLoadingTest.php" line="49" class="ProfileLoadingTest" classname="ProfileLoadingTest" assertions="11" time="0.211907"/>
+      <testcase name="testValidPairProsePersistsAcrossVisitsAndTransientEviction" file="/opt/ascla-tests/php/ProfileLoadingTest.php" line="58" class="ProfileLoadingTest" classname="ProfileLoadingTest" assertions="11" time="0.196373"/>
+      <testcase name="testOnlyRelevantProfileChangesAndProviderChangesRegenerateProse" file="/opt/ascla-tests/php/ProfileLoadingTest.php" line="69" class="ProfileLoadingTest" classname="ProfileLoadingTest" assertions="18" time="0.382220"/>
+      <testcase name="testCachedProseNeverBypassesNetworkingPrivacyOrBlocks" file="/opt/ascla-tests/php/ProfileLoadingTest.php" line="80" class="ProfileLoadingTest" classname="ProfileLoadingTest" assertions="9" time="0.252395"/>
+      <testsuite name="ProfileLoadingTest::testProviderFailureUsesShortFallbackAndKeepsProfileAvailable" tests="5" assertions="45" errors="0" failures="0" skipped="0" time="0.916329">
+        <testcase name="testProviderFailureUsesShortFallbackAndKeepsProfileAvailable with data set &quot;timeout&quot;" file="/opt/ascla-tests/php/ProfileLoadingTest.php" line="102" class="ProfileLoadingTest" classname="ProfileLoadingTest" assertions="9" time="0.185715"/>
+        <testcase name="testProviderFailureUsesShortFallbackAndKeepsProfileAvailable with data set &quot;quota&quot;" file="/opt/ascla-tests/php/ProfileLoadingTest.php" line="102" class="ProfileLoadingTest" classname="ProfileLoadingTest" assertions="9" time="0.178433"/>
+        <testcase name="testProviderFailureUsesShortFallbackAndKeepsProfileAvailable with data set &quot;invalid JSON&quot;" file="/opt/ascla-tests/php/ProfileLoadingTest.php" line="102" class="ProfileLoadingTest" classname="ProfileLoadingTest" assertions="9" time="0.183029"/>
+        <testcase name="testProviderFailureUsesShortFallbackAndKeepsProfileAvailable with data set &quot;wrong shape&quot;" file="/opt/ascla-tests/php/ProfileLoadingTest.php" line="102" class="ProfileLoadingTest" classname="ProfileLoadingTest" assertions="9" time="0.185226"/>
+        <testcase name="testProviderFailureUsesShortFallbackAndKeepsProfileAvailable with data set &quot;empty prose&quot;" file="/opt/ascla-tests/php/ProfileLoadingTest.php" line="102" class="ProfileLoadingTest" classname="ProfileLoadingTest" assertions="9" time="0.183926"/>
+      </testsuite>
+      <testcase name="testLocalRateLimitFallsBackWithoutCallingProvider" file="/opt/ascla-tests/php/ProfileLoadingTest.php" line="110" class="ProfileLoadingTest" classname="ProfileLoadingTest" assertions="4" time="0.180081"/>
+      <testcase name="testCacheIsBoundedAndKeepsTasksAndTargetsSeparate" file="/opt/ascla-tests/php/ProfileLoadingTest.php" line="116" class="ProfileLoadingTest" classname="ProfileLoadingTest" assertions="7" time="0.204373"/>
+      <testcase name="testConcurrentMissDoesNotCallProviderOrPersistBusyFallback" file="/opt/ascla-tests/php/ProfileLoadingTest.php" line="125" class="ProfileLoadingTest" classname="ProfileLoadingTest" assertions="10" time="0.194051"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

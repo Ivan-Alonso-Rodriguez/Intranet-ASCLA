@@ -1,5 +1,7 @@
 # Pruebas de integración, E2E y seguridad de ASCLA
 
+El código actual prepara Core **1.11.0**. Esta entrega de reportes conserva su ejecución histórica de **1.10.9**; no se ha sustituido con resultados locales nuevos. La validación local de 1.11.0 se identifica en el manifiesto y la evidencia de `docs/evidence/release-1.11.0/`. Para renovar esta carpeta, ejecuta ambos clientes contra el mismo destino y paquete, con los seis flujos de `tests/qa-flow-contract.json`.
+
 Esta carpeta reúne la entrega de pruebas para GitHub: colección Bruno con variables, explicación de los flujos, evidencias de Playwright y resultados publicables de seguridad con OWASP ZAP y CSP. Los resultados identifican su fecha y entorno; la fecha de preparación de esta carpeta no equivale a otra ejecución.
 
 ## Última versión desplegada: ejecución del 22 de octubre de 2026

@@ -7,7 +7,7 @@ const remote=process.env.ASCLA_ACCEPTANCE_MODE==='remote';
 if(remote){
  const target=new URL(process.env.ASCLA_TEST_SITE_URL||'https://wordpress.ingsoftware.lat/');
  if(target.username||target.password||target.search||target.hash||target.pathname!=='/'||(!((target.protocol==='https:'&&target.hostname==='wordpress.ingsoftware.lat')||(process.env.ASCLA_E2E_EPHEMERAL==='1'&&target.protocol==='http:'&&/^ascla[_-]/.test(target.hostname)))))throw Error('Use the configured WordPress QA URL');
- if(new URL(fixture.base).origin!==target.origin||fixture.origin!=='ascla-qa-tools'||fixture.core_version!=='1.10.9'||!/^ascla_qa_[a-f0-9]{10}_$/.test(fixture.prefix||''))throw Error('Download a fresh QA access file from this site');
+ if(new URL(fixture.base).origin!==target.origin||fixture.origin!=='ascla-qa-tools'||fixture.core_version!=='1.11.0'||!/^ascla_qa_[a-f0-9]{10}_$/.test(fixture.prefix||''))throw Error('Download a fresh QA access file from this site');
  for(const name of ['admin','a','b','ui_a','ui_b'])if(!fixture.actors[name]?.login?.startsWith(fixture.prefix)||!Number.isInteger(fixture.actors[name]?.id)||typeof fixture.actors[name]?.password!=='string')throw Error('Synthetic QA accounts are required');
  fixture.base=target.origin;
 }

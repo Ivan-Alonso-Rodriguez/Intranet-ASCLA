@@ -1,0 +1,138 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-23T19:40:15.932Z",
+  "scope": "WordPress local desechable; cola, REST y navegador reales. Respuestas HTTP de Supadata simuladas para esta prueba, sin clave ni consumo real. No acredita conexión al servicio real ni publicación.",
+  "package_sha256": "57b528f3b2731a3cb6c488c0b7e3d901c55fb26bc67e7551af11b87c6feb5dc2",
+  "checks": [
+    "La clave se configura desde WordPress, vuelve vacía al navegador y el modo nativo queda seleccionado sin generación",
+    "La generación adicional se puede activar y desactivar desde el formulario real",
+    "El botón Obtener subtítulos inicia la cola real y muestra el estado asíncrono sin pedir Google OAuth",
+    "Se guarda y visualiza la transcripción completa con el último segmento después de dos horas",
+    "La lectura mantiene contraste y distribución en móvil y escritorio, en ambos temas",
+    "Abrir y cerrar la transcripción conserva el comentario en curso",
+    "Generar resumen y nota reutiliza la fuente completa guardada y conserva el original",
+    "Los asociados conservan acceso al recurso y sus resúmenes; la fuente editorial, credenciales y consultas de pago requieren permisos",
+    "Eliminar la clave desde Ajustes funciona y conserva las transcripciones previamente guardadas"
+  ],
+  "scans": [
+    {
+      "name": "ajustes-supadata",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "trabajo-en-segundo-plano",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "transcripcion-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 2
+    },
+    {
+      "name": "transcripcion-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 2
+    },
+    {
+      "name": "transcripcion-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 2
+    },
+    {
+      "name": "transcripcion-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 2
+    }
+  ],
+  "errors": [],
+  "package_manifest": "docs/evidence/release-1.11.0/package-supadata.json",
+  "phpunit": {
+    "tests": "157",
+    "assertions": "1456",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "42.163117",
+    "source": "tests/php",
+    "provider_responses": "simulated",
+    "notes": "Controlled negative cases deliberately log provider, delivery, rejected-write and revoked-permission errors; the assertions verify those paths."
+  },
+  "pdf_regression": {
+    "checks": 19,
+    "axe_views": 10,
+    "errors": [],
+    "native_report": "test-results/supadata1110/pdf-regression/index.html"
+  },
+  "provider_fixture": {
+    "simulated_provider": true,
+    "requests": [
+      "https://api.supadata.ai/v1/transcript?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DASCLA_SD001&lang=es&text=false&mode=native",
+      "https://api.supadata.ai/v1/transcript/job-fixture-long",
+      "https://api.supadata.ai/v1/transcript/job-fixture-long"
+    ],
+    "creates": 1,
+    "polls": 2
+  },
+  "official_sources": [
+    "https://docs.supadata.ai/get-transcript",
+    "https://docs.supadata.ai/api-reference/introduction",
+    "https://docs.supadata.ai/errors/list",
+    "https://docs.supadata.ai/errors/limit-exceeded"
+  ],
+  "architecture": {
+    "provider": "Supadata native by default; optional auto tries existing captions first",
+    "oauth_required_for_transcripts": false,
+    "complete_source": "2-hour-5-minute fixture, 1500 timestamped segments, 295521 characters; final segment retained in storage, editor, viewer and existing AI context",
+    "asynchronous": "202 job ID persisted; queued/active deferred in existing queue; complete source saved before multimedia resumes",
+    "cache": "7 days; shared per video/language/credential; existing stored or manual source wins; pending video job reused across a language change",
+    "secret": "AES-256-GCM WordPress option, non-autoloaded; constant/environment precedence; explicit external-only server policy respected; no key in REST, URL, audit or browser return",
+    "limits": "Conservative account pacing; Retry-After; quota/plan/auth/access errors; bounded transient errors; no automatic billable resubmission after ambiguous initial timeout; explicit retry for failed or expired jobs",
+    "preservation": "Up to 2000000 characters and 16 MiB provider responses; invalid or over-limit results fail whole, never silently clipped; full source sent to selected AI without slicing"
+  },
+  "native_reports": [
+    "test-results/supadata1110/index.html",
+    "test-results/supadata1110/phpunit.xml",
+    "test-results/supadata1110/pdf-regression/index.html"
+  ],
+  "live_supadata_verification": false,
+  "limitations": [
+    "Supadata and AI responses are simulated in these local checks. No real Supadata API Key was supplied; the user will configure it later.",
+    "No remote deployment, full shared Bruno/Playwright rerun, SonarQube or ZAP run is claimed.",
+    "External availability, supported videos, provider plans/credits and the selected AI model context limits still apply. A functioning cron worker is needed to retrieve async results before provider expiry."
+  ],
+  "temporary_environment_cleanup": "completed; isolated containers, volumes, fixture accounts, private access file, uploads and dummy API key removed",
+  "unchanged_hashes": [
+    "ascla-core/src/Services/Media.php",
+    "ascla-core/src/Frontend/SecurityHeaders.php",
+    "ascla-core/assets/pdf-preview.js",
+    "ascla-core/assets/accessibility.js",
+    "ascla-core/src/Integrations/GoogleOAuth.php",
+    "ascla-core/src/Integrations/GoogleCalendarTransport.php"
+  ]
+}

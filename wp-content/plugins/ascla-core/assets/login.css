@@ -60,9 +60,9 @@ body.login.ascla-login {
 .ascla-login #login form .input:focus { border-color: var(--ascla-blue); box-shadow: 0 0 0 3px #116da31c; outline: 2px solid transparent; }
 .ascla-login #login form .password-input { padding-right: 45px; }
 .ascla-login #login .wp-pwd button { color: var(--ascla-muted); height: 48px; width: 44px; top: 0; }
-.ascla-login #login form .forgetmenot { float: none; margin: 0 0 24px; }
-.ascla-login #login form .forgetmenot label { font-weight: 400; color: var(--ascla-muted); }
-.ascla-login #rememberme { border-color: #91a6bb; border-radius: 4px; width: 17px; height: 17px; }
+.ascla-login #login form .forgetmenot { float: none; display:flex; align-items:center; gap:8px; margin: 0 0 24px; }
+.ascla-login #login form .forgetmenot label { display:inline-flex; align-items:center; gap:8px; font-weight: 400; color: var(--ascla-muted); margin:0; }
+.ascla-login #rememberme { flex:0 0 17px; margin:0; border-color: #91a6bb; border-radius: 4px; width: 17px; height: 17px; }
 .ascla-login #login .submit { clear: both; }
 .ascla-login #login .button-primary { float: none; width: 100%; min-height: 48px; padding: 10px 16px; border: 1px solid var(--ascla-blue); border-radius: 9px; background: var(--ascla-blue); color: #fff; font-size: 14px; font-weight: 600; line-height: 1.6; text-shadow: none; box-shadow: 0 4px 10px #116da320; }
 .ascla-login #login .button-primary:hover { background: #105981; border-color: #105981; }

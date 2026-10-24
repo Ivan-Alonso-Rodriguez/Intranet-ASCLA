@@ -1,12 +1,38 @@
 # ASCLA Core — Intranet ASCLA
 
-## Versión actual: 1.10.9 · esquema 15
+## Versión actual: 1.11.0 · esquema 15
 
 Plugin WordPress para una comunidad profesional privada: perfiles, Directorio, conexiones, mensajería, Hub, foros, eventos, microeventos, Centro de Conocimiento, Galería, Aliados, Contacto y administración. Elementor es opcional; no se modifica WordPress Core.
 
 El código instalable está en [wp-content/plugins/ascla-core](wp-content/plugins/ascla-core). La carpeta del plugin siempre es `ascla-core`; el número de versión no forma parte de su nombre. Sus datos se conservan al desactivarlo o desinstalarlo.
 
+La versión 1.11.0 mejora la inscripción con Google Calendar, los comentarios sin publicar, la mensajería y la navegación entre ventanas. El [paquete](docs/evidence/release-1.11.0/package.json) y la [validación local](docs/evidence/release-1.11.0/usability1110.json) tienen su propia identificación. Los reportes existentes de `pruebas/` conservan la versión, fecha y entorno de su ejecución; no se presentan como resultados nuevos de 1.11.0.
+
+La nueva revisión añade reactivación de eventos cancelados, conserva inscripciones y espera, reprograma recordatorios y calendario y renueva la bandeja de notificaciones con tonos neutros. [Evidencia de reactivación y notificaciones](docs/evidence/release-1.11.0/event-reactivation1110.json).
+
 ## Documentación
+
+La optimización retira traducciones antiguas sin referencias y funciones de interfaz ya retiradas. Los catálogos compilados omiten las traducciones idénticas al original mediante el comportamiento estándar de gettext, conservando los archivos PO editables y los valores personalizados. Las entradas dinámicas o dudosas se conservan. [Auditoría y validación](docs/evidence/release-1.11.0/code-optimization1110.json).
+
+El resumen generado desarrolla las ideas en varios párrafos, con una extensión orientativa de 220 a 350 palabras cuando la fuente lo permite. «Actualizar resumen y nota» permite regenerar el material sin volver a obtener una transcripción ya guardada; conserva la versión anterior hasta completar el proceso y notifica los errores. La ficha oculta el desplegable de la transcripción y muestra los marcos de trabajo en etiquetas a todo el ancho. [Evidencia de regeneración](docs/evidence/release-1.11.0/summary-refresh1110.json).
+
+Los PDF se abren automáticamente con controles de lectura refinados y sin el panel visible «Texto de la página». Galería oculta el nombre del archivo y amplía las zonas laterales para cambiar de foto. Al publicar un video con Supadata configurado, los subtítulos y el resumen se preparan en segundo plano, sin botones manuales; los fallos generan una notificación. [Evidencia de visores y automatización](docs/evidence/release-1.11.0/readers-auto1110.json).
+
+El resumen de los recursos presenta una estructura editorial con tipografía legible, párrafos separados, conclusiones numeradas, referencias en secciones completas y conceptos en etiquetas. La vista se adapta al tema y al ancho de pantalla; reutiliza los textos guardados sin volver a generarlos. [Evidencia de presentación](docs/evidence/release-1.11.0/summary1110.json).
+
+La obtención de subtítulos públicos incorpora Supadata sin Google OAuth, con prioridad a subtítulos existentes, generación opcional, caché y seguimiento de trabajos largos. El original completo se conserva y puede consultarse en la publicación o utilizarse para generar resumen y nota. [Configuración y límites de Supadata](MANUAL_QA_UAT.md#subtítulos-públicos-de-youtube-con-supadata).
+
+La previsualización de PDF se abre dentro de la publicación, con páginas, zoom, texto para tecnologías de asistencia y descarga. El lector PDF.js 6.4.299 se carga desde archivos locales fijados y con licencia Apache-2.0; no se utilizan visores externos. Se conservan las cabeceras de seguridad y el acceso privado a los archivos. [Evidencia del lector PDF](docs/evidence/release-1.11.0/pdf-preview1110.json).
+
+La revisión de perfiles y Galería compacta los intereses del perfil público, muestra el usuario de acceso solo en Mi perfil, mejora las barras de desplazamiento y cambia la acción de las tarjetas a «Abrir». El editor incorpora búsqueda paginada de eventos y publicación seleccionada por defecto para una galería nueva con permisos. El visor coloca las flechas junto a la fotografía; los adjuntos muestran sus nombres alineados. Eliminar una publicación de Galería retira también sus archivos privados y sus copias maestras sin uso. Notificaciones elimina el contador repetido de la cabecera y usa «notificaciones» en el pie. [Evidencia de esta etapa](docs/evidence/release-1.11.0/gallery-profile1110.json).
+
+Se restaura la portada predeterminada anterior para los recursos sin foto o con una miniatura no disponible. Conserva las tarjetas ampliadas del Centro de Conocimiento. La [evidencia de portadas](docs/evidence/release-1.11.0/knowledge-cover1110.json) identifica el ZIP de esa etapa; las etapas anteriores mantienen su propio manifiesto.
+
+La [revisión del visor y Centro de Conocimiento](docs/evidence/release-1.11.0/media-knowledge1110.json) amplía las fotografías dentro de Galería, añade navegación por miniaturas y conserva el acceso al original y los documentos. Centro de Conocimiento presenta tarjetas más amplias, tipos y duraciones claros y portadas de respaldo. Cada revisión conserva su propio manifiesto; el manifiesto vigente identifica el ZIP más reciente.
+
+La revisión visual adicional de 1.11.0 incorpora tarjetas del inicio navegables, estados y Chatham House neutros, acciones uniformes en Directorio y tarjetas de eventos con fecha destacada. Su [validación visual local](docs/evidence/release-1.11.0/visual1110.json) identifica el ZIP actualizado; la validación anterior conserva su propio SHA.
+
+La [revisión de Galería y calendario](docs/evidence/release-1.11.0/gallery-calendar1110.json) añade portadas más amplias, títulos y acciones claros, borradores neutros y estados de inscripción legibles en modo oscuro. Los inscritos sin Google vinculado conservan el enlace manual de calendario aunque haya una invitación pendiente. El [manifiesto vigente](docs/evidence/release-1.11.0/package.json) identifica el ZIP más reciente; cada evidencia anterior conserva su propio paquete.
 
 Los cinco documentos principales tienen un propósito propio:
 

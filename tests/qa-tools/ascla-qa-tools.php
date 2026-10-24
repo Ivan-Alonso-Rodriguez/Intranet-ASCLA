@@ -20,14 +20,14 @@ final class ASCLA_QA_Tools
     {
         $host=strtolower((string)wp_parse_url(home_url(),PHP_URL_HOST));
         $local=in_array($host,['localhost','127.0.0.1'],true) || (wp_get_environment_type()==='local' && preg_match('/^ascla[_-][a-z0-9_-]+$/',$host));
-        return defined('ASCLA_VERSION') && ASCLA_VERSION==='1.10.9' && class_exists(ASCLA\Core\Services\Profiles::class)
+        return defined('ASCLA_VERSION') && ASCLA_VERSION==='1.11.0' && class_exists(ASCLA\Core\Services\Profiles::class)
             && ($host==='wordpress.ingsoftware.lat' || $local);
     }
     private static function authorize(string $action): void
     {
         if (!current_user_can('manage_options')) { wp_die('Acceso reservado a administración.',403); }
         check_admin_referer('ascla_qa_tools_'.$action);
-        if (!self::ready()) { wp_die('Requiere ASCLA Core 1.10.9 y el sitio de pruebas configurado.',400); }
+        if (!self::ready()) { wp_die('Requiere ASCLA Core 1.11.0 y el sitio de pruebas configurado.',400); }
     }
     private static function execute(string $run,string $action): string
     {
@@ -68,7 +68,7 @@ final class ASCLA_QA_Tools
     {
         if (!current_user_can('manage_options')) { wp_die('Acceso reservado a administración.',403); }
         echo '<div class="wrap"><h1>ASCLA QA · Bruno y Playwright</h1><p>Pruebas sobre <strong>'.esc_html(home_url()).'</strong></p>';
-        if (!self::ready()) { echo '<div class="notice notice-error inline"><p>Instala primero ASCLA Core 1.10.9 en wordpress.ingsoftware.lat o en un local de pruebas.</p></div></div>';return; }
+        if (!self::ready()) { echo '<div class="notice notice-error inline"><p>Instala primero ASCLA Core 1.11.0 en wordpress.ingsoftware.lat o en un local de pruebas.</p></div></div>';return; }
         $state=get_option(self::OPTION);
         if (isset($_GET['cleaned'])) { echo '<div class="notice notice-success inline"><p>Lote temporal eliminado.</p></div>'; }
         if ($state) {

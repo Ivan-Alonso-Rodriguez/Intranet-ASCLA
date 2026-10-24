@@ -65,6 +65,7 @@ final class Profiles
         $data['photo_url']=!empty($data['photo_id'])?Media::profilePhotoUrl((int)$data['photo_id'],$id):'';
         if ($own) {
             $data['email']=wp_get_current_user()->user_email;
+            $data['username']=wp_get_current_user()->user_login;
             $data['email_notifications']=Notifications::emailPreferences($id);
             $data['publication_missing']=ProfileRequirements::missing(self::raw($id));
         }

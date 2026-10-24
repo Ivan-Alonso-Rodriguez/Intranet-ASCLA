@@ -1,12 +1,34 @@
 # Guía práctica de QA, SonarQube y UAT
 
-Versión documentada: **1.10.9**, esquema **15**. Este proyecto WordPress utiliza un flujo manual; el [Jenkinsfile](Jenkinsfile) se conserva como referencia opcional para un uso futuro. Aquí se explica cómo ejecutar las herramientas, revisar sus resultados e instalar la entrega. No se exige cobertura del 100 %; las pruebas y el Quality Gate deben satisfacer los criterios acordados para la entrega.
+Versión documentada: **1.11.0**, esquema **15**. Este proyecto WordPress utiliza un flujo manual; el [Jenkinsfile](Jenkinsfile) se conserva como referencia opcional para un uso futuro. Aquí se explica cómo ejecutar las herramientas, revisar sus resultados e instalar la entrega. No se exige cobertura del 100 %; las pruebas y el Quality Gate deben satisfacer los criterios acordados para la entrega.
 
 Todos los comandos se ejecutan **desde la raíz del repositorio**, en una terminal Bash; en Windows, usa WSL con Docker Desktop operativo e integrado con esa distribución. Las rutas de los ejemplos son relativas al repositorio. Los dominios publicados corresponden a servicios del proyecto; `localhost` y `127.0.0.1` son ejemplos genéricos de acceso local.
 
-Esta guía distingue procedimientos disponibles de pruebas ya ejecutadas. La preparación de 1.10.9 conserva los reportes de cobertura anteriores; no los regenera ni cambia su revisión. `quality-ci.sh` sí genera cobertura: úsalo únicamente cuando corresponda realizar una nueva validación completa de QA. Las comprobaciones de documentación, paquete, entrega y seguridad no requieren modificar esos reportes.
+Esta guía distingue procedimientos disponibles de pruebas ya ejecutadas. La validación local de 1.11.0 renueva los informes PHP y JavaScript sobre el árbol de trabajo; esos informes no acreditan por sí solos una revisión Git limpia. Los reportes históricos de `pruebas/` conservan su propia versión y alcance. `quality-ci.sh` genera cobertura: úsalo cuando corresponda realizar una nueva validación completa de QA. Las comprobaciones de documentación y paquete no requieren modificar esos reportes.
+
+## Validar los cambios de 1.11.0
+
+Para la vista previa PDF y las flechas de Galería usa `node tests/readers-auto1110.cjs` en WordPress local desechable con el fixture compartido y `ASCLA_AXE_PATH`. Genera un documento real de dos páginas y verifica apertura automática, páginas, zoom, texto accesible sin panel visible, comentarios conservados, descarga original y errores. Las zonas de las flechas deben responder por encima y por debajo de sus círculos, sin mostrar el nombre del archivo. Comprueba acceso sin sesión/denegado y eliminación, y la integridad de PDF.js bajo `assets/pdfjs/`. Ejecuta también `tests/php/VideoPreparationTest.php` y las regresiones PHP de cabeceras, medios y ciclo del contenido. Informe actual: `test-results/readers-auto1110/index.html`; [evidencia](docs/evidence/release-1.11.0/readers-auto1110.json). El informe PDF anterior conserva su alcance histórico. No se ejecutan scripts del PDF ni se admite edición interactiva de formularios; los PDF protegidos con contraseña conservan la descarga. La librería oficial de terceros tiene licencia y procedencia en `assets/pdfjs/NOTICE.txt` y queda fuera del análisis de código propio de SonarQube.
+
+Para perfiles y Galería, ejecuta `tests/php/GalleryProfile1110Test.php` con las regresiones de medios temporales, perfiles y notificaciones. En el sitio desechable con el fixture compartido, usa `node tests/gallery-profile1110.cjs` y `ASCLA_AXE_PATH`: valida privacidad del usuario, diseño adaptable, búsqueda con más de veinte eventos reales, paginación, selección por teclado, estado inicial de publicación, flechas, adjuntos y eliminación con respuestas 404 de los archivos. Informe: `test-results/gallery-profile1110/index.html`; [evidencia](docs/evidence/release-1.11.0/gallery-profile1110.json). La eliminación permanente de los adjuntos se limita a los archivos de esa galería; un maestro aún usado por otro recorte se conserva.
+
+Para reactivación ejecuta `tests/php/EventReactivationTest.php` junto a las regresiones de eventos, recordatorios, notificaciones y `UserExperience1110Test.php` en WordPress desechable. Prepara los avisos con `tests/event-reactivation1110-fixture.php` (solo CLI/local), y usa `node tests/event-reactivation1110.cjs` con el fixture compartido y `ASCLA_AXE_PATH`. Verifica cancelar → reactivar, permisos, historial, reservas, filtros, lectura y borrado; incluye escritorio/móvil y ambos temas. Informe: `test-results/event-reactivation1110/index.html`; [evidencia](docs/evidence/release-1.11.0/event-reactivation1110.json). Los seis flujos compartidos de Bruno/Playwright mantienen el mismo contrato; esta regresión dirigida es adicional y no sustituye su ejecución completa.
+
+El esquema continúa en 15. Ejecuta `tests/php/UserExperience1110Test.php` y la regresión PHP en un WordPress local desechable con los datos demo preparados. El fixture `tests/shared-test-users-fixture.php` genera los accesos privados de Ana, Bruno, Carla y Administrador; `tests/usability1110-fixture.php` prepara el chat y la bandeja para la regresión dirigida. Conserva ambos JSON solo dentro de `test-results/`.
+
+Ejecuta `node tests/usability1110.cjs` con Playwright disponible. `ASCLA_UX_FIXTURE` señala el JSON privado; el archivo adicional del chat se guarda en `test-results/sonar-preparation/release1110-ui-fixture.json`. El runner admite solo origen local y loopback. Revisa `test-results/usability1110/summary.json` y las capturas. El estado OAuth de la interfaz y el escenario de pocas coincidencias se simulan; las operaciones Google y los errores se comprueban aparte en PHPUnit. Para validar una integración real, conecta una cuenta autorizada, inscríbete, verifica un único evento con su enlace y cancela para comprobar su retiro. Si se usa una invitación del organizador, comprueba también el correo de Google y su aceptación; una respuesta HTTP correcta no acredita recepción del correo.
+
+No sustituyas con estos resultados los informes antiguos ni `coverage/source-revision`. Genera la cobertura completa desde la revisión limpia que se vaya a promover y repite SonarQube para QA/UAT según las secciones de este manual. El nuevo manifiesto está en `docs/evidence/release-1.11.0/package.json`.
+
+Para la revisión visual adicional, ejecuta `node tests/visual1110.cjs` con el mismo fixture local, Playwright y `axe-core` disponibles. `ASCLA_AXE_PATH` permite señalar una copia local de `axe.min.js`. Comprueba navegación por teclado desde las cuatro tarjetas del inicio, tipografía y espacios del Directorio, estados y Chatham House y tarjetas de eventos en escritorio/móvil y ambos temas. El resultado y las capturas quedan en `test-results/visual1110/`; [visual1110.json](docs/evidence/release-1.11.0/visual1110.json) identifica el ZIP revisado. Las ejecuciones anteriores mantienen su SHA original y [su manifiesto](docs/evidence/release-1.11.0/package-initial.json).
+
+La revisión posterior usa `node tests/gallery-calendar1110.cjs` con ese fixture local, Playwright y axe. `ASCLA_GALLERY_IMAGE_A` y `ASCLA_GALLERY_IMAGE_B` permiten usar imágenes de prueba locales; por defecto utiliza el logo del plugin. Comprueba borradores, estados, Galería y el calendario manual antes/después de inscribirse o cancelar. Los estados de Google pendiente/invitado y la conexión OAuth se simulan solo para comprobar la disponibilidad del botón; no se envía ninguna invitación real. Ejecuta también `tests/php/UserExperience1110Test.php` para validar los enlaces de calendario y la sincronización. [gallery-calendar1110.json](docs/evidence/release-1.11.0/gallery-calendar1110.json) identifica el nuevo ZIP y sus resultados; las etapas anteriores conservan sus manifiestos.
 
 ## 1. Elegir qué vas a comprobar
+
+La revisión dirigida de la portada predeterminada usa `ASCLA_MEDIA_REPORT=test-results/knowledge-cover1110 node tests/media-knowledge1110.cjs` con el fixture local, Playwright, axe y las mismas variables de imágenes. Comprueba portada sin imagen, fotografía válida y respaldo ante error, en ambos temas y tamaños. Los metadatos de la miniatura se simulan; no depende de YouTube. Los resultados quedan en `test-results/knowledge-cover1110/` y [su evidencia](docs/evidence/release-1.11.0/knowledge-cover1110.json) identifica el paquete.
+
+Para la revisión del visor y Centro de Conocimiento, ejecuta `node tests/media-knowledge1110.cjs` con el fixture loopback, Playwright, axe y las variables de imágenes locales descritas arriba. Comprueba imagen única/álbum, botones y teclado, acceso al original/PDF y conservación de comentarios; después, tarjetas, filtro por tipo y accesos de recursos. La miniatura y duración de un video se simulan para validar la presentación sin depender de YouTube. El informe y las capturas quedan en `test-results/media-knowledge1110/`; [la evidencia](docs/evidence/release-1.11.0/media-knowledge1110.json) identifica el paquete revisado.
 
 | Objetivo | Comando principal | Dónde actúa | Qué revisar |
 |---|---|---|---|
@@ -45,7 +67,7 @@ python3 scripts/verify-package.py
 python3 scripts/check-docs.py
 ```
 
-El verificador puede actualizar el [manifiesto público](docs/evidence/release-1.10.9/package.json); incorpora ese cambio al commit de la entrega antes de generar cobertura. Revisa y agrega los archivos correspondientes, confirma el commit y comparte `development` según el procedimiento del equipo.
+El verificador puede actualizar el [manifiesto público](docs/evidence/release-1.11.0/package.json); incorpora ese cambio al commit de la entrega antes de generar cobertura. Revisa y agrega los archivos correspondientes, confirma el commit y comparte `development` según el procedimiento del equipo.
 
 Para promover esa revisión a QA, con el checkout ya limpio:
 
@@ -306,7 +328,7 @@ El código se confirma en `development` y luego se promueve a `qa` y `uat`. Los 
 Este recorrido corresponde al entorno de pruebas [wordpress.ingsoftware.lat](https://wordpress.ingsoftware.lat/). Requiere permiso para instalar plugins en WordPress y Docker en el equipo que ejecuta las pruebas; **no requiere SSH ni WP-CLI en el servidor**. Administración ASCLA y administración técnica de WordPress tienen permisos distintos.
 
 1. Ejecuta `python3 scripts/build.py` y `python3 scripts/verify-package.py`. Conserva el SHA-256 del ZIP que vas a evaluar.
-2. En WordPress, abre **Plugins → Añadir plugin → Subir plugin**. Selecciona `dist/ascla-core.zip` y reemplaza la versión instalada. Comprueba que ASCLA Core **1.10.9** está activo; el mismo número de versión puede contener correcciones distintas, por eso debes registrar también el paquete.
+2. En WordPress, abre **Plugins → Añadir plugin → Subir plugin**. Selecciona `dist/ascla-core.zip` y reemplaza la versión instalada. Comprueba que ASCLA Core **1.11.0** está activo; el mismo número de versión puede contener correcciones distintas, por eso debes registrar también el paquete.
 3. Ejecuta `python3 scripts/build-qa-tools.py`. Instala y activa `dist/ascla-qa-tools.zip` desde Plugins. Es un auxiliar independiente del core y restringido a entornos permitidos de pruebas.
 4. Abre **Herramientas → ASCLA QA**, confirma el entorno y pulsa **Crear lote y descargar acceso**. Se crean cinco cuentas sintéticas y se descarga `ascla-qa-access.json`.
 5. Crea la carpeta `test-results` si no existe y coloca el archivo en `test-results/ascla-qa-access.json`. Es privado y está ignorado por Git. No lo agregues a reportes ni al repositorio.
@@ -322,11 +344,11 @@ bash scripts/acceptance-tests.sh
 7. Abre el reporte indicado, comprueba que el destino es el QA publicado y revisa los tres grupos. Examina `cleanup.log`: el ejecutor intenta retirar el lote temporal con autenticación y comprobación de propiedad.
 8. Si no se confirma la limpieza, entra con tu administrador habitual a **Herramientas → ASCLA QA → Limpiar lote temporal**. Conserva el acceso privado hasta confirmar la limpieza. Después retira el JSON descargado y desactiva/elimina **ASCLA QA Tools**. Para repetir, prepara un lote nuevo.
 
-El archivo de acceso debe corresponder a ese sitio, al auxiliar y a Core 1.10.9. El runner rechaza cuentas ajenas al lote. No instala el core ni cambia ramas; prueba lo que ya está instalado. Las pruebas locales no sustituyen este paso.
+El archivo de acceso debe corresponder a ese sitio, al auxiliar y a Core 1.11.0. El runner rechaza cuentas ajenas al lote. No instala el core ni cambia ramas; prueba lo que ya está instalado. Las pruebas locales no sustituyen este paso.
 
 ### Alternativa para quien administra un QA mediante Compose
 
-Solo en el host que gestiona ese proyecto, con su configuración privada y Core 1.10.9 ya activo:
+Solo en el host que gestiona ese proyecto, con su configuración privada y Core 1.11.0 ya activo:
 
 ```bash
 ASCLA_ACCEPTANCE_MODE=deployed \
@@ -569,3 +591,65 @@ Si cambias la matriz, edita primero [requirements/ascla-analysis.json](requireme
 Se mantienen los cinco MD principales y los tres MD de la [entrega de pruebas](pruebas/README.md), enlazados en [README](README.md). Usa rutas relativas y dominios del proyecto; evita carpetas personales, rutas absolutas de equipos, nombres de dispositivo e IP privadas en texto, enlaces y bloques de comandos. El verificador comprueba estas referencias, enlaces, anclas, exclusiones Git y sincronización de la matriz.
 
 Los resúmenes JSON/JUnit revisados de `docs/evidence/` se permiten en Git. Los originales, accesos y archivos locales siguen en `test-results/`, ignorados. Por solicitud del responsable, `pruebas/` incluye copias publicables de la colección, reportes, videos y capturas, con las credenciales excluidas y la procedencia registrada. Valida la carpeta con `python3 scripts/verify-qa-delivery.py`. Este cambio documental no requiere otra versión ni reconstruir el plugin.
+
+## Subtítulos públicos de YouTube con Supadata
+
+ASCLA Core 1.11.0 permite consultar y conservar transcripciones completas de videos públicos de otros canales sin Google OAuth. La transcripción manual sigue disponible. Google Calendar conserva su conexión independiente.
+
+### Configuración en WordPress
+
+1. En Administración → Configuración → Inteligencia artificial, selecciona **Supadata · videos públicos sin Google OAuth**.
+2. Introduce la **Supadata API Key**, indica el idioma preferido (`es` por defecto) y guarda. El campo vuelve vacío: dejarlo vacío conserva la clave. La opción de eliminar la clave permite retirarla.
+3. Deja desactivado **Generar la transcripción si no existen subtítulos** para usar únicamente subtítulos existentes (`mode=native`). Si autorizas la generación, ASCLA solicita `mode=auto`: Supadata busca primero subtítulos existentes y solo genera si faltan. El idioma es una preferencia; el proveedor puede devolver otro idioma disponible.
+4. Configura también el proveedor de IA y su clave para generar resúmenes reales. Publica un recurso con URL de YouTube: ASCLA obtiene los subtítulos y genera el resumen y la nota automáticamente, sin botones manuales. Los borradores no inician consultas. El proceso continúa si cierras la página; al terminar, la ficha abierta actualiza el resumen y conserva el comentario en curso. La transcripción queda guardada para el procesamiento y la edición autorizada; el desplegable **Transcripción completa** no aparece en la ficha. **Actualizar resumen y nota** permite generar una versión nueva a petición, reutilizando la fuente guardada. Durante la espera conserva el resumen anterior y el comentario sin publicar; evita trabajos duplicados y vuelve a habilitar la acción si hay un error.
+5. Si hay un error, la ficha muestra el motivo y el responsable y los administradores reciben una notificación con acceso al recurso. Al corregir y guardar la configuración del proveedor, se reanudan los trabajos automáticos fallidos que sigan vigentes. Las esperas asíncronas y los límites temporales se gestionan sin avisos repetidos. La publicación no queda bloqueada por la preparación del resumen.
+
+La configuración requiere `ascla_configure`. Consultar transcripciones y generar materiales requiere permisos de Ejecutivo o Administrador y membresía activa. La transcripción original conserva su carácter editorial: no se añade a la respuesta de otros asociados.
+
+### Clave y política del servidor
+
+La clave introducida en WordPress se cifra con AES-256-GCM usando las sales del sitio y se guarda en una opción sin carga automática. Los endpoints solo devuelven presencia y origen, nunca el valor. Tras cambiar las sales, puede ser necesario volver a introducirla. Protege también las copias de seguridad y el acceso administrativo.
+
+Como alternativa, define `ASCLA_SUPADATA_KEY` en el entorno o en `wp-config.php` fuera del repositorio. Esa configuración tiene prioridad y bloquea la edición del campo. Si el operador fija explícitamente `ASCLA_EXTERNAL_SECRETS_ONLY=1`, ASCLA respeta esa política y exige la clave externa. Sin ese bloqueo explícito, la clave de Supadata se puede configurar cifrada desde WordPress sin habilitar el almacenamiento de otras claves de servicio en instalaciones nuevas.
+
+### Videos largos, caché y errores
+
+- El endpoint utilizado es `GET https://api.supadata.ai/v1/transcript`, con autenticación `x-api-key` y segmentos temporales (`text=false`). No se establece un recorte por minutos ni se usa el endpoint de extracción de datos.
+- Ante HTTP 202, se conserva `jobId` y se consulta `/transcript/{jobId}` desde la cola. `queued` y `active` mantienen la tarea pendiente sin agotar sus intentos. Al recibir `completed`, se guarda toda la respuesta y continúa la tarea original. La consulta no crea nuevas solicitudes de transcripción mientras exista un trabajo activo.
+- La consulta se programa cada 30 segundos, con espera adicional ante límites y fallos transitorios. Es necesario que WP-Cron funcione o que el servidor ejecute los eventos pendientes periódicamente. Supadata conserva los resultados de trabajos durante una hora después de completarlos: el trabajador debe seguir activo aunque el usuario cierre la página.
+- La transcripción guardada en el recurso se reutiliza sin nuevas llamadas. La caché de resultados dura siete días y se comparte por video, idioma y credencial del sitio. Una transcripción manual tiene prioridad. Cambiar el video elimina su transcripción automática; una respuesta tardía no sobrescribe una edición manual ni otro video.
+- Se gestionan 206 sin subtítulos, 401 clave inválida, 402 plan insuficiente, 403 restricciones, 404 video o trabajo no disponible, 429 y errores 5xx. Los límites de frecuencia respetan `Retry-After`; el agotamiento de créditos detiene la tarea para revisión. Los fallos transitorios tienen un máximo de ocho intentos; un trabajo remoto no resuelto tras 24 horas requiere revisión.
+- Si no se confirma la respuesta inicial por un fallo de conexión, ASCLA evita repetirla automáticamente: podría haber consumido créditos. Revisa el panel de Supadata antes de usar **Reintentar**. Un trabajo remoto fallido o expirado puede iniciar una solicitud nueva mediante ese reintento explícito o al guardar una corrección de la configuración. La respuesta inicial de consumo incierto queda excluida de la reanudación automática.
+- ASCLA admite hasta 2.000.000 de caracteres por transcripción y 16 MiB por respuesta del proveedor. Si se supera un límite o hay segmentos inválidos, falla la operación completa: no se guarda un fragmento como si fuera una transcripción completa. El límite anterior de 100.000 caracteres se ha retirado. El generador recibe la fuente completa; si el modelo de IA elegido no admite su tamaño, su error no elimina ni recorta el original guardado.
+
+Solo se envían a Supadata la URL pública del video y las opciones de consulta. Los comentarios, perfiles y datos privados de ASCLA no se envían a este servicio. La generación posterior de resúmenes sigue usando el proveedor de IA configurado y la política editorial existente.
+
+Los videos privados, restringidos, transmisiones todavía en curso y las restricciones del plan de Supadata pueden impedir una transcripción. Consulta las condiciones y costes actuales en la [documentación oficial de transcripciones](https://docs.supadata.ai/get-transcript) y la [referencia de errores y cuotas](https://docs.supadata.ai/errors/limit-exceeded).
+
+### Verificación de esta entrega
+
+Se comprueba con transcripciones sintéticas de más de dos horas, incluidas sus últimas palabras, y con respuestas nativas/asíncronas, errores, caché, permisos y el flujo existente de resumen. Las pruebas locales simulan las respuestas HTTP de Supadata. El usuario configurará la clave después: esta entrega no acredita una llamada real con su cuenta ni un despliegue remoto. La evidencia del proveedor se conserva en [supadata1110.json](docs/evidence/release-1.11.0/supadata1110.json). Para el flujo automático actual, ejecuta `node tests/video-auto1110.cjs` con el fixture HTTP simulado `tests/supadata1110-fixture.php` y WP-Cron activo; verifica publicación sin botones, espera asíncrona, navegación de vuelta, comentario conservado, notificación de error y reanudación al corregir la clave. La evidencia actual se registra en [readers-auto1110.json](docs/evidence/release-1.11.0/readers-auto1110.json).
+
+## Error de instalación por upload_max_filesize · 1.11.0
+
+Tras la limpieza de código y catálogos, el paquete completo también queda por debajo de 2 MiB y conserva los PO editables. Para una variante todavía más pequeña, ejecutar `python scripts/build-installer.py` después de construir y verificar el paquete completo. La variante `dist/ascla-core-instalable.zip` ocupa menos de 2 MiB: solo omite los dos archivos fuente de traducción `.po`. Conserva los catálogos compilados `.mo`, `en.json` y todos los archivos de ejecución sin cambiar sus bytes. Los fuentes editables permanecen en el repositorio y el ZIP completo. [Verificación del paquete de instalación](docs/evidence/release-1.11.0/upload-limit1110.json).
+
+Si el servidor usa un límite inferior o el error persiste, el operador del hosting debe revisar el PHP que atiende WordPress; puede establecer `upload_max_filesize = 8M` y `post_max_size = 16M` desde su panel o configuración PHP. El proyecto Docker ya permite 5M/8M; cambiar el repositorio no modifica un hosting externo. No debe intentarse corregir una subida anterior a la instalación desde el código del plugin. [Referencia oficial de PHP](https://www.php.net/manual/en/ini.core.php#ini.upload-max-filesize). No se han modificado ajustes del servidor remoto.
+
+## Presentación editorial del resumen · 1.11.0
+
+Abrir un recurso con resumen, nota técnica, conclusiones, referencias, conceptos, palabras clave y cápsulas. Comprobar párrafos completos y letra legible en móvil/escritorio, claro/oscuro. Las conclusiones deben estar numeradas, los marcos ocupar todo el ancho con etiquetas y las normativas tener su propio apartado. Los conceptos y etiquetas deben ajustarse al ancho sin ocultar entradas. Verificar también un resumen breve sin otros apartados, una lista de más de veinte conceptos y una etiqueta extensa. La lectura no debe ejecutar HTML del contenido ni alterar el comentario en curso. Se trata de presentación del material existente: no modifica los textos guardados ni vuelve a consultar a la IA o Supadata. La evidencia específica se registra en [summary1110.json](docs/evidence/release-1.11.0/summary1110.json).
+
+
+## Regeneración y presentación del resumen
+
+El generador pide entre tres y cinco párrafos, con unas 220 a 350 palabras cuando el contenido lo permite, sin rellenar videos breves ni inventar datos. La nueva extensión se aplica a nuevas generaciones y a «Actualizar resumen y nota»; no modifica automáticamente los resúmenes ya guardados. Marcos de trabajo ocupa todo el ancho y presenta etiquetas como Conceptos importantes; Normativas conserva una sección propia.
+
+En WordPress local desechable ejecuta `tests/php/VideoPreparationTest.php` junto a las regresiones de Supadata, permisos, cola y ciclo editorial. Para navegador usa `node tests/summary-refresh1110.cjs` con los fixtures locales `tests/summary-refresh1110-fixture.php` y `tests/supadata1110-fixture.php`, WP-Cron y `ASCLA_AXE_PATH`. Comprueba regeneración, reutilización de fuente, clics duplicados, versión previa conservada ante errores, comentario en curso, acceso exclusivo editorial, transcripción oculta y marcos adaptables en ambos temas. La IA y Supadata se simulan: no acredita una llamada real a la cuenta del usuario. [Evidencia actual](docs/evidence/release-1.11.0/summary-refresh1110.json).
+
+
+## Optimización de código y traducciones
+
+Los archivos de recursos y las clases con carga dinámica se revisan antes de eliminarlos. Los adaptadores de LinkedIn y X conservan sus bloqueos explícitos y pruebas; las migraciones, avisos de licencia y dependencias del visor PDF permanecen. Se retiran funciones de interfaz sin puntos de entrada y traducciones antiguas confirmadas, conservando las claves construidas dinámicamente.
+
+`python scripts/translations.py` mantiene los PO editables y compila MO compactos: una traducción igual a su clave utiliza la respuesta original de gettext; una traducción personalizada sigue incluida. El compilador comprueba con GNU gettext todas las entradas originales, incluidas las omitidas. Para comparar con una entrega anterior en WordPress usa `tests/php/CodeOptimizationTest.php` con los snapshots locales en `/tmp` preparados por el laboratorio; ejecuta también las regresiones de contenido, formularios, cola, Supadata y seguridad. `node tests/code-optimization1110.cjs` revisa el flujo vigente de resumen y las consultas de traducción en español e inglés, incluidas pantallas de administración y validaciones dinámicas. [Evidencia de optimización](docs/evidence/release-1.11.0/code-optimization1110.json).

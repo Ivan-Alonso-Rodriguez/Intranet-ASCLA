@@ -4,6 +4,20 @@ namespace ASCLA\Core\Integrations;
 /** Bounded Calendar HTTP requests and provider error handling. */
 final class GoogleCalendarTransport
 {
+    public static function createPersonal(string $token,array $body,int $user,int $post): array
+    {
+        // A retry after a lost HTTP response must address the same Google event.
+        $generation=(int)get_post_meta($post,'_ascla_event_reactivation_count',true);
+        $suffix=$generation?'|reactivation:'.$generation:'';
+        $body['id']=substr(hash('sha256',home_url('/').'|'.$user.'|'.$post.$suffix),0,32);
+        $url='https://www.googleapis.com/calendar/v3/calendars/primary/events';
+        $data=self::request($token,'POST',$url,$body,false,[200,201,409]);
+        if (!empty($data['_conflict'])) {
+            $remote=$body['id'];unset($body['id']);
+            $data=self::request($token,'PATCH',$url.'/'.rawurlencode($remote),$body,false,[200]);
+        }
+        return $data;
+    }
     public static function request(string $token,string $method,string $url,?array $body,bool $sendUpdates,array $allowed): array
     {
         if ($sendUpdates) { $url.=(str_contains($url,'?')?'&':'?').'sendUpdates=all'; }

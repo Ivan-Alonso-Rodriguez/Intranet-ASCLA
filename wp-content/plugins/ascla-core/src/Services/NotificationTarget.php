@@ -28,6 +28,7 @@ final class NotificationTarget
         'event'=>['Eventos','calendar','eventos',self::VIEW_EVENTS],
         'event_waitlist_available'=>['Eventos','calendar','eventos','Confirmar cupo'],
         'event_cancelled'=>['Eventos','calendar','eventos','Ver evento cancelado'],
+        'event_reactivated'=>['Eventos','calendar','eventos','Revisar encuentro'],
         'event_updated'=>['Eventos','calendar','eventos','Ver cambios del evento'],
         'event_reminder'=>['Eventos','calendar','eventos',self::VIEW_EVENTS],
         'microevent'=>['Eventos','calendar','eventos',self::VIEW_EVENTS],
@@ -261,6 +262,14 @@ final class NotificationTarget
         if (!$job || ((int)$job['user_id']!==get_current_user_id() && !current_user_can('ascla_manage'))) { return self::unavailable($view); }
         $payload=json_decode($job['payload'],true)?:[];
         $result=json_decode($job['result']??'null',true)?:[];
+        if (!empty($payload['automatic'])) {
+            $id=absint($payload['resource_id']??0);$post=get_post($id);
+            if (!$post||!Content::canRead($post)||!Access::canPublish()) { return self::unavailable($view); }
+            $view['title']=self::tr('No se pudo preparar el resumen del video','The video summary could not be prepared');
+            $view['description']=Access::excerpt($post->post_title.' · '.($job['error']??''),240);
+            $view['url']=Catalog::url('centro-conocimiento',['item'=>$id]);
+            $view['action_label']=self::tr('Ver recurso','View resource');return $view;
+        }
         if ($job['kind']==='answer') {
             $view['title']=match($job['status']) { 'error'=>self::tr('Tu consulta necesita atención','Your question needs attention'), 'completed'=>self::tr('Tu respuesta del asistente está lista','Your assistant answer is ready'), default=>self::tr('Estamos preparando tu respuesta','We are preparing your answer') };
             $view['description']=Access::excerpt($payload['question']??self::tr('Consulta al asistente','Assistant question'),180);

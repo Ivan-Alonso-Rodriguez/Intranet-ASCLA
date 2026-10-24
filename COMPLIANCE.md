@@ -1,6 +1,28 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 22 de octubre de 2026. Plugin **1.10.9**, esquema **15**. Este documento describe el estado del código y la evidencia por etapa. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado.
+Revisión documental: 23 de octubre de 2026. Plugin **1.11.0**, esquema **15**. Este documento describe el estado del código y la evidencia por etapa. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado.
+
+## Versión 1.11.0: interacción y calendario
+
+La previsualización de PDF se abre dentro de la publicación, con páginas, zoom, texto extraído y descarga. El lector PDF.js 6.4.299 se carga desde archivos locales fijados y con licencia Apache-2.0; no se utilizan visores externos. Se conservan las cabeceras de seguridad y el acceso privado a los archivos. [Evidencia del lector PDF](docs/evidence/release-1.11.0/pdf-preview1110.json).
+
+La revisión de perfiles y Galería compacta los intereses del perfil público, muestra el usuario de acceso solo en Mi perfil, mejora las barras de desplazamiento y cambia la acción de las tarjetas a «Abrir». El editor incorpora búsqueda paginada de eventos y publicación seleccionada por defecto para una galería nueva con permisos. El visor coloca las flechas junto a la fotografía; los adjuntos muestran sus nombres alineados. Eliminar una publicación de Galería retira también sus archivos privados y sus copias maestras sin uso. Notificaciones elimina el contador repetido de la cabecera y usa «notificaciones» en el pie. [Evidencia de esta etapa](docs/evidence/release-1.11.0/gallery-profile1110.json).
+
+La [revisión de reactivación y notificaciones](docs/evidence/release-1.11.0/event-reactivation1110.json) registra pruebas locales de permisos, conservación de inscripciones, cupos y avisos por cada ciclo cancelar/reactivar. La operación utiliza el mismo bloqueo que las inscripciones y conserva el motivo anterior en el historial. Calendario se valida con HTTP simulado; no acredita entrega a Google real. La bandeja conserva lectura, filtros, paginación y borrado confirmado con un diseño renovado.
+
+La [revisión de portadas predeterminadas](docs/evidence/release-1.11.0/knowledge-cover1110.json) restaura la composición anterior con fondo y título para recursos sin fotografía y para miniaturas fallidas, conservando las imágenes válidas y el diseño de las tarjetas nuevas. Sus comprobaciones locales tienen un paquete propio; los resultados anteriores mantienen su SHA original.
+
+La [revisión del visor y Centro de Conocimiento](docs/evidence/release-1.11.0/media-knowledge1110.json) verifica ampliación de fotografías sin recorte, navegación del álbum, conservación del comentario, originales y documentos. Comprueba también tarjetas, filtros y accesos del Centro de Conocimiento en ambos temas y tamaños de pantalla. Esta etapa modifica solo la presentación y conserva los permisos de los archivos privados.
+
+La [revisión de Galería y calendario](docs/evidence/release-1.11.0/gallery-calendar1110.json) comprueba borradores neutros, mayúsculas iniciales en sus etiquetas, estados de inscripción legibles en modo oscuro y el calendario manual para inscritos sin cuenta vinculada. El enlace para asistir se incorpora a esa plantilla únicamente con inscripción confirmada. Galería presenta portadas, recuento real de imágenes y tres accesos equivalentes; conserva filtros, permisos y paginación.
+
+La revisión visual adicional se identifica en [visual1110.json](docs/evidence/release-1.11.0/visual1110.json): navegación desde los indicadores del inicio, estados y Chatham House neutros, acciones del Directorio con tipografía uniforme y separación reducida y tarjetas de eventos reorganizadas. Las pruebas anteriores conservan su SHA y alcance, sin atribuirlas al ZIP posterior.
+
+La inscripción inicia una entrega de calendario con reintentos; conserva la inscripción si Google falla y muestra su estado. Usa la invitación del organizador cuando existe y, en su ausencia, una copia en el calendario personal conectado. La copia incluye el enlace del encuentro y se retira al cancelar. Sin conexión OAuth ni invitación, se ofrece una sola alternativa manual tras inscribirse. El enlace de Zoom se muestra únicamente a inscritos confirmados; la API lo oculta a lectores sin inscripción, conservando el acceso de edición de los responsables.
+
+Se incorporan Enter/Shift+Enter en mensajería, eliminación de notificaciones de la propia cuenta con confirmación y límite de instantánea, historial de ventanas que conserva los formularios y confirmación al descartar comentarios y respuestas. La selección de texto no activa el cierre exterior. Se ajustan el estado Oculto en modo oscuro, el menú editorial, los cursores deshabilitados, las casillas y el aviso de pocas coincidencias.
+
+La evidencia de esta entrega es local y se identifica en [usability1110.json](docs/evidence/release-1.11.0/usability1110.json). Las secciones fechadas siguientes conservan las verificaciones de 1.10.9. No acreditan el despliegue, ZAP, SonarQube ni aceptación UAT de 1.11.0. Las invitaciones de Google se comprueban con respuestas HTTP simuladas; la llegada al correo y la aceptación en una cuenta real requieren OAuth y validación del destinatario.
 
 ## Preparación del análisis SonarQube del 22 de octubre de 2026
 
@@ -426,3 +448,7 @@ Cada fila conserva su propia revisión: no se suman ejecuciones repetidas como p
 El [manifiesto actual](docs/evidence/release-1.10.9/package.json) identifica el ZIP 1.10.9, esquema 15; el [manifiesto provisional anterior](docs/evidence/release-1.10.8/package.json) se conserva como evidencia histórica. Las correcciones quedan preparadas para instalación manual; no se presentan como ya instaladas en QA. La última aceptación HTTP/UI completa tampoco certifica los ZIP posteriores. No se midió nueva cobertura en esas etapas ni se exige el 100 %. El análisis estático local no acredita el Quality Gate publicado: debe repetirse el flujo de QA sobre el commit que incluya estas correcciones. Los reportes de cobertura anteriores conservan su revisión original.
 
 La consolidación documental no cambia el código del plugin, su ZIP, los resultados anteriores ni los estados de requisitos. La [verificación documental](scripts/check-docs.py) comprueba inventario, enlaces, Git y sincronización de la matriz.
+
+## Transcripciones públicas con Supadata · 1.11.0
+
+Supadata sustituye la descarga de subtítulos mediante OAuth. La clave es cifrada y editable por configuración autorizada de WordPress salvo política externa explícita; no sale por REST ni se incluye en URLs. El proveedor solo recibe el enlace público. Se conservan las restricciones editoriales de la fuente, el acceso a recursos y Google Calendar. La cola persiste el identificador remoto, respeta límites y conserva el original completo o falla sin guardar fragmentos. [Configuración, costes, límites y verificación](MANUAL_QA_UAT.md#subtítulos-públicos-de-youtube-con-supadata).

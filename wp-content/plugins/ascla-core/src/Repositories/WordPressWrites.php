@@ -13,9 +13,9 @@ final class WordPressWrites
         return (int)$result;
     }
 
-    public static function meta(string $type,int $id,string $key,mixed $value): void
+    public static function meta(string $type,int $id,string $key,mixed $value,bool $preserveSlashes=false): void
     {
-        $result=update_metadata($type,$id,$key,$value);
+        $result=update_metadata($type,$id,$key,$preserveSlashes?wp_slash($value):$value);
         // false also means unchanged; that is valid only if the requested value is stored.
         if ($result===false && get_metadata($type,$id,$key,true)!=$value) { throw new RepositoryException(self::FAILED); }
     }

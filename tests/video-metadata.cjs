@@ -61,10 +61,10 @@ module.exports = async function videoScenarios({test, admin, request, base, fixt
       assert.equal(await admin.evaluate(() => window.__ytDestroyed), 1);
     });
     await test("A failed automatic YouTube loader can retry on the same page", async () => {
-      const id = await resource(); mode = "network-error"; await generate();
+      await resource(); mode = "network-error"; await generate();
       assert.equal(await admin.locator('script[data-ascla-youtube-api]').count(), 0);
-      mode = "success"; await admin.locator('.modal-top [data-action="close"]').click();
-      await admin.locator('[data-action="item"][data-id="' + id + '"]').first().click(); await generate();
+      mode = "success"; await admin.locator('.modal-top [data-action="modal-back"]').click();
+      await admin.locator('.modal [data-action="generate"]').waitFor(); await generate();
       assert.equal(durationWrites, 2); assert.equal(multimediaJobs, 4);
     });
   } finally {
