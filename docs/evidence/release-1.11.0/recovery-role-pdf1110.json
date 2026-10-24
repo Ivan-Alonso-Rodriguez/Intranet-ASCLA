@@ -3,7 +3,7 @@
   "date": "2026-10-24T13:18:47.400894+00:00",
   "scope": "Chrome y Edge reales en Windows; sitio WordPress local desechable. Las carencias de funciones, el bloqueo de workers y los errores de red/HTTP se simulan explícitamente. No se identifica el navegador exacto del incidente original ni se afirma una prueba real de Safari.",
   "package_sha256": "5328fbf8479bf26ad6a75e4532e91b7b46a693524b66329e539876a0448ce4a5",
-  "package_manifest": "docs/evidence/release-1.11.0/package.json",
+  "package_manifest": "docs/evidence/release-1.11.0/package-recovery-role-pdf.json",
   "previous_package_manifest": "docs/evidence/release-1.11.0/package-transcript-context.json",
   "phpunit": {
     "name": "CLI Arguments",

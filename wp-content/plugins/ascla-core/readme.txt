@@ -11,6 +11,10 @@ ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 == Changelog ==
 
 = 1.11.0 =
+* Revisar contenido a todo el ancho en WordPress y página independiente, con pestañas compactas, filas legibles, borradores plegados y estados vacíos renovados.
+* Resumen de participación por actividad, personas y asistencias, con explicación de ceros y listas pendientes. Revisión editorial en tarjetas con borradores separados; Pendiente de revisión neutro en ambos temas y decisiones con motivo conservadas.
+* Encuentros con pasos de preparación, condiciones y siguiente acción por propuesta. Estadísticas con resumen más claro, gráfico de asistencia y barras de intereses y comparación de períodos; distingue cero de falta de datos y conserva filtros, tablas y permisos.
+* Conversaciones compactas y plegadas, con un único nivel visual. Cabecera Autor ▸ destinatario y respuestas agrupadas bajo el comentario respondido, sin menciones automáticas; expansión de cinco en cinco y conservación de borradores, notificaciones y moderación.
 * Confirmación de recuperación genérica y persistente con formulario conservado; identidad propia del Ejecutivo. PDF compatible con más navegadores, respaldo sin worker, reintentos y errores detallados de carga, acceso y archivo.
 * Duración calculada con los tiempos de la transcripción. La IA recibe todo el texto hablado sin marcas temporales ni numeración de subtítulos; el original y los enlaces temporales se conservan.
 * Limpieza de traducciones antiguas, código de interfaz retirado y estilos sin uso. Catálogos gettext compactos con los mismos textos y archivos PO editables conservados.

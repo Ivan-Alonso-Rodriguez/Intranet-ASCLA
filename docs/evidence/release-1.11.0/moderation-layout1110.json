@@ -1,0 +1,284 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-24T21:52:08.540Z",
+  "scope": "Chrome real en Windows; WordPress nativo y página independiente en un laboratorio loopback desechable, con datos sintéticos y decisiones reales. Sin servicios externos.",
+  "package_sha256": "2502df127e5aa880431076497a124617895a6c8639b571ac37406d9274e651c8",
+  "package_manifest": "docs/evidence/release-1.11.0/package.json",
+  "previous_package_manifest": "docs/evidence/release-1.11.0/package-summary-review.json",
+  "phpunit": {
+    "name": "CLI Arguments",
+    "tests": "101",
+    "assertions": "925",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "34.187454"
+  },
+  "checks": [
+    "WordPress nativo usa todo el ancho del panel con filas de publicaciones y datos reales, sin el límite de 520 px",
+    "El diseño nativo mantiene el ancho y la legibilidad en una laptop de 1440 px",
+    "Los borradores se despliegan por separado y no aumentan el contador de aprobación",
+    "Abrir una publicación conserva su estado hasta guardar una decisión",
+    "Las filas y los estados pendientes conservan el tema oscuro y los colores neutros",
+    "WordPress nativo se adapta a 390 px sin desbordamiento horizontal",
+    "Comentarios muestra autor y texto completo con las acciones de aprobación, ocultación y eliminación",
+    "Reportes muestra contexto, motivo y acciones de revisión sin borrar el contenido",
+    "La página independiente conserva el mismo diseño amplio a 1920 y 1440 px",
+    "Las tres secciones de la página independiente funcionan en móvil con acciones accesibles",
+    "La aprobación real exige motivo, actualiza los contadores y presenta el estado vacío de comentarios",
+    "Marcar un reporte revisado mantiene la publicación y permite desplegar su historial",
+    "El estado vacío y el historial mantienen el ancho, el tema oscuro y la adaptación móvil",
+    "Revisar publicación permite aprobar con motivo y actualiza la lista sin modificar sus permisos",
+    "La cola vacía nativa ocupa todo el ancho y conserva los borradores sin desplegarlos automáticamente",
+    "Los estados vacíos de comentarios y reportes también se verifican dentro de wp-admin",
+    "Las pestañas y las nuevas explicaciones de las vistas vacías se traducen al inglés",
+    "Los asociados mantienen el acceso denegado a moderación y no hay errores JavaScript"
+  ],
+  "native_width_before": {
+    "name": "wordpress",
+    "queue": 520,
+    "panel": 1432,
+    "maxWidth": "520px",
+    "bodyClass": "wp-admin wp-core-ui js toplevel_page_ascla auto-fold admin-bar branch-6-8 version-6-8-3 admin-color-fresh locale-es-es svg wp-theme-twentytwentyfive customize-support sticky-menu"
+  },
+  "geometry": [
+    {
+      "name": "wordpress-publicaciones-1920",
+      "viewport": 1920,
+      "panel": 1432,
+      "queue": 1430,
+      "row": 1430,
+      "overflow": false
+    },
+    {
+      "name": "wordpress-publicaciones-1440",
+      "viewport": 1440,
+      "panel": 970,
+      "queue": 968,
+      "row": 968,
+      "overflow": false
+    },
+    {
+      "name": "wordpress-borradores",
+      "viewport": 1440,
+      "panel": 970,
+      "queue": 968,
+      "row": 968,
+      "overflow": false
+    },
+    {
+      "name": "wordpress-publicaciones-oscuro",
+      "viewport": 1440,
+      "panel": 970,
+      "queue": 968,
+      "row": 968,
+      "overflow": false
+    },
+    {
+      "name": "wordpress-publicaciones-movil",
+      "viewport": 390,
+      "panel": 346,
+      "queue": 344,
+      "row": 344,
+      "overflow": false
+    },
+    {
+      "name": "wordpress-comentarios",
+      "viewport": 1440,
+      "panel": 970,
+      "queue": 968,
+      "row": null,
+      "overflow": false
+    },
+    {
+      "name": "wordpress-reportes",
+      "viewport": 1440,
+      "panel": 970,
+      "queue": 968,
+      "row": null,
+      "overflow": false
+    },
+    {
+      "name": "pagina-publicaciones-1920",
+      "viewport": 1920,
+      "panel": 1420,
+      "queue": 1418,
+      "row": 1418,
+      "overflow": false
+    },
+    {
+      "name": "pagina-publicaciones-1440",
+      "viewport": 1440,
+      "panel": 1130,
+      "queue": 1128,
+      "row": 1128,
+      "overflow": false
+    },
+    {
+      "name": "pagina-publicaciones-movil",
+      "viewport": 390,
+      "panel": 356,
+      "queue": 354,
+      "row": 354,
+      "overflow": false
+    },
+    {
+      "name": "pagina-comentarios-movil",
+      "viewport": 390,
+      "panel": 356,
+      "queue": 354,
+      "row": null,
+      "overflow": false
+    },
+    {
+      "name": "pagina-reportes-movil",
+      "viewport": 390,
+      "panel": 356,
+      "queue": 354,
+      "row": null,
+      "overflow": false
+    },
+    {
+      "name": "comentarios-al-dia",
+      "viewport": 1440,
+      "panel": 1130,
+      "queue": 1128,
+      "row": null,
+      "overflow": false
+    },
+    {
+      "name": "reportes-al-dia",
+      "viewport": 1440,
+      "panel": 1130,
+      "queue": 1128,
+      "row": null,
+      "overflow": false
+    },
+    {
+      "name": "reportes-al-dia-oscuro",
+      "viewport": 1440,
+      "panel": 1130,
+      "queue": 1128,
+      "row": null,
+      "overflow": false
+    },
+    {
+      "name": "reportes-al-dia-movil",
+      "viewport": 390,
+      "panel": 356,
+      "queue": 354,
+      "row": null,
+      "overflow": false
+    },
+    {
+      "name": "wordpress-publicaciones-al-dia",
+      "viewport": 1440,
+      "panel": 970,
+      "queue": 968,
+      "row": 968,
+      "overflow": false
+    },
+    {
+      "name": "wordpress-comentarios-al-dia",
+      "viewport": 1440,
+      "panel": 970,
+      "queue": 968,
+      "row": null,
+      "overflow": false
+    },
+    {
+      "name": "wordpress-reportes-al-dia",
+      "viewport": 1440,
+      "panel": 970,
+      "queue": 968,
+      "row": null,
+      "overflow": false
+    }
+  ],
+  "accessibility_scans": [
+    {
+      "name": "wordpress-publicaciones-1920",
+      "violations": []
+    },
+    {
+      "name": "wordpress-publicaciones-1440",
+      "violations": []
+    },
+    {
+      "name": "wordpress-borradores",
+      "violations": []
+    },
+    {
+      "name": "wordpress-publicaciones-oscuro",
+      "violations": []
+    },
+    {
+      "name": "wordpress-publicaciones-movil",
+      "violations": []
+    },
+    {
+      "name": "wordpress-comentarios",
+      "violations": []
+    },
+    {
+      "name": "wordpress-reportes",
+      "violations": []
+    },
+    {
+      "name": "pagina-publicaciones-1920",
+      "violations": []
+    },
+    {
+      "name": "pagina-publicaciones-1440",
+      "violations": []
+    },
+    {
+      "name": "pagina-publicaciones-movil",
+      "violations": []
+    },
+    {
+      "name": "pagina-comentarios-movil",
+      "violations": []
+    },
+    {
+      "name": "pagina-reportes-movil",
+      "violations": []
+    },
+    {
+      "name": "comentarios-al-dia",
+      "violations": []
+    },
+    {
+      "name": "reportes-al-dia",
+      "violations": []
+    },
+    {
+      "name": "reportes-al-dia-oscuro",
+      "violations": []
+    },
+    {
+      "name": "reportes-al-dia-movil",
+      "violations": []
+    },
+    {
+      "name": "wordpress-publicaciones-al-dia",
+      "violations": []
+    },
+    {
+      "name": "wordpress-comentarios-al-dia",
+      "violations": []
+    },
+    {
+      "name": "wordpress-reportes-al-dia",
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "limits": [
+    "Laboratorio local con registros sintéticos; no acredita instalación ni comportamiento en el servidor remoto.",
+    "Las capturas se recortan al área de revisión y ocultan la cabecera global fija durante la captura; las medidas y pruebas se realizan con la interfaz completa.",
+    "Escaneos automáticos de accesibilidad sobre el área modificada, sin certificación de accesibilidad global."
+  ],
+  "report": "test-results/moderation-layout1110/index.html",
+  "test_source": "tests/moderation-layout1110.cjs"
+}

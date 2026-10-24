@@ -28,7 +28,7 @@ async function close(mode='escape'){
 }
 async function api(p,route,body){return p.evaluate(async({route,body})=>{const r=await fetch(ASCLA.api+route,{method:body?'POST':'GET',headers:{'X-WP-Nonce':ASCLA.nonce,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});return {status:r.status,body:await r.json()};},{route,body});}
 (async()=>{try{
- browser=await chromium.launch({headless:true});page=await login('ascla_member');
+ browser=await chromium.launch({headless:true,...(process.env.ASCLA_BROWSER_CHANNEL?{channel:process.env.ASCLA_BROWSER_CHANNEL}:{})});page=await login('ascla_member');
  await page.goto(base+'/foros/?q='+encodeURIComponent(f.prefix));await counter(f.posts.main.id).waitFor();await page.keyboard.press('Escape');
  page.on('framenavigated',frame=>{if(frame===page.mainFrame())navigations++;});
  await counter(f.posts.main.id).evaluate(el=>{el.dataset.originalCounter='true';});
@@ -38,11 +38,11 @@ async function api(p,route,body){return p.evaluate(async({route,body})=>{const r
  await counter(f.posts.main.id).click();await page.locator(`[data-comment-id="${first.id}"] [data-action=comment-reply]`).click();
  const reply=await submit(page.locator('[data-form=comment-reply]'),'Respuesta al primer comentario');assert.equal(reply.status,'publish');await close('button');
  assert.equal(await counter(f.posts.main.id).innerText(),'2 comentarios');assert.equal(await counter(f.posts.other.id).innerText(),'2 comentarios');pass('Una respuesta actualiza solo el tema correspondiente y usa el plural');
- await counter(f.posts.main.id).click();await page.locator(`[data-comment-id="${reply.id}"] summary`).click();await page.locator(`[data-comment-id="${reply.id}"] [data-action=delete-comment]`).click();
+ await counter(f.posts.main.id).click();await page.locator(`[data-comment-thread="${first.id}"] [data-action=comment-expand]`).click();await page.locator(`[data-comment-id="${reply.id}"] summary`).click();await page.locator(`[data-comment-id="${reply.id}"] [data-action=delete-comment]`).click();
  const removed=page.waitForResponse(r=>r.request().method()==='DELETE'&&r.url().includes('/comments/'+reply.id));await page.locator('[data-action=delete-confirm]').click();assert.equal((await removed).status(),200);
- await page.locator('[data-form=comment]').waitFor();await close('backdrop');assert.equal(await counter(f.posts.main.id).innerText(),'1 comentario');pass('Eliminar una respuesta disminuye el contador al cerrar por el fondo');
+ await page.waitForFunction(id=>document.querySelector(`[data-comment-count="${id}"]`)?.textContent==='1 comentario',f.posts.main.id);await page.locator('[data-form=comment]').waitFor();await close('backdrop');assert.equal(await counter(f.posts.main.id).innerText(),'1 comentario');pass('Eliminar una respuesta disminuye el contador al cerrar por el fondo');
  assert.equal(await page.locator('[data-form=filters] [name=q]').inputValue(),f.prefix);assert.equal(navigations,0);pass('Se conservan la búsqueda y el documento durante publicación, respuesta y eliminación');
- await counter(f.posts.large.id).click();await page.locator('#comments-list .comment').nth(99).waitFor();assert.equal(await page.locator('#comments-list .comment').count(),100);
+ await counter(f.posts.large.id).click();await page.locator('#comments-list .comment').first().waitFor();while(await page.locator('[data-action=comment-more]').count())await page.locator('[data-action=comment-more]').click();await page.locator('#comments-list .comment').nth(99).waitFor();assert.equal(await page.locator('#comments-list .comment').count(),100);
  await submit(page.locator('[data-form=comment]'),'Nuevo aporte fuera de los primeros cien');await close();assert.equal(await counter(f.posts.large.id).innerText(),'102 comentarios');pass('El total usa los 102 comentarios del servidor aunque el detalle solo cargue cien');
  await page.goto(base+'/hub/?q='+encodeURIComponent(f.prefix));await counter(f.posts.hub.id).waitFor();await counter(f.posts.hub.id).click();
  const pending=await submit(page.locator('[data-form=comment]'),'Comentario que requiere revisión');assert.equal(pending.status,'pending');await close();assert.equal(await counter(f.posts.hub.id).innerText(),'0 comentarios');pass('El Hub comparte la actualización y los comentarios pendientes no aumentan el total publicado');

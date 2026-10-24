@@ -75,6 +75,9 @@ msgstr "Abrir PDF en otra pestaña"
 msgid "Abrir archivo"
 msgstr "Abrir archivo"
 
+msgid "Abrir borrador"
+msgstr "Abrir borrador"
+
 msgid "Abrir contenido"
 msgstr "Abrir contenido"
 
@@ -191,6 +194,9 @@ msgstr "Activar en el catálogo"
 
 msgid "Active JavaScript para utilizar la intranet."
 msgstr "Active JavaScript para utilizar la intranet."
+
+msgid "Actividad"
+msgstr "Actividad"
 
 msgid "Actividad e intereses"
 msgstr "Actividad e intereses"
@@ -405,6 +411,9 @@ msgstr "Aplicar cambios"
 msgid "Aplicar filtros"
 msgstr "Aplicar filtros"
 
+msgid "Aportes que necesitan aprobación"
+msgstr "Aportes que necesitan aprobación"
+
 msgid "Aprendizaje activo"
 msgstr "Aprendizaje activo"
 
@@ -564,6 +573,9 @@ msgstr "Asociados elegibles"
 msgid "Asociados en la comunidad"
 msgstr "Asociados en la comunidad"
 
+msgid "Asociados que comparten un interés visible."
+msgstr "Asociados que comparten un interés visible."
+
 msgid "Atención actualizada."
 msgstr "Atención actualizada."
 
@@ -602,6 +614,9 @@ msgstr "Autorización registrada"
 
 msgid "Avisos antes del evento (horas)"
 msgstr "Avisos antes del evento (horas)"
+
+msgid "Avisos de la comunidad por revisar"
+msgstr "Avisos de la comunidad por revisar"
 
 msgid "Avisos de nuevos recursos"
 msgstr "Avisos de nuevos recursos"
@@ -645,6 +660,9 @@ msgstr "Aún no hay Me gusta en contenidos con temas para este período."
 msgid "Aún no hay asistencias para mostrar en el gráfico."
 msgstr "Aún no hay asistencias para mostrar en el gráfico."
 
+msgid "Aún no hay asistencias registradas. Las listas pendientes pueden cambiar estas cifras."
+msgstr "Aún no hay asistencias registradas. Las listas pendientes pueden cambiar estas cifras."
+
 msgid "Aún no hay coincidencias disponibles"
 msgstr "Aún no hay coincidencias disponibles"
 
@@ -662,6 +680,9 @@ msgstr "Aún no hay importaciones."
 
 msgid "Aún no hay intereses en este perfil."
 msgstr "Aún no hay intereses en este perfil."
+
+msgid "Aún no hay registros para representar en este gráfico."
+msgstr "Aún no hay registros para representar en este gráfico."
 
 msgid "Aún no tienes consultas"
 msgstr "Aún no tienes consultas"
@@ -815,6 +836,9 @@ msgstr "Cada barra muestra asistencias, no personas distintas."
 
 msgid "Cada persona cuenta una sola vez, aunque haya asistido a varios eventos."
 msgstr "Cada persona cuenta una sola vez, aunque haya asistido a varios eventos."
+
+msgid "Cada persona cuenta una sola vez. Quienes regresan asistieron a dos o más eventos."
+msgstr "Cada persona cuenta una sola vez. Quienes regresan asistieron a dos o más eventos."
 
 msgid "Cambia la búsqueda o el estado seleccionado."
 msgstr "Cambia la búsqueda o el estado seleccionado."
@@ -972,6 +996,9 @@ msgstr "Centro de Conocimiento"
 msgid "Cerrada"
 msgstr "Cerrada"
 
+msgid "Cerrados"
+msgstr "Cerrados"
+
 msgid "Cerrar"
 msgstr "Cerrar"
 
@@ -1032,6 +1059,9 @@ msgstr "Columna no válida."
 msgid "Combina mayúsculas, minúsculas, números y símbolos. Evita secuencias y datos personales."
 msgstr "Combina mayúsculas, minúsculas, números y símbolos. Evita secuencias y datos personales."
 
+msgid "Comentario no disponible"
+msgstr "Comentario no disponible"
+
 msgid "Comentario reportado"
 msgstr "Comentario reportado"
 
@@ -1046,6 +1076,9 @@ msgstr "Comentarios por aprobar"
 
 msgid "Comentó en"
 msgstr "Comentó en"
+
+msgid "Compara las dos barras de cada indicador. Cada indicador utiliza su propia escala."
+msgstr "Compara las dos barras de cada indicador. Cada indicador utiliza su propia escala."
 
 msgid "Compara los intereses guardados con la asistencia real a eventos."
 msgstr "Compara los intereses guardados con la asistencia real a eventos."
@@ -1140,6 +1173,9 @@ msgstr "Comunidad ASCLA"
 msgid "Comunidad profesional"
 msgstr "Comunidad profesional"
 
+msgid "Con membresía, consentimiento y perfil completo."
+msgstr "Con membresía, consentimiento y perfil completo."
+
 msgid "Conceptos importantes"
 msgstr "Conceptos importantes"
 
@@ -1220,6 +1256,9 @@ msgstr "Configurar ASCLA"
 
 msgid "Confirma"
 msgstr "Confirma"
+
+msgid "Confirma el grupo y ajusta la fecha y la agenda."
+msgstr "Confirma el grupo y ajusta la fecha y la agenda."
 
 msgid "Confirma las notificaciones que deseas eliminar."
 msgstr "Confirma las notificaciones que deseas eliminar."
@@ -1320,6 +1359,9 @@ msgstr "Consulta con ASCLA para obtener más información sobre esta alianza."
 msgid "Consulta el estado actual de cada persona seleccionada. Una invitación no confirma su asistencia."
 msgstr "Consulta el estado actual de cada persona seleccionada. Una invitación no confirma su asistencia."
 
+msgid "Consulta el estado de cada propuesta y el siguiente paso."
+msgstr "Consulta el estado de cada propuesta y el siguiente paso."
+
 msgid "Consulta el estado y el historial de atención."
 msgstr "Consulta el estado y el historial de atención."
 
@@ -1382,6 +1424,9 @@ msgstr "Contenido explícito"
 
 msgid "Contenido generado"
 msgstr "Contenido generado"
+
+msgid "Contenido pendiente de publicación"
+msgstr "Contenido pendiente de publicación"
 
 msgid "Contenido publicado"
 msgstr "Contenido publicado"
@@ -1503,6 +1548,9 @@ msgstr "Criterios de completitud"
 msgid "Criterios de completitud no válidos."
 msgstr "Criterios de completitud no válidos."
 
+msgid "Cuando haya contenido pendiente de aprobación, aparecerá aquí."
+msgstr "Cuando haya contenido pendiente de aprobación, aparecerá aquí."
+
 msgid "Cuando se publiquen recursos vinculados con tus intereses aparecerán aquí."
 msgstr "Cuando se publiquen recursos vinculados con tus intereses aparecerán aquí."
 
@@ -1562,6 +1610,9 @@ msgstr "Cápsula sugerida"
 
 msgid "Cápsulas sugeridas"
 msgstr "Cápsulas sugeridas"
+
+msgid "Círculos de conversación"
+msgstr "Círculos de conversación"
 
 msgid "Código de asociado"
 msgstr "Código de asociado"
@@ -1767,6 +1818,9 @@ msgstr "Duración no válida para este evento."
 msgid "Duración por confirmar"
 msgstr "Duración por confirmar"
 
+msgid "ENCUENTROS ENTRE ASOCIADOS"
+msgstr "ENCUENTROS ENTRE ASOCIADOS"
+
 msgid "Edita los datos del asociado desde Usuarios e intereses en ASCLA."
 msgstr "Edita los datos del asociado desde Usuarios e intereses en ASCLA."
 
@@ -1871,6 +1925,15 @@ msgstr "El correo no admite saltos de línea ni caracteres de control."
 
 msgid "El editor de imágenes no está disponible. Recarga la página e inténtalo de nuevo."
 msgstr "El editor de imágenes no está disponible. Recarga la página e inténtalo de nuevo."
+
+msgid "El encuentro está publicado. Puedes consultar sus inscripciones."
+msgstr "El encuentro está publicado. Puedes consultar sus inscripciones."
+
+msgid "El encuentro finalizó. Puedes consultar su historial."
+msgstr "El encuentro finalizó. Puedes consultar su historial."
+
+msgid "El encuentro fue cancelado. Su historial se conserva."
+msgstr "El encuentro fue cancelado. Su historial se conserva."
 
 msgid "El evento cambió de fecha, horario o modalidad. Revisa los cambios y confirma nuevamente tu asistencia."
 msgstr "El evento cambió de fecha, horario o modalidad. Revisa los cambios y confirma nuevamente tu asistencia."
@@ -2066,6 +2129,12 @@ msgstr "En la comunidad desde"
 
 msgid "En lista de espera"
 msgstr "En lista de espera"
+
+msgid "En preparación o publicados"
+msgstr "En preparación o publicados"
+
+msgid "En respuesta a"
+msgstr "En respuesta a"
 
 msgid "Encontramos señales de afinidad entre sus perfiles profesionales."
 msgstr "Encontramos señales de afinidad entre sus perfiles profesionales."
@@ -2328,6 +2397,9 @@ msgstr "Eventos asistidos"
 msgid "Eventos de la comunidad"
 msgstr "Eventos de la comunidad"
 
+msgid "Eventos del período"
+msgstr "Eventos del período"
+
 msgid "Eventos disponibles"
 msgstr "Eventos disponibles"
 
@@ -2429,6 +2501,9 @@ msgstr "Fecha del comentario"
 
 msgid "Fecha por confirmar"
 msgstr "Fecha por confirmar"
+
+msgid "Fecha por definir"
+msgstr "Fecha por definir"
 
 msgid "Fecha y hora de publicación"
 msgstr "Fecha y hora de publicación"
@@ -2667,6 +2742,9 @@ msgstr "Hay eventos pendientes de analizar"
 msgid "Hay filtros adicionales"
 msgstr "Hay filtros adicionales"
 
+msgid "Hay listas por revisar. Los totales registrados pueden crecer al completar la asistencia."
+msgstr "Hay listas por revisar. Los totales registrados pueden crecer al completar la asistencia."
+
 msgid "Haz que tu perfil conecte con las personas y las ideas que te interesan."
 msgstr "Haz que tu perfil conecte con las personas y las ideas que te interesan."
 
@@ -2895,6 +2973,9 @@ msgstr "Inicio de sesión · desafío adaptativo según el umbral configurado"
 msgid "Inscripciones"
 msgstr "Inscripciones"
 
+msgid "Inscripciones con lista verificada"
+msgstr "Inscripciones con lista verificada"
+
 msgid "Inscripciones confirmadas"
 msgstr "Inscripciones confirmadas"
 
@@ -2921,6 +3002,9 @@ msgstr "Inscripción cerrada o reservada a los miembros recomendados."
 
 msgid "Inscrito"
 msgstr "Inscrito"
+
+msgid "Inscritos que asistieron"
+msgstr "Inscritos que asistieron"
 
 msgid "Inscríbete antes de guardar este evento en tu calendario."
 msgstr "Inscríbete antes de guardar este evento en tu calendario."
@@ -2960,6 +3044,9 @@ msgstr "Intereses importados de formularios"
 
 msgid "Intereses propuestos · máximo 3"
 msgstr "Intereses propuestos · máximo 3"
+
+msgid "Intereses que más se comparten"
+msgstr "Intereses que más se comparten"
 
 msgid "Intereses y objetivos"
 msgstr "Intereses y objetivos"
@@ -3081,6 +3168,9 @@ msgstr "La eliminación es permanente y retira sus referencias."
 msgid "La entrega a Google Calendar quedó registrada y se reintentará si el servicio falla."
 msgstr "La entrega a Google Calendar quedó registrada y se reintentará si el servicio falla."
 
+msgid "La evolución de un vistazo"
+msgstr "La evolución de un vistazo"
+
 msgid "La experiencia de nuestra comunidad, siempre a tu alcance."
 msgstr "La experiencia de nuestra comunidad, siempre a tu alcance."
 
@@ -3135,11 +3225,23 @@ msgstr "La otra persona ya recibió tu mensaje. Podrás seguir escribiendo cuand
 msgid "La participación está desactivada. Puedes habilitarla desde Privacidad y participación."
 msgstr "La participación está desactivada. Puedes habilitarla desde Privacidad y participación."
 
+msgid "La propuesta está aprobada. Revisa la fecha y publica cuando esté lista."
+msgstr "La propuesta está aprobada. Revisa la fecha y publica cuando esté lista."
+
+msgid "La propuesta no fue aprobada. Puedes consultar la decisión."
+msgstr "La propuesta no fue aprobada. Puedes consultar la decisión."
+
 msgid "La propuesta volverá a borrador para su revisión. Podrás editarla y aprobarla antes de publicarla."
 msgstr "La propuesta volverá a borrador para su revisión. Podrás editarla y aprobarla antes de publicarla."
 
 msgid "La prueba usa texto sintético y el catálogo actual; no envía respuestas, correos ni perfiles de asociados."
 msgstr "La prueba usa texto sintético y el catálogo actual; no envía respuestas, correos ni perfiles de asociados."
+
+msgid "La publicación abre el proceso de invitaciones e inscripción."
+msgstr "La publicación abre el proceso de invitaciones e inscripción."
+
+msgid "La publicación está programada para la fecha indicada."
+msgstr "La publicación está programada para la fecha indicada."
 
 msgid "La publicación programada necesita revisión."
 msgstr "La publicación programada necesita revisión."
@@ -3167,6 +3269,9 @@ msgstr "La solicitud resuelta se enviará a la papelera."
 
 msgid "La solicitud se cancelará y la otra persona dejará de ver la notificación asociada."
 msgstr "La solicitud se cancelará y la otra persona dejará de ver la notificación asociada."
+
+msgid "La tasa estará disponible cuando haya inscripciones con una lista de asistencia verificada."
+msgstr "La tasa estará disponible cuando haya inscripciones con una lista de asistencia verificada."
 
 msgid "La tasa necesita inscritos con una lista verificada. El promedio necesita al menos una lista verificada. Sin esa base, no se muestra un cero."
 msgstr "La tasa necesita inscritos con una lista verificada. El promedio necesita al menos una lista verificada. Sin esa base, no se muestra un cero."
@@ -3228,6 +3333,12 @@ msgstr "Las filas sin asociar no crean cuentas ni asistencias. Puedes registrarl
 msgid "Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."
 msgstr "Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."
 
+msgid "Las inscripciones son reservas. No confirman que la persona haya asistido."
+msgstr "Las inscripciones son reservas. No confirman que la persona haya asistido."
+
+msgid "Las listas del período están verificadas. La tasa y el promedio utilizan esa base."
+msgstr "Las listas del período están verificadas. La tasa y el promedio utilizan esa base."
+
 msgid "Las listas pendientes pueden cambiar la comparación. Aumentó o Disminuyó describe la diferencia; no es una evaluación de desempeño."
 msgstr "Las listas pendientes pueden cambiar la comparación. Aumentó o Disminuyó describe la diferencia; no es una evaluación de desempeño."
 
@@ -3242,6 +3353,9 @@ msgstr "Le gusta"
 
 msgid "Lectura no válida."
 msgstr "Lectura no válida."
+
+msgid "Lee la actividad, las personas y las asistencias como tres datos diferentes."
+msgstr "Lee la actividad, las personas y las asistencias como tres datos diferentes."
 
 msgid "Leído"
 msgstr "Leído"
@@ -3327,11 +3441,17 @@ msgstr "Los mensajes de personas aún no autorizadas aparecen aquí."
 msgid "Los momentos que construyen nuestra comunidad."
 msgstr "Los momentos que construyen nuestra comunidad."
 
+msgid "Los nuevos comentarios que necesiten aprobación aparecerán aquí."
+msgstr "Los nuevos comentarios que necesiten aprobación aparecerán aquí."
+
 msgid "Los ocho grupos mínimos siempre se incluyen y son obligatorios al guardar. Los criterios adicionales cuentan para llegar al 100 %, pero no impiden guardar un perfil con sus mínimos completos."
 msgstr "Los ocho grupos mínimos siempre se incluyen y son obligatorios al guardar. Los criterios adicionales cuentan para llegar al 100 %, pero no impiden guardar un perfil con sus mínimos completos."
 
 msgid "Los permisos no pueden superar los del rol asignado."
 msgstr "Los permisos no pueden superar los del rol asignado."
+
+msgid "Los reportes de la comunidad aparecerán aquí para que puedas revisarlos."
+msgstr "Los reportes de la comunidad aparecerán aquí para que puedas revisarlos."
 
 msgid "Los sectores que conoces"
 msgstr "Los sectores que conoces"
@@ -3669,6 +3789,9 @@ msgstr "No hay datos para este período."
 msgid "No hay entregas pendientes."
 msgstr "No hay entregas pendientes."
 
+msgid "No hay eventos finalizados con estos filtros. Prueba otras fechas para consultar la participación."
+msgstr "No hay eventos finalizados con estos filtros. Prueba otras fechas para consultar la participación."
+
 msgid "No hay microeventos archivados."
 msgstr "No hay microeventos archivados."
 
@@ -4005,6 +4128,9 @@ msgstr "Ocultar conversación"
 msgid "Ocultar del catálogo"
 msgstr "Ocultar del catálogo"
 
+msgid "Ocultar respuestas"
+msgstr "Ocultar respuestas"
+
 msgid "Ocultar retira el contenido del catálogo y conserva sus archivos e historial."
 msgstr "Ocultar retira el contenido del catálogo y conserva sus archivos e historial."
 
@@ -4230,17 +4356,29 @@ msgstr "Persona o asistencia"
 msgid "Persona o área de contacto"
 msgstr "Persona o área de contacto"
 
+msgid "Personas"
+msgstr "Personas"
+
 msgid "Personas con acciones en el registro de actividad."
 msgstr "Personas con acciones en el registro de actividad."
 
 msgid "Personas con al menos una asistencia."
 msgstr "Personas con al menos una asistencia."
 
+msgid "Personas con ese interés guardado; refleja los perfiles actuales."
+msgstr "Personas con ese interés guardado; refleja los perfiles actuales."
+
 msgid "Personas con interés guardado"
 msgstr "Personas con interés guardado"
 
+msgid "Personas distintas que asistieron"
+msgstr "Personas distintas que asistieron"
+
 msgid "Personas inscritas o con asistencia registrada, ordenadas por cantidad de asistencias."
 msgstr "Personas inscritas o con asistencia registrada, ordenadas por cantidad de asistencias."
+
+msgid "Personas necesarias para preparar una propuesta."
+msgstr "Personas necesarias para preparar una propuesta."
 
 msgid "Personas que asistieron"
 msgstr "Personas que asistieron"
@@ -4368,6 +4506,9 @@ msgstr "Preparar propuestas de la semana"
 msgid "Preparar propuestas del período"
 msgstr "Preparar propuestas del período"
 
+msgid "Preparar propuestas no las publica. Podrás revisarlas antes de continuar."
+msgstr "Preparar propuestas no las publica. Podrás revisarlas antes de continuar."
+
 msgid "Presencial"
 msgstr "Presencial"
 
@@ -4407,6 +4548,9 @@ msgstr "Programa del evento"
 msgid "Programación guardada. Falta aprobación administrativa."
 msgstr "Programación guardada. Falta aprobación administrativa."
 
+msgid "Programada"
+msgstr "Programada"
+
 msgid "Programado"
 msgstr "Programado"
 
@@ -4427,6 +4571,9 @@ msgstr "Promedio por evento"
 
 msgid "Promedio por evento con lista verificada. Sin listas verificadas no se calcula."
 msgstr "Promedio por evento con lista verificada. Sin listas verificadas no se calcula."
+
+msgid "Promedio por evento verificado"
+msgstr "Promedio por evento verificado"
 
 msgid "Propiedad intelectual"
 msgstr "Propiedad intelectual"
@@ -4485,6 +4632,9 @@ msgstr "Publicaciones"
 msgid "Publicaciones por aprobar"
 msgstr "Publicaciones por aprobar"
 
+msgid "Publicación administrativa"
+msgstr "Publicación administrativa"
+
 msgid "Publicación del evento"
 msgstr "Publicación del evento"
 
@@ -4517,6 +4667,9 @@ msgstr "Publicar comentario"
 
 msgid "Publicar contenido editorial y gestionar eventos"
 msgstr "Publicar contenido editorial y gestionar eventos"
+
+msgid "Publicar el encuentro"
+msgstr "Publicar el encuentro"
 
 msgid "Publicar evento"
 msgstr "Publicar evento"
@@ -4625,6 +4778,9 @@ msgstr "Qué ven otros asociados"
 
 msgid "RECOMENDACIONES PARA TI"
 msgstr "RECOMENDACIONES PARA TI"
+
+msgid "REVISIÓN DE LA COMUNIDAD"
+msgstr "REVISIÓN DE LA COMUNIDAD"
 
 msgid "Reabrir registro"
 msgstr "Reabrir registro"
@@ -4911,11 +5067,23 @@ msgstr "Retirar del catálogo"
 msgid "Retirar del catálogo conserva la ficha y su historial. Puedes reactivarla más adelante."
 msgstr "Retirar del catálogo conserva la ficha y su historial. Puedes reactivarla más adelante."
 
+msgid "Reunir al grupo"
+msgstr "Reunir al grupo"
+
 msgid "Revisa"
 msgstr "Revisa"
 
 msgid "Revisa el contenido"
 msgstr "Revisa el contenido"
+
+msgid "Revisa el grupo, la fecha y la agenda para decidir su publicación."
+msgstr "Revisa el grupo, la fecha y la agenda para decidir su publicación."
+
+msgid "Revisa las condiciones o ajusta los mínimos antes de preparar propuestas."
+msgstr "Revisa las condiciones o ajusta los mínimos antes de preparar propuestas."
+
+msgid "Revisa las inscripciones y las condiciones del encuentro."
+msgstr "Revisa las inscripciones y las condiciones del encuentro."
 
 msgid "Revisa los mínimos en Configuración → Participación y revisión y los intereses autorizados de los perfiles."
 msgstr "Revisa los mínimos en Configuración → Participación y revisión y los intereses autorizados de los perfiles."
@@ -4977,6 +5145,9 @@ msgstr "Revisar encuentro"
 msgid "Revisar entregas"
 msgstr "Revisar entregas"
 
+msgid "Revisar la propuesta"
+msgstr "Revisar la propuesta"
+
 msgid "Revisar microevento"
 msgstr "Revisar microevento"
 
@@ -4988,6 +5159,9 @@ msgstr "Revisar propuesta"
 
 msgid "Revisar publicaciones"
 msgstr "Revisar publicaciones"
+
+msgid "Revisar publicación"
+msgstr "Revisar publicación"
 
 msgid "Revisar reporte"
 msgstr "Revisar reporte"
@@ -5018,6 +5192,9 @@ msgstr "Salir sin guardar"
 
 msgid "Se añadirán los intereses aceptados conservando los actuales."
 msgstr "Se añadirán los intereses aceptados conservando los actuales."
+
+msgid "Se buscan intereses compartidos entre asociados elegibles."
+msgstr "Se buscan intereses compartidos entre asociados elegibles."
 
 msgid "Se comparan dos períodos consecutivos con la misma cantidad de días."
 msgstr "Se comparan dos períodos consecutivos con la misma cantidad de días."
@@ -5208,8 +5385,14 @@ msgstr "Siguiente"
 msgid "Sin actividad publicada"
 msgstr "Sin actividad publicada"
 
+msgid "Sin asistencia registrada"
+msgstr "Sin asistencia registrada"
+
 msgid "Sin base previa"
 msgstr "Sin base previa"
+
+msgid "Sin base verificada"
+msgstr "Sin base verificada"
 
 msgid "Sin cambios"
 msgstr "Sin cambios"
@@ -5751,6 +5934,9 @@ msgstr "Una conversación puede ser el inicio de una gran colaboración."
 msgid "Una mirada a su actividad"
 msgstr "Una mirada a su actividad"
 
+msgid "Una persona en tres eventos suma tres asistencias. El promedio usa solo listas verificadas."
+msgstr "Una persona en tres eventos suma tres asistencias. El promedio usa solo listas verificadas."
+
 msgid "Una persona y un evento pueden estar en varios temas. No sumes las filas como si fueran personas distintas."
 msgstr "Una persona y un evento pueden estar en varios temas. No sumes las filas como si fueran personas distintas."
 
@@ -5829,6 +6015,15 @@ msgstr "Vencida"
 msgid "Ver"
 msgstr "Ver"
 
+msgid "Ver %s respuestas más"
+msgstr "Ver %s respuestas más"
+
+msgid "Ver 1 respuesta"
+msgstr "Ver 1 respuesta"
+
+msgid "Ver 1 respuesta más"
+msgstr "Ver 1 respuesta más"
+
 msgid "Ver Centro de Conocimiento"
 msgstr "Ver Centro de Conocimiento"
 
@@ -5892,11 +6087,17 @@ msgstr "Ver integrantes"
 msgid "Ver intranet"
 msgstr "Ver intranet"
 
+msgid "Ver las %s respuestas"
+msgstr "Ver las %s respuestas"
+
 msgid "Ver mis consultas"
 msgstr "Ver mis consultas"
 
 msgid "Ver mis publicaciones"
 msgstr "Ver mis publicaciones"
+
+msgid "Ver más comentarios"
+msgstr "Ver más comentarios"
 
 msgid "Ver o corregir lista"
 msgstr "Ver o corregir lista"
@@ -6045,6 +6246,9 @@ msgstr "avisos"
 msgid "baja"
 msgstr "baja"
 
+msgid "candidatos del grupo"
+msgstr "candidatos del grupo"
+
 msgid "caracteres"
 msgstr "caracteres"
 
@@ -6084,6 +6288,9 @@ msgstr "de"
 msgid "de afinidad"
 msgstr "de afinidad"
 
+msgid "de inscritos"
+msgstr "de inscritos"
+
 msgid "del tiempo del evento"
 msgstr "del tiempo del evento"
 
@@ -6092,6 +6299,9 @@ msgstr "disponibles"
 
 msgid "días"
 msgstr "días"
+
+msgid "en este listado"
+msgstr "en este listado"
 
 msgid "encontradas"
 msgstr "encontradas"
@@ -6347,6 +6557,9 @@ msgstr "¿Qué se publicó recientemente?"
 
 msgid "¿Qué significa Chatham House?"
 msgstr "¿Qué significa Chatham House?"
+
+msgid "¿Qué tan completos están los registros?"
+msgstr "¿Qué tan completos están los registros?"
 
 msgid "¿Qué temas reúnen a la comunidad?"
 msgstr "¿Qué temas reúnen a la comunidad?"

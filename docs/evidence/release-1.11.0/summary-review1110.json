@@ -1,0 +1,124 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-24T21:32:19.075Z",
+  "scope": "Chrome real en Windows y WordPress loopback desechable. Cifras, filtros, permisos y decisiones reales con datos sintéticos; sin servicios externos.",
+  "package_sha256": "5b65573c241528b816dbccc5ff2c3adc8b486fd141ec5a6e1ae8e0eda0a3dad8",
+  "package_manifest": "docs/evidence/release-1.11.0/package-summary-review.json",
+  "previous_package_manifest": "docs/evidence/release-1.11.0/package-comment-replies.json",
+  "phpunit": {
+    "name": "CLI Arguments",
+    "tests": "101",
+    "assertions": "925",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "41.685323"
+  },
+  "checks": [
+    "El bloque distingue actividad, personas y asistencias con seis cifras reales y una única cobertura de listas dentro del resumen",
+    "El caso de cinco eventos y seis reservas explica el cero registrado y las cuatro listas pendientes sin afirmar que nadie asistió",
+    "Revisar asistencias conserva el foco en el registro y permite abrir una lista pendiente",
+    "Las asistencias parciales se mantienen y el promedio sin listas verificadas se muestra como Sin datos",
+    "Un período sin eventos muestra su estado vacío sin un acceso de revisión engañoso",
+    "El resumen se adapta a móvil y ambos temas y conserva los gráficos de asistencia y temas",
+    "Publicaciones muestra tarjetas con título, extracto, autor, fecha, estado neutro y una acción de revisión; el contador excluye borradores",
+    "Los borradores siguen separados, conservan su estado y se abren desde una acción propia",
+    "Revisar abre la publicación completa y no la publica automáticamente; el estado neutro también se aplica en su ficha",
+    "Pendiente de revisión usa el color neutro del tema en escritorio y móvil, sin amarillo",
+    "Comentarios conserva el texto y sus acciones de aprobar, mantener oculto y eliminar en tarjetas neutras",
+    "Reportes conserva el motivo, el contexto y la acción para marcar la revisión sin eliminar contenido",
+    "Los nuevos textos se traducen al inglés",
+    "La revisión de una publicación mantiene su motivo obligatorio y publica solo al guardar la decisión",
+    "La aprobación de comentarios sigue funcionando y actualiza la cola tras guardar el motivo",
+    "Las consultas administrativas conservan los permisos y no se producen errores JavaScript"
+  ],
+  "accessibility_scans": [
+    {
+      "name": "resumen-por-conceptos-claro",
+      "violations": []
+    },
+    {
+      "name": "resumen-con-listas-pendientes",
+      "violations": []
+    },
+    {
+      "name": "resumen-sin-base-verificada",
+      "violations": []
+    },
+    {
+      "name": "resumen-oscuro",
+      "violations": []
+    },
+    {
+      "name": "resumen-movil-oscuro",
+      "violations": []
+    },
+    {
+      "name": "revisar-publicaciones-claro",
+      "violations": []
+    },
+    {
+      "name": "borradores-separados",
+      "violations": []
+    },
+    {
+      "name": "revisar-publicaciones-oscuro",
+      "violations": []
+    },
+    {
+      "name": "revisar-publicaciones-movil",
+      "violations": []
+    },
+    {
+      "name": "revisar-comentarios",
+      "violations": []
+    },
+    {
+      "name": "revisar-reportes",
+      "violations": []
+    }
+  ],
+  "page_errors": [],
+  "behavior": {
+    "summary": "Six existing measures grouped as activity, people and attendances; distinct units and definitions retained",
+    "coverage": "One verified-list progress indicator inside the overview, with a review action and empty/no-baseline states",
+    "review_queue": "Publication cards with author, date, excerpt and full-review action; drafts remain separate; comments/reports retain controls",
+    "pending_state": "Neutral --state-bg/--state-ink/--state-border in both themes across the application",
+    "decisions": "Publication/comment approval occurs only after saving the decision and required reason; opening a card does not publish",
+    "schema": 15,
+    "server_formulas_and_permissions": "unchanged"
+  },
+  "data_checks": {
+    "full_scope": {
+      "events": 8,
+      "registrations": 15,
+      "unique_attendees": 3,
+      "attendances": 5,
+      "average": 1,
+      "recurring": 1,
+      "verified_lists": 3
+    },
+    "zero_recorded_case": {
+      "events": 5,
+      "registrations": 6,
+      "unique_attendees": 0,
+      "attendances": 0,
+      "average": 0,
+      "verified_lists": 1,
+      "pending_lists": 4
+    },
+    "partial_list_case": {
+      "attendances": 2,
+      "average": null
+    },
+    "empty_scope": {
+      "events": 0
+    }
+  },
+  "limits": [
+    "Local disposable WordPress with synthetic records, not a remote deployment or new coverage run.",
+    "Counts use the existing authorized server queries and bounds. No conversion rate is inferred by comparing total registrations with all attendances.",
+    "The existing attendance/topic/period charts remain available; server formulas and the database schema are unchanged."
+  ],
+  "local_report": "test-results/summary-review1110/index.html"
+}

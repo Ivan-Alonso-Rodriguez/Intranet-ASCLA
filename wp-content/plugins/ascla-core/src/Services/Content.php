@@ -598,7 +598,7 @@ final class ContentInteractions
 
     public static function comments(int $id): array
     {
-        Content::get($id); $comments=get_comments(['post_id'=>$id,'status'=>'approve','include_unapproved'=>[get_current_user_id()],'number'=>100,'order'=>'ASC']);
+        Content::get($id); $comments=get_comments(['post_id'=>$id,'status'=>'approve','include_unapproved'=>[get_current_user_id()],'number'=>100,'orderby'=>['comment_date_gmt'=>'ASC','comment_ID'=>'ASC']]);
         $me=get_current_user_id();
         return array_map(static function($c) use($me) {
             $cid=(int)$c->comment_ID;$reactions=ContentReactions::summary($cid,true);

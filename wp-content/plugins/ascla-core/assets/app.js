@@ -1801,30 +1801,114 @@
     container.outerHTML = reactionButtons(result, id, comment);
     root.querySelector('.reaction-picker [data-id="'+id+'"][data-comment="'+comment+'"][data-reaction="'+key+'"]')?.focus();
   }
-  function commentsHTML(comments, postId) {
-    if (!comments.length) return `<p class="private-note">${E(T('Sé la primera persona en compartir una idea.'))}</p>`;
-    const children = new Map();
+  const commentViews = new WeakMap();
+  const COMMENT_BATCH = 10, REPLY_BATCH = 5;
+  function commentThreads(comments) {
+    const byId = new Map(comments.map(c => [Number(c.id), c])), groups = new Map();
     for (const c of comments) {
-      const parent = Number(c.parent || 0);
-      if (!children.has(parent)) children.set(parent, []);
-      children.get(parent).push(c);
+      let head = c;
+      const visited = new Map();
+      while (byId.has(Number(head.parent))) {
+        visited.set(Number(head.id), visited.size);
+        const next = byId.get(Number(head.parent));
+        if (visited.has(Number(next.id))) {
+          head = byId.get(Math.min(...[...visited.keys()].slice(visited.get(Number(next.id)))));
+          break;
+        }
+        head = next;
+      }
+      const id = Number(head.id);
+      if (!groups.has(id)) groups.set(id, {root:head, replies:[]});
+      if (Number(c.id) !== id) groups.get(id).replies.push(c);
     }
-    const seen = new Set();
-    const renderOne = (c, depth = 0) => {
-      if (seen.has(Number(c.id))) return '';
-      seen.add(Number(c.id));
-      const menu = commentOverflow(c, postId);
-      const canReply = c.status === 'publish';
-      const actions = `<div class="comment-actions">${canReply ? reactionButtons(c, c.id, true) : ""}${canReply ? btn(I('reply') + ' ' + T('Responder'), 'comment-reply', ("data-id=\"" + (Number(c.id)) + "\" data-post=\"" + (Number(postId)) + "\" data-author=\"" + (E(c.author)) + "\""), 'ghost small') : ''}${c.status === 'pending' ? status(c.status) : ''}</div>`;
-      const replies = (children.get(Number(c.id)) || []).map(child => renderOne(child, depth + 1)).join('');
-      const authorName = Number(c.author_id) > 0
-        ? `<button type="button" class="comment-author" data-action="member" data-id="${Number(c.author_id)}" aria-label="${E(T('Ver perfil de'))} ${E(c.author)}">${E(c.author)}</button>`
-        : `<strong>${E(c.author)}</strong>`;
-      return `<article class="comment ${depth ? 'comment-reply' : ''} comment-depth-${Math.min(depth, 4)}" data-comment-id="${Number(c.id)}"><div class="comment-head"><div>${authorName} <small class="muted">${date(c.date)}</small></div>${menu}</div><p>${E(c.body)}</p>${actions}<div class="comment-reply-slot"></div>${replies}</article>`;
-    };
-    let html = (children.get(0) || []).map(c => renderOne(c, 0)).join('');
-    for (const c of comments) if (!seen.has(Number(c.id))) html += renderOne(c, 0);
-    return html;
+    for (const thread of groups.values()) {
+      const children = new Map(), ordered = [], seen = new Set([Number(thread.root.id)]);
+      for (const c of thread.replies) {
+        const parent = Number(c.parent);
+        if (!children.has(parent)) children.set(parent, []);
+        children.get(parent).push(c);
+      }
+      // Parent first, then its newest replies, without introducing another visual level.
+      const visit = items => {
+        const stack = [...items];
+        while (stack.length) {
+          const c = stack.pop(), id = Number(c.id);
+          if (seen.has(id)) continue;
+          seen.add(id); ordered.push(c);
+          stack.push(...(children.get(id) || []));
+        }
+      };
+      visit(children.get(Number(thread.root.id)) || []);
+      for (const c of thread.replies) if (!seen.has(Number(c.id))) visit([c]);
+      thread.replies = ordered;
+    }
+    return [...groups.values()];
+  }
+  function commentBody(c, recipient) {
+    let body = String(c.body || '');
+    // Suppress a matching prefix from the previous UI without changing the saved message.
+    if (recipient) {
+      const token = '@' + (String(recipient.author || '').normalize('NFKC').trim().replace(/\s+/gu, '.').replace(/[^\p{L}\p{N}_.-]/gu, '') || 'ASCLA');
+      const rest = body.slice(token.length);
+      if (body.startsWith(token) && /^\s/u.test(rest) && rest.trim()) body = rest.trimStart();
+    }
+    return E(body);
+  }
+  function commentCard(c, view, threadId) {
+    const isReply = Number(c.id) !== threadId, canReply = c.status === 'publish';
+    const postId = view.postId, recipient = view.byId.get(Number(c.parent));
+    const authorName = Number(c.author_id) > 0
+      ? `<button type="button" class="comment-author" data-action="member" data-id="${Number(c.author_id)}" aria-label="${E(T('Ver perfil de'))} ${E(c.author)}">${E(c.author)}</button>`
+      : `<strong>${E(c.author)}</strong>`;
+    const actions = `<div class="comment-actions">${canReply ? reactionButtons(c, c.id, true) : ''}${canReply ? btn(T('Responder'), 'comment-reply', `data-id="${Number(c.id)}" data-thread="${threadId}" data-post="${Number(postId)}" data-author="${E(c.author)}"`, 'ghost small') : ''}${c.status === 'pending' ? status(c.status) : ''}</div>`;
+    const context = Number(c.parent) > 0 ? `<span class="comment-reply-context"><span aria-hidden="true">▸</span><span class="screen-reader-text">${E(T('En respuesta a'))} </span><span class="comment-recipient-name">${E(recipient?.author || T('Comentario no disponible'))}</span></span>` : '';
+    return `<article class="comment${isReply ? ' comment-reply' : ''}" data-comment-id="${Number(c.id)}" data-reply-to="${Number(c.parent) || 0}"><span class="comment-avatar" aria-hidden="true">${avatar({name:c.author})}</span><div class="comment-copy"><div class="comment-head"><div class="comment-identity"><span class="comment-authors">${authorName}${context}</span><time class="muted" datetime="${E(String(c.date).replace(' ', 'T'))}Z">${date(c.date)}</time></div>${commentOverflow(c, postId)}</div><p>${commentBody(c,recipient)}</p>${actions}<div class="comment-reply-slot"></div></div></article>`;
+  }
+  function commentThreadControls(thread, shown) {
+    const id = Number(thread.root.id), total = thread.replies.length;
+    if (!total) return '';
+    const remaining = total - shown;
+    const label = shown ? (remaining === 1 ? 'Ver 1 respuesta más' : 'Ver %s respuestas más') : (total === 1 ? 'Ver 1 respuesta' : 'Ver las %s respuestas');
+    const more = remaining ? btn(T(label).replace('%s', String(shown ? remaining : total)), 'comment-expand', `data-id="${id}" aria-expanded="${shown > 0}" aria-controls="comment-replies-${id}"`, 'ghost small comment-thread-toggle') : '';
+    const hide = shown ? btn('Ocultar respuestas', 'comment-collapse', `data-id="${id}" aria-expanded="true" aria-controls="comment-replies-${id}"`, 'ghost small comment-thread-toggle') : '';
+    return more + hide;
+  }
+  function commentThreadMarkup(thread, view) {
+    const id = Number(thread.root.id), shown = Math.min(view.expanded.get(id) || 0, thread.replies.length);
+    return `<div class="comment-thread" data-comment-thread="${id}">${commentCard(thread.root, view, id)}<div class="comment-replies" id="comment-replies-${id}" ${shown ? '' : 'hidden'}>${thread.replies.slice(0, shown).map(c => commentCard(c, view, id)).join('')}</div><div class="comment-thread-controls">${commentThreadControls(thread, shown)}</div></div>`;
+  }
+  function commentsHTML(view) {
+    if (!view.threads.length) return `<p class="comment-empty">${E(T('Sé la primera persona en compartir una idea.'))}</p>`;
+    return view.threads.slice(0, view.visible).map(thread => commentThreadMarkup(thread, view)).join('')
+      + (view.threads.length > view.visible ? btn('Ver más comentarios', 'comment-more', '', 'small comment-more') : '');
+  }
+  async function changeCommentThread(action, button) {
+    const list = button.closest('#comments-list'), view = commentViews.get(list);
+    if (!view) return;
+    if (action === 'comment-more') {
+      const next = view.threads.slice(view.visible, view.visible + COMMENT_BATCH);
+      button.insertAdjacentHTML('beforebegin', next.map(thread => commentThreadMarkup(thread, view)).join(''));
+      view.visible += next.length;
+      if (view.visible >= view.threads.length) button.remove();
+      list.querySelector(`[data-comment-thread="${Number(next[0]?.root.id)}"] .comment-author`)?.focus();
+      return;
+    }
+    const id = Number(button.dataset.id), thread = view.threads.find(t => Number(t.root.id) === id);
+    const node = button.closest('.comment-thread'), replies = node?.querySelector('.comment-replies');
+    if (!thread || !replies) return;
+    const before = view.expanded.get(id) || 0;
+    if (action === 'comment-collapse') {
+      if (!(await confirmCommentExit(dirtyComments(replies)))) return;
+      replies.replaceChildren(); replies.hidden = true;
+      view.expanded.delete(id);
+    } else {
+      const shown = Math.min(before + REPLY_BATCH, thread.replies.length);
+      replies.insertAdjacentHTML('beforeend', thread.replies.slice(before, shown).map(c => commentCard(c, view, id)).join(''));
+      replies.hidden = false; view.expanded.set(id, shown);
+    }
+    const controls = node.querySelector('.comment-thread-controls');
+    controls.innerHTML = commentThreadControls(thread, view.expanded.get(id) || 0);
+    controls.querySelector('button')?.focus();
   }
   async function openCommentReply(button) {
     const comment = button.closest('.comment');
@@ -1832,11 +1916,12 @@
     const previous=[...root.querySelectorAll('.comment-reply-form')];
     if (!(await confirmCommentExit(previous.filter(form=>form.elements.body?.value.trim())))) return;
     previous.forEach(form => form.remove());
-    const slot = comment.querySelector(':scope > .comment-reply-slot');
+    const slot = comment.querySelector(':scope > .comment-copy > .comment-reply-slot');
     if (!slot) return;
     const replyId = `reply-body-${++fieldSequence}`;
-    slot.innerHTML = `<form class="comment-reply-form" data-form="comment-reply" data-id="${Number(button.dataset.post)}" data-parent="${Number(button.dataset.id)}"><label for="${replyId}">${E(T("Responder a"))} ${E(button.dataset.author || T('este comentario'))}</label><textarea id="${replyId}" name="body" required maxlength="5000" placeholder="${E(T("Escribe una respuesta…"))}"></textarea><div class="form-actions">${btn('Cancelar','comment-reply-cancel','','ghost small')}<button class="btn primary small">${E(T("Responder"))}</button></div></form>`;
-    slot.querySelector('textarea')?.focus();
+    slot.innerHTML = `<form class="comment-reply-form" data-form="comment-reply" data-id="${Number(button.dataset.post)}" data-parent="${Number(button.dataset.id)}" data-thread="${Number(button.dataset.thread)}"><label for="${replyId}">${E(T("Responder a"))} ${E(button.dataset.author || T('este comentario'))}</label><textarea id="${replyId}" name="body" required maxlength="5000" placeholder="${E(T("Escribe una respuesta…"))}"></textarea><div class="form-actions">${btn('Cancelar','comment-reply-cancel','','ghost small')}<button class="btn primary small">${E(T("Responder"))}</button></div></form>`;
+    const input = slot.querySelector('textarea');
+    input?.focus(); input?.setSelectionRange(input.value.length, input.value.length);
   }
   function eventAttendees(d) {
     if (!Array.isArray(d.attendees)) return '';
@@ -1908,10 +1993,10 @@
     return ` · ${p.meta.capacity} ${E(T("cupos"))}${availabilitySummary}`;
   }
   const microStates={pending:"Pendiente de revisión",approved:"Aprobada",published:"Publicada",insufficient:"Inscripciones insuficientes",denied:"Denegada",cancelled:"Cancelada",finished:"Finalizada"};
-  function microEventHistory(meta) {
+  function microEventHistory(meta, showState = true) {
     if (!meta.micro) return "";
     const rows=(meta.micro_history || []).map(h=>'<li><strong>'+E(T(microStates[h.state] || h.state))+'</strong> · '+date(h.at)+'<p>'+E(h.reason || "")+'</p></li>').join("");
-    return '<p class="private-note">'+E(T(microStates[meta.micro_state] || "Pendiente de revisión"))+'</p>'+
+    return (showState?'<p class="private-note">'+E(T(microStates[meta.micro_state] || "Pendiente de revisión"))+'</p>':'')+
       (rows?'<details><summary>'+E(T("Historial de microeventos"))+'</summary><ol>'+rows+'</ol></details>':"");
   }
   function microInvitationRoster(d) {
@@ -2067,12 +2152,23 @@
   function microHistoryCard(p) {
     const archiveLabel=p.meta.micro_archived?'Restaurar en el panel':'Archivar del panel';
     const archive=p.meta.can_archive?btn(T(archiveLabel),'micro-archive','data-id="'+Number(p.id)+'" data-archived="'+!p.meta.micro_archived+'"','small'):'';
-    return '<article class="card" data-micro-id="'+Number(p.id)+'"><h3>'+E(p.title)+'</h3>'+microEventHistory(p.meta)+'<div class="form-actions">'+btn('Ver','item','data-id="'+p.id+'"','small')+archive+'</div></article>';
+    const state=p.meta.cancelled?'cancelled':(p.status==='scheduled'?'scheduled':p.meta.micro_state||'pending');
+    const titles={...microStates,scheduled:'Programada'};
+    const guidance={pending:'Revisa el grupo, la fecha y la agenda para decidir su publicación.',approved:'La propuesta está aprobada. Revisa la fecha y publica cuando esté lista.',scheduled:'La publicación está programada para la fecha indicada.',published:'El encuentro está publicado. Puedes consultar sus inscripciones.',cancelled:'El encuentro fue cancelado. Su historial se conserva.',denied:'La propuesta no fue aprobada. Puedes consultar la decisión.',finished:'El encuentro finalizó. Puedes consultar su historial.',insufficient:'Revisa las inscripciones y las condiciones del encuentro.'};
+    const label=state==='pending'?'Revisar propuesta':'Ver encuentro';
+    const dateLabel=p.meta.start?date(p.meta.start,{day:'numeric',month:'short',year:'numeric'})+' · '+time(p.meta.start):T('Fecha por definir');
+    const people=Array.isArray(p.meta.invitees)?p.meta.invitees.length:null;
+    const group=people===null?'':`<span>${I('users')}${people} ${E(T('candidatos del grupo'))}</span>`;
+    return `<article class="card micro-history-card" data-micro-id="${Number(p.id)}"><div class="micro-card-heading"><span class="micro-card-icon" aria-hidden="true">${I('hub')}</span><div><span class="micro-state${['pending','approved','published','scheduled'].includes(state)?' active':''}">${E(T(titles[state]||titles.pending))}</span><h3>${E(p.title)}</h3></div></div><div class="micro-card-meta"><span>${I('calendar')}${E(dateLabel)}</span>${group}${p.meta.capacity?`<span>${I('users')}${Number(p.meta.capacity)} ${E(T('cupos'))}</span>`:''}</div><p class="micro-next-step">${E(T(guidance[state]||guidance.pending))}</p><div class="micro-card-footer"><div class="micro-card-history">${microEventHistory(p.meta,false)}</div><div class="form-actions">${archive}${btn(T(label)+' '+I('arrow'),'item',`data-id="${Number(p.id)}"`,'small'+(state==='pending'?' primary':''))}</div></div></article>`;
   }
   function microHistoryMarkup(proposals) {
     const archived=!!S.microShowArchived,shown=proposals.filter(p=>!!p.meta.micro_archived===archived);
     const emptyText=archived?'No hay microeventos archivados.':'No hay microeventos en este listado.';
-    return '<h3>'+E(T('Historial de microeventos'))+'</h3>'+microHistoryTabs(archived)+shown.map(microHistoryCard).join('')+(shown.length?'':empty(emptyText));
+    const closed=p=>p.meta.cancelled||['denied','finished','cancelled'].includes(p.meta.micro_state);
+    const pending=shown.filter(p=>!closed(p)&&!p.meta.micro_approved&&['draft','pending'].includes(p.status)).length;
+    const finished=shown.filter(closed).length;
+    const counts=[['Por revisar',pending,'shield'],['En preparación o publicados',shown.length-pending-finished,'calendar'],['Cerrados',finished,'check']].map(([name,value,icon])=>`<div><span class="micro-count-icon" aria-hidden="true">${I(icon)}</span><span>${E(T(name))}<strong>${value}</strong></span></div>`).join('');
+    return `<section class="micro-history"><div class="micro-history-heading"><div><h3>${E(T('Historial de microeventos'))}</h3><p>${E(T('Consulta el estado de cada propuesta y el siguiente paso.'))}</p></div><span class="tag">${shown.length} ${E(T('en este listado'))}</span></div>${microHistoryTabs(archived)}<div class="micro-counts">${counts}</div><div class="micro-history-list">${shown.map(microHistoryCard).join('')||(empty(emptyText))}</div></section>`;
   }
   function itemActionButtons(p, id, eventIsPast, eventCancelled) {
     const actionButtons = itemEditingActions(p,id) + itemEventActions(p,id,eventIsPast,eventCancelled)
@@ -2125,15 +2221,28 @@
   }
   function itemCommentsMarkup(p, id) {
     if (p.status !== "publish") return "";
-    return `<section class="comments"><h3>${E(T("Conversación"))}</h3><div id="comments-list">${E(T("Cargando comentarios…"))}</div><form class="comment-form" data-form="comment" data-id="${id}">${field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')}<button class="btn primary small">${E(T("Publicar comentario"))}</button></form></section>`;
+    return `<section class="comments"><div class="comments-heading"><span class="comments-icon" aria-hidden="true">${I('hub')}</span><h3>${E(T("Conversación"))}</h3></div><div id="comments-list">${E(T("Cargando comentarios…"))}</div><form class="comment-form" data-form="comment" data-id="${id}">${field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')}<button class="btn primary small">${E(T("Publicar comentario"))}</button></form></section>`;
   }
-  async function loadItemComments(p, id) {
+  async function loadItemComments(p, id, previous, drafts = []) {
     if (p.status !== "publish") return;
     const comments = await api("items/" + id + "/comments");
-    const target = document.getElementById("comments-list");
-    if (target && activeModal()?.querySelector(`form[data-form="comment"][data-id="${Number(id)}"]`)) target.innerHTML = commentsHTML(comments, id);
+    const target = activeModal()?.querySelector('#comments-list');
+    if (!target || !activeModal()?.querySelector(`form[data-form="comment"][data-id="${Number(id)}"]`)) return;
+    const view = {postId:Number(id), threads:commentThreads(comments), byId:new Map(comments.map(c=>[Number(c.id),c])), visible:previous?.visible || COMMENT_BATCH, expanded:new Map(previous?.expanded || []), latest:previous?.latest};
+    const latest = view.threads.findIndex(t => Number(t.root.id) === view.latest);
+    if (latest > 0) view.threads.unshift(...view.threads.splice(latest, 1));
+    for (const draft of drafts) {
+      const index = view.threads.findIndex(t => Number(t.root.id) === draft.parent || t.replies.some(c => Number(c.id) === draft.parent));
+      if (index < 0) continue;
+      view.visible = Math.max(view.visible, index + 1);
+      const thread = view.threads[index], replyIndex = thread.replies.findIndex(c => Number(c.id) === draft.parent);
+      if (replyIndex >= 0) view.expanded.set(Number(thread.root.id), Math.max(view.expanded.get(Number(thread.root.id)) || 0, replyIndex + 1));
+    }
+    commentViews.set(target, view); target.innerHTML = commentsHTML(view);
   }
   async function item(id) {
+    const existing = commentViews.get(activeModal()?.querySelector('#comments-list'));
+    const commentView = existing?.postId === Number(id) ? existing : null;
     const drafts=dirtyComments().filter(form=>Number(form.dataset.id)===Number(id)).map(form=>({parent:Number(form.dataset.parent)||0,body:form.elements.body.value}));
     const p = await api("items/" + id);
     S.item = p;
@@ -2160,7 +2269,7 @@
     );
     void interestLearning().watch(p,dialog,S.page==="admin");
     watchVideoPreparation(p,dialog);
-    await loadItemComments(p, id);
+    await loadItemComments(p, id, commentView, drafts);
     for (const draft of drafts) {
       if (draft.parent) {
         const reply=activeModal()?.querySelector(`[data-action="comment-reply"][data-id="${draft.parent}"]`);
@@ -3123,16 +3232,17 @@
   function adminUserFilters(roles, f) {
     return `<form class="card directory-search admin-user-filters" data-form="admin-filter" data-area="users" role="search" aria-label="${E(T('Buscar usuarios'))}"><div class="directory-search-row"><div class="field"><label for="admin-user-search">${E(T('Buscar usuarios'))}</label><input type="search" id="admin-user-search" name="q" maxlength="100" placeholder="${E(T('Nombre, usuario, correo, cargo, empresa o experiencia…'))}" value="${E(f.q||'')}"></div><div class="field"><label for="admin-user-country">${E(T('País'))}</label><input type="search" id="admin-user-country" name="country" maxlength="120" placeholder="${E(T('Todos los países'))}" value="${E(f.country||'')}"></div><button class="btn primary">${I('search')} ${E(T('Buscar'))}</button>${btn('Limpiar filtros','admin-users-reset','','ghost')}</div><div class="directory-facets">${directoryTermFilter('industries','Industria',S.boot.catalogs.industry,f)}${directoryTermFilter('interests','Interés',S.boot.catalogs.interest,f)}${directoryTermFilter('areas','Área de conocimiento',S.boot.catalogs.area,f)}<span class="private-note">${E(T('Puedes elegir varias opciones en cada filtro.'))}</span></div><div class="form-grid admin-user-access-filters">${select('role','Rol',[['','Todos los roles'],...roles.map(r=>[r.id,r.name])],f.role||'')}${select('state','Acceso',[['','Todos'],['active','Activo'],['suspended','Suspendido'],['expired','Vencido']],f.state||'')}</div></form>`;
   }
-  function adminPendingRow(p) {
-    let badges = "";
-    if (p.meta.generated) badges += " · IA";
-    if (p.meta.chatham) badges += " · Chatham House";
+  function adminPendingCard(p) {
+    const icons={event:'calendar',gallery:'gallery',resource:'book',hub:'hub',forum:'hub',topic:'hub',ally:'star'};
+    const badge = p.meta.chatham ? `<span class="moderation-content-tag">${I('shield')} Chatham House</span>` : '';
+    const generated = p.meta.generated ? `<span class="moderation-content-tag">${I('spark')} IA</span>` : '';
     let publicationNote = "";
     if (!S.boot.admin && !S.boot.executive && ["gallery", "resource"].includes(p.type)) {
-      publicationNote = "<small>Publicación administrativa</small>";
+      publicationNote = `<small>${E(T('Publicación administrativa'))}</small>`;
     }
-    const review = btn("Revisar", "item", 'data-id="' + p.id + '"', "small");
-    return `<tr role="row"><td role="cell"><strong>${E(p.title)}</strong><br><small>${E(typeLabel[p.type])}${badges}</small></td><td role="cell" data-label="${E(T('Autor'))}">${E(p.author.name)}</td><td role="cell">${status(p.status)}</td><td role="cell">${review}${publicationNote}</td></tr>`;
+    const review = btn(T(p.status==='draft'?'Abrir borrador':'Revisar publicación')+' '+I('arrow'), 'item', `data-id="${Number(p.id)}"`, 'small'+(p.status==='pending'?' primary':''));
+    const excerpt = p.body ? `<p class="moderation-excerpt">${E(p.body.slice(0,180))}${p.body.length>180?'…':''}</p>` : '';
+    return `<article class="moderation-publication" data-moderation-item="${Number(p.id)}"><span class="moderation-kind-icon" aria-hidden="true">${I(icons[p.type]||'book')}</span><div class="moderation-publication-main"><span class="moderation-content-type">${E(contentTypeTitle(p.type))}</span><h4><button type="button" class="moderation-item-title" data-action="item" data-id="${Number(p.id)}">${E(p.title)}</button></h4>${excerpt}<div class="moderation-publication-meta"><span>${I('users')}${E(p.author.name)}</span><time datetime="${E(p.date)}">${I('clock')}${date(p.date)}</time>${badge}${generated}</div></div><div class="moderation-publication-footer">${status(p.status)}${publicationNote}${review}</div></article>`;
   }
   function adminReportCard(r) {
     const cardClass = r.reviewed ? "is-reviewed" : "";
@@ -3153,37 +3263,39 @@
     const remove = r.can_delete
       ? btn("Eliminar reporte", "admin-delete", 'data-kind="report" data-id="' + r.id + '"', "danger small")
       : "";
-    return `<div class="admin-report ${cardClass}"><div><div class="admin-report-heading"><strong>${E(title)}</strong><span class="tag ${stateClass}">${E(T(stateLabel))}</span></div>${excerpt}<p class="private-note"><b>Motivo:</b> ${E(r.reason_label || "Sin motivo registrado")}${detail}${reviewedBy}</p></div><div class="form-actions">${open}${markReviewed}${remove}</div></div>`;
+    return `<article class="admin-report ${cardClass}"><span class="moderation-kind-icon" aria-hidden="true">${I('shield')}</span><div class="moderation-report-main"><div class="admin-report-heading"><h4>${E(title)}</h4><span class="tag ${stateClass}">${E(T(stateLabel))}</span></div>${excerpt}<p class="private-note"><b>Motivo:</b> ${E(r.reason_label || "Sin motivo registrado")}${detail}${reviewedBy}</p></div><div class="form-actions">${open}${markReviewed}${remove}</div></article>`;
   }
   function adminCommentCard(c) {
     const remove = c.can_delete
       ? btn("Eliminar comentario", "delete-comment", 'data-id="' + c.id + '"', "danger small")
       : "";
-    const approve = btn("Aprobar", "comment-moderate", 'data-id="' + c.id + '" data-decision="approve"', "small");
-    const reject = btn("Mantener oculto", "comment-moderate", 'data-id="' + c.id + '" data-decision="reject"', "small");
-    return `<div class="comment"><strong>${E(c.author)}</strong><p>${E(c.body)}</p>${approve}${reject}${remove}</div>`;
+    const approve = btn("Aprobar", "comment-moderate", 'data-id="' + c.id + '" data-decision="approve"', "primary small");
+    const reject = btn("Mantener oculto", "comment-moderate", 'data-id="' + c.id + '" data-decision="reject"', "ghost small");
+    return `<article class="moderation-comment" data-moderation-comment="${Number(c.id)}"><span class="moderation-comment-avatar" aria-hidden="true">${avatar({name:c.author})}</span><div class="moderation-comment-main"><div class="moderation-comment-heading"><strong>${E(c.author)}</strong>${status('pending')}</div><p>${E(c.body)}</p><div class="form-actions">${approve}${reject}${remove}</div></div></article>`;
   }
   function adminModeration(d) {
     const views = [['publicaciones','Publicaciones',d.pending.filter(p=>p.status==='pending').length,'book']];
     if (S.boot.moderator) views.push(['comentarios','Comentarios',d.comments.length,'hub'],['reportes','Reportes recibidos',d.reports.filter(r=>!r.reviewed).length,'shield']);
     if (!views.some(([key])=>key===S.moderationView)) S.moderationView='publicaciones';
-    const navigation=views.map(([key,label,count,icon])=>`<button type="button" class="moderation-choice${S.moderationView===key?' active':''}" data-moderation-view="${key}" aria-pressed="${S.moderationView===key}">${I(icon)}<span>${E(T(label))}</span><strong>${Number(count)}</strong></button>`).join('');
-    return `<div class="admin-section-heading"><div><h2>${E(T('Revisar contenido'))}</h2><p>${E(T('Elige qué quieres revisar. Cada sección muestra las acciones disponibles para tu rol.'))}</p></div></div><nav class="moderation-choices" aria-label="${E(T('Qué quieres revisar'))}">${navigation}</nav><section class="card moderation-queue" aria-live="polite">${moderationQueue(d,S.moderationView)}</section>`;
+    const navigation=views.map(([key,label,count,icon])=>`<button type="button" class="moderation-choice${S.moderationView===key?' active':''}" data-moderation-view="${key}" aria-pressed="${S.moderationView===key}" aria-controls="moderation-queue">${I(icon)}<span>${E(T(label))}</span><strong>${Number(count)}</strong></button>`).join('');
+    return `<div class="moderation-workspace"><div class="admin-section-heading"><div><span class="eyebrow">${E(T('REVISIÓN DE LA COMUNIDAD'))}</span><h2>${E(T('Revisar contenido'))}</h2><p>${E(T('Elige qué quieres revisar. Cada sección muestra las acciones disponibles para tu rol.'))}</p></div></div><div class="moderation-inbox"><nav class="moderation-choices" aria-label="${E(T('Qué quieres revisar'))}">${navigation}</nav><section id="moderation-queue" class="moderation-queue" aria-live="polite">${moderationQueue(d,S.moderationView)}</section></div></div>`;
   }
-  function moderationTable(items) {
-    return `<div class="table-wrap"><table class="data-table moderation-publications" role="table"><thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">${E(T('Contenido'))}</th><th scope="col" role="columnheader">${E(T('Autor'))}</th><th scope="col" role="columnheader">${E(T('Estado'))}</th><th scope="col" role="columnheader">${E(T('Acción'))}</th></tr></thead><tbody role="rowgroup">${items.map(adminPendingRow).join('')}</tbody></table></div>`;
+  function moderationCards(items) {
+    return `<div class="moderation-publications">${items.map(adminPendingCard).join('')}</div>`;
+  }
+  function moderationEmpty(icon, title, description) {
+    return `<div class="moderation-empty"><span aria-hidden="true">${I(icon)}</span><h4>${E(T(title))}</h4><p>${E(T(description))}</p></div>`;
   }
   function moderationQueue(d, view) {
-    if (view==='comentarios') return `<h3>${E(T('Comentarios por aprobar'))}</h3><p class="moderation-help">${E(T('Aprobar hace visible el comentario. Mantener oculto lo conserva sin publicar.'))}</p>${d.comments.map(adminCommentCard).join('') || empty('No hay comentarios por aprobar.')}`;
+    if (view==='comentarios') return `<header class="moderation-queue-heading"><h3>${E(T('Comentarios por aprobar'))}</h3><p class="moderation-help">${E(T('Aprobar hace visible el comentario. Mantener oculto lo conserva sin publicar.'))}</p></header><div class="moderation-comment-list">${d.comments.map(adminCommentCard).join('') || moderationEmpty('hub','No hay comentarios por aprobar.','Los nuevos comentarios que necesiten aprobación aparecerán aquí.')}</div>`;
     if (view==='reportes') {
       const pending=d.reports.filter(r=>!r.reviewed),reviewed=d.reports.filter(r=>r.reviewed);
       const history=reviewed.length?`<details class="moderation-history"><summary>${E(T('Reportes ya revisados'))} <span>${reviewed.length}</span></summary>${reviewed.map(adminReportCard).join('')}</details>`:'';
-      return `<h3>${E(T('Contenido reportado por la comunidad'))}</h3><p class="moderation-help">${E(T('Abre el contenido para comprobar el motivo. Marca el reporte como revisado cuando termines; esto no elimina la publicación ni el comentario.'))}</p>${pending.map(adminReportCard).join('') || empty('No hay reportes por revisar.')}${history}`;
+      return `<header class="moderation-queue-heading"><h3>${E(T('Contenido reportado por la comunidad'))}</h3><p class="moderation-help">${E(T('Abre el contenido para comprobar el motivo. Marca el reporte como revisado cuando termines; esto no elimina la publicación ni el comentario.'))}</p></header><div class="moderation-report-list">${pending.map(adminReportCard).join('') || moderationEmpty('shield','No hay reportes por revisar.','Los reportes de la comunidad aparecerán aquí para que puedas revisarlos.')}</div>${history}`;
     }
     const pending=d.pending.filter(p=>p.status==='pending'),drafts=d.pending.filter(p=>p.status==='draft');
-    const expanded=pending.length?'':'open';
-    const saved=drafts.length?`<details class="moderation-history" ${expanded}><summary>${E(T('Borradores guardados'))} <span>${drafts.length}</span></summary><p class="moderation-help">${E(T('Están sin publicar y aún se pueden editar. No son solicitudes de aprobación.'))}</p>${moderationTable(drafts)}</details>`:'';
-    return `<h3>${E(T('Publicaciones por aprobar'))}</h3><p class="moderation-help">${E(T('Abre una publicación para revisar el texto y decidir si se publica.'))}</p>${pending.length?moderationTable(pending):empty('No hay publicaciones por aprobar.')}${saved}`;
+    const saved=drafts.length?`<details class="moderation-history"><summary>${E(T('Borradores guardados'))} <span>${drafts.length}</span></summary><p class="moderation-help">${E(T('Están sin publicar y aún se pueden editar. No son solicitudes de aprobación.'))}</p>${moderationCards(drafts)}</details>`:'';
+    return `<header class="moderation-queue-heading"><h3>${E(T('Publicaciones por aprobar'))}</h3><p class="moderation-help">${E(T('Abre una publicación para revisar el texto y decidir si se publica.'))}</p></header>${pending.length?moderationCards(pending):moderationEmpty('check','No hay publicaciones por aprobar.','Cuando haya contenido pendiente de aprobación, aparecerá aquí.')}${saved}`;
   }
   let statisticsPanel, interestImports, memberInsights, alliesView;
   function alliesUI(){
@@ -3322,7 +3434,8 @@
     panel.innerHTML=`<div class="admin-section-heading"><div><h2>${E(T('Tareas de IA'))}</h2><p>${E(T('Consulta lo que ASCLA está preparando. Si una tarea falla, puedes abrirla y volver a intentarlo.'))}</p></div></div><div class="alert">${E(T('El contenido creado con ayuda de IA debe revisarse antes de publicarlo.'))}</div><div class="admin-actions">${link('centro-conocimiento','Ver recursos','primary')}${S.boot.moderator?btn('Probar sugerencias de redes sociales','social-job'):''}${btn('Actualizar estados','admin-refresh')}</div><div class="card table-wrap"><table class="data-table"><thead><tr><th>${E(T('Tarea'))}</th><th>${E(T('Estado'))}</th><th>${E(T('Detalle'))}</th><th>${E(T('Acción'))}</th></tr></thead><tbody>${rows || '<tr><td colspan="4">'+E(T('Todavía no hay tareas de IA.'))+'</td></tr>'}</tbody></table></div>`;
   }
   async function adminMicroeventsTab(panel) {
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ENCUENTROS ENTRE ASOCIADOS</span><h2>Círculos de conversación</h2><p>Grupos con intereses comunes y cupos configurables, con una agenda para conversar.</p></div></div><div class="card"><h3>Preparar los próximos encuentros</h3><p class="detail-body">Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.</p><div class="admin-actions">${(S.boot.admin||S.boot.executive)?btn(I('spark')+' Preparar propuestas del período','micro-job','','primary'):''}${link('eventos','Ver encuentros','small')}</div><div id="micro-job-result"></div></div>`;
+    const steps=[['Reunir al grupo','Se buscan intereses compartidos entre asociados elegibles.'],['Revisar la propuesta','Confirma el grupo y ajusta la fecha y la agenda.'],['Publicar el encuentro','La publicación abre el proceso de invitaciones e inscripción.']].map(([title,description])=>`<li><strong>${E(T(title))}</strong><span>${E(T(description))}</span></li>`).join('');
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T('ENCUENTROS ENTRE ASOCIADOS'))}</span><h2>${E(T('Círculos de conversación'))}</h2><p>${E(T('Grupos con intereses comunes y cupos configurables, con una agenda para conversar.'))}</p></div></div><section class="card micro-planning"><div class="micro-planning-intro"><span class="micro-planning-icon" aria-hidden="true">${I('hub')}</span><h3>${E(T('Preparar los próximos encuentros'))}</h3><p>${E(T('Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.'))}</p><div class="admin-actions">${(S.boot.admin||S.boot.executive)?btn(I('spark')+' '+T('Preparar propuestas del período'),'micro-job','','primary'):''}${link('eventos','Ver encuentros','small')}</div></div><ol class="micro-planning-steps">${steps}</ol><div id="micro-job-result"></div></section>`;
     const [proposals,diagnostics]=await Promise.all([allContent("event",{micro:1,...(S.boot.admin?{}:{mine:1})}),api("microevents/diagnostics").catch(error=>({error:error.message}))]);
     panel.querySelector('#micro-job-result').innerHTML=microDiagnosticsHTML(diagnostics);
     panel.insertAdjacentHTML("beforeend",microHistoryMarkup(proposals));
@@ -3330,7 +3443,9 @@
   function microDiagnosticsHTML(d) {
     if (!d || d.error) return '<div class="error">'+E(T('No se pudieron comprobar las condiciones para generar microeventos.'))+'</div>';
     const messages={ready:'Hay candidatos para preparar propuestas.',insufficient_candidates:'No hay suficientes asociados elegibles para alcanzar el mínimo.',insufficient_shared_interest:'Ningún interés visible reúne el mínimo de asociados requerido.',incompatible_group:'No se encontró un grupo compatible con los bloqueos actuales.',no_group:'No se encontró un grupo que cumpla las condiciones actuales.'};
-    return '<div class="alert micro-diagnostics" role="status"><strong>'+E(T(messages[d.reason] || messages.no_group))+'</strong><p>'+E(T('Asociados elegibles'))+': '+Number(d.eligible)+' · '+E(T('Mínimo por grupo'))+': '+Number(d.minimum)+' · '+E(T('Mayor grupo con un interés común'))+': '+Number(d.max_shared_interest)+'</p><details><summary>'+E(T('Revisar condiciones'))+'</summary><p>'+E(T('Se respetan la membresía activa, el consentimiento para microeventos, el perfil completo, la privacidad de intereses y los bloqueos.'))+'</p><p>'+E(T('Excluidos por membresía'))+': '+Number(d.excluded?.inactive || 0)+' · '+E(T('Sin consentimiento'))+': '+Number(d.excluded?.no_consent || 0)+' · '+E(T('Perfil incompleto'))+': '+Number(d.excluded?.incomplete || 0)+'</p><p>'+E(T('Revisa los mínimos en Configuración → Participación y revisión y los intereses autorizados de los perfiles.'))+'</p></details></div>';
+    const metrics=[['eligible','Asociados elegibles',d.eligible,'Con membresía, consentimiento y perfil completo.'],['minimum','Mínimo por grupo',d.minimum,'Personas necesarias para preparar una propuesta.'],['shared','Mayor grupo con un interés común',d.max_shared_interest,'Asociados que comparten un interés visible.']].map(([key,title,value,description])=>`<div data-micro-stat="${key}"><strong>${Number(value)}</strong><span>${E(T(title))}</span><small>${E(T(description))}</small></div>`).join('');
+    const excluded=[['Excluidos por membresía',d.excluded?.inactive],['Sin consentimiento',d.excluded?.no_consent],['Perfil incompleto',d.excluded?.incomplete]].map(([title,value])=>`<div><span>${E(T(title))}</span><strong>${Number(value||0)}</strong></div>`).join('');
+    return `<div class="micro-diagnostics"><div class="micro-readiness" role="status"><span aria-hidden="true">${I(d.reason==='ready'?'check':'users')}</span><div><strong>${E(T(messages[d.reason]||messages.no_group))}</strong><p>${E(T(d.reason==='ready'?'Preparar propuestas no las publica. Podrás revisarlas antes de continuar.':'Revisa las condiciones o ajusta los mínimos antes de preparar propuestas.'))}</p></div></div><div class="micro-diagnostic-metrics">${metrics}</div><details><summary>${E(T('Revisar condiciones'))}</summary><p>${E(T('Se respetan la membresía activa, el consentimiento para microeventos, el perfil completo, la privacidad de intereses y los bloqueos.'))}</p><div class="micro-exclusions">${excluded}</div><p>${E(T('Revisa los mínimos en Configuración → Participación y revisión y los intereses autorizados de los perfiles.'))}</p></details></div>`;
   }
   async function handleMicroArchive(a,b,id) {
     if (a === 'micro-archive-tab') { S.microShowArchived=b.dataset.archived==='true';await admin();return; }
@@ -3724,7 +3839,10 @@
     }
   }
   async function handleClickActions12(a, b, id, _event) {
-    if (a === "comment-reply-cancel") {
+    if (['comment-expand','comment-collapse','comment-more'].includes(a)) {
+      await changeCommentThread(a, b);
+    }
+    else if (a === "comment-reply-cancel") {
       const form=b.closest('.comment-reply-form');
       if (!form?.elements.body?.value.trim() || await confirmCommentExit([form])) form?.remove();
     }
@@ -4353,7 +4471,7 @@
     { test: (a) => (a === "delete-content") || (a === "delete-comment"), run: handleClickActions10 },
     { test: (a) => a === 'chat-hide', run: async (a,b) => { await api(`conversations/${Number(b.dataset.id)}/hide`, {}); stopChat(); S.conversation = 0; history.replaceState(null, '', location.pathname); await messages(); } },
     { test: (a) => (a === "delete-message") || (a === "comment-reply"), run: handleClickActions11 },
-    { test: (a) => (a === "comment-reply-cancel") || (a === "report-comment"), run: handleClickActions12 },
+    { test: (a) => ['comment-reply-cancel','report-comment','comment-expand','comment-collapse','comment-more'].includes(a), run: handleClickActions12 },
     { test: (a) => (a === "comment-like") || (a === "content-reaction") || (a === "delete-media"), run: handleClickActions13 },
     { test: (a) => (a === "delete-cancel") || (a === "delete-confirm"), run: handleClickActions14 },
     { test: (a) => (a === "editor") || (a === "notifications"), run: handleClickActions15 },
@@ -4604,6 +4722,8 @@ root.addEventListener("click", async (event) => {
     } else if (action === "comment") {
       const r = await api("items/" + form.dataset.id + "/comments", { body: data.body });
       toast(r.status === "pending" ? "Comentario enviado a revisión." : "Comentario publicado.");
+      const view = commentViews.get(activeModal()?.querySelector('#comments-list'));
+      if (view) view.latest = Number(r.id);
       form.reset();
       await item(Number(form.dataset.id));
     }
@@ -4615,6 +4735,11 @@ root.addEventListener("click", async (event) => {
       parent: Number(form.dataset.parent),
       });
       toast(r.status === "pending" ? "Respuesta enviada a revisión." : "Respuesta publicada.");
+      const view = commentViews.get(form.closest('#comments-list'));
+      const thread = view?.threads.find(t => Number(t.root.id) === Number(form.dataset.thread));
+      if (thread) {
+        view.expanded.set(Number(thread.root.id), Math.max(REPLY_BATCH, view.expanded.get(Number(thread.root.id)) || 0) + 1);
+      }
       form.reset();
       await item(Number(form.dataset.id));
     }

@@ -37,7 +37,7 @@
       return `<p class="stats-table-hint">${label('Desliza la tabla para ver todas las columnas.')}</p><div class="table-wrap" tabindex="0" role="region" aria-label="${E(headers.map(T).join(' · '))}"><table class="data-table stats-table"><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table></div>`;
     };
     const tabs = [['overview','Resumen','La comunidad de un vistazo','users'],['users','Participación','Quiénes asisten a los eventos','calendar'],['topics','Intereses','Los temas que reúnen a la comunidad','heart'],['trends','Comparar períodos','Qué cambió respecto al período anterior','clock'],['ai','Temas con IA','Agrupar eventos por su contenido','spark']];
-    const metrics = {events:"Eventos finalizados",registrations:"Inscripciones confirmadas",attendees:"Asistentes únicos",attendances:"Asistencias verificadas",recurring:"Usuarios recurrentes"};
+    const metrics = {events:"Eventos finalizados",registrations:"Inscripciones confirmadas",attendees:"Personas que asistieron",attendances:"Asistencias registradas",recurring:"Personas que regresan"};
     const attendanceStates=[['unknown','Sin verificar'],['present','Asistió'],['partial','Asistencia parcial'],['absent','No asistió'],['review','Revisión manual']];
     const attendanceOptions=status=>attendanceStates.map(([key,text])=>{
       const selected = status===key ? 'selected' : '';
@@ -63,6 +63,40 @@
     const help = (title,body) => `<details class="stats-help"><summary>${label(title)}</summary><div>${body}</div></details>`;
     const intro = (title,text) => `<div class="stats-view-intro"><h3>${label(title)}</h3><p>${label(text)}</p></div>`;
     const metric = (key,title,value,hint,icon='users') => `<article class="card stats-metric" data-stat="${key}"><div class="stats-metric-label"><span class="stats-metric-icon" aria-hidden="true">${I(icon)}</span><span>${label(title)}</span></div><strong>${E(value)}</strong><small>${label(hint)}</small></article>`;
+    const count = value => Number.isFinite(Number(value)) ? Math.max(0,Number(value)) : 0;
+    function participationSummary() {
+      const s=data.summary;
+      const cards=[
+        ['Actividad','calendar',['events',number(s.events),'Eventos finalizados'],['registrations',number(s.registrations),'Inscripciones confirmadas'],'Las inscripciones son reservas. No confirman que la persona haya asistido.'],
+        ['Personas','users',['attendees',number(s.attendees),'Personas distintas que asistieron'],['recurring',number(s.recurring),'Personas que regresan'],'Cada persona cuenta una sola vez. Quienes regresan asistieron a dos o más eventos.'],
+        ['Asistencias','check',['attendances',number(s.attendances),'Asistencias registradas'],['average',s.average===null?T('Sin datos'):number(s.average),'Promedio por evento verificado'],'Una persona en tres eventos suma tres asistencias. El promedio usa solo listas verificadas.']
+      ].map(([title,icon,main,other,description])=>`<article class="card stats-summary-card"><header><span class="stats-metric-icon" aria-hidden="true">${I(icon)}</span><h4>${label(title)}</h4></header><div class="stats-summary-main" data-stat="${main[0]}"><strong>${E(main[1])}</strong><span>${label(main[2])}</span></div><div class="stats-summary-support" data-stat="${other[0]}"><strong>${E(other[1])}</strong><span>${label(other[2])}</span></div><p>${label(description)}</p></article>`).join('');
+      const pending=Math.max(0,s.events-s.complete_events);
+      let message='Las listas del período están verificadas. La tasa y el promedio utilizan esa base.';
+      if (!s.events) message='No hay eventos finalizados con estos filtros. Prueba otras fechas para consultar la participación.';
+      else if (pending && !s.attendances) message='Aún no hay asistencias registradas. Las listas pendientes pueden cambiar estas cifras.';
+      else if (pending) message='Hay listas por revisar. Los totales registrados pueden crecer al completar la asistencia.';
+      return `<section class="stats-participation-summary"><div class="stats-overview-heading">${intro('Participación en eventos','Lee la actividad, las personas y las asistencias como tres datos diferentes.')}<span class="stats-scope-label">${I('calendar')}${label('Eventos del período')}</span></div><div class="stats-summary-groups">${cards}</div><div class="stats-summary-note"><span class="stats-summary-review-icon" aria-hidden="true">${I(pending?'clock':'check')}</span><div class="stats-summary-review-copy"><strong>${label('¿Qué tan completos están los registros?')}</strong><p>${label(message)}</p></div><div class="stats-summary-completion"><span><b>${number(s.complete_events)} / ${number(s.events)}</b> ${label('listas verificadas')}</span><progress value="${count(s.complete_events)}" max="${Math.max(1,count(s.events))}" aria-label="${label('Listas de asistencia verificadas')}"></progress><small>${number(pending)} ${label('por revisar')}</small></div>${s.events?action('Revisar asistencias','show-events','','small'):''}</div></section>`;
+    }
+    function barsChart(title,description,items) {
+      const rows=items.filter(x=>count(x.value)>0).sort((a,b)=>count(b.value)-count(a.value)).slice(0,6);
+      const max=Math.max(1,...rows.map(x=>count(x.value)));
+      const bars=rows.map(x=>`<li><div><span>${E(x.name)}</span><strong>${number(x.value)}</strong></div><progress aria-hidden="true" max="${max}" value="${count(x.value)}"></progress></li>`).join('');
+      return `<figure class="card stats-visual"><figcaption><h4>${label(title)}</h4><p>${label(description)}</p></figcaption>${rows.length?`<ol class="stats-chart-rows">${bars}</ol>`:`<div class="stats-chart-empty">${I('calendar')}<p>${label('Aún no hay registros para representar en este gráfico.')}</p></div>`}</figure>`;
+    }
+    function attendanceChart() {
+      const s=data.summary,eligible=count(s.rate_registered),attended=count(s.rate_attended);
+      const known=eligible>0&&s.rate!==null&&s.rate!==undefined;
+      const value=known?Math.max(0,Math.min(100,count(s.rate))):0;
+      return `<figure class="card stats-visual stats-attendance-chart" data-stat="rate"><figcaption><h4>${label('Asistencia de inscritos')}</h4><p>${label('Porcentaje de inscritos que asistieron, solo en listas verificadas.')}</p></figcaption><div class="stats-rate-layout"><div class="stats-donut${known?'':' no-data'}"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle class="stats-donut-track" cx="50" cy="50" r="40"></circle><circle class="stats-donut-value${value?'':' is-zero'}" cx="50" cy="50" r="40" pathLength="100" stroke-dasharray="${value} 100" transform="rotate(-90 50 50)"></circle></svg><div><strong>${E(known?percent(s.rate):T('Sin datos'))}</strong><span>${label(known?'de inscritos':'Sin base verificada')}</span></div></div><dl class="stats-chart-legend"><div><dt><span class="stats-legend-dot"></span>${label('Inscritos que asistieron')}</dt><dd>${number(attended)}</dd></div><div><dt><span class="stats-legend-dot muted"></span>${label('Sin asistencia registrada')}</dt><dd>${number(Math.max(0,eligible-attended))}</dd></div><div class="stats-legend-total"><dt>${label('Inscripciones con lista verificada')}</dt><dd>${number(eligible)}</dd></div></dl></div>${!known?`<p class="stats-chart-footnote">${label('La tasa estará disponible cuando haya inscripciones con una lista de asistencia verificada.')}</p>`:''}</figure>`;
+    }
+    function comparisonChart() {
+      const rows=data.trends.map(t=>{
+        const max=Math.max(1,count(t.current),count(t.previous));
+        return `<li><div class="stats-comparison-label"><strong>${label(metrics[t.metric])}</strong>${delta(t.change)}</div><div class="stats-comparison-pair"><span>${label('Período elegido')}</span><progress aria-hidden="true" max="${max}" value="${count(t.current)}"></progress><b>${number(t.current)}</b></div><div class="stats-comparison-pair previous"><span>${label('Período anterior')}</span><progress aria-hidden="true" max="${max}" value="${count(t.previous)}"></progress><b>${number(t.previous)}</b></div></li>`;
+      }).join('');
+      return `<figure class="stats-visual stats-comparison-chart"><figcaption><h4>${label('La evolución de un vistazo')}</h4><p>${label('Compara las dos barras de cada indicador. Cada indicador utiliza su propia escala.')}</p></figcaption><ol class="stats-comparison-rows">${rows}</ol></figure>`;
+    }
     function coverage() {
       const s=data.summary,remaining=s.events-s.complete_events;
       const message=s.events?'Las tasas solo se calculan con listas verificadas. Las demás cifras pueden incluir registros parciales.':'Prueba otras fechas o quita los filtros para encontrar eventos finalizados.';
@@ -80,7 +114,7 @@
           <details class="stats-advanced" ${advanced?'open':''}><summary>${label('Filtrar por categoría o evento')}${advanced?` <span class="tag">${label('Hay filtros adicionales')}</span>`:''}</summary><div class="stats-advanced-grid">${select('category','Categoría',data.options.categories,filters.category)}<label class="field"><span>${label('Buscar un evento en el selector')}</span><input name="event_search" value="${E(filters.event_search||'')}" maxlength="100" placeholder="${label('Escribe parte del título')}"></label>${select('event','Evento',data.options.events,filters.event)}<p class="private-note full">${eventHint}</p></div></details>
           <div class="stats-filter-footer"><p>${label('Mostrando')}: <strong>${range(p.from,p.to)}</strong></p>${action('Quitar filtros','clear-filters','title="'+label('Conserva las fechas y quita tema, categoría y evento.')+'"','ghost small')}</div><div data-stats-error role="alert" hidden></div>
         </form>
-        <nav class="stats-tabs" aria-label="${label('Vistas de estadísticas')}">${tabsHtml}</nav>${coverage()}<div id="stats-view"></div>`;
+        <nav class="stats-tabs" aria-label="${label('Vistas de estadísticas')}">${tabsHtml}</nav>${section==='overview'?'':coverage()}<div id="stats-view"></div>`;
       const view=panel.querySelector('#stats-view');
       if(section==='overview') overview(view);
       else if(section==='users') users(view);
@@ -95,17 +129,6 @@
     }
     function overview(view) {
       const s=data.summary;
-      const primary=[
-        ['events','Eventos finalizados',number(s.events),'Eventos publicados y no cancelados que terminaron en el período.','calendar'],
-        ['attendees','Personas que asistieron',number(s.attendees),'Cada persona cuenta una sola vez, aunque haya asistido a varios eventos.','users'],
-        ['attendances','Asistencias registradas',number(s.attendances),'Una asistencia por persona y evento. Solo incluye el estado Asistió.','check'],
-        ['rate','Asistencia de inscritos',percent(s.rate),'Porcentaje de inscritos que asistieron, solo en listas verificadas.','calendar']
-      ].map(args=>metric(...args)).join('');
-      const secondary=[
-        ['registrations','Inscripciones confirmadas',number(s.registrations),'Reservas aceptadas; una inscripción no confirma que la persona asistió.','calendar'],
-        ['average','Promedio de asistentes',number(s.average),'Promedio por evento con lista verificada. Sin listas verificadas no se calcula.','users'],
-        ['recurring','Personas que regresan',number(s.recurring),'Asistieron a dos o más eventos durante el período elegido.','heart']
-      ].map(args=>metric(...args)).join('');
       const community=[
         ['users','Cuentas ASCLA',number(s.users),'Cuentas con acceso asignado a ASCLA; incluye membresías suspendidas.','users'],
         ['new_users','Nuevas cuentas',number(s.new_users),'Cuentas creadas durante las fechas elegidas.','users'],
@@ -115,7 +138,8 @@
       const eventTable=table(['Evento','Inscripciones','Asistencias','Estado de la lista','Acciones'],data.events.map(renderEventRow));
       const previous=action('Anterior','event-page',pagerAttrs(eventPage-1,eventPage===1));
       const next=action('Siguiente','event-page',pagerAttrs(eventPage+1,eventPage*20>=data.events_total));
-      view.innerHTML=`${intro('¿Cómo participa la comunidad?','Estas cifras corresponden a los eventos del período y a los filtros aplicados.')}<div class="stats-grid stats-primary">${primary}</div><div class="stats-grid stats-secondary">${secondary}</div>${guide}
+      const topicsChart=barsChart('Temas con más asistencias','Cada barra muestra asistencias, no personas distintas.',data.topics.map(t=>({name:t.name,value:t.attendances})));
+      view.innerHTML=`${participationSummary()}<div class="stats-visual-grid">${attendanceChart()}${topicsChart}</div>${guide}
         <section class="stats-community"><div class="stats-subheading"><h3>${label('La comunidad en cifras')}</h3><p>${label('Este bloque no cambia al filtrar por evento, tema o categoría. Las nuevas cuentas y la actividad sí usan las fechas elegidas.')}</p></div><div class="stats-grid stats-secondary">${community}</div></section>
         <section class="card stats-section" id="stats-attendance"><div class="stats-heading"><div><h3 tabindex="-1">${label('Registro de asistencia')}</h3><p>${label('Abre un evento, registra o importa sus asistentes y verifica la lista al terminar.')}</p></div><span class="tag">${number(data.events_total)} ${label('eventos')}</span></div>${eventTable}<div class="admin-pager">${previous}<span>${eventPage} / ${Math.max(1,Math.ceil(data.events_total/20))}</span>${next}</div></section>`;
     }
@@ -138,9 +162,7 @@
       return row([E(t.name),number(t.declared),number(t.profile),number(t.forms),number(t.content),number(t.events),number(t.registrations),number(t.attendees),number(t.attendances)]);
     }
     function topics(view) {
-      const max=Math.max(1,...data.topics.map(t=>t.attendances));
-      const bars=data.topics.filter(t=>t.attendances>0).slice(0,6).map(t=>`<div class="stats-bar"><span>${E(t.name)}</span><div aria-hidden="true"><progress max="100" value="${Math.round(t.attendances*100/max)}"></progress></div><strong>${number(t.attendances)}</strong></div>`).join('');
-      const chart=bars?`<div class="stats-chart"><h4>${label('Temas con más asistencias')}</h4><p>${label('Cada barra muestra asistencias, no personas distintas.')}</p><div class="stats-bars">${bars}</div></div>`:note('Aún no hay asistencias para mostrar en el gráfico.');
+      const chart=`<div class="stats-visual-grid">${barsChart('Intereses que más se comparten','Personas con ese interés guardado; refleja los perfiles actuales.',data.topics.map(t=>({name:t.name,value:t.declared})))}${barsChart('Temas con más asistencias','Cada barra muestra asistencias, no personas distintas.',data.topics.map(t=>({name:t.name,value:t.attendances})))}</div>`;
       const topicTable=table(['Tema','Personas con interés guardado','Eventos','Personas que asistieron','Asistencias'],data.topics.map(t=>row([`<strong>${E(t.name)}</strong>`,number(t.declared),number(t.events),number(t.attendees),number(t.attendances)])));
       const sources=table(['Tema','Personas con interés guardado','Perfil','Forms','Contenido publicado','Eventos','Inscripciones','Personas que asistieron','Asistencias'],data.topics.map(renderTopicRow));
       const indexNote=data.index_complete?'':`<div class="stats-reading-note">${I('clock')}<p>${label('El índice de perfiles históricos se está actualizando. Los conteos declarados todavía son parciales.')}</p></div>`;
@@ -157,7 +179,8 @@
       const currentNote=p.includes_today?note('El período actual incluye hoy y todavía puede cambiar.'):'';
       const trendsTable=table(['Indicador','Período elegido','Período anterior','Cambio'],data.trends.map(renderTrendRow));
       const topicsTable=table(['Tema','Asistencias actuales','Asistencias anteriores','Cambio'],data.topics.map(renderTopicTrendRow));
-      view.innerHTML=`<section class="card stats-section">${intro('¿Qué cambió entre períodos?','Se comparan dos períodos consecutivos con la misma cantidad de días.')}<div class="stats-period-comparison"><div><span>${label('Período elegido')}</span><strong>${range(p.from,p.to)}</strong><small>${number(data.summary.complete_events)} / ${number(data.summary.events)} ${label('listas verificadas')}</small></div><div><span>${label('Período anterior')}</span><strong>${range(p.previous_from,p.previous_to)}</strong><small>${number(data.previous.complete_events)} / ${number(data.previous.events)} ${label('listas verificadas')}</small></div></div>${currentNote}${note('Las listas pendientes pueden cambiar la comparación. Aumentó o Disminuyó describe la diferencia; no es una evaluación de desempeño.')}${trendsTable}${help('Cómo se calcula el cambio',note('Cambio porcentual = (valor actual − valor anterior) / valor anterior × 100. Sin un valor anterior positivo, un aumento se muestra como Sin base previa. Si ambos son cero, se muestra Sin cambios.'))}<h4>${label('Evolución por tema')}</h4>${topicsTable}${note('Los intereses del perfil reflejan su estado actual; no se usan para inventar una evolución histórica.')}</section>`;
+      const comparison=comparisonChart();
+      view.innerHTML=`<section class="card stats-section">${intro('¿Qué cambió entre períodos?','Se comparan dos períodos consecutivos con la misma cantidad de días.')}<div class="stats-period-comparison"><div><span>${label('Período elegido')}</span><strong>${range(p.from,p.to)}</strong><small>${number(data.summary.complete_events)} / ${number(data.summary.events)} ${label('listas verificadas')}</small></div><div><span>${label('Período anterior')}</span><strong>${range(p.previous_from,p.previous_to)}</strong><small>${number(data.previous.complete_events)} / ${number(data.previous.events)} ${label('listas verificadas')}</small></div></div>${currentNote}${note('Las listas pendientes pueden cambiar la comparación. Aumentó o Disminuyó describe la diferencia; no es una evaluación de desempeño.')}${comparison}${trendsTable}${help('Cómo se calcula el cambio',note('Cambio porcentual = (valor actual − valor anterior) / valor anterior × 100. Sin un valor anterior positivo, un aumento se muestra como Sin base previa. Si ambos son cero, se muestra Sin cambios.'))}<h4>${label('Evolución por tema')}</h4>${topicsTable}${note('Los intereses del perfil reflejan su estado actual; no se usan para inventar una evolución histórica.')}</section>`;
     }
     function renderAiRow(g) {
       return row([E(g.name),number(g.events),number(g.previous_events),number(g.attendances),number(g.previous_attendances),delta(g.change)]);
