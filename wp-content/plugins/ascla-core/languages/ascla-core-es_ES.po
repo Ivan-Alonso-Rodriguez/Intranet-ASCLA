@@ -1743,6 +1743,9 @@ msgstr "Documentos del aliado"
 msgid "Duración de Recordarme (días)"
 msgstr "Duración de Recordarme (días)"
 
+msgid "Duración de la transcripción"
+msgstr "Duración de la transcripción"
+
 msgid "Duración del bloqueo (minutos)"
 msgstr "Duración del bloqueo (minutos)"
 
@@ -1811,6 +1814,9 @@ msgstr "El CSV no contiene filas."
 
 msgid "El CSV no contiene participantes."
 msgstr "El CSV no contiene participantes."
+
+msgid "El PDF no está disponible o no tienes permiso para verlo. Comprueba tu sesión y vuelve a intentarlo."
+msgstr "El PDF no está disponible o no tienes permiso para verlo. Comprueba tu sesión y vuelve a intentarlo."
 
 msgid "El análisis está al día"
 msgstr "El análisis está al día"
@@ -1928,6 +1934,9 @@ msgstr "El resultado supera los 20 intereses permitidos."
 
 msgid "El rol principal siempre está seleccionado. Acumular varios roles exige una autorización previa de la Junta registrada en ASCLA."
 msgstr "El rol principal siempre está seleccionado. Acumular varios roles exige una autorización previa de la Junta registrada en ASCLA."
+
+msgid "El servidor no devolvió un PDF. Tu sesión puede haber caducado; vuelve a iniciar sesión e inténtalo nuevamente."
+msgstr "El servidor no devolvió un PDF. Tu sesión puede haber caducado; vuelve a iniciar sesión e inténtalo nuevamente."
 
 msgid "El teléfono debe ser texto."
 msgstr "El teléfono debe ser texto."
@@ -2249,6 +2258,9 @@ msgstr "Estas cifras corresponden a los eventos del período y a los filtros apl
 
 msgid "Este PDF requiere una contraseña. Descárgalo para abrirlo con tu lector."
 msgstr "Este PDF requiere una contraseña. Descárgalo para abrirlo con tu lector."
+
+msgid "Este PDF supera el tamaño permitido para previsualizar. Puedes descargarlo para abrirlo con tu lector."
+msgstr "Este PDF supera el tamaño permitido para previsualizar. Puedes descargarlo para abrirlo con tu lector."
 
 msgid "Este aviso corresponde a una tarea de administración."
 msgstr "Este aviso corresponde a una tarea de administración."
@@ -3030,6 +3042,9 @@ msgstr "La asistencia se registra en eventos finalizados y no cancelados."
 msgid "La cabecera CSV contiene columnas repetidas para el mismo dato."
 msgstr "La cabecera CSV contiene columnas repetidas para el mismo dato."
 
+msgid "La carga del PDF tardó demasiado. Comprueba tu conexión e inténtalo nuevamente."
+msgstr "La carga del PDF tardó demasiado. Comprueba tu conexión e inténtalo nuevamente."
+
 msgid "La clave se guarda cifrada en WordPress y nunca se devuelve al navegador. También puedes definir ASCLA_SUPADATA_KEY en el servidor. Si el servidor exige claves externas, ese ajuste tiene prioridad."
 msgstr "La clave se guarda cifrada en WordPress y nunca se devuelve al navegador. También puedes definir ASCLA_SUPADATA_KEY en el servidor. Si el servidor exige claves externas, ese ajuste tiene prioridad."
 
@@ -3768,6 +3783,9 @@ msgstr "No se pudo cambiar el estado del aliado."
 msgid "No se pudo cargar el historial. Vuelve a abrir la ficha."
 msgstr "No se pudo cargar el historial. Vuelve a abrir la ficha."
 
+msgid "No se pudo cargar el lector PDF. Recarga la página o actualiza tu navegador e inténtalo nuevamente."
+msgstr "No se pudo cargar el lector PDF. Recarga la página o actualiza tu navegador e inténtalo nuevamente."
+
 msgid "No se pudo cargar la actividad"
 msgstr "No se pudo cargar la actividad"
 
@@ -3792,6 +3810,9 @@ msgstr "No se pudo consultar el trabajo de Supadata. Se volverá a intentar."
 msgid "No se pudo consultar la actividad. Reintente la operación."
 msgstr "No se pudo consultar la actividad. Reintente la operación."
 
+msgid "No se pudo descargar el PDF. Comprueba tu conexión e inténtalo nuevamente."
+msgstr "No se pudo descargar el PDF. Comprueba tu conexión e inténtalo nuevamente."
+
 msgid "No se pudo guardar el rol de la cuenta."
 msgstr "No se pudo guardar el rol de la cuenta."
 
@@ -3813,6 +3834,9 @@ msgstr "No se pudo mostrar esta página. Puedes descargar el PDF."
 msgid "No se pudo obtener una transcripción verificable. Conecta YouTube OAuth o pega una transcripción autorizada. ASCLA no generará información sin una transcripción válida."
 msgstr "No se pudo obtener una transcripción verificable. Conecta YouTube OAuth o pega una transcripción autorizada. ASCLA no generará información sin una transcripción válida."
 
+msgid "No se pudo previsualizar este PDF. El archivo está dañado o no es un PDF válido. Puedes descargarlo para revisarlo."
+msgstr "No se pudo previsualizar este PDF. El archivo está dañado o no es un PDF válido. Puedes descargarlo para revisarlo."
+
 msgid "No se pudo previsualizar este PDF. Puedes descargarlo para abrirlo con tu lector."
 msgstr "No se pudo previsualizar este PDF. Puedes descargarlo para abrirlo con tu lector."
 
@@ -3824,6 +3848,9 @@ msgstr "No se pudo publicar el contenido programado. Vuelve a guardar la fecha."
 
 msgid "No se pudo sincronizar con Google Calendar. Puedes reintentar."
 msgstr "No se pudo sincronizar con Google Calendar. Puedes reintentar."
+
+msgid "No se pudo verificar la duración directamente desde YouTube. Abre el reproductor y vuelve a intentar; la transcripción no contiene tiempos válidos."
+msgstr "No se pudo verificar la duración directamente desde YouTube. Abre el reproductor y vuelve a intentar; la transcripción no contiene tiempos válidos."
 
 msgid "No se pudo verificar la duración directamente desde YouTube. Conecta YouTube OAuth y vuelve a intentar; ASCLA no estimará la duración usando la transcripción."
 msgstr "No se pudo verificar la duración directamente desde YouTube. Conecta YouTube OAuth y vuelve a intentar; ASCLA no estimará la duración usando la transcripción."
@@ -4064,6 +4091,9 @@ msgstr "Paginación del directorio"
 
 msgid "Palabras clave"
 msgstr "Palabras clave"
+
+msgid "Panel Ejecutivo"
+msgstr "Panel Ejecutivo"
 
 msgid "Para aparecer en el directorio y recibir recomendaciones, completa:"
 msgstr "Para aparecer en el directorio y recibir recomendaciones, completa:"
@@ -4763,6 +4793,9 @@ msgstr "Reiniciar aprendizaje"
 
 msgid "Reintentar"
 msgstr "Reintentar"
+
+msgid "Reintentar previsualización"
+msgstr "Reintentar previsualización"
 
 msgid "Reintentar sincronización"
 msgstr "Reintentar sincronización"

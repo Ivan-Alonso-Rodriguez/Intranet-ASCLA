@@ -1,14 +1,14 @@
 {
   "version": "1.11.0",
   "artifact": "dist/ascla-core-instalable.zip",
-  "sha256": "ff332763ecd2d5f7416f3dba0a17ab3cf71028447ede0b656ca500123a26802e",
-  "bytes": 1950051,
+  "sha256": "f8f2eb97345c94890be2a1a40133d54f2ac9bed9bb399e136f156966b737f663",
+  "bytes": 1989491,
   "files": 212,
   "upload_limit_bytes": 2097152,
   "below_2MiB": true,
   "crc_valid": true,
   "all_retained_files_identical_to_complete_release": true,
-  "complete_release_sha256": "9e6261bee97e9baa589e8b623c4a30465286a6eb794bfee3115c044db30b24c2",
+  "complete_release_sha256": "5328fbf8479bf26ad6a75e4532e91b7b46a693524b66329e539876a0448ce4a5",
   "complete_release_unchanged": true,
   "omitted_translation_sources": [
     "ascla-core/languages/ascla-core-en_US.po",

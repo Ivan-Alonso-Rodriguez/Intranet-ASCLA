@@ -3,7 +3,7 @@
   "date": "2026-10-24T00:36:56.425Z",
   "scope": "Conservative source/reference audit and local disposable WordPress checks. Providers simulated. No remote deployment, external security audit, or assertion that all possible dynamic branches are exhaustively covered.",
   "package_sha256": "9e6261bee97e9baa589e8b623c4a30465286a6eb794bfee3115c044db30b24c2",
-  "package_manifest": "docs/evidence/release-1.11.0/package.json",
+  "package_manifest": "docs/evidence/release-1.11.0/package-code-optimization.json",
   "previous_package_manifest": "docs/evidence/release-1.11.0/package-summary-refresh.json",
   "size": {
     "complete_before_bytes": 2125406,

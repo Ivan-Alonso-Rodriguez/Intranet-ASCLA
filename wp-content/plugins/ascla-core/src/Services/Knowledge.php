@@ -1,7 +1,7 @@
 <?php
 namespace ASCLA\Core\Services;
 use ASCLA\Core\Integrations\{AIProviderInterface,MockAIProvider,RealAIProvider,OpenAIProvider,DeepSeekProvider,MockVideoProvider,YouTubeVideoProvider};
-use ASCLA\Core\Domain\{Anonymizer,EditorialPrivacy,EntityRedactor,Grounding};
+use ASCLA\Core\Domain\{Anonymizer,EditorialPrivacy,EntityRedactor,Grounding,Transcript};
 final class Knowledge
 {
     private const UPDATED_SOURCES_LABEL='Fuentes actualizadas';
@@ -91,9 +91,10 @@ final class Knowledge
         $meta['video_metadata_mode']='YouTube Player API (navegador)';
         $meta['video_metadata_checked_at']=current_datetime()->format(DATE_ATOM);
         $meta['thumbnail_url']=YouTubeVideoProvider::thumbnail((string)$meta['video_id']);
+        $meta=VideoTranscripts::withDuration($meta);
         update_post_meta($id,'_ascla',wp_slash($meta));
-        Audit::record('video_metadata_updated',$id,'YouTube Player API (navegador)');
-        return ['resource_id'=>$id,'mode'=>$meta['video_metadata_mode'],'duration_seconds'=>$seconds,'message'=>'Duración verificada directamente con el reproductor de YouTube.'];
+        Audit::record('video_metadata_updated',$id,$meta['video_metadata_mode']);
+        return ['resource_id'=>$id,'mode'=>$meta['video_metadata_mode'],'duration_seconds'=>$meta['duration_seconds'],'message'=>'Duración y miniatura actualizadas automáticamente.'];
     }
     private static function syncVideoMetadata(int $id,bool $strict): array
     {
@@ -107,14 +108,13 @@ final class Knowledge
         $meta=(array)get_post_meta($id,'_ascla',true);
         [$transcript,$videoMode,$identities]=self::editorialContext($id,$meta);
 
-        // Before generating excerpts, refresh the real YouTube duration whenever OAuth/API is available.
+        // Prefer caption timing; use video metadata only when the source has no valid timestamps.
         self::autoVideoMetadata($id);
         $meta=(array)get_post_meta($id,'_ascla',true);
         $durationSeconds=(int)($meta['duration_seconds']??0);
-        // Never infer the video length from captions. If YouTube cannot verify it, keep it unknown and do not create timed capsules.
         if ($durationSeconds<=0) { $durationSeconds=0; }
 
-        $result=EntityRedactor::cleanTree($ai->generate('multimedia',['source_id'=>$id,'transcript'=>$transcript,'chatham'=>!empty($meta['chatham']),'duration_seconds'=>$durationSeconds]));
+        $result=EntityRedactor::cleanTree($ai->generate('multimedia',['source_id'=>$id,'transcript'=>Transcript::plainText($transcript),'chatham'=>!empty($meta['chatham']),'duration_seconds'=>$durationSeconds]));
         if (!empty($meta['chatham'])) { $result=EntityRedactor::tree($result,$identities); }
         $result=Grounding::multimedia($result,$transcript);
         $summary=self::naturalizeVideoLanguage(Access::text($result['summary']??'',15000));
@@ -226,7 +226,7 @@ final class Knowledge
         }
         $meta=(array)get_post_meta($id,'_ascla',true);
         $transcript=trim((string)($meta['transcript']??''));$videoMode=$meta['transcript_mode']??'Transcripción manual autorizada';
-        if (mb_strlen($transcript)<30) {
+        if (mb_strlen(Transcript::plainText($transcript))<30) {
             self::rememberTranscriptFailure($id,$meta,'La transcripción disponible es demasiado corta para verificar el contenido.');
             Access::require(false,'La transcripción disponible es insuficiente para generar contenido confiable. ASCLA no generará información sin evidencia suficiente.',400);
         }
@@ -443,6 +443,12 @@ final class KnowledgeVideoMetadata
     {
         $post=Content::get($id);$meta=(array)get_post_meta($id,'_ascla',true);
         Access::require($post->post_type==='ascla_resource' && !empty($meta['video_id']),'Seleccione un recurso con video de YouTube.',400);
+        $meta=VideoTranscripts::withDuration($meta);
+        if (($meta['video_metadata_mode']??'')===VideoTranscripts::DURATION_MODE) {
+            $meta['thumbnail_url']=YouTubeVideoProvider::thumbnail($meta['video_id']);
+            update_post_meta($id,'_ascla',wp_slash($meta));
+            return ['resource_id'=>$id,'mode'=>$meta['video_metadata_mode'],'duration_seconds'=>$meta['duration_seconds'],'message'=>'Duración y miniatura actualizadas automáticamente.'];
+        }
         $previousMode=(string)($meta['video_metadata_mode']??'');
         $previousDuration=str_contains($previousMode,'transcripci')?0:max(0,min(604800,(int)($meta['duration_seconds']??0)));
         [$duration,$mode,$title]=self::officialMetadata((string)$meta['video_id']);
@@ -471,7 +477,7 @@ final class KnowledgeVideoMetadata
             return [max(0,min(604800,(int)($data['duration_seconds']??0))),(string)($data['mode']??'Metadatos públicos de YouTube')];
         } catch (\Throwable) {
             if ($strict && $previousDuration<=0) {
-                throw new ServiceException('No se pudo verificar la duración directamente desde YouTube. Abre el reproductor y vuelve a intentar; ASCLA no estimará la duración usando la transcripción.');
+                throw new ServiceException('No se pudo verificar la duración directamente desde YouTube. Abre el reproductor y vuelve a intentar; la transcripción no contiene tiempos válidos.');
             }
             return [0,''];
         }

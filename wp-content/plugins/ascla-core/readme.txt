@@ -11,6 +11,8 @@ ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 == Changelog ==
 
 = 1.11.0 =
+* Confirmación de recuperación genérica y persistente con formulario conservado; identidad propia del Ejecutivo. PDF compatible con más navegadores, respaldo sin worker, reintentos y errores detallados de carga, acceso y archivo.
+* Duración calculada con los tiempos de la transcripción. La IA recibe todo el texto hablado sin marcas temporales ni numeración de subtítulos; el original y los enlaces temporales se conservan.
 * Limpieza de traducciones antiguas, código de interfaz retirado y estilos sin uso. Catálogos gettext compactos con los mismos textos y archivos PO editables conservados.
 * Resumen más desarrollado y regeneración editorial con fuente reutilizada y versión previa conservada. Transcripción completa oculta en la ficha; marcos de trabajo en etiquetas a todo el ancho.
 * Subtítulos y resumen automáticos al publicar un video, sin botones manuales; continúa en segundo plano y notifica errores. PDF abierto al entrar, controles refinados y sin texto duplicado; Galería sin nombre de archivo y con zonas laterales amplias para cambiar de foto.

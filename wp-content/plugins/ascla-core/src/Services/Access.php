@@ -3,6 +3,15 @@ namespace ASCLA\Core\Services;
 final class Access
 {
     public static function member(int $id=0): bool { return user_can($id?:get_current_user_id(),'ascla_access') && Membership::status($id?:get_current_user_id())==='active'; }
+    /** A display label follows assigned roles, never their shared administrative capabilities. */
+    public static function roleLabel(int $id=0): string
+    {
+        $user=get_userdata($id?:get_current_user_id());
+        foreach (['administrator'=>'Administrador','ascla_executive'=>'Ejecutivo ASCLA','ascla_moderator'=>'Moderador ASCLA','ascla_member'=>'Asociado ASCLA'] as $role=>$label) {
+            if ($user&&in_array($role,$user->roles,true)) { return $label; }
+        }
+        return 'Comunidad ASCLA';
+    }
     public static function isAdministrator(int $id=0): bool
     {
         $id=$id?:get_current_user_id();

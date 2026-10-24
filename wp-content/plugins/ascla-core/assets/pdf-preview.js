@@ -1,7 +1,23 @@
 /* Private PDF reader. Extracted text is available to assistive technology; scripts are never run. */
 globalThis.ASCLAPdfPreview = ({root,config:C,T=text=>text}) => {
-  const states=new Map();let library;
-  const current=(node,state)=>states.get(node)===state && node.open;
+  const states=new Map();let library,workerEntry,workerUsers=0,libraryRetries=0;
+  // These small standard Promise APIs are absent in some otherwise supported Chromium versions.
+  function installPromiseCompatibility() {
+    if(typeof Promise.withResolvers!=='function')Object.defineProperty(Promise,'withResolvers',{configurable:true,writable:true,value:function(){
+      let resolve,reject;const promise=new this((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject};
+    }});
+    if(typeof Promise.try!=='function')Object.defineProperty(Promise,'try',{configurable:true,writable:true,value:function(callback,...args){
+      return new this(resolve=>resolve(callback(...args)));
+    }});
+  }
+  installPromiseCompatibility();
+  const current=(node,state)=>states.get(node)===state && node.open && !state.failed;
+  const failure=code=>Object.assign(new Error(code),{pdfCode:code});
+  async function timed(promise,ms=25000) {
+    let timer;
+    try { return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(failure('timeout')),ms);})]); }
+    finally { clearTimeout(timer); }
+  }
   const message=(node,text)=>{node.querySelector('.pdf-status').textContent=T(text);};
   const busy=(node,value)=>{
     node.querySelector('.pdf-page').setAttribute('aria-busy',String(value));
@@ -16,12 +32,39 @@ globalThis.ASCLAPdfPreview = ({root,config:C,T=text=>text}) => {
     const state=states.get(node);if(!state)return;
     states.delete(node);clearTimeout(state.timer);state.abort.abort();state.observer?.disconnect();
     state.render?.cancel();
-    const finish=()=>{state.worker?.terminate();if(state.workerUrl)URL.revokeObjectURL(state.workerUrl);};
-    if(state.task)void state.task.destroy().catch(()=>{}).finally(finish);else finish();
+    release(state);
     const canvas=node.querySelector('canvas');canvas.width=canvas.height=0;canvas.hidden=true;
     node.querySelector('.pdf-extracted-text').textContent='';
     node.querySelector('.pdf-position').textContent='';message(node,'');busy(node,true);
-    delete node.dataset.pdfPage;delete node.dataset.pdfPages;
+    node.querySelector('[data-pdf-retry]').hidden=true;
+    delete node.dataset.pdfPage;delete node.dataset.pdfPages;delete node.dataset.pdfError;
+  }
+  function release(state) {
+    if(state.released)return;state.released=true;
+    const finish=()=>{
+      state.pdfWorker?.destroy();
+      if(state.workerEntry&&--workerUsers===0){URL.revokeObjectURL(workerEntry);workerEntry=null;}
+    };
+    if(state.task)void state.task.destroy().catch(()=>{}).finally(finish);else finish();
+  }
+  function failed(node,state,error) {
+    const code=error.pdfCode||(error.name==='PasswordException'?'password':error.name==='InvalidPDFException'?'invalid':'reader');
+    if(code==='reader'){library=null;libraryRetries++;}
+    const messages={
+      reader:'No se pudo cargar el lector PDF. Recarga la página o actualiza tu navegador e inténtalo nuevamente.',
+      timeout:'La carga del PDF tardó demasiado. Comprueba tu conexión e inténtalo nuevamente.',
+      network:'No se pudo descargar el PDF. Comprueba tu conexión e inténtalo nuevamente.',
+      access:'El PDF no está disponible o no tienes permiso para verlo. Comprueba tu sesión y vuelve a intentarlo.',
+      session:'El servidor no devolvió un PDF. Tu sesión puede haber caducado; vuelve a iniciar sesión e inténtalo nuevamente.',
+      size:'Este PDF supera el tamaño permitido para previsualizar. Puedes descargarlo para abrirlo con tu lector.',
+      invalid:'No se pudo previsualizar este PDF. El archivo está dañado o no es un PDF válido. Puedes descargarlo para revisarlo.',
+      password:'Este PDF requiere una contraseña. Descárgalo para abrirlo con tu lector.'
+    };
+    state.failed=true;state.abort.abort();state.observer?.disconnect();state.render?.cancel();release(state);
+    node.dataset.pdfError=code;message(node,messages[code]||messages.reader);busy(node,true);
+    const canvas=node.querySelector('canvas');canvas.width=canvas.height=0;canvas.hidden=true;
+    node.querySelector('.pdf-extracted-text').textContent='';
+    node.querySelector('[data-pdf-retry]').hidden=false;
   }
   async function render(node,state) {
     if(!current(node,state)||state.busy)return;
@@ -44,7 +87,7 @@ globalThis.ASCLAPdfPreview = ({root,config:C,T=text=>text}) => {
       node.dataset.pdfPage=String(state.page);node.dataset.pdfPages=String(state.doc.numPages);
       message(node,'');
     } catch(error) {
-      if(current(node,state)&&error.name!=='RenderingCancelledException')message(node,'No se pudo mostrar esta página. Puedes descargar el PDF.');
+      if(current(node,state)&&error.name!=='RenderingCancelledException')failed(node,state,error);
     } finally {
       state.busy=false;if(current(node,state)){busy(node,false);controls(node,state);}
     }
@@ -52,32 +95,39 @@ globalThis.ASCLAPdfPreview = ({root,config:C,T=text=>text}) => {
   async function open(node) {
     if(states.has(node))return;
     const state={page:1,zoom:Number(node.querySelector('[data-pdf-zoom]').value),abort:new AbortController(),busy:false};states.set(node,state);
+    node.querySelector('[data-pdf-retry]').hidden=true;delete node.dataset.pdfError;
     busy(node,true);message(node,'Cargando PDF…');
     try {
       const url=new URL(node.dataset.pdfUrl,location.href);
-      if(url.origin!==location.origin)throw Error('Private origin required');
-      library ||= import(C.pdfModule).catch(error=>{library=null;throw error;});
-      const pdf=await library;if(!current(node,state))return;
-      pdf.GlobalWorkerOptions.workerSrc=C.pdfWorker;
-      const response=await fetch(url,{credentials:'same-origin',cache:'no-store',signal:state.abort.signal});
-      if(!response.ok||!response.headers.get('Content-Type')?.startsWith('application/pdf'))throw Error('PDF unavailable');
-      const data=await response.arrayBuffer();if(data.byteLength>6*1024*1024)throw Error('PDF too large');
+      const moduleUrl=new URL(C.pdfModule,location.href),workerUrl=new URL(C.pdfWorker,location.href);
+      if([url,moduleUrl,workerUrl].some(value=>value.origin!==location.origin))throw failure('reader');
+      if(libraryRetries)moduleUrl.searchParams.set('pdf_retry',String(libraryRetries));
+      library ||= import(moduleUrl.href).catch(error=>{library=null;throw error;});
+      const pdf=await timed(library);if(!current(node,state))return;
+      let response;
+      try { response=await timed(fetch(url,{credentials:'same-origin',cache:'no-store',signal:state.abort.signal})); }
+      catch(error){throw error.pdfCode?error:failure('network');}
+      if(!response.ok)throw failure([401,403,404].includes(response.status)?'access':'network');
+      const mime=(response.headers.get('Content-Type')||'').split(';')[0].trim().toLowerCase();
+      if(!['application/pdf','application/octet-stream'].includes(mime))throw failure('session');
+      if(Number(response.headers.get('Content-Length'))>6*1024*1024)throw failure('size');
+      const data=await timed(response.arrayBuffer());if(data.byteLength>6*1024*1024)throw failure('size');
       if(!current(node,state))return;
-      // A blob entry inherits the page's isolation policy; its only import is our pinned local worker.
-      const workerUrl=new URL(C.pdfWorker,location.href);if(workerUrl.origin!==location.origin)throw Error('Private worker origin required');
-      state.workerUrl=URL.createObjectURL(new Blob(['import '+JSON.stringify(workerUrl.href)+';'],{type:'text/javascript'}));
-      state.worker=new Worker(state.workerUrl,{type:'module'});
-      state.pdfWorker=new pdf.PDFWorker({port:state.worker});
+      // Preserve isolation in a worker; exporting its handler also enables PDF.js's official main-thread fallback.
+      workerEntry ||= URL.createObjectURL(new Blob(['('+installPromiseCompatibility.toString()+')(); const {WorkerMessageHandler}=await import('+JSON.stringify(workerUrl.href)+'); export {WorkerMessageHandler};'],{type:'text/javascript'}));
+      state.workerEntry=true;workerUsers++;pdf.GlobalWorkerOptions.workerSrc=workerEntry;
+      state.pdfWorker=new pdf.PDFWorker();
       state.task=pdf.getDocument({data:new Uint8Array(data),worker:state.pdfWorker,disableFontFace:true,useSystemFonts:true,useWasm:false,useWorkerFetch:false,enableXfa:false,isEvalSupported:false,verbosity:0,maxImageSize:16000000});
-      state.doc=await state.task.promise;if(!current(node,state))return;
+      state.doc=await timed(state.task.promise);if(!current(node,state))return;
       await render(node,state);
+      if(!current(node,state)||typeof ResizeObserver!=='function')return;
       state.observer=new ResizeObserver(()=>{
         if(Math.abs(node.querySelector('.pdf-page').clientWidth-state.width)<8)return;
         clearTimeout(state.timer);state.timer=setTimeout(()=>{if(current(node,state))void render(node,state);},180);
       });state.observer.observe(node.querySelector('.pdf-page'));
     } catch(error) {
       if(!current(node,state)||error.name==='AbortError')return;
-      message(node,error.name==='PasswordException'?'Este PDF requiere una contraseña. Descárgalo para abrirlo con tu lector.':'No se pudo previsualizar este PDF. Puedes descargarlo para abrirlo con tu lector.');
+      failed(node,state,error);
     }
   }
   root.addEventListener('toggle',event=>{
@@ -85,6 +135,8 @@ globalThis.ASCLAPdfPreview = ({root,config:C,T=text=>text}) => {
     if(event.target.open)void open(event.target);else dispose(event.target);
   },true);
   root.addEventListener('click',event=>{
+    const retry=event.target.closest?.('[data-pdf-retry]');
+    if(retry){event.preventDefault();const node=retry.closest('.pdf-preview');dispose(node);void open(node);return;}
     const button=event.target.closest?.('[data-pdf-step]');if(!button||button.disabled)return;
     const node=button.closest('.pdf-preview'),state=states.get(node);if(!state?.doc||state.busy)return;
     event.preventDefault();state.page=Math.max(1,Math.min(state.doc.numPages,state.page+Number(button.dataset.pdfStep)));void render(node,state);

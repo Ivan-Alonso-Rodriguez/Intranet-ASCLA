@@ -2073,5 +2073,16 @@
   "El video cambió mientras se preparaba el resumen. Se descartó el resultado anterior.": "The video changed while its summary was being prepared. The previous result was discarded.",
   "Actualizar resumen y nota": "Refresh summary and technical note",
   "Actualizando resumen…": "Updating summary…",
-  "Selecciona un recurso publicado.": "Select a published resource."
+  "Selecciona un recurso publicado.": "Select a published resource.",
+  "Duración de la transcripción": "Transcript duration",
+  "No se pudo verificar la duración directamente desde YouTube. Abre el reproductor y vuelve a intentar; la transcripción no contiene tiempos válidos.": "The duration could not be verified directly with YouTube. Open the player and try again; the transcript contains no valid timestamps.",
+  "Panel Ejecutivo": "Executive dashboard",
+  "Reintentar previsualización": "Retry preview",
+  "No se pudo cargar el lector PDF. Recarga la página o actualiza tu navegador e inténtalo nuevamente.": "The PDF reader could not be loaded. Reload the page or update your browser and try again.",
+  "La carga del PDF tardó demasiado. Comprueba tu conexión e inténtalo nuevamente.": "The PDF took too long to load. Check your connection and try again.",
+  "No se pudo descargar el PDF. Comprueba tu conexión e inténtalo nuevamente.": "The PDF could not be downloaded. Check your connection and try again.",
+  "El PDF no está disponible o no tienes permiso para verlo. Comprueba tu sesión y vuelve a intentarlo.": "The PDF is unavailable or you do not have permission to view it. Check your session and try again.",
+  "El servidor no devolvió un PDF. Tu sesión puede haber caducado; vuelve a iniciar sesión e inténtalo nuevamente.": "The server did not return a PDF. Your session may have expired; sign in again and retry.",
+  "Este PDF supera el tamaño permitido para previsualizar. Puedes descargarlo para abrirlo con tu lector.": "This PDF exceeds the preview size limit. Download it to open it in your PDF reader.",
+  "No se pudo previsualizar este PDF. El archivo está dañado o no es un PDF válido. Puedes descargarlo para revisarlo.": "This PDF could not be previewed. The file is damaged or is not a valid PDF. Download it to inspect it."
 }

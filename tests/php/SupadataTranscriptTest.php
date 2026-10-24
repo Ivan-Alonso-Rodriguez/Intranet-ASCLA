@@ -77,10 +77,16 @@ final class SupadataTranscriptTest extends TestCase
         self::assertStringContainsString('mode=native',$this->requests[0]['url']);self::assertStringContainsString('text=false',$this->requests[0]['url']);self::assertStringNotContainsString($this->key,$this->requests[0]['url']);
         $full=$meta['transcript'];$saved=Content::save('resource',['title'=>'Video actualizado','body'=>'Revisión editorial.','meta'=>['transcript'=>$full]],$id);
         self::assertSame($full,$saved['meta']['transcript']);self::assertSame('supadata',$saved['meta']['transcript_status']);
-        $ai=new class($full) implements AIProviderInterface {
-            public function __construct(private string $full) {}
+        $ai=new class(implode(' ',array_map('trim',array_column($content,'text')))) implements AIProviderInterface {
+            public function __construct(private string $speech) {}
             public function mode(): string { return 'test-full-source'; }
-            public function generate(string $task,array $context): array { TestCase::assertSame($this->full,$context['transcript']);return (new MockAIProvider())->generate($task,$context); }
+            public function generate(string $task,array $context): array {
+                TestCase::assertSame(hash('sha256',$this->speech),hash('sha256',$context['transcript']),'Every spoken segment must reach the AI, in order, without timing metadata.');
+                TestCase::assertStringNotContainsString('-->',$context['transcript']);
+                TestCase::assertStringContainsString('MARCADOR_FINAL_2_HORAS C:\\archivo',$context['transcript']);
+                TestCase::assertSame(7500,$context['duration_seconds']);
+                return (new MockAIProvider())->generate($task,$context);
+            }
         };
         Knowledge::multimedia($id,$ai);self::assertSame($full,get_post_meta($id,'_ascla',true)['transcript']);self::assertCount(1,$this->requests);
     }

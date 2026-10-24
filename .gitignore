@@ -169,3 +169,13 @@ __pycache__/
 !/docs/evidence/release-1.11.0/code-optimization1110.json
 
 !/docs/evidence/release-1.11.0/code-optimization1110-junit.xml
+
+!/docs/evidence/release-1.11.0/package-code-optimization.json
+!/docs/evidence/release-1.11.0/upload-limit-code-optimization.json
+!/docs/evidence/release-1.11.0/transcript-context1110.json
+!/docs/evidence/release-1.11.0/transcript-context1110-junit.xml
+
+!/docs/evidence/release-1.11.0/package-transcript-context.json
+!/docs/evidence/release-1.11.0/upload-limit-transcript-context.json
+!/docs/evidence/release-1.11.0/recovery-role-pdf1110.json
+!/docs/evidence/release-1.11.0/recovery-role-pdf1110-junit.xml

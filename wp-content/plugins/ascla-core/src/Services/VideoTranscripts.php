@@ -2,18 +2,36 @@
 namespace ASCLA\Core\Services;
 
 use ASCLA\Core\Integrations\SupadataVideoProvider;
+use ASCLA\Core\Domain\Transcript;
 use ASCLA\Core\Jobs\DeferredJob;
 use ASCLA\Core\Repositories\Store;
 
 final class VideoTranscripts
 {
     public const MAX_CHARACTERS=2000000;
+    public const DURATION_MODE='Duración de la transcripción';
+
+    /** The final caption is the available duration reference, even when the video has an uncaptioned ending. */
+    public static function withDuration(array $meta): array
+    {
+        $duration=Transcript::duration((string)($meta['transcript']??''));
+        if ($duration>0 && $duration<=604800) {
+            $meta['duration_seconds']=$duration;
+            $meta['video_metadata_mode']=self::DURATION_MODE;
+        } elseif (($meta['video_metadata_mode']??'')===self::DURATION_MODE) {
+            unset($meta['duration_seconds'],$meta['video_metadata_mode']);
+        }
+        return $meta;
+    }
     public static function obtain(int $id): array
     {
         Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden consultar transcripciones.',403);
         $post=Content::get($id);$meta=(array)get_post_meta($id,'_ascla',true);
         Access::require($post->post_type==='ascla_resource','Seleccione un recurso.',400);
-        if (trim((string)($meta['transcript']??''))!=='') { return self::result($id,$meta); }
+        if (trim((string)($meta['transcript']??''))!=='') {
+            $meta=self::update($id,(string)($meta['video_id']??''),static fn(array $current)=>$current);
+            return self::result($id,$meta);
+        }
         Access::require(!empty($meta['video_id']),'El recurso no tiene video de YouTube ni transcripción autorizada.',400);
         Access::require(Settings::get()['youtube_mode']==='supadata','No hay una transcripción verificable. Activa Supadata en Ajustes o añade una transcripción autorizada manualmente.',409);
         $videoId=(string)$meta['video_id'];
@@ -42,8 +60,11 @@ final class VideoTranscripts
         return Store::lock('content:'.$id,static function()use($id,$videoId,$change){
             $post=get_post($id);$current=(array)get_post_meta($id,'_ascla',true);
             Access::require($post&&$post->post_status!=='trash'&&($current['video_id']??'')===$videoId,'El recurso o su video cambió durante la consulta. Vuelve a abrirlo.',409);
-            if (trim((string)($current['transcript']??''))!=='') { return $current; }
-            $current=$change($current);update_post_meta($id,'_ascla',wp_slash($current));return $current;
+            $previous=$current;
+            if (trim((string)($current['transcript']??''))==='') { $current=$change($current); }
+            $current=self::withDuration($current);
+            if ($current!==$previous) { update_post_meta($id,'_ascla',wp_slash($current)); }
+            return $current;
         });
     }
     private static function result(int $id,array $meta): array

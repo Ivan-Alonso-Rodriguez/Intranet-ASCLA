@@ -31,7 +31,7 @@ final class ContentMeta
         self::eventReference($data,$input);
         self::duration($data,$input);
         $data['thumbnail_url']=\ASCLA\Core\Integrations\YouTubeVideoProvider::thumbnail($data['video_id']??'');
-        if ($type==='resource') { self::resource($data); }
+        if ($type==='resource') { self::resource($data);$data=VideoTranscripts::withDuration($data); }
         return $data;
     }
 

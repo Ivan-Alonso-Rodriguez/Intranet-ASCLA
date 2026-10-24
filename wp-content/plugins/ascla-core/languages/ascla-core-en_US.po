@@ -1743,6 +1743,9 @@ msgstr "Partner documents"
 msgid "Duración de Recordarme (días)"
 msgstr "Remember me duration (days)"
 
+msgid "Duración de la transcripción"
+msgstr "Transcript duration"
+
 msgid "Duración del bloqueo (minutos)"
 msgstr "Lockout duration (minutes)"
 
@@ -1811,6 +1814,9 @@ msgstr "The CSV contains no rows."
 
 msgid "El CSV no contiene participantes."
 msgstr "The CSV contains no participants."
+
+msgid "El PDF no está disponible o no tienes permiso para verlo. Comprueba tu sesión y vuelve a intentarlo."
+msgstr "The PDF is unavailable or you do not have permission to view it. Check your session and try again."
 
 msgid "El análisis está al día"
 msgstr "Analysis is up to date"
@@ -1928,6 +1934,9 @@ msgstr "The result exceeds the 20 allowed interests."
 
 msgid "El rol principal siempre está seleccionado. Acumular varios roles exige una autorización previa de la Junta registrada en ASCLA."
 msgstr "The primary role is always selected. Multiple roles require prior Board authorization recorded in ASCLA."
+
+msgid "El servidor no devolvió un PDF. Tu sesión puede haber caducado; vuelve a iniciar sesión e inténtalo nuevamente."
+msgstr "The server did not return a PDF. Your session may have expired; sign in again and retry."
 
 msgid "El teléfono debe ser texto."
 msgstr "The phone number must be text."
@@ -2249,6 +2258,9 @@ msgstr "These figures reflect events in the selected period and the applied filt
 
 msgid "Este PDF requiere una contraseña. Descárgalo para abrirlo con tu lector."
 msgstr "This PDF requires a password. Download it to open it in your reader."
+
+msgid "Este PDF supera el tamaño permitido para previsualizar. Puedes descargarlo para abrirlo con tu lector."
+msgstr "This PDF exceeds the preview size limit. Download it to open it in your PDF reader."
 
 msgid "Este aviso corresponde a una tarea de administración."
 msgstr "This notification belongs to an administration task."
@@ -3030,6 +3042,9 @@ msgstr "Attendance can be recorded only for completed, non-cancelled events."
 msgid "La cabecera CSV contiene columnas repetidas para el mismo dato."
 msgstr "The CSV header contains duplicate columns for the same field."
 
+msgid "La carga del PDF tardó demasiado. Comprueba tu conexión e inténtalo nuevamente."
+msgstr "The PDF took too long to load. Check your connection and try again."
+
 msgid "La clave se guarda cifrada en WordPress y nunca se devuelve al navegador. También puedes definir ASCLA_SUPADATA_KEY en el servidor. Si el servidor exige claves externas, ese ajuste tiene prioridad."
 msgstr "The key is encrypted in WordPress and never returned to the browser. You can also set ASCLA_SUPADATA_KEY on the server. An explicit external-only server policy takes priority."
 
@@ -3768,6 +3783,9 @@ msgstr "Partner status could not be changed."
 msgid "No se pudo cargar el historial. Vuelve a abrir la ficha."
 msgstr "History could not be loaded. Please reopen the record."
 
+msgid "No se pudo cargar el lector PDF. Recarga la página o actualiza tu navegador e inténtalo nuevamente."
+msgstr "The PDF reader could not be loaded. Reload the page or update your browser and try again."
+
 msgid "No se pudo cargar la actividad"
 msgstr "Activity could not be loaded"
 
@@ -3792,6 +3810,9 @@ msgstr "The Supadata job could not be checked. It will be retried."
 msgid "No se pudo consultar la actividad. Reintente la operación."
 msgstr "Activity could not be retrieved. Please try again."
 
+msgid "No se pudo descargar el PDF. Comprueba tu conexión e inténtalo nuevamente."
+msgstr "The PDF could not be downloaded. Check your connection and try again."
+
 msgid "No se pudo guardar el rol de la cuenta."
 msgstr "The account role could not be saved."
 
@@ -3813,6 +3834,9 @@ msgstr "This page could not be displayed. You can download the PDF."
 msgid "No se pudo obtener una transcripción verificable. Conecta YouTube OAuth o pega una transcripción autorizada. ASCLA no generará información sin una transcripción válida."
 msgstr "A verifiable transcript could not be obtained. Connect YouTube OAuth or paste an authorized transcript. ASCLA will not generate information without a valid transcript."
 
+msgid "No se pudo previsualizar este PDF. El archivo está dañado o no es un PDF válido. Puedes descargarlo para revisarlo."
+msgstr "This PDF could not be previewed. The file is damaged or is not a valid PDF. Download it to inspect it."
+
 msgid "No se pudo previsualizar este PDF. Puedes descargarlo para abrirlo con tu lector."
 msgstr "This PDF could not be previewed. Download it to open it in your reader."
 
@@ -3824,6 +3848,9 @@ msgstr "The scheduled content could not be published. Save the date again."
 
 msgid "No se pudo sincronizar con Google Calendar. Puedes reintentar."
 msgstr "Google Calendar could not be synchronized. You can try again."
+
+msgid "No se pudo verificar la duración directamente desde YouTube. Abre el reproductor y vuelve a intentar; la transcripción no contiene tiempos válidos."
+msgstr "The duration could not be verified directly with YouTube. Open the player and try again; the transcript contains no valid timestamps."
 
 msgid "No se pudo verificar la duración directamente desde YouTube. Conecta YouTube OAuth y vuelve a intentar; ASCLA no estimará la duración usando la transcripción."
 msgstr "The duration could not be verified directly from YouTube. Connect YouTube OAuth and try again; ASCLA will not estimate duration from the transcript."
@@ -4064,6 +4091,9 @@ msgstr "Directory pagination"
 
 msgid "Palabras clave"
 msgstr "Keywords"
+
+msgid "Panel Ejecutivo"
+msgstr "Executive dashboard"
 
 msgid "Para aparecer en el directorio y recibir recomendaciones, completa:"
 msgstr "To appear in the directory and receive recommendations, complete:"
@@ -4763,6 +4793,9 @@ msgstr "Reset learning"
 
 msgid "Reintentar"
 msgstr "Retry"
+
+msgid "Reintentar previsualización"
+msgstr "Retry preview"
 
 msgid "Reintentar sincronización"
 msgstr "Retry synchronization"
