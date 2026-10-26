@@ -69,6 +69,9 @@ msgstr "Open a request to read the message and reply."
 msgid "Abre una publicación para revisar el texto y decidir si se publica."
 msgstr "Open a post to review the text and decide whether to publish it."
 
+msgid "Abrir"
+msgstr "Open"
+
 msgid "Abrir PDF en otra pestaña"
 msgstr "Open PDF in another tab"
 
@@ -2382,6 +2385,9 @@ msgstr "Event reactivated"
 msgid "Evento reactivado. Las personas relacionadas fueron notificadas."
 msgstr "Event reactivated. Participants have been notified."
 
+msgid "Evento relacionado"
+msgstr "Related event"
+
 msgid "Eventos"
 msgstr "Events"
 
@@ -3161,6 +3167,9 @@ msgstr "The administration account manages the community and does not participat
 
 msgid "La cuota de Supadata se agotó. Revisa el plan o los créditos en Supadata."
 msgstr "The Supadata quota is exhausted. Check your plan or credits in Supadata."
+
+msgid "La duración se obtiene de los tiempos de la transcripción; si no hay tiempos válidos, se conserva la duración disponible del video."
+msgstr "Duration comes from the transcript timestamps; when valid timestamps are unavailable, the existing video duration is preserved."
 
 msgid "La eliminación es permanente y retira sus referencias."
 msgstr "Deletion is permanent and removes its references."
@@ -4008,6 +4017,9 @@ msgstr "Do not use"
 msgid "Nombre"
 msgstr "First name"
 
+msgid "Nombre de usuario"
+msgstr "Username"
+
 msgid "Nombre del aliado"
 msgstr "Partner name"
 
@@ -4722,11 +4734,17 @@ msgstr "Select a field to switch between visible and hidden. Moderators can stil
 msgid "Página"
 msgstr "Page"
 
+msgid "Página anterior"
+msgstr "Previous page"
+
 msgid "Página no válida."
 msgstr "Invalid page."
 
 msgid "Página personal"
 msgstr "Personal website"
+
+msgid "Página siguiente"
+msgstr "Next page"
 
 msgid "Páginas de actividad"
 msgstr "Activity pages"
@@ -5205,6 +5223,9 @@ msgstr "Saved as an absence, without adding attendance."
 msgid "Se conservarán las inscripciones y la lista de espera. Se avisará a las personas relacionadas y se volverán a programar los recordatorios y la sincronización del calendario."
 msgstr "Registrations and the waitlist will be preserved. Participants will be notified, and reminders and calendar synchronization will resume."
 
+msgid "Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar."
+msgstr "Consent and group history are considered. Review the proposals and adjust the date and agenda before publishing."
+
 msgid "Se eliminará el reporte revisado. El contenido reportado se conservará."
 msgstr "The reviewed report will be deleted. The reported content will be preserved."
 
@@ -5408,6 +5429,9 @@ msgstr "No data"
 
 msgid "Sin descripción del grupo."
 msgstr "No group description."
+
+msgid "Sin evento"
+msgstr "No event"
 
 msgid "Sin eventos pendientes"
 msgstr "No pending events"

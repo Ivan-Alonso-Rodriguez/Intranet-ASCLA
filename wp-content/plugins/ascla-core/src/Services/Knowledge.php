@@ -4,6 +4,7 @@ use ASCLA\Core\Integrations\{AIProviderInterface,MockAIProvider,RealAIProvider,O
 use ASCLA\Core\Domain\{Anonymizer,EditorialPrivacy,EntityRedactor,Grounding,Transcript};
 final class Knowledge
 {
+    private const METADATA_UPDATED='Duración y miniatura actualizadas automáticamente.';
     private const UPDATED_SOURCES_LABEL='Fuentes actualizadas';
     private const ABSTENTION='No existe suficiente información en ASCLA para responder esta consulta. Prueba con una pregunta sobre eventos, publicaciones o recursos de la comunidad.';
     private const IDENTITIES_SEPARATOR='/[\n,;]+/u';
@@ -94,7 +95,7 @@ final class Knowledge
         $meta=VideoTranscripts::withDuration($meta);
         update_post_meta($id,'_ascla',wp_slash($meta));
         Audit::record('video_metadata_updated',$id,$meta['video_metadata_mode']);
-        return ['resource_id'=>$id,'mode'=>$meta['video_metadata_mode'],'duration_seconds'=>$meta['duration_seconds'],'message'=>'Duración y miniatura actualizadas automáticamente.'];
+        return ['resource_id'=>$id,'mode'=>$meta['video_metadata_mode'],'duration_seconds'=>$meta['duration_seconds'],'message'=>self::METADATA_UPDATED];
     }
     private static function syncVideoMetadata(int $id,bool $strict): array
     {
@@ -105,14 +106,12 @@ final class Knowledge
         Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden generar recursos.',403);
         $ai=$ai??self::provider();
         $post=Content::get($id); Access::require($post->post_type==='ascla_resource','Seleccione un recurso.',400);
-        $meta=(array)get_post_meta($id,'_ascla',true);
-        [$transcript,$videoMode,$identities]=self::editorialContext($id,$meta);
+        [$transcript,$videoMode,$identities]=self::editorialContext($id);
 
         // Prefer caption timing; use video metadata only when the source has no valid timestamps.
         self::autoVideoMetadata($id);
         $meta=(array)get_post_meta($id,'_ascla',true);
-        $durationSeconds=(int)($meta['duration_seconds']??0);
-        if ($durationSeconds<=0) { $durationSeconds=0; }
+        $durationSeconds=max(0,(int)($meta['duration_seconds']??0));
 
         $result=EntityRedactor::cleanTree($ai->generate('multimedia',['source_id'=>$id,'transcript'=>Transcript::plainText($transcript),'chatham'=>!empty($meta['chatham']),'duration_seconds'=>$durationSeconds]));
         if (!empty($meta['chatham'])) { $result=EntityRedactor::tree($result,$identities); }
@@ -216,7 +215,7 @@ final class Knowledge
         }
         return array_values(array_unique($clean));
     }
-    private static function editorialContext(int $id,array $meta): array
+    private static function editorialContext(int $id): array
     {
         try { VideoTranscripts::obtain($id); }
         catch (\ASCLA\Core\Jobs\DeferredJob $waiting) { throw $waiting; }
@@ -439,6 +438,7 @@ final class KnowledgeAnswer
 
 final class KnowledgeVideoMetadata
 {
+    private const METADATA_UPDATED='Duración y miniatura actualizadas automáticamente.';
     public static function sync(int $id,bool $strict): array
     {
         $post=Content::get($id);$meta=(array)get_post_meta($id,'_ascla',true);
@@ -447,7 +447,7 @@ final class KnowledgeVideoMetadata
         if (($meta['video_metadata_mode']??'')===VideoTranscripts::DURATION_MODE) {
             $meta['thumbnail_url']=YouTubeVideoProvider::thumbnail($meta['video_id']);
             update_post_meta($id,'_ascla',wp_slash($meta));
-            return ['resource_id'=>$id,'mode'=>$meta['video_metadata_mode'],'duration_seconds'=>$meta['duration_seconds'],'message'=>'Duración y miniatura actualizadas automáticamente.'];
+            return ['resource_id'=>$id,'mode'=>$meta['video_metadata_mode'],'duration_seconds'=>$meta['duration_seconds'],'message'=>self::METADATA_UPDATED];
         }
         $previousMode=(string)($meta['video_metadata_mode']??'');
         $previousDuration=str_contains($previousMode,'transcripci')?0:max(0,min(604800,(int)($meta['duration_seconds']??0)));
@@ -457,7 +457,7 @@ final class KnowledgeVideoMetadata
         self::apply($meta,$duration,$mode,$title,$previousMode);
         update_post_meta($id,'_ascla',wp_slash($meta));
         if ($mode!=='') { Audit::record('video_metadata_updated',$id,$mode); }
-        return ['resource_id'=>$id,'mode'=>$mode?:($meta['video_metadata_mode']??'Datos conservados'),'duration_seconds'=>$duration,'message'=>$duration>0?'Duración y miniatura actualizadas automáticamente.':'No fue posible detectar la duración; se conservaron los datos disponibles.'];
+        return ['resource_id'=>$id,'mode'=>$mode?:($meta['video_metadata_mode']??'Datos conservados'),'duration_seconds'=>$duration,'message'=>$duration>0?self::METADATA_UPDATED:'No fue posible detectar la duración; se conservaron los datos disponibles.'];
     }
 
     private static function officialMetadata(string $videoId): array

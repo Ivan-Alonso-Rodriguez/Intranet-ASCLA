@@ -2155,5 +2155,13 @@
   "REVISIÓN DE LA COMUNIDAD": "COMMUNITY REVIEW",
   "Los nuevos comentarios que necesiten aprobación aparecerán aquí.": "New comments that need approval will appear here.",
   "Los reportes de la comunidad aparecerán aquí para que puedas revisarlos.": "Community reports will appear here for you to review.",
-  "Cuando haya contenido pendiente de aprobación, aparecerá aquí.": "Content awaiting approval will appear here."
+  "Cuando haya contenido pendiente de aprobación, aparecerá aquí.": "Content awaiting approval will appear here.",
+  "Abrir": "Open",
+  "Evento relacionado": "Related event",
+  "Nombre de usuario": "Username",
+  "Página anterior": "Previous page",
+  "Página siguiente": "Next page",
+  "Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.": "Consent and group history are considered. Review the proposals and adjust the date and agenda before publishing.",
+  "Sin evento": "No event",
+  "La duración se obtiene de los tiempos de la transcripción; si no hay tiempos válidos, se conserva la duración disponible del video.": "Duration comes from the transcript timestamps; when valid timestamps are unavailable, the existing video duration is preserved."
 }

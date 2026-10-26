@@ -28,18 +28,33 @@ async function login(browser, name, password) {
     viewport: { width: 1440, height: 1000 },
   });
   const page = await context.newPage();
+  const loginErrors = [];
+  page.on('pageerror', error => loginErrors.push(error.stack || error.message));
   await require("./helpers/browser.cjs").startCoverage(page, coverage);
-
+  try {
   await page.goto(base + "/wp-login.php");
+  await require('./helpers/browser.cjs').waitForNativeLogin(page);
   await page.locator("#user_login").fill(name);
   await page.locator("#user_pass").fill(password);
+  assert.ok(await page.locator('#user_pass').evaluate((input, expected) => input.value === expected, password), 'Native login must retain the password in its own field');
   await Promise.all([
-    page.waitForNavigation({waitUntil: "domcontentloaded"}),
+    page.waitForResponse(response => response.request().method() === 'POST' && new URL(response.url()).pathname.endsWith('/wp-login.php')),
     page.locator("#wp-submit").click(),
   ]);
+  await page.waitForURL(url => !url.pathname.endsWith('/wp-login.php'), {waitUntil: 'domcontentloaded'});
   await page.goto(base + "/intranet/");
   await require('./helpers/browser.cjs').waitForHome(page);
   return { context, page };
+  } catch (error) {
+    const diagnostic = {path: new URL(page.url()).pathname, errors: loginErrors,
+      feedback: await page.locator('#login_error,.ascla-login-error,[role="alert"]').allTextContents(),
+      fields: await page.locator('#loginform input').evaluateAll(inputs=>inputs.map(input=>({name:input.name,type:input.type,filled:Boolean(input.value),disabled:input.disabled,valid:input.validity.valid}))),
+      button: await page.locator('#wp-submit').evaluate(button=>({disabled:button.disabled,formAction:button.form?.action,formValid:button.form?.checkValidity()}))};
+    fs.writeFileSync(path.join(root, 'test-results/failure-login.json'), JSON.stringify(diagnostic, null, 2));
+    await page.screenshot({path: path.join(root, 'test-results/failure-login.png')});
+    await context.close();
+    throw new Error(error.message + '\nLogin diagnostic: ' + JSON.stringify(diagnostic));
+  }
 }
 async function request(page, route, body, method) {
   return page.evaluate(
@@ -216,9 +231,9 @@ async function goto(page, route) {
       await a.locator("#admin-panel").waitFor();
       await a.locator('.admin-tabs [data-tab="moderacion"]').click();
       const review = a.locator("#admin-panel")
-        .getByRole("row")
+        .locator('.moderation-publication[data-moderation-item="' + post.id + '"]')
         .filter({ hasText: "E2E Publicación de gobernanza" })
-        .getByRole("button", { name: "Revisar", exact: true });
+        .getByRole("button", { name: "Revisar publicación", exact: true });
       await review.waitFor({ state: "visible" });
       assert.equal(await review.getAttribute("data-id"), String(post.id));
       await review.click();

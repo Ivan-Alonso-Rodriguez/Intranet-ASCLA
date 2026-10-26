@@ -1,10 +1,16 @@
 # Guía práctica de QA, SonarQube y UAT
 
-Versión documentada: **1.11.0**, esquema **15**. Este proyecto WordPress utiliza un flujo manual; el [Jenkinsfile](Jenkinsfile) se conserva como referencia opcional para un uso futuro. Aquí se explica cómo ejecutar las herramientas, revisar sus resultados e instalar la entrega. No se exige cobertura del 100 %; las pruebas y el Quality Gate deben satisfacer los criterios acordados para la entrega.
+Versión documentada: **1.11.0**, esquema **15**. Este proyecto WordPress ofrece el flujo manual de esta guía y un [pipeline de Jenkins operativo](ci/README.md), comprobado en laboratorio local. Aquí se explica cómo ejecutar las herramientas, revisar sus resultados e instalar la entrega. Las pruebas y los Quality Gates deben satisfacer los criterios de la entrega; Jenkins aplica los controles antes de permitir un despliegue.
 
 Todos los comandos se ejecutan **desde la raíz del repositorio**, en una terminal Bash; en Windows, usa WSL con Docker Desktop operativo e integrado con esa distribución. Las rutas de los ejemplos son relativas al repositorio. Los dominios publicados corresponden a servicios del proyecto; `localhost` y `127.0.0.1` son ejemplos genéricos de acceso local.
 
 Esta guía distingue procedimientos disponibles de pruebas ya ejecutadas. La validación local de 1.11.0 renueva los informes PHP y JavaScript sobre el árbol de trabajo; esos informes no acreditan por sí solos una revisión Git limpia. Los reportes históricos de `pruebas/` conservan su propia versión y alcance. `quality-ci.sh` genera cobertura: úsalo cuando corresponda realizar una nueva validación completa de QA. Las comprobaciones de documentación y paquete no requieren modificar esos reportes.
+
+Para Jenkins/Trivy, consulta la [guía de integración y presentación](ci/README.md). La validación incluye pruebas de política, ejecución real de Trivy en Jenkins, HTML/JSON archivados con build fallido, despliegue omitido y un job de prueba de retención SUCCESS → FAILURE. SonarQube y ZAP son bloqueantes en QA/UAT; su configuración y el alcance de cada ejecución se registran por separado.
+
+La [corrección posterior de imágenes](docs/evidence/release-1.11.0/trivy-remediation1110.json) elimina los 379 hallazgos bloqueantes anteriores mediante runtimes Alpine actualizados y un buzón MailDev con dependencias corregidas. Trivy analiza las cuatro imágenes reales dentro de Jenkins y aprueba con cero hallazgos, sin exclusiones ni cambios a los umbrales. Se conservan WordPress, PHP, Apache y la rama de MariaDB; se comprueban la migración de datos, el correo y la regresión del plugin. Informe local: `test-results/trivy-remediation/index.html`.
+
+La [validación anterior de QA y UAT](docs/evidence/release-1.11.0/full-qa1110.json) ejecutó 810 pruebas PHP por entorno, las suites de navegador y SonarQube real del curso: ambos Quality Gates aprobaron con 0 incidencias abiertas y cobertura global de 91.2 %. En esa ejecución anterior Trivy y ZAP bloquearon el despliegue; ese resultado histórico no describe las imágenes corregidas. No se atribuye un nuevo análisis remoto de SonarQube a la corrección de infraestructura ni se acredita despliegue remoto o aceptación humana de UAT.
 
 ## Validar los cambios de 1.11.0
 
@@ -482,7 +488,7 @@ El responsable técnico conserva una copia privada y configura en entorno o `wp-
 
 ### Correo, Calendar y cron
 
-1. Envía una notificación de prueba a una cuenta autorizada y comprueba recepción con el proveedor real. Mailpit solo acredita captura local; véase el [alcance SMTP](COMPLIANCE.md#correo).
+1. Envía una notificación de prueba a una cuenta autorizada y comprueba recepción con el proveedor real. El buzón MailDev (servicio interno `mailpit`) solo acredita captura local; véase el [alcance SMTP](COMPLIANCE.md#correo).
 2. Comprueba que WP-Cron tiene tráfico suficiente o un ejecutor externo operativo. En **Configuración → Correo y recuperación → Revisar entregas**, revisa pendientes, fallos y reintentos; el operador con CLI dispone de `wp ascla deliveries`.
 3. En un entorno desechable, simula un fallo y comprueba recuperación y auditoría del reintento. El esquema 15 conserva entregas cifradas junto con la transacción; tras ocho intentos fallidos requieren revisión administrativa. Verifica preferencias, membresía y caducidad de ofertas antes del envío.
 4. Con Calendar real, crea/reprograma/cancela una prueba autorizada. Comprueba que el estado remoto final coincide y que un trabajo atrasado no recrea un evento cancelado. Una aceptación SMTP no prueba lectura ni garantiza recepción exactamente una vez; un resultado ambiguo puede ocasionar reintentos.
@@ -531,7 +537,7 @@ En Administración → Galerías y recursos, busca una publicación y pulsa Ocul
 
 ## 11. Pruebas de seguridad con ZAP, sin Jenkins
 
-La integración solicitada de ZAP y CSP en Jenkins, después del despliegue en `qa`, sigue pendiente; también faltan archivado, retención de un build y limpieza final. Este procedimiento se ejecuta independientemente de Jenkins. El proyecto es un monolito WordPress: sus páginas y su API se comprueban por separado en la misma instalación temporal. No se utiliza una aplicación Next.js ni se ejecutan ataques contra el WordPress publicado.
+El [pipeline de Jenkins](ci/README.md) ejecuta ZAP y CSP en QA/UAT sobre las imágenes construidas, en HTTPS desechable y antes de permitir el despliegue. Archiva las copias publicables incluso si falla, conserva solo el último build y limpia el laboratorio. El procedimiento de esta sección también permite ejecutar esas comprobaciones independientemente de Jenkins. El proyecto es un monolito WordPress: sus páginas y su API se comprueban por separado en la misma instalación temporal. No se ejecutan ataques contra el WordPress publicado.
 
 ### Preparar y ejecutar
 
@@ -644,7 +650,7 @@ Se comprueba con transcripciones sintéticas de más de dos horas, incluidas sus
 
 ## Error de instalación por upload_max_filesize · 1.11.0
 
-Tras la limpieza de código y catálogos, el paquete completo también queda por debajo de 2 MiB y conserva los PO editables. Para una variante todavía más pequeña, ejecutar `python scripts/build-installer.py` después de construir y verificar el paquete completo. La variante `dist/ascla-core-instalable.zip` ocupa menos de 2 MiB: solo omite los dos archivos fuente de traducción `.po`. Conserva los catálogos compilados `.mo`, `en.json` y todos los archivos de ejecución sin cambiar sus bytes. Los fuentes editables permanecen en el repositorio y el ZIP completo. [Verificación del paquete de instalación](docs/evidence/release-1.11.0/upload-limit1110.json).
+El paquete completo conserva los PO editables y el lector PDF local; su tamaño actual y SHA-256 están en [package.json](docs/evidence/release-1.11.0/package.json). El límite de subida del servidor debe permitir ese tamaño; el usuario ya amplió el límite de 2 MiB. La [variante histórica de instalación](docs/evidence/release-1.11.0/upload-limit1110.json) omitía únicamente los PO y corresponde a su propio paquete. No debe confundirse un ZIP anterior con la entrega actual.
 
 Si el servidor usa un límite inferior o el error persiste, el operador del hosting debe revisar el PHP que atiende WordPress; puede establecer `upload_max_filesize = 8M` y `post_max_size = 16M` desde su panel o configuración PHP. El proyecto Docker ya permite 5M/8M; cambiar el repositorio no modifica un hosting externo. No debe intentarse corregir una subida anterior a la instalación desde el código del plugin. [Referencia oficial de PHP](https://www.php.net/manual/en/ini.core.php#ini.upload-max-filesize). No se han modificado ajustes del servidor remoto.
 

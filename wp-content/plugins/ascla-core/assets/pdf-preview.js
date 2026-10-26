@@ -1,6 +1,5 @@
 /* Private PDF reader. Extracted text is available to assistive technology; scripts are never run. */
-globalThis.ASCLAPdfPreview = ({root,config:C,T=text=>text}) => {
-  const states=new Map();let library,workerEntry,workerUsers=0,libraryRetries=0;
+(() => {
   // These small standard Promise APIs are absent in some otherwise supported Chromium versions.
   function installPromiseCompatibility() {
     if(typeof Promise.withResolvers!=='function')Object.defineProperty(Promise,'withResolvers',{configurable:true,writable:true,value:function(){
@@ -10,6 +9,14 @@ globalThis.ASCLAPdfPreview = ({root,config:C,T=text=>text}) => {
       return new this(resolve=>resolve(callback(...args)));
     }});
   }
+  function readerErrorCode(error) {
+    if(error.pdfCode)return error.pdfCode;
+    if(error.name==='PasswordException')return 'password';
+    return error.name==='InvalidPDFException'?'invalid':'reader';
+  }
+
+globalThis.ASCLAPdfPreview = ({root,config:C,T=text=>text}) => {
+  const states=new Map();let library,workerEntry,workerUsers=0,libraryRetries=0;
   installPromiseCompatibility();
   const current=(node,state)=>states.get(node)===state && node.open && !state.failed;
   const failure=code=>Object.assign(new Error(code),{pdfCode:code});
@@ -40,7 +47,8 @@ globalThis.ASCLAPdfPreview = ({root,config:C,T=text=>text}) => {
     delete node.dataset.pdfPage;delete node.dataset.pdfPages;delete node.dataset.pdfError;
   }
   function release(state) {
-    if(state.released)return;state.released=true;
+    if(state.released){return;}
+    state.released=true;
     const finish=()=>{
       state.pdfWorker?.destroy();
       if(state.workerEntry&&--workerUsers===0){URL.revokeObjectURL(workerEntry);workerEntry=null;}
@@ -48,7 +56,7 @@ globalThis.ASCLAPdfPreview = ({root,config:C,T=text=>text}) => {
     if(state.task)void state.task.destroy().catch(()=>{}).finally(finish);else finish();
   }
   function failed(node,state,error) {
-    const code=error.pdfCode||(error.name==='PasswordException'?'password':error.name==='InvalidPDFException'?'invalid':'reader');
+    const code=readerErrorCode(error);
     if(code==='reader'){library=null;libraryRetries++;}
     const messages={
       reader:'No se pudo cargar el lector PDF. Recarga la página o actualiza tu navegador e inténtalo nuevamente.',
@@ -65,6 +73,18 @@ globalThis.ASCLAPdfPreview = ({root,config:C,T=text=>text}) => {
     const canvas=node.querySelector('canvas');canvas.width=canvas.height=0;canvas.hidden=true;
     node.querySelector('.pdf-extracted-text').textContent='';
     node.querySelector('[data-pdf-retry]').hidden=false;
+  }
+  async function download(url,state) {
+    let response;
+    try { response=await timed(fetch(url,{credentials:'same-origin',cache:'no-store',signal:state.abort.signal})); }
+    catch(error){throw error.pdfCode?error:failure('network');}
+    if(!response.ok)throw failure([401,403,404].includes(response.status)?'access':'network');
+    const mime=(response.headers.get('Content-Type')||'').split(';')[0].trim().toLowerCase();
+    if(!['application/pdf','application/octet-stream'].includes(mime))throw failure('session');
+    if(Number(response.headers.get('Content-Length'))>6*1024*1024)throw failure('size');
+    const data=await timed(response.arrayBuffer());
+    if(data.byteLength>6*1024*1024)throw failure('size');
+    return data;
   }
   async function render(node,state) {
     if(!current(node,state)||state.busy)return;
@@ -104,14 +124,7 @@ globalThis.ASCLAPdfPreview = ({root,config:C,T=text=>text}) => {
       if(libraryRetries)moduleUrl.searchParams.set('pdf_retry',String(libraryRetries));
       library ||= import(moduleUrl.href).catch(error=>{library=null;throw error;});
       const pdf=await timed(library);if(!current(node,state))return;
-      let response;
-      try { response=await timed(fetch(url,{credentials:'same-origin',cache:'no-store',signal:state.abort.signal})); }
-      catch(error){throw error.pdfCode?error:failure('network');}
-      if(!response.ok)throw failure([401,403,404].includes(response.status)?'access':'network');
-      const mime=(response.headers.get('Content-Type')||'').split(';')[0].trim().toLowerCase();
-      if(!['application/pdf','application/octet-stream'].includes(mime))throw failure('session');
-      if(Number(response.headers.get('Content-Length'))>6*1024*1024)throw failure('size');
-      const data=await timed(response.arrayBuffer());if(data.byteLength>6*1024*1024)throw failure('size');
+      const data=await download(url,state);
       if(!current(node,state))return;
       // Preserve isolation in a worker; exporting its handler also enables PDF.js's official main-thread fallback.
       workerEntry ||= URL.createObjectURL(new Blob(['('+installPromiseCompatibility.toString()+')(); const {WorkerMessageHandler}=await import('+JSON.stringify(workerUrl.href)+'); export {WorkerMessageHandler};'],{type:'text/javascript'}));
@@ -151,3 +164,4 @@ globalThis.ASCLAPdfPreview = ({root,config:C,T=text=>text}) => {
     release(scope){for(const node of states.keys())if(node===scope||scope?.contains(node))dispose(node);}
   };
 };
+})();

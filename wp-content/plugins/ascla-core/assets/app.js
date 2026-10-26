@@ -1,7 +1,6 @@
 /* ASCLA frontend. WordPress owns authentication and authorization; this UI never grants permissions. */
 (() => {
   "use strict";
-  const scriptNonce = document.currentScript?.nonce || "";
   const root = document.getElementById("ascla-root");
   if (!root || !globalThis.ASCLA) return;
   const C = globalThis.ASCLA;
@@ -1124,7 +1123,8 @@
     const coverTitle = p.title.split(':')[0];
     const visual = `<span class="knowledge-cover-empty resource-cover v${i%3}"><span class="cover-label">${E(T('ASCLA · CONOCIMIENTO'))}</span> <strong>${E(coverTitle)}</strong><span class="cover-icon">${I(video?'play':'book')}</span></span>`
       + (p.meta.thumbnail_url ? `<img class="resource-thumbnail" src="${E(p.meta.thumbnail_url)}" alt="" loading="lazy">` : '');
-    const cover = `<a class="knowledge-cover" href="${E(p.url)}" aria-label="${E(T('Explorar'))}: ${E(T('ASCLA · CONOCIMIENTO'))} ${E(coverTitle)}${video?' '+E(duration):''}"><span class="knowledge-cover-visual" aria-hidden="true">${visual}${video?`<span class="knowledge-duration">${I('play')} ${E(duration)}</span>`:''}</span></a>`;
+    const durationBadge = video?`<span class="knowledge-duration">${I('play')} ${E(duration)}</span>`:'';
+    const cover = `<a class="knowledge-cover" href="${E(p.url)}" aria-label="${E(T('Explorar'))}: ${E(T('ASCLA · CONOCIMIENTO'))} ${E(coverTitle)}${video?' '+E(duration):''}"><span class="knowledge-cover-visual" aria-hidden="true">${visual}${durationBadge}</span></a>`;
     const summary = p.meta.summary || p.body;
     return `<article class="card resource-card knowledge-card">${cover}<div class="resource-content"><div class="resource-card-badges"><span class="tag">${I(video?'play':'book')} ${E(T(type))}</span>${p.status==='publish'?'':status(p.status)}</div>${resourceRecommendation(p.recommendation)}<h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(summary.slice(0,190))}${summary.length>190?'…':''}</p><div class="resource-footer"><span class="knowledge-date">${I('calendar')}<time datetime="${E(p.date)}">${date(p.date)}</time></span>${btn('Explorar '+I('arrow'),'item','data-id="'+Number(p.id)+'"','small primary')}</div></div></article>`;
   }
@@ -1329,7 +1329,10 @@
     if (!dialog.isConnected) return;
     const suggested = other && p.networking && p.directory && S.boot.me.networking && !p.connection?.blocked;
     const actions = (other ? connectionActions(p, suggested, false, true) : link("perfil", "Editar perfil", "primary")) + directoryAdminActions(p);
-    const terms = Object.entries(p.terms || {}).filter(([, v]) => v.length).map(([k, v]) => `<section class="member-topic-group"><h3>${E(T(profileLabels[k] || k))}</h3><div class="tag-row">${v.map(t=>`<span class="tag">${E(t)}</span>`).join("")}</div></section>`).join("");
+    const terms = Object.entries(p.terms || {}).filter(([, v]) => v.length).map(([k, v]) => {
+      const tags=v.map(t=>`<span class="tag">${E(t)}</span>`).join("");
+      return `<section class="member-topic-group"><h3>${E(T(profileLabels[k] || k))}</h3><div class="tag-row">${tags}</div></section>`;
+    }).join("");
     const sources = ["linkedin", "twitter", "website"].filter((k) => p[k]).map((k) => `<a href="${E(safeURL(p[k]))}" target="_blank" rel="noopener noreferrer">${E({ linkedin: "LinkedIn", twitter: "X / Twitter", website: T("Sitio personal") }[k])} ↗</a>`).join("");
     dialog.querySelector(".modal-top h2").textContent = p.name;
     dialog.querySelector('[role="dialog"]').setAttribute("aria-label", p.name);
@@ -1769,9 +1772,13 @@
     const calendar=scheduled
       ? `<time class="event-card-date" datetime="${E(p.meta.start)}"><strong>${date(p.meta.start,{day:'numeric'})}</strong><span>${date(p.meta.start,{month:'short'})}</span></time>`
       : `<div class="event-card-date is-pending">${I('calendar')}<span>${E(T('Por confirmar'))}</span></div>`;
-    const hours=scheduled ? time(p.meta.start)+(p.meta.end && Number.isFinite(Date.parse(p.meta.end))?' – '+time(p.meta.end):'') : T('Por confirmar');
+    const endTime=p.meta.end && Number.isFinite(Date.parse(p.meta.end))?' – '+time(p.meta.end):'';
+    const hours=scheduled ? time(p.meta.start)+endTime : T('Por confirmar');
     const image=cover ? `<button type="button" class="event-card-cover" data-action="item" data-id="${Number(p.id)}" aria-label="${E(T('Ver evento'))}: ${E(p.title)}"><img src="${E(cover.url)}" alt="${E(p.title)}" loading="lazy"></button>` : '';
-    return `<article class="card event-card${p.meta.cancelled?' is-cancelled':''}">${image}<div class="event-card-layout">${calendar}<div class="event-card-content"><div class="event-card-heading"><span class="event-modality">${E(T(p.meta.modality || 'Virtual'))}</span>${state}</div><h3>${E(p.title)}</h3><p class="detail-body event-card-description">${E(p.body.slice(0,160))}</p><div class="detail-meta event-card-meta"><span>${I('clock')}${E(hours)}</span>${p.meta.location?`<span class="event-card-location">${I('pin')}${E(p.meta.location)}</span>`:''}</div></div></div><div class="form-actions event-card-actions">${p.meta.chatham?`<span class="event-card-confidentiality">${I('shield')} Chatham House</span>`:'<span></span>'}${btn('Ver encuentro '+I('arrow'),'item',`data-id="${Number(p.id)}"`,'small primary')}</div></article>`;
+    const location=p.meta.location?`<span class="event-card-location">${I('pin')}${E(p.meta.location)}</span>`:'';
+    const confidentiality=p.meta.chatham?`<span class="event-card-confidentiality">${I('shield')} Chatham House</span>`:'<span></span>';
+    const open=btn('Ver encuentro '+I('arrow'),'item',`data-id="${Number(p.id)}"`,'small primary');
+    return `<article class="card event-card${p.meta.cancelled?' is-cancelled':''}">${image}<div class="event-card-layout">${calendar}<div class="event-card-content"><div class="event-card-heading"><span class="event-modality">${E(T(p.meta.modality || 'Virtual'))}</span>${state}</div><h3>${E(p.title)}</h3><p class="detail-body event-card-description">${E(p.body.slice(0,160))}</p><div class="detail-meta event-card-meta"><span>${I('clock')}${E(hours)}</span>${location}</div></div></div><div class="form-actions event-card-actions">${confidentiality}${open}</div></article>`;
   }
   function galleryCard(p) {
     const images = UI.images(p);
@@ -1779,7 +1786,7 @@
       ? `<img src="${E(images[0].url)}" alt="" class="gallery-card-image" loading="lazy">`
       : `<span class="gallery-card-placeholder" aria-hidden="true">${I('gallery')}<span>${E(T('Galería'))}</span></span>`;
     const count = images.length ? `<span class="gallery-card-count" aria-label="${E(T('Imágenes'))}: ${images.length}">${I('gallery')} ${images.length}</span>` : '';
-    return `<article class="card gallery-card"><button type="button" class="gallery-card-cover" data-action="item" data-id="${Number(p.id)}" aria-label="${E(T('Abrir'))}: ${E(p.title)}${images.length?' · '+E(T('Imágenes'))+': '+images.length:''}">${cover}${count}</button><div class="gallery-card-content"><h3><button type="button" class="gallery-card-title" data-action="item" data-id="${Number(p.id)}">${E(p.title)}</button></h3><p>${E(p.body.slice(0,160))}</p><div class="gallery-card-footer"><span class="gallery-card-date">${I('calendar')}<time datetime="${E(p.date)}">${date(p.date)}</time></span>${btn('Abrir '+I('arrow'), 'item', 'data-id="'+Number(p.id)+'"', 'primary small')}</div></div></article>`;
+    return `<article class="card gallery-card"><button type="button" class="gallery-card-cover" data-action="item" data-id="${Number(p.id)}" aria-label="${E(T('Abrir'))} ${E(T('Galería'))}: ${E(p.title)}${images.length?' · '+E(T('Imágenes'))+': '+images.length:''}">${cover}${count}</button><div class="gallery-card-content"><h3><button type="button" class="gallery-card-title" data-action="item" data-id="${Number(p.id)}">${E(p.title)}</button></h3><p>${E(p.body.slice(0,160))}</p><div class="gallery-card-footer"><span class="gallery-card-date">${I('calendar')}<time datetime="${E(p.date)}">${date(p.date)}</time></span>${btn('Abrir '+I('arrow'), 'item', 'data-id="'+Number(p.id)+'"', 'primary small')}</div></div></article>`;
   }
   function commentOverflow(c, postId) {
     const items = [];
@@ -1806,22 +1813,28 @@
   function commentThreads(comments) {
     const byId = new Map(comments.map(c => [Number(c.id), c])), groups = new Map();
     for (const c of comments) {
-      let head = c;
-      const visited = new Map();
-      while (byId.has(Number(head.parent))) {
-        visited.set(Number(head.id), visited.size);
-        const next = byId.get(Number(head.parent));
-        if (visited.has(Number(next.id))) {
-          head = byId.get(Math.min(...[...visited.keys()].slice(visited.get(Number(next.id)))));
-          break;
-        }
-        head = next;
-      }
+      const head = commentRoot(c,byId);
       const id = Number(head.id);
       if (!groups.has(id)) groups.set(id, {root:head, replies:[]});
       if (Number(c.id) !== id) groups.get(id).replies.push(c);
     }
-    for (const thread of groups.values()) {
+    for (const thread of groups.values()) orderCommentReplies(thread);
+    return [...groups.values()];
+  }
+  function commentRoot(comment,byId) {
+    let head=comment;const visited=new Map();
+    while (byId.has(Number(head.parent))) {
+      visited.set(Number(head.id),visited.size);
+      const next=byId.get(Number(head.parent));
+      if (visited.has(Number(next.id))) {
+        head=byId.get(Math.min(...[...visited.keys()].slice(visited.get(Number(next.id)))));
+        break;
+      }
+      head=next;
+    }
+    return head;
+  }
+  function orderCommentReplies(thread) {
       const children = new Map(), ordered = [], seen = new Set([Number(thread.root.id)]);
       for (const c of thread.replies) {
         const parent = Number(c.parent);
@@ -1841,8 +1854,6 @@
       visit(children.get(Number(thread.root.id)) || []);
       for (const c of thread.replies) if (!seen.has(Number(c.id))) visit([c]);
       thread.replies = ordered;
-    }
-    return [...groups.values()];
   }
   function commentBody(c, recipient) {
     let body = String(c.body || '');
@@ -1860,7 +1871,8 @@
     const authorName = Number(c.author_id) > 0
       ? `<button type="button" class="comment-author" data-action="member" data-id="${Number(c.author_id)}" aria-label="${E(T('Ver perfil de'))} ${E(c.author)}">${E(c.author)}</button>`
       : `<strong>${E(c.author)}</strong>`;
-    const actions = `<div class="comment-actions">${canReply ? reactionButtons(c, c.id, true) : ''}${canReply ? btn(T('Responder'), 'comment-reply', `data-id="${Number(c.id)}" data-thread="${threadId}" data-post="${Number(postId)}" data-author="${E(c.author)}"`, 'ghost small') : ''}${c.status === 'pending' ? status(c.status) : ''}</div>`;
+    const replyData=`data-id="${Number(c.id)}" data-thread="${threadId}" data-post="${Number(postId)}" data-author="${E(c.author)}"`;
+    const actions = `<div class="comment-actions">${canReply ? reactionButtons(c, c.id, true) : ''}${canReply ? btn(T('Responder'), 'comment-reply', replyData, 'ghost small') : ''}${c.status === 'pending' ? status(c.status) : ''}</div>`;
     const context = Number(c.parent) > 0 ? `<span class="comment-reply-context"><span aria-hidden="true">▸</span><span class="screen-reader-text">${E(T('En respuesta a'))} </span><span class="comment-recipient-name">${E(recipient?.author || T('Comentario no disponible'))}</span></span>` : '';
     return `<article class="comment${isReply ? ' comment-reply' : ''}" data-comment-id="${Number(c.id)}" data-reply-to="${Number(c.parent) || 0}"><span class="comment-avatar" aria-hidden="true">${avatar({name:c.author})}</span><div class="comment-copy"><div class="comment-head"><div class="comment-identity"><span class="comment-authors">${authorName}${context}</span><time class="muted" datetime="${E(String(c.date).replace(' ', 'T'))}Z">${date(c.date)}</time></div>${commentOverflow(c, postId)}</div><p>${commentBody(c,recipient)}</p>${actions}<div class="comment-reply-slot"></div></div></article>`;
   }
@@ -1868,8 +1880,10 @@
     const id = Number(thread.root.id), total = thread.replies.length;
     if (!total) return '';
     const remaining = total - shown;
-    const label = shown ? (remaining === 1 ? 'Ver 1 respuesta más' : 'Ver %s respuestas más') : (total === 1 ? 'Ver 1 respuesta' : 'Ver las %s respuestas');
-    const more = remaining ? btn(T(label).replace('%s', String(shown ? remaining : total)), 'comment-expand', `data-id="${id}" aria-expanded="${shown > 0}" aria-controls="comment-replies-${id}"`, 'ghost small comment-thread-toggle') : '';
+    let label=total === 1 ? 'Ver 1 respuesta' : 'Ver las %s respuestas';
+    if (shown) label=remaining === 1 ? 'Ver 1 respuesta más' : 'Ver %s respuestas más';
+    const replyCount=shown ? remaining : total;
+    const more = remaining ? btn(T(label).replace('%s', String(replyCount)), 'comment-expand', `data-id="${id}" aria-expanded="${shown > 0}" aria-controls="comment-replies-${id}"`, 'ghost small comment-thread-toggle') : '';
     const hide = shown ? btn('Ocultar respuestas', 'comment-collapse', `data-id="${id}" aria-expanded="true" aria-controls="comment-replies-${id}"`, 'ghost small comment-thread-toggle') : '';
     return more + hide;
   }
@@ -2112,10 +2126,16 @@
     let checks=0;const deadline=Date.now()+86400000;
     const again=(delay=checks<12?5000:30000)=>{if(Date.now()<deadline)setTimeout(poll,delay);};
     const poll=async()=>{
-      if(!target.isConnected){if(modalHistory.some(entry=>entry.node===dialog))again();return;}
+      if(!target.isConnected){
+        if(modalHistory.some(entry=>entry.node===dialog)){again();}
+        return;
+      }
       try {
         const job=await api('jobs/'+state.job_id);checks++;
-        if(!target.isConnected){if(modalHistory.some(entry=>entry.node===dialog))again();return;}
+        if(!target.isConnected){
+          if(modalHistory.some(entry=>entry.node===dialog)){again();}
+          return;
+        }
         if(['completed','error'].includes(job.status)){await item(p.id);return;}
         again();
       } catch(error){target.textContent=error.message;again(30000);}
@@ -2152,14 +2172,18 @@
   function microHistoryCard(p) {
     const archiveLabel=p.meta.micro_archived?'Restaurar en el panel':'Archivar del panel';
     const archive=p.meta.can_archive?btn(T(archiveLabel),'micro-archive','data-id="'+Number(p.id)+'" data-archived="'+!p.meta.micro_archived+'"','small'):'';
-    const state=p.meta.cancelled?'cancelled':(p.status==='scheduled'?'scheduled':p.meta.micro_state||'pending');
+    let state=p.meta.micro_state||'pending';
+    if (p.status==='scheduled') state='scheduled';
+    if (p.meta.cancelled) state='cancelled';
     const titles={...microStates,scheduled:'Programada'};
     const guidance={pending:'Revisa el grupo, la fecha y la agenda para decidir su publicación.',approved:'La propuesta está aprobada. Revisa la fecha y publica cuando esté lista.',scheduled:'La publicación está programada para la fecha indicada.',published:'El encuentro está publicado. Puedes consultar sus inscripciones.',cancelled:'El encuentro fue cancelado. Su historial se conserva.',denied:'La propuesta no fue aprobada. Puedes consultar la decisión.',finished:'El encuentro finalizó. Puedes consultar su historial.',insufficient:'Revisa las inscripciones y las condiciones del encuentro.'};
     const label=state==='pending'?'Revisar propuesta':'Ver encuentro';
     const dateLabel=p.meta.start?date(p.meta.start,{day:'numeric',month:'short',year:'numeric'})+' · '+time(p.meta.start):T('Fecha por definir');
     const people=Array.isArray(p.meta.invitees)?p.meta.invitees.length:null;
     const group=people===null?'':`<span>${I('users')}${people} ${E(T('candidatos del grupo'))}</span>`;
-    return `<article class="card micro-history-card" data-micro-id="${Number(p.id)}"><div class="micro-card-heading"><span class="micro-card-icon" aria-hidden="true">${I('hub')}</span><div><span class="micro-state${['pending','approved','published','scheduled'].includes(state)?' active':''}">${E(T(titles[state]||titles.pending))}</span><h3>${E(p.title)}</h3></div></div><div class="micro-card-meta"><span>${I('calendar')}${E(dateLabel)}</span>${group}${p.meta.capacity?`<span>${I('users')}${Number(p.meta.capacity)} ${E(T('cupos'))}</span>`:''}</div><p class="micro-next-step">${E(T(guidance[state]||guidance.pending))}</p><div class="micro-card-footer"><div class="micro-card-history">${microEventHistory(p.meta,false)}</div><div class="form-actions">${archive}${btn(T(label)+' '+I('arrow'),'item',`data-id="${Number(p.id)}"`,'small'+(state==='pending'?' primary':''))}</div></div></article>`;
+    const capacity=p.meta.capacity?`<span>${I('users')}${Number(p.meta.capacity)} ${E(T('cupos'))}</span>`:'';
+    const open=btn(T(label)+' '+I('arrow'),'item',`data-id="${Number(p.id)}"`,'small'+(state==='pending'?' primary':''));
+    return `<article class="card micro-history-card" data-micro-id="${Number(p.id)}"><div class="micro-card-heading"><span class="micro-card-icon" aria-hidden="true">${I('hub')}</span><div><span class="micro-state${['pending','approved','published','scheduled'].includes(state)?' active':''}">${E(T(titles[state]||titles.pending))}</span><h3>${E(p.title)}</h3></div></div><div class="micro-card-meta"><span>${I('calendar')}${E(dateLabel)}</span>${group}${capacity}</div><p class="micro-next-step">${E(T(guidance[state]||guidance.pending))}</p><div class="micro-card-footer"><div class="micro-card-history">${microEventHistory(p.meta,false)}</div><div class="form-actions">${archive}${open}</div></div></article>`;
   }
   function microHistoryMarkup(proposals) {
     const archived=!!S.microShowArchived,shown=proposals.filter(p=>!!p.meta.micro_archived===archived);
@@ -2194,7 +2218,9 @@
     const video = p.meta.video_id ? `<div class="video-wrap"><iframe credentialless loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/${E(p.meta.video_id)}${clipQuery}" title="${E(p.title)}" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe></div><div class="video-metadata"><span>${videoDuration}</span>${videoModeTag}</div>` : "";
     const eventCover = p.type === "event" ? UI.images(p)[0] : null;
     const eventCoverMarkup = eventCover ? `<figure class="event-detail-cover"><img src="${E(eventCover.url)}" alt="${E(p.title)}"></figure>` : "";
-    const attachmentsMarkup = p.type === 'gallery' ? UI.gallery(p) : (p.type === "event" ? "" : UI.attachments(p));
+    let attachmentsMarkup='';
+    if (p.type==='gallery') attachmentsMarkup=UI.gallery(p);
+    else if (p.type!=='event') attachmentsMarkup=UI.attachments(p);
     const deleteMedia = (p.media || []).filter(m => m.can_delete).map(m => btn(`${T("Eliminar archivo")}: ${E(m.name)}`, "delete-media", `data-id="${m.id}" data-post="${id}" data-name="${E(m.name)}"`, "ghost danger small")).join("");
     return { video, eventCoverMarkup, attachmentsMarkup, deleteMedia };
   }
@@ -2270,6 +2296,9 @@
     void interestLearning().watch(p,dialog,S.page==="admin");
     watchVideoPreparation(p,dialog);
     await loadItemComments(p, id, commentView, drafts);
+    await restoreCommentDrafts(drafts);
+  }
+  async function restoreCommentDrafts(drafts) {
     for (const draft of drafts) {
       if (draft.parent) {
         const reply=activeModal()?.querySelector(`[data-action="comment-reply"][data-id="${draft.parent}"]`);
@@ -2297,7 +2326,7 @@
         + transcriptWarning
         + field("identities", "Identidades y afiliaciones que deben anonimizarse (una por línea)", m.identities || "", "textarea");
     }
-    return `<div class="form-grid">${select("resource_type", "Tipo de recurso", ["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"], m.resource_type || "Artículo")}${field("source", "Fuente / autoría", m.source || "")}${field("youtube_url", "URL de YouTube", m.youtube_url || "", "url")}${field("url", "URL del recurso externo", m.url || "", "url")}</div>${videoNote}${field("copyright", "Propiedad intelectual", m.copyright || "© ASCLA – Asociación de Secretarios Corporativos de América Latina")}${field("summary", "Resumen", m.summary || "", "textarea")}${moderatorFields}<p class="private-note">Las conferencias completas permanecen en YouTube. La duración se consulta directamente desde los metadatos del video y nunca se estima a partir de la transcripción.</p>`;
+    return `<div class="form-grid">${select("resource_type", "Tipo de recurso", ["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"], m.resource_type || "Artículo")}${field("source", "Fuente / autoría", m.source || "")}${field("youtube_url", "URL de YouTube", m.youtube_url || "", "url")}${field("url", "URL del recurso externo", m.url || "", "url")}</div>${videoNote}${field("copyright", "Propiedad intelectual", m.copyright || "© ASCLA – Asociación de Secretarios Corporativos de América Latina")}${field("summary", "Resumen", m.summary || "", "textarea")}${moderatorFields}<p class="private-note">${E(T('La duración se obtiene de los tiempos de la transcripción; si no hay tiempos válidos, se conserva la duración disponible del video.'))}</p>`;
   }
   function editorStatusOptions(type, m, directResourcePublisher, directContentPublisher) {
     if (directContentPublisher && ['gallery','resource'].includes(type)) return [['draft','Borrador'],['pending','Pendiente de revisión'],['publish','Publicado'],['ascla_hidden','Oculto']];
@@ -2468,7 +2497,8 @@
   }
   async function relatedEventPicker(id) {
     const current=id?await api('items/'+Number(id)).catch(()=>null):null;
-    const label=current?current.title+(current.meta.start?' · '+date(current.meta.start):''):T('Sin evento');
+    const relatedDate=current?.meta.start?' · '+date(current.meta.start):'';
+    const label=current?current.title+relatedDate:T('Sin evento');
     return `<div class="field related-event-field"><span>${E(T('Evento relacionado'))}</span><input type="hidden" name="event_id" value="${Number(id)}"><details class="related-event-picker"><summary><span data-related-event-label>${E(label)}</span>${I('chevron')}</summary><div class="related-event-panel"><label for="related-event-search">${E(T('Buscar evento'))}</label><input type="search" id="related-event-search" data-event-search maxlength="150" autocomplete="off" placeholder="${E(T('Escribe el nombre del evento…'))}"><div class="related-event-results" role="group" aria-label="${E(T('Eventos disponibles'))}"></div><div class="related-event-pagination"></div></div></details></div>`;
   }
   const eventPickerRequests=new WeakMap();
@@ -2485,7 +2515,9 @@
       results.innerHTML=btn(T('Sin evento'),'related-event-select','data-id="0" data-label="'+E(T('Sin evento'))+'" aria-pressed="'+(selected===0)+'"','related-event-option')
         +feed.items.map(p=>{const label=p.title+(p.meta.start?' · '+date(p.meta.start):'');return btn(`<span><strong>${E(p.title)}</strong><small>${p.meta.start?E(date(p.meta.start)):E(T('Fecha por confirmar'))} · #${Number(p.id)}</small></span>${status(p.status)}`,'related-event-select',`data-id="${Number(p.id)}" data-label="${E(label)}" aria-pressed="${selected===Number(p.id)}"`,'related-event-option');}).join('')
         +(feed.items.length?'':`<p class="private-note" role="status">${E(T('No se encontraron eventos.'))}</p>`);
-      pagination.innerHTML=`<span role="status">${E(T('Página'))} ${feed.page} ${E(T('de'))} ${feed.pages}</span><div>${btn(I('arrow'),'related-event-page',`data-page="${feed.page-1}" aria-label="${E(T('Página anterior'))}" ${feed.page<=1?'disabled':''}`,'event-picker-prev ghost')}${btn(I('arrow'),'related-event-page',`data-page="${feed.page+1}" aria-label="${E(T('Página siguiente'))}" ${feed.page>=feed.pages?'disabled':''}`,'ghost')}</div>`;
+      const previous=btn(I('arrow'),'related-event-page',`data-page="${feed.page-1}" aria-label="${E(T('Página anterior'))}" ${feed.page<=1?'disabled':''}`,'event-picker-prev ghost');
+      const next=btn(I('arrow'),'related-event-page',`data-page="${feed.page+1}" aria-label="${E(T('Página siguiente'))}" ${feed.page>=feed.pages?'disabled':''}`,'ghost');
+      pagination.innerHTML=`<span role="status">${E(T('Página'))} ${feed.page} ${E(T('de'))} ${feed.pages}</span><div>${previous}${next}</div>`;
       if(focusResults)results.querySelector('button')?.focus();
     } catch(error) {
       if(picker.isConnected&&eventPickerRequests.get(picker)===request)results.innerHTML=`<p class="error" role="alert">${E(error.message)}</p>${btn('Reintentar','related-event-page','data-page="1"','small')}`;
@@ -2882,7 +2914,8 @@
         if (j.status === 'completed') { onDone(j.result);return; }
         if (j.status === 'error') { await showJobError(target,id,j.error,onError);return; }
         const jobStatusLabel = j.status === 'processing' ? 'Procesando' : 'Pendiente';
-        target.innerHTML = assistantMode ? assistantLoadingBody(j.status) : `<div class="alert">${I('clock')} ${jobStatusLabel} · Trabajo #${id}${j.error ? '<p>'+E(j.error)+'</p>' : ''}</div>`;
+        const jobError=j.error?'<p>'+E(j.error)+'</p>':'';
+        target.innerHTML = assistantMode ? assistantLoadingBody(j.status) : `<div class="alert">${I('clock')} ${jobStatusLabel} · Trabajo #${id}${jobError}</div>`;
         if (++attempts < 90) setTimeout(poll, 2500);
         else target.innerHTML = assistantMode ? `<div class="assistant-message-meta"><span>${I('spark')} ASCLA</span></div><div class="assistant-message-copy">${E(T('La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta.'))}</div>` : '<div class="alert">El trabajo continúa en segundo plano. Recibirás una notificación cuando esté listo.</div>';
       } catch (error) { target.innerHTML = `<div class="error">${E(error.message)}</div>`; }
@@ -3241,7 +3274,8 @@
       publicationNote = `<small>${E(T('Publicación administrativa'))}</small>`;
     }
     const review = btn(T(p.status==='draft'?'Abrir borrador':'Revisar publicación')+' '+I('arrow'), 'item', `data-id="${Number(p.id)}"`, 'small'+(p.status==='pending'?' primary':''));
-    const excerpt = p.body ? `<p class="moderation-excerpt">${E(p.body.slice(0,180))}${p.body.length>180?'…':''}</p>` : '';
+    const excerptSuffix=p.body?.length>180?'…':'';
+    const excerpt = p.body ? `<p class="moderation-excerpt">${E(p.body.slice(0,180))}${excerptSuffix}</p>` : '';
     return `<article class="moderation-publication" data-moderation-item="${Number(p.id)}"><span class="moderation-kind-icon" aria-hidden="true">${I(icons[p.type]||'book')}</span><div class="moderation-publication-main"><span class="moderation-content-type">${E(contentTypeTitle(p.type))}</span><h4><button type="button" class="moderation-item-title" data-action="item" data-id="${Number(p.id)}">${E(p.title)}</button></h4>${excerpt}<div class="moderation-publication-meta"><span>${I('users')}${E(p.author.name)}</span><time datetime="${E(p.date)}">${I('clock')}${date(p.date)}</time>${badge}${generated}</div></div><div class="moderation-publication-footer">${status(p.status)}${publicationNote}${review}</div></article>`;
   }
   function adminReportCard(r) {
@@ -3690,16 +3724,29 @@
       event.preventDefault();const picker=event.target.closest('.related-event-picker');
       clearTimeout(eventPickerTimers.get(picker));void loadRelatedEvents(picker,1,true);return;
     }
-    const thumbnail = event.target.closest?.('.gallery-thumbnail');
+    if (galleryKeyboard(event)||connectionTabKeyboard(event)) return;
+    const input = event.target.closest?.('.assistant-compose textarea[name="question"],form[data-form="message"] textarea[name="body"]');
+    if (!input || event.key !== "Enter" || event.shiftKey || event.isComposing) return;
+    event.preventDefault();
+    if (event.repeat || input.form?.dataset.sending === 'true' || input.form?.querySelector('button[type="submit"],button:not([type])')?.disabled) return;
+    input.form?.requestSubmit();
+  });
+  function galleryKeyboard(event) {
+    const thumbnail=event.target.closest?.('.gallery-thumbnail');
     if (thumbnail && ['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) {
       event.preventDefault();
       const viewer = thumbnail.closest('.gallery-viewer');
       const count = viewer.querySelectorAll('.gallery-thumbnail').length;
-      const next = event.key==='Home' ? 0 : event.key==='End' ? count-1 : Math.max(0,Math.min(count-1,Number(thumbnail.dataset.index)+(event.key==='ArrowRight'?1:-1)));
+      let next=Math.max(0,Math.min(count-1,Number(thumbnail.dataset.index)+(event.key==='ArrowRight'?1:-1)));
+      if (event.key==='Home') next=0;
+      if (event.key==='End') next=count-1;
       UI.selectGallery(thumbnail,next);
       viewer.querySelectorAll('.gallery-thumbnail')[next].focus();
-      return;
+      return true;
     }
+    return false;
+  }
+  function connectionTabKeyboard(event) {
     const connectionTab = event.target.closest?.('[data-action="connection-tab"]');
     if (connectionTab && ['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) {
       event.preventDefault();
@@ -3708,14 +3755,10 @@
       let next=(index+direction+CONNECTION_TABS.length)%CONNECTION_TABS.length;
       if(event.key==='Home')next=0;
       if(event.key==='End')next=CONNECTION_TABS.length-1;
-      selectConnectionTab(CONNECTION_TABS[next][0],true);return;
+      selectConnectionTab(CONNECTION_TABS[next][0],true);return true;
     }
-    const input = event.target.closest?.('.assistant-compose textarea[name="question"],form[data-form="message"] textarea[name="body"]');
-    if (!input || event.key !== "Enter" || event.shiftKey || event.isComposing) return;
-    event.preventDefault();
-    if (event.repeat || input.form?.dataset.sending === 'true' || input.form?.querySelector('button[type="submit"],button:not([type])')?.disabled) return;
-    input.form?.requestSubmit();
-  });
+    return false;
+  }
 
 
     async function handleClickActions01(a, _b, _id, _event) {
@@ -4420,6 +4463,7 @@
     else if (a === "delivery-retry") { await api(`admin/deliveries/${id}/retry`,{}); await deliveryList(); }
   }
   async function handleExperienceAction(a,b,id) {
+      if (await reactivationAction(a,b,id)) return true;
       if(a==='related-event-page'){await loadRelatedEvents(b.closest('.related-event-picker'),Number(b.dataset.page)||1,true);return true;}
       if(a==='related-event-select'){
         const picker=b.closest('.related-event-picker'),input=picker.closest('.related-event-field').querySelector('[name="event_id"]');
@@ -4434,11 +4478,24 @@
         const resolve=commentExitResolver;commentExitResolver=null;closeModalDecision();resolve?.(a==='comment-exit-discard');return true;
       }
       if (a === 'calendar-retry') { await api(`events/${id}/calendar-sync`,{});await item(id);return true; }
+      if (a === 'notifications-delete-all-request') {
+        const snapshot=await api('notifications/summary');
+        const confirm=btn(T('Eliminar todas'),'notifications-delete-all-confirm',`data-through="${Number(snapshot.latest_id)}"`,'danger');
+        modal(T('Eliminar todas las notificaciones'),`<p>${E(T('Se eliminarán todas tus notificaciones actuales, incluidas las que están en otras páginas. Las nuevas notificaciones seguirán llegando.'))}</p><div class="form-actions">${btn(T('Conservar notificaciones'),'close')}${confirm}</div>`);return true;
+      }
+      if (a === 'notifications-delete-all-confirm') {
+        await api('notifications',{through:Number(b.dataset.through)},'DELETE');closeModal();S.noticePage=1;
+        await notifications();await refreshNotifications();toast('Notificaciones eliminadas.');return true;
+      }
+    return false;
+  }
+  async function reactivationAction(a,b,id) {
       if (a === 'event-reactivate-request') {
         const explanation=b.dataset.draft==='true'
           ?'La propuesta volverá a borrador para su revisión. Podrás editarla y aprobarla antes de publicarla.'
           :'Se conservarán las inscripciones y la lista de espera. Se avisará a las personas relacionadas y se volverán a programar los recordatorios y la sincronización del calendario.';
-        modal(T('Reactivar evento'),`<p class="detail-body">${E(b.dataset.title||'')}</p><p>${E(T(explanation))}</p><p class="private-note">${E(T('Revisa que la fecha y los datos del encuentro sigan vigentes. Si cambió el horario o la modalidad, se solicitará confirmar nuevamente la asistencia.'))}</p><div class="form-actions">${btn('Volver','modal-back')}${btn('Reactivar evento','event-reactivate-confirm',`data-id="${id}"`,'primary')}</div>`);return true;
+        const confirm=btn('Reactivar evento','event-reactivate-confirm',`data-id="${id}"`,'primary');
+        modal(T('Reactivar evento'),`<p class="detail-body">${E(b.dataset.title||'')}</p><p>${E(T(explanation))}</p><p class="private-note">${E(T('Revisa que la fecha y los datos del encuentro sigan vigentes. Si cambió el horario o la modalidad, se solicitará confirmar nuevamente la asistencia.'))}</p><div class="form-actions">${btn('Volver','modal-back')}${confirm}</div>`);return true;
       }
       if (a === 'event-reactivate-confirm') {
         const updated=await api(`events/${id}/reactivate`,{});
@@ -4446,14 +4503,6 @@
         toast(updated.status==='draft'?'Propuesta reactivada. Revisa el borrador antes de publicarla.':'Evento reactivado. Las personas relacionadas fueron notificadas.');
         if(S.page==='eventos')await listing();else if(S.page==='admin')await admin();
         await item(id);return true;
-      }
-      if (a === 'notifications-delete-all-request') {
-        const snapshot=await api('notifications/summary');
-        modal(T('Eliminar todas las notificaciones'),`<p>${E(T('Se eliminarán todas tus notificaciones actuales, incluidas las que están en otras páginas. Las nuevas notificaciones seguirán llegando.'))}</p><div class="form-actions">${btn(T('Conservar notificaciones'),'close')}${btn(T('Eliminar todas'),'notifications-delete-all-confirm',`data-through="${Number(snapshot.latest_id)}"`,'danger')}</div>`);return true;
-      }
-      if (a === 'notifications-delete-all-confirm') {
-        await api('notifications',{through:Number(b.dataset.through)},'DELETE');closeModal();S.noticePage=1;
-        await notifications();await refreshNotifications();toast('Notificaciones eliminadas.');return true;
       }
     return false;
   }
@@ -4512,18 +4561,23 @@
     { test: (a) => (a === "google-connect") || (a === "google-disconnect"), run: handleClickActions50 },
     { test: (a) => ["google-event","mail-test","delivery-list","delivery-retry"].includes(a), run: handleClickActions51 },
   ];
+  function galleryClick(event,button) {
+    if (!['gallery-select','gallery-step'].includes(button.dataset.action)) return false;
+    event.preventDefault();
+    if (button.disabled) return true;
+    const current=Number(button.closest('.gallery-viewer').dataset.galleryIndex);
+    UI.selectGallery(button,button.dataset.action==='gallery-select'?Number(button.dataset.index):current+Number(button.dataset.direction));
+    return true;
+  }
+  function modifiedNotificationClick(event,button) {
+    return button.dataset.action==='notification-open' && (event.ctrlKey||event.metaKey||event.shiftKey||event.altKey);
+  }
 root.addEventListener("click", async (event) => {
     const b = event.target.closest("[data-action]");
     if (!b) return;
-    if (['gallery-select','gallery-step'].includes(b.dataset.action)) {
-      event.preventDefault();
-      if (b.disabled) return;
-      const current = Number(b.closest('.gallery-viewer').dataset.galleryIndex);
-      UI.selectGallery(b,b.dataset.action==='gallery-select'?Number(b.dataset.index):current+Number(b.dataset.direction));
-      return;
-    }
+    if (galleryClick(event,b)) return;
     if (b.dataset.action === "board-role-approval") { event.preventDefault(); boardApprovalEditor(Number(b.dataset.id)); return; }
-    if (b.dataset.action === "notification-open" && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) return;
+    if (modifiedNotificationClick(event,b)) return;
     event.preventDefault();
     const a = b.dataset.action,
       id = Number(b.dataset.id || 0);
@@ -4978,6 +5032,12 @@ root.addEventListener("click", async (event) => {
     }
     return true;
   }
+  function cancelUnsavedSave(saveAndLeave) {
+    if (saveAndLeave) {
+      S.pendingUnsavedSaveForm=null;
+      resolveUnsavedExit(false);
+    }
+  }
 root.addEventListener("submit", async (event) => {
     const form = event.target.closest("[data-form]");
     if (!form) return;
@@ -5000,10 +5060,7 @@ root.addEventListener("submit", async (event) => {
       if (actionHandler) await actionHandler.run(action, form, data, submit, event);
       if (saveAndLeave && S.pendingUnsavedResolver) resolveUnsavedExit(true);
     } catch (e) {
-      if (saveAndLeave) {
-        S.pendingUnsavedSaveForm = null;
-        resolveUnsavedExit(false);
-      }
+      cancelUnsavedSave(saveAndLeave);
       if (e.name !== "AbortError") toast(e.message);
     } finally {
       delete form.dataset.submitting;
@@ -5078,9 +5135,11 @@ root.addEventListener("submit", async (event) => {
     });
   }
   function attachedFileMarkup(media,pending=false,preview=false) {
-    return `<span class="attached-file ${preview?'image-ready':''}" data-media="${Number(media.id)}" ${pending?`data-pending-media="${Number(media.id)}"`:''}>${preview?`<img src="${E(media.url)}" alt="">`:''}<span class="attached-file-name">${E(media.name)}</span>${btn('Quitar','detach-media',`data-id="${Number(media.id)}"`,'ghost small')}</span>`;
+    const pendingAttribute=pending?`data-pending-media="${Number(media.id)}"`:'';
+    const image=preview?`<img src="${E(media.url)}" alt="">`:'';
+    const remove=btn('Quitar','detach-media',`data-id="${Number(media.id)}"`,'ghost small');
+    return `<span class="attached-file ${preview?'image-ready':''}" data-media="${Number(media.id)}" ${pendingAttribute}>${image}<span class="attached-file-name">${E(media.name)}</span>${remove}</span>`;
   }
-  function preparedImageMarkup(media) { return attachedFileMarkup(media,true,true); }
   function humanFileSize(bytes) {
     const value = Number(bytes) || 0;
     if (value < 1024) return value + " B";

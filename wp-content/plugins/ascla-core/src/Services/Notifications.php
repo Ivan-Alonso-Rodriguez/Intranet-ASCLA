@@ -3,6 +3,7 @@ namespace ASCLA\Core\Services;
 use ASCLA\Core\Repositories\Store;
 final class Notifications
 {
+    private const USER_FILTER='user_id=%d';
     private const EMAIL_META='_ascla_email_notifications';
     private const EMAIL_DEFAULTS=['connections'=>true,'messages'=>true,'events'=>true,'support'=>true];
     private const TOAST_KINDS=[
@@ -100,16 +101,16 @@ final class Notifications
 
     public static function list(): array
     {
-        return array_map([NotificationTarget::class,'view'],Store::rows('notifications','user_id=%d',[get_current_user_id()]));
+        return array_map([NotificationTarget::class,'view'],Store::rows('notifications',self::USER_FILTER,[get_current_user_id()]));
     }
     public static function summary(): array
     {
         return ['unread_total'=>Store::count('notifications','user_id=%d AND read_at IS NULL',[get_current_user_id()]),'latest_id'=>self::latestId(),
-            'total_all'=>Store::count('notifications','user_id=%d',[get_current_user_id()])];
+            'total_all'=>Store::count('notifications',self::USER_FILTER,[get_current_user_id()])];
     }
     public static function feed(array $filter): array
     {
-        $where='user_id=%d'; $args=[get_current_user_id()];
+        $where=self::USER_FILTER; $args=[get_current_user_id()];
         if (($filter['filter']??'')==='unread') { $where.=' AND read_at IS NULL'; }
         $total=Store::count('notifications',$where,$args); $pages=max(1,(int)ceil($total/20));
         $page=min($pages,max(1,(int)($filter['page']??1))); $offset=($page-1)*20;

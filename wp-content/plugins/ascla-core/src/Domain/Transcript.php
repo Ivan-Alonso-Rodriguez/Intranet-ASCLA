@@ -13,7 +13,8 @@ final class Transcript
         $stamp=self::STAMP;
         if (preg_match('/^WEBVTT(?:[ \t][^\n]*)?(?:\n|$)/',$text)) {
             $text=preg_replace('/^WEBVTT[^\n]*(?:\n(?:Kind|Language|X-TIMESTAMP-MAP):[^\n]*)*(?:\n|$)/','',$text)??$text;
-            $text=preg_replace('/^(?:NOTE(?:[ \t][^\n]*)?|STYLE|REGION)\n.*?(?:\n[ \t]*\n|\z)/ms','',$text)??$text;
+            $blocks=preg_split('/\n[ \t]*\n/',trim($text))?:[$text];
+            $text=implode("\n\n",array_filter($blocks,static fn($block)=>!preg_match('/^(?:NOTE(?:[ \t][^\n]*)?|STYLE|REGION)(?:\n|$)/',$block)));
             $text=trim($text);
             // WebVTT permits named cue identifiers as well as numbered ones.
             $text=preg_replace('/(\A|\n[ \t]*\n)[^\n]+\n(?=[ \t]*'.$stamp.'[ \t]+-->)/','$1',$text)??$text;

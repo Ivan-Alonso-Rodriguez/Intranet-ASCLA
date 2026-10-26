@@ -1,17 +1,17 @@
 /* Real local Chrome/Edge and WordPress; synthetic accounts/files, explicitly simulated network failures. */
 const {chromium}=require('playwright');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
-const fixture=JSON.parse(fs.readFileSync('test-results/sonar-preparation/release1110-users.json','utf8'));
-const extra=JSON.parse(fs.readFileSync('test-results/sonar-preparation/recovery-role-pdf1110-users.json','utf8'));
+const fixture=JSON.parse(fs.readFileSync(process.env.ASCLA_BASE_FIXTURE||'test-results/sonar-preparation/release1110-users.json','utf8'));
+const extra=JSON.parse(fs.readFileSync(process.env.ASCLA_RECOVERY_FIXTURE||'test-results/sonar-preparation/recovery-role-pdf1110-users.json','utf8'));
 if(fixture.origin!=='ascla-local-test-users'||extra.origin!=='recovery-role-pdf1110-local-fixture'||!['127.0.0.1','localhost'].includes(new URL(fixture.base).hostname))throw Error('Disposable loopback required');
-const out=path.resolve('test-results/recovery-role-pdf1110'),checks=[],scans=[],errors=[],contexts=[],posts=[];
+const out=path.resolve(process.env.ASCLA_RECOVERY_OUT||'test-results/recovery-role-pdf1110'),checks=[],scans=[],errors=[],contexts=[],posts=[];
 let browser,edge,admin,pdfFile,resource,activePage;
 const pass=name=>{checks.push(name);console.log('PASS '+name);};
 async function api(page,route,body,method){return page.evaluate(async({route,body,method})=>{const r=await fetch(ASCLA.api+route,{method:method||(body?'POST':'GET'),headers:{'X-WP-Nonce':ASCLA.nonce,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});return {status:r.status,body:await r.json()};},{route,body,method});}
 async function ok(page,route,body,method){const r=await api(page,route,body,method);assert.ok(r.status>=200&&r.status<300,route+': '+r.status+' '+r.body.message);return r.body;}
 async function go(page,url){await page.goto(fixture.base+'/'+url);await page.locator('#page-content h1').waitFor();if(url.includes('?item='))await page.locator('.modal .detail-meta').waitFor();}
 async function context(owner=browser,init){const c=await owner.newContext({viewport:{width:1440,height:1000},timezoneId:'America/Lima'});contexts.push(c);if(init)await c.addInitScript(init);return c;}
-async function login(actor,init,owner=browser){const c=await context(owner,init),p=await c.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(fixture.base+'/wp-login.php');await p.locator('#user_login').fill(actor.login);await p.locator('#user_pass').fill(actor.password);await Promise.all([p.waitForNavigation(),p.locator('#wp-submit').click()]);await go(p,'intranet/');return p;}
+async function login(actor,init,owner=browser){const c=await context(owner,init),p=await c.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(fixture.base+'/wp-login.php');await p.locator('#user_login').fill(actor.login);await p.locator('#user_pass').fill(actor.password);await Promise.all([p.waitForNavigation(),p.locator('#wp-submit').click()]);await go(p,'intranet/');const language=p.locator('.header-language select[name="_ascla_locale"]');if(await language.inputValue()!=='es_ES')await Promise.all([p.waitForNavigation(),language.selectOption('es_ES')]);return p;}
 async function ready(page,number=1){await page.waitForFunction(n=>document.querySelector('.pdf-preview')?.dataset.pdfPage===String(n)&&document.querySelector('.pdf-page')?.getAttribute('aria-busy')!=='true',number,{timeout:40000});}
 async function capture(page,name){assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await page.addScriptTag({path:process.env.ASCLA_AXE_PATH});const r=await page.evaluate(()=>axe.run(document.querySelector('#ascla-root')||document.body,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}}));scans.push({name,violations:r.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}))});assert.deepEqual(scans.at(-1).violations,[],name);await page.screenshot({path:path.join(out,name+'.png')});}
 async function preview(page){activePage=page;await go(page,'centro-conocimiento/?item='+resource.id);await ready(page);}

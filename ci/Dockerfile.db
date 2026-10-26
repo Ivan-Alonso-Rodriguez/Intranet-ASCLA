@@ -1,0 +1,20 @@
+ARG ENTRYPOINT_IMAGE=mariadb:11.4@sha256:250e1609e93c0e6aecf64bfbab2d84d5e89d2481540fe77447ff6c855c3b1873
+ARG BASE_IMAGE=alpine:3.22@sha256:2e0b81d60597f449baa56dc25d355367869d2dca4cd57e866f1e2b52af3eb55f
+FROM ${ENTRYPOINT_IMAGE} AS upstream
+FROM ${BASE_IMAGE}
+ARG SECURITY_REFRESH=local
+RUN test -n "$SECURITY_REFRESH" \
+    && apk upgrade --no-cache \
+    && apk add --no-cache 'mariadb>=11.4.13' mariadb-client bash tzdata su-exec findutils \
+    && mkdir -p /run/mysqld /docker-entrypoint-initdb.d \
+    && chown mysql:mysql /run/mysqld
+COPY --from=upstream /usr/local/bin/docker-entrypoint.sh /usr/local/bin/healthcheck.sh /usr/local/bin/
+COPY ci/gosu-alpine.sh /usr/local/bin/gosu
+COPY ci/mariadb-alpine.cnf /etc/my.cnf.d/zzzz-ascla.cnf
+RUN chmod 644 /etc/my.cnf.d/zzzz-ascla.cnf \
+    && chmod 755 /usr/local/bin/gosu /usr/local/bin/docker-entrypoint.sh /usr/local/bin/healthcheck.sh \
+    && gosu mysql true && mariadbd --version
+VOLUME /var/lib/mysql
+EXPOSE 3306
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["mariadbd"]

@@ -38,10 +38,12 @@ if (($input['action']??'')==='cleanup-contact') {
 if (($input['action']??'')==='mail-count') {
     $email=(string)($input['email']??$user->user_email);
     if (!preg_match('/^atomic_[a-z0-9_]+@example\.invalid$/i',$email)) { exit(2); }
-    $response=wp_remote_get('http://mailpit:8025/api/v1/search?query='.rawurlencode('to:'.$email));
+    $response=wp_remote_get('http://mailpit:8025/api/email');
     if (is_wp_error($response) || wp_remote_retrieve_response_code($response)!==200) { exit(4); }
     $data=json_decode(wp_remote_retrieve_body($response),true);
-    echo wp_json_encode(['count'=>count($data['messages']??[])]);exit;
+    if (!is_array($data)||!array_is_list($data)) { exit(4); }
+    $messages=array_filter($data,static fn($message)=>in_array($email,array_column($message['to']??[],'address'),true));
+    echo wp_json_encode(['count'=>count($messages)]);exit;
 }
 $clear();
 if (($input['mode']??'')==='metadata') {

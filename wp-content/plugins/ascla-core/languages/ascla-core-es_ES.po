@@ -69,6 +69,9 @@ msgstr "Abre una consulta para leer el mensaje y responder."
 msgid "Abre una publicación para revisar el texto y decidir si se publica."
 msgstr "Abre una publicación para revisar el texto y decidir si se publica."
 
+msgid "Abrir"
+msgstr "Abrir"
+
 msgid "Abrir PDF en otra pestaña"
 msgstr "Abrir PDF en otra pestaña"
 
@@ -2382,6 +2385,9 @@ msgstr "Evento reactivado"
 msgid "Evento reactivado. Las personas relacionadas fueron notificadas."
 msgstr "Evento reactivado. Las personas relacionadas fueron notificadas."
 
+msgid "Evento relacionado"
+msgstr "Evento relacionado"
+
 msgid "Eventos"
 msgstr "Eventos"
 
@@ -3161,6 +3167,9 @@ msgstr "La cuenta de administración gestiona la comunidad y no participa en el 
 
 msgid "La cuota de Supadata se agotó. Revisa el plan o los créditos en Supadata."
 msgstr "La cuota de Supadata se agotó. Revisa el plan o los créditos en Supadata."
+
+msgid "La duración se obtiene de los tiempos de la transcripción; si no hay tiempos válidos, se conserva la duración disponible del video."
+msgstr "La duración se obtiene de los tiempos de la transcripción; si no hay tiempos válidos, se conserva la duración disponible del video."
 
 msgid "La eliminación es permanente y retira sus referencias."
 msgstr "La eliminación es permanente y retira sus referencias."
@@ -4008,6 +4017,9 @@ msgstr "No utilizar"
 msgid "Nombre"
 msgstr "Nombre"
 
+msgid "Nombre de usuario"
+msgstr "Nombre de usuario"
+
 msgid "Nombre del aliado"
 msgstr "Nombre del aliado"
 
@@ -4722,11 +4734,17 @@ msgstr "Pulsa un dato para cambiar entre visible y oculto. La moderación puede 
 msgid "Página"
 msgstr "Página"
 
+msgid "Página anterior"
+msgstr "Página anterior"
+
 msgid "Página no válida."
 msgstr "Página no válida."
 
 msgid "Página personal"
 msgstr "Página personal"
+
+msgid "Página siguiente"
+msgstr "Página siguiente"
 
 msgid "Páginas de actividad"
 msgstr "Páginas de actividad"
@@ -5205,6 +5223,9 @@ msgstr "Se conserva como ausencia, sin sumar una asistencia."
 msgid "Se conservarán las inscripciones y la lista de espera. Se avisará a las personas relacionadas y se volverán a programar los recordatorios y la sincronización del calendario."
 msgstr "Se conservarán las inscripciones y la lista de espera. Se avisará a las personas relacionadas y se volverán a programar los recordatorios y la sincronización del calendario."
 
+msgid "Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar."
+msgstr "Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar."
+
 msgid "Se eliminará el reporte revisado. El contenido reportado se conservará."
 msgstr "Se eliminará el reporte revisado. El contenido reportado se conservará."
 
@@ -5408,6 +5429,9 @@ msgstr "Sin datos"
 
 msgid "Sin descripción del grupo."
 msgstr "Sin descripción del grupo."
+
+msgid "Sin evento"
+msgstr "Sin evento"
 
 msgid "Sin eventos pendientes"
 msgstr "Sin eventos pendientes"

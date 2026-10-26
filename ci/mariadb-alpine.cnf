@@ -1,0 +1,10 @@
+[mariadbd]
+user=mysql
+datadir=/var/lib/mysql
+socket=/run/mysqld/mysqld.sock
+pid-file=/run/mysqld/mysqld.pid
+bind-address=0.0.0.0
+skip-name-resolve
+skip-networking=0
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci

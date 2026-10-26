@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Manual integration/API E2E/UI E2E; Jenkins is outside this project's scope.
+# Manual integration/API E2E/UI E2E against an explicitly selected test environment.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
@@ -51,7 +51,7 @@ ASCLA_EXTERNAL_SECRETS_ONLY=0
 ASCLA_SEED_DATA=false
 EOF_ENV
     docker network inspect proxy_net >/dev/null 2>&1 || docker network create proxy_net >/dev/null
-    dc up -d db mailpit wordpress
+    dc up -d --build db mailpit wordpress
     ready=no
     for i in $(seq 1 24); do
       if dc run --rm cli sh /opt/ascla-scripts/init-wordpress.sh >"$OUT/setup.log" 2>&1; then ready=yes; break; fi
@@ -63,7 +63,9 @@ EOF_ENV
     PROJECT="${ASCLA_TEST_PROJECT:?Indica el proyecto Docker de QA con ASCLA_TEST_PROJECT}"
     ENV_FILE="${ASCLA_TEST_ENV_FILE:?Indica el archivo privado de QA con ASCLA_TEST_ENV_FILE}"
     if [[ ! "$PROJECT" =~ ^ascla[_-].*qa ]] || [ ! -f "$ENV_FILE" ]; then echo 'Proyecto o archivo QA no válido.'; exit 1; fi
-    dc exec -T wordpress php -r 'require "/var/www/html/wp-load.php"; if (!defined("ASCLA_VERSION") || ASCLA_VERSION!=="1.10.9") exit(1);' || { echo 'QA debe tener activo ASCLA Core 1.10.9.'; exit 1; }
+    EXPECTED_VERSION="$(sed -n 's/^ \* Version: *\([0-9.]*\).*/\1/p' wp-content/plugins/ascla-core/ascla-core.php)"
+    test -n "$EXPECTED_VERSION"
+    dc exec -T -e ASCLA_EXPECTED_VERSION="$EXPECTED_VERSION" wordpress php -r 'require "/var/www/html/wp-load.php"; if (!defined("ASCLA_VERSION") || ASCLA_VERSION!==getenv("ASCLA_EXPECTED_VERSION")) exit(1);' || { echo "QA debe tener activo ASCLA Core $EXPECTED_VERSION."; exit 1; }
     ;;
   remote)
     INPUT_FIXTURE="${ASCLA_TEST_FIXTURE:?Indica el JSON privado descargado desde Herramientas > ASCLA QA}"

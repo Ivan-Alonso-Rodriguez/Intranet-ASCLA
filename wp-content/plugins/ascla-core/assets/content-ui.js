@@ -34,11 +34,13 @@ globalThis.ASCLAContent = function ({ escape: E, icon: I, config: C, T = (text) 
   function gallery(p) {
     const photos = images(p);
     const files = (p.media || []).filter(m => !m.mime.startsWith('image/'));
-    const documents = files.length ? `<div class="gallery-documents">${files.map(m => m.mime==='application/pdf'?pdfAttachment(m):`<a class="btn small" href="${E(m.url)}" target="_blank" rel="noopener noreferrer">${I('download')} ${E(m.name)}</a>`).join('')}</div>` : '';
+    const documentLinks=files.map(m => m.mime==='application/pdf'?pdfAttachment(m):`<a class="btn small" href="${E(m.url)}" target="_blank" rel="noopener noreferrer">${I('download')} ${E(m.name)}</a>`).join('');
+    const documents = files.length ? `<div class="gallery-documents">${documentLinks}</div>` : '';
     if (!photos.length) return documents;
     const first = photos[0];
     const navigation = photos.length > 1 ? `<div class="gallery-viewer-controls"><button type="button" class="btn gallery-side-arrow gallery-prev" data-action="gallery-step" data-direction="-1" aria-label="${E(T('Imagen anterior'))}" title="${E(T('Imagen anterior'))}" disabled><span class="gallery-arrow-icon" aria-hidden="true">${I('arrow')}</span></button><button type="button" class="btn gallery-side-arrow" data-action="gallery-step" data-direction="1" aria-label="${E(T('Imagen siguiente'))}" title="${E(T('Imagen siguiente'))}"><span class="gallery-arrow-icon" aria-hidden="true">${I('arrow')}</span></button></div>` : '';
-    const thumbnails = photos.length > 1 ? `<div class="gallery-thumbnails" role="group" aria-label="${E(T('Imágenes'))}">${photos.map((m,index) => `<button type="button" class="gallery-thumbnail" data-action="gallery-select" data-index="${index}" data-src="${E(m.url)}" data-name="${E(m.name)}" aria-pressed="${index===0}" aria-label="${E(T('Ver imagen'))} ${index+1}: ${E(m.name)}"><img src="${E(m.url)}" alt="" loading="lazy"><span aria-hidden="true">${index+1}</span></button>`).join('')}</div>` : '';
+    const thumbnailItems=photos.map((m,index) => `<button type="button" class="gallery-thumbnail" data-action="gallery-select" data-index="${index}" data-src="${E(m.url)}" data-name="${E(m.name)}" aria-pressed="${index===0}" aria-label="${E(T('Ver imagen'))} ${index+1}: ${E(m.name)}"><img src="${E(m.url)}" alt="" loading="lazy"><span aria-hidden="true">${index+1}</span></button>`).join('');
+    const thumbnails = photos.length > 1 ? `<div class="gallery-thumbnails" role="group" aria-label="${E(T('Imágenes'))}">${thumbnailItems}</div>` : '';
     return `<section class="gallery-viewer" aria-label="${E(T('Imágenes'))}" data-gallery-index="0"><figure class="gallery-figure"><div class="gallery-stage-shell"><a class="gallery-stage" href="${E(first.url)}" target="_blank" rel="noopener noreferrer" aria-label="${E(T('Ver imagen completa'))}: ${E(first.name)}"><img src="${E(first.url)}" alt="${E(first.name)}"></a>${navigation}</div><figcaption><span class="gallery-position" role="status" aria-live="polite">1 / ${photos.length}</span></figcaption></figure><div class="gallery-viewer-toolbar"><a class="btn small gallery-original" href="${E(first.url)}" target="_blank" rel="noopener noreferrer">${E(T('Ver imagen completa'))} ↗</a></div>${thumbnails}</section>${documents}`;
   }
   function selectGallery(control, index) {
@@ -146,14 +148,17 @@ globalThis.ASCLAContent = function ({ escape: E, icon: I, config: C, T = (text) 
       tags: "Palabras clave",
       moments: "Cápsulas sugeridas",
     };
-    const prose = (text) => typeof text === 'string'
-      ? `<div class="knowledge-prose">${text.trim().split(/\r?\n\s*\r?\n/).map(paragraph => `<p>${E(paragraph).replaceAll('\n','<br>')}</p>`).join('')}</div>`
-      : value(text);
+    const prose = (text) => {
+      if (typeof text !== 'string') return value(text);
+      const paragraphs=text.trim().split(/\r?\n\s*\r?\n/).map(paragraph => `<p>${E(paragraph).replaceAll('\n','<br>')}</p>`).join('');
+      return `<div class="knowledge-prose">${paragraphs}</div>`;
+    };
     const list = (items, kind) => {
       if (!Array.isArray(items)) return prose(items);
       const tag = kind === 'conclusions' ? 'ol' : 'ul';
       const style = ['frameworks','concepts','tags'].includes(kind) ? 'knowledge-tag-list' : 'knowledge-reading-list';
-      return `<${tag} class="${style}">${items.map(entry => `<li>${value(entry)}</li>`).join('')}</${tag}>`;
+      const entries=items.map(entry => `<li>${value(entry)}</li>`).join('');
+      return `<${tag} class="${style}">${entries}</${tag}>`;
     };
     const html = Object.entries(sections)
       .filter(([key]) => p.meta[key]?.length)

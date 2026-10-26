@@ -34,6 +34,8 @@
 .own-comment p { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 #ascla-root {
+  --scroll-thumb: #97a8b8;
+  --scroll-hover: #6a8196;
   font-family:
     Inter,
     ui-sans-serif,
@@ -5180,7 +5182,6 @@ html[data-ascla-theme="dark"] #ascla-root .activity-card:hover{background:var(--
 #ascla-root .member-topic-group .tag{font-size:11px;line-height:1.5;margin:0;padding:4px 7px}
 #ascla-root .profile-summary-person .profile-username{font-size:12px;line-height:1.6;margin:4px 0 12px;color:var(--muted);overflow-wrap:anywhere}
 #ascla-root .profile-username strong{font-weight:600;color:var(--ink)}
-#ascla-root{--scroll-thumb:#97a8b8;--scroll-hover:#6a8196}
 html[data-ascla-theme="dark"] #ascla-root{--scroll-thumb:#526778;--scroll-hover:#7890a4}
 #ascla-root :where(.ascla-sidebar,.modal,.modal-content,.gallery-thumbnails,.recommendation-strip,.admin-tabs,.related-event-results,.topic-options,.chat-list,.chat-messages){scrollbar-width:thin;scrollbar-color:var(--scroll-thumb) transparent}
 #ascla-root .ascla-sidebar{scrollbar-color:#8397bb transparent}

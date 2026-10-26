@@ -4,6 +4,7 @@ use ASCLA\Core\Repositories\Store;
 use ASCLA\Core\Services\{Access,Audit,Knowledge,MicroEvents,Notifications,Content,Discovery,Birthdays,Matching};
 final class Queue
 {
+    private const PUBLISH_REVOKED='Permiso de publicación revocado.';
     private const DEMO_MODE='DEMO MODE';
     public static function boot(): void { add_action('ascla_event_offers',[\ASCLA\Core\Services\Events::class,'refreshWaitlist']); add_action('ascla_jobs',[self::class,'run']); add_action('ascla_jobs',[Birthdays::class,'maybeProcess'],20); add_action('ascla_jobs_continue',[self::class,'run']); add_action('ascla_microevents',[MicroEvents::class,'monthly']); add_action('ascla_micro_tick',[\ASCLA\Core\Services\MicroLifecycle::class,'tick']); add_action('ascla_event_reminder',[\ASCLA\Core\Services\EventReminders::class,'send'],10,2); add_action('ascla_discovery',static fn()=>self::enqueue('discovery',[],0)); add_action('ascla_recommendations',static fn()=>self::enqueue('recommendations',[],0)); }
     public static function enqueue(string $kind,array $payload,int $user=-1): array
@@ -70,7 +71,7 @@ final class Queue
     {
         $row=self::get($id); Access::require($row['status']==='error','Sólo se pueden reintentar trabajos fallidos.',400);
         if (in_array($row['kind'],['transcript','multimedia'],true)) {
-            Access::require(Access::canPublish(),'Permiso de publicación revocado.');
+            Access::require(Access::canPublish(),self::PUBLISH_REVOKED);
             $stored=Store::one('jobs',$id);$payload=json_decode($stored['payload'],true)?:[];
             $post=get_post((int)($payload['resource_id']??0));
             $meta=$post&&$post->post_type==='ascla_resource'&&Content::canRead($post)?(array)get_post_meta($post->ID,'_ascla',true):[];
@@ -82,9 +83,9 @@ final class Queue
     {
         $kind=(string)$row['kind'];$user=(int)$row['user_id'];
         if (!in_array($kind,['microevents','resource_notifications','discovery','recommendations'],true) || $user!==0) { Access::require(Access::member(),'La cuenta ya no tiene acceso.'); }
-        if ($kind==='microevents' && $user!==0) { Access::require(Access::canPublish(),'Permiso de publicación revocado.'); }
+        if ($kind==='microevents' && $user!==0) { Access::require(Access::canPublish(),self::PUBLISH_REVOKED); }
         if ($kind==='social') { Access::require(current_user_can('ascla_moderate'),'Permiso de moderación revocado.'); }
-        if (in_array($kind,['transcript','multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Permiso de publicación revocado.'); }
+        if (in_array($kind,['transcript','multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),self::PUBLISH_REVOKED); }
     }
 
     private static function executeJob(array $row,array $payload): array

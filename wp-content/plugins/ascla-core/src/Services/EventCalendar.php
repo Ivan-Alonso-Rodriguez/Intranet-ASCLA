@@ -52,9 +52,11 @@ final class EventCalendar
         if ($delivery && in_array($delivery['status'],['pending','processing','failed'],true)) {
             return $delivery['status']==='failed'?'failed':'pending';
         }
-        if (self::organizer($id)===$user) { return 'organizer'; }
-        if (get_user_meta($user,'_ascla_google_event_'.$id,true)!=='') { return 'synced'; }
-        return (string)get_user_meta($user,'_ascla_calendar_status_'.$id,true);
+        return match(true) {
+            self::organizer($id)===$user=>'organizer',
+            get_user_meta($user,'_ascla_google_event_'.$id,true)!==''=>'synced',
+            default=>(string)get_user_meta($user,'_ascla_calendar_status_'.$id,true),
+        };
     }
 
     public static function deliver(int $id): bool
@@ -67,19 +69,27 @@ final class EventCalendar
             $active=$post->post_status==='publish' && empty($meta['cancelled']) && strtotime($meta['end']??'')>time();
             $organizer=self::organizer($id);
             if ($organizer && $active) {
-                // A previously personal copy must not coexist with an organizer invitation.
-                if ($organizer!==$user && GoogleOAuth::connected($user) && get_user_meta($user,'_ascla_google_event_'.$id,true)!=='') {
-                    GoogleOAuth::calendar($id,'cancel');
-                }
-                GoogleOAuth::syncOrganizerEvent($id,$organizer,true);
-                WordPressWrites::meta('user',$user,'_ascla_calendar_status_'.$id,'invited');
+                self::deliverInvitation($id,$user,$organizer);
                 return true;
             }
-            if (!GoogleOAuth::connected($user) || $post->post_status!=='publish') { return false; }
-            $save=$active && ($registration['status']??'')==='accepted';
-            GoogleOAuth::calendar($id,$save?'save':'cancel');
-            WordPressWrites::meta('user',$user,'_ascla_calendar_status_'.$id,$save?'synced':'');
-            return true;
+            return self::deliverPersonal($id,$user,$post,$active,$registration);
         });
+    }
+    private static function deliverInvitation(int $id,int $user,int $organizer): void
+    {
+        // A personal copy must not coexist with an organizer invitation.
+        if ($organizer!==$user && GoogleOAuth::connected($user) && get_user_meta($user,'_ascla_google_event_'.$id,true)!=='') {
+            GoogleOAuth::calendar($id,'cancel');
+        }
+        GoogleOAuth::syncOrganizerEvent($id,$organizer,true);
+        WordPressWrites::meta('user',$user,'_ascla_calendar_status_'.$id,'invited');
+    }
+    private static function deliverPersonal(int $id,int $user,\WP_Post $post,bool $active,array $registration): bool
+    {
+        if (!GoogleOAuth::connected($user) || $post->post_status!=='publish') { return false; }
+        $save=$active && ($registration['status']??'')==='accepted';
+        GoogleOAuth::calendar($id,$save?'save':'cancel');
+        WordPressWrites::meta('user',$user,'_ascla_calendar_status_'.$id,$save?'synced':'');
+        return true;
     }
 }

@@ -45,14 +45,12 @@ final class NotificationTarget
         'birthday'=>['Comunidad','users','directorio',self::VIEW_PROFILE_ES],
     ];
 
-    private static function tr(string $es,string $en): string { return Language::text($es,$en); }
-
     public static function view(array $row): array
     {
         try { return self::resolve($row); }
         catch (\Throwable $error) {
             // A corrupt legacy row must not prevent other notices from being read.
-            return ['id'=>(int)($row['id']??0),'kind'=>'unknown','title'=>self::tr('Aviso no disponible','Notification unavailable'),'label'=>self::tr('Aviso no disponible','Notification unavailable'),'description'=>self::tr('Abre la sección para consultar la actividad.','Open the section to review this activity.'),'category'=>'ASCLA','icon'=>'bell','url'=>Catalog::url('intranet'),'action_label'=>self::tr('Ir al inicio','Go to Home'),'available'=>false,'read_at'=>$row['read_at']??null,'created_at'=>$row['created_at']??null];
+            return ['id'=>(int)($row['id']??0),'kind'=>'unknown','title'=>Language::text('Aviso no disponible','Notification unavailable'),'label'=>Language::text('Aviso no disponible','Notification unavailable'),'description'=>Language::text('Abre la sección para consultar la actividad.','Open the section to review this activity.'),'category'=>'ASCLA','icon'=>'bell','url'=>Catalog::url('intranet'),'action_label'=>Language::text('Ir al inicio','Go to Home'),'available'=>false,'read_at'=>$row['read_at']??null,'created_at'=>$row['created_at']??null];
         }
     }
 
@@ -86,8 +84,8 @@ final class NotificationTarget
 
     private static function unavailable(array $view): array
     {
-        $view['title']=self::tr('Este contenido ya no está disponible','This content is no longer available');
-        $view['description']=self::tr('Puede haber sido retirado o haber cambiado sus permisos. Puedes continuar en la sección.','It may have been removed or its permissions may have changed. You can continue in the section.');
+        $view['title']=Language::text('Este contenido ya no está disponible','This content is no longer available');
+        $view['description']=Language::text('Puede haber sido retirado o haber cambiado sus permisos. Puedes continuar en la sección.','It may have been removed or its permissions may have changed. You can continue in the section.');
         $view['available']=false;
         $view['url']=add_query_arg('notice','unavailable',$view['url']);
         return $view;
@@ -96,7 +94,7 @@ final class NotificationTarget
     private static function actor(array $context): string
     {
         $user=get_userdata(absint($context['actor']??0));
-        return $user?Access::excerpt(Profiles::publicName((int)$user->ID),80):self::tr('Un asociado','A member');
+        return $user?Access::excerpt(Profiles::publicName((int)$user->ID),80):Language::text('Un asociado','A member');
     }
 
     private static function post(array $view,array $context): array
@@ -105,7 +103,7 @@ final class NotificationTarget
         if (!$post || in_array($post->post_status,['trash','auto-draft'],true) || !Content::canRead($post)) { return self::unavailable($view); }
         if ($post->post_type==='ascla_contact') { return self::support($view,$context,$post); }
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
-        $actor=empty($meta['chatham'])?self::actor($context):self::tr('Un asociado','A member');
+        $actor=empty($meta['chatham'])?self::actor($context):Language::text('Un asociado','A member');
         $view['title']=NotificationCopy::postTitle($view['kind'],$actor,!empty($meta['chatham']),$view['title']);
         $view['description']=NotificationCopy::postDescription($post,$view['kind'],$context);
         $view['url']=Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$post->ID]);
@@ -126,17 +124,17 @@ final class NotificationTarget
             $view['title']=Language::english()?$actor.' sent a new support request':$actor.' envió una nueva solicitud de soporte';
             $view['description']=$number.' · '.Access::excerpt($post->post_title,160);
             $view['url']=current_user_can('ascla_moderate')?App::adminUrl(['page'=>'ascla-solicitudes']):Catalog::url('contacto');
-            $view['action_label']=self::tr(self::REVIEW_REQUEST_LABEL,'Review request');
+            $view['action_label']=Language::text(self::REVIEW_REQUEST_LABEL,'Review request');
         } elseif ($view['kind']==='support_received') {
-            $view['title']=self::tr('Recibimos tu solicitud de soporte','We received your support request');
+            $view['title']=Language::text('Recibimos tu solicitud de soporte','We received your support request');
             $view['description']=$number.' · '.Access::excerpt($post->post_title,140).' · '.$stateLabel;
             $view['url']=Catalog::url('contacto');
-            $view['action_label']=self::tr('Ver mis solicitudes','View my requests');
+            $view['action_label']=Language::text('Ver mis solicitudes','View my requests');
         } elseif ($view['kind']==='support_update') {
             $view['title']=Language::english()?'Your request '.$number.' is now '.$stateLabel:'Tu solicitud '.$number.' ahora está '.$stateLabel;
             $view['description']=Access::excerpt($post->post_title,180);
             $view['url']=Catalog::url('contacto');
-            $view['action_label']=self::tr('Ver estado','View status');
+            $view['action_label']=Language::text('Ver estado','View status');
         }
         return $view;
     }
@@ -156,12 +154,12 @@ final class NotificationTarget
 
     private static function groupConversationView(array $view,array $conversation,string $actor): array
     {
-        $title=Access::excerpt((string)($conversation['title']??self::tr('Grupo ASCLA','ASCLA group')),100);
+        $title=Access::excerpt((string)($conversation['title']??Language::text('Grupo ASCLA','ASCLA group')),100);
         $view['title']=$view['kind']==='conversation_group'
-            ?self::tr($actor.' te añadió a '.$title,$actor.' added you to '.$title)
-            :self::tr($actor.' escribió en '.$title,$actor.' wrote in '.$title);
-        $view['description']=self::tr('Abre el chat grupal para ver la conversación.','Open the group chat to view the conversation.');
-        $view['action_label']=self::tr('Abrir grupo','Open group');
+            ?Language::text($actor.' te añadió a '.$title,$actor.' added you to '.$title)
+            :Language::text($actor.' escribió en '.$title,$actor.' wrote in '.$title);
+        $view['description']=Language::text('Abre el chat grupal para ver la conversación.','Open the group chat to view the conversation.');
+        $view['action_label']=Language::text('Abrir grupo','Open group');
         return $view;
     }
 
@@ -170,16 +168,16 @@ final class NotificationTarget
         if (empty($context['actor']) && !empty($conversation['other']['id'])) { $actor=self::actor(['actor'=>$conversation['other']['id']]); }
         if ($view['kind']==='conversation_request') {
             $view['title']=Language::english()?$actor.' sent you a conversation request':$actor.' te envió una solicitud de conversación';
-            $view['description']=self::tr('Lee el primer mensaje y decide si deseas aceptar la conversación.','Read the first message and decide whether to accept the conversation.');
-            $view['action_label']=self::tr(self::REVIEW_REQUEST_LABEL,'Review request');
+            $view['description']=Language::text('Lee el primer mensaje y decide si deseas aceptar la conversación.','Read the first message and decide whether to accept the conversation.');
+            $view['action_label']=Language::text(self::REVIEW_REQUEST_LABEL,'Review request');
         } elseif ($view['kind']==='conversation_accepted') {
             $view['title']=Language::english()?$actor.' accepted your conversation request':$actor.' aceptó tu solicitud de conversación';
-            $view['description']=self::tr('Ya puedes continuar la conversación en Mensajería.','You can now continue the conversation in Messages.');
-            $view['action_label']=self::tr('Continuar conversación','Continue conversation');
+            $view['description']=Language::text('Ya puedes continuar la conversación en Mensajería.','You can now continue the conversation in Messages.');
+            $view['action_label']=Language::text('Continuar conversación','Continue conversation');
         } else {
             $view['title']=Language::english()?$actor.' sent you a message':$actor.' te envió un mensaje';
-            $view['description']=self::tr('Continúa la conversación privada en Mensajería.','Continue the private conversation in Messages.');
-            $view['action_label']=self::tr('Leer mensaje','Read message');
+            $view['description']=Language::text('Continúa la conversación privada en Mensajería.','Continue the private conversation in Messages.');
+            $view['action_label']=Language::text('Leer mensaje','Read message');
         }
         return $view;
     }
@@ -214,9 +212,9 @@ final class NotificationTarget
     private static function birthdayProfileView(array $view,array $profile,string $name): array
     {
         $view['title']=Language::english()?'🎉 Today is '.$name.'’s birthday':'🎉 Hoy cumple años '.$name;
-        $view['description']=self::tr('Puedes abrir su perfil y enviarle un saludo desde ASCLA.','Open their profile and send a birthday greeting from ASCLA.');
+        $view['description']=Language::text('Puedes abrir su perfil y enviarle un saludo desde ASCLA.','Open their profile and send a birthday greeting from ASCLA.');
         $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
-        $view['action_label']=self::tr(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN);
+        $view['action_label']=Language::text(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN);
         return $view;
     }
 
@@ -227,14 +225,14 @@ final class NotificationTarget
             'incoming_pending'=>Language::english()?$name.' wants to start a conversation with you':$name.' quiere iniciar una conversación contigo',
             'outgoing_pending'=>Language::english()?'Your conversation request to '.$name.' is pending':'Tu solicitud de conversación a '.$name.' está pendiente',
             'allowed'=>Language::english()?'You can now message '.$name:'Ya puedes conversar con '.$name,
-            default=>self::tr('Solicitud de conversación cerrada','Conversation request closed'),
+            default=>Language::text('Solicitud de conversación cerrada','Conversation request closed'),
         };
-        $view['description']=self::tr('Puedes aceptar la solicitud sin crear una conexión profesional.','You can accept the request without creating a professional connection.');
+        $view['description']=Language::text('Puedes aceptar la solicitud sin crear una conexión profesional.','You can accept the request without creating a professional connection.');
         $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
         $view['action_label']=match($state['state']) {
-            'incoming_pending'=>self::tr('Aceptar o rechazar solicitud','Accept or reject request'),
-            'allowed'=>self::tr('Enviar mensaje','Send message'),
-            default=>self::tr(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN),
+            'incoming_pending'=>Language::text('Aceptar o rechazar solicitud','Accept or reject request'),
+            'allowed'=>Language::text('Enviar mensaje','Send message'),
+            default=>Language::text(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN),
         };
         return $view;
     }
@@ -244,15 +242,15 @@ final class NotificationTarget
         $state=Connections::between(get_current_user_id(),(int)$profile['id']);
         $view['title']=in_array($view['kind'],['connection','connection_accepted'],true)
             ?match($state['state']) {
-                'incoming_pending'=>self::tr($name.' quiere conectar contigo',$name.' wants to connect with you'),
-                'outgoing_pending'=>self::tr('Tu solicitud a '.$name.' está pendiente','Your request to '.$name.' is pending'),
-                'connected'=>self::tr('Ya estás conectado con '.$name,'You are now connected with '.$name),
-                default=>self::tr('Solicitud de conexión cerrada','Connection request closed'),
+                'incoming_pending'=>Language::text($name.' quiere conectar contigo',$name.' wants to connect with you'),
+                'outgoing_pending'=>Language::text('Tu solicitud a '.$name.' está pendiente','Your request to '.$name.' is pending'),
+                'connected'=>Language::text('Ya estás conectado con '.$name,'You are now connected with '.$name),
+                default=>Language::text('Solicitud de conexión cerrada','Connection request closed'),
             }
-            :self::tr('Una conexión para ti: '.$name,'A connection for you: '.$name);
-        $view['description']=self::tr('Conoce su experiencia y encuentra temas para conversar.','Explore their experience and find topics to discuss.');
+            :Language::text('Una conexión para ti: '.$name,'A connection for you: '.$name);
+        $view['description']=Language::text('Conoce su experiencia y encuentra temas para conversar.','Explore their experience and find topics to discuss.');
         $view['url']=Catalog::url('perfil',['member'=>$profile['id']]);
-        $view['action_label']=$state['state']==='incoming_pending'?self::tr('Aceptar o rechazar solicitud','Accept or reject request'):self::tr(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN);
+        $view['action_label']=$state['state']==='incoming_pending'?Language::text('Aceptar o rechazar solicitud','Accept or reject request'):Language::text(self::VIEW_PROFILE_ES,self::VIEW_PROFILE_EN);
         return $view;
     }
 
@@ -263,18 +261,26 @@ final class NotificationTarget
         $payload=json_decode($job['payload'],true)?:[];
         $result=json_decode($job['result']??'null',true)?:[];
         if (!empty($payload['automatic'])) {
-            $id=absint($payload['resource_id']??0);$post=get_post($id);
-            if (!$post||!Content::canRead($post)||!Access::canPublish()) { return self::unavailable($view); }
-            $view['title']=self::tr('No se pudo preparar el resumen del video','The video summary could not be prepared');
-            $view['description']=Access::excerpt($post->post_title.' · '.($job['error']??''),240);
-            $view['url']=Catalog::url('centro-conocimiento',['item'=>$id]);
-            $view['action_label']=self::tr('Ver recurso','View resource');return $view;
+            return self::automaticJob($view,$job,$payload);
         }
+        return self::standardJob($view,$job,$payload,$result);
+    }
+    private static function automaticJob(array $view,array $job,array $payload): array
+    {
+        $id=absint($payload['resource_id']??0);$post=get_post($id);
+        if (!$post||!Content::canRead($post)||!Access::canPublish()) { return self::unavailable($view); }
+        $view['title']=Language::text('No se pudo preparar el resumen del video','The video summary could not be prepared');
+        $view['description']=Access::excerpt($post->post_title.' · '.($job['error']??''),240);
+        $view['url']=Catalog::url('centro-conocimiento',['item'=>$id]);
+        $view['action_label']=Language::text('Ver recurso','View resource');return $view;
+    }
+    private static function standardJob(array $view,array $job,array $payload,array $result): array
+    {
         if ($job['kind']==='answer') {
-            $view['title']=match($job['status']) { 'error'=>self::tr('Tu consulta necesita atención','Your question needs attention'), 'completed'=>self::tr('Tu respuesta del asistente está lista','Your assistant answer is ready'), default=>self::tr('Estamos preparando tu respuesta','We are preparing your answer') };
-            $view['description']=Access::excerpt($payload['question']??self::tr('Consulta al asistente','Assistant question'),180);
+            $view['title']=match($job['status']) { 'error'=>Language::text('Tu consulta necesita atención','Your question needs attention'), 'completed'=>Language::text('Tu respuesta del asistente está lista','Your assistant answer is ready'), default=>Language::text('Estamos preparando tu respuesta','We are preparing your answer') };
+            $view['description']=Access::excerpt($payload['question']??Language::text('Consulta al asistente','Assistant question'),180);
             $view['url']=Catalog::url('asistente',['job'=>(int)$job['id']]);
-            $view['action_label']=$job['status']==='error'?self::tr('Revisar y reintentar','Review and retry'):self::tr('Leer respuesta','Read answer');
+            $view['action_label']=$job['status']==='error'?Language::text('Revisar y reintentar','Review and retry'):Language::text('Leer respuesta','Read answer');
             return $view;
         }
         $id=absint($result['resource_id']??$result['items'][0]['draft_id']??0);
@@ -284,33 +290,28 @@ final class NotificationTarget
     private static function jobResult(array $view,array $job,int $id): array
     {
         if ($job['status']==='completed' && $id) {
-            $view['title']=$job['kind']==='video_metadata'?self::tr('Los datos del video están actualizados','The video data has been updated'):self::tr('Tu contenido está listo para revisar','Your content is ready to review');
+            $view['title']=$job['kind']==='video_metadata'?Language::text('Los datos del video están actualizados','The video data has been updated'):Language::text('Tu contenido está listo para revisar','Your content is ready to review');
             return self::post($view,['id'=>$id]);
         }
-        $view['title']=$job['status']==='error'?self::tr('Una tarea necesita revisión','A task needs review'):self::tr('Tu tarea se ha completado','Your task is complete');
+        $view['title']=$job['status']==='error'?Language::text('Una tarea necesita revisión','A task needs review'):Language::text('Tu tarea se ha completado','Your task is complete');
         $view['description']=Language::english()?(['microevents'=>'Conversation circle proposal','social'=>'Content curation','multimedia'=>'Summary and multimedia derivatives','video_metadata'=>'Video data'][$job['kind']]??'Review the status and result.'):(['microevents'=>'Propuesta de círculos de conversación','social'=>'Curaduría de contenidos','multimedia'=>'Resumen y derivados multimedia','video_metadata'=>'Datos del video'][$job['kind']]??'Revisa el estado y el resultado.');
-        $view['url']=self::activityUrl();
-        $view['action_label']=self::tr('Revisar actividad','Review activity');
+        $view['url']=(current_user_can('ascla_moderate')?App::adminUrl(['page'=>'ascla-ia']):Catalog::url('asistente',['history'=>1]));
+        $view['action_label']=Language::text('Revisar actividad','Review activity');
         return $view;
-    }
-
-    private static function activityUrl(): string
-    {
-        return current_user_can('ascla_moderate')?App::adminUrl(['page'=>'ascla-ia']):Catalog::url('asistente',['history'=>1]);
     }
 
     private static function legacy(array $view): array
     {
         if (in_array($view['kind'],['job','job_error'],true)) {
-            $view['title']=self::tr('Revisa tus consultas y tareas anteriores','Review your previous questions and tasks');
-            $view['description']=self::tr('Este aviso anterior no guardó un resultado concreto. Abre tu historial para encontrarlo.','This older notification did not store a specific result. Open your history to find it.');
-            $view['url']=self::activityUrl();
-            $view['action_label']=self::tr('Abrir historial','Open history');
+            $view['title']=Language::text('Revisa tus consultas y tareas anteriores','Review your previous questions and tasks');
+            $view['description']=Language::text('Este aviso anterior no guardó un resultado concreto. Abre tu historial para encontrarlo.','This older notification did not store a specific result. Open your history to find it.');
+            $view['url']=(current_user_can('ascla_moderate')?App::adminUrl(['page'=>'ascla-ia']):Catalog::url('asistente',['history'=>1]));
+            $view['action_label']=Language::text('Abrir historial','Open history');
         } elseif ($view['kind']==='welcome') {
-            $view['title']=self::tr('Bienvenido a tu comunidad ASCLA','Welcome to your ASCLA community');
-            $view['description']=self::tr('Encuentra encuentros, recursos y nuevas conexiones desde el inicio.','Find events, resources and new connections from Home.');
+            $view['title']=Language::text('Bienvenido a tu comunidad ASCLA','Welcome to your ASCLA community');
+            $view['description']=Language::text('Encuentra encuentros, recursos y nuevas conexiones desde el inicio.','Find events, resources and new connections from Home.');
         } else {
-            $view['description']=self::tr('Aviso anterior sin referencia al contenido. Puedes continuar en su sección.','Older notification without a content reference. You can continue in its section.');
+            $view['description']=Language::text('Aviso anterior sin referencia al contenido. Puedes continuar en su sección.','Older notification without a content reference. You can continue in its section.');
         }
         return $view;
     }

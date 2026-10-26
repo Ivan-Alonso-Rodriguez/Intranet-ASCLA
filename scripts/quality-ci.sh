@@ -4,19 +4,39 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 mkdir -p coverage test-results
-rm -f coverage/source-revision
+rm -f coverage/source-revision coverage/clover.xml coverage/junit.xml coverage/lcov.info coverage/php-summary.txt
 SOURCE_REVISION="$(git rev-parse HEAD)"
 SOURCE_CLEAN="$(git status --porcelain)"
 
 # Each build has its own database, volumes and DNS alias on proxy_net.
-SAFE_BRANCH="$(printf '%s' "${BRANCH_NAME:-ci}" | tr -cs '[:alnum:]_-' '-')"
+SAFE_BRANCH="$(printf '%s' "${ASCLA_BRANCH:-${BRANCH_NAME:-ci}}" | tr -cs '[:alnum:]_-' '-')"
 export COMPOSE_PROJECT_NAME="ascla_ci_${SAFE_BRANCH}_${BUILD_NUMBER:-local}"
 CI_ENV_FILE="$(mktemp "$ROOT/.env.ci.XXXXXX")"
 chmod 600 "$CI_ENV_FILE"
-dc() { docker compose --env-file "$CI_ENV_FILE" "$@"; }
+dc() { docker compose --env-file "$CI_ENV_FILE" -f compose.yaml -f ci/compose.quality.yaml "$@"; }
+collect_php_reports() {
+  for pair in '/tmp/ascla-clover.xml:clover.xml' '/tmp/ascla-coverage.txt:php-summary.txt' '/tmp/ascla-junit.xml:junit.xml'; do
+    if dc exec -T wordpress test -s "${pair%%:*}" >/dev/null 2>&1; then
+      dc cp "wordpress:${pair%%:*}" "coverage/${pair#*:}" || return 1
+    fi
+  done
+  if [ -f coverage/clover.xml ]; then
+    sed -i 's#/var/www/html/wp-content/plugins/ascla-core/#wp-content/plugins/ascla-core/#g' coverage/clover.xml
+  fi
+  if [ -f coverage/junit.xml ]; then
+    sed -i 's#/opt/ascla-tests/#tests/#g; s#/tmp/ascla-tests/#tests/#g' coverage/junit.xml
+  fi
+}
 cleanup() {
-  dc down -v --remove-orphans >/dev/null 2>&1 || true
+  local status=$?
+  trap - EXIT
+  set +e
+  cd /
+  cd "$ROOT" || exit 1
+  collect_php_reports || status=1
+  dc down -v --remove-orphans >/dev/null 2>&1 || status=1
   rm -f "$CI_ENV_FILE"
+  exit "$status"
 }
 trap cleanup EXIT
 docker network inspect proxy_net >/dev/null
@@ -49,7 +69,15 @@ ASCLA_SEED_DATA=true
 EOF_ENV
 
 echo 'Levantando WordPress desechable para pruebas...'
-dc up -d db mailpit wordpress
+dc up -d --build db mailpit wordpress
+# The nested test volume is empty on first creation; populate it from the
+# freshly built image before activation, never from the host bind mount.
+dc exec -T -u 0 wordpress sh -c '
+  set -e
+  test -z "$(ls -A /var/www/html/wp-content/plugins/ascla-core)"
+  cp -a /usr/src/wordpress/wp-content/plugins/ascla-core/. /var/www/html/wp-content/plugins/ascla-core/
+  chown -R www-data:www-data /var/www/html/wp-content/plugins/ascla-core
+'
 
 echo 'Esperando e inicializando WordPress/ASCLA...'
 INSTALADO=no
@@ -74,9 +102,9 @@ fi
 echo 'Verificando contexto local y captura de correo de WP-CLI...'
 dc run --rm cli wp eval '
   if (wp_get_environment_type() !== "local" || !ASCLA\Core\Integrations\Mailer::local()) {
-    WP_CLI::error("WP-CLI debe usar el entorno local y la captura Mailpit del WordPress desechable. Revise WORDPRESS_CONFIG_EXTRA del servicio cli.");
+    WP_CLI::error("WP-CLI debe usar el entorno local y la captura SMTP del WordPress desechable. Revise WORDPRESS_CONFIG_EXTRA del servicio cli.");
   }
-  WP_CLI::success("Contexto WP-CLI local y correo capturado en Mailpit.");
+  WP_CLI::success("Contexto WP-CLI local y correo capturado en el buzón desechable.");
 '
 dc run --rm cli wp ascla seed
 
@@ -84,12 +112,12 @@ echo 'Preparando PHPUnit y PCOV...'
 dc exec -T -u 0 wordpress sh -c '
   set -e
   if ! command -v curl >/dev/null 2>&1; then
-    apt-get update
-    apt-get install -y --no-install-recommends curl ca-certificates
+    if command -v apk >/dev/null 2>&1; then apk add --no-cache curl ca-certificates;
+    else apt-get update && apt-get install -y --no-install-recommends curl ca-certificates; fi
   fi
   if ! php -m | grep -qi "^pcov$"; then
-    apt-get update
-    apt-get install -y --no-install-recommends $PHPIZE_DEPS
+    if command -v apk >/dev/null 2>&1; then apk add --no-cache $PHPIZE_DEPS;
+    else apt-get update && apt-get install -y --no-install-recommends $PHPIZE_DEPS; fi
     # Install the official release archive directly: PECL REST metadata can be unavailable.
     curl -fsSL --retry 3 --connect-timeout 15 --max-time 120 \
       https://pecl.php.net/get/pcov-1.0.12.tgz -o /tmp/ascla-pcov-1.0.12.tgz
@@ -100,6 +128,10 @@ dc exec -T -u 0 wordpress sh -c '
   fi
   php --ri pcov >/dev/null
   test -f /tmp/phpunit.phar || curl -fsSL https://phar.phpunit.de/phpunit-11.phar -o /tmp/phpunit.phar
+  # PHPUnit traverses native storage: musl directory iteration may skip files
+  # on a Windows bind mount. Individual fixture calls can retain the RO mount.
+  test ! -e /tmp/ascla-tests
+  cp -a /opt/ascla-tests /tmp/ascla-tests
 '
 
 echo 'Ejecutando PHPUnit con cobertura para SonarQube...'
@@ -109,22 +141,15 @@ dc exec -T wordpress php \
   -d pcov.enabled=1 \
   -d pcov.directory=/var/www/html/wp-content/plugins/ascla-core \
   /tmp/phpunit.phar \
-  --bootstrap /opt/ascla-tests/bootstrap.php \
+  --bootstrap /tmp/ascla-tests/bootstrap.php \
   --coverage-filter /var/www/html/wp-content/plugins/ascla-core \
   --coverage-clover /tmp/ascla-clover.xml \
   --coverage-text=/tmp/ascla-coverage.txt \
   --log-junit /tmp/ascla-junit.xml \
-  /opt/ascla-tests/php
+  /tmp/ascla-tests/php
 
+collect_php_reports
 dc exec -T wordpress env ASCLA_PLUGIN_ROOT=/var/www/html/wp-content/plugins/ascla-core php /opt/ascla-tests/release-sanity.php
-
-dc cp wordpress:/tmp/ascla-clover.xml coverage/clover.xml
-dc cp wordpress:/tmp/ascla-coverage.txt coverage/php-summary.txt
-dc cp wordpress:/tmp/ascla-junit.xml coverage/junit.xml
-
-# Sonar debe ver rutas relativas al workspace, no rutas internas del contenedor.
-sed -i 's#/var/www/html/wp-content/plugins/ascla-core/#wp-content/plugins/ascla-core/#g' coverage/clover.xml
-sed -i 's#/opt/ascla-tests/#tests/#g' coverage/junit.xml
 
 printf '%s' '{"action":"setup"}' | dc exec -T wordpress php /opt/ascla-tests/statistics-fixture.php > test-results/statistics-fixture.json
 dc run --rm -e ASCLA_E2E_EPHEMERAL=1 cli wp eval-file /opt/ascla-tests/privacy108-fixture.php > test-results/privacy108-fixture.json

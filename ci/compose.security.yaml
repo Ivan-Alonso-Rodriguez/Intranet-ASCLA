@@ -1,0 +1,8 @@
+# Fixture access only in owned disposable QA; application code remains in the image.
+services:
+  wordpress:
+    volumes:
+      - ./tests:/opt/ascla-tests:ro
+  cli:
+    volumes:
+      - ./tests:/opt/ascla-tests:ro

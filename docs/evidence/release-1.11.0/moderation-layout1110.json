@@ -3,7 +3,7 @@
   "date": "2026-10-24T21:52:08.540Z",
   "scope": "Chrome real en Windows; WordPress nativo y página independiente en un laboratorio loopback desechable, con datos sintéticos y decisiones reales. Sin servicios externos.",
   "package_sha256": "2502df127e5aa880431076497a124617895a6c8639b571ac37406d9274e651c8",
-  "package_manifest": "docs/evidence/release-1.11.0/package.json",
+  "package_manifest": "docs/evidence/release-1.11.0/package-moderation-layout.json",
   "previous_package_manifest": "docs/evidence/release-1.11.0/package-summary-review.json",
   "phpunit": {
     "name": "CLI Arguments",

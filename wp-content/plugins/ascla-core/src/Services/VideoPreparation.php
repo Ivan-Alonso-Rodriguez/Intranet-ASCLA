@@ -43,11 +43,7 @@ final class VideoPreparation
     }
     public static function schedule(int $id): void
     {
-        $actor=get_current_user_id();
-        if (!$actor) {
-            $candidates=array_merge([(int)get_post_field('post_author',$id)],array_map('intval',get_users(['capability'=>'ascla_configure','fields'=>'ID'])));
-            foreach ($candidates as $candidate) { if (Access::member($candidate)&&(user_can($candidate,'ascla_manage')||user_can($candidate,'ascla_publish'))) { $actor=$candidate;break; } }
-        }
+        $actor=self::automaticActor($id);
         if (!$actor||!Access::member($actor)||(!user_can($actor,'ascla_manage')&&!user_can($actor,'ascla_publish'))) { return; }
         Store::atomic('content:'.$id,static function()use($id,$actor){
             $post=get_post($id);$meta=(array)get_post_meta($id,'_ascla',true);
@@ -57,6 +53,16 @@ final class VideoPreparation
             $job=Queue::enqueue('multimedia',['resource_id'=>$id,'automatic'=>true,'source_signature'=>$signature],$actor);
             update_post_meta($id,self::META,['signature'=>$signature,'job_id'=>$job['id'],'status'=>'pending','error'=>'']);
         });
+    }
+    private static function automaticActor(int $id): int
+    {
+        $actor=get_current_user_id();
+        if ($actor) { return $actor; }
+        $candidates=array_merge([(int)get_post_field('post_author',$id)],array_map('intval',get_users(['capability'=>'ascla_configure','fields'=>'ID'])));
+        foreach ($candidates as $candidate) {
+            if (Access::member($candidate)&&(user_can($candidate,'ascla_manage')||user_can($candidate,'ascla_publish'))) { return $candidate; }
+        }
+        return 0;
     }
     public static function run(int $id,int $job,string $signature): array
     {

@@ -51,7 +51,11 @@ final class ExecutiveAdministrationTest extends TestCase
         }
         self::assertSame($before,get_option('ascla_settings'));
         foreach(['ascla_configure','manage_options','create_users','edit_users','delete_users','promote_users','install_plugins'] as $cap) { self::assertFalse(current_user_can($cap),$cap); }
-        self::assertSame(403,$this->api('POST','users',['username'=>'exec_native_denied','email'=>'exec_native_denied@example.invalid','password'=>wp_generate_password(30),'roles'=>['administrator']],true)->get_status());
+        // This assertion exercises authorization. Random passwords can fail the
+        // character/sequence policy before the permission callback is reached.
+        $password='R7!mZ2@pV8#kT6%wQ4&nH9*eJ5+sL3';
+        self::assertSame('',ASCLA\Core\Services\CredentialPolicy::error($password,(object)['user_login'=>'exec_native_denied','user_email'=>'exec_native_denied@example.invalid']));
+        self::assertSame(403,$this->api('POST','users',['username'=>'exec_native_denied','email'=>'exec_native_denied@example.invalid','password'=>$password,'roles'=>['administrator']],true)->get_status());
         self::assertSame(403,$this->api('POST','users/'.$this->member,['roles'=>['administrator']],true)->get_status());
         get_userdata($this->executive)->add_cap('ascla_configure');self::assertFalse(current_user_can('ascla_configure'));
         self::assertSame(400,$this->api('POST','admin/users/'.$this->member,['email'=>get_userdata($this->member)->user_email,'role'=>'administrator','first_name'=>'No elevar'])->get_status());

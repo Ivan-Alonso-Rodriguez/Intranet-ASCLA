@@ -15,9 +15,7 @@ final class ContentMeta
         self::texts($data,$input,$editorial);
         if ($type==='contact') { SupportCategories::validate($data,$input); }
         self::urls($data,$input);
-        if (($data['video_id']??'')!==$previousVideo && ($data['transcript_status']??'')==='supadata') {
-            foreach (['transcript','transcript_status','transcript_video_id','transcript_mode','transcript_language','transcript_checked_at','transcript_error'] as $field) { unset($data[$field]); }
-        }
+        self::clearPreviousCaptions($data,$previousVideo);
         if ($editorial && isset($input['chatham'])) { $data['chatham']=rest_sanitize_boolean($input['chatham']); }
         elseif (!isset($data['chatham'])) { $data['chatham']=Settings::get()['chatham_default']; }
         if ($type==='ally') { Allies::metadata($data,$input); }
@@ -33,6 +31,12 @@ final class ContentMeta
         $data['thumbnail_url']=\ASCLA\Core\Integrations\YouTubeVideoProvider::thumbnail($data['video_id']??'');
         if ($type==='resource') { self::resource($data);$data=VideoTranscripts::withDuration($data); }
         return $data;
+    }
+    private static function clearPreviousCaptions(array &$data,mixed $previousVideo): void
+    {
+        if (($data['video_id']??'')!==$previousVideo && ($data['transcript_status']??'')==='supadata') {
+            foreach (['transcript','transcript_status','transcript_video_id','transcript_mode','transcript_language','transcript_checked_at','transcript_error'] as $field) { unset($data[$field]); }
+        }
     }
 
     private static function texts(array &$data,array $input,bool $editorial): void

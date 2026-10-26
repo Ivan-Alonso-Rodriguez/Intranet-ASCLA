@@ -25,4 +25,13 @@ async function waitForHome(page) {
   require('node:assert/strict').equal(state.page, state.administrative ? 'admin' : 'intranet');
   await page.locator(state.administrative ? '.admin-workspace #admin-panel' : '.hero').waitFor();
 }
-module.exports = {startCoverage, stopCoverage, waitForHome};
+async function waitForNativeLogin(page) {
+  await page.waitForLoadState('load');
+  // WordPress schedules wp_attempt_focus() after 200 ms. HTML autofocus can
+  // happen earlier, so focus alone does not prove that its callback has run.
+  await page.waitForFunction(() => {
+    const navigation=performance.getEntriesByType('navigation')[0];
+    return navigation?.domContentLoadedEventEnd>0 && performance.now()-navigation.domContentLoadedEventEnd>=250;
+  });
+}
+module.exports = {startCoverage, stopCoverage, waitForHome, waitForNativeLogin};

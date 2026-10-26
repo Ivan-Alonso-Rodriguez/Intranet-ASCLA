@@ -1,10 +1,10 @@
 /* Real WordPress submissions, legacy nested replies and privacy aliases on a disposable loopback site. */
 const {chromium}=require('playwright');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
-const fixture=JSON.parse(fs.readFileSync('test-results/sonar-preparation/release1110-users.json','utf8'));
-const data=JSON.parse(fs.readFileSync('test-results/sonar-preparation/comment-threads1110-fixture.json','utf8'));
+const fixture=JSON.parse(fs.readFileSync(process.env.ASCLA_BASE_FIXTURE||'test-results/sonar-preparation/release1110-users.json','utf8'));
+const data=JSON.parse(fs.readFileSync(process.env.ASCLA_COMMENT_FIXTURE||'test-results/sonar-preparation/comment-threads1110-fixture.json','utf8'));
 if(fixture.origin!=='ascla-local-test-users'||data.origin!=='comment-threads1110-local-fixture'||!['127.0.0.1','localhost'].includes(new URL(fixture.base).hostname))throw Error('Disposable loopback required');
-const out=path.resolve('test-results/comment-replies1110');fs.mkdirSync(out,{recursive:true});
+const out=path.resolve(process.env.ASCLA_COMMENT_OUT||'test-results/comment-replies1110');fs.mkdirSync(out,{recursive:true});
 const checks=[],scans=[],errors=[],contexts=[];let browser,page;
 const pass=name=>{checks.push(name);console.log('PASS '+name);};
 async function api(p,route,body,method){return p.evaluate(async({route,body,method})=>{const r=await fetch(ASCLA.api+route,{method:method||(body?'POST':'GET'),headers:{'X-WP-Nonce':ASCLA.nonce,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});return{status:r.status,body:await r.json()};},{route,body,method});}

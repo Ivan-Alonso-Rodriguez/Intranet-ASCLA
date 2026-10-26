@@ -2,6 +2,16 @@
 
 Revisión documental: 23 de octubre de 2026. Plugin **1.11.0**, esquema **15**. Este documento describe el estado del código y la evidencia por etapa. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado.
 
+## Validación completa de QA y UAT del 26 de octubre de 2026
+
+La [corrección posterior de imágenes](docs/evidence/release-1.11.0/trivy-remediation1110.json) elimina los 379 hallazgos bloqueantes anteriores mediante runtimes Alpine actualizados y un buzón MailDev con dependencias corregidas. Trivy analiza las cuatro imágenes reales dentro de Jenkins y aprueba con cero hallazgos, sin exclusiones ni cambios a los umbrales. Se conservan WordPress, PHP, Apache y la rama de MariaDB; se comprueban la migración de datos, el correo y la regresión del plugin. Informe local: `test-results/trivy-remediation/index.html`.
+
+La [validación anterior de QA y UAT](docs/evidence/release-1.11.0/full-qa1110.json) ejecutó 810 pruebas PHP por entorno, las suites de navegador y SonarQube real del curso: ambos Quality Gates aprobaron con 0 incidencias abiertas y cobertura global de 91.2 %. En esa ejecución anterior Trivy y ZAP bloquearon el despliegue; ese resultado histórico no describe las imágenes corregidas. No se atribuye un nuevo análisis remoto de SonarQube a la corrección de infraestructura ni se acredita despliegue remoto o aceptación humana de UAT.
+
+## Primera validación de seguridad de Jenkins del 25 de octubre de 2026
+
+El Jenkinsfile añade construcción de imágenes, Trivy bloqueante, reportes HTML/JSON, retención de la última ejecución incluyendo un éxito anterior, y limpieza final. En QA/UAT se mantienen las pruebas, SonarQube y Quality Gate y se ejecuta ZAP/CSP en un entorno HTTPS desechable con la imagen construida. Solo LOW se admite en Trivy; errores, UNKNOWN y reportes incompletos también bloquean. La [guía de CI](ci/README.md) distingue los requisitos del servidor del curso del laboratorio local, y no atribuye a sus ejecuciones la evidencia histórica de SonarQube o del hosting. El plugin y su esquema no cambian por esta integración. La [evidencia de Jenkins/Trivy](docs/evidence/release-1.11.0/jenkins-trivy1110.json) acredita el build local 3 bloqueado, HTML/JSON archivados y retención SUCCESS → FAILURE; el ZAP aislado de aquella primera revisión pasó por separado. Ese registro histórico no acredita el análisis posterior de SonarQube ni el Jenkins externo.
+
 ## Versión 1.11.0: interacción y calendario
 
 La [revisión de claridad y moderación](docs/evidence/release-1.11.0/summary-review1110.json) reorganiza el bloque de participación sin cambiar fórmulas ni permisos. Conserva las seis cifras y distingue reservas, personas únicas, personas recurrentes, asistencias y promedio con listas verificadas. La cobertura se presenta una sola vez dentro del resumen. El caso cinco eventos/seis reservas/cero asistencias explica las cuatro listas pendientes. La cola editorial mantiene borradores, decisiones con motivo y controles de acceso; Pendiente de revisión usa las variables neutras del tema en toda la interfaz.
@@ -88,7 +98,7 @@ Se corrigen #573–#576: Hub, foros/temas, Galería, recursos, Eventos y Aliados
 
 Los foros tienen tarjetas visibles con descripción, autor y acceso. La portada de Galería abre el contenido con clic o teclado. La [evidencia de esta regresión](docs/evidence/release-1.10.9/drafts-ui109.json) registra **76 pruebas PHP dirigidas/859 aserciones**, **diez controles de navegador** y **49 controles portables** aprobados; no es una nueva suite completa. El ZIP de esa etapa contenía 201 archivos y 2.056 mensajes por idioma; su huella se conserva en el resumen, separada del [manifiesto actual](docs/evidence/release-1.10.9/package.json). Se retiraron el entorno temporal y sus credenciales. No se genera cobertura ni se repite ZAP; la aceptación remota, UAT y el Quality Gate mantienen sus validaciones pendientes. Los estados y porcentajes de los 302 requisitos no aumentan por esta corrección documental.
 
-Las copias revisadas del [dashboard de seguridad](pruebas/seguridad/dashboard.html) conservan el análisis local del 19 de octubre y omiten datos de sesión. **La integración de ZAP/CSP en Jenkins sobre `qa` sigue pendiente**, incluidos archivado, retención de un build y limpieza del workspace. El Jenkinsfile actual no acredita esos controles.
+Las copias revisadas del [dashboard de seguridad](pruebas/seguridad/dashboard.html) conservan el análisis local del 19 de octubre y omiten datos de sesión. Aquel registro no acredita Jenkins. La [validación posterior de QA/UAT](docs/evidence/release-1.11.0/full-qa1110.json) sí comprueba la integración real de ZAP/CSP, el archivado, la retención del último build y la limpieza; conserva su resultado bloqueante sin excepciones.
 
 ## Perfil, mensajería y retiro editorial del 20 de octubre de 2026
 

@@ -233,10 +233,7 @@ final class ContentPublishing
     {
         [$title,$body,$meta]=EditorialPayload::reader($post,$meta,$title,$body);
         if ($post->post_type==='ascla_ally') { $meta['ally_status']=Allies::state($post,$meta); }
-        if ($post->post_type==='ascla_event' && !Content::canEdit($post)) {
-            $accepted=Store::count('registrations',"event_id=%d AND user_id=%d AND status='accepted'",[$post->ID,get_current_user_id()]);
-            if (!$accepted || !empty($meta['cancelled'])) { unset($meta['url']); }
-        }
+        self::eventReaderMeta($post,$meta);
         if (!current_user_can('ascla_moderate') && !Access::canPublish()) {
             unset($meta['transcript'],$meta['identities'],$meta['invitees'],$meta['moderation'],$meta['transcript_error'],$meta['transcript_mode'],$meta['transcript_checked_at'],$meta['transcript_video_id'],$meta['transcript_language']);
         }
@@ -257,6 +254,13 @@ final class ContentPublishing
     }
 
 
+    private static function eventReaderMeta(\WP_Post $post,array &$meta): void
+    {
+        if ($post->post_type==='ascla_event' && !Content::canEdit($post)) {
+            $accepted=Store::count('registrations',"event_id=%d AND user_id=%d AND status='accepted'",[$post->ID,get_current_user_id()]);
+            if (!$accepted || !empty($meta['cancelled'])) { unset($meta['url']); }
+        }
+    }
     private static function recommendedListing(array $args,int $page,array $filter): array
     {
         $perPage=max(1,min(100,(int)($filter['per_page']??18)));
