@@ -29,7 +29,7 @@ body.ascla-frontend-login {
   box-shadow: none;
 }
 .ascla-frontend-login .wp-hide-pw .dashicons { vertical-align: middle; }
-.ascla-frontend-login .hide-if-no-js { display: none; }
+.ascla-frontend-login .wp-pwd .wp-hide-pw.hide-if-no-js { display: none; }
 .ascla-frontend-login #login .message,
 .ascla-frontend-login #login .notice { border-left: 4px solid #72aee6; }
 .ascla-frontend-login #login #login_error { border-left: 4px solid #d63638; }

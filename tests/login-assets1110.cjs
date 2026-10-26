@@ -34,6 +34,9 @@ const pass=label=>{checks.push(label);console.log('PASS '+label);};
   views.push({width,theme,locale,styles:styles.map(({id,path})=>({id,path})),axe_violations:0});await context.close();
  }
  pass('Ocho vistas conservan diseño, idioma, teclado, mostrar contraseña, Recordarme y accesibilidad A/AA');
+ const withoutScripts=await browser.newContext({javaScriptEnabled:false}),plain=await withoutScripts.newPage();
+ await plain.goto(base+'/login/');assert.equal(await plain.locator('.wp-hide-pw').isVisible(),false);assert.equal(await plain.locator('#user_pass').getAttribute('type'),'password');await withoutScripts.close();
+ pass('Sin JavaScript se conserva el campo de contraseña y se oculta el control que requiere scripts');
  for(const [index,name] of ['Administrador','Ana','Bruno','Carla'].entries()){
   const context=await browser.newContext({viewport:{width:index%2?390:1440,height:1000}}),page=await context.newPage(),actor=fixture.actors[name];
   await page.goto(base+'/login/');await page.locator('#user_login').fill(actor.login);await page.locator('#user_pass').fill(actor.password);
