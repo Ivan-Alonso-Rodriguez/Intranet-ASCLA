@@ -1,7 +1,7 @@
 from http.server import BaseHTTPRequestHandler,HTTPServer
 from pathlib import Path
 import json,secrets,subprocess,threading,time,requests
-out=Path('/results');out.mkdir(exist_ok=True);key=secrets.token_hex(24);timestamp=int(time.time())
+out=Path('/results');out.mkdir(exist_ok=True);(out/'summary.json').unlink(missing_ok=True);key=secrets.token_hex(24);timestamp=int(time.time())
 class Fixture(BaseHTTPRequestHandler):
     def do_GET(self):
         body=json.dumps({'issuedAt':timestamp}).encode();self.send_response(200)
@@ -23,7 +23,7 @@ try:
         except (requests.RequestException,ValueError,RuntimeError):time.sleep(1)
     else:raise TimeoutError('Control engine did not start')
     scanners=api('pscan/view/scanners')['scanners'];rule=next(item for item in scanners if str(item['id'])=='10096')
-    assert str(rule['enabled']).lower()=='true'
+    if str(rule['enabled']).lower()!='true':raise RuntimeError('Timestamp rule is disabled')
     api('core/action/accessUrl',{'url':'http://127.0.0.1:9123/fixture.json'})
     finding=None
     for attempt in range(60):
@@ -31,7 +31,7 @@ try:
         finding=next((alert for alert in alerts if str(alert.get('pluginId'))=='10096' and alert.get('evidence')==str(timestamp)),None)
         if finding:break
         time.sleep(1)
-    assert finding,'The real timestamp was not detected'
+    if not finding:raise RuntimeError('The real timestamp was not detected')
     result={'status':'PASS','engine_version':version,'rule':'10096','rule_enabled':True,'real_timestamp_detected':True,'native_risk':finding['risk'],'evidence':finding['evidence'],'application_scan_modified':False}
     (out/'summary.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 except Exception as error:
