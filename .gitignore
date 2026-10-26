@@ -207,3 +207,4 @@ __pycache__/
 !/docs/evidence/release-1.11.0/upload-limit-moderation-layout.json
 !/docs/evidence/release-1.11.0/full-qa1110.json
 !/docs/evidence/release-1.11.0/trivy-remediation1110.json
+!/docs/evidence/release-1.11.0/package-trivy-remediation.json
