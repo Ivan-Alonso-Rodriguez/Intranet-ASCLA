@@ -6,6 +6,8 @@ El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y prueba
 
 ### 1.11.0 — Calendario e interacción
 
+El acceso comunitario utiliza un layout propio en lugar del CSS del login administrativo de WordPress. Mantiene las primitivas de formulario y las dependencias originales de recuperación/login nativo; mejora el contraste del botón principal en oscuro. Se añade regresión de estilos, acceso y accesibilidad y un control positivo independiente de la regla de timestamps de ZAP. El escáner y sus umbrales no se modifican.
+
 La [corrección posterior de imágenes](docs/evidence/release-1.11.0/trivy-remediation1110.json) elimina los 379 hallazgos bloqueantes anteriores mediante runtimes Alpine actualizados y un buzón MailDev con dependencias corregidas. Trivy analiza las cuatro imágenes reales dentro de Jenkins y aprueba con cero hallazgos, sin exclusiones ni cambios a los umbrales. Se conservan WordPress, PHP, Apache y la rama de MariaDB; se comprueban la migración de datos, el correo y la regresión del plugin. Informe local: `test-results/trivy-remediation/index.html`.
 
 La [validación anterior de QA y UAT](docs/evidence/release-1.11.0/full-qa1110.json) ejecutó 810 pruebas PHP por entorno, las suites de navegador y SonarQube real del curso: ambos Quality Gates aprobaron con 0 incidencias abiertas y cobertura global de 91.2 %. En esa ejecución anterior Trivy y ZAP bloquearon el despliegue; ese resultado histórico no describe las imágenes corregidas. No se atribuye un nuevo análisis remoto de SonarQube a la corrección de infraestructura ni se acredita despliegue remoto o aceptación humana de UAT.

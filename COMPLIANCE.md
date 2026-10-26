@@ -10,6 +10,8 @@ La [validación anterior de QA y UAT](docs/evidence/release-1.11.0/full-qa1110.j
 
 ## Primera validación de seguridad de Jenkins del 25 de octubre de 2026
 
+La corrección posterior del acceso comunitario separa su presentación de la del login nativo: reutiliza formularios y botones, pero define su propio layout. No carga las paletas administrativas ajenas a ese formulario. Los archivos originales de WordPress y las reglas de ZAP permanecen intactos. La regresión comprueba dependencias, otros contextos, accesibilidad y acceso real; el control positivo independiente exige que ZAP continúe detectando timestamps reales. La decisión final depende de repetir el análisis completo y no se sustituye por ese control positivo.
+
 El Jenkinsfile añade construcción de imágenes, Trivy bloqueante, reportes HTML/JSON, retención de la última ejecución incluyendo un éxito anterior, y limpieza final. En QA/UAT se mantienen las pruebas, SonarQube y Quality Gate y se ejecuta ZAP/CSP en un entorno HTTPS desechable con la imagen construida. Solo LOW se admite en Trivy; errores, UNKNOWN y reportes incompletos también bloquean. La [guía de CI](ci/README.md) distingue los requisitos del servidor del curso del laboratorio local, y no atribuye a sus ejecuciones la evidencia histórica de SonarQube o del hosting. El plugin y su esquema no cambian por esta integración. La [evidencia de Jenkins/Trivy](docs/evidence/release-1.11.0/jenkins-trivy1110.json) acredita el build local 3 bloqueado, HTML/JSON archivados y retención SUCCESS → FAILURE; el ZAP aislado de aquella primera revisión pasó por separado. Ese registro histórico no acredita el análisis posterior de SonarQube ni el Jenkins externo.
 
 ## Versión 1.11.0: interacción y calendario
