@@ -11,14 +11,20 @@ async function goto(p,route){await p.goto(base+'/'+route);await p.locator('#page
 async function login(name,password){const p=await browser.newPage({viewport:{width:1280,height:900}});p.on('pageerror',e=>errors.push(e.message));await p.goto(base+'/wp-login.php');await p.locator('#user_login').fill(name);await p.locator('#user_pass').fill(password);await Promise.all([p.waitForNavigation({waitUntil:'domcontentloaded'}),p.locator('#wp-submit').click()]);await goto(p,'intranet/');return p;}
 async function locale(value){await admin.evaluate(async locale=>{const r=await fetch(location.href,{method:'POST',body:new URLSearchParams({_ascla_change_language:'1',_ascla_locale:locale,_ascla_language_nonce:ASCLA.languageNonce})});if(!r.ok)throw Error('Language update failed');},value);assert.equal((await ok(admin,'native:users/me?context=edit')).locale,value);}
 function pass(name){checks.push(name);console.log('PASS '+name);}
+// Only fixture writes may wait for the real server window. Test assertions
+// continue to use api()/ok() directly, so unexpected 429 responses still fail.
+async function fixtureRequest(p,route,body,method){
+ let result=await api(p,route,body,method);
+ if(result.status===429){
+  const wait=61000-Date.now()%60000;
+  console.log('Fixture write reached the API write limit; waiting '+Math.ceil(wait/1000)+'s before one retry.');
+  await new Promise(resolve=>setTimeout(resolve,wait));result=await api(p,route,body,method);
+ }
+ return result;
+}
 async function removeFixture(route,label){
  try{
-  let result=await api(admin,route,null,'DELETE');
-  if(result.status===429){
-   const wait=61000-Date.now()%60000;
-   console.log('Fixture cleanup reached the API write limit; waiting '+Math.ceil(wait/1000)+'s before retrying.');
-   await new Promise(resolve=>setTimeout(resolve,wait));result=await api(admin,route,null,'DELETE');
-  }
+  const result=await fixtureRequest(admin,route,null,'DELETE');
   assert.equal(result.status,200,'Fixture cleanup failed: '+label+' '+route+' HTTP '+result.status+' '+(result.body?.message||''));
  }catch(error){errors.push(error.message);console.error(error.message);process.exitCode=1;}
 }
@@ -30,7 +36,7 @@ async function scan(p,name){await p.addScriptTag({path:require.resolve('axe-core
  browser=await chromium.launch({headless:true});admin=await login('ascla.admin',env.ASCLA_ADMIN_PASSWORD);originalLocale=(await ok(admin,'native:users/me?context=edit')).locale;await locale('es_ES');
  const suffix=crypto.randomBytes(4).toString('hex'),prefix='Eventos108 '+suffix,upcoming=[],past=[],start=Date.now()+3*86400000;
  for(const role of ['ascla_member','ascla_executive']){const username='events108_'+role+'_'+suffix,password='J9!kR4#'+crypto.randomBytes(18).toString('base64url');const u=await ok(admin,'native:users',{username,password,email:username+'@example.invalid',roles:[role]});users.push(u.id);const p=await login(username,password);if(role==='ascla_member')member={...u,page:p};else executive={...u,page:p};}
- async function event(p,title,at,extra={},status='publish'){const item=await ok(p,'content/event',{title,body:'Encuentro de prueba de paginación',status,meta:{start:new Date(at).toISOString(),end:new Date(at+3600000).toISOString(),chatham:false,...extra}});posts.push(item.id);return item;}
+ async function event(p,title,at,extra={},status='publish'){const response=await fixtureRequest(p,'content/event',{title,body:'Encuentro de prueba de paginación',status,meta:{start:new Date(at).toISOString(),end:new Date(at+3600000).toISOString(),chatham:false,...extra}});assert.ok(response.status>=200&&response.status<300,'Fixture event creation failed: HTTP '+response.status+' '+(response.body?.message||''));const item=response.body;posts.push(item.id);return item;}
  for(let i=0;i<23;i++)upcoming.push((await event(admin,prefix+' próximo '+i,start,{modality:'Presencial'})).id);
  for(let i=0;i<19;i++)past.push((await event(admin,prefix+' anterior '+i,Date.now()-3*86400000)).id);
  const pending=await event(admin,prefix+' borrador ajeno',start,{},'draft');assert.equal(pending.status,'draft');
