@@ -4,7 +4,11 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
-### 1.11.0 — Calendario e interacción
+## 1.11.0 — Calendario e interacción
+
+Revisión documental del 26 de octubre: el README vuelve a servir como entrada breve al proyecto; los detalles de cambios permanecen en este historial y en Cumplimiento. La guía de CI se incorpora al inventario de nueve Markdown y al verificador de enlaces, privacidad y exclusiones. Se actualizan las referencias al paquete 1.11.0 y al pipeline implementado, sin generar pruebas ni cobertura nuevas.
+
+Se sincronizan las huellas de tres guías de la entrega y se registra la ausencia de siete originales nativos históricos cuyo alias privado fue reutilizado; el original de navegador aún coincide. Se conservan las huellas originales y todos los reportes publicados; el verificador distingue ausencia de original y modificación de un original retenido. Cuatro pruebas de esa validación comprueban huellas, ausencia declarada y límites de rutas, sin recoger cobertura ni repetir pruebas del producto.
 
 El acceso comunitario utiliza un layout propio en lugar del CSS del login administrativo de WordPress. Mantiene las primitivas de formulario y las dependencias originales de recuperación/login nativo; mejora el contraste del botón principal en oscuro. Se añade regresión de estilos, acceso y accesibilidad y un control positivo independiente de la regla de timestamps de ZAP. El escáner y sus umbrales no se modifican.
 
@@ -110,11 +114,12 @@ Validación local: **76 pruebas PHP y 859 aserciones**, más **10 controles de n
 
 ## Resumen de versiones
 
-> Ordenado de la versión más reciente a la más antigua. La versión vigente del proyecto es **1.10.9**.
+> Ordenado de la versión más reciente a la más antigua. La versión vigente del proyecto es **1.11.0**.
 
 | Versión | Enfoque principal | Estado |
 |---|---|---|
-| 1.10.9 | Carga, perfil, Directorio, administración, IA, retiro editorial y seguridad/ZAP | **Actual** |
+| 1.11.0 | Calendario, comentarios, lectores, transcripciones, administración y CI con Trivy/ZAP | **Actual** |
+| 1.10.9 | Carga, perfil, Directorio, administración, IA, retiro editorial y seguridad/ZAP | Anterior |
 | 1.10.8 | Filtros/paginación de eventos, asistencia y validación estricta de entrada | Anterior |
 | 1.10.7 | Directorio, programación editorial, microeventos, Contacto, reacciones, gettext y transacciones | Anterior |
 | 1.10.6 | Adecuación al análisis ASCLA, cierre QA, seguridad, membresías y auditoría esquema 14 | Anterior |

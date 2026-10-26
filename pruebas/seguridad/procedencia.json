@@ -5,39 +5,46 @@
   "source_sha256": "0b737f5511b599b06f300c3ba17e85d7dd7aa2822f0b1809d1e7246807e8e1a6",
   "report": "seguridad/dashboard.html",
   "retention": "latest-only",
-  "note": "Copias derivadas y revisadas; los HTML/JSON nativos completos permanecen privados. Se preservan las fechas, los estados y los conteos originales.",
+  "note": "Copias derivadas y revisadas; los HTML/JSON nativos completos permanecen privados. Se preservan las fechas, los estados y los conteos originales. Revisión del 26 de octubre: el alias privado security-latest se renovó; siete originales nativos de esta exportación ya no están disponibles; el original de navegador aún coincide. Se conservan sus huellas y las copias publicadas, sin atribuirles una nueva ejecución.",
   "sources": [
     {
-      "source_relative": "test-results/security-latest/security-summary.json",
-      "source_sha256": "8b97a0c6d7b9a837ff72d0273c06200e592ede0a04347f81d8d5826aa2616ef6"
+      "source_sha256": "8b97a0c6d7b9a837ff72d0273c06200e592ede0a04347f81d8d5826aa2616ef6",
+      "source_location_at_export": "test-results/security-latest/security-summary.json",
+      "native_original_available": false
     },
     {
-      "source_relative": "test-results/security-latest/source-manifest.json",
-      "source_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435"
+      "source_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435",
+      "source_location_at_export": "test-results/security-latest/source-manifest.json",
+      "native_original_available": false
     },
     {
-      "source_relative": "test-results/security-latest/csp-validation.json",
-      "source_sha256": "8e74b37c2700d9c218d4372e0c8580b7f2c796e75b7c357049bd4695ce368a5d"
+      "source_sha256": "8e74b37c2700d9c218d4372e0c8580b7f2c796e75b7c357049bd4695ce368a5d",
+      "source_location_at_export": "test-results/security-latest/csp-validation.json",
+      "native_original_available": false
     },
     {
-      "source_relative": "test-results/security-latest/browser-security.json",
-      "source_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1"
+      "source_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1",
+      "source_relative": "test-results/security-latest/browser-security.json"
     },
     {
-      "source_relative": "test-results/security-latest/frontend-result.json",
-      "source_sha256": "e97e4c24d66246e5ff0e4fd54596e3741ec8bb8e45ce9900cbdc9110e2ff5701"
+      "source_sha256": "e97e4c24d66246e5ff0e4fd54596e3741ec8bb8e45ce9900cbdc9110e2ff5701",
+      "source_location_at_export": "test-results/security-latest/frontend-result.json",
+      "native_original_available": false
     },
     {
-      "source_relative": "test-results/security-latest/frontend-zap.json",
-      "source_sha256": "564ab846a5850d3f994fd24d0bc95cc37ba15e86efe4ea428fb162b859b4fdf6"
+      "source_sha256": "564ab846a5850d3f994fd24d0bc95cc37ba15e86efe4ea428fb162b859b4fdf6",
+      "source_location_at_export": "test-results/security-latest/frontend-zap.json",
+      "native_original_available": false
     },
     {
-      "source_relative": "test-results/security-latest/backend-result.json",
-      "source_sha256": "789f13961522943c07c15072a17c7603f6b7dfd70d3191e2065640e363959f33"
+      "source_sha256": "789f13961522943c07c15072a17c7603f6b7dfd70d3191e2065640e363959f33",
+      "source_location_at_export": "test-results/security-latest/backend-result.json",
+      "native_original_available": false
     },
     {
-      "source_relative": "test-results/security-latest/backend-zap.json",
-      "source_sha256": "cf45215d55075a5724140ba0e7b921aa499fcb0351263994ceac175c76be358c"
+      "source_sha256": "cf45215d55075a5724140ba0e7b921aa499fcb0351263994ceac175c76be358c",
+      "source_location_at_export": "test-results/security-latest/backend-zap.json",
+      "native_original_available": false
     }
   ],
   "files": [
@@ -223,5 +230,15 @@
         "sha256": "83d7c8c73669f7cd63db8c85f91ced516f3367afcef4a5295353a8f13d447915"
       }
     ]
+  },
+  "native_source_retention": {
+    "review_date": "2026-10-26",
+    "available": false,
+    "reason": "El alias privado security-latest contiene otra ejecución. No se conserva el conjunto nativo completo de la exportación histórica; el original de navegador con huella coincidente sigue verificado.",
+    "source_location_at_export_is_hint_only": true,
+    "recorded_source_hashes_preserved": true,
+    "published_artifact_hashes_preserved": true,
+    "unavailable_sources": 7,
+    "retained_matching_sources": 1
   }
 }

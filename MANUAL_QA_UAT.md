@@ -608,9 +608,11 @@ python3 scripts/check-docs.py
 
 Si cambias la matriz, edita primero [requirements/ascla-analysis.json](requirements/ascla-analysis.json) y ejecuta `python3 scripts/check-docs.py --write-matrix`. Conserva textos/prioridades originales y justifica estados; una corrección documental no aumenta el porcentaje de cumplimiento.
 
-Se mantienen los cinco MD principales y los tres MD de la [entrega de pruebas](pruebas/README.md), enlazados en [README](README.md). Usa rutas relativas y dominios del proyecto; evita carpetas personales, rutas absolutas de equipos, nombres de dispositivo e IP privadas en texto, enlaces y bloques de comandos. El verificador comprueba estas referencias, enlaces, anclas, exclusiones Git y sincronización de la matriz.
+Se mantienen nueve Markdown: los cinco principales, la [guía de CI](ci/README.md) y los tres de la [entrega de pruebas](pruebas/README.md), enlazados en [README](README.md). Usa rutas relativas y dominios del proyecto; evita carpetas personales, rutas absolutas de equipos, nombres de dispositivo e IP privadas en texto, enlaces y bloques de comandos. El verificador consulta el inventario publicable de Git y comprueba estas referencias, enlaces, anclas, exclusiones y sincronización de la matriz.
 
 Los resúmenes JSON/JUnit revisados de `docs/evidence/` se permiten en Git. Los originales, accesos y archivos locales siguen en `test-results/`, ignorados. Por solicitud del responsable, `pruebas/` incluye copias publicables de la colección, reportes, videos y capturas, con las credenciales excluidas y la procedencia registrada. Valida la carpeta con `python3 scripts/verify-qa-delivery.py`. Este cambio documental no requiere otra versión ni reconstruir el plugin.
+
+La procedencia distingue un original conservado (`source_relative`) de una ubicación histórica reutilizada (`source_location_at_export`). Siete de los ocho originales nativos de la exportación de seguridad del 22 de octubre ya no están disponibles: `security-latest` contiene otra ejecución. El original de navegador aún coincide y se verifica. Sus huellas originales y las copias publicadas se conservan; el verificador informa las ausencias y comprueba las copias por separado. No presenta los archivos de la ejecución posterior como originales de aquella exportación ni acredita una nueva prueba de seguridad.
 
 ## Subtítulos públicos de YouTube con Supadata
 

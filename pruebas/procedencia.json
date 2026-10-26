@@ -1457,43 +1457,49 @@
       "published": "seguridad/frontend-zap.json",
       "published_sha256": "bdea618b5ab51ab22f2226666b0589e1a1269fad0d0749114da2dc8bdd8e7e82",
       "transformed": true,
-      "source_relative": "test-results/security-latest/frontend-zap.json",
-      "source_sha256": "564ab846a5850d3f994fd24d0bc95cc37ba15e86efe4ea428fb162b859b4fdf6"
+      "source_sha256": "564ab846a5850d3f994fd24d0bc95cc37ba15e86efe4ea428fb162b859b4fdf6",
+      "source_location_at_export": "test-results/security-latest/frontend-zap.json",
+      "native_original_available": false
     },
     {
       "published": "seguridad/frontend-zap.html",
       "published_sha256": "9e6d77d12a20e100e87b895c6a853b56314d52dbf42a6d1d46708033c4b88e83",
       "transformed": true,
-      "source_relative": "test-results/security-latest/frontend-zap.json",
-      "source_sha256": "564ab846a5850d3f994fd24d0bc95cc37ba15e86efe4ea428fb162b859b4fdf6"
+      "source_sha256": "564ab846a5850d3f994fd24d0bc95cc37ba15e86efe4ea428fb162b859b4fdf6",
+      "source_location_at_export": "test-results/security-latest/frontend-zap.json",
+      "native_original_available": false
     },
     {
       "published": "seguridad/backend-zap.json",
       "published_sha256": "ab96f5507ff3b1511f7e55ddfdf47422dfa1ae1c458bbd430c4f0346a4d746fc",
       "transformed": true,
-      "source_relative": "test-results/security-latest/backend-zap.json",
-      "source_sha256": "cf45215d55075a5724140ba0e7b921aa499fcb0351263994ceac175c76be358c"
+      "source_sha256": "cf45215d55075a5724140ba0e7b921aa499fcb0351263994ceac175c76be358c",
+      "source_location_at_export": "test-results/security-latest/backend-zap.json",
+      "native_original_available": false
     },
     {
       "published": "seguridad/backend-zap.html",
       "published_sha256": "7e091a4dc91fb820cdbe71e7fe55f133355ca7c3c8fb5d7ab100bd7e37b9713f",
       "transformed": true,
-      "source_relative": "test-results/security-latest/backend-zap.json",
-      "source_sha256": "cf45215d55075a5724140ba0e7b921aa499fcb0351263994ceac175c76be358c"
+      "source_sha256": "cf45215d55075a5724140ba0e7b921aa499fcb0351263994ceac175c76be358c",
+      "source_location_at_export": "test-results/security-latest/backend-zap.json",
+      "native_original_available": false
     },
     {
       "published": "seguridad/resumen.json",
       "published_sha256": "e32d192d219da070410b4da173ed4d3fb3c05fc420a06bd542b62ba2560fc62e",
       "transformed": true,
-      "source_relative": "test-results/security-latest/security-summary.json",
-      "source_sha256": "8b97a0c6d7b9a837ff72d0273c06200e592ede0a04347f81d8d5826aa2616ef6"
+      "source_sha256": "8b97a0c6d7b9a837ff72d0273c06200e592ede0a04347f81d8d5826aa2616ef6",
+      "source_location_at_export": "test-results/security-latest/security-summary.json",
+      "native_original_available": false
     },
     {
       "published": "seguridad/csp-validation.json",
       "published_sha256": "8e74b37c2700d9c218d4372e0c8580b7f2c796e75b7c357049bd4695ce368a5d",
       "transformed": true,
-      "source_relative": "test-results/security-latest/csp-validation.json",
-      "source_sha256": "8e74b37c2700d9c218d4372e0c8580b7f2c796e75b7c357049bd4695ce368a5d"
+      "source_sha256": "8e74b37c2700d9c218d4372e0c8580b7f2c796e75b7c357049bd4695ce368a5d",
+      "source_location_at_export": "test-results/security-latest/csp-validation.json",
+      "native_original_available": false
     },
     {
       "published": "seguridad/browser-security.json",
@@ -1506,8 +1512,9 @@
       "published": "seguridad/source-manifest.json",
       "published_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435",
       "transformed": true,
-      "source_relative": "test-results/security-latest/source-manifest.json",
-      "source_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435"
+      "source_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435",
+      "source_location_at_export": "test-results/security-latest/source-manifest.json",
+      "native_original_available": false
     },
     {
       "published": "seguridad/sources/config/security.conf",
@@ -1569,20 +1576,23 @@
       "published": "seguridad/fuentes.html",
       "published_sha256": "0ee852cf72db758559e1f18b1a8d426ef6843e7eb0c3ed53d6bdc46800299f86",
       "transformed": true,
-      "source_relative": "test-results/security-latest/source-manifest.json",
-      "source_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435"
+      "source_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435",
+      "source_location_at_export": "test-results/security-latest/source-manifest.json",
+      "native_original_available": false
     },
     {
       "published": "seguridad/dashboard.html",
       "published_sha256": "a89bcf64880667c9e47a71e4fe5d0cd487825ff8e42d8187a41dc04c6bc64dba",
       "transformed": true,
-      "source_relative": "test-results/security-latest/security-summary.json",
-      "source_sha256": "8b97a0c6d7b9a837ff72d0273c06200e592ede0a04347f81d8d5826aa2616ef6"
+      "source_sha256": "8b97a0c6d7b9a837ff72d0273c06200e592ede0a04347f81d8d5826aa2616ef6",
+      "source_location_at_export": "test-results/security-latest/security-summary.json",
+      "native_original_available": false
     },
     {
       "published": "seguridad/procedencia.json",
-      "published_sha256": "a2c3df03c39a8ca00f2f0e4e3d55d6a6abb548e0b764d16e171b5fa6d957e8ad",
-      "transformed": true
+      "published_sha256": "1b799bce38ba2ebd0545075916e20d99a42e150d676f957dad4cf471a2221512",
+      "transformed": true,
+      "transformation_note": "Metadatos revisados el 26 de octubre: siete originales nativos históricos no disponibles, uno coincidente y huellas originales conservadas."
     },
     {
       "published": "actualizacion/latest-ui.json",
@@ -1924,7 +1934,17 @@
     "report": "seguridad/dashboard.html",
     "prepared_at": "2026-10-22T09:57:08.355Z",
     "environment": "local-ephemeral-https",
-    "jenkins_evidence": false
+    "jenkins_evidence": false,
+    "native_source_retention": {
+      "review_date": "2026-10-26",
+      "available": false,
+      "reason": "El alias privado security-latest contiene otra ejecución. No se conserva el conjunto nativo completo de la exportación histórica; el original de navegador con huella coincidente sigue verificado.",
+      "source_location_at_export_is_hint_only": true,
+      "recorded_source_hashes_preserved": true,
+      "published_artifact_hashes_preserved": true,
+      "unavailable_sources": 7,
+      "retained_matching_sources": 1
+    }
   },
   "refresh": {
     "date": "2026-10-22T08:27:53.510Z",

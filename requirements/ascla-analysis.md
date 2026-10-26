@@ -1,6 +1,6 @@
 # Matriz de requisitos ASCLA
 
-Fuente: DOCUMENTO DE ANALISIS Y DISEÑO ASCLA .pdf, 86 páginas. Revisión: 2026-10-22. Plugin 1.11.0, esquema 15.
+Fuente: DOCUMENTO DE ANALISIS Y DISEÑO ASCLA .pdf, 86 páginas. Revisión: 2026-10-26. Plugin 1.11.0, esquema 15.
 
 Esta vista se genera desde el [JSON de requisitos](ascla-analysis.json). Conserva 302 textos originales y 240 prioridades RF/RNF. Código revisado identifica implementación y evidencia; no acredita aceptación integral. Las excepciones del usuario no son cumplimiento literal del PDF.
 

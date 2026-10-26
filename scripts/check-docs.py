@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCUMENTS = (
     'README.md', 'MANUAL_QA_UAT.md', 'COMPLIANCE.md', 'VERSION_HISTORY.md',
     'requirements/ascla-analysis.md',
+    'ci/README.md',
     'pruebas/README.md', 'pruebas/backend/README.md', 'pruebas/frontend/README.md',
 )
 RETIRED = (
@@ -114,7 +115,11 @@ def main():
     if args.write_matrix:
         (ROOT / 'requirements/ascla-analysis.md').write_text(expected, encoding='utf-8', newline='\n')
     errors = []
-    found = {p.relative_to(ROOT).as_posix() for p in [*ROOT.glob('*.md'), *(ROOT / 'docs').rglob('*.md'), *(ROOT / 'requirements').rglob('*.md'), *(ROOT / 'pruebas').rglob('*.md')]}
+    inventory = subprocess.run(
+        ['git', 'ls-files', '--cached', '--others', '--exclude-standard', '-z', '--', '*.md', '*.MD'],
+        cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True,
+    )
+    found = set(filter(None, inventory.stdout.decode('utf-8').split('\0')))
     if found != set(DOCUMENTS):
         errors.append('Markdown inventory differs: ' + repr(sorted(found.symmetric_difference(DOCUMENTS))))
     if len(rows) != 302 or len({r['id'] for r in rows}) != 302 or sum('pdf_priority' in r for r in rows) != 240:
@@ -122,6 +127,16 @@ def main():
     if (ROOT / 'requirements/ascla-analysis.md').read_text(encoding='utf-8') != expected:
         errors.append('Matrix differs from JSON; run --write-matrix.')
     texts = {name: (ROOT / name).read_text(encoding='utf-8') for name in DOCUMENTS if (ROOT / name).is_file()}
+    version = matrix['plugin_version']
+    version_labels = {
+        'README.md': f'## Versión actual: {version}',
+        'MANUAL_QA_UAT.md': f'Versión documentada: **{version}**',
+        'COMPLIANCE.md': f'Plugin **{version}**',
+        'VERSION_HISTORY.md': f'**Versión actual:** `{version}`',
+    }
+    for name, label in version_labels.items():
+        if label not in texts.get(name, '')[:2000]:
+            errors.append(f'{name}: current version differs from the requirements matrix')
     publishable = set(DOCUMENTS) | {'requirements/ascla-analysis.json', 'scripts/check-docs.py'}
     counts = collections.Counter(r['status'] for r in rows)
     compliance = texts.get('COMPLIANCE.md', '')

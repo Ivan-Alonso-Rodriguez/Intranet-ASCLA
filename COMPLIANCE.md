@@ -1,8 +1,8 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 23 de octubre de 2026. Plugin **1.11.0**, esquema **15**. Este documento describe el estado del código y la evidencia por etapa. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado.
+Revisión documental: 26 de octubre de 2026. Plugin **1.11.0**, esquema **15**. Este documento describe el estado del código y la evidencia por etapa. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado.
 
-## Validación completa de QA y UAT del 26 de octubre de 2026
+## Validaciones de QA, UAT e imágenes del 25 y 26 de octubre de 2026
 
 La [corrección posterior de imágenes](docs/evidence/release-1.11.0/trivy-remediation1110.json) elimina los 379 hallazgos bloqueantes anteriores mediante runtimes Alpine actualizados y un buzón MailDev con dependencias corregidas. Trivy analiza las cuatro imágenes reales dentro de Jenkins y aprueba con cero hallazgos, sin exclusiones ni cambios a los umbrales. Se conservan WordPress, PHP, Apache y la rama de MariaDB; se comprueban la migración de datos, el correo y la regresión del plugin. Informe local: `test-results/trivy-remediation/index.html`.
 
@@ -271,7 +271,7 @@ Sobre el PDF íntegro, 263/302 (**87,1 %**) están marcados Código revisado. Ex
 - Ejecutivo y Administrador pueden crear y revisar propuestas de microeventos; se requiere revisión antes de publicarlas.
 - Administración puede editar directamente los datos del asociado. Contacto queda como referencia opcional de uso único; excepción autorizada a RN-001 y RN-032, con auditoría y preferencias personales conservadas.
 - La única reacción es **Me gusta**. Las reacciones heredadas retiradas se contabilizan de manera compatible y pueden quitarse.
-- El flujo Git y las pruebas vigentes son manuales. El [Jenkinsfile](Jenkinsfile) conserva las etapas existentes; ZAP y CSP en `qa`, su archivado, la retención de un build y la limpieza final están pendientes. La instalación de plugins queda a cargo del responsable del entorno.
+- La promoción Git conserva el orden `development → qa → uat → main`. Las pruebas pueden ejecutarse manualmente y el [Jenkinsfile](Jenkinsfile) aplica Trivy antes del despliegue y pruebas, SonarQube/Quality Gate y ZAP/CSP en QA/UAT. Su archivado, retención y limpieza están implementados; la [guía de CI](ci/README.md) distingue su validación local de la configuración y aprobación del entorno de destino. La instalación manual de plugins queda a cargo de su responsable.
 - El aprendizaje de intereses es automático y respeta las desmarcaciones guardadas del usuario.
 - Administración asigna el tipo Individual o Empresa asociada; por ahora esta clasificación no administra grupos ni cupos empresariales.
 
@@ -465,7 +465,7 @@ Cada fila conserva su propia revisión: no se suman ejecuciones repetidas como p
 | Correcciones de SonarQube | Las 137 incidencias exportadas se reproducen exactamente en SonarQube local 26.9; el código corregido obtiene cero. 677 pruebas PHP/7.565 aserciones, 49 controles portables y doce recorridos de navegador/110 controles aprobados; 148 estados axe registrados sin infracciones automáticas ni desbordamiento. Sin casos nuevos, nueva cobertura, cambios de reglas, exclusiones o umbrales. | [Resumen verificable](docs/evidence/release-1.10.8/sonar-fixes108.json) |
 | Integración y E2E desde UAT, 15 de octubre | Bruno: 10 peticiones/15 comprobaciones de integración y 23/38 del backend E2E; Playwright: tres recorridos, cinco videos y cinco capturas aprobados. Rama `uat`, base `c525b99`, ajustes del ejecutor sin commit y fuentes capturadas. WordPress local desechable, limpieza confirmada; sin Jenkins, nueva cobertura ni despliegue público. Conserva el intento inicial con un recorrido fallido y su evidencia. | [Resumen](docs/evidence/release-1.10.8/uat-acceptance108.json), [guía para exponer](MANUAL_QA_UAT.md#exponer-pruebas) |
 
-El [manifiesto actual](docs/evidence/release-1.10.9/package.json) identifica el ZIP 1.10.9, esquema 15; el [manifiesto provisional anterior](docs/evidence/release-1.10.8/package.json) se conserva como evidencia histórica. Las correcciones quedan preparadas para instalación manual; no se presentan como ya instaladas en QA. La última aceptación HTTP/UI completa tampoco certifica los ZIP posteriores. No se midió nueva cobertura en esas etapas ni se exige el 100 %. El análisis estático local no acredita el Quality Gate publicado: debe repetirse el flujo de QA sobre el commit que incluya estas correcciones. Los reportes de cobertura anteriores conservan su revisión original.
+El [manifiesto actual](docs/evidence/release-1.11.0/package.json) identifica el ZIP 1.11.0, esquema 15. Los manifiestos [1.10.9](docs/evidence/release-1.10.9/package.json) y [1.10.8](docs/evidence/release-1.10.8/package.json) conservan sus paquetes históricos. Las ejecuciones HTTP/UI, SonarQube y ZAP acreditan únicamente las revisiones identificadas en cada resumen; no certifican un ZIP posterior ni su instalación remota. Los resultados de QA/UAT y la corrección posterior de imágenes se distinguen al inicio de este documento. Esta revisión documental no genera cobertura ni cambia las huellas o la revisión de los reportes existentes.
 
 La consolidación documental no cambia el código del plugin, su ZIP, los resultados anteriores ni los estados de requisitos. La [verificación documental](scripts/check-docs.py) comprueba inventario, enlaces, Git y sincronización de la matriz.
 
