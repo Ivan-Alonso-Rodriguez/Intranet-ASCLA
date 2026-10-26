@@ -12,7 +12,7 @@ if ($action==='setup') {
         $login='journey_mailmsg_'.bin2hex(random_bytes(6)); $password=wp_generate_password(32);
         $id=wp_insert_user(['user_login'=>$login,'user_email'=>$login.'@example.invalid','user_pass'=>$password,'role'=>$i===3?'administrator':'ascla_member','display_name'=>$name.' Pruebas']);
         if (is_wp_error($id)) { exit(2); }
-        wp_set_current_user($id); Profiles::save(['first_name'=>$name,'last_name'=>'Pruebas','hidden'=>[],'networking'=>true]);
+        wp_set_current_user($id); Profiles::save(['first_name'=>$name,'last_name'=>'Pruebas','position'=>$name.' Cargo','company'=>'Organización '.$name,'hidden'=>[],'networking'=>true]);
         $users[]=['id'=>$id,'login'=>$login,'password'=>$password,'email'=>$login.'@example.invalid'];
     }
     echo wp_json_encode($users);

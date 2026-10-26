@@ -88,9 +88,10 @@ final class Login
     public static function frontAssets(): void
     {
         if (!self::isFrontendPage()) { return; }
-        wp_enqueue_style('login');
-        wp_enqueue_style('dashicons');
-        wp_enqueue_style('ascla-login', ASCLA_URL . 'assets/login.css', ['login'], ASCLA_VERSION);
+        // This template owns its layout. Reuse form primitives without loading
+        // the native admin login layout and all of its administration palettes.
+        wp_enqueue_style('ascla-login-layout',ASCLA_URL.'assets/login-layout.css',['dashicons','buttons','forms','l10n'],App::assetVersion('assets/login-layout.css'));
+        wp_enqueue_style('ascla-login', ASCLA_URL . 'assets/login.css', ['ascla-login-layout'], App::assetVersion('assets/login.css'));
         // Turnstile normally enqueues itself on wp-login.php. The dedicated ASCLA login
         // calls the same policy so adaptive protection is preserved instead of duplicated.
         Turnstile::enqueue();
@@ -200,7 +201,7 @@ final class Login
 
     private static function targetFor(\WP_User $user, string $requested): string
     {
-        $fallback=Catalog::url('intranet');
+        $fallback=App::homeUrl((int)$user->ID);
         if ($requested==='') { return $fallback; }
         $safe=wp_validate_redirect($requested,$fallback);
         $allowed=false;
@@ -286,19 +287,6 @@ final class Login
 
     public static function redirect(string $redirect, string $requested, $user): string
     {
-        if (!$user instanceof \WP_User || !user_can($user, 'ascla_access') || user_can($user, 'manage_options')) {
-            return $redirect;
-        }
-        $fallback = Catalog::url('intranet');
-        $target = wp_validate_redirect($requested, $fallback);
-        if(user_can($user,'ascla_admin_area') && str_starts_with($target,admin_url())){
-            parse_str((string)wp_parse_url($target,PHP_URL_QUERY),$query);
-            $page=is_string($query['page']??null)?sanitize_key($query['page']):'';
-            return App::adminUrl($page!==''?['page'=>$page]:[]);
-        }
-        // Only ASCLA page IDs may receive member redirects, including query-string permalinks.
-        $pageId = url_to_postid($target);
-        return $pageId && in_array($pageId, array_map('intval', get_option('ascla_pages', [])), true)
-            ? $target : $fallback;
+        return LoginRedirect::resolve($redirect,$requested,$user);
     }
 }

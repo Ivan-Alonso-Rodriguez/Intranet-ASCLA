@@ -31,7 +31,7 @@ final class ContentLifecycleTest extends TestCase
         foreach(array_keys(ASCLA\Core\Domain\Catalog::TYPES) as $type){
             $meta=$type==='event'?['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000)]:[];
             $p=$this->post($type,['meta'=>$meta]);
-            if($type==='contact')$p=ASCLA\Core\Services\Administration::contactStatus($p['id'],'closed');
+            if($type==='contact') { ascla_test_support_state($p['id'],$this->users[0],'closed');self::assertSame(200,$this->api('DELETE','items/'.$p['id'])->get_status());self::assertSame('private',get_post_status($p['id']));continue; }
             self::assertTrue($p['can_delete']);
             self::assertSame(200,$this->api('DELETE','items/'.$p['id'])->get_status());self::assertSame('trash',get_post_status($p['id']));
             self::assertSame(404,$this->api('GET','items/'.$p['id'])->get_status());self::assertSame(404,$this->api('DELETE','items/'.$p['id'])->get_status());
@@ -63,7 +63,7 @@ final class ContentLifecycleTest extends TestCase
     }
     public function testAuthorCanDeleteOwnPendingContentAndModeratorCanReviewButOtherMembersCannot():void
     {
-        wp_set_current_user($this->users[2]);$p=$this->post();self::assertSame('pending',$p['status']);self::assertTrue($p['can_delete']);
+        wp_set_current_user($this->users[2]);$p=$this->post('hub',['status'=>'pending']);self::assertSame('pending',$p['status']);self::assertTrue($p['can_delete']);
         wp_set_current_user($this->users[1]);self::assertTrue(Content::serialize(Content::get($p['id']))['can_delete']);
         wp_set_current_user($this->users[3]);self::assertSame(404,$this->api('DELETE','items/'.$p['id'])->get_status());
         wp_set_current_user($this->users[2]);self::assertSame(200,$this->api('DELETE','items/'.$p['id'])->get_status());
@@ -83,10 +83,35 @@ final class ContentLifecycleTest extends TestCase
         wp_set_current_user($this->users[3]);self::assertSame(403,$this->api('DELETE','comments/'.$c['id'])->get_status());
         wp_set_current_user($this->users[2]);self::assertSame(200,$this->api('DELETE','comments/'.$c['id'])->get_status());self::assertNotContains($c['id'],array_column(Content::comments($hub['id']),'id'));
     }
+    public function testRemovedReactionsRemainRemovableLikesAndCannotBeSubmittedAgain():void
+    {
+        $topic=$this->post('topic');$comment=Content::comment($topic['id'],'Comentario con reacciones anteriores');
+        wp_set_current_user($this->users[2]);
+        foreach (['like'=>$topic['id'],'comment_like'=>$comment['id']] as $kind=>$id) {
+            $route=$kind==='like'?'items/'.$id.'/reaction':'comments/'.$id.'/reaction';
+            $where=['user_id'=>$this->users[2],'target_id'=>$id,'kind'=>$kind];
+            foreach (['useful','celebrate',''] as $previous) {
+                Store::insert('relations',$where+['reason'=>$previous,'created_at'=>current_time('mysql',true)]);
+                $item=$kind==='like'?Content::serialize(Content::get($id)):Content::comments($topic['id'])[0];
+                self::assertSame('like',$item['reaction']);self::assertSame(['like'=>1],$item['reaction_counts']);
+                foreach (['useful','celebrate'] as $removed) {
+                    self::assertSame(400,$this->api('POST',$route,['kind'=>'like','reaction'=>$removed,'active'=>true])->get_status());
+                }
+                for ($attempt=0;$attempt<2;$attempt++) {
+                    $result=$this->api('POST',$route,['kind'=>'like','reaction'=>'like','active'=>true]);
+                    self::assertSame(200,$result->get_status());self::assertSame(['like'=>1],$result->get_data()['reaction_counts']);
+                }
+                $result=$this->api('POST',$route,['kind'=>'like','active'=>false]);
+                self::assertSame(200,$result->get_status());self::assertSame(['like'=>0],$result->get_data()['reaction_counts']);
+                self::assertSame('', $result->get_data()['reaction']);
+                self::assertSame([],Store::rows('relations','user_id=%d AND target_id=%d AND kind=%s',array_values($where)));
+            }
+        }
+    }
     public function testFileDeletionRemovesPostAndProfileReferencesButPreservesOtherFiles():void
     {
         wp_set_current_user($this->users[2]);$id=Store::insert('media',['user_id'=>$this->users[2],'post_id'=>0,'name'=>'lifecycle-private.png','mime'=>'image/png','bytes'=>'fixture','created_at'=>current_time('mysql',true)]);$this->media[]=$id;
-        Profiles::save(['photo_id'=>$id]);$post=$this->post('hub',['meta'=>['media_ids'=>[$id]]]);self::assertTrue($post['media'][0]['can_delete']);
+        Profiles::save(ascla_test_profile(['photo_id'=>$id]));$post=$this->post('hub',['meta'=>['media_ids'=>[$id]]]);self::assertTrue($post['media'][0]['can_delete']);
         wp_set_current_user($this->users[3]);self::assertNotContains($id,array_column(Media::listing()['items'],'id'));self::assertSame(403,$this->api('DELETE','media/'.$id)->get_status());
         wp_set_current_user($this->users[1]);self::assertSame(403,$this->api('DELETE','media/'.$id)->get_status());
         wp_set_current_user($this->users[0]);self::assertContains($id,array_column(Media::listing(['q'=>'lifecycle-private','scope'=>'all'])['items'],'id'));self::assertSame(200,$this->api('DELETE','media/'.$id)->get_status());
@@ -118,6 +143,58 @@ final class ContentLifecycleTest extends TestCase
         $draft=$this->post('event',$payload+['status'=>'draft']);self::assertSame('draft',$draft['status']);
         foreach(array_slice($this->users,1) as $id){wp_set_current_user($id);self::assertSame(403,$this->api('POST','content/event',$payload)->get_status());self::assertSame(403,$this->api('POST','content/event/'.$p['id'],$payload)->get_status());self::assertSame($id===$this->users[1]?404:403,$this->api('POST','items/'.$draft['id'].'/moderate',['decision'=>'approve','reason'=>'Publicar'])->get_status());}
         wp_set_current_user($this->users[2]);Content::comment($p['id'],'Participaré');self::assertSame('publish',get_post_status($p['id']));
+    }
+    public function testIncompleteEventCanBeSavedAsDraftButCannotBePublished():void
+    {
+        wp_set_current_user($this->users[0]);
+        $created=$this->api('POST','content/event',['title'=>'','body'=>'','status'=>'draft','meta'=>[]]);
+        self::assertSame(200,$created->get_status());$draft=$created->get_data();$this->posts[]=$draft['id'];
+        self::assertSame('draft',$draft['status']);self::assertSame('Borrador de evento',$draft['title']);
+        self::assertArrayNotHasKey('start',$draft['meta']);self::assertArrayNotHasKey('end',$draft['meta']);
+        $partial=$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento todavía incompleto','body'=>'','status'=>'draft','meta'=>[]]);
+        self::assertSame(200,$partial->get_status());self::assertSame('draft',$partial->get_data()['status']);
+        self::assertSame(400,$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento todavía incompleto','body'=>'','status'=>'publish','meta'=>[]])->get_status());
+        self::assertSame(400,$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento listo','body'=>'Descripción completa','status'=>'publish','meta'=>[]])->get_status());
+        $complete=$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento listo','body'=>'Descripción completa','status'=>'publish','meta'=>['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000)]]);
+        self::assertSame(200,$complete->get_status());self::assertSame('publish',$complete->get_data()['status']);
+    }
+    public function testIncompleteDraftStillRejectsInvalidDatesNumbersAndPublication():void
+    {
+        $base=['title'=>'Borrador protegido','body'=>'','status'=>'draft'];
+        $created=$this->api('POST','content/event',$base+['meta'=>[]]);
+        self::assertSame(200,$created->get_status());$id=$created->get_data()['id'];$this->posts[]=$id;
+        $before=get_post_meta($id,'_ascla',true);
+        foreach ([['capacity'=>1.5],['capacity'=>true],['offer_hours'=>0],['modality'=>'unknown'],['start'=>'2027-02-30T10:00:00Z'],['start'=>'2027-01-15T10:00'],['start'=>'2027-01-15T11:00:00Z','end'=>'2027-01-15T10:00:00Z']] as $meta) {
+            self::assertSame(400,$this->api('POST','content/event/'.$id,$base+['meta'=>$meta])->get_status());
+            self::assertSame($before,get_post_meta($id,'_ascla',true));
+        }
+        foreach (['publish','scheduled','pending'] as $status) {
+            self::assertSame(400,$this->api('POST','content/event/'.$id,['title'=>'Completo','body'=>'Descripción','status'=>$status,'meta'=>[]])->get_status());
+            self::assertSame('draft',get_post_status($id));
+        }
+        self::assertSame(400,$this->api('POST','content/event/'.$id,['title'=>"\u{200D}",'body'=>'Descripción','status'=>'publish','meta'=>['start'=>'2027-01-15T10:00:00Z','end'=>'2027-01-15T11:00:00Z']])->get_status());
+        wp_set_current_user($this->users[2]);
+        self::assertSame(404,$this->api('GET','items/'.$id)->get_status());
+        self::assertSame(403,$this->api('POST','content/event',$base+['meta'=>[]])->get_status());
+        $hub=$this->api('POST','content/hub',['title'=>'','body'=>'','status'=>'draft']);
+        self::assertSame(200,$hub->get_status());$this->posts[]=$hub->get_data()['id'];
+        self::assertSame('draft',$hub->get_data()['status']);
+        self::assertSame(400,$this->api('POST','content/hub',['title'=>'','body'=>'','status'=>'publish'])->get_status());
+    }
+    public function testMicroeventDraftAllowsMissingDeadlineWithoutWeakeningIntegerValidation():void
+    {
+        $created=$this->api('POST','content/event',['title'=>'Microevento en preparación','body'=>'','status'=>'draft','meta'=>['capacity'=>0]]);
+        self::assertSame(200,$created->get_status());$id=$created->get_data()['id'];$this->posts[]=$id;
+        // Microevent identity is server-owned, created by the proposal service rather than REST input.
+        update_post_meta($id,'_ascla',get_post_meta($id,'_ascla',true)+['micro'=>true]);
+        self::assertSame(200,$this->api('POST','content/event/'.$id,['title'=>'Microevento en preparación','body'=>'','status'=>'draft','meta'=>['registration_deadline'=>'']])->get_status());
+        $before=get_post_meta($id,'_ascla',true);self::assertArrayNotHasKey('registration_deadline',$before);
+        foreach ([['micro_min'=>true],['micro_min'=>1.5],['priority_hours'=>false],['priority_hours'=>169]] as $meta) {
+            self::assertSame(400,$this->api('POST','content/event/'.$id,['title'=>'Sin modificar','body'=>'','status'=>'draft','meta'=>$meta])->get_status());
+            self::assertSame($before,get_post_meta($id,'_ascla',true));
+        }
+        self::assertSame(400,$this->api('POST','content/event/'.$id,['title'=>'Microevento','body'=>'Descripción','status'=>'pending','meta'=>[]])->get_status());
+        self::assertSame('draft',get_post_status($id));
     }
     public function testEventCoverAcceptsOneImageAndRejectsMultipleFilesOrPdf():void
     {

@@ -1,0 +1,33 @@
+meta {
+  name: 18. El administrador cancela el evento
+  type: http
+  seq: 18
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/events/{{eventoCupoId}}/cancel
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAdministrador}}
+  X-WP-Nonce: {{nonceAdministrador}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "reason": "Cancelación del evento de demostración de aforo."
+  }
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Evento identificado y cancelado", function () { expect(Number(res.getBody().id)).to.equal(Number(bru.getCollectionVar("eventoCupoId")));expect(res.getBody().cancelled).to.equal(true); });
+}

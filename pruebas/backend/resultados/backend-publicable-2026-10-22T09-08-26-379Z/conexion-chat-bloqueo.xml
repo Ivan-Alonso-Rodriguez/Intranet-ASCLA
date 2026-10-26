@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<testsuites>
+  <testsuite name="01. Iniciar sesión como Ana" file="flujos-e2e\02-conexion-chat-bloqueo\01-iniciar-sesion-ana.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:09:24.137" hostname="DESKTOP-VJV2FMV" time="3.022">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\01-iniciar-sesion-ana" time="1.511"/>
+    <testcase name="Sesión y nonce propios de Ana" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\01-iniciar-sesion-ana" time="1.511"/>
+  </testsuite>
+  <testsuite name="02. Iniciar sesión como Bruno" file="flujos-e2e\02-conexion-chat-bloqueo\02-iniciar-sesion-bruno.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:09:24.137" hostname="DESKTOP-VJV2FMV" time="2.745">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\02-iniciar-sesion-bruno" time="1.372"/>
+    <testcase name="Sesión y nonce propios de Bruno" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\02-iniciar-sesion-bruno" time="1.372"/>
+  </testsuite>
+  <testsuite name="03. Ana solicita conexión con Bruno" file="flujos-e2e\02-conexion-chat-bloqueo\03-ana-solicita-conexion-con-bruno.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:09:24.137" hostname="DESKTOP-VJV2FMV" time="0.963">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\03-ana-solicita-conexion-con-bruno" time="0.481"/>
+    <testcase name="Solicitud pendiente con ID real" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\03-ana-solicita-conexion-con-bruno" time="0.481"/>
+  </testsuite>
+  <testsuite name="04. Bruno acepta la solicitud obtenida" file="flujos-e2e\02-conexion-chat-bloqueo\04-bruno-acepta-la-solicitud-obtenida.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:09:24.137" hostname="DESKTOP-VJV2FMV" time="0.854">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\04-bruno-acepta-la-solicitud-obtenida" time="0.427"/>
+    <testcase name="Conexión confirmada" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\04-bruno-acepta-la-solicitud-obtenida" time="0.427"/>
+  </testsuite>
+  <testsuite name="05. Ana comprueba que puede escribir" file="flujos-e2e\02-conexion-chat-bloqueo\05-ana-comprueba-que-puede-escribir.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:09:24.137" hostname="DESKTOP-VJV2FMV" time="0.855">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\05-ana-comprueba-que-puede-escribir" time="0.428"/>
+    <testcase name="La conexión habilita los mensajes" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\05-ana-comprueba-que-puede-escribir" time="0.428"/>
+  </testsuite>
+  <testsuite name="06. Ana abre la conversación" file="flujos-e2e\02-conexion-chat-bloqueo\06-ana-abre-la-conversacion.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:09:24.138" hostname="DESKTOP-VJV2FMV" time="0.931">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\06-ana-abre-la-conversacion" time="0.465"/>
+    <testcase name="Conversación con ID real" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\06-ana-abre-la-conversacion" time="0.465"/>
+  </testsuite>
+  <testsuite name="07. Ana envía un mensaje" file="flujos-e2e\02-conexion-chat-bloqueo\07-ana-envia-un-mensaje.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:09:24.138" hostname="DESKTOP-VJV2FMV" time="0.930">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\07-ana-envia-un-mensaje" time="0.465"/>
+    <testcase name="El servidor conserva el texto enviado" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\07-ana-envia-un-mensaje" time="0.465"/>
+  </testsuite>
+  <testsuite name="08. Bruno lee el mensaje exacto" file="flujos-e2e\02-conexion-chat-bloqueo\08-bruno-lee-el-mensaje-exacto.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:09:24.138" hostname="DESKTOP-VJV2FMV" time="0.827">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\08-bruno-lee-el-mensaje-exacto" time="0.414"/>
+    <testcase name="El destinatario recibe el mensaje de esta ejecución" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\08-bruno-lee-el-mensaje-exacto" time="0.414"/>
+  </testsuite>
+  <testsuite name="09. Bruno bloquea a Ana" file="flujos-e2e\02-conexion-chat-bloqueo\09-bruno-bloquea-a-ana.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:09:24.138" hostname="DESKTOP-VJV2FMV" time="0.843">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\09-bruno-bloquea-a-ana" time="0.422"/>
+    <testcase name="Bloqueo activo" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\09-bruno-bloquea-a-ana" time="0.422"/>
+  </testsuite>
+  <testsuite name="10. El bloqueo impide escribir" file="flujos-e2e\02-conexion-chat-bloqueo\10-el-bloqueo-impide-escribir.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:09:24.138" hostname="DESKTOP-VJV2FMV" time="0.867">
+    <testcase name="Código HTTP esperado: 404" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\10-el-bloqueo-impide-escribir" time="0.434"/>
+    <testcase name="El servidor oculta la conversación bloqueada" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\10-el-bloqueo-impide-escribir" time="0.434"/>
+  </testsuite>
+  <testsuite name="11. Bruno desbloquea a Ana" file="flujos-e2e\02-conexion-chat-bloqueo\11-bruno-desbloquea-a-ana.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:09:24.138" hostname="DESKTOP-VJV2FMV" time="0.822">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\11-bruno-desbloquea-a-ana" time="0.411"/>
+    <testcase name="Bloqueo retirado" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\11-bruno-desbloquea-a-ana" time="0.411"/>
+  </testsuite>
+  <testsuite name="12. Desbloquear no restaura la conexión" file="flujos-e2e\02-conexion-chat-bloqueo\12-desbloquear-no-restaura-la-conexion.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:09:24.138" hostname="DESKTOP-VJV2FMV" time="0.840">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\12-desbloquear-no-restaura-la-conexion" time="0.420"/>
+    <testcase name="La relación termina sin permiso de mensajería" status="pass" classname="flujos-e2e\02-conexion-chat-bloqueo\12-desbloquear-no-restaura-la-conexion" time="0.420"/>
+  </testsuite>
+</testsuites>

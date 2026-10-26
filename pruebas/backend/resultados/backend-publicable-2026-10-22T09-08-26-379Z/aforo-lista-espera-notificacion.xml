@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<testsuites>
+  <testsuite name="01. Iniciar sesión como Administrador" file="flujos-e2e\04-aforo-espera-notificacion\01-iniciar-sesion-administrador.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.225" hostname="DESKTOP-VJV2FMV" time="3.847">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\01-iniciar-sesion-administrador" time="1.924"/>
+    <testcase name="Sesión y nonce propios de Administrador" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\01-iniciar-sesion-administrador" time="1.924"/>
+  </testsuite>
+  <testsuite name="02. Iniciar sesión como Ana" file="flujos-e2e\04-aforo-espera-notificacion\02-iniciar-sesion-ana.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="2.724">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\02-iniciar-sesion-ana" time="1.362"/>
+    <testcase name="Sesión y nonce propios de Ana" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\02-iniciar-sesion-ana" time="1.362"/>
+  </testsuite>
+  <testsuite name="03. Iniciar sesión como Bruno" file="flujos-e2e\04-aforo-espera-notificacion\03-iniciar-sesion-bruno.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="2.744">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\03-iniciar-sesion-bruno" time="1.372"/>
+    <testcase name="Sesión y nonce propios de Bruno" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\03-iniciar-sesion-bruno" time="1.372"/>
+  </testsuite>
+  <testsuite name="04. Iniciar sesión como Carla" file="flujos-e2e\04-aforo-espera-notificacion\04-iniciar-sesion-carla.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="2.703">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\04-iniciar-sesion-carla" time="1.352"/>
+    <testcase name="Sesión y nonce propios de Carla" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\04-iniciar-sesion-carla" time="1.352"/>
+  </testsuite>
+  <testsuite name="05. Crear evento con un solo cupo" file="flujos-e2e\04-aforo-espera-notificacion\05-crear-evento-con-un-solo-cupo.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="1.006">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\05-crear-evento-con-un-solo-cupo" time="0.503"/>
+    <testcase name="Evento publicado con capacidad uno" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\05-crear-evento-con-un-solo-cupo" time="0.503"/>
+  </testsuite>
+  <testsuite name="06. Ana confirma el único cupo" file="flujos-e2e\04-aforo-espera-notificacion\06-ana-confirma-el-unico-cupo.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="0.847">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\06-ana-confirma-el-unico-cupo" time="0.424"/>
+    <testcase name="Cupo confirmado y aforo completo" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\06-ana-confirma-el-unico-cupo" time="0.424"/>
+  </testsuite>
+  <testsuite name="07. Bruno no puede sobrepasar el aforo" file="flujos-e2e\04-aforo-espera-notificacion\07-bruno-no-puede-sobrepasar-el-aforo.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="0.848">
+    <testcase name="Código HTTP esperado: 409" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\07-bruno-no-puede-sobrepasar-el-aforo" time="0.424"/>
+    <testcase name="El rechazo se debe a falta de cupos" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\07-bruno-no-puede-sobrepasar-el-aforo" time="0.424"/>
+  </testsuite>
+  <testsuite name="08. Bruno entra en lista de espera" file="flujos-e2e\04-aforo-espera-notificacion\08-bruno-entra-en-lista-de-espera.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="0.847">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\08-bruno-entra-en-lista-de-espera" time="0.424"/>
+    <testcase name="Primer puesto de la lista de espera" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\08-bruno-entra-en-lista-de-espera" time="0.424"/>
+  </testsuite>
+  <testsuite name="09. Guardar avisos antes de liberar el cupo" file="flujos-e2e\04-aforo-espera-notificacion\09-guardar-avisos-antes-de-liberar-el-cupo.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="0.896">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\09-guardar-avisos-antes-de-liberar-el-cupo" time="0.896"/>
+  </testsuite>
+  <testsuite name="10. Ana cancela su inscripción" file="flujos-e2e\04-aforo-espera-notificacion\10-ana-cancela-su-inscripcion.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="0.909">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\10-ana-cancela-su-inscripcion" time="0.455"/>
+    <testcase name="Inscripción cancelada" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\10-ana-cancela-su-inscripcion" time="0.455"/>
+  </testsuite>
+  <testsuite name="11. El cupo se ofrece a Bruno" file="flujos-e2e\04-aforo-espera-notificacion\11-el-cupo-se-ofrece-a-bruno.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="0.850">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\11-el-cupo-se-ofrece-a-bruno" time="0.425"/>
+    <testcase name="Oferta vigente reservada para la lista de espera" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\11-el-cupo-se-ofrece-a-bruno" time="0.425"/>
+  </testsuite>
+  <testsuite name="12. La oferta genera un aviso nuevo" file="flujos-e2e\04-aforo-espera-notificacion\12-la-oferta-genera-un-aviso-nuevo.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="1.001">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\12-la-oferta-genera-un-aviso-nuevo" time="0.501"/>
+    <testcase name="Aumenta el contador de avisos pendientes" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\12-la-oferta-genera-un-aviso-nuevo" time="0.501"/>
+  </testsuite>
+  <testsuite name="13. El aviso corresponde al evento probado" file="flujos-e2e\04-aforo-espera-notificacion\13-el-aviso-corresponde-al-evento-probado.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="1.835">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\13-el-aviso-corresponde-al-evento-probado" time="0.918"/>
+    <testcase name="Existe una notificación de cupo para este evento" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\13-el-aviso-corresponde-al-evento-probado" time="0.918"/>
+  </testsuite>
+  <testsuite name="14. Bruno abre la notificación del cupo" file="flujos-e2e\04-aforo-espera-notificacion\14-abrir-aviso.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="0.982">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\14-abrir-aviso" time="0.491"/>
+    <testcase name="Validación: 14. Bruno abre la notificación del cupo" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\14-abrir-aviso" time="0.491"/>
+  </testsuite>
+  <testsuite name="15. La notificación queda leída" file="flujos-e2e\04-aforo-espera-notificacion\15-aviso-leido.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="1.596">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\15-aviso-leido" time="0.798"/>
+    <testcase name="Validación: 15. La notificación queda leída" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\15-aviso-leido" time="0.798"/>
+  </testsuite>
+  <testsuite name="16. Bruno confirma la vacante ofrecida" file="flujos-e2e\04-aforo-espera-notificacion\16-confirmar-vacante.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="0.945">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\16-confirmar-vacante" time="0.472"/>
+    <testcase name="Validación: 16. Bruno confirma la vacante ofrecida" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\16-confirmar-vacante" time="0.472"/>
+  </testsuite>
+  <testsuite name="17. Comprobar un único inscrito" file="flujos-e2e\04-aforo-espera-notificacion\17-vacante-persistente.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="0.880">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\17-vacante-persistente" time="0.440"/>
+    <testcase name="Validación: 17. Comprobar un único inscrito" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\17-vacante-persistente" time="0.440"/>
+  </testsuite>
+  <testsuite name="18. El administrador cancela el evento" file="flujos-e2e\04-aforo-espera-notificacion\18-el-administrador-cancela-el-evento.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="0.887">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\18-el-administrador-cancela-el-evento" time="0.444"/>
+    <testcase name="Evento identificado y cancelado" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\18-el-administrador-cancela-el-evento" time="0.444"/>
+  </testsuite>
+  <testsuite name="19. Carla no puede inscribirse al evento cancelado" file="flujos-e2e\04-aforo-espera-notificacion\19-carla-no-puede-inscribirse-al-evento-cancelado.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-10-22T09:10:09.226" hostname="DESKTOP-VJV2FMV" time="0.845">
+    <testcase name="Código HTTP esperado: 409" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\19-carla-no-puede-inscribirse-al-evento-cancelado" time="0.422"/>
+    <testcase name="El rechazo identifica la cancelación" status="pass" classname="flujos-e2e\04-aforo-espera-notificacion\19-carla-no-puede-inscribirse-al-evento-cancelado" time="0.422"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,227 @@
+{
+  "prepared_at": "2026-10-22T09:57:08.355Z",
+  "date": "2026-10-22T09:11:27.133208+00:00",
+  "status": "PASS",
+  "source_sha256": "0b737f5511b599b06f300c3ba17e85d7dd7aa2822f0b1809d1e7246807e8e1a6",
+  "report": "seguridad/dashboard.html",
+  "retention": "latest-only",
+  "note": "Copias derivadas y revisadas; los HTML/JSON nativos completos permanecen privados. Se preservan las fechas, los estados y los conteos originales.",
+  "sources": [
+    {
+      "source_relative": "test-results/security-latest/security-summary.json",
+      "source_sha256": "8b97a0c6d7b9a837ff72d0273c06200e592ede0a04347f81d8d5826aa2616ef6"
+    },
+    {
+      "source_relative": "test-results/security-latest/source-manifest.json",
+      "source_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435"
+    },
+    {
+      "source_relative": "test-results/security-latest/csp-validation.json",
+      "source_sha256": "8e74b37c2700d9c218d4372e0c8580b7f2c796e75b7c357049bd4695ce368a5d"
+    },
+    {
+      "source_relative": "test-results/security-latest/browser-security.json",
+      "source_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1"
+    },
+    {
+      "source_relative": "test-results/security-latest/frontend-result.json",
+      "source_sha256": "e97e4c24d66246e5ff0e4fd54596e3741ec8bb8e45ce9900cbdc9110e2ff5701"
+    },
+    {
+      "source_relative": "test-results/security-latest/frontend-zap.json",
+      "source_sha256": "564ab846a5850d3f994fd24d0bc95cc37ba15e86efe4ea428fb162b859b4fdf6"
+    },
+    {
+      "source_relative": "test-results/security-latest/backend-result.json",
+      "source_sha256": "789f13961522943c07c15072a17c7603f6b7dfd70d3191e2065640e363959f33"
+    },
+    {
+      "source_relative": "test-results/security-latest/backend-zap.json",
+      "source_sha256": "cf45215d55075a5724140ba0e7b921aa499fcb0351263994ceac175c76be358c"
+    }
+  ],
+  "files": [
+    {
+      "published": "seguridad/frontend-zap.json",
+      "published_sha256": "bdea618b5ab51ab22f2226666b0589e1a1269fad0d0749114da2dc8bdd8e7e82",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/frontend-zap.json",
+      "source_sha256": "564ab846a5850d3f994fd24d0bc95cc37ba15e86efe4ea428fb162b859b4fdf6"
+    },
+    {
+      "published": "seguridad/frontend-zap.html",
+      "published_sha256": "9e6d77d12a20e100e87b895c6a853b56314d52dbf42a6d1d46708033c4b88e83",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/frontend-zap.json",
+      "source_sha256": "564ab846a5850d3f994fd24d0bc95cc37ba15e86efe4ea428fb162b859b4fdf6"
+    },
+    {
+      "published": "seguridad/backend-zap.json",
+      "published_sha256": "ab96f5507ff3b1511f7e55ddfdf47422dfa1ae1c458bbd430c4f0346a4d746fc",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/backend-zap.json",
+      "source_sha256": "cf45215d55075a5724140ba0e7b921aa499fcb0351263994ceac175c76be358c"
+    },
+    {
+      "published": "seguridad/backend-zap.html",
+      "published_sha256": "7e091a4dc91fb820cdbe71e7fe55f133355ca7c3c8fb5d7ab100bd7e37b9713f",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/backend-zap.json",
+      "source_sha256": "cf45215d55075a5724140ba0e7b921aa499fcb0351263994ceac175c76be358c"
+    },
+    {
+      "published": "seguridad/resumen.json",
+      "published_sha256": "e32d192d219da070410b4da173ed4d3fb3c05fc420a06bd542b62ba2560fc62e",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/security-summary.json",
+      "source_sha256": "8b97a0c6d7b9a837ff72d0273c06200e592ede0a04347f81d8d5826aa2616ef6"
+    },
+    {
+      "published": "seguridad/csp-validation.json",
+      "published_sha256": "8e74b37c2700d9c218d4372e0c8580b7f2c796e75b7c357049bd4695ce368a5d",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/csp-validation.json",
+      "source_sha256": "8e74b37c2700d9c218d4372e0c8580b7f2c796e75b7c357049bd4695ce368a5d"
+    },
+    {
+      "published": "seguridad/browser-security.json",
+      "published_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/browser-security.json",
+      "source_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1"
+    },
+    {
+      "published": "seguridad/source-manifest.json",
+      "published_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/source-manifest.json",
+      "source_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435"
+    },
+    {
+      "published": "seguridad/sources/config/security.conf",
+      "published_sha256": "046a5c3c4218d30b63d6bb3932f6006fec4c9deeb8a8f1f4491e9041977f9361",
+      "transformed": false,
+      "source_relative": "config/security.conf",
+      "source_sha256": "046a5c3c4218d30b63d6bb3932f6006fec4c9deeb8a8f1f4491e9041977f9361"
+    },
+    {
+      "published": "seguridad/sources/config/security.ini",
+      "published_sha256": "f20edcf8154edcf83c4efb8710000f928219f64ef3f1177f813efeb4c3715195",
+      "transformed": false,
+      "source_relative": "config/security.ini",
+      "source_sha256": "f20edcf8154edcf83c4efb8710000f928219f64ef3f1177f813efeb4c3715195"
+    },
+    {
+      "published": "seguridad/sources/config/uploads.ini",
+      "published_sha256": "37f5d881277cf3827e605ba5f048f5e88cf724ae95741eff698aa92c6d54c228",
+      "transformed": false,
+      "source_relative": "config/uploads.ini",
+      "source_sha256": "37f5d881277cf3827e605ba5f048f5e88cf724ae95741eff698aa92c6d54c228"
+    },
+    {
+      "published": "seguridad/sources/scripts/check-security-headers.cjs",
+      "published_sha256": "2ab14b0a0569b072bb74244e729d96e389aaead0981ccf6cb764e9242b83d1ad",
+      "transformed": false,
+      "source_relative": "scripts/check-security-headers.cjs",
+      "source_sha256": "2ab14b0a0569b072bb74244e729d96e389aaead0981ccf6cb764e9242b83d1ad"
+    },
+    {
+      "published": "seguridad/sources/security/zap-rules.tsv",
+      "published_sha256": "406b6c917a8140f74b2785f7a927c9988efb1599f95cfedb3f30a09a48d769f6",
+      "transformed": false,
+      "source_relative": "security/zap-rules.tsv",
+      "source_sha256": "406b6c917a8140f74b2785f7a927c9988efb1599f95cfedb3f30a09a48d769f6"
+    },
+    {
+      "published": "seguridad/sources/tests/security-browser.cjs",
+      "published_sha256": "4aed7b411d513118b2a7fa9df03cdb4c4e0c897e7f556ca168a7ee99df292621",
+      "transformed": false,
+      "source_relative": "tests/security-browser.cjs",
+      "source_sha256": "4aed7b411d513118b2a7fa9df03cdb4c4e0c897e7f556ca168a7ee99df292621"
+    },
+    {
+      "published": "seguridad/sources/tests/security-openapi.py",
+      "published_sha256": "a9db108d15c1152ff34664d6df4fb1291e39a005c0003f7005568d3d0ad9eb36",
+      "transformed": false,
+      "source_relative": "tests/security-openapi.py",
+      "source_sha256": "a9db108d15c1152ff34664d6df4fb1291e39a005c0003f7005568d3d0ad9eb36"
+    },
+    {
+      "published": "seguridad/sources/tests/zap-scan.py",
+      "published_sha256": "441db2be5d8bab1840fc907a81909e7253376a8dbbdfbe438dde7dc230d0238e",
+      "transformed": false,
+      "source_relative": "tests/zap-scan.py",
+      "source_sha256": "441db2be5d8bab1840fc907a81909e7253376a8dbbdfbe438dde7dc230d0238e"
+    },
+    {
+      "published": "seguridad/fuentes.html",
+      "published_sha256": "0ee852cf72db758559e1f18b1a8d426ef6843e7eb0c3ed53d6bdc46800299f86",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/source-manifest.json",
+      "source_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435"
+    },
+    {
+      "published": "seguridad/dashboard.html",
+      "published_sha256": "a89bcf64880667c9e47a71e4fe5d0cd487825ff8e42d8187a41dc04c6bc64dba",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/security-summary.json",
+      "source_sha256": "8b97a0c6d7b9a837ff72d0273c06200e592ede0a04347f81d8d5826aa2616ef6"
+    },
+    {
+      "published": "seguridad/sustento.json",
+      "published_sha256": "e19438d3ddf3721d201c0408f54507eabb0fa2294e425d05e9b1c48bdddd2ed3",
+      "transformed": true
+    },
+    {
+      "published": "seguridad/sustento.html",
+      "published_sha256": "00c9f83ad3d51c95e56aa8e5429aff9ab3dd5b80d01f30e2a31cf3a31cc23fb3",
+      "transformed": true
+    }
+  ],
+  "remote_review": {
+    "report": "actualizacion/index.html#seguridad",
+    "date": "2026-10-22T08:21:15.775Z",
+    "target": "https://wordpress.ingsoftware.lat"
+  },
+  "explanation": {
+    "report": "seguridad/sustento.html",
+    "references": [
+      {
+        "file": "seguridad/resumen.json",
+        "sha256": "e32d192d219da070410b4da173ed4d3fb3c05fc420a06bd542b62ba2560fc62e"
+      },
+      {
+        "file": "seguridad/frontend-zap.json",
+        "sha256": "bdea618b5ab51ab22f2226666b0589e1a1269fad0d0749114da2dc8bdd8e7e82"
+      },
+      {
+        "file": "seguridad/backend-zap.json",
+        "sha256": "ab96f5507ff3b1511f7e55ddfdf47422dfa1ae1c458bbd430c4f0346a4d746fc"
+      },
+      {
+        "file": "seguridad/csp-validation.json",
+        "sha256": "8e74b37c2700d9c218d4372e0c8580b7f2c796e75b7c357049bd4695ce368a5d"
+      },
+      {
+        "file": "seguridad/browser-security.json",
+        "sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1"
+      },
+      {
+        "file": "actualizacion/deployment.json",
+        "sha256": "643be25a643e94a34b97abd396e5d0516ce2f05eddc12e0ac9ada5c7e3efb287"
+      },
+      {
+        "file": "actualizacion/remote-csp-validation.json",
+        "sha256": "9ae2a3470270243e8212a181d01655982cbc118a058d7899fe88b207b9c6a1de"
+      },
+      {
+        "file": "actualizacion/remote-browser-security.json",
+        "sha256": "375c3083eea1c08c7bc2c5e0b5ca8f32830076e4cf3ba076b96f6445737e6ebb"
+      },
+      {
+        "file": "actualizacion/server-exposure.json",
+        "sha256": "83d7c8c73669f7cd63db8c85f91ced516f3367afcef4a5295353a8f13d447915"
+      }
+    ]
+  }
+}

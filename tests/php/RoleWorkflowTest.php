@@ -122,18 +122,19 @@ final class RoleWorkflowTest extends TestCase
         self::assertSame('publish',get_post_status($topic['id']));
         wp_set_current_user($this->member);$comment=Content::comment($topic['id'],'Comentario para moderar');
         wp_set_current_user($this->executive);
-        self::assertSame(200,$this->api('POST','admin/comments/'.$comment['id'],['decision'=>'approve'])->get_status());
+        self::assertSame(400,$this->api('POST','admin/comments/'.$comment['id'],['decision'=>'approve'])->get_status());
+        self::assertSame(200,$this->api('POST','admin/comments/'.$comment['id'],['decision'=>'approve','reason'=>'Comentario revisado y conforme.'])->get_status());
         self::assertSame(200,$this->api('DELETE','comments/'.$comment['id'])->get_status());
         self::assertSame(200,$this->api('GET','admin/contacts')->get_status());
     }
 
-    public function testExecutiveHasNoAccessToAdminOnlyManagement(): void
+    public function testExecutiveManagesUsersButCannotConfigureTheEnvironment(): void
     {
         wp_set_current_user($this->executive);
-        self::assertSame(403, $this->api('GET', 'admin/users')->get_status(), 'Gestión de usuarios es sólo de Admin');
+        self::assertSame(200, $this->api('GET', 'admin/users')->get_status(), 'Ejecutivo gestiona usuarios de ASCLA');
         self::assertSame(403, $this->api('POST', 'settings', ['demo' => true])->get_status(), 'Configuración del entorno es sólo de Admin');
         self::assertSame(403, $this->api('POST', 'ai/test')->get_status(), 'Integraciones/IA es sólo de Admin');
-        self::assertSame(403, $this->api('POST', 'admin/member/' . $this->member, ['suspended' => true])->get_status(), 'Suspender miembros es sólo de Admin');
+        self::assertSame(200, $this->api('POST', 'admin/member/' . $this->member, ['suspended' => true])->get_status(), 'Ejecutivo puede suspender asociados');
     }
 
     public function testExecutiveCanTriggerResourceProcessingJobsButModeratorCannot(): void
@@ -203,7 +204,7 @@ final class RoleWorkflowTest extends TestCase
         self::assertTrue(Content::comments($post['id'])[0]['can_delete']);
         self::assertSame(200,$this->api('DELETE','comments/'.$comment['id'])->get_status());self::assertSame('trash',wp_get_comment_status($comment['id']));
     }
-    public function testExecutiveCanReviewOwnEditorialDraftButCannotReadOrEditForeignDrafts(): void
+    public function testExecutiveReviewsOwnDraftAndManagesOtherPublishedEditorialContent(): void
     {
         wp_set_current_user($this->executive);$own=Content::save('resource',['title'=>'Recurso propio','body'=>'Borrador','status'=>'draft']);$this->posts[]=$own['id'];
         self::assertTrue($own['can_edit']);self::assertTrue($own['can_moderate']);
@@ -213,8 +214,8 @@ final class RoleWorkflowTest extends TestCase
             wp_set_current_user($user);self::assertSame(404,$this->api('GET','items/'.$foreign['id'])->get_status());
         }
         wp_set_current_user($this->admin);wp_update_post(['ID'=>$foreign['id'],'post_status'=>'publish']);wp_set_current_user($this->executive);
-        self::assertFalse($this->api('GET','items/'.$foreign['id'])->get_data()['can_edit']);
-        self::assertSame(403,$this->api('POST','content/resource/'.$foreign['id'],['title'=>'No permitido','body'=>'No permitido'])->get_status());
+        self::assertTrue($this->api('GET','items/'.$foreign['id'])->get_data()['can_edit']);
+        self::assertSame(200,$this->api('POST','content/resource/'.$foreign['id'],['title'=>'Revisión administrativa','body'=>'Contenido revisado'])->get_status());
     }
     public function testAdminPayloadAndJobsDoNotExposeOtherRolesPrivateData(): void
     {
@@ -225,8 +226,8 @@ final class RoleWorkflowTest extends TestCase
         wp_set_current_user($this->executive);$editorial=Content::save('resource',['title'=>'Borrador editorial','body'=>'Texto editorial','status'=>'draft']);$this->posts[]=$editorial['id'];
         $own=Queue::enqueue('video_metadata',['resource_id'=>$editorial['id']]);
         $data=$this->api('GET','admin')->get_data();self::assertContains($editorial['id'],array_column($data['pending'],'id'));self::assertContains($private['id'],array_column($data['pending'],'id'));
-        self::assertNotEmpty($data['comments']);self::assertNotEmpty($data['reports']);self::assertSame([],$data['audit']);
-        self::assertNotContains($question['id'],array_map('intval',array_column($data['jobs'],'id')));self::assertContains($own['id'],array_map('intval',array_column($data['jobs'],'id')));
+        self::assertNotEmpty($data['comments']);self::assertNotEmpty($data['reports']);self::assertNotEmpty($data['audit']);
+        self::assertContains($question['id'],array_map('intval',array_column($data['jobs'],'id')));self::assertContains($own['id'],array_map('intval',array_column($data['jobs'],'id')));
         wp_set_current_user($this->moderator);$data=$this->api('GET','admin')->get_data();
         self::assertContains($private['id'],array_column($data['pending'],'id'));self::assertNotContains($editorial['id'],array_column($data['pending'],'id'));self::assertSame([],$data['audit']);
         foreach([$question['id'],$own['id']] as $id){self::assertSame(404,$this->api('GET','jobs/'.$id)->get_status());self::assertSame(404,$this->api('POST','jobs/'.$id.'/retry')->get_status());}

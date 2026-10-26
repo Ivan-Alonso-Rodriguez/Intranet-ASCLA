@@ -1,0 +1,29 @@
+meta {
+  name: new-message-denied
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/conversations/{{conversationId}}/messages
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+  Content-Type: application/json
+}
+body:json {
+  {
+    "body": "QA: este mensaje no debe enviarse."
+  }
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("Desconexi\u00f3n impide mensajes nuevos", function () { expect(res.getStatus()).to.equal(403); });
+}

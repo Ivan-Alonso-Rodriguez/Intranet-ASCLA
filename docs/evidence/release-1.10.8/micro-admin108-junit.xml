@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="29" assertions="230" errors="0" failures="0" skipped="0" time="15.341570">
+    <testsuite name="MicroEventsTest" file="/opt/ascla-tests/php/MicroEventsTest.php" tests="13" assertions="138" errors="0" failures="0" skipped="0" time="10.532801">
+      <testcase name="testWeeklyBatchIsIdempotentWithIndependentConsentAndMandatoryReview" file="/opt/ascla-tests/php/MicroEventsTest.php" line="45" class="MicroEventsTest" classname="MicroEventsTest" assertions="16" time="1.101789"/>
+      <testcase name="testPriorityWindowOpensToMembersWhoOptedOutAndCannotBeBypassedByAuthor" file="/opt/ascla-tests/php/MicroEventsTest.php" line="61" class="MicroEventsTest" classname="MicroEventsTest" assertions="6" time="1.021327"/>
+      <testcase name="testInsufficientRegistrationsReopenAfterAdminExtendsDeadlineAndHistoryIsRetained" file="/opt/ascla-tests/php/MicroEventsTest.php" line="72" class="MicroEventsTest" classname="MicroEventsTest" assertions="9" time="1.315114"/>
+      <testcase name="testDenialNeedsReasonAndCannotDeleteOrRegenerateTheSameProposal" file="/opt/ascla-tests/php/MicroEventsTest.php" line="86" class="MicroEventsTest" classname="MicroEventsTest" assertions="6" time="0.584332"/>
+      <testcase name="testPlanningRespectsVolumeDistinctInterestsMinimumAndBlockedPairs" file="/opt/ascla-tests/php/MicroEventsTest.php" line="93" class="MicroEventsTest" classname="MicroEventsTest" assertions="25" time="0.492367"/>
+      <testcase name="testOnlyConfirmedMembersReceiveOneReminderAndFinishedStateIsRecorded" file="/opt/ascla-tests/php/MicroEventsTest.php" line="103" class="MicroEventsTest" classname="MicroEventsTest" assertions="8" time="0.996690"/>
+      <testcase name="testPendingProposalCanBeCancelledWithReasonWithoutLosingItsHistoryOrRecurringBatch" file="/opt/ascla-tests/php/MicroEventsTest.php" line="115" class="MicroEventsTest" classname="MicroEventsTest" assertions="12" time="0.569033"/>
+      <testcase name="testCancellingAnApprovedScheduledProposalStopsFuturePublication" file="/opt/ascla-tests/php/MicroEventsTest.php" line="127" class="MicroEventsTest" classname="MicroEventsTest" assertions="9" time="0.591003"/>
+      <testcase name="testReviewRefreshReopensAnApprovedGroupAfterRemovingAnIncompleteCandidate" file="/opt/ascla-tests/php/MicroEventsTest.php" line="142" class="MicroEventsTest" classname="MicroEventsTest" assertions="10" time="0.896202"/>
+      <testcase name="testReviewCancelsAnInsufficientGroupImmediatelyAndIsIdempotent" file="/opt/ascla-tests/php/MicroEventsTest.php" line="156" class="MicroEventsTest" classname="MicroEventsTest" assertions="10" time="0.538190"/>
+      <testcase name="testConsentChangesAfterReviewCannotBeApprovedAndOnlyAdministrationMayReconcileOrCancel" file="/opt/ascla-tests/php/MicroEventsTest.php" line="169" class="MicroEventsTest" classname="MicroEventsTest" assertions="9" time="0.557545"/>
+      <testcase name="testPublishedCancellationPreservesRegistrationsNotifiesOnceAndStopsReminders" file="/opt/ascla-tests/php/MicroEventsTest.php" line="182" class="MicroEventsTest" classname="MicroEventsTest" assertions="13" time="1.288145"/>
+      <testcase name="testFailedCancellationRollsBackTheProposalHistoryAndPublicationSchedule" file="/opt/ascla-tests/php/MicroEventsTest.php" line="194" class="MicroEventsTest" classname="MicroEventsTest" assertions="5" time="0.581064"/>
+    </testsuite>
+    <testsuite name="MicroGeneration108Test" file="/opt/ascla-tests/php/MicroGeneration108Test.php" tests="7" assertions="43" errors="0" failures="0" skipped="0" time="2.583805">
+      <testcase name="testFourEligibleMembersWithACommonInterestCanCreateAndRepeatWithoutDuplicates" file="/opt/ascla-tests/php/MicroGeneration108Test.php" line="35" class="MicroGeneration108Test" classname="MicroGeneration108Test" assertions="7" time="0.343038"/>
+      <testcase name="testZeroResultsFromAHigherMinimumCanBeRetriedAfterCorrectingTheSetting" file="/opt/ascla-tests/php/MicroGeneration108Test.php" line="41" class="MicroGeneration108Test" classname="MicroGeneration108Test" assertions="4" time="0.378689"/>
+      <testcase name="testFourWaitingMembersWithDifferentInterestsExplainTheMissingSharedGroup" file="/opt/ascla-tests/php/MicroGeneration108Test.php" line="47" class="MicroGeneration108Test" classname="MicroGeneration108Test" assertions="8" time="0.371610"/>
+      <testcase name="testHiddenInterestsAreNotUsedToForceAGroupOrLeakedInDiagnostics" file="/opt/ascla-tests/php/MicroGeneration108Test.php" line="56" class="MicroGeneration108Test" classname="MicroGeneration108Test" assertions="5" time="0.318416"/>
+      <testcase name="testBlocksExplainIncompatibilityWithoutBypassingThem" file="/opt/ascla-tests/php/MicroGeneration108Test.php" line="62" class="MicroGeneration108Test" classname="MicroGeneration108Test" assertions="4" time="0.385549"/>
+      <testcase name="testCancelledAndDeniedProposalsCanBeArchivedAndRestoredWithoutDeletingTheirRecords" file="/opt/ascla-tests/php/MicroGeneration108Test.php" line="68" class="MicroGeneration108Test" classname="MicroGeneration108Test" assertions="11" time="0.407515"/>
+      <testcase name="testDeniedArchiveKeepsTheDenialReasonAndRestoringDoesNotReopenApproval" file="/opt/ascla-tests/php/MicroGeneration108Test.php" line="79" class="MicroGeneration108Test" classname="MicroGeneration108Test" assertions="4" time="0.378988"/>
+    </testsuite>
+    <testsuite name="PrivacyLabels108Test" file="/opt/ascla-tests/php/PrivacyLabels108Test.php" tests="9" assertions="49" errors="0" failures="0" skipped="0" time="2.224964">
+      <testsuite name="PrivacyLabels108Test::testLegacyLabelsAreNaturalForAllReadersWithoutOverwritingTheSource" tests="4" assertions="26" errors="0" failures="0" skipped="0" time="1.010757">
+        <testcase name="testLegacyLabelsAreNaturalForAllReadersWithoutOverwritingTheSource with data set #0" file="/opt/ascla-tests/php/PrivacyLabels108Test.php" line="26" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="5" time="0.255589"/>
+        <testcase name="testLegacyLabelsAreNaturalForAllReadersWithoutOverwritingTheSource with data set #1" file="/opt/ascla-tests/php/PrivacyLabels108Test.php" line="26" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="7" time="0.249427"/>
+        <testcase name="testLegacyLabelsAreNaturalForAllReadersWithoutOverwritingTheSource with data set #2" file="/opt/ascla-tests/php/PrivacyLabels108Test.php" line="26" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="7" time="0.246064"/>
+        <testcase name="testLegacyLabelsAreNaturalForAllReadersWithoutOverwritingTheSource with data set #3" file="/opt/ascla-tests/php/PrivacyLabels108Test.php" line="26" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="7" time="0.259677"/>
+      </testsuite>
+      <testcase name="testAuthoredTitlesAndLiteralUsesOfTheWordAreNotRewritten" file="/opt/ascla-tests/php/PrivacyLabels108Test.php" line="35" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="9" time="0.239315"/>
+      <testcase name="testNewProposalsKeepTheInstitutionalLabel" file="/opt/ascla-tests/php/PrivacyLabels108Test.php" line="43" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="2" time="0.239066"/>
+      <testcase name="testGeneratedLegacySuffixIsRemovedWithoutRewritingAuthoredTitlesOrStoredSources" file="/opt/ascla-tests/php/PrivacyLabels108Test.php" line="47" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="3" time="0.230904"/>
+      <testcase name="testVisibleLegacyTitleIsSearchableAndHiddenIdentitiesRemainExcluded" file="/opt/ascla-tests/php/PrivacyLabels108Test.php" line="54" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="7" time="0.254045"/>
+      <testcase name="testSavedAssistantReferencesUseTheCurrentLabelAndStillHideIdentity" file="/opt/ascla-tests/php/PrivacyLabels108Test.php" line="62" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="2" time="0.250877"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

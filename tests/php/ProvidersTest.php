@@ -8,7 +8,7 @@ final class ProvidersTest extends TestCase
     private int $user; private $http; private array $settings; private array $posts=[]; private array $users=[]; private array $savedSecrets=[];
     protected function setUp(): void
     {
-        $this->settings=Settings::get();foreach(['ai_key','openai_key','deepseek_key','google_client_secret'] as $key)$this->savedSecrets[$key]=Secrets::get($key);$this->user=wp_insert_user(['user_login'=>'test_provider_'.bin2hex(random_bytes(4)),'user_pass'=>wp_generate_password(30),'role'=>'administrator']);wp_set_current_user($this->user);
+        $this->settings=Settings::get();foreach(['ai_key','openai_key','deepseek_key','supadata_key','google_client_secret'] as $key)$this->savedSecrets[$key]=Secrets::get($key);$this->user=wp_insert_user(['user_login'=>'test_provider_'.bin2hex(random_bytes(4)),'user_pass'=>wp_generate_password(30),'role'=>'administrator']);wp_set_current_user($this->user);
         Settings::save(['ai_mode'=>'real','ai_model'=>'gemini-test-model','ai_key'=>'fake-key-for-http-mock','google_client_id'=>'fake-client-id','google_client_secret'=>'fake-client-secret']);
     }
     protected function tearDown(): void
@@ -16,7 +16,7 @@ final class ProvidersTest extends TestCase
         if($this->http)remove_filter('pre_http_request',$this->http,10);
         foreach($this->posts as $id){Store::delete('registrations',['event_id'=>$id]);wp_delete_post($id,true);}
         foreach($this->users as $id)wp_delete_user($id);
-        foreach(['ai_key','openai_key','deepseek_key','google_client_secret','google_calendar_'.$this->user,'google_youtube_'.$this->user] as $key)Secrets::remove($key);
+        foreach(['ai_key','openai_key','deepseek_key','supadata_key','google_client_secret','google_calendar_'.$this->user,'google_youtube_'.$this->user] as $key)Secrets::remove($key);
         foreach($this->savedSecrets as $key=>$value){if($value!=='')Secrets::set($key,$value);}
         wp_delete_user($this->user);update_option('ascla_settings',$this->settings,false);wp_set_current_user(0);
     }
@@ -79,15 +79,15 @@ final class ProvidersTest extends TestCase
     {
         Secrets::remove('ai_key');$this->expectException(RuntimeException::class);$this->expectExceptionMessage('Configura una Gemini API Key');(new RealAIProvider())->generate('answer',[]);
     }
-    public function testYouTubeUsesAuthorizedCaptionsDownload(): void
+    public function testYouTubeUsesPublicSupadataCaptionsWithoutGoogleOAuth(): void
     {
-        Secrets::set('google_youtube_'.$this->user,wp_json_encode(['access_token'=>'fake','expires_at'=>time()+3600]));
-        $this->mock(static function($args,$url){self::assertSame('Bearer fake',$args['headers']['Authorization']);if(str_contains($url,'/captions?'))return self::response(['items'=>[['id'=>'caption-id']]]);self::assertSame('https://www.googleapis.com/youtube/v3/captions/caption-id?tfmt=srt',$url);return self::response("1\n00:00:00,000 --> 00:01:00,000\nTexto autorizado");});
-        $r=(new YouTubeVideoProvider())->transcript('abcdefghijk');self::assertSame('API REAL YouTube',$r['mode']);self::assertStringContainsString('Texto autorizado',$r['text']);
+        $key='fixture-caption-'.bin2hex(random_bytes(8));Secrets::set('supadata_key',$key);Settings::save(['supadata_generate'=>false]);
+        $this->mock(static function($args,$url)use($key){self::assertStringStartsWith('https://api.supadata.ai/v1/transcript?',$url);self::assertSame($key,$args['headers']['x-api-key']);self::assertArrayNotHasKey('Authorization',$args['headers']);self::assertStringContainsString('mode=native',$url);return self::response(['content'=>[['offset'=>0,'duration'=>60000,'text'=>'Texto público completo']],'lang'=>'es']);});
+        $r=(new YouTubeVideoProvider())->transcript('abcdefghijk');self::assertStringContainsString('Supadata',$r['mode']);self::assertStringContainsString('Texto público completo',$r['text']);self::assertStringContainsString('00:01:00,000',$r['text']);
     }
     public function testYouTubeDoesNotInventUnavailableCaptions(): void
     {
-        Secrets::set('google_youtube_'.$this->user,wp_json_encode(['access_token'=>'fake','expires_at'=>time()+3600]));$this->mock(static fn()=>self::response(['items'=>[]]));$this->expectException(RuntimeException::class);$this->expectExceptionMessage('No se encontraron subtítulos');(new YouTubeVideoProvider())->transcript('abcdefghijk');
+        Secrets::set('supadata_key','fixture-caption-'.bin2hex(random_bytes(8)));$this->mock(static fn()=>self::response(['error'=>'transcript-unavailable'],206));$this->expectException(RuntimeException::class);$this->expectExceptionMessage('no tiene subtítulos');(new YouTubeVideoProvider())->transcript('abcdefghijk');
     }
     public function testYouTubeMetadataUsesOfficialEndpointAndDuration(): void
     {

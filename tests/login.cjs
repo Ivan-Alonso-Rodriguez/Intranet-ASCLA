@@ -12,7 +12,8 @@ const env = Object.fromEntries(fs.readFileSync(path.join(root, '.env'), 'utf8').
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();
   const errors = [], checks = [];
-  const evidence = path.join(root, 'docs/evidence');
+  const evidence = path.join(root, 'test-results');
+  fs.mkdirSync(evidence, { recursive: true });
   page.on('pageerror', error => errors.push(error.message));
   try {
     await page.goto(base + '/aliados/');

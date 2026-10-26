@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-22T08:21:15.775Z",
+  "http_date": "2026-10-22T09:41:10.563Z",
+  "target": "https://wordpress.ingsoftware.lat",
+  "status": "FAIL",
+  "headers": {
+    "date": "2026-10-22T09:41:10.563Z",
+    "status": "FAIL",
+    "checks": 20,
+    "passed": 19,
+    "failed": [
+      {
+        "nombre": "Sin versión del servidor",
+        "cumple": false
+      }
+    ]
+  },
+  "browser": {
+    "status": "PASS",
+    "checks": 6,
+    "views": 42,
+    "js_errors": 0,
+    "csp_violations": 0
+  },
+  "server": "Apache/2.4.68 (Debian)",
+  "active_zap_rerun": {
+    "status": "PASS",
+    "date": "2026-10-22T09:11:27.133208+00:00",
+    "environment": "local-ephemeral-https",
+    "reason": "Nueva ejecución completada con el código actual: 14 rutas HTML y 18 operaciones GET REST. Cero alertas altas, medias o bajas; nueve informativas en páginas y una en API. El entorno y las credenciales temporales se retiraron.",
+    "report": "seguridad/dashboard.html"
+  }
+}

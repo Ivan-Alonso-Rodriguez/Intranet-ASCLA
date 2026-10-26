@@ -1,0 +1,31 @@
+meta {
+  name: 11. Cancelar el evento ficticio
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/events/{{eventoPublicacionId}}/cancel
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAdministrador}}
+  X-WP-Nonce: {{nonceAdministrador}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"reason": "Cierre de la prueba de publicación e inscripción."}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Validación: 11. Cancelar el evento ficticio", function () { expect(res.getBody().cancelled).to.equal(true); });
+}

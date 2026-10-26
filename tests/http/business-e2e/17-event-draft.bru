@@ -1,0 +1,34 @@
+meta {
+  name: event-draft
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/content/event
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{adminCookie}}
+  X-WP-Nonce: {{adminNonce}}
+  Content-Type: application/json
+}
+body:json {
+  {}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+script:pre-request {
+  req.setBody({title:bru.getEnvVar("prefix")+" Evento HTTP",body:"Encuentro sintético de aceptación QA.",status:"draft",meta:{chatham:false,start:new Date(Date.now()+3*86400000).toISOString(),end:new Date(Date.now()+3*86400000+3600000).toISOString(),capacity:5,modality:"Virtual",location:"Sala QA"}});
+}
+script:post-response {
+  if(res.getStatus()===200) { bru.setVar("eventId",res.getBody().id);bru.setVar("eventDraft",res.getBody()); }
+}
+tests {
+  test("Administrador crea borrador", function () { expect(res.getStatus()).to.equal(200); });
+  test("Estado borrador", function () { expect(res.getBody().status).to.equal("draft"); });
+}

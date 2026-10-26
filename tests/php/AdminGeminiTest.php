@@ -59,13 +59,14 @@ final class AdminGeminiTest extends TestCase
     {
         wp_set_current_user($this->users[2]);$p=$this->post('contact');
         self::assertSame(403,$this->api('POST','admin/contact/'.$p['id'],['status'=>'closed'])->get_status());
-        wp_set_current_user($this->users[1]);
-        foreach(['progress','closed','open'] as $state) {
-            $r=$this->api('POST','admin/contact/'.$p['id'],['status'=>$state]);self::assertSame(200,$r->get_status());self::assertSame($state,$r->get_data()['meta']['request_status']);
+        ascla_test_support_state($p['id'],$this->users[0]);
+        $before=count(get_post_meta($p['id'],'_ascla',true)['request_history']);
+        foreach(['progress','resolved','closed'] as $state) {
+            $r=$this->api('POST','admin/contact/'.$p['id'],['status'=>$state,'response'=>$state==='resolved'?'Atendida':'']);self::assertSame(200,$r->get_status());self::assertSame($state,$r->get_data()['meta']['request_status']);
             self::assertSame($state,get_post_meta($p['id'],'_ascla_request_status',true));
             $list=Administration::contacts(['q'=>$p['title'],'state'=>$state]);self::assertSame([$p['id']],array_column($list['items'],'id'));
         }
-        Administration::contactStatus($p['id'],'open');self::assertCount(3,get_post_meta($p['id'],'_ascla',true)['request_history']);
+        self::assertSame(409,$this->api('POST','admin/contact/'.$p['id'],['status'=>'open'])->get_status());self::assertCount($before+3,get_post_meta($p['id'],'_ascla',true)['request_history']);
         self::assertSame(400,$this->api('POST','admin/contact/'.$p['id'],['status'=>'invented'])->get_status());
     }
     public function testUsersAreAdminOnlyAndSuspensionCannotTargetSelfOrAdministrator(): void

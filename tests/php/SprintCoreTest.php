@@ -46,7 +46,7 @@ final class SprintCoreTest extends TestCase
         }
     }
     public function testHiddenNamesAreAliasedInProfilesSearchContentCommentsAndMessages(): void {
-        $uid=$this->users[1];wp_set_current_user($uid);Profiles::save(['first_name'=>'NombreReservado','last_name'=>'ApellidoReservado','hidden'=>['first_name'],'networking'=>true]);
+        $uid=$this->users[1];wp_set_current_user($uid);Profiles::save(ascla_test_profile(['first_name'=>'NombreReservado','last_name'=>'ApellidoReservado','hidden'=>['first_name'],'networking'=>true]));
         wp_set_current_user($this->users[0]);$post=$this->post('resource');wp_set_current_user($uid);Content::comment($post,'Opinión del asociado');
         wp_set_current_user($this->users[2]);$profile=Profiles::visible($uid);
         self::assertArrayNotHasKey('first_name',$profile);self::assertArrayNotHasKey('last_name',$profile);self::assertSame('Asociado ASCLA '.$uid,$profile['name']);
@@ -63,7 +63,7 @@ final class SprintCoreTest extends TestCase
         self::assertSame(1,Store::count('notifications',"user_id=%d AND kind='comment'",[$this->users[1]]));
         wp_set_current_user($this->users[0]);Settings::save(['moderate_comments'=>true]);wp_set_current_user($this->users[2]);
         $pending=Content::comment($post,'Comentario pendiente');self::assertSame(1,Store::count('notifications',"user_id=%d AND kind='comment'",[$this->users[1]]));
-        wp_set_current_user($this->users[0]);foreach([$pending['id'],$pending['id'],$immediate['id']] as $cid){self::assertSame(200,$this->api('admin/comments/'.$cid,['decision'=>'approve'])->get_status());}
+        wp_set_current_user($this->users[0]);foreach([$pending['id'],$pending['id'],$immediate['id']] as $cid){self::assertSame(200,$this->api('admin/comments/'.$cid,['decision'=>'approve','reason'=>'Comentario revisado y conforme.'])->get_status());}
         self::assertSame(2,Store::count('notifications',"user_id=%d AND kind='comment'",[$this->users[1]]));
     }
 }

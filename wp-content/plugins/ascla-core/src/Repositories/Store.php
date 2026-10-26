@@ -3,7 +3,7 @@ namespace ASCLA\Core\Repositories;
 
 final class Store
 {
-    private const TABLES=['conversations','participants','messages','relations','registrations','notifications','audit','jobs','media','attendance','imports','import_rows','user_interests'];
+    private const TABLES=['conversations','participants','messages','relations','registrations','notifications','audit','jobs','deliveries','media','attendance','imports','import_rows','user_interests'];
     public static function table(string $name): string
     {
         global $wpdb;
@@ -23,7 +23,8 @@ final class Store
     }
     public static function delete(string $table,array $where): void
     {
-        global $wpdb; $wpdb->delete(self::table($table),$where);
+        global $wpdb;
+        if ($wpdb->delete(self::table($table),$where)===false) { throw new RepositoryException('No se pudo eliminar el registro.'); }
     }
     public static function rows(string $table,string $where='1=1',array $args=[],string $suffix='ORDER BY id DESC LIMIT 100'): array
     {
@@ -47,5 +48,29 @@ final class Store
         global $wpdb; $name='ascla_'.substr(hash('sha256',$wpdb->prefix.$key),0,56);
         if ((int)$wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, %d)',$name,max(0,min(3,$timeout))))!==1) { throw new RepositoryException('Operación en curso. Intente nuevamente.'); }
         try { return $callback(); } finally { $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)',$name)); }
+    }
+    public static function atomic(string $key,callable $callback): mixed
+    {
+        return self::lock($key,static fn()=>Transaction::run($callback));
+    }
+    /** Normal contention is not an error for a background recovery attempt. */
+    public static function tryLock(string $key,callable $callback): bool
+    {
+        global $wpdb;$name='ascla_'.substr(hash('sha256',$wpdb->prefix.$key),0,56);
+        $result=$wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s,0)',$name));
+        if ($result===null || $wpdb->last_error!=='') { throw new RepositoryException('No se pudo comprobar el bloqueo.'); }
+        if ((int)$result!==1) { return false; }
+        try { $callback();return true; } finally { $wpdb->get_var($wpdb->prepare('SELECT RELEASE_LOCK(%s)',$name)); }
+    }
+    /** Hold a deterministic set of locks until the complete callback (including commit) ends. */
+    public static function locks(array $keys,callable $callback): mixed
+    {
+        $keys=array_values(array_unique($keys));sort($keys,SORT_STRING);
+        return self::acquireLocks($keys,0,$callback);
+    }
+    private static function acquireLocks(array $keys,int $offset,callable $callback): mixed
+    {
+        if (!isset($keys[$offset])) { return $callback(); }
+        return self::lock($keys[$offset],static fn()=>self::acquireLocks($keys,$offset+1,$callback));
     }
 }

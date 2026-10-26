@@ -1,0 +1,100 @@
+{
+  "format": "ascla-qa-refresh-v1",
+  "date": "2026-10-22T08:27:53.510Z",
+  "target": "https://wordpress.ingsoftware.lat",
+  "deployment": {
+    "checked_at": "2026-10-22T08:20:00.150Z",
+    "target": "https://wordpress.ingsoftware.lat",
+    "version": "1.10.9",
+    "local_reference_package_sha256": "f3430e4f82f34ce29434e7e11ac4bfd3441e3bc64050c9a3f7df7c9e8b9d71a5",
+    "assets": [
+      {
+        "file": "assets/app.js",
+        "local_sha256": "9cfc43300a16588472437559ae60a2d43cbca83d38d539ef9098add8751fc1bf",
+        "deployed_sha256": "9cfc43300a16588472437559ae60a2d43cbca83d38d539ef9098add8751fc1bf",
+        "matches": true
+      },
+      {
+        "file": "assets/app.css",
+        "local_sha256": "619425e488b83a3042420de2b988f802aa661a2f574314603f9ed5b9053465c1",
+        "deployed_sha256": "619425e488b83a3042420de2b988f802aa661a2f574314603f9ed5b9053465c1",
+        "matches": true
+      }
+    ],
+    "scope": "Public JavaScript and CSS match the current local package. Private server-side PHP files were not downloaded; behavior is checked by the executed API/UI tests."
+  },
+  "backend": {
+    "requests": 81,
+    "checks": 149,
+    "assistant_provider": "Google Gemini · API real"
+  },
+  "latest_ui": {
+    "tests": 14,
+    "passed": 14,
+    "videos": 16,
+    "screenshots": 16,
+    "cleanup": {
+      "status": "passed",
+      "owned_content": 9,
+      "removed": 9,
+      "method": "Owned test posts moved to trash; unrelated content and user profiles preserved."
+    }
+  },
+  "security": {
+    "headers": {
+      "date": "2026-10-22T09:41:10.563Z",
+      "status": "FAIL",
+      "checks": 20,
+      "passed": 19,
+      "failed": [
+        {
+          "nombre": "Sin versión del servidor",
+          "cumple": false
+        }
+      ]
+    },
+    "browser": {
+      "status": "PASS",
+      "checks": 6,
+      "views": 42,
+      "js_errors": 0,
+      "csp_violations": 0
+    },
+    "server": "Apache/2.4.68 (Debian)",
+    "active_zap_rerun": {
+      "status": "PASS",
+      "date": "2026-10-22T09:11:27.133208+00:00",
+      "environment": "local-ephemeral-https",
+      "reason": "Nueva ejecución completada con el código actual: 14 rutas HTML y 18 operaciones GET REST. Cero alertas altas, medias o bajas; nueve informativas en páginas y una en API. El entorno y las credenciales temporales se retiraron.",
+      "report": "seguridad/dashboard.html"
+    }
+  },
+  "test_sources": [
+    {
+      "file": "tests/qa-latest-ui.cjs",
+      "sha256": "77dfebf9617970918334267753232bccedd59867273c09b2679bef084607cc32"
+    },
+    {
+      "file": "tests/qa-security-browser.cjs",
+      "sha256": "401b60e440ba2123f134b0dabafd4461833f6056931fc15e231046d5e8eb870c"
+    },
+    {
+      "file": "scripts/check-security-headers.cjs",
+      "sha256": "2ab14b0a0569b072bb74244e729d96e389aaead0981ccf6cb764e9242b83d1ad"
+    },
+    {
+      "file": "scripts/check-server-exposure.cjs",
+      "sha256": "631d21e51e25f18e33d26d35396eb85e8a6411bbeb8c4e014bc9b8f2828a4b28"
+    },
+    {
+      "file": "scripts/qa-target-provenance.cjs",
+      "sha256": "a633b0f6b20328981d18e21fd0248b412090cb9e790ec351fc5ab864b399ad16"
+    }
+  ],
+  "limitations": [
+    "La comparación de despliegue verifica JavaScript y CSS públicos; las pruebas comprueban comportamiento del backend, sin descargar todos los PHP privados.",
+    "Las regresiones recientes son adicionales a los seis recorridos principales y no se suman como casos únicos del plan.",
+    "ZAP activo se volvió a ejecutar en HTTPS aislado con el código actual; sus resultados no se atribuyen al hosting publicado.",
+    "No se acredita Quality Gate, integración ZAP en Jenkins, pruebas de carga ni aceptación UAT."
+  ]
+}

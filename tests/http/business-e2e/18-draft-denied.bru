@@ -1,0 +1,23 @@
+meta {
+  name: draft-denied
+  type: http
+  seq: 18
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/items/{{eventId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("Asociado no lee borrador ajeno", function () { expect(res.getStatus()).to.equal(404); });
+}

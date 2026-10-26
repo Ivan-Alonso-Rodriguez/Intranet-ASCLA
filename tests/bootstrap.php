@@ -5,6 +5,11 @@ $_SERVER['REQUEST_METHOD']='GET';
 $_SERVER['SERVER_NAME']=$testUrl['host']??'localhost';
 require getenv('ASCLA_WP_ROOT')?:'/var/www/html/wp-load.php';
 if (wp_get_environment_type()!=='local') { throw new RuntimeException('Tests only run against a local disposable WordPress.'); }
+// Exercise legacy credential fixtures only in this guarded disposable process.
+putenv('ASCLA_EXTERNAL_SECRETS_ONLY=0');
 require_once ABSPATH.'wp-admin/includes/user.php';
 require_once ABSPATH.'wp-admin/includes/plugin.php';
 ASCLA\Core\Database\Installer::activate(false);
+
+require_once __DIR__.'/profile-fixture.php';
+require_once __DIR__.'/support-fixture.php';

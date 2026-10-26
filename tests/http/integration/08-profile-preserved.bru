@@ -1,0 +1,24 @@
+meta {
+  name: profile-preserved
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/profiles/{{aId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("Perfil se vuelve a consultar", function () { expect(res.getStatus()).to.equal(200); });
+  test("El rechazo conserva la empresa", function () { expect(res.getBody().company).to.equal(bru.getVar("previousCompany")); });
+}

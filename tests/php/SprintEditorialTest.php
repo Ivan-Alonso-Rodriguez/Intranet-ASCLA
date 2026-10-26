@@ -3,7 +3,7 @@ use PHPUnit\Framework\TestCase;
 use ASCLA\Core\Domain\{EntityRedactor,Grounding};
 final class SprintEditorialTest extends TestCase
 {
-    public function testUnknownPeopleOrganizationsAndAffiliationsAreRedacted(): void {
+    public function testAttributedSpeakersAffiliationsAndPrivateContactLinksAreRedacted(): void {
         $input='El ponente Juan Pérez compartió su experiencia. La directora María explicó el acuerdo. Pedro Gómez de Empresa Boreal presentó el marco. El gerente de Compañía Aurora respondió. Contacto: juan@boreal.example https://example.org/juan';
         $entities=EntityRedactor::detectEntities($input);self::assertNotEmpty($entities);
         $out=EntityRedactor::redact($input);
@@ -13,6 +13,34 @@ final class SprintEditorialTest extends TestCase
     public function testFinalOutputIsRedactedEvenIfProviderReintroducesIdentity(): void {
         $tree=EntityRedactor::tree(['summary'=>'La directora María aprobó la propuesta.','infographic'=>['key_points'=>['Pedro Gómez de Empresa Boreal intervino.']]]);
         self::assertStringNotContainsString('María',json_encode($tree));self::assertStringNotContainsString('Boreal',json_encode($tree));
+    }
+    public function testPublicReferencesCannotOverrideExplicitlyReservedIdentities(): void {
+        $title='Foro Internacional con Juan Pérez';$known=[' Juan Pérez '];
+        $text=$title.'. La directora María respondió.';
+        $out=EntityRedactor::redact($text,$known,[$title]);
+        self::assertStringContainsString('Foro Internacional',$out);self::assertStringNotContainsString('identidad reservada',$out);
+        foreach(['Juan Pérez','María','participante'] as $secret)self::assertStringNotContainsString($secret,$out);
+        self::assertTrue(EntityRedactor::validateRedaction($out,$known,[$title])['valid']);
+        self::assertFalse(EntityRedactor::validateRedaction($text,$known,[$title])['valid']);
+        self::assertSame($out,EntityRedactor::redact($out,$known,[$title]));
+    }
+    public function testPublicNamesInstitutionsStandardsAndDocumentsAreNotAssumedConfidential(): void {
+        $text="Gobierno Corporativo: se citan Michael Porter y Peter Drucker, Banco Mundial y Universidad de los Andes. Balanced Scorecard, COSO ERM, ISO 37000 y Ley General de Sociedades. https://www.iso.org/standard/65036.html";
+        self::assertSame($text,EntityRedactor::redact($text));
+        self::assertTrue(EntityRedactor::validateRedaction($text)['valid']);
+        $reserved=EntityRedactor::redact($text,['Michael Porter']);
+        self::assertStringNotContainsString('Michael Porter',$reserved);self::assertStringContainsString('Peter Drucker',$reserved);self::assertStringContainsString('Banco Mundial',$reserved);
+        self::assertTrue(EntityRedactor::validateRedaction('La norma ISO 37000 es una referencia.',['ISOX'])['valid']);
+    }
+    public function testLegacyAndProviderLabelsAreRemovedWithoutChangingLegitimatePrivacyVocabulary(): void {
+        foreach (['[identidad reservada]: Se revisó ISO 37000.','La identidad reservada explicó ISO 37000.','Reserved identity: ISO 37000.'] as $text) {
+            $clean=EntityRedactor::cleanLabels($text);
+            foreach (['identidad reservada','Reserved identity','asclaprivateentity','[',']'] as $label) self::assertStringNotContainsString($label,$clean);
+            self::assertStringContainsString('ISO 37000',$clean);self::assertSame($clean,EntityRedactor::cleanLabels($clean));
+        }
+        self::assertSame('Información reservada y protección de datos.',EntityRedactor::cleanLabels('Información reservada y protección de datos.'));
+        $decoded=\ASCLA\Core\Integrations\AIProviderSupport::decodeObject('{"text":"La identidad reservada explicó ISO 37000.","concepts":["Balanced Scorecard"],"id":12}','Local fixture');
+        self::assertSame('Se explicó ISO 37000.',$decoded['text']);self::assertSame(['Balanced Scorecard'],$decoded['concepts']);self::assertSame(12,$decoded['id']);
     }
     public function testNaturalAnswerIsPreservedAndOnlyUnknownReferencesAreRemoved(): void {
         $body='El directorio puede revisar los riesgos. La evaluación tiene seguimiento.';

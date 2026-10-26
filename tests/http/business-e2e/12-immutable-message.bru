@@ -1,0 +1,23 @@
+meta {
+  name: immutable-message
+  type: http
+  seq: 12
+}
+
+delete {
+  url: {{base}}/wp-json/ascla/v1/conversations/{{conversationId}}/messages/{{messageId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("Mensaje enviado no se puede borrar", function () { expect(res.getStatus()).to.equal(403); });
+}

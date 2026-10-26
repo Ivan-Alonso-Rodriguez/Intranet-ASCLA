@@ -35,11 +35,11 @@ def generate():
     table='\n'.join(f"| {r['name']} | {r['concurrency']} | {r['requests']} | {r['seconds']} | {r['p95_ms']} | {r['errors']} |" for r in load['profiles'])
     largest=volume['profiles'][-1]
     volume_table='\n'.join(f"| {m['operation']} | {m['ms']} | {m['queries']} | {m['max_query_ms']} | {m['slow_queries_over_100ms']} |" for m in largest['measurements'])
-    login=json.loads((ROOT/'docs/evidence/login.json').read_text(encoding='utf-8-sig'))
+    login=read('login.json')
     assert login['status']=='passed'
     report=f"""# Informe de calidad — ASCLA Core {port['plugin']}
 
-Fecha: {datetime.date.today().isoformat()}. Este informe corresponde al ZIP actual y sustituye las métricas anteriores. Pruebas con datos ficticios locales. WordPress Core, Elementor, terceros y dependencias de desarrollo quedan fuera del código propio medido.
+Fecha de generación: {datetime.date.today().isoformat()}. Este informe reúne artefactos locales y comprueba el ZIP contra las fuentes. Antes de usarlo para una entrega, verifica la fecha, revisión y alcance de cada evidencia; no sustituye una aceptación posterior ni certifica el servidor publicado. WordPress Core, Elementor, terceros y dependencias de desarrollo quedan fuera del código propio medido.
 
 ## Resultados medidos
 
@@ -47,7 +47,7 @@ Fecha: {datetime.date.today().isoformat()}. Este informe corresponde al ZIP actu
 |---|---|
 | PHPUnit | {junit['tests']} pruebas, {junit['assertions']} aserciones; cero fallos/errores |
 | Regresión de navegador | {len(e2e['results'])} comprobaciones; cero errores JavaScript |
-| Aceptación 1.1.0 | {len(completion['checks'])} comprobaciones en escritorio y móvil |
+| Aceptación complementaria | {len(completion['checks'])} comprobaciones en escritorio y móvil |
 | Acceso y recuperación | {len(login['checks'])} comprobaciones; sin correo real |
 | ZIP en instalación nueva | {len(browser['pages'])} páginas con enlaces predeterminados |
 | Cobertura PHP | {php[1]}% {php[2]} líneas de clases/servicios |
@@ -121,14 +121,14 @@ OpenAI, YouTube y Calendar necesitan credenciales, consentimiento y prueba real.
     python scripts/sonar.py report
     python scripts/report.py
 
-Conserva la salida de la instalación nueva en test-results/portability-fresh.json antes de ejecutar la actualización. Guarda el JSON de volumen en test-results/volume-current.json con UTF-8. Para instalación nueva usa scripts/portability.ps1 -Project NOMBRE_NUEVO después de detener el entorno que ocupa 8089; conserva sus volúmenes. Sonar requiere el servicio de compose.quality.yaml en estado UP y configuración inicial mediante scripts/sonar.py init y gate. Los siguientes análisis reutilizan el token ignorado por Git, que vence el 12 de septiembre de 2026.
+Conserva la salida de la instalación nueva en test-results/portability-fresh.json antes de ejecutar la actualización. Guarda el JSON de volumen en test-results/volume-current.json con UTF-8. Para instalación nueva usa scripts/portability.ps1 -Project NOMBRE_NUEVO después de detener el entorno que ocupa 8089; conserva sus volúmenes. Sonar requiere el servicio de compose.quality.yaml en estado UP y configuración inicial mediante scripts/sonar.py init y gate. Utiliza una credencial privada vigente; no se presupone una fecha de validez fija.
 
 ZIP: **{len(files)} archivos**, **{archive.stat().st_size} bytes**, SHA-256 **{digest}**. Este generador verifica que el ZIP coincide con los archivos actuales. El build es reproducible.
 
-Evidencias compactas en docs/evidence/; XML y LCOV completos en coverage/. [Detalle de la entrega](COMPLETION_1.1.0.md).
+Este reporte generado y sus evidencias compactas permanecen en test-results/quality-evidence/; XML y LCOV completos, en coverage/. [Estado y alcance vigentes](../COMPLIANCE.md).
 """
-    (ROOT/'docs/QUALITY_REPORT.md').write_text(report,encoding='utf8')
-    evidence=ROOT/'docs/evidence'; evidence.mkdir(exist_ok=True)
+    (RESULT/'quality-summary.md').write_text(report,encoding='utf8')
+    evidence=RESULT/'quality-evidence'; evidence.mkdir(exist_ok=True)
     for name in ['sonar-metrics.json','sonar-gate.json','sonar-hotspots.json','performance.json','volume-current.json','portability.json','portability-fresh.json','portability-update.json','portability-browser.json','e2e.json','completion.json','sidebar.json']:
         (evidence/name).write_text(json.dumps(read(name),indent=2,ensure_ascii=False),encoding='utf8')
     issues=read('sonar-issues.json')

@@ -1,0 +1,124 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-23T20:11:30.871Z",
+  "scope": "Real disposable loopback WordPress; synthetic editorial text; desktop/mobile, light/dark, complete/sparse/long/escaped resources. No external transcription, AI generation, remote deployment or security audit.",
+  "package_sha256": "4e8bf212e2832dc60f9c559b1b7e9b8ec9338ec3e11af4e5e58568628b39b1db",
+  "checks": [
+    "Párrafos íntegros, tipografía legible y conclusiones numeradas: desktop-light",
+    "Referencias adaptables y conceptos compactos, sin desbordes ni infracciones automáticas: desktop-light",
+    "Las referencias al video y el comentario conservan su funcionamiento: desktop-light",
+    "Párrafos íntegros, tipografía legible y conclusiones numeradas: mobile-light",
+    "Referencias adaptables y conceptos compactos, sin desbordes ni infracciones automáticas: mobile-light",
+    "Las referencias al video y el comentario conservan su funcionamiento: mobile-light",
+    "Párrafos íntegros, tipografía legible y conclusiones numeradas: desktop-dark",
+    "Referencias adaptables y conceptos compactos, sin desbordes ni infracciones automáticas: desktop-dark",
+    "Las referencias al video y el comentario conservan su funcionamiento: desktop-dark",
+    "Párrafos íntegros, tipografía legible y conclusiones numeradas: mobile-dark",
+    "Referencias adaptables y conceptos compactos, sin desbordes ni infracciones automáticas: mobile-dark",
+    "Las referencias al video y el comentario conservan su funcionamiento: mobile-dark",
+    "Las listas largas mantienen todas sus entradas y las etiquetas extensas se ajustan al ancho",
+    "Un recurso con solo resumen presenta un único bloque y no deja secciones vacías",
+    "El contenido se presenta como texto seguro, sin ejecutar HTML",
+    "Un recurso sin material generado mantiene su presentación y conversación existentes"
+  ],
+  "scans": [
+    {
+      "name": "resumen-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "resumen-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "resumen-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "resumen-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "conceptos-largos-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "resumen-breve-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    }
+  ],
+  "screens": [
+    "resumen-desktop-light",
+    "resumen-desktop-light-referencias",
+    "resumen-mobile-light",
+    "resumen-mobile-light-referencias",
+    "resumen-desktop-dark",
+    "resumen-desktop-dark-referencias",
+    "resumen-mobile-dark",
+    "resumen-mobile-dark-referencias",
+    "conceptos-largos-mobile-dark",
+    "resumen-breve-mobile-dark"
+  ],
+  "errors": [],
+  "package_manifest": "docs/evidence/release-1.11.0/package-summary.json",
+  "installer": {
+    "version": "1.11.0",
+    "artifact": "dist/ascla-core-instalable.zip",
+    "sha256": "5d2859ee8d27312be76d5b0b9fa16ac223af274ddc76fcdf4af7bf4162640055",
+    "bytes": 2023873,
+    "files": 211,
+    "upload_limit_bytes": 2097152,
+    "below_2MiB": true,
+    "crc_valid": true,
+    "all_retained_files_identical_to_complete_release": true,
+    "complete_release_sha256": "4e8bf212e2832dc60f9c559b1b7e9b8ec9338ec3e11af4e5e58568628b39b1db",
+    "complete_release_unchanged": true,
+    "omitted_translation_sources": [
+      "ascla-core/languages/ascla-core-en_US.po",
+      "ascla-core/languages/ascla-core-es_ES.po"
+    ],
+    "runtime_translation_catalogs_retained": true,
+    "scope": "Packaging-only variant; existing PHP, JavaScript, PDF.js, CSS and compiled translations remain byte-identical to the verified complete release. No server settings were changed and no new functional test run is claimed."
+  },
+  "production_files_changed_since_supadata": [
+    "ascla-core/assets/app.css",
+    "ascla-core/assets/content-ui.js",
+    "ascla-core/readme.txt"
+  ],
+  "php_and_integrations_unchanged": true,
+  "phpunit_rerun": false,
+  "content_policy": "Presentation of existing text only. Paragraphs, numbered conclusions, paired references, and wrapping concept/keyword lists. No source rewrite, new generation or remote provider request.",
+  "native_report": "test-results/summary1110/index.html",
+  "visual_review": "Desktop dark and mobile light screenshots reviewed; readable paragraphs and contrast, compact reference/tag groups, no horizontal overflow.",
+  "temporary_environment_cleanup": "completed; disposable containers, volumes, users and private access files removed"
+}

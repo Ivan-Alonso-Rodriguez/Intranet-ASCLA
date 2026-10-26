@@ -15,14 +15,18 @@ final class Router
     private static function dispatch(\WP_REST_Request $request,callable $callback): mixed
     {
         try {
-            if (strlen((string)$request->get_body())>1048576) { throw new ApiException('Solicitud demasiado grande.',413); }
+            $maxBody=preg_match('~^/ascla/v1/content/resource(?:/\d+)?$~',$request->get_route())?12582912:1048576;
+            if (strlen((string)$request->get_body())>$maxBody) { throw new ApiException('Solicitud demasiado grande.',413); }
             if ($request->get_method()!=='GET') { Access::limit('write',100); }
+            RequestValidation::validate($request);
             return rest_ensure_response($callback($request));
         } catch (ApiException $e) {
-            return new \WP_Error('ascla_error',$e->getMessage(),['status'=>$e->getCode()?:400]);
+            if ($e->getCode()>=500) { \ASCLA\Core\Services\TechnicalErrors::record(\ASCLA\Core\Services\TechnicalErrors::routeModule($request->get_route()),'request_failed',$e); }
+            return new \WP_Error('ascla_error',\ASCLA\Core\Frontend\Translations::error($e->getMessage()),['status'=>$e->getCode()?:400]);
         } catch (\Throwable $e) {
-            Audit::record('request_failed',0,get_class($e));
-            return new \WP_Error('ascla_error',$e instanceof \RuntimeException?$e->getMessage():'No se pudo completar la operación. Reintente o contacte al administrador.',['status'=>500]);
+            $database=$e instanceof \ASCLA\Core\Repositories\RepositoryException;
+            \ASCLA\Core\Services\TechnicalErrors::record($database?'database':\ASCLA\Core\Services\TechnicalErrors::routeModule($request->get_route()),'request_failed',$e,severity:$database?'critical':'error');
+            return new \WP_Error('ascla_error',\ASCLA\Core\Frontend\Translations::error($e instanceof \RuntimeException?$e->getMessage():'No se pudo completar la operación. Reintente o contacte al administrador.'),['status'=>500]);
         }
     }
     public static function route(string $path,string $methods,callable $callback,string $cap='ascla_access'): void
@@ -50,16 +54,27 @@ final class RouterRoutes
 {
     public static function community(): void
     {
-        Router::route('/bootstrap','GET',static fn()=>['me'=>Profiles::visible(get_current_user_id()),'profile_completion'=>Profiles::completion(get_current_user_id()),'can_create'=>array_combine(array_keys(\ASCLA\Core\Domain\Catalog::TYPES),array_map([Content::class,'canCreate'],array_keys(\ASCLA\Core\Domain\Catalog::TYPES))),'birthday'=>\ASCLA\Core\Services\Birthdays::info(get_current_user_id()),'catalogs'=>Profiles::catalogs(),'admin_area'=>current_user_can('ascla_admin_area'),'moderator'=>current_user_can('ascla_moderate'),'executive'=>current_user_can('ascla_publish'),'admin'=>current_user_can('ascla_manage'),'demo'=>Settings::get()['demo'],'ai_mode'=>Knowledge::provider()->mode(),'google_connected'=>\ASCLA\Core\Integrations\Secrets::get('google_calendar_'.get_current_user_id())!=='','notification_cursor'=>Notifications::latestId()]);
+        Router::route('/bootstrap','GET',[\ASCLA\Core\Services\Bootstrap::class,'get']);
         Router::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
         Router::route('/profiles','GET',static fn($r)=>Profiles::directory($r->get_params()));
         Router::route('/locations/countries','GET',static fn()=>Locations::countries());
         Router::route('/locations/cities','GET',static fn($r)=>Locations::cities((string)$r['country'],(string)($r['q']??''),rest_sanitize_boolean($r['exact']??false)));
+        Router::route('/profiles/review','POST',static fn($r)=>\ASCLA\Core\Services\ProfileReview::forClient(\ASCLA\Core\Services\ProfileReview::respond((string)$r['decision'])),'ascla_write');
         Router::route('/profiles/me','POST',static fn($r)=>Profiles::save($r->get_json_params()?:[]),'ascla_write');
+        Router::route('/interests/learned','GET',static fn()=>\ASCLA\Core\Services\LearnedInterests::get());
+        Router::route('/items/(?P<id>\d+)/reading','POST',static fn($r)=>\ASCLA\Core\Services\LearnedInterests::start((int)$r['id']),'ascla_write');
+        Router::route('/items/(?P<id>\d+)/read','POST',static fn($r)=>\ASCLA\Core\Services\LearnedInterests::read((int)$r['id'],Access::text($r['ticket']??'',40)),'ascla_write');
+        Router::route('/account/session','GET',static fn()=>\ASCLA\Core\Services\SessionPolicy::status());
+        Router::route('/account/session','POST',static fn()=>\ASCLA\Core\Services\SessionPolicy::status(true));
         Router::route('/account/password','POST',static fn($r)=>Account::changePassword($r->get_json_params()?:[]),'ascla_write');
         Router::route('/account/password-reset','POST',static fn()=>Account::sendPasswordReset(),'ascla_write');
         Router::route('/profiles/(?P<id>\d+)','GET',static fn($r)=>\ASCLA\Core\Services\Connections::profile((int)$r['id']));
         Router::route('/matching','GET',static fn()=>Matching::recommendations());
+        Router::route('/recommendations','GET',static fn()=>Matching::overview());
+        Router::route('/recommendations/dismissed','GET',static fn()=>Matching::dismissed());
+        Router::route('/recommendations/(?P<id>\d+)/dismiss','POST',static fn($r)=>Matching::dismiss((int)$r['id']),'ascla_write');
+        Router::route('/recommendations/(?P<id>\d+)/restore','POST',static fn($r)=>Matching::restore((int)$r['id']),'ascla_write');
+        Router::route('/recommendations/(?P<id>\d+)/view','POST',static fn($r)=>Matching::select((int)$r['id']),'ascla_write');
         Router::route('/matching/(?P<id>\d+)','GET',static fn($r)=>Matching::between(get_current_user_id(),(int)$r['id'],$r->has_param('explain')?rest_sanitize_boolean($r['explain']):true));
         Router::route('/matching/(?P<id>\d+)/intro','GET',static fn($r)=>Matching::intro((int)$r['id']));
         Router::route('/connections','GET',static fn()=>\ASCLA\Core\Services\Connections::listing());
@@ -68,7 +83,7 @@ final class RouterRoutes
         Router::route('/conversation-requests','POST',static fn($r)=>ConversationRequests::request((int)$r['target'],(string)$r['body']),'ascla_write');
         Router::route('/conversation-requests/(?P<id>\d+)/respond','POST',static fn($r)=>ConversationRequests::respond((int)$r['id'],(string)$r['decision']),'ascla_write');
         Router::route('/conversation-requests/(?P<target>\d+)/cancel','POST',static fn($r)=>ConversationRequests::cancel((int)$r['target']),'ascla_write');
-        Router::route('/relations','POST',static fn($r)=>Messaging::relation((int)$r['target'],(string)$r['kind'],rest_sanitize_boolean($r['active'])),'ascla_write');
+        Router::route('/relations','POST',static fn($r)=>Messaging::relation((int)$r['target'],(string)$r['kind'],rest_sanitize_boolean($r['active']),(string)($r['message']??'')),'ascla_write');
         Router::route('/content/(?P<type>[a-z]+)','GET',static fn($r)=>Content::listing($r['type'],$r->get_params()));
         Router::route('/content/(?P<type>[a-z]+)','POST',static fn($r)=>Content::save($r['type'],$r->get_json_params()?:[]),'ascla_write');
         Router::route('/content/(?P<type>[a-z]+)/(?P<id>\d+)','POST',static fn($r)=>Content::save($r['type'],$r->get_json_params()?:[],(int)$r['id']),'ascla_write');
@@ -76,27 +91,36 @@ final class RouterRoutes
         Router::route('/items/(?P<id>\d+)/video-duration','POST',static fn($r)=>Knowledge::browserVideoDuration((int)$r['id'],(int)($r['duration_seconds']??0)),'ascla_admin_area');
         Router::route('/items/(?P<id>\d+)','DELETE',static fn($r)=>Content::remove((int)$r['id']),'ascla_write');
         Router::route('/comments/(?P<id>\d+)','DELETE',static fn($r)=>Content::removeComment((int)$r['id']),'ascla_write');
+        Router::route('/comments/mine','GET',static fn($r)=>\ASCLA\Core\Services\CommentHistory::listing($r->get_params()));
         Router::route('/items/(?P<id>\d+)/comments','GET',static fn($r)=>Content::comments((int)$r['id']));
         Router::route('/items/(?P<id>\d+)/comments','POST',static fn($r)=>Content::comment((int)$r['id'],(string)$r['body'],(int)($r['parent']??0)),'ascla_write');
-        Router::route('/comments/(?P<id>\d+)/reaction','POST',static fn($r)=>Content::reactComment((int)$r['id'],rest_sanitize_boolean($r['active'])),'ascla_write');
+        Router::route('/comments/(?P<id>\d+)/reaction','POST',static fn($r)=>Content::reactComment((int)$r['id'],rest_sanitize_boolean($r['active']),(string)($r['reaction']??'like')),'ascla_write');
         Router::route('/comments/(?P<id>\d+)/report','POST',static fn($r)=>Content::reportComment((int)$r['id'],(string)$r['reason'],(string)($r['detail']??'')),'ascla_write');
-        Router::route('/items/(?P<id>\d+)/reaction','POST',static fn($r)=>Content::react((int)$r['id'],(string)$r['kind'],rest_sanitize_boolean($r['active'])),'ascla_write');
+        Router::route('/items/(?P<id>\d+)/reaction','POST',static fn($r)=>Content::react((int)$r['id'],(string)$r['kind'],rest_sanitize_boolean($r['active']),(string)($r['reaction']??'like')),'ascla_write');
         Router::route('/items/(?P<id>\d+)/report','POST',static fn($r)=>Content::report((int)$r['id'],(string)$r['reason'],(string)($r['detail']??'')),'ascla_write');
         Router::route('/items/(?P<id>\d+)/moderate','POST',static fn($r)=>Content::moderate((int)$r['id'],(string)$r['decision'],(string)$r['reason'],rest_sanitize_boolean($r['reviewed'])),'ascla_admin_area');
         Router::route('/conversations','GET',static fn($r)=>Messaging::conversations(Access::text($r['q']??'',120)));
         Router::route('/conversations','POST',static fn($r)=>Messaging::start((int)$r['target']),'ascla_write');
         Router::route('/conversations/group','POST',static fn($r)=>Messaging::createGroup((string)$r['title'],(array)($r['users']??[]),(int)($r['photo_id']??0),(string)($r['description']??'')),'ascla_write');
         Router::route('/conversations/(?P<id>\d+)/messages','GET',static fn($r)=>Messaging::messages((int)$r['id'],(int)$r['before'],$r->has_param('after')?(int)$r['after']:null));
+        Router::route('/conversations/(?P<id>\d+)/hide','POST',static fn($r)=>\ASCLA\Core\Services\ConversationVisibility::hide((int)$r['id']),'ascla_write');
+        Router::route('/conversations/(?P<id>\d+)/read','POST',static fn($r)=>\ASCLA\Core\Services\ConversationVisibility::read((int)$r['id'],(int)$r['last']),'ascla_write');
         Router::route('/conversations/(?P<id>\d+)/messages','POST',static fn($r)=>Messaging::send((int)$r['id'],(string)$r['body']),'ascla_write');
         Router::route('/conversations/(?P<id>\d+)/messages/(?P<message>\d+)','DELETE',static fn($r)=>Messaging::removeMessage((int)$r['id'],(int)$r['message']),'ascla_write');
         Router::route('/events/(?P<id>\d+)','GET',static fn($r)=>Events::detail((int)$r['id']));
         Router::route('/events/(?P<id>\d+)/invite','POST',static fn($r)=>Events::invite((int)$r['id'],(array)$r['users']),'ascla_publish');
-        Router::route('/events/(?P<id>\d+)/cancel','POST',static fn($r)=>Events::cancel((int)$r['id']),'ascla_publish');
+        Router::route('/events/(?P<id>\d+)/cancel','POST',static fn($r)=>Events::cancel((int)$r['id'],(string)($r['reason']??'')),'ascla_publish');
+        Router::route('/events/(?P<id>\d+)/reactivate','POST',static fn($r)=>\ASCLA\Core\Services\EventReactivation::run((int)$r['id']),'ascla_publish');
+        Router::route('/events/(?P<id>\d+)/candidates','POST',static fn($r)=>\ASCLA\Core\Services\MicroEligibility::review((int)$r['id']),'ascla_manage');
+        Router::route('/events/(?P<id>\d+)/archive','POST',static fn($r)=>\ASCLA\Core\Services\MicroArchive::set((int)$r['id'],\ASCLA\Core\Services\FormRules::boolean($r['archived'])),'ascla_manage');
+        Router::route('/microevents/diagnostics','GET',static fn()=>\ASCLA\Core\Services\MicroEvents::diagnostics(),'ascla_publish');
         Router::route('/events/(?P<id>\d+)/register','POST',static fn($r)=>Events::register((int)$r['id'],(string)$r['status']),'ascla_write');
+        Router::route('/events/(?P<id>\d+)/calendar-sync','POST',static fn($r)=>\ASCLA\Core\Services\EventCalendar::retry((int)$r['id']),'ascla_write');
     }
 
     public static function notifications(): void
     {        Router::route('/notifications','GET',static fn()=>Notifications::list());
+        Router::route('/notifications','DELETE',static fn($r)=>Notifications::deleteAll((int)$r['through']));
         Router::route('/notifications/feed','GET',static fn($r)=>Notifications::feed($r->get_params()));
         Router::route('/notifications/toasts','GET',static fn($r)=>Notifications::toastFeed((int)($r['after']??0)));
         Router::route('/notifications/summary','GET',static fn()=>Notifications::summary());
@@ -119,11 +143,16 @@ final class RouterRoutes
         Router::route('/assistant/thread','GET',static fn($r)=>Queue::thread((string)($r['thread']??'')));
         Router::route('/jobs/(?P<id>\d+)','GET',static fn($r)=>Queue::get((int)$r['id']));
         Router::route('/jobs/(?P<id>\d+)/retry','POST',static fn($r)=>Queue::retry((int)$r['id']));
+        Router::route('/resources/(?P<id>\d+)/regenerate','POST',static function($r){
+            Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden gestionar recursos.',403);
+            Access::limit('resource_regenerate',5,300);
+            return \ASCLA\Core\Services\VideoPreparation::regenerate((int)$r['id']);
+        },'ascla_admin_area');
         Router::route('/jobs','POST',static function($r) {
-            $kind=(string)$r['kind']; Access::require(in_array($kind,['multimedia','microevents','social','video_metadata'],true),'Tipo de trabajo no válido.',400);
+            $kind=(string)$r['kind']; Access::require(in_array($kind,['transcript','multimedia','microevents','social','video_metadata'],true),'Tipo de trabajo no válido.',400);
             if ($kind==='microevents') { Access::require(Access::canPublish()); }
             if ($kind==='social') { Access::require(current_user_can('ascla_moderate')); }
-            if (in_array($kind,['multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden gestionar recursos.',403); Content::get((int)$r['resource_id']); }
+            if (in_array($kind,['transcript','multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Solo un Ejecutivo o un administrador pueden gestionar recursos.',403); Content::get((int)$r['resource_id']); }
             Access::limit('admin_job',10,300); return Queue::enqueue($kind,['resource_id'=>(int)$r['resource_id']]);
         },'ascla_admin_area');
         Router::route('/ai/test','POST',static function(){
@@ -134,10 +163,17 @@ final class RouterRoutes
                 'deepseek'=>\ASCLA\Core\Integrations\DeepSeekProvider::test(),
                 default=>\ASCLA\Core\Integrations\RealAIProvider::test(),
             };
-        },'ascla_manage');
+        },'ascla_configure');
         Router::route('/admin/users','GET',static fn($r)=>\ASCLA\Core\Services\Administration::users($r->get_params()),'ascla_manage');
+        Router::route('/admin/allies','GET',static fn($r)=>\ASCLA\Core\Services\Allies::listing($r->get_params()),'ascla_manage');
+        Router::route('/admin/editorial/(?P<type>gallery|resource)','GET',static fn($r)=>\ASCLA\Core\Services\EditorialRegistry::listing($r['type'],$r->get_params()),'ascla_admin_area');
+        Router::route('/admin/editorial/(?P<type>gallery|resource)/(?P<id>\d+)/history','GET',static fn($r)=>\ASCLA\Core\Services\EditorialRegistry::history($r['type'],(int)$r['id']),'ascla_admin_area');
+        Router::route('/admin/allies/(?P<id>\d+)/status','POST',static fn($r)=>\ASCLA\Core\Services\Allies::changeStatus((int)$r['id'],Access::text($r['state']??'',20)),'ascla_manage');
+        Router::route('/admin/allies/(?P<id>\d+)/history','GET',static fn($r)=>\ASCLA\Core\Services\Allies::history((int)$r['id']),'ascla_manage');
         Router::route('/admin/users','POST',static fn($r)=>\ASCLA\Core\Services\Administration::createUser($r->get_json_params()?:[]),'ascla_manage');
         Router::route('/admin/users/(?P<id>\d+)','GET',static fn($r)=>\ASCLA\Core\Services\Administration::user((int)$r['id']),'ascla_manage');
+        Router::route('/admin/users/(?P<id>\d+)/insights','GET',static fn($r)=>\ASCLA\Core\Services\MemberInsights::get((int)$r['id'],$r->get_params()),'ascla_manage');
+        Router::route('/admin/users/(?P<id>\d+)/role-approval','POST',static fn($r)=>\ASCLA\Core\Services\RoleApprovals::register((int)$r['id'],$r->get_json_params()?:[]),'ascla_manage');
         Router::route('/admin/users/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Administration::updateUser((int)$r['id'],$r->get_json_params()?:[]),'ascla_manage');
         Router::route('/admin/users/(?P<id>\d+)','DELETE',static fn($r)=>\ASCLA\Core\Services\Administration::deleteUser((int)$r['id']),'ascla_manage');
         Router::route('/admin/interest-catalog','POST',static fn($r)=>!empty($r['seed'])?\ASCLA\Core\Domain\InterestCatalog::seed():\ASCLA\Core\Domain\InterestCatalog::create(Access::text($r['name']??'',100)),'ascla_manage');
@@ -167,21 +203,21 @@ final class RouterRoutes
         Router::route('/admin/attendance/(?P<id>\d+)/imports/(?P<import>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Attendance::apply((int)$r['id'],(int)$r['import']),'ascla_publish');
         Router::route('/admin/attendance/(?P<id>\d+)/preview','POST',static fn($r)=>\ASCLA\Core\Services\Attendance::preview((int)$r['id'],\ASCLA\Core\Domain\ZoomCsv::input($r['csv']??''),$r->get_params()),'ascla_publish');
         Router::route('/admin/attendance/(?P<id>\d+)/import','POST',static fn($r)=>\ASCLA\Core\Services\Attendance::import((int)$r['id'],\ASCLA\Core\Domain\ZoomCsv::input($r['csv']??''),Access::text($r['token']??'',64),$r->get_params()),'ascla_publish');
-        Router::route('/admin/contacts','GET',static fn($r)=>\ASCLA\Core\Services\Administration::contacts($r->get_params()),'ascla_moderate');
-        Router::route('/mail/test','POST',static fn()=>\ASCLA\Core\Integrations\Mailer::test(),'ascla_manage');
-        Router::route('/settings','GET',static fn()=>Settings::status(),'ascla_manage');
-        Router::route('/settings','POST',static fn($r)=>Settings::save($r->get_json_params()?:[]),'ascla_manage');
-        Router::route('/admin','GET',static fn()=>RouterAdmin::build(),'ascla_admin_area');
+        Router::route('/admin/contact/(?P<id>\d+)/assign','POST',static fn($r)=>\ASCLA\Core\Services\SupportRequests::assign((int)$r['id'],(int)$r['assignee']),'ascla_manage');
+        Router::route('/admin/contacts','GET',static fn($r)=>\ASCLA\Core\Services\Administration::contacts($r->get_params()),'ascla_publish');
+        Router::route('/mail/test','POST',static fn()=>\ASCLA\Core\Integrations\Mailer::test(),'ascla_configure');
+        Router::route('/admin/deliveries','GET',static fn()=>\ASCLA\Core\Jobs\Deliveries::overview(),'ascla_manage');
+        Router::route('/admin/deliveries/(?P<id>\d+)/retry','POST',static fn($r)=>\ASCLA\Core\Jobs\Deliveries::retry((int)$r['id']),'ascla_manage');
+        Router::route('/settings','GET',static fn()=>Settings::status(),'ascla_configure');
+        Router::route('/settings','POST',static fn($r)=>Settings::save($r->get_json_params()?:[]),'ascla_configure');
+        Router::route('/admin','GET',static fn($r)=>RouterAdmin::build(Access::text($r['section']??'',30)),'ascla_admin_area');
         Router::route('/admin/reports/(?P<id>\d+)','DELETE',static fn($r)=>\ASCLA\Core\Services\Reports::remove((int)$r['id']),'ascla_moderate');
-        Router::route('/admin/contact/(?P<id>\d+)','DELETE',static fn($r)=>\ASCLA\Core\Services\Administration::deleteContact((int)$r['id']),'ascla_moderate');
-        Router::route('/admin/reports/(?P<id>\d+)/review','POST',static fn($r)=>Content::reviewReport((int)$r['id']),'ascla_moderate');
-        Router::route('/admin/comments/(?P<id>\d+)','POST',static function($r) {
-            $comment=get_comment((int)$r['id']); Access::require($comment && Content::get((int)$comment->comment_post_ID),'Comentario no válido.',404);
-            $status=$r['decision']==='approve'?'approve':'hold'; wp_set_comment_status($comment->comment_ID,$status); Audit::record('comment_moderation',(int)$comment->comment_ID,$status); return ['ok'=>true];
-        },'ascla_moderate');
-        Router::route('/admin/contact/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Administration::contactStatus((int)$r['id'],(string)$r['status']),'ascla_moderate');
+        Router::route('/admin/contact/(?P<id>\d+)','DELETE',static fn($r)=>\ASCLA\Core\Services\Administration::deleteContact((int)$r['id']),'ascla_publish');
+        Router::route('/admin/reports/(?P<id>\d+)/review','POST',static fn($r)=>Content::reviewReport((int)$r['id'],(string)($r['reason']??'')),'ascla_moderate');
+        Router::route('/admin/comments/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\CommentModeration::decide((int)$r['id'],(string)$r['decision'],(string)($r['reason']??'')),'ascla_moderate');
+        Router::route('/admin/contact/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Administration::contactStatus((int)$r['id'],(string)$r['status'],(string)($r['response']??'')),'ascla_publish');
         Router::route('/admin/member/(?P<id>\d+)','POST',static fn($r)=>\ASCLA\Core\Services\Administration::suspend((int)$r['id'],rest_sanitize_boolean($r['suspended'])),'ascla_manage');
-        Router::route('/demo','POST',static fn($r)=>\ASCLA\Core\Services\Demo::seed((string)$r['password']),'ascla_manage');
+        Router::route('/demo','POST',static fn($r)=>\ASCLA\Core\Services\Demo::seed((string)$r['password']),'ascla_configure');
         Router::route('/google/connect','POST',static fn($r)=>GoogleOAuth::connect((string)$r['service']));
         Router::route('/google/disconnect','POST',static fn($r)=>GoogleOAuth::disconnect((string)$r['service']));
         Router::route('/events/(?P<id>\d+)/google','POST',static fn($r)=>GoogleOAuth::calendar((int)$r['id'],(string)$r['operation']));
@@ -191,23 +227,26 @@ final class RouterRoutes
 
 final class RouterAdmin
 {
-    public static function build(): array
+    public static function build(string $section=''): array
     {
+        Access::require(in_array($section,['','resumen','moderacion','trabajos','logs'],true),'Sección no válida.',400);
+        $overview=$section==='' || $section==='resumen';
+        $moderation=$section==='' || $section==='moderacion';
         $moderator=current_user_can('ascla_moderate');$admin=current_user_can('ascla_manage');
-        $pending=self::pending();
-        $comments=self::comments($moderator);
-        $jobs=self::jobs($admin);
-        $reports=self::reports($moderator,$admin);
-        $audit=self::audit($admin);
-        return ['pending'=>$pending,'comments'=>$comments,'reports'=>$reports,'jobs'=>$jobs,'audit'=>$audit,'counts'=>['members'=>count(get_users(['capability'=>'ascla_access','fields'=>'ID'])),'pending'=>count($pending)]];
+        $pending=$overview || $moderation?self::pending($section==='resumen'):[];
+        $comments=$moderation?self::comments($moderator):[];
+        $jobs=$overview || $section==='trabajos'?self::jobs($admin):[];
+        $reports=$overview || $moderation?self::reports($moderator,$admin):[];
+        $audit=$section==='' || $section==='logs'?self::audit($admin):[];
+        return ['pending'=>$pending,'comments'=>$comments,'reports'=>$reports,'jobs'=>$jobs,'audit'=>$audit,'counts'=>['members'=>$overview?count(get_users(['capability'=>'ascla_access','fields'=>'ID'])):0,'pending'=>count($pending)]];
     }
 
-    private static function pending(): array
+    private static function pending(bool $summary=false): array
     {
         $pending=[];
         foreach (\ASCLA\Core\Domain\Catalog::TYPES as $key=>$label) {
             foreach (get_posts(['post_type'=>'ascla_'.$key,'post_status'=>['pending','draft'],'numberposts'=>50]) as $post) {
-                if (Content::canRead($post)) { $pending[]=Content::serialize($post); }
+                if (Content::canRead($post)) { $pending[]=$summary?['id'=>(int)$post->ID]:Content::serialize($post); }
             }
         }
         return $pending;
@@ -319,4 +358,3 @@ final class RouterAdmin
         return $audit;
     }
 }
-

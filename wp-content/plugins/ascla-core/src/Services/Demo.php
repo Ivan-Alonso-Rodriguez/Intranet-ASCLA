@@ -64,7 +64,7 @@ final class DemoSeed
         if (is_wp_error($uid)) { throw new ServiceException('No se pudo crear un usuario demo.'); }
         update_user_meta($uid,'_ascla_demo',true);
         [$first,$last]=explode(' ',$name,2);wp_set_current_user($uid);
-        $fields=['first_name'=>$first,'last_name'=>$last,'position'=>self::POSITIONS[$i%3],'company'=>self::COMPANIES[$i%9].' (ficticia)','country'=>self::COUNTRIES[$i%6],'city'=>self::CITIES[$i%6],'member_type'=>'Asociado demo','bio'=>'Perfil ficticio para explorar la comunidad. Me interesa compartir experiencias y aprender sobre gobierno corporativo.','experience'=>'Experiencia ficticia en coordinación de juntas, seguimiento de acuerdos y gestión de riesgos.','directory'=>true,'networking'=>true,'microevents'=>true];
+        $fields=['first_name'=>$first,'last_name'=>$last,'position'=>self::POSITIONS[$i%3],'company'=>self::COMPANIES[$i%9].' (ficticia)','country'=>self::COUNTRIES[$i%6],'city'=>self::CITIES[$i%6],'bio'=>'Perfil ficticio para explorar la comunidad. Me interesa compartir experiencias y aprender sobre gobierno corporativo.','experience'=>'Experiencia ficticia en coordinación de juntas, seguimiento de acuerdos y gestión de riesgos.','directory'=>true,'networking'=>true,'microevents'=>true];
         foreach (Profiles::TERMS as $key=>$tax) {
             $list=$catalogs[$tax];$fields[$key]=[(int)$list[$i%count($list)]['id'],(int)$list[($i+1)%count($list)]['id']];
         }
@@ -74,10 +74,18 @@ final class DemoSeed
 
     private static function post(array $users,string $key,string $type,string $title,string $body,array $meta=[],int $author=0): int
     {
-        $existing=get_posts(['post_type'=>'ascla_'.$type,'post_status'=>'any','meta_key'=>'_ascla_demo_key','meta_value'=>$key,'numberposts'=>1]);
-        if ($existing) { return (int)$existing[0]->ID; }
-        $defaultAuthor=in_array($type,['event','resource','gallery'],true)?get_current_user_id():$users[0];
+        $resourceAuthor=$users[abs(crc32($key))%count($users)];
+        $defaultAuthor=$users[0];
+        if ($type==='resource') { $defaultAuthor=$resourceAuthor; }
+        elseif (in_array($type,['event','gallery'],true)) { $defaultAuthor=get_current_user_id(); }
         $postAuthor=$author?:$defaultAuthor;
+        $existing=get_posts(['post_type'=>'ascla_'.$type,'post_status'=>'any','meta_key'=>'_ascla_demo_key','meta_value'=>$key,'numberposts'=>1]);
+        if ($existing) {
+            // Demo resources belong to fictional members so an administrator can also
+            // exercise RF-041; the recommender intentionally excludes authored content.
+            if ($type==='resource' && (int)$existing[0]->post_author!==$postAuthor) { wp_update_post(['ID'=>$existing[0]->ID,'post_author'=>$postAuthor]); }
+            return (int)$existing[0]->ID;
+        }
         $id=wp_insert_post(wp_slash(['post_type'=>'ascla_'.$type,'post_title'=>$title,'post_content'=>$body,'post_status'=>'draft','post_author'=>$postAuthor,'comment_status'=>'open']));
         update_post_meta($id,'_ascla_demo_key',$key);
         update_post_meta($id,'_ascla',array_merge(['demo'=>true,'chatham'=>true],$meta));
@@ -138,4 +146,3 @@ final class DemoSeed
         update_option('ascla_demo_messages',true,false);
     }
 }
-

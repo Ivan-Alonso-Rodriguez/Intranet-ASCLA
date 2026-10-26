@@ -1,0 +1,17 @@
+ARG BASE_IMAGE=node:26-alpine3.24@sha256:40cd011b55415bc894e45b02fdd5a5dfde056921b7d23a64c74f80497af48797
+FROM ${BASE_IMAGE} AS dependencies
+WORKDIR /app
+COPY ci/mail/package.json ci/mail/package-lock.json ./
+RUN npm ci --ignore-scripts --omit=dev --no-audit --no-fund
+FROM ${BASE_IMAGE}
+USER root
+ARG SECURITY_REFRESH=local
+RUN test -n "$SECURITY_REFRESH" && apk upgrade --no-cache \
+    && rm -rf /usr/local/lib/node_modules/npm /opt/yarn-* \
+    && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/yarn /usr/local/bin/yarnpkg
+WORKDIR /app
+COPY --from=dependencies --chown=node:node /app /app
+USER node
+ENV MAILDEV_SMTP_PORT=1025 MAILDEV_WEB_PORT=8025 MAILDEV_MAX_EMAILS=200
+EXPOSE 1025 8025
+ENTRYPOINT ["/app/node_modules/.bin/maildev"]

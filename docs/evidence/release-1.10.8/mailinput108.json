@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-15",
+  "recorded_at_utc": "2026-10-15T07:58:14.760377+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "requirements": [
+    "RNF-013",
+    "RNF-007",
+    "RNF-017"
+  ],
+  "scope": "Local WordPress/MariaDB and REST regressions for mail/settings validation. Frontend limits share constants with PHP; JavaScript syntax checked. No real SMTP delivery, browser rerun, complete quality-ci, new coverage or QA deployment.",
+  "php": {
+    "tests": 186,
+    "assertions": 924,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "junit": "docs/evidence/release-1.10.8/mailinput108-junit.xml",
+    "sha256": "446c7ed9278e715341e0a19eb7d64859e32660af5c8cc077153ce9e9be3b162e"
+  },
+  "new_tests_included_in_total": 45,
+  "portable_checks": 49,
+  "javascript_syntax": "passed",
+  "verified": [
+    "Malformed SMTP text, nulls, control characters and disallowed port types are rejected before settings/secret/audit changes",
+    "Raw length is checked before trimming; UI receives shared limits",
+    "False clear flags are normalized in direct service calls as well as REST",
+    "Explicit clear remains supported in WordPress transport mode",
+    "Password 0 and leading/trailing password spaces survive encrypted storage; blank password preserves the old credential",
+    "Existing encrypted credentials, external secret management, delivery failures and transactional validation remain covered",
+    "The new email validation error is returned in English for an English administrator"
+  ],
+  "cleanup": {
+    "remaining_fixture_users": 0,
+    "verified_with": "Read-only local CLI query of the owned mailinput108_ prefix"
+  },
+  "progress": {
+    "total": 302,
+    "reviewed": 265,
+    "excluded": 17,
+    "adjusted_by_user": 3,
+    "agreed_scope": 285,
+    "reviewed_or_adjusted": 268,
+    "pending": 17,
+    "literal_reviewed_percent": 87.7,
+    "agreed_scope_reviewed_or_adjusted_percent": 94.0,
+    "agreed_scope_pending_percent": 6.0,
+    "meaning": "Requirement inventory, not acceptance certification, test coverage or an estimate of remaining effort"
+  },
+  "source_sha256": {
+    "wp-content/plugins/ascla-core/src/Integrations/Mailer.php": "2d89a9ae5d2b934187c49a80343f5edeb61dfde9344d95d78d8f7346194d863a",
+    "wp-content/plugins/ascla-core/src/Integrations/Secrets.php": "7b1f9b0ff59fd5af5e0d87cadd72fec67541838fb5771f840ae780b5f5044c7a",
+    "wp-content/plugins/ascla-core/src/Services/Settings.php": "f1842ba7765d46408be8a766aeb6b4b4f2594db4f5802c96e6d2d7388a854e34",
+    "wp-content/plugins/ascla-core/src/Services/FormRules.php": "51abea5373276d64ed49aa82dcb5b1d617476f14167d63763e00a617b206c7b5",
+    "wp-content/plugins/ascla-core/src/Frontend/App.php": "be7f78cc29556620cb31e47e3638e46dff26bbd8f2572f09b040d6abbcf147bb",
+    "wp-content/plugins/ascla-core/assets/app.js": "80acc744f69e16bee89bf0689dbcd2ad97d3890c7674255de7ecf39bd91f223f",
+    "wp-content/plugins/ascla-core/languages/en.json": "3d164b2a72733239760ae4dcb2ca025d38ac52611f8997eefbec69160c6b0c1d",
+    "tests/php/MailSettingsInput108Test.php": "ac402f72994ffb3ba671f49662c1a5f35ca9f4af3444702fad69ec7ffc7bba70"
+  },
+  "package": {
+    "bytes": 1334911,
+    "sha256": "3f91fbf79587a26140b102d2e69aa42fade2d2f66a2f25cacd92fb01ca2a6f79",
+    "files": 183,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true
+  },
+  "deployment": {
+    "automatic": false,
+    "installation_by": "Environment administrator, per user preference",
+    "real_smtp_and_qa_validation_pending": true
+  }
+}

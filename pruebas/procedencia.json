@@ -1,0 +1,1975 @@
+{
+  "prepared_at": "2026-10-22T09:57:08.340Z",
+  "note": "Los originales se conservan en test-results. Las copias retiran rutas personales y valores de sesión/contraseña/respuesta completa del asistente cuando corresponda. Las vistas HTML organizan los resultados sin alterar sus estados, conteos ni errores.",
+  "backend": {
+    "run": "backend-publicable-2026-10-22T09-08-26-379Z",
+    "date": "2026-10-22T09:10:41.177Z",
+    "target": "https://wordpress.ingsoftware.lat",
+    "mode": "remote-shared-test-users",
+    "assistant_provider": "observado en respuesta"
+  },
+  "retention": "latest-only",
+  "frontend": {
+    "id": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+    "category": "aprobadas",
+    "date": "2026-10-22T09:14:04.500Z",
+    "target": "https://wordpress.ingsoftware.lat",
+    "journeys": 6,
+    "passed": 6,
+    "videos": 12,
+    "screenshots": 12,
+    "report": "aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/index.html",
+    "mode": "remote-shared-test-users"
+  },
+  "files": [
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "aforo-lista-espera-notificacion.html",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/aforo-lista-espera-notificacion.html",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/aforo-lista-espera-notificacion.html",
+      "source_sha256": "689be17980a9d4ac7090a57a302883d8a6c6125fffbd49b7142708ab6b31d704",
+      "published_sha256": "2a1e75640ca8a48600e764cdf13a74e5f003d45b7638ac6b64c0c0698ad97d10",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "aforo-lista-espera-notificacion.json",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/aforo-lista-espera-notificacion.json",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/aforo-lista-espera-notificacion.json",
+      "source_sha256": "83a3bc441020e572f16c5bb7b772c6c8dfc7525322c46e548e24618457487a60",
+      "published_sha256": "15941255c0ef8a704d202d8b74a10a4373ad84be534fa4840d37956e37c17d12",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "aforo-lista-espera-notificacion.log",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/aforo-lista-espera-notificacion.log",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/aforo-lista-espera-notificacion.txt",
+      "source_sha256": "e8b27b0ff2d827f06b04ead211b62fdde6691d06fde254c7a1bd27304923eca0",
+      "published_sha256": "767dee750d68414fd0d5d16b0e52cfd25ba77f3145cfea2d09526306caf8308d",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "aforo-lista-espera-notificacion.xml",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/aforo-lista-espera-notificacion.xml",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/aforo-lista-espera-notificacion.xml",
+      "source_sha256": "29920377facb320933d5d25547bfa4baf2bfa047f8b10194a32c9892bd5ad4ff",
+      "published_sha256": "29920377facb320933d5d25547bfa4baf2bfa047f8b10194a32c9892bd5ad4ff",
+      "transformed": false
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "asistente-ia.html",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/asistente-ia.html",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/asistente-ia.html",
+      "source_sha256": "1321158de93d8db8256ed4150e6c412889c3e2fc7ac82031d8023c6989fb456f",
+      "published_sha256": "1aad39654d8cce66da983820c0bc6d073ac4199cfea61bfc3e48573e4bc3b3bf",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "asistente-ia.json",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/asistente-ia.json",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/asistente-ia.json",
+      "source_sha256": "0025293030cd3e7a7bdf79c163ab08be9fbdb43f0d2e0d1b529d83b4fc2aadc7",
+      "published_sha256": "6b19406ba26cd071dbaf2111ea86f3530c2bb524af859371663c6418b39d14e8",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "asistente-ia.log",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/asistente-ia.log",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/asistente-ia.txt",
+      "source_sha256": "895ae15959fc72668abfe76dfd2c6d7ff65b70ef1dae44903357d891d4efe67a",
+      "published_sha256": "d59f1bff026b133891dc2dfa5336899018527997ff2505ca8f8409854c6c3dbb",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "asistente-ia.xml",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/asistente-ia.xml",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/asistente-ia.xml",
+      "source_sha256": "48f45ebedc71fd11dbb866c5a4c2d5e555add55920db108b7c854723e7c32283",
+      "published_sha256": "48f45ebedc71fd11dbb866c5a4c2d5e555add55920db108b7c854723e7c32283",
+      "transformed": false
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "borrador-publicacion-inscripcion.html",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/borrador-publicacion-inscripcion.html",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/borrador-publicacion-inscripcion.html",
+      "source_sha256": "946165ce6e23e37cfac4dc71eec9bbe3a08a4f9351a929f9cb8c228850a1d5ad",
+      "published_sha256": "01ce8011c5fb8f3ac00fee38aa47c1a55b2d7a2d4e81c05979787923dc0d6ece",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "borrador-publicacion-inscripcion.json",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/borrador-publicacion-inscripcion.json",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/borrador-publicacion-inscripcion.json",
+      "source_sha256": "b16772d6921b9c84a04af197bef4d238016de0854e6101db0dc08c1d0284d852",
+      "published_sha256": "0bf3c38dadb821d81c24e3e3ef83755390be8403b664619d38fc2c850210645c",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "borrador-publicacion-inscripcion.log",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/borrador-publicacion-inscripcion.log",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/borrador-publicacion-inscripcion.txt",
+      "source_sha256": "15af38a073998cd6f37ffbaef3872fce469c563f6c26815f79c352d8382bfc18",
+      "published_sha256": "29be631af1501691113d484fd061dff1725424bec9e75f6577ec126c6756df94",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "borrador-publicacion-inscripcion.xml",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/borrador-publicacion-inscripcion.xml",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/borrador-publicacion-inscripcion.xml",
+      "source_sha256": "8f09dfd90bfd078c5d5969145f0235660e61d40ea9e3b4f753a77a5ed1bb320e",
+      "published_sha256": "8f09dfd90bfd078c5d5969145f0235660e61d40ea9e3b4f753a77a5ed1bb320e",
+      "transformed": false
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "conexion-chat-bloqueo.html",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/conexion-chat-bloqueo.html",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/conexion-chat-bloqueo.html",
+      "source_sha256": "176377ae60edcedd2e597a74586a23c091bfe96fa38a5265aa371ec969c25463",
+      "published_sha256": "6b884e3134c5fc4a85e7dd823e33bd613829c3b1e7b5f53dea45062fc2477a65",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "conexion-chat-bloqueo.json",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/conexion-chat-bloqueo.json",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/conexion-chat-bloqueo.json",
+      "source_sha256": "dce2b6c6f0badd8ed510a6da54e26b4c78b4079d3430093c29f897305d852637",
+      "published_sha256": "d902fec5694c8acabf0e3a19195628835472f018534f34a689f45b3fd72ab7d4",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "conexion-chat-bloqueo.log",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/conexion-chat-bloqueo.log",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/conexion-chat-bloqueo.txt",
+      "source_sha256": "6f036b4af861307e5ba47ee6128c5a593ac763393996b1c08d7cf487e1f0dad6",
+      "published_sha256": "a73f461fec9482eb394fe2d57776c43027c09eee78c03feaf0ae411018577317",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "conexion-chat-bloqueo.xml",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/conexion-chat-bloqueo.xml",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/conexion-chat-bloqueo.xml",
+      "source_sha256": "d8858029ff7867bf82e150cd4bf30c3d15fdd80055193c732190bcc82e25a5ba",
+      "published_sha256": "d8858029ff7867bf82e150cd4bf30c3d15fdd80055193c732190bcc82e25a5ba",
+      "transformed": false
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "integracion.html",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/integracion.html",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/integracion.html",
+      "source_sha256": "5b29bd435e93fbca6e66c81ecc2c468dea657d9eb32ccbc72b8f0c462042ed7b",
+      "published_sha256": "f82791c0366b1a6e4a8569837d08335d2b716bf67d194691882a7372f5242a3f",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "integracion.json",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/integracion.json",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/integracion.json",
+      "source_sha256": "8a580ffd66d2f9bab275e2b10b2224aaae30f11abdf48f6bd00bf56993a346d6",
+      "published_sha256": "8e06d4c122102dc8dc35324f04e94c27d5572da2996f02c35e1b0cded88a84e2",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "integracion.log",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/integracion.log",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/integracion.txt",
+      "source_sha256": "af732bb617eaed58e1a9b31bb63a2e399b015b5032168df33ed87cadfbf053cd",
+      "published_sha256": "ea4df84ea4c05df157f601177610e3e37f74cf418f0de33c7168fac566c6d66a",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "integracion.xml",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/integracion.xml",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/integracion.xml",
+      "source_sha256": "890c099f49d00b3e94bc3241ff97faed6ce9a765a61bf72be5414e213a94a250",
+      "published_sha256": "890c099f49d00b3e94bc3241ff97faed6ce9a765a61bf72be5414e213a94a250",
+      "transformed": false
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "perfil.html",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/perfil.html",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/perfil.html",
+      "source_sha256": "1ee206e259aa2c15842aacc859a7c61f9c71d5879bf28d143b7e5f70d98f693d",
+      "published_sha256": "d3e41e15af0472cb810acee3864b951dec6463650af2074831c6c378690fb1a4",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "perfil.json",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/perfil.json",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/perfil.json",
+      "source_sha256": "367a308b042dea4c0259786897e800a80cf1892ded1975a7d78d93f30d3802e3",
+      "published_sha256": "006d401a77781b3608fd5657a3e691aeb1f3a050111214b0ca4cdcbed8033bdb",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "perfil.log",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/perfil.log",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/perfil.txt",
+      "source_sha256": "63bdb2fcfef7837d94693e854822d497a07ea7756bda8068701f2f611660735e",
+      "published_sha256": "f8ebe1ecf2d1a2a502c5f54e4c0dd53c0e1912c63c2c5b93a5a46e77ff817c6c",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "perfil.xml",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/perfil.xml",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/perfil.xml",
+      "source_sha256": "b06afdc41a2ce4fc1f1c879026bf6fafbaad191d653d689126c16ab266e8d68a",
+      "published_sha256": "b06afdc41a2ce4fc1f1c879026bf6fafbaad191d653d689126c16ab266e8d68a",
+      "transformed": false
+    },
+    {
+      "source_set": "coleccion-bruno",
+      "source_file": "bruno.json",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/bruno.json",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/bruno.json",
+      "source_sha256": "b0cbcddc036ab8fe0e02fbd560186a768524cb26d09aa76967627e259de6b9b0",
+      "published_sha256": "b0cbcddc036ab8fe0e02fbd560186a768524cb26d09aa76967627e259de6b9b0",
+      "transformed": false
+    },
+    {
+      "source_set": "coleccion-bruno",
+      "source_file": "collection.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/collection.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/collection.bru",
+      "source_sha256": "c36507f282a729afd1c298233cdc5bc9eeb1ff4fa3f7f1074412a96c786b316d",
+      "published_sha256": "585e75dde939cbdfff8e1950ee1f925b599abaea7cdc2e6228cb25bf2f166e60",
+      "transformed": true
+    },
+    {
+      "source_set": "01-perfil",
+      "source_file": "01-login-carla.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/01-login-carla.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/01-login-carla.bru",
+      "source_sha256": "e265a21ea6ef6da1fb6d4d1ca4f9d7ef9272edabc0237a479e16895e9ecb61f2",
+      "published_sha256": "e265a21ea6ef6da1fb6d4d1ca4f9d7ef9272edabc0237a479e16895e9ecb61f2",
+      "transformed": false
+    },
+    {
+      "source_set": "01-perfil",
+      "source_file": "02-perfil-original.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/02-perfil-original.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/02-perfil-original.bru",
+      "source_sha256": "70b43fdd9235a85f416eac09a8070b016930c01100322ade5ff8030f2f50d1be",
+      "published_sha256": "70b43fdd9235a85f416eac09a8070b016930c01100322ade5ff8030f2f50d1be",
+      "transformed": false
+    },
+    {
+      "source_set": "01-perfil",
+      "source_file": "03-guardar-biografia.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/03-guardar-biografia.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/03-guardar-biografia.bru",
+      "source_sha256": "67fed36056e8090cf10b0db9e2b194658ddcfdc2f154e9cbf6509c6cdc1b9215",
+      "published_sha256": "67fed36056e8090cf10b0db9e2b194658ddcfdc2f154e9cbf6509c6cdc1b9215",
+      "transformed": false
+    },
+    {
+      "source_set": "01-perfil",
+      "source_file": "04-persistencia.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/04-persistencia.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/04-persistencia.bru",
+      "source_sha256": "c2dc161fd869ea9ab756cbf676d50b31facd06a9faa21361557657c74504e27e",
+      "published_sha256": "c2dc161fd869ea9ab756cbf676d50b31facd06a9faa21361557657c74504e27e",
+      "transformed": false
+    },
+    {
+      "source_set": "01-perfil",
+      "source_file": "05-empresa-obligatoria.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/05-empresa-obligatoria.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/05-empresa-obligatoria.bru",
+      "source_sha256": "6bd3ebd22464c51240cdda3328b0df4616fb9f579116e85d8623d619073639b1",
+      "published_sha256": "6bd3ebd22464c51240cdda3328b0df4616fb9f579116e85d8623d619073639b1",
+      "transformed": false
+    },
+    {
+      "source_set": "01-perfil",
+      "source_file": "06-conservacion.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/06-conservacion.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/06-conservacion.bru",
+      "source_sha256": "6311ccb657913fe3d3d71e6efd2b2e506e206b0db53da15a5f55d0b1c61f34fb",
+      "published_sha256": "6311ccb657913fe3d3d71e6efd2b2e506e206b0db53da15a5f55d0b1c61f34fb",
+      "transformed": false
+    },
+    {
+      "source_set": "01-perfil",
+      "source_file": "07-restaurar-biografia.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/07-restaurar-biografia.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/07-restaurar-biografia.bru",
+      "source_sha256": "a459ef89dcca945e06c76f3c7ead12046c630b18ea47f1a66a1fe05f10a962ae",
+      "published_sha256": "a459ef89dcca945e06c76f3c7ead12046c630b18ea47f1a66a1fe05f10a962ae",
+      "transformed": false
+    },
+    {
+      "source_set": "01-perfil",
+      "source_file": "folder.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/folder.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/01-perfil/folder.bru",
+      "source_sha256": "26e87de088a66e682ee9d13926c7b26a2b84eb3fff5bfd10068567bb014f64f6",
+      "published_sha256": "26e87de088a66e682ee9d13926c7b26a2b84eb3fff5bfd10068567bb014f64f6",
+      "transformed": false
+    },
+    {
+      "source_set": "02-conexion-chat-bloqueo",
+      "source_file": "01-iniciar-sesion-ana.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/01-iniciar-sesion-ana.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/01-iniciar-sesion-ana.bru",
+      "source_sha256": "ab0bcab66a313bbbcbb4f7aa991970c21bf08b4924ba16261a0987abf2654109",
+      "published_sha256": "ab0bcab66a313bbbcbb4f7aa991970c21bf08b4924ba16261a0987abf2654109",
+      "transformed": false
+    },
+    {
+      "source_set": "02-conexion-chat-bloqueo",
+      "source_file": "02-iniciar-sesion-bruno.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/02-iniciar-sesion-bruno.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/02-iniciar-sesion-bruno.bru",
+      "source_sha256": "387c93a8b9bd23f2752354f4b123c86a6351b3a0de5d1d86708606cee80636a8",
+      "published_sha256": "387c93a8b9bd23f2752354f4b123c86a6351b3a0de5d1d86708606cee80636a8",
+      "transformed": false
+    },
+    {
+      "source_set": "02-conexion-chat-bloqueo",
+      "source_file": "03-ana-solicita-conexion-con-bruno.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/03-ana-solicita-conexion-con-bruno.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/03-ana-solicita-conexion-con-bruno.bru",
+      "source_sha256": "2898389dbaab3067d01a638d8700f67d1879425ec47eb06734ac25633d8cb74f",
+      "published_sha256": "2898389dbaab3067d01a638d8700f67d1879425ec47eb06734ac25633d8cb74f",
+      "transformed": false
+    },
+    {
+      "source_set": "02-conexion-chat-bloqueo",
+      "source_file": "04-bruno-acepta-la-solicitud-obtenida.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/04-bruno-acepta-la-solicitud-obtenida.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/04-bruno-acepta-la-solicitud-obtenida.bru",
+      "source_sha256": "1740fe8bdde39cfbc636cd4b4b44f0d4b21a6a853e4cc67f333ade610ee7af9a",
+      "published_sha256": "1740fe8bdde39cfbc636cd4b4b44f0d4b21a6a853e4cc67f333ade610ee7af9a",
+      "transformed": false
+    },
+    {
+      "source_set": "02-conexion-chat-bloqueo",
+      "source_file": "05-ana-comprueba-que-puede-escribir.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/05-ana-comprueba-que-puede-escribir.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/05-ana-comprueba-que-puede-escribir.bru",
+      "source_sha256": "b3746a00dc1e21508865995efc1d28e1ddc56cb8edf25292bc7dfda76da48176",
+      "published_sha256": "b3746a00dc1e21508865995efc1d28e1ddc56cb8edf25292bc7dfda76da48176",
+      "transformed": false
+    },
+    {
+      "source_set": "02-conexion-chat-bloqueo",
+      "source_file": "06-ana-abre-la-conversacion.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/06-ana-abre-la-conversacion.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/06-ana-abre-la-conversacion.bru",
+      "source_sha256": "a3b670415dd03ffede78e6dd44d97fc8f33132791e8a640dd6849ecf5959d832",
+      "published_sha256": "a3b670415dd03ffede78e6dd44d97fc8f33132791e8a640dd6849ecf5959d832",
+      "transformed": false
+    },
+    {
+      "source_set": "02-conexion-chat-bloqueo",
+      "source_file": "07-ana-envia-un-mensaje.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/07-ana-envia-un-mensaje.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/07-ana-envia-un-mensaje.bru",
+      "source_sha256": "d7bb675ab6e429b3e5d2ded1d22b6f9f5b048fd11c40bba69a26fce8cb4726bd",
+      "published_sha256": "d7bb675ab6e429b3e5d2ded1d22b6f9f5b048fd11c40bba69a26fce8cb4726bd",
+      "transformed": false
+    },
+    {
+      "source_set": "02-conexion-chat-bloqueo",
+      "source_file": "08-bruno-lee-el-mensaje-exacto.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/08-bruno-lee-el-mensaje-exacto.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/08-bruno-lee-el-mensaje-exacto.bru",
+      "source_sha256": "cad5b74384272577faabceefdd777eb16e3ae67d9b1b874f783b6515b2fe1b95",
+      "published_sha256": "cad5b74384272577faabceefdd777eb16e3ae67d9b1b874f783b6515b2fe1b95",
+      "transformed": false
+    },
+    {
+      "source_set": "02-conexion-chat-bloqueo",
+      "source_file": "09-bruno-bloquea-a-ana.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/09-bruno-bloquea-a-ana.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/09-bruno-bloquea-a-ana.bru",
+      "source_sha256": "7c6cde311057d4db4c16c66c36c99eb35cc2c484d4eb56ea937250a6dfe4b83e",
+      "published_sha256": "7c6cde311057d4db4c16c66c36c99eb35cc2c484d4eb56ea937250a6dfe4b83e",
+      "transformed": false
+    },
+    {
+      "source_set": "02-conexion-chat-bloqueo",
+      "source_file": "10-el-bloqueo-impide-escribir.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/10-el-bloqueo-impide-escribir.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/10-el-bloqueo-impide-escribir.bru",
+      "source_sha256": "f6f9d28fd44d61f5a8f33daf5af8a8f90fb57ea75973ee0b32942d548ce5c6b8",
+      "published_sha256": "f6f9d28fd44d61f5a8f33daf5af8a8f90fb57ea75973ee0b32942d548ce5c6b8",
+      "transformed": false
+    },
+    {
+      "source_set": "02-conexion-chat-bloqueo",
+      "source_file": "11-bruno-desbloquea-a-ana.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/11-bruno-desbloquea-a-ana.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/11-bruno-desbloquea-a-ana.bru",
+      "source_sha256": "c6c597d66bcd96fed6c5ffa01fc3155013dfd5f4069298ae0545ed3f6f69194c",
+      "published_sha256": "c6c597d66bcd96fed6c5ffa01fc3155013dfd5f4069298ae0545ed3f6f69194c",
+      "transformed": false
+    },
+    {
+      "source_set": "02-conexion-chat-bloqueo",
+      "source_file": "12-desbloquear-no-restaura-la-conexion.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/12-desbloquear-no-restaura-la-conexion.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/12-desbloquear-no-restaura-la-conexion.bru",
+      "source_sha256": "9b54cd9a2c51c9b1dfadd0b558e501efb0bf7271eb2911778f3a9c7f3ccec951",
+      "published_sha256": "9b54cd9a2c51c9b1dfadd0b558e501efb0bf7271eb2911778f3a9c7f3ccec951",
+      "transformed": false
+    },
+    {
+      "source_set": "02-conexion-chat-bloqueo",
+      "source_file": "folder.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/folder.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/02-conexion-chat-bloqueo/folder.bru",
+      "source_sha256": "813bf5121ee6ee17c77b3c562f5ce549207e7749cc053c90d7d193d00e11469f",
+      "published_sha256": "813bf5121ee6ee17c77b3c562f5ce549207e7749cc053c90d7d193d00e11469f",
+      "transformed": false
+    },
+    {
+      "source_set": "03-borrador-publicacion-inscripcion",
+      "source_file": "01-login-administrador.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/01-login-administrador.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/01-login-administrador.bru",
+      "source_sha256": "5cd5e7f4a7ac31fcf5e3fcc04fabbe88b48da7bc7abfda6f5bad1bf34f5ff5bc",
+      "published_sha256": "5cd5e7f4a7ac31fcf5e3fcc04fabbe88b48da7bc7abfda6f5bad1bf34f5ff5bc",
+      "transformed": false
+    },
+    {
+      "source_set": "03-borrador-publicacion-inscripcion",
+      "source_file": "02-login-ana.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/02-login-ana.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/02-login-ana.bru",
+      "source_sha256": "20cf98de5cdf950337d128b310f9d77729b2e93db11521796983739f7ac4e3ca",
+      "published_sha256": "20cf98de5cdf950337d128b310f9d77729b2e93db11521796983739f7ac4e3ca",
+      "transformed": false
+    },
+    {
+      "source_set": "03-borrador-publicacion-inscripcion",
+      "source_file": "03-borrador-incompleto.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/03-borrador-incompleto.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/03-borrador-incompleto.bru",
+      "source_sha256": "0ec72ea8e87678d8516d5558f0ca7e73b12343f4a3a48fc7cc0ff73debbc2873",
+      "published_sha256": "0ec72ea8e87678d8516d5558f0ca7e73b12343f4a3a48fc7cc0ff73debbc2873",
+      "transformed": false
+    },
+    {
+      "source_set": "03-borrador-publicacion-inscripcion",
+      "source_file": "04-borrador-privado.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/04-borrador-privado.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/04-borrador-privado.bru",
+      "source_sha256": "ad6b551f86990ca19963d56da238bad7822e878f22365d0d7d41b403b79e605a",
+      "published_sha256": "ad6b551f86990ca19963d56da238bad7822e878f22365d0d7d41b403b79e605a",
+      "transformed": false
+    },
+    {
+      "source_set": "03-borrador-publicacion-inscripcion",
+      "source_file": "05-publicacion-invalida.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/05-publicacion-invalida.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/05-publicacion-invalida.bru",
+      "source_sha256": "e0e889bd5eef6d4ea55c6690863465b32d9725fe6a1b92aa90fd16a867c66e43",
+      "published_sha256": "e0e889bd5eef6d4ea55c6690863465b32d9725fe6a1b92aa90fd16a867c66e43",
+      "transformed": false
+    },
+    {
+      "source_set": "03-borrador-publicacion-inscripcion",
+      "source_file": "06-borrador-conservado.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/06-borrador-conservado.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/06-borrador-conservado.bru",
+      "source_sha256": "6c4839ede396119de5a4a7e7da827fdecaccb0edeff5f4c6ec01cf1d3e039c82",
+      "published_sha256": "6c4839ede396119de5a4a7e7da827fdecaccb0edeff5f4c6ec01cf1d3e039c82",
+      "transformed": false
+    },
+    {
+      "source_set": "03-borrador-publicacion-inscripcion",
+      "source_file": "07-publicar-evento.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/07-publicar-evento.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/07-publicar-evento.bru",
+      "source_sha256": "f86ec9f06bb6c0c2696e4d26b17ba2d9c229faca56b4f1533a1e0c455c3cf77c",
+      "published_sha256": "f86ec9f06bb6c0c2696e4d26b17ba2d9c229faca56b4f1533a1e0c455c3cf77c",
+      "transformed": false
+    },
+    {
+      "source_set": "03-borrador-publicacion-inscripcion",
+      "source_file": "08-fechas-persistentes.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/08-fechas-persistentes.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/08-fechas-persistentes.bru",
+      "source_sha256": "9b6b54020d8c6b4b288a358d68873841f4247c1e14ceecdcb2a107203f4545b6",
+      "published_sha256": "9b6b54020d8c6b4b288a358d68873841f4247c1e14ceecdcb2a107203f4545b6",
+      "transformed": false
+    },
+    {
+      "source_set": "03-borrador-publicacion-inscripcion",
+      "source_file": "09-inscripcion.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/09-inscripcion.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/09-inscripcion.bru",
+      "source_sha256": "e8d01cc76f619a50a6ad9c3681197d78e8e86eafa21a00fc34ef6218f4553bfd",
+      "published_sha256": "e8d01cc76f619a50a6ad9c3681197d78e8e86eafa21a00fc34ef6218f4553bfd",
+      "transformed": false
+    },
+    {
+      "source_set": "03-borrador-publicacion-inscripcion",
+      "source_file": "10-inscripcion-persistente.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/10-inscripcion-persistente.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/10-inscripcion-persistente.bru",
+      "source_sha256": "1d3098702784b002ca81fcb1e8c05510db7986f2345893c47205218b20d4fc28",
+      "published_sha256": "1d3098702784b002ca81fcb1e8c05510db7986f2345893c47205218b20d4fc28",
+      "transformed": false
+    },
+    {
+      "source_set": "03-borrador-publicacion-inscripcion",
+      "source_file": "11-cancelar-evento.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/11-cancelar-evento.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/11-cancelar-evento.bru",
+      "source_sha256": "96e76e9ca82cf653ba8320530dc25c1f77414d65b8a60f18f4a23551557dbbf4",
+      "published_sha256": "96e76e9ca82cf653ba8320530dc25c1f77414d65b8a60f18f4a23551557dbbf4",
+      "transformed": false
+    },
+    {
+      "source_set": "03-borrador-publicacion-inscripcion",
+      "source_file": "12-cancelacion-persistente.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/12-cancelacion-persistente.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/12-cancelacion-persistente.bru",
+      "source_sha256": "ba5ac9cc7ee048df82e52f3d10ea07eb3fbd739ac8742de2e8de4a51eaa9b9e1",
+      "published_sha256": "ba5ac9cc7ee048df82e52f3d10ea07eb3fbd739ac8742de2e8de4a51eaa9b9e1",
+      "transformed": false
+    },
+    {
+      "source_set": "03-borrador-publicacion-inscripcion",
+      "source_file": "folder.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/folder.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/03-borrador-publicacion-inscripcion/folder.bru",
+      "source_sha256": "a1bf87593c32e5fbd765f3911e4b1156bb97c8936a41538df4c3b64bc9c0853b",
+      "published_sha256": "a1bf87593c32e5fbd765f3911e4b1156bb97c8936a41538df4c3b64bc9c0853b",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "01-iniciar-sesion-administrador.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/01-iniciar-sesion-administrador.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/01-iniciar-sesion-administrador.bru",
+      "source_sha256": "5cd5e7f4a7ac31fcf5e3fcc04fabbe88b48da7bc7abfda6f5bad1bf34f5ff5bc",
+      "published_sha256": "5cd5e7f4a7ac31fcf5e3fcc04fabbe88b48da7bc7abfda6f5bad1bf34f5ff5bc",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "02-iniciar-sesion-ana.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/02-iniciar-sesion-ana.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/02-iniciar-sesion-ana.bru",
+      "source_sha256": "20cf98de5cdf950337d128b310f9d77729b2e93db11521796983739f7ac4e3ca",
+      "published_sha256": "20cf98de5cdf950337d128b310f9d77729b2e93db11521796983739f7ac4e3ca",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "03-iniciar-sesion-bruno.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/03-iniciar-sesion-bruno.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/03-iniciar-sesion-bruno.bru",
+      "source_sha256": "ece0738bdea9db882753e8e09120a42441084827c03f90dfb897b62beae833df",
+      "published_sha256": "ece0738bdea9db882753e8e09120a42441084827c03f90dfb897b62beae833df",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "04-iniciar-sesion-carla.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/04-iniciar-sesion-carla.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/04-iniciar-sesion-carla.bru",
+      "source_sha256": "38c569263ffab66d6b22cd9f9c5969f79c2ed716339bc4222db6674d93d97bc5",
+      "published_sha256": "38c569263ffab66d6b22cd9f9c5969f79c2ed716339bc4222db6674d93d97bc5",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "05-crear-evento-con-un-solo-cupo.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/05-crear-evento-con-un-solo-cupo.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/05-crear-evento-con-un-solo-cupo.bru",
+      "source_sha256": "f685e96745b68fada7d4d15a710f52d7cbc7042718bba07f424e75354dc9f1c7",
+      "published_sha256": "f685e96745b68fada7d4d15a710f52d7cbc7042718bba07f424e75354dc9f1c7",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "06-ana-confirma-el-unico-cupo.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/06-ana-confirma-el-unico-cupo.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/06-ana-confirma-el-unico-cupo.bru",
+      "source_sha256": "a7c3a53e035c4a4a7d225a79bf33a21722bca807023c099041bcfa0c1fcb8b46",
+      "published_sha256": "a7c3a53e035c4a4a7d225a79bf33a21722bca807023c099041bcfa0c1fcb8b46",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "07-bruno-no-puede-sobrepasar-el-aforo.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/07-bruno-no-puede-sobrepasar-el-aforo.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/07-bruno-no-puede-sobrepasar-el-aforo.bru",
+      "source_sha256": "9212852e4083609cba1892c5e222365312e40d810d7f7319a8122cad6fd09d7f",
+      "published_sha256": "9212852e4083609cba1892c5e222365312e40d810d7f7319a8122cad6fd09d7f",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "08-bruno-entra-en-lista-de-espera.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/08-bruno-entra-en-lista-de-espera.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/08-bruno-entra-en-lista-de-espera.bru",
+      "source_sha256": "4f9e0c9c236968bdd0e468617014dfc685126ceb2260ac8259cb5cab2a261067",
+      "published_sha256": "4f9e0c9c236968bdd0e468617014dfc685126ceb2260ac8259cb5cab2a261067",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "09-guardar-avisos-antes-de-liberar-el-cupo.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/09-guardar-avisos-antes-de-liberar-el-cupo.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/09-guardar-avisos-antes-de-liberar-el-cupo.bru",
+      "source_sha256": "f3cf7120d73e1ffdfe1c056281e349dcbcc3b7e948bd63528b53decc5841d342",
+      "published_sha256": "f3cf7120d73e1ffdfe1c056281e349dcbcc3b7e948bd63528b53decc5841d342",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "10-ana-cancela-su-inscripcion.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/10-ana-cancela-su-inscripcion.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/10-ana-cancela-su-inscripcion.bru",
+      "source_sha256": "62936782040905f9fb833a353bde0799e811438e97991083d100535e0e84fa8e",
+      "published_sha256": "62936782040905f9fb833a353bde0799e811438e97991083d100535e0e84fa8e",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "11-el-cupo-se-ofrece-a-bruno.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/11-el-cupo-se-ofrece-a-bruno.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/11-el-cupo-se-ofrece-a-bruno.bru",
+      "source_sha256": "4f4d0291db2597d7b536e5b3e9ecf8ccecf629b09e80e2751806abd20d9aabbc",
+      "published_sha256": "4f4d0291db2597d7b536e5b3e9ecf8ccecf629b09e80e2751806abd20d9aabbc",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "12-la-oferta-genera-un-aviso-nuevo.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/12-la-oferta-genera-un-aviso-nuevo.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/12-la-oferta-genera-un-aviso-nuevo.bru",
+      "source_sha256": "fe68359f48f65f6f64cc27b5ffefb9747fd95b2281ce822cbb3daf812ee8248b",
+      "published_sha256": "fe68359f48f65f6f64cc27b5ffefb9747fd95b2281ce822cbb3daf812ee8248b",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "13-el-aviso-corresponde-al-evento-probado.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/13-el-aviso-corresponde-al-evento-probado.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/13-el-aviso-corresponde-al-evento-probado.bru",
+      "source_sha256": "79e0ec40abdd514c09e021c8cd6f862c95b8e7ed554f8711c91c6b615985321a",
+      "published_sha256": "79e0ec40abdd514c09e021c8cd6f862c95b8e7ed554f8711c91c6b615985321a",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "14-abrir-aviso.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/14-abrir-aviso.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/14-abrir-aviso.bru",
+      "source_sha256": "1e4f8569920e3998fd58e741f1eb6ad9a498e97038a9619690f3d0ab2ef69e9d",
+      "published_sha256": "1e4f8569920e3998fd58e741f1eb6ad9a498e97038a9619690f3d0ab2ef69e9d",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "15-aviso-leido.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/15-aviso-leido.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/15-aviso-leido.bru",
+      "source_sha256": "b9cf162ce22bb5b61b110c860d501a9ff8bda26d244e3f98041a51768f686fd4",
+      "published_sha256": "b9cf162ce22bb5b61b110c860d501a9ff8bda26d244e3f98041a51768f686fd4",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "16-confirmar-vacante.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/16-confirmar-vacante.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/16-confirmar-vacante.bru",
+      "source_sha256": "0ff7765839231c71ed95f2ac03217645e00d70538d866582c58fb19e271882e3",
+      "published_sha256": "0ff7765839231c71ed95f2ac03217645e00d70538d866582c58fb19e271882e3",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "17-vacante-persistente.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/17-vacante-persistente.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/17-vacante-persistente.bru",
+      "source_sha256": "9eba0ddf8c49e8e64932938f3c6bcd045e4760c03c385eeb56b674956513e77d",
+      "published_sha256": "9eba0ddf8c49e8e64932938f3c6bcd045e4760c03c385eeb56b674956513e77d",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "18-el-administrador-cancela-el-evento.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/18-el-administrador-cancela-el-evento.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/18-el-administrador-cancela-el-evento.bru",
+      "source_sha256": "f4d4b81a6e54a81eec450123e95379a4ed337b80d658f72f2a2d27f9499e21d8",
+      "published_sha256": "f4d4b81a6e54a81eec450123e95379a4ed337b80d658f72f2a2d27f9499e21d8",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "19-carla-no-puede-inscribirse-al-evento-cancelado.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/19-carla-no-puede-inscribirse-al-evento-cancelado.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/19-carla-no-puede-inscribirse-al-evento-cancelado.bru",
+      "source_sha256": "03717da3661a9f460856696e6960cac82ebd61f64cedcffc2260246b892bdd50",
+      "published_sha256": "03717da3661a9f460856696e6960cac82ebd61f64cedcffc2260246b892bdd50",
+      "transformed": false
+    },
+    {
+      "source_set": "04-aforo-espera-notificacion",
+      "source_file": "folder.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/folder.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/04-aforo-espera-notificacion/folder.bru",
+      "source_sha256": "5ab9f5683ffafffe93370d1fe8710209ccc9d8068c68462914ce3d17f9b0203e",
+      "published_sha256": "5ab9f5683ffafffe93370d1fe8710209ccc9d8068c68462914ce3d17f9b0203e",
+      "transformed": false
+    },
+    {
+      "source_set": "05-suspension-reactivacion",
+      "source_file": "01-iniciar-sesion-administrador.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/01-iniciar-sesion-administrador.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/01-iniciar-sesion-administrador.bru",
+      "source_sha256": "5cd5e7f4a7ac31fcf5e3fcc04fabbe88b48da7bc7abfda6f5bad1bf34f5ff5bc",
+      "published_sha256": "5cd5e7f4a7ac31fcf5e3fcc04fabbe88b48da7bc7abfda6f5bad1bf34f5ff5bc",
+      "transformed": false
+    },
+    {
+      "source_set": "05-suspension-reactivacion",
+      "source_file": "02-iniciar-sesion-carla.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/02-iniciar-sesion-carla.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/02-iniciar-sesion-carla.bru",
+      "source_sha256": "a4985d10a0df29fc1a62d8dbc6e4a8b08574087fdc1ab4d9dde37c4f672940b5",
+      "published_sha256": "a4985d10a0df29fc1a62d8dbc6e4a8b08574087fdc1ab4d9dde37c4f672940b5",
+      "transformed": false
+    },
+    {
+      "source_set": "05-suspension-reactivacion",
+      "source_file": "03-carla-tiene-acceso-antes-de-la-suspension.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/03-carla-tiene-acceso-antes-de-la-suspension.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/03-carla-tiene-acceso-antes-de-la-suspension.bru",
+      "source_sha256": "1cff10d4fa8ab041a546f38e65ddd98ad1475e5d3acb0123604f7deea37dd726",
+      "published_sha256": "1cff10d4fa8ab041a546f38e65ddd98ad1475e5d3acb0123604f7deea37dd726",
+      "transformed": false
+    },
+    {
+      "source_set": "05-suspension-reactivacion",
+      "source_file": "04-el-administrador-suspende-a-carla.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/04-el-administrador-suspende-a-carla.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/04-el-administrador-suspende-a-carla.bru",
+      "source_sha256": "187a417db6511bae0f37766fbceed31c615fcb6a0d88390b60f128cc0cbe02d1",
+      "published_sha256": "187a417db6511bae0f37766fbceed31c615fcb6a0d88390b60f128cc0cbe02d1",
+      "transformed": false
+    },
+    {
+      "source_set": "05-suspension-reactivacion",
+      "source_file": "05-la-cuenta-suspendida-pierde-el-acceso.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/05-la-cuenta-suspendida-pierde-el-acceso.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/05-la-cuenta-suspendida-pierde-el-acceso.bru",
+      "source_sha256": "cce35a75b4b88ce17949c99792bfc299d38ef88847f3284bf3f987a812310df4",
+      "published_sha256": "cce35a75b4b88ce17949c99792bfc299d38ef88847f3284bf3f987a812310df4",
+      "transformed": false
+    },
+    {
+      "source_set": "05-suspension-reactivacion",
+      "source_file": "06-el-administrador-reactiva-a-carla.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/06-el-administrador-reactiva-a-carla.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/06-el-administrador-reactiva-a-carla.bru",
+      "source_sha256": "ae7d688dad0530273450b84792095f7060d7e1ae343a74dfb5feb4357b7d09e7",
+      "published_sha256": "ae7d688dad0530273450b84792095f7060d7e1ae343a74dfb5feb4357b7d09e7",
+      "transformed": false
+    },
+    {
+      "source_set": "05-suspension-reactivacion",
+      "source_file": "07-reactivar-no-revive-la-sesion-revocada.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/07-reactivar-no-revive-la-sesion-revocada.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/07-reactivar-no-revive-la-sesion-revocada.bru",
+      "source_sha256": "8c99a99915eb32e99139ea83348f7235ed427cb6ec4e78baf6f1b5a5e1fd33df",
+      "published_sha256": "8c99a99915eb32e99139ea83348f7235ed427cb6ec4e78baf6f1b5a5e1fd33df",
+      "transformed": false
+    },
+    {
+      "source_set": "05-suspension-reactivacion",
+      "source_file": "08-iniciar-sesion-carla.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/08-iniciar-sesion-carla.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/08-iniciar-sesion-carla.bru",
+      "source_sha256": "ee204c4607a6a44ae33064ad7faabacbccd5d120305f15748d9705504b1a15f6",
+      "published_sha256": "ee204c4607a6a44ae33064ad7faabacbccd5d120305f15748d9705504b1a15f6",
+      "transformed": false
+    },
+    {
+      "source_set": "05-suspension-reactivacion",
+      "source_file": "09-carla-recupera-el-acceso-con-una-sesion-nueva.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/09-carla-recupera-el-acceso-con-una-sesion-nueva.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/09-carla-recupera-el-acceso-con-una-sesion-nueva.bru",
+      "source_sha256": "248355955a50f8d89378ba384eb6226362ac219ebfb3c31f04e75f176fae79fb",
+      "published_sha256": "248355955a50f8d89378ba384eb6226362ac219ebfb3c31f04e75f176fae79fb",
+      "transformed": false
+    },
+    {
+      "source_set": "05-suspension-reactivacion",
+      "source_file": "folder.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/folder.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/05-suspension-reactivacion/folder.bru",
+      "source_sha256": "87f46ee473dce8b89d4c1101c182d210156772ca82fc91e68b754abd2a419dae",
+      "published_sha256": "87f46ee473dce8b89d4c1101c182d210156772ca82fc91e68b754abd2a419dae",
+      "transformed": false
+    },
+    {
+      "source_set": "06-asistente-ia",
+      "source_file": "01-iniciar-sesion-ana.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/06-asistente-ia/01-iniciar-sesion-ana.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/06-asistente-ia/01-iniciar-sesion-ana.bru",
+      "source_sha256": "ab0bcab66a313bbbcbb4f7aa991970c21bf08b4924ba16261a0987abf2654109",
+      "published_sha256": "ab0bcab66a313bbbcbb4f7aa991970c21bf08b4924ba16261a0987abf2654109",
+      "transformed": false
+    },
+    {
+      "source_set": "06-asistente-ia",
+      "source_file": "02-ana-realiza-una-pregunta-en-un-hilo-nuevo.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/06-asistente-ia/02-ana-realiza-una-pregunta-en-un-hilo-nuevo.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/06-asistente-ia/02-ana-realiza-una-pregunta-en-un-hilo-nuevo.bru",
+      "source_sha256": "616d2f821f04d4a24d3ffe5155976cef91d94cd122aa18d5a576516ba60b3453",
+      "published_sha256": "616d2f821f04d4a24d3ffe5155976cef91d94cd122aa18d5a576516ba60b3453",
+      "transformed": false
+    },
+    {
+      "source_set": "06-asistente-ia",
+      "source_file": "03-esperar-el-procesamiento-real-del-trabajo.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/06-asistente-ia/03-esperar-el-procesamiento-real-del-trabajo.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/06-asistente-ia/03-esperar-el-procesamiento-real-del-trabajo.bru",
+      "source_sha256": "6a0f003b3bd85619438cbedf074d5a30dc229362c294b815d294d260d8a613c9",
+      "published_sha256": "6a0f003b3bd85619438cbedf074d5a30dc229362c294b815d294d260d8a613c9",
+      "transformed": false
+    },
+    {
+      "source_set": "06-asistente-ia",
+      "source_file": "04-el-hilo-conserva-la-pregunta-y-la-respuesta.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/06-asistente-ia/04-el-hilo-conserva-la-pregunta-y-la-respuesta.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/06-asistente-ia/04-el-hilo-conserva-la-pregunta-y-la-respuesta.bru",
+      "source_sha256": "98d37b47f4f14b45164f83f5c16ae05f75bafc083b01be34fc6c115fb7877d46",
+      "published_sha256": "98d37b47f4f14b45164f83f5c16ae05f75bafc083b01be34fc6c115fb7877d46",
+      "transformed": false
+    },
+    {
+      "source_set": "06-asistente-ia",
+      "source_file": "folder.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/06-asistente-ia/folder.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/06-asistente-ia/folder.bru",
+      "source_sha256": "94ff8e72e3818f8993d05f060859612a8aef9d73dc212b74d7a42c4a9dae66c1",
+      "published_sha256": "94ff8e72e3818f8993d05f060859612a8aef9d73dc212b74d7a42c4a9dae66c1",
+      "transformed": false
+    },
+    {
+      "source_set": "flujos-e2e",
+      "source_file": "folder.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/folder.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/flujos-e2e/folder.bru",
+      "source_sha256": "dc5cd4340ee3ae6c6d09e69adcc50e8174ccc7642bc80e05270a1cf8a2ad7d3e",
+      "published_sha256": "dc5cd4340ee3ae6c6d09e69adcc50e8174ccc7642bc80e05270a1cf8a2ad7d3e",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "01-login-a.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/01-login-a.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/01-login-a.bru",
+      "source_sha256": "c774a17be38d9c31fedc456f95163a78a650b30efbfb668b5ac62179b9e06859",
+      "published_sha256": "c774a17be38d9c31fedc456f95163a78a650b30efbfb668b5ac62179b9e06859",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "02-nonce-a.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/02-nonce-a.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/02-nonce-a.bru",
+      "source_sha256": "633ada22e4925f27e9066660503101b0f1a08e09c02692de6d42fc6f4ef53ee3",
+      "published_sha256": "633ada22e4925f27e9066660503101b0f1a08e09c02692de6d42fc6f4ef53ee3",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "03-identity.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/03-identity.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/03-identity.bru",
+      "source_sha256": "f9c0a7504d9a1073f356cd78984064610e89913acd9f616353fad3c4e87878f9",
+      "published_sha256": "f9c0a7504d9a1073f356cd78984064610e89913acd9f616353fad3c4e87878f9",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "04-anonymous-directory.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/04-anonymous-directory.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/04-anonymous-directory.bru",
+      "source_sha256": "07b5fe750c976579ca1c1a46180c95900679f3183bd1fa3a0ef28486216eb9c1",
+      "published_sha256": "07b5fe750c976579ca1c1a46180c95900679f3183bd1fa3a0ef28486216eb9c1",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "05-admin-denied.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/05-admin-denied.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/05-admin-denied.bru",
+      "source_sha256": "c055d98de816db34484b220af04e429d35536bc3d32d2efd64b662c869824396",
+      "published_sha256": "c055d98de816db34484b220af04e429d35536bc3d32d2efd64b662c869824396",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "06-profile-before.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/06-profile-before.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/06-profile-before.bru",
+      "source_sha256": "86da4ea85816c1cfb7ec23423cc2b4bff912c850a5db764601522c0127194c92",
+      "published_sha256": "86da4ea85816c1cfb7ec23423cc2b4bff912c850a5db764601522c0127194c92",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "07-invalid-profile.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/07-invalid-profile.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/07-invalid-profile.bru",
+      "source_sha256": "5f06d16fcd390f876b6acd983e15af3fb297ec25326b00238247f399722b53de",
+      "published_sha256": "5f06d16fcd390f876b6acd983e15af3fb297ec25326b00238247f399722b53de",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "08-profile-preserved.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/08-profile-preserved.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/08-profile-preserved.bru",
+      "source_sha256": "e36e342ac3fe301d2533afc08009bcd4838908bc1fc87cbc33e6b1047a12652d",
+      "published_sha256": "e36e342ac3fe301d2533afc08009bcd4838908bc1fc87cbc33e6b1047a12652d",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "09-directory-page.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/09-directory-page.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/09-directory-page.bru",
+      "source_sha256": "b55b379137a84f91053598480a1c1cabd9fdcaeb3cc936cc05b2c5e2d06f4b68",
+      "published_sha256": "b55b379137a84f91053598480a1c1cabd9fdcaeb3cc936cc05b2c5e2d06f4b68",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "10-invalid-date-range.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/10-invalid-date-range.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/10-invalid-date-range.bru",
+      "source_sha256": "7f5fd561d7ba431bc522f33b707b576c9cd604895275d247b537f3521e1a2f29",
+      "published_sha256": "7f5fd561d7ba431bc522f33b707b576c9cd604895275d247b537f3521e1a2f29",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "11-login-administrador.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/11-login-administrador.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/11-login-administrador.bru",
+      "source_sha256": "2fa9b8f0c35d14e53858e83181b3920d680e27725d43e30b8dd853ae5983477b",
+      "published_sha256": "2fa9b8f0c35d14e53858e83181b3920d680e27725d43e30b8dd853ae5983477b",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "12-inicio-administrador.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/12-inicio-administrador.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/12-inicio-administrador.bru",
+      "source_sha256": "e723a30f2599116a49254fe78bdaea8679797130b396f28d1890cfae3a3c0b41",
+      "published_sha256": "e723a30f2599116a49254fe78bdaea8679797130b396f28d1890cfae3a3c0b41",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "13-directorio-sin-administrador.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/13-directorio-sin-administrador.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/13-directorio-sin-administrador.bru",
+      "source_sha256": "008116d4ad445e5d5ab771a272d55a220de1def9764d29c458efa3b02bc0325d",
+      "published_sha256": "008116d4ad445e5d5ab771a272d55a220de1def9764d29c458efa3b02bc0325d",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "14-perfil-administrador-oculto.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/14-perfil-administrador-oculto.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/14-perfil-administrador-oculto.bru",
+      "source_sha256": "2dbc3803f2cd101f68539e2738ee1d58b17a2104b21ec6ce01595d467a9af7b5",
+      "published_sha256": "2dbc3803f2cd101f68539e2738ee1d58b17a2104b21ec6ce01595d467a9af7b5",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "15-conexion-hacia-administrador.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/15-conexion-hacia-administrador.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/15-conexion-hacia-administrador.bru",
+      "source_sha256": "1ad144887810b5a2d36af01fd98dfb109c1bf43655647770e42272e982041c0b",
+      "published_sha256": "1ad144887810b5a2d36af01fd98dfb109c1bf43655647770e42272e982041c0b",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "16-chat-hacia-administrador.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/16-chat-hacia-administrador.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/16-chat-hacia-administrador.bru",
+      "source_sha256": "97310d6e8b50a2af4e1ae61674e2eb55501ebe345c3992e6ff8e24e8a93f9b6e",
+      "published_sha256": "97310d6e8b50a2af4e1ae61674e2eb55501ebe345c3992e6ff8e24e8a93f9b6e",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "17-conexion-desde-administrador.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/17-conexion-desde-administrador.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/17-conexion-desde-administrador.bru",
+      "source_sha256": "4f5dc8979a9b85f06063634560caa7ed7c38e4f01f5f80bf297acd7d2f14bcb1",
+      "published_sha256": "4f5dc8979a9b85f06063634560caa7ed7c38e4f01f5f80bf297acd7d2f14bcb1",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "18-chat-desde-administrador.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/18-chat-desde-administrador.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/18-chat-desde-administrador.bru",
+      "source_sha256": "6204805891c2a86632a5d307edf0270c1c6d9ed9f07a7c7430e0a6ada979aa02",
+      "published_sha256": "6204805891c2a86632a5d307edf0270c1c6d9ed9f07a7c7430e0a6ada979aa02",
+      "transformed": false
+    },
+    {
+      "source_set": "integracion",
+      "source_file": "folder.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/folder.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/coleccion-bruno/integracion/folder.bru",
+      "source_sha256": "b64d61bdd904634cf7035491cce55799e97af8b03fb4baa636f193f6482dfa33",
+      "published_sha256": "b64d61bdd904634cf7035491cce55799e97af8b03fb4baa636f193f6482dfa33",
+      "transformed": false
+    },
+    {
+      "source_set": "sources",
+      "source_file": "native-login.cjs",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/native-login.cjs",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/native-login.cjs",
+      "source_sha256": "01725e4990924221c1425387615569c7b4b880492b5fed48272ede2b30ec7b84",
+      "published_sha256": "01725e4990924221c1425387615569c7b4b880492b5fed48272ede2b30ec7b84",
+      "transformed": false
+    },
+    {
+      "source_set": "sources",
+      "source_file": "qa-access.cjs",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/qa-access.cjs",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/qa-access.cjs",
+      "source_sha256": "3c1822e6e67b6905889a0645c1f79bfdf8dba2b16fd6be679a8de04db6412037",
+      "published_sha256": "3c1822e6e67b6905889a0645c1f79bfdf8dba2b16fd6be679a8de04db6412037",
+      "transformed": false
+    },
+    {
+      "source_set": "sources",
+      "source_file": "qa-flow-contract.json",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/qa-flow-contract.json",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/qa-flow-contract.json",
+      "source_sha256": "3e10a7a414b870c9a32bf7a8ae16ff2e50a17b3fc0dc7a34dc0f40fcc26c99c3",
+      "published_sha256": "3e10a7a414b870c9a32bf7a8ae16ff2e50a17b3fc0dc7a34dc0f40fcc26c99c3",
+      "transformed": false
+    },
+    {
+      "source_set": "sources",
+      "source_file": "qa-target-provenance.cjs",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/qa-target-provenance.cjs",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/qa-target-provenance.cjs",
+      "source_sha256": "a633b0f6b20328981d18e21fd0248b412090cb9e790ec351fc5ab864b399ad16",
+      "published_sha256": "a633b0f6b20328981d18e21fd0248b412090cb9e790ec351fc5ab864b399ad16",
+      "transformed": false
+    },
+    {
+      "source_set": "sources",
+      "source_file": "run-publishable-backend.cjs",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/sources/run-publishable-backend.cjs",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/sources/run-publishable-backend.cjs",
+      "source_sha256": "8993727f26bfdee7463bfa92f5af97a4977d099a85707c6f845dfcb7217a90aa",
+      "published_sha256": "8993727f26bfdee7463bfa92f5af97a4977d099a85707c6f845dfcb7217a90aa",
+      "transformed": false
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "summary.json",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/summary.json",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/summary.json",
+      "source_sha256": "6b64763040f05d41f825fafd3a535a77fc29ac30157cae13882f67c0b37b7e6e",
+      "published_sha256": "6b64763040f05d41f825fafd3a535a77fc29ac30157cae13882f67c0b37b7e6e",
+      "transformed": false
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "suspension-reactivacion-acceso.html",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/suspension-reactivacion-acceso.html",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/suspension-reactivacion-acceso.html",
+      "source_sha256": "c557a57e80c4ae1635c85063cc4e8ef0f4c2f281c80e0f196cc82bc0c89bb73d",
+      "published_sha256": "6db15ac2e434247bf484142ddb7e21a33ffa44cf3bac86c13fd12ab03c13a139",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "suspension-reactivacion-acceso.json",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/suspension-reactivacion-acceso.json",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/suspension-reactivacion-acceso.json",
+      "source_sha256": "eadfbf2964923cb699c22e928a94c24d7ecbaadd3f7291050a14c12411157066",
+      "published_sha256": "408775c9ed3cb593fc0c455f0ae171e6b49127416671438aecb2b21a1167871c",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "suspension-reactivacion-acceso.log",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/suspension-reactivacion-acceso.log",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/suspension-reactivacion-acceso.txt",
+      "source_sha256": "eaa22bc7384988e0fc4a239881e7e914b6ca1f0d2ed32c5dc2ded5bc5d3e7448",
+      "published_sha256": "96267383f66c83326a958f09501be7548246423b2e370dfc84396a8f2f039eaa",
+      "transformed": true
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "suspension-reactivacion-acceso.xml",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/suspension-reactivacion-acceso.xml",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/suspension-reactivacion-acceso.xml",
+      "source_sha256": "c17ca4ffb1d582297fd951705293112f1a6465f6566e537f5977e0d6748b229a",
+      "published_sha256": "c17ca4ffb1d582297fd951705293112f1a6465f6566e537f5977e0d6748b229a",
+      "transformed": false
+    },
+    {
+      "source_set": "backend-publicable-2026-10-22T09-08-26-379Z",
+      "source_file": "variables-finales.bru",
+      "source_relative": "test-results/backend-publicable-2026-10-22T09-08-26-379Z/variables-finales.bru",
+      "published": "backend/resultados/backend-publicable-2026-10-22T09-08-26-379Z/variables-finales.bru",
+      "source_sha256": "4ddb8b97a55c674ac73e8bb2cbc8549fdb8b149cd06cea5d4d5a4a53f261b3d3",
+      "published_sha256": "6d010dd2172ec6081bf6affba4736bc2ba52831487bfc95e593a8d48289263b2",
+      "transformed": true
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "summary.json",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/summary.json",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/summary.json",
+      "source_sha256": "2f70e7839d78927c82c145e45983cfcd4b6f761cf8e56572d3323085aec284f6",
+      "published_sha256": "2f70e7839d78927c82c145e45983cfcd4b6f761cf8e56572d3323085aec284f6",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "frontend.json",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/frontend.json",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/frontend.json",
+      "source_sha256": "52f535757e1bddd306cdf301efcb9c0aeffd5084beba9c89277da91e1d785e6c",
+      "published_sha256": "52f535757e1bddd306cdf301efcb9c0aeffd5084beba9c89277da91e1d785e6c",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "frontend.xml",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/frontend.xml",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/frontend.xml",
+      "source_sha256": "2452dac9be337d083131153a196aed45a624eb1e2e89e56588840d0e277d4d41",
+      "published_sha256": "2452dac9be337d083131153a196aed45a624eb1e2e89e56588840d0e277d4d41",
+      "transformed": false
+    },
+    {
+      "source_set": "perfil",
+      "source_file": "page@4bf56f526f7aaf443ecce0bcbbc2b7a6.webm",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/perfil/page@4bf56f526f7aaf443ecce0bcbbc2b7a6.webm",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/perfil/page@4bf56f526f7aaf443ecce0bcbbc2b7a6.webm",
+      "source_sha256": "c285dd0ad67fa2b673ce25027f08a28332fa5a62d27249ea6d379a6eb4274ca0",
+      "published_sha256": "c285dd0ad67fa2b673ce25027f08a28332fa5a62d27249ea6d379a6eb4274ca0",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "perfil-0-passed.png",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/perfil-0-passed.png",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/perfil-0-passed.png",
+      "source_sha256": "e889f086641a35007e566f2bc5ae2195910264377107bedebeee4ede61637ccf",
+      "published_sha256": "e889f086641a35007e566f2bc5ae2195910264377107bedebeee4ede61637ccf",
+      "transformed": false
+    },
+    {
+      "source_set": "conexion-chat-bloqueo",
+      "source_file": "page@e6ae6c47361ff1aba711b5e8b29de357.webm",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/conexion-chat-bloqueo/page@e6ae6c47361ff1aba711b5e8b29de357.webm",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/conexion-chat-bloqueo/page@e6ae6c47361ff1aba711b5e8b29de357.webm",
+      "source_sha256": "b96140e289918842288758307f758d0d7e70ee7d51c9580e918248da848d7caa",
+      "published_sha256": "b96140e289918842288758307f758d0d7e70ee7d51c9580e918248da848d7caa",
+      "transformed": false
+    },
+    {
+      "source_set": "conexion-chat-bloqueo",
+      "source_file": "page@7a1930903f3361bb3ae2acde10e27645.webm",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/conexion-chat-bloqueo/page@7a1930903f3361bb3ae2acde10e27645.webm",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/conexion-chat-bloqueo/page@7a1930903f3361bb3ae2acde10e27645.webm",
+      "source_sha256": "889cb9bf808311667c309a773eda40a63b69463c4f8762f98ab57ef2463ba7bb",
+      "published_sha256": "889cb9bf808311667c309a773eda40a63b69463c4f8762f98ab57ef2463ba7bb",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "conexion-chat-bloqueo-0-passed.png",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/conexion-chat-bloqueo-0-passed.png",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/conexion-chat-bloqueo-0-passed.png",
+      "source_sha256": "487eba4b1dabad922d89cdbfad11f2d9568afac242f1451986a4fbea412be830",
+      "published_sha256": "487eba4b1dabad922d89cdbfad11f2d9568afac242f1451986a4fbea412be830",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "conexion-chat-bloqueo-1-passed.png",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/conexion-chat-bloqueo-1-passed.png",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/conexion-chat-bloqueo-1-passed.png",
+      "source_sha256": "422b3395e0a277c589dfaf9e6ff8215fe2968dec0a583fbdfa9f685fa7bd5874",
+      "published_sha256": "422b3395e0a277c589dfaf9e6ff8215fe2968dec0a583fbdfa9f685fa7bd5874",
+      "transformed": false
+    },
+    {
+      "source_set": "borrador-publicacion-inscripcion",
+      "source_file": "page@a937dabadb4649ed7f01d844a7a6bccc.webm",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/borrador-publicacion-inscripcion/page@a937dabadb4649ed7f01d844a7a6bccc.webm",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/borrador-publicacion-inscripcion/page@a937dabadb4649ed7f01d844a7a6bccc.webm",
+      "source_sha256": "7f97fd4a1660f4851c430c719af77f4b2747a958b9b41b3cedc27cfd5335ff2c",
+      "published_sha256": "7f97fd4a1660f4851c430c719af77f4b2747a958b9b41b3cedc27cfd5335ff2c",
+      "transformed": false
+    },
+    {
+      "source_set": "borrador-publicacion-inscripcion",
+      "source_file": "page@36660548e57f26cce98374522f18a10b.webm",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/borrador-publicacion-inscripcion/page@36660548e57f26cce98374522f18a10b.webm",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/borrador-publicacion-inscripcion/page@36660548e57f26cce98374522f18a10b.webm",
+      "source_sha256": "4c0f7e4e66a22aec6dc4878c0a60fa75a22e82ad00dfaa033c90c2ae8335c384",
+      "published_sha256": "4c0f7e4e66a22aec6dc4878c0a60fa75a22e82ad00dfaa033c90c2ae8335c384",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "borrador-publicacion-inscripcion-0-passed.png",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/borrador-publicacion-inscripcion-0-passed.png",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/borrador-publicacion-inscripcion-0-passed.png",
+      "source_sha256": "92ec6ef8469c94e03734c6fb9ee90d2c172593f4bd901a59b19f649bc9e836a2",
+      "published_sha256": "92ec6ef8469c94e03734c6fb9ee90d2c172593f4bd901a59b19f649bc9e836a2",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "borrador-publicacion-inscripcion-1-passed.png",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/borrador-publicacion-inscripcion-1-passed.png",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/borrador-publicacion-inscripcion-1-passed.png",
+      "source_sha256": "8be5d7347824f0b27af66a8c90cf34d7b209ceca1ab0490a9e8d7fe670b22fa0",
+      "published_sha256": "8be5d7347824f0b27af66a8c90cf34d7b209ceca1ab0490a9e8d7fe670b22fa0",
+      "transformed": false
+    },
+    {
+      "source_set": "aforo-lista-espera-notificacion",
+      "source_file": "page@301e9e931e3b53895ebef98169949672.webm",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/aforo-lista-espera-notificacion/page@301e9e931e3b53895ebef98169949672.webm",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/aforo-lista-espera-notificacion/page@301e9e931e3b53895ebef98169949672.webm",
+      "source_sha256": "df3eb35c5aec6e9583090ac9cf4a4777e2a05ce800f48ecc58eb5532360005b1",
+      "published_sha256": "df3eb35c5aec6e9583090ac9cf4a4777e2a05ce800f48ecc58eb5532360005b1",
+      "transformed": false
+    },
+    {
+      "source_set": "aforo-lista-espera-notificacion",
+      "source_file": "page@71c5f6ce97da1729b60352012cd60137.webm",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/aforo-lista-espera-notificacion/page@71c5f6ce97da1729b60352012cd60137.webm",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/aforo-lista-espera-notificacion/page@71c5f6ce97da1729b60352012cd60137.webm",
+      "source_sha256": "b0c62582c3512cb6868e47b0d665b859a8f4117b207a7bde897bc2bf82214345",
+      "published_sha256": "b0c62582c3512cb6868e47b0d665b859a8f4117b207a7bde897bc2bf82214345",
+      "transformed": false
+    },
+    {
+      "source_set": "aforo-lista-espera-notificacion",
+      "source_file": "page@e4bd5d996ec620eae1f0ff012f9b1366.webm",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/aforo-lista-espera-notificacion/page@e4bd5d996ec620eae1f0ff012f9b1366.webm",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/aforo-lista-espera-notificacion/page@e4bd5d996ec620eae1f0ff012f9b1366.webm",
+      "source_sha256": "6fa3d7dad025a2e567f737aa6eb4d920f32cf92df18d491ff0807484178e8815",
+      "published_sha256": "6fa3d7dad025a2e567f737aa6eb4d920f32cf92df18d491ff0807484178e8815",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "aforo-lista-espera-notificacion-0-passed.png",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/aforo-lista-espera-notificacion-0-passed.png",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/aforo-lista-espera-notificacion-0-passed.png",
+      "source_sha256": "4f36eb6331668b239e3e65426ee6c3129e1e69801707651ca1fc573ecaa9a6ee",
+      "published_sha256": "4f36eb6331668b239e3e65426ee6c3129e1e69801707651ca1fc573ecaa9a6ee",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "aforo-lista-espera-notificacion-1-passed.png",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/aforo-lista-espera-notificacion-1-passed.png",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/aforo-lista-espera-notificacion-1-passed.png",
+      "source_sha256": "8797b9096322635f56c26ec7d9b061f3d214182ba2c78e703acf839162d9d9f0",
+      "published_sha256": "8797b9096322635f56c26ec7d9b061f3d214182ba2c78e703acf839162d9d9f0",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "aforo-lista-espera-notificacion-2-passed.png",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/aforo-lista-espera-notificacion-2-passed.png",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/aforo-lista-espera-notificacion-2-passed.png",
+      "source_sha256": "b80f7e4d42424f26f174f6fc99e1683e2350309c2adcc3fd208b6590307400bb",
+      "published_sha256": "b80f7e4d42424f26f174f6fc99e1683e2350309c2adcc3fd208b6590307400bb",
+      "transformed": false
+    },
+    {
+      "source_set": "suspension-reactivacion-acceso",
+      "source_file": "page@babb31e5d2fd144f3a9ab05082a6da2e.webm",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/suspension-reactivacion-acceso/page@babb31e5d2fd144f3a9ab05082a6da2e.webm",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/suspension-reactivacion-acceso/page@babb31e5d2fd144f3a9ab05082a6da2e.webm",
+      "source_sha256": "8a045eb0b4fb0090733075a0f5e32ce4bcdf83c43760003f722a34c65fd821ee",
+      "published_sha256": "8a045eb0b4fb0090733075a0f5e32ce4bcdf83c43760003f722a34c65fd821ee",
+      "transformed": false
+    },
+    {
+      "source_set": "suspension-reactivacion-acceso",
+      "source_file": "page@dadada32722df3f452ad1c5827db93b9.webm",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/suspension-reactivacion-acceso/page@dadada32722df3f452ad1c5827db93b9.webm",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/suspension-reactivacion-acceso/page@dadada32722df3f452ad1c5827db93b9.webm",
+      "source_sha256": "fddc0cbf60cb13704edbbc5607c8363766d29c94c0dae9230acbd308fbc90b2f",
+      "published_sha256": "fddc0cbf60cb13704edbbc5607c8363766d29c94c0dae9230acbd308fbc90b2f",
+      "transformed": false
+    },
+    {
+      "source_set": "suspension-reactivacion-acceso",
+      "source_file": "page@013831db7c33b640b4bb69f8b2a64ef4.webm",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/suspension-reactivacion-acceso/page@013831db7c33b640b4bb69f8b2a64ef4.webm",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/suspension-reactivacion-acceso/page@013831db7c33b640b4bb69f8b2a64ef4.webm",
+      "source_sha256": "2cb9a35c575d71e7bb2a90e1d6deca3915d90ea7e6c23cc88ee0f4c5aeb3b1c6",
+      "published_sha256": "2cb9a35c575d71e7bb2a90e1d6deca3915d90ea7e6c23cc88ee0f4c5aeb3b1c6",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "suspension-reactivacion-acceso-0-passed.png",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/suspension-reactivacion-acceso-0-passed.png",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/suspension-reactivacion-acceso-0-passed.png",
+      "source_sha256": "bf2689c24e7b56a52205d0d650e55f9542e00d87a7188e6b82f52e5fafe5a7fe",
+      "published_sha256": "bf2689c24e7b56a52205d0d650e55f9542e00d87a7188e6b82f52e5fafe5a7fe",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "suspension-reactivacion-acceso-1-passed.png",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/suspension-reactivacion-acceso-1-passed.png",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/suspension-reactivacion-acceso-1-passed.png",
+      "source_sha256": "5db3d58c9b799fba8b444687179fc5f92bf911523490ec41e845f726a2179ef3",
+      "published_sha256": "5db3d58c9b799fba8b444687179fc5f92bf911523490ec41e845f726a2179ef3",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "suspension-reactivacion-acceso-2-passed.png",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/suspension-reactivacion-acceso-2-passed.png",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/suspension-reactivacion-acceso-2-passed.png",
+      "source_sha256": "7cf0c8d453d7b2e31323cc391312e13b427c65151c80b81b8924d7815824dd55",
+      "published_sha256": "7cf0c8d453d7b2e31323cc391312e13b427c65151c80b81b8924d7815824dd55",
+      "transformed": false
+    },
+    {
+      "source_set": "asistente-ia",
+      "source_file": "page@0b8e539d7625baff44597f42bd85239d.webm",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/asistente-ia/page@0b8e539d7625baff44597f42bd85239d.webm",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/videos/asistente-ia/page@0b8e539d7625baff44597f42bd85239d.webm",
+      "source_sha256": "f5cbfd3783f5c88aa50a34fe33d899d1791fc24aa3e14f12a16ed40fecaf9962",
+      "published_sha256": "f5cbfd3783f5c88aa50a34fe33d899d1791fc24aa3e14f12a16ed40fecaf9962",
+      "transformed": false
+    },
+    {
+      "source_set": "playwright-usuarios-2026-10-22T09-11-07-221Z",
+      "source_file": "asistente-ia-0-passed.png",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/asistente-ia-0-passed.png",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/asistente-ia-0-passed.png",
+      "source_sha256": "5e9e5ed8fac10fc168f15344034a93a6198065c3d8bf71e11391704ca63f1614",
+      "published_sha256": "5e9e5ed8fac10fc168f15344034a93a6198065c3d8bf71e11391704ca63f1614",
+      "transformed": false
+    },
+    {
+      "source_set": "sources",
+      "source_file": "acceptance-ui.cjs",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/sources/acceptance-ui.cjs",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/sources/acceptance-ui.cjs",
+      "source_sha256": "d64b8785de82e4e0b0d0ed80a9204dee79dc9406f87ff1172796116f92f61f51",
+      "published_sha256": "d64b8785de82e4e0b0d0ed80a9204dee79dc9406f87ff1172796116f92f61f51",
+      "transformed": false
+    },
+    {
+      "source_set": "sources",
+      "source_file": "run-playwright-test-users.cjs",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/sources/run-playwright-test-users.cjs",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/sources/run-playwright-test-users.cjs",
+      "source_sha256": "5657245b546fe8090db10653d27f53e46dac9b68d44dc6bd50dcb9d8bd60865f",
+      "published_sha256": "5657245b546fe8090db10653d27f53e46dac9b68d44dc6bd50dcb9d8bd60865f",
+      "transformed": false
+    },
+    {
+      "source_set": "sources",
+      "source_file": "qa-access.cjs",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/sources/qa-access.cjs",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/sources/qa-access.cjs",
+      "source_sha256": "3c1822e6e67b6905889a0645c1f79bfdf8dba2b16fd6be679a8de04db6412037",
+      "published_sha256": "3c1822e6e67b6905889a0645c1f79bfdf8dba2b16fd6be679a8de04db6412037",
+      "transformed": false
+    },
+    {
+      "source_set": "sources",
+      "source_file": "native-login.cjs",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/sources/native-login.cjs",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/sources/native-login.cjs",
+      "source_sha256": "01725e4990924221c1425387615569c7b4b880492b5fed48272ede2b30ec7b84",
+      "published_sha256": "01725e4990924221c1425387615569c7b4b880492b5fed48272ede2b30ec7b84",
+      "transformed": false
+    },
+    {
+      "source_set": "sources",
+      "source_file": "qa-target-provenance.cjs",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/sources/qa-target-provenance.cjs",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/sources/qa-target-provenance.cjs",
+      "source_sha256": "a633b0f6b20328981d18e21fd0248b412090cb9e790ec351fc5ab864b399ad16",
+      "published_sha256": "a633b0f6b20328981d18e21fd0248b412090cb9e790ec351fc5ab864b399ad16",
+      "transformed": false
+    },
+    {
+      "source_set": "sources",
+      "source_file": "qa-flow-contract.json",
+      "source_relative": "test-results/playwright-usuarios-2026-10-22T09-11-07-221Z/sources/qa-flow-contract.json",
+      "published": "frontend/aprobadas/playwright-usuarios-2026-10-22T09-11-07-221Z/sources/qa-flow-contract.json",
+      "source_sha256": "ff95e1c6e5f5b41408e8dd78b663605af8a9094ac760393647d2968fb34d9ac8",
+      "published_sha256": "ff95e1c6e5f5b41408e8dd78b663605af8a9094ac760393647d2968fb34d9ac8",
+      "transformed": false
+    },
+    {
+      "published": "seguridad/frontend-zap.json",
+      "published_sha256": "bdea618b5ab51ab22f2226666b0589e1a1269fad0d0749114da2dc8bdd8e7e82",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/frontend-zap.json",
+      "source_sha256": "564ab846a5850d3f994fd24d0bc95cc37ba15e86efe4ea428fb162b859b4fdf6"
+    },
+    {
+      "published": "seguridad/frontend-zap.html",
+      "published_sha256": "9e6d77d12a20e100e87b895c6a853b56314d52dbf42a6d1d46708033c4b88e83",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/frontend-zap.json",
+      "source_sha256": "564ab846a5850d3f994fd24d0bc95cc37ba15e86efe4ea428fb162b859b4fdf6"
+    },
+    {
+      "published": "seguridad/backend-zap.json",
+      "published_sha256": "ab96f5507ff3b1511f7e55ddfdf47422dfa1ae1c458bbd430c4f0346a4d746fc",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/backend-zap.json",
+      "source_sha256": "cf45215d55075a5724140ba0e7b921aa499fcb0351263994ceac175c76be358c"
+    },
+    {
+      "published": "seguridad/backend-zap.html",
+      "published_sha256": "7e091a4dc91fb820cdbe71e7fe55f133355ca7c3c8fb5d7ab100bd7e37b9713f",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/backend-zap.json",
+      "source_sha256": "cf45215d55075a5724140ba0e7b921aa499fcb0351263994ceac175c76be358c"
+    },
+    {
+      "published": "seguridad/resumen.json",
+      "published_sha256": "e32d192d219da070410b4da173ed4d3fb3c05fc420a06bd542b62ba2560fc62e",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/security-summary.json",
+      "source_sha256": "8b97a0c6d7b9a837ff72d0273c06200e592ede0a04347f81d8d5826aa2616ef6"
+    },
+    {
+      "published": "seguridad/csp-validation.json",
+      "published_sha256": "8e74b37c2700d9c218d4372e0c8580b7f2c796e75b7c357049bd4695ce368a5d",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/csp-validation.json",
+      "source_sha256": "8e74b37c2700d9c218d4372e0c8580b7f2c796e75b7c357049bd4695ce368a5d"
+    },
+    {
+      "published": "seguridad/browser-security.json",
+      "published_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/browser-security.json",
+      "source_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1"
+    },
+    {
+      "published": "seguridad/source-manifest.json",
+      "published_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/source-manifest.json",
+      "source_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435"
+    },
+    {
+      "published": "seguridad/sources/config/security.conf",
+      "published_sha256": "046a5c3c4218d30b63d6bb3932f6006fec4c9deeb8a8f1f4491e9041977f9361",
+      "transformed": false,
+      "source_relative": "config/security.conf",
+      "source_sha256": "046a5c3c4218d30b63d6bb3932f6006fec4c9deeb8a8f1f4491e9041977f9361"
+    },
+    {
+      "published": "seguridad/sources/config/security.ini",
+      "published_sha256": "f20edcf8154edcf83c4efb8710000f928219f64ef3f1177f813efeb4c3715195",
+      "transformed": false,
+      "source_relative": "config/security.ini",
+      "source_sha256": "f20edcf8154edcf83c4efb8710000f928219f64ef3f1177f813efeb4c3715195"
+    },
+    {
+      "published": "seguridad/sources/config/uploads.ini",
+      "published_sha256": "37f5d881277cf3827e605ba5f048f5e88cf724ae95741eff698aa92c6d54c228",
+      "transformed": false,
+      "source_relative": "config/uploads.ini",
+      "source_sha256": "37f5d881277cf3827e605ba5f048f5e88cf724ae95741eff698aa92c6d54c228"
+    },
+    {
+      "published": "seguridad/sources/scripts/check-security-headers.cjs",
+      "published_sha256": "2ab14b0a0569b072bb74244e729d96e389aaead0981ccf6cb764e9242b83d1ad",
+      "transformed": false,
+      "source_relative": "scripts/check-security-headers.cjs",
+      "source_sha256": "2ab14b0a0569b072bb74244e729d96e389aaead0981ccf6cb764e9242b83d1ad"
+    },
+    {
+      "published": "seguridad/sources/security/zap-rules.tsv",
+      "published_sha256": "406b6c917a8140f74b2785f7a927c9988efb1599f95cfedb3f30a09a48d769f6",
+      "transformed": false,
+      "source_relative": "security/zap-rules.tsv",
+      "source_sha256": "406b6c917a8140f74b2785f7a927c9988efb1599f95cfedb3f30a09a48d769f6"
+    },
+    {
+      "published": "seguridad/sources/tests/security-browser.cjs",
+      "published_sha256": "4aed7b411d513118b2a7fa9df03cdb4c4e0c897e7f556ca168a7ee99df292621",
+      "transformed": false,
+      "source_relative": "tests/security-browser.cjs",
+      "source_sha256": "4aed7b411d513118b2a7fa9df03cdb4c4e0c897e7f556ca168a7ee99df292621"
+    },
+    {
+      "published": "seguridad/sources/tests/security-openapi.py",
+      "published_sha256": "a9db108d15c1152ff34664d6df4fb1291e39a005c0003f7005568d3d0ad9eb36",
+      "transformed": false,
+      "source_relative": "tests/security-openapi.py",
+      "source_sha256": "a9db108d15c1152ff34664d6df4fb1291e39a005c0003f7005568d3d0ad9eb36"
+    },
+    {
+      "published": "seguridad/sources/tests/zap-scan.py",
+      "published_sha256": "441db2be5d8bab1840fc907a81909e7253376a8dbbdfbe438dde7dc230d0238e",
+      "transformed": false,
+      "source_relative": "tests/zap-scan.py",
+      "source_sha256": "441db2be5d8bab1840fc907a81909e7253376a8dbbdfbe438dde7dc230d0238e"
+    },
+    {
+      "published": "seguridad/fuentes.html",
+      "published_sha256": "0ee852cf72db758559e1f18b1a8d426ef6843e7eb0c3ed53d6bdc46800299f86",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/source-manifest.json",
+      "source_sha256": "f783b6d65ea2c4f2f809cecd1f8a8eaa778d9e1d00b38ec8d80f0205e2ef3435"
+    },
+    {
+      "published": "seguridad/dashboard.html",
+      "published_sha256": "a89bcf64880667c9e47a71e4fe5d0cd487825ff8e42d8187a41dc04c6bc64dba",
+      "transformed": true,
+      "source_relative": "test-results/security-latest/security-summary.json",
+      "source_sha256": "8b97a0c6d7b9a837ff72d0273c06200e592ede0a04347f81d8d5826aa2616ef6"
+    },
+    {
+      "published": "seguridad/procedencia.json",
+      "published_sha256": "a2c3df03c39a8ca00f2f0e4e3d55d6a6abb548e0b764d16e171b5fa6d957e8ad",
+      "transformed": true
+    },
+    {
+      "published": "actualizacion/latest-ui.json",
+      "published_sha256": "0a209c6145c7be99ceead7dbdd4a50e2dae7a358c3b8232b66b3119fcc644730",
+      "source_relative": "test-results/qa-refresh-20261022/latest-ui.json",
+      "source_sha256": "0a209c6145c7be99ceead7dbdd4a50e2dae7a358c3b8232b66b3119fcc644730",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/remote-browser-security.json",
+      "published_sha256": "375c3083eea1c08c7bc2c5e0b5ca8f32830076e4cf3ba076b96f6445737e6ebb",
+      "source_relative": "test-results/qa-refresh-20261022/remote-browser-security.json",
+      "source_sha256": "375c3083eea1c08c7bc2c5e0b5ca8f32830076e4cf3ba076b96f6445737e6ebb",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/remote-csp-validation.json",
+      "published_sha256": "9ae2a3470270243e8212a181d01655982cbc118a058d7899fe88b207b9c6a1de",
+      "source_relative": "test-results/qa-refresh-20261022/remote-csp-validation.json",
+      "source_sha256": "9ae2a3470270243e8212a181d01655982cbc118a058d7899fe88b207b9c6a1de",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/deployment.json",
+      "published_sha256": "643be25a643e94a34b97abd396e5d0516ce2f05eddc12e0ac9ada5c7e3efb287",
+      "source_relative": "test-results/qa-refresh-20261022/deployment.json",
+      "source_sha256": "643be25a643e94a34b97abd396e5d0516ce2f05eddc12e0ac9ada5c7e3efb287",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/remote-observation.json",
+      "published_sha256": "c163aa39d9bc23e1553b4a23b4040136f1d1f3478587c720c3f1c3a1d25abcd5",
+      "source_relative": "test-results/qa-refresh-20261022/remote-observation.json",
+      "source_sha256": "c163aa39d9bc23e1553b4a23b4040136f1d1f3478587c720c3f1c3a1d25abcd5",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/server-exposure.json",
+      "published_sha256": "83d7c8c73669f7cd63db8c85f91ced516f3367afcef4a5295353a8f13d447915",
+      "source_relative": "test-results/qa-refresh-20261022/server-exposure.json",
+      "source_sha256": "83d7c8c73669f7cd63db8c85f91ced516f3367afcef4a5295353a8f13d447915",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/roles-administrativos/page@0389c2781517df292464bb4fa5cfec1f.webm",
+      "published_sha256": "826cd6f111afccc50b2750c6aef08200b4e421145938f54c3a00678e405e38ae",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/roles-administrativos/page@0389c2781517df292464bb4fa5cfec1f.webm",
+      "source_sha256": "826cd6f111afccc50b2750c6aef08200b4e421145938f54c3a00678e405e38ae",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/roles-administrativos/page@9f50092ed4aa9662e78970f6e5755040.webm",
+      "published_sha256": "c6aae663a59b3b0fdb95a705def9919a6452c11532bcd9e54758521f7b3de742",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/roles-administrativos/page@9f50092ed4aa9662e78970f6e5755040.webm",
+      "source_sha256": "c6aae663a59b3b0fdb95a705def9919a6452c11532bcd9e54758521f7b3de742",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-roles-administrativos-0-passed.png",
+      "published_sha256": "ed38d91b8527d47f574c1bdaa7ad944ea7d934a2b73efd2d8bb9c89635168922",
+      "source_relative": "test-results/qa-refresh-20261022/latest-roles-administrativos-0-passed.png",
+      "source_sha256": "ed38d91b8527d47f574c1bdaa7ad944ea7d934a2b73efd2d8bb9c89635168922",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-roles-administrativos-1-passed.png",
+      "published_sha256": "7f803949b8daecd08ceb052f12946735a41343714ff3ff79a94ba05a8aa9de60",
+      "source_relative": "test-results/qa-refresh-20261022/latest-roles-administrativos-1-passed.png",
+      "source_sha256": "7f803949b8daecd08ceb052f12946735a41343714ff3ff79a94ba05a8aa9de60",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/usuarios-filtros/page@159564311b14f3cbc9a8675574bae21a.webm",
+      "published_sha256": "641cfc4225a56eeefc1a8beb0ad56c8096e91da75fba82b1bd4608fe22f91557",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/usuarios-filtros/page@159564311b14f3cbc9a8675574bae21a.webm",
+      "source_sha256": "641cfc4225a56eeefc1a8beb0ad56c8096e91da75fba82b1bd4608fe22f91557",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-usuarios-filtros-0-passed.png",
+      "published_sha256": "f348d3dba3cda31908f074377d01d0c918f8ba05c2fdfb1244ff04765c70f626",
+      "source_relative": "test-results/qa-refresh-20261022/latest-usuarios-filtros-0-passed.png",
+      "source_sha256": "f348d3dba3cda31908f074377d01d0c918f8ba05c2fdfb1244ff04765c70f626",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/directorio-cuadricula-y-botones/page@322e7e1398d2a7d4230accf293739c1f.webm",
+      "published_sha256": "2976fffd309c4a1616164d1f493089413a090ef7f2f6877895e387720c9aa4a0",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/directorio-cuadricula-y-botones/page@322e7e1398d2a7d4230accf293739c1f.webm",
+      "source_sha256": "2976fffd309c4a1616164d1f493089413a090ef7f2f6877895e387720c9aa4a0",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-directorio-cuadricula-y-botones-0-passed.png",
+      "published_sha256": "0d232f19c57703d5f69da108b0fa3295ea9c3142fb4719ae4ed91096faf54cbf",
+      "source_relative": "test-results/qa-refresh-20261022/latest-directorio-cuadricula-y-botones-0-passed.png",
+      "source_sha256": "0d232f19c57703d5f69da108b0fa3295ea9c3142fb4719ae4ed91096faf54cbf",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/perfil-tipo-asociado/page@e48008b62bbaa687330ea99fdbacc5be.webm",
+      "published_sha256": "459cafa6ba280811428316da5d921a1c59cc5cf2d1c43474bc55f21aeff15e4b",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/perfil-tipo-asociado/page@e48008b62bbaa687330ea99fdbacc5be.webm",
+      "source_sha256": "459cafa6ba280811428316da5d921a1c59cc5cf2d1c43474bc55f21aeff15e4b",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-perfil-tipo-asociado-0-passed.png",
+      "published_sha256": "d789386c6e30a2c5c48bc6d0b70f10bd51590a7bcccdd2c12e8fb0ec7839aa52",
+      "source_relative": "test-results/qa-refresh-20261022/latest-perfil-tipo-asociado-0-passed.png",
+      "source_sha256": "d789386c6e30a2c5c48bc6d0b70f10bd51590a7bcccdd2c12e8fb0ec7839aa52",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/foros-lista-unica/page@2287e50ac6248801a6b3746b02c764b5.webm",
+      "published_sha256": "911a9c1b64b49002724cd930d03d1aa155c13a3f80c77316f0b306b005a45c44",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/foros-lista-unica/page@2287e50ac6248801a6b3746b02c764b5.webm",
+      "source_sha256": "911a9c1b64b49002724cd930d03d1aa155c13a3f80c77316f0b306b005a45c44",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-foros-lista-unica-0-passed.png",
+      "published_sha256": "0f79314861b93cedce42fbc2bcaaa52163bbd6c8c9aeae2a04e9de3e7a208937",
+      "source_relative": "test-results/qa-refresh-20261022/latest-foros-lista-unica-0-passed.png",
+      "source_sha256": "0f79314861b93cedce42fbc2bcaaa52163bbd6c8c9aeae2a04e9de3e7a208937",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/galeria-portada-y-cabecera/page@19e693fb4120ba93ad8fee693476b436.webm",
+      "published_sha256": "16c90c41f402aa6bb806860752cce449737f93f54e153a49b0332a83ecb6cda2",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/galeria-portada-y-cabecera/page@19e693fb4120ba93ad8fee693476b436.webm",
+      "source_sha256": "16c90c41f402aa6bb806860752cce449737f93f54e153a49b0332a83ecb6cda2",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-galeria-portada-y-cabecera-0-passed.png",
+      "published_sha256": "0738fa9d5a3cf383869bf9f9760db5e71ed5f64fec49138af4d62593b1f21b27",
+      "source_relative": "test-results/qa-refresh-20261022/latest-galeria-portada-y-cabecera-0-passed.png",
+      "source_sha256": "0738fa9d5a3cf383869bf9f9760db5e71ed5f64fec49138af4d62593b1f21b27",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/biblioteca-integrada/page@b670b1a52699ec26b7622f9a40188e72.webm",
+      "published_sha256": "524406a99ab92a87611423ddda5d4d30ea38e40dea3ea6805617c2294f0c0e87",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/biblioteca-integrada/page@b670b1a52699ec26b7622f9a40188e72.webm",
+      "source_sha256": "524406a99ab92a87611423ddda5d4d30ea38e40dea3ea6805617c2294f0c0e87",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/biblioteca-integrada/page@a8549d32df0fca87cfd9c2b33d79c9bc.webm",
+      "published_sha256": "9e2563bdd8bef9b352a27632b92d91951231258221074bb4bcaf44ed9d2e2ea1",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/biblioteca-integrada/page@a8549d32df0fca87cfd9c2b33d79c9bc.webm",
+      "source_sha256": "9e2563bdd8bef9b352a27632b92d91951231258221074bb4bcaf44ed9d2e2ea1",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-biblioteca-integrada-0-passed.png",
+      "published_sha256": "df9ebde20c5ee94d3f6aa79b893f85a51be6eb10eca13550d5087642ca3e9997",
+      "source_relative": "test-results/qa-refresh-20261022/latest-biblioteca-integrada-0-passed.png",
+      "source_sha256": "df9ebde20c5ee94d3f6aa79b893f85a51be6eb10eca13550d5087642ca3e9997",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-biblioteca-integrada-1-passed.png",
+      "published_sha256": "dbb0a5077b9211f2c95557343e2cf383dbbe19fbd9a1ded124589abf921c128c",
+      "source_relative": "test-results/qa-refresh-20261022/latest-biblioteca-integrada-1-passed.png",
+      "source_sha256": "dbb0a5077b9211f2c95557343e2cf383dbbe19fbd9a1ded124589abf921c128c",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/aliados-menu-tres-puntos/page@0a681d18efcb669231831f5ab09639af.webm",
+      "published_sha256": "558ce60b1a85e1a0565d6f07ab50f127ee8a19fd839b5758325b3c5eff619804",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/aliados-menu-tres-puntos/page@0a681d18efcb669231831f5ab09639af.webm",
+      "source_sha256": "558ce60b1a85e1a0565d6f07ab50f127ee8a19fd839b5758325b3c5eff619804",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-aliados-menu-tres-puntos-0-passed.png",
+      "published_sha256": "122743130494b290bb8a6d2a5e421d520b7d15b3f6edbb1ac7e30d8009c6321e",
+      "source_relative": "test-results/qa-refresh-20261022/latest-aliados-menu-tres-puntos-0-passed.png",
+      "source_sha256": "122743130494b290bb8a6d2a5e421d520b7d15b3f6edbb1ac7e30d8009c6321e",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/borrador-hub/page@811db0f11628950022c900cc5a72ebc2.webm",
+      "published_sha256": "d0c9fe48ca2f677d98a710642fb05d15f894ddc3485aab128e53d21356bfe7a0",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/borrador-hub/page@811db0f11628950022c900cc5a72ebc2.webm",
+      "source_sha256": "d0c9fe48ca2f677d98a710642fb05d15f894ddc3485aab128e53d21356bfe7a0",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-borrador-hub-0-passed.png",
+      "published_sha256": "8c9716cb9ae1fddae36e37572cd9234b676f19533b69d3df19b65338515a0e7b",
+      "source_relative": "test-results/qa-refresh-20261022/latest-borrador-hub-0-passed.png",
+      "source_sha256": "8c9716cb9ae1fddae36e37572cd9234b676f19533b69d3df19b65338515a0e7b",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/borrador-forum/page@3294f8e6e371a7a025417cf0122fc64b.webm",
+      "published_sha256": "e4a87b3747e3913f2ffc7adce17da2f493f556719f8222491693c70a56cc6a40",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/borrador-forum/page@3294f8e6e371a7a025417cf0122fc64b.webm",
+      "source_sha256": "e4a87b3747e3913f2ffc7adce17da2f493f556719f8222491693c70a56cc6a40",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-borrador-forum-0-passed.png",
+      "published_sha256": "f1af7cf85d8a6a9211661812e3887270d9473977fa6b3059e4b95bb326cb0413",
+      "source_relative": "test-results/qa-refresh-20261022/latest-borrador-forum-0-passed.png",
+      "source_sha256": "f1af7cf85d8a6a9211661812e3887270d9473977fa6b3059e4b95bb326cb0413",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/borrador-gallery/page@4da478c7c6329010d8cc63bf966a8814.webm",
+      "published_sha256": "7b0eb2d497ccd7fe4f00e04efa76d112211cd54a8f639d5844bd51b38f0d2313",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/borrador-gallery/page@4da478c7c6329010d8cc63bf966a8814.webm",
+      "source_sha256": "7b0eb2d497ccd7fe4f00e04efa76d112211cd54a8f639d5844bd51b38f0d2313",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-borrador-gallery-0-passed.png",
+      "published_sha256": "139378ad1ea77173d05bc8179434b407d67fdd0f5a2d42dde7e88048ead9515a",
+      "source_relative": "test-results/qa-refresh-20261022/latest-borrador-gallery-0-passed.png",
+      "source_sha256": "139378ad1ea77173d05bc8179434b407d67fdd0f5a2d42dde7e88048ead9515a",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/borrador-resource/page@da546ccc602981231fbf6037238c9b76.webm",
+      "published_sha256": "3d062ff60b23991c27ed0dcdd73b93c62b5f7c8b90b376d22d1fd6bce49931ca",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/borrador-resource/page@da546ccc602981231fbf6037238c9b76.webm",
+      "source_sha256": "3d062ff60b23991c27ed0dcdd73b93c62b5f7c8b90b376d22d1fd6bce49931ca",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-borrador-resource-0-passed.png",
+      "published_sha256": "0e003eaf32fd7df9f94f739b57aa798307801d4236379fbd89829941aaa9c4ad",
+      "source_relative": "test-results/qa-refresh-20261022/latest-borrador-resource-0-passed.png",
+      "source_sha256": "0e003eaf32fd7df9f94f739b57aa798307801d4236379fbd89829941aaa9c4ad",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/borrador-event/page@95964c13b6313a2ba0aca82524da5bc4.webm",
+      "published_sha256": "8cece6f4e613168ccf988a0570a093d679920862d810de27ea3e3cf76f154019",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/borrador-event/page@95964c13b6313a2ba0aca82524da5bc4.webm",
+      "source_sha256": "8cece6f4e613168ccf988a0570a093d679920862d810de27ea3e3cf76f154019",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-borrador-event-0-passed.png",
+      "published_sha256": "4165cb4d147b6ee68e8096f1358f033c9a1f945cfc5b789f230f158f399c360e",
+      "source_relative": "test-results/qa-refresh-20261022/latest-borrador-event-0-passed.png",
+      "source_sha256": "4165cb4d147b6ee68e8096f1358f033c9a1f945cfc5b789f230f158f399c360e",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-videos/borrador-ally/page@f84ef65dbdd12c1611b98e8f7ccb6400.webm",
+      "published_sha256": "11d912aa7e4b33e780f32c536c948d7ed1ef9c2366e1a2e81259c8123c3a36d3",
+      "source_relative": "test-results/qa-refresh-20261022/latest-videos/borrador-ally/page@f84ef65dbdd12c1611b98e8f7ccb6400.webm",
+      "source_sha256": "11d912aa7e4b33e780f32c536c948d7ed1ef9c2366e1a2e81259c8123c3a36d3",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/latest-borrador-ally-0-passed.png",
+      "published_sha256": "241f5b7d4f2446395d97b323a93fb7f4fefe160b257b59bdc93337e8b77044a3",
+      "source_relative": "test-results/qa-refresh-20261022/latest-borrador-ally-0-passed.png",
+      "source_sha256": "241f5b7d4f2446395d97b323a93fb7f4fefe160b257b59bdc93337e8b77044a3",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/security-videos/Administrador/page@f9569016513b51843ea5d9acb6024b9d.webm",
+      "published_sha256": "ef1996d7bf44f2d7a612977f58e36e66f84d914b67de58de6a2b198d62347ac1",
+      "source_relative": "test-results/qa-refresh-20261022/security-videos/Administrador/page@f9569016513b51843ea5d9acb6024b9d.webm",
+      "source_sha256": "ef1996d7bf44f2d7a612977f58e36e66f84d914b67de58de6a2b198d62347ac1",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/security-videos/Ejecutivo/page@94d69f2ca55d4dacaf0a1b442b7341fb.webm",
+      "published_sha256": "e565ac1ebaa7e410b8711c5467aaa8908cf01dbb748d8417acb8a1696cf75f20",
+      "source_relative": "test-results/qa-refresh-20261022/security-videos/Ejecutivo/page@94d69f2ca55d4dacaf0a1b442b7341fb.webm",
+      "source_sha256": "e565ac1ebaa7e410b8711c5467aaa8908cf01dbb748d8417acb8a1696cf75f20",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/security-videos/Moderador/page@5e7ea391ceedc9f34fe27381d5f0f062.webm",
+      "published_sha256": "85f252b0f854be6a5c1e0372252357ed3298a2b6c8ff3521b0fd768c7ffcd59f",
+      "source_relative": "test-results/qa-refresh-20261022/security-videos/Moderador/page@5e7ea391ceedc9f34fe27381d5f0f062.webm",
+      "source_sha256": "85f252b0f854be6a5c1e0372252357ed3298a2b6c8ff3521b0fd768c7ffcd59f",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/security-videos/Asociado/page@1156f6c3dd368edd6c6f1125d1946bfd.webm",
+      "published_sha256": "5b2c5c1546f16caefcd3708062acd6826f296868ee1f0d0542b6cc12ed5d0083",
+      "source_relative": "test-results/qa-refresh-20261022/security-videos/Asociado/page@1156f6c3dd368edd6c6f1125d1946bfd.webm",
+      "source_sha256": "5b2c5c1546f16caefcd3708062acd6826f296868ee1f0d0542b6cc12ed5d0083",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/security-administrador.png",
+      "published_sha256": "9a92066ba91ce447511db80cfa6b5f80ffdb9b9deabde57aa5912428e5ff3789",
+      "source_relative": "test-results/qa-refresh-20261022/security-administrador.png",
+      "source_sha256": "9a92066ba91ce447511db80cfa6b5f80ffdb9b9deabde57aa5912428e5ff3789",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/security-ejecutivo.png",
+      "published_sha256": "7f803949b8daecd08ceb052f12946735a41343714ff3ff79a94ba05a8aa9de60",
+      "source_relative": "test-results/qa-refresh-20261022/security-ejecutivo.png",
+      "source_sha256": "7f803949b8daecd08ceb052f12946735a41343714ff3ff79a94ba05a8aa9de60",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/security-moderador.png",
+      "published_sha256": "ce25c7dbbb815005e533e392e6958af0906b0bb85f68e2505592685c5b990cff",
+      "source_relative": "test-results/qa-refresh-20261022/security-moderador.png",
+      "source_sha256": "ce25c7dbbb815005e533e392e6958af0906b0bb85f68e2505592685c5b990cff",
+      "transformed": false
+    },
+    {
+      "published": "actualizacion/security-asociado.png",
+      "published_sha256": "85b0b0e71bc4a9487c56dcf20ad406f2c2e24aeebfab3ece20207e1793e584ed",
+      "source_relative": "test-results/qa-refresh-20261022/security-asociado.png",
+      "source_sha256": "85b0b0e71bc4a9487c56dcf20ad406f2c2e24aeebfab3ece20207e1793e584ed",
+      "transformed": false
+    },
+    {
+      "published": "seguridad/sustento.json",
+      "published_sha256": "e19438d3ddf3721d201c0408f54507eabb0fa2294e425d05e9b1c48bdddd2ed3",
+      "transformed": true
+    },
+    {
+      "published": "seguridad/sustento.html",
+      "published_sha256": "00c9f83ad3d51c95e56aa8e5429aff9ab3dd5b80d01f30e2a31cf3a31cc23fb3",
+      "transformed": true
+    }
+  ],
+  "security": {
+    "date": "2026-10-22T09:11:27.133208+00:00",
+    "status": "PASS",
+    "source_sha256": "0b737f5511b599b06f300c3ba17e85d7dd7aa2822f0b1809d1e7246807e8e1a6",
+    "report": "seguridad/dashboard.html",
+    "prepared_at": "2026-10-22T09:57:08.355Z",
+    "environment": "local-ephemeral-https",
+    "jenkins_evidence": false
+  },
+  "refresh": {
+    "date": "2026-10-22T08:27:53.510Z",
+    "target": "https://wordpress.ingsoftware.lat",
+    "report": "actualizacion/index.html",
+    "recent_ui": {
+      "tests": 14,
+      "passed": 14,
+      "videos": 16,
+      "screenshots": 16,
+      "cleanup": {
+        "status": "passed",
+        "owned_content": 9,
+        "removed": 9,
+        "method": "Owned test posts moved to trash; unrelated content and user profiles preserved."
+      }
+    },
+    "remote_security": {
+      "headers": {
+        "date": "2026-10-22T09:41:10.563Z",
+        "status": "FAIL",
+        "checks": 20,
+        "passed": 19,
+        "failed": [
+          {
+            "nombre": "Sin versión del servidor",
+            "cumple": false
+          }
+        ]
+      },
+      "browser": {
+        "status": "PASS",
+        "checks": 6,
+        "views": 42,
+        "js_errors": 0,
+        "csp_violations": 0
+      },
+      "server": "Apache/2.4.68 (Debian)",
+      "active_zap_rerun": {
+        "status": "PASS",
+        "date": "2026-10-22T09:11:27.133208+00:00",
+        "environment": "local-ephemeral-https",
+        "reason": "Nueva ejecución completada con el código actual: 14 rutas HTML y 18 operaciones GET REST. Cero alertas altas, medias o bajas; nueve informativas en páginas y una en API. El entorno y las credenciales temporales se retiraron.",
+        "report": "seguridad/dashboard.html"
+      }
+    }
+  }
+}

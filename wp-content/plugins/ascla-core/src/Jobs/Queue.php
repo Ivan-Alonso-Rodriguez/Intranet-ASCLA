@@ -1,14 +1,15 @@
 <?php
 namespace ASCLA\Core\Jobs;
 use ASCLA\Core\Repositories\Store;
-use ASCLA\Core\Services\{Access,Audit,Knowledge,MicroEvents,Notifications,Content,Discovery,Birthdays};
+use ASCLA\Core\Services\{Access,Audit,Knowledge,MicroEvents,Notifications,Content,Discovery,Birthdays,Matching};
 final class Queue
 {
+    private const PUBLISH_REVOKED='Permiso de publicación revocado.';
     private const DEMO_MODE='DEMO MODE';
-    public static function boot(): void { add_action('ascla_jobs',[self::class,'run']); add_action('ascla_jobs',[Birthdays::class,'maybeProcess'],20); add_action('ascla_jobs_continue',[self::class,'run']); add_action('ascla_monthly',[MicroEvents::class,'monthly']); add_action('ascla_discovery',static fn()=>self::enqueue('discovery',[],0)); }
+    public static function boot(): void { add_action('ascla_event_offers',[\ASCLA\Core\Services\Events::class,'refreshWaitlist']); add_action('ascla_jobs',[self::class,'run']); add_action('ascla_jobs',[Birthdays::class,'maybeProcess'],20); add_action('ascla_jobs_continue',[self::class,'run']); add_action('ascla_microevents',[MicroEvents::class,'monthly']); add_action('ascla_micro_tick',[\ASCLA\Core\Services\MicroLifecycle::class,'tick']); add_action('ascla_event_reminder',[\ASCLA\Core\Services\EventReminders::class,'send'],10,2); add_action('ascla_discovery',static fn()=>self::enqueue('discovery',[],0)); add_action('ascla_recommendations',static fn()=>self::enqueue('recommendations',[],0)); }
     public static function enqueue(string $kind,array $payload,int $user=-1): array
     {
-        Access::require(in_array($kind,['multimedia','answer','microevents','social','resource_notifications','discovery','video_metadata'],true),'Trabajo no válido.',400);
+        Access::require(in_array($kind,['transcript','multimedia','answer','microevents','social','resource_notifications','discovery','recommendations','video_metadata'],true),'Trabajo no válido.',400);
         $id=Store::insert('jobs',['kind'=>$kind,'user_id'=>$user<0?get_current_user_id():$user,'payload'=>wp_json_encode($payload),'status'=>'pending','created_at'=>current_time('mysql',true)]);
         self::wake(); return ['id'=>$id,'status'=>'pending'];
     }
@@ -69,26 +70,35 @@ final class Queue
     public static function retry(int $id): array
     {
         $row=self::get($id); Access::require($row['status']==='error','Sólo se pueden reintentar trabajos fallidos.',400);
+        if (in_array($row['kind'],['transcript','multimedia'],true)) {
+            Access::require(Access::canPublish(),self::PUBLISH_REVOKED);
+            $stored=Store::one('jobs',$id);$payload=json_decode($stored['payload'],true)?:[];
+            $post=get_post((int)($payload['resource_id']??0));
+            $meta=$post&&$post->post_type==='ascla_resource'&&Content::canRead($post)?(array)get_post_meta($post->ID,'_ascla',true):[];
+            if (!empty($meta['video_id'])) { \ASCLA\Core\Integrations\SupadataVideoProvider::retry((string)$meta['video_id']); }
+        }
         Store::update('jobs',['status'=>'pending','attempts'=>0,'error'=>null,'locked_at'=>null],['id'=>$id]); self::wake(); return self::get($id);
     }
     private static function authorizeJob(array $row): void
     {
         $kind=(string)$row['kind'];$user=(int)$row['user_id'];
-        if (!in_array($kind,['microevents','resource_notifications','discovery'],true) || $user!==0) { Access::require(Access::member(),'La cuenta ya no tiene acceso.'); }
-        if ($kind==='microevents' && $user!==0) { Access::require(Access::canPublish(),'Permiso de publicación revocado.'); }
+        if (!in_array($kind,['microevents','resource_notifications','discovery','recommendations'],true) || $user!==0) { Access::require(Access::member(),'La cuenta ya no tiene acceso.'); }
+        if ($kind==='microevents' && $user!==0) { Access::require(Access::canPublish(),self::PUBLISH_REVOKED); }
         if ($kind==='social') { Access::require(current_user_can('ascla_moderate'),'Permiso de moderación revocado.'); }
-        if (in_array($kind,['multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),'Permiso de publicación revocado.'); }
+        if (in_array($kind,['transcript','multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),self::PUBLISH_REVOKED); }
     }
 
     private static function executeJob(array $row,array $payload): array
     {
         return match($row['kind']) {
+            'transcript'=>\ASCLA\Core\Services\VideoTranscripts::obtain((int)($payload['resource_id']??0)),
             'answer'=>Knowledge::answer($payload['question']??'',self::history((int)$row['user_id'],(string)($payload['thread']??'legacy'),(int)$row['id'])),
-            'multimedia'=>Knowledge::multimedia((int)($payload['resource_id']??0)),
+            'multimedia'=>!empty($payload['automatic'])?\ASCLA\Core\Services\VideoPreparation::run((int)($payload['resource_id']??0),(int)$row['id'],(string)($payload['source_signature']??'')):Knowledge::multimedia((int)($payload['resource_id']??0)),
             'microevents'=>MicroEvents::create(),
             'social'=>self::social(),
             'resource_notifications'=>Discovery::resource((int)($payload['resource_id']??0)),
             'discovery'=>Discovery::networking(),
+            'recommendations'=>Matching::refreshAll(),
             'video_metadata'=>Knowledge::videoMetadata((int)($payload['resource_id']??0)),
         };
     }
@@ -96,16 +106,20 @@ final class Queue
     private static function completeJob(array $row,array $result): void
     {
         Store::update('jobs',['status'=>'completed','result'=>wp_json_encode($result),'error'=>null,'locked_at'=>null],['id'=>$row['id']]);
-        Notifications::send((int)$row['user_id'],'job','Tu trabajo en segundo plano ha finalizado.','',['type'=>'job','id'=>(int)$row['id']]);
+        $payload=json_decode($row['payload'],true)?:[];
+        if (empty($payload['automatic'])) { Notifications::send((int)$row['user_id'],'job','Tu trabajo en segundo plano ha finalizado.','',['type'=>'job','id'=>(int)$row['id']]); }
         Audit::record('job_completed',(int)$row['id'],$row['kind']);
     }
 
     private static function failJob(array $row,\Throwable $error): void
     {
+        \ASCLA\Core\Services\TechnicalErrors::record('jobs','job_failed',$error,(int)$row['id']);
         $safe=$error instanceof \ASCLA\Core\Rest\ApiException||$error instanceof \RuntimeException?$error->getMessage():'No se pudo completar el trabajo. Revise la configuración o reintente.';
         Store::update('jobs',['status'=>'error','error'=>substr(sanitize_text_field($safe),0,255),'locked_at'=>null],['id'=>$row['id']]);
         Audit::record('job_failed',(int)$row['id'],$row['kind']);
-        Notifications::send((int)$row['user_id'],'job_error','Una tarea necesita revisión.','',['type'=>'job','id'=>(int)$row['id']]);
+        $payload=json_decode($row['payload'],true)?:[];
+        if (!empty($payload['automatic'])) { \ASCLA\Core\Services\VideoPreparation::failed($row,$payload,$safe); }
+        else { Notifications::send((int)$row['user_id'],'job_error','Una tarea necesita revisión.','',['type'=>'job','id'=>(int)$row['id']]); }
     }
 
     private static function processRow(array $row,string $table,int $original): void
@@ -117,6 +131,9 @@ final class Queue
             wp_set_current_user((int)$row['user_id']);$payload=json_decode($row['payload'],true)?:[];
             self::authorizeJob($row);
             self::completeJob($row,self::executeJob($row,$payload));
+        } catch (DeferredJob $waiting) {
+            if (!empty($payload['automatic'])) { \ASCLA\Core\Services\VideoPreparation::update((int)$payload['resource_id'],(int)$row['id'],['status'=>'pending']); }
+            Store::update('jobs',['status'=>'pending','attempts'=>max(0,(int)$row['attempts']),'error'=>$waiting->getMessage(),'locked_at'=>gmdate('Y-m-d H:i:s',time()+max(5,min(900,$waiting->delay)))],['id'=>$row['id']]);
         } catch (\Throwable $error) {
             self::failJob($row,$error);
         } finally {
@@ -127,11 +144,16 @@ final class Queue
     public static function run(): void
     {
         global $wpdb;$table=Store::table('jobs');
-        $wpdb->query("UPDATE $table SET status='error', error='Trabajo interrumpido. Reintente desde administración.' WHERE status='processing' AND locked_at < UTC_TIMESTAMP() - INTERVAL 10 MINUTE");
-        $rows=Store::rows('jobs',"status='pending' AND attempts<3",[],'ORDER BY id ASC LIMIT 2');$original=get_current_user_id();
+        foreach (Store::rows('jobs',"status='processing' AND locked_at < UTC_TIMESTAMP() - INTERVAL 10 MINUTE") as $stale) {
+            self::failJob($stale,new \RuntimeException('Trabajo interrumpido. Reintente desde administración.'));
+        }
+        $rows=Store::rows('jobs',"status='pending' AND attempts<3 AND (locked_at IS NULL OR locked_at<=UTC_TIMESTAMP())",[],'ORDER BY id ASC LIMIT 2');$original=get_current_user_id();
         foreach ($rows as $row) { self::processRow($row,$table,$original); }
         // WordPress deduplicates identical single events; use a continuation hook for backlog.
-        if (Store::count('jobs','status=%s AND attempts<3',['pending'])) { self::wake(5); }
+        if (Store::count('jobs','status=%s AND attempts<3',['pending'])) {
+            $next=$wpdb->get_var("SELECT MIN(COALESCE(locked_at,UTC_TIMESTAMP())) FROM $table WHERE status='pending' AND attempts<3");
+            self::wake(max(5,min(60,(strtotime($next.' UTC')?:time())-time())));
+        }
     }
 
     /** A dedicated one-shot wakeup avoids WordPress deduplicating against the hourly safety event. */

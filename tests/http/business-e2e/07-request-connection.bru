@@ -1,0 +1,34 @@
+meta {
+  name: request-connection
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/relations
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+  Content-Type: application/json
+}
+body:json {
+  {}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+script:pre-request {
+  req.setBody({target:Number(bru.getEnvVar("bId")),kind:"connect",active:true,message:"QA: compartimos interés en gobernanza."});
+}
+script:post-response {
+  if(res.getStatus()===200) bru.setVar("requestId",res.getBody().request_id);
+}
+tests {
+  test("A solicita conectar", function () { expect(res.getStatus()).to.equal(200); });
+  test("Solicitud pendiente creada", function () { expect(res.getBody().state).to.equal("outgoing_pending");expect(res.getBody().request_id).to.be.above(0); });
+}

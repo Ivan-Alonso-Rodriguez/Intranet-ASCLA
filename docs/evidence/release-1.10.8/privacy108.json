@@ -1,0 +1,42 @@
+{
+  "stage": "Privacidad y Forms 1.10.8",
+  "date": "2026-10-14",
+  "commit": "d01e3d12b6c404ba5aaa9fc4648f5989565bf590",
+  "working_tree": "uncommitted",
+  "version": "1.10.8",
+  "schema": 15,
+  "php_tests": 529,
+  "php_assertions": 6673,
+  "php_coverage_percent": 84.36,
+  "browser_checks": 6,
+  "portable_checks": 49,
+  "gettext_messages_per_locale": 1477,
+  "full_quality_ci_rerun": false,
+  "new_js_coverage": false,
+  "requirements_advanced": [
+    "RF-051",
+    "RF-052",
+    "RNF-006",
+    "RNF-013",
+    "RNF-017"
+  ],
+  "evidence": "docs/evidence/release-1.10.8/privacy108.json",
+  "php_report": "test-results/privacy108-junit.xml",
+  "clover_report": "test-results/privacy108-clover.xml",
+  "browser_report": "test-results/privacy108.json",
+  "browser_suites": [
+    "privacy108"
+  ],
+  "source_hashes_report": "test-results/privacy108-source-hashes.json",
+  "package": {
+    "version": "1.10.8",
+    "bytes": 1278829,
+    "sha256": "646fd9209810b79fbed58aa041b072b6652f7809d1b546292905524d39953eea",
+    "files": 172,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true,
+    "translation_catalog_included": true
+  },
+  "limitations": "Solo seis controles de navegador repetidos en esta etapa; las 69 comprobaciones y 134 estados axe corresponden a la etapa anterior. Sin quality-ci completo, nueva cobertura JavaScript, Quality Gate remoto ni despliegue. RNF-006, RNF-013 y RNF-017 conservan sus pendientes."
+}

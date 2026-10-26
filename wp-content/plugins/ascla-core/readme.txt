@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.10.4
+Stable tag: 1.11.0
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,110 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.11.0 =
+* Revisar contenido a todo el ancho en WordPress y página independiente, con pestañas compactas, filas legibles, borradores plegados y estados vacíos renovados.
+* Resumen de participación por actividad, personas y asistencias, con explicación de ceros y listas pendientes. Revisión editorial en tarjetas con borradores separados; Pendiente de revisión neutro en ambos temas y decisiones con motivo conservadas.
+* Encuentros con pasos de preparación, condiciones y siguiente acción por propuesta. Estadísticas con resumen más claro, gráfico de asistencia y barras de intereses y comparación de períodos; distingue cero de falta de datos y conserva filtros, tablas y permisos.
+* Conversaciones compactas y plegadas, con un único nivel visual. Cabecera Autor ▸ destinatario y respuestas agrupadas bajo el comentario respondido, sin menciones automáticas; expansión de cinco en cinco y conservación de borradores, notificaciones y moderación.
+* Confirmación de recuperación genérica y persistente con formulario conservado; identidad propia del Ejecutivo. PDF compatible con más navegadores, respaldo sin worker, reintentos y errores detallados de carga, acceso y archivo.
+* Duración calculada con los tiempos de la transcripción. La IA recibe todo el texto hablado sin marcas temporales ni numeración de subtítulos; el original y los enlaces temporales se conservan.
+* Limpieza de traducciones antiguas, código de interfaz retirado y estilos sin uso. Catálogos gettext compactos con los mismos textos y archivos PO editables conservados.
+* Resumen más desarrollado y regeneración editorial con fuente reutilizada y versión previa conservada. Transcripción completa oculta en la ficha; marcos de trabajo en etiquetas a todo el ancho.
+* Subtítulos y resumen automáticos al publicar un video, sin botones manuales; continúa en segundo plano y notifica errores. PDF abierto al entrar, controles refinados y sin texto duplicado; Galería sin nombre de archivo y con zonas laterales amplias para cambiar de foto.
+* Resumen editorial más legible: párrafos, conclusiones numeradas, referencias agrupadas y conceptos compactos; adaptable a móvil y ambos temas sin regenerar contenido.
+* Supadata para subtítulos públicos sin Google OAuth, clave cifrada desde WordPress, caché y trabajos asíncronos. Conserva transcripciones completas, prioriza subtítulos existentes y admite generación opcional.
+* Lector PDF privado integrado con páginas, zoom, texto para tecnologías de asistencia y descarga; PDF.js local con licencia incluida.
+* Perfiles compactos y usuario de acceso en Mi perfil; barras de desplazamiento refinadas, Galería con flechas laterales, eventos relacionados con búsqueda paginada y limpieza de adjuntos al eliminar. Notificaciones sin contador duplicado.
+* Reactivación de eventos cancelados con historial, inscripciones, avisos, recordatorios y calendario. Bandeja de notificaciones renovada y adaptable.
+* Inscripción con sincronización automática de Google Calendar; enlace del encuentro reservado a inscritos.
+* Enter envía mensajes; Shift+Enter conserva el salto de línea.
+* Eliminación de notificaciones por cuenta y confirmación de comentarios sin publicar.
+* Navegación entre ventanas emergentes, selección de texto y ajustes de contraste y alineación.
+* Indicadores del inicio navegables, estados y Chatham House en tonos neutros, botones del Directorio uniformes y nuevas tarjetas de eventos con fecha destacada.
+* Borradores neutros, etiquetas con mayúscula inicial y estados de inscripción adaptados al tema oscuro.
+* Opción manual de Google Calendar para inscritos sin cuenta vinculada, con el enlace del encuentro; Galería con portadas amplias y accesos desde imagen, título y botón.
+* Visor de Galería con imagen amplia sin recortar, miniaturas, controles y acceso al original; Centro de Conocimiento con tarjetas, títulos y portadas más legibles.
+* Restaura la portada predeterminada ilustrada del Centro de Conocimiento cuando no existe fotografía o falla la miniatura.
+
+= 1.10.9 =
+* Retira el botón de actualización de YouTube y conserva la obtención automática de metadatos y duración.
+* Restringe scripts con nonce y strict-dynamic, sin permisos generales de YouTube, ytimg o Cloudflare.
+* Consolida los cambios del 17 de octubre de 2026 y conserva el esquema 15.
+* Acelera el arranque y la navegación de los módulos con datos autorizados, consultas agrupadas y contadores agregados.
+* Corrige el guardado del perfil administrativo y limita el tipo de asociado a Independiente o Empresa asociada, establecido por administración.
+* Simplifica Directorio, alinea sus tarjetas y añade teléfono internacional con banderas y aviso privado.
+* Aclara navegación, moderación y formularios, y simplifica Consultas de Contacto con filtros e historial desplegable.
+* Permite editar los datos e intereses del asociado desde administración, con validación, revisión de cambios simultáneos y auditoría.
+* Reorganiza las estadísticas con indicadores explicados, cinco vistas y registro de asistencia guiado.
+* Mejora la recuperación RAG en repreguntas y conserva referencias públicas en la IA sin divulgar identidades reservadas.
+* Muestra a administración las personas seleccionadas para microeventos y su estado de invitación o respuesta.
+* Actualiza las comprobaciones y herramientas de QA para Core 1.10.9; conserva las evidencias históricas y no recoge cobertura nueva.
+
+= 1.10.8 =
+* Inicia la cuenta administrativa en Administración ASCLA y la excluye del networking, directorio, recomendaciones y microeventos, también con relaciones heredadas.
+* Muestra un solo logo y dispone las secciones administrativas encima del contenido, con un único panel lateral.
+* Valida campos SMTP y borrado explícito de credenciales; conserva contraseñas válidas, espacios y el valor 0 sin exponerlos en respuestas.
+* Rechaza identificadores mal formados y campos obligatorios compuestos únicamente por caracteres invisibles.
+* Valida los pesos de afinidad y los enteros administrativos sin recortar ni convertir silenciosamente entradas inválidas.
+* Amplía la validación de metadatos anidados, listas de selección y recordatorios de eventos.
+* Bloquea texto obligatorio invisible en la interfaz y traduce los errores de perfil incompleto; conserva la visibilidad autorizada de incompletos en el Directorio.
+* Conserva el esquema 15, las decisiones de privacidad y el flujo manual de QA/UAT.
+
+= 1.10.7 =
+* Rechaza estructuras REST inválidas y números fuera de rango; comparte límites entre controles y servidor, incluido Contacto de hasta 5000 caracteres.
+* Comprueba la escritura de la nueva contraseña dentro de la transacción y emite la cookie después de confirmar el cambio.
+* Traduce errores de formulario y textos de grupos sin modificar títulos ni contenido aportado por los asociados; mejora etiquetas y retorno del foco en comentarios.
+* Refuerza contraste, etiquetas, campos únicos y navegación por teclado; conserva foco y avisos accesibles en diálogos anidados y el editor de imágenes.
+* Recupera la búsqueda global móvil y ajusta pestañas, tablas y etiquetas administrativas largas a 360px.
+* Incorpora regresiones WCAG automáticas para pantallas principales, formularios y ambos temas; mantiene la revisión humana y de navegadores como pendiente.
+* Recupera invalidaciones de caché externo tras una interrupción después del commit; conserva claves cifradas en el esquema 15 y usa lecturas SQL privadas mientras hay pendientes.
+* Corrige la invocación sin argumentos del cron de entregas e identifica las actualizaciones internas en Administración.
+* El panel consulta solo metadatos de entrega y el trabajador carga un payload por vez, evitando acumular adjuntos grandes en memoria.
+* Aísla el caché durante transacciones; rollback conserva valores confirmados y commit invalida claves de base de datos. Serializa el incremento global de revisión de perfiles.
+* Recordarme conserva el cierre tras 30 minutos de inactividad por decisión expresa del usuario; excepción documentada a RN-058.
+* Añade permisos individuales y registro de autorización previa de Junta, incluido el rol técnico; restringe rutas nativas y acumulaciones no aprobadas.
+* Forms/Zoom, asistencia, umbrales y configuración usan transacciones comunes; conserva bloqueos de perfiles hasta confirmar lotes.
+* Admite credenciales de entorno/wp-config y modo externo; protege la migración de claves anteriores y los tokens OAuth individuales.
+* Corrige la cuadrícula de cuentas en móvil.
+* Añade criterios de completitud configurables, conservando mínimos obligatorios y opcionales ajenos al cálculo.
+* Hub, Foros, Galería y Centro de Conocimiento incorporan rangos de publicación inclusivos y validación de fechas.
+* Registra errores técnicos con módulo, gravedad y UTC sin copiar secretos; conserva un diagnóstico seguro ante rollback o caída de la base.
+* Crea/edita grupos y envía mensajes con rollback y correos tras confirmar; preserva el historial inmutable.
+* Consulta eventos próximos antes del límite y recorre páginas con eventos restringidos; protege ubicación y modalidad reservadas en el contexto del Asistente.
+* La búsqueda de contenido anonimizado comprueba la proyección del lector antes de contar y paginar, conservando originales para editores autorizados.
+* El perfil valida las escrituras y revierte conjuntamente identidad, preferencias y revisión si alguna falla; recomendaciones y cumpleaños se procesan después del commit.
+* Conserva únicamente Me gusta en publicaciones y comentarios. Las reacciones anteriores se cuentan como Me gusta y la API rechaza los tipos retirados.
+* Corrige la altura de Mis conexiones y preserva títulos públicos en contenido, referencias e historial del Asistente.
+* Aprobar comentarios ya aprobados es idempotente; actualiza regresiones a los contratos actuales de perfiles, Hub, moderación y microeventos.
+* Reorganiza el Directorio e incluye perfiles incompletos respetando privacidad y membresía.
+* Incorpora programación editorial, revalidación de candidatos y aprobación separada de microeventos.
+* Amplía categorías de Contacto, autorización de cambios personales y protección REST nativa.
+* Continúa la adecuación al PDF con publicación directa del Hub, reacciones y localización gettext.
+* Añade rollback InnoDB para conexiones, RSVP y moderación, con correo ASCLA después del commit.
+* Exige motivo en comentarios y reportes, registra estado anterior/posterior y conserva auditoría al eliminar reportes revisados.
+* Extiende transacciones a publicaciones, cuentas, Contacto y estados de microeventos; comprueba escrituras de WordPress y difiere correos nativos/Calendar hasta confirmar cambios.
+* Conserva reacciones ajenas al eliminar cuentas con identificadores coincidentes; valida cron en todas las secciones y vencimientos FIFO concurrentes.
+* Foros separa Mis temas de Mis comentarios, con búsqueda, fechas y contexto visible.
+* Migra al esquema 15: cola cifrada de entregas de correo y Calendar; conserva los datos existentes.
+
+= 1.10.6 =
+* Consolida la adecuación al Documento de Análisis y Diseño ASCLA y las correcciones QA 024–058.
+* Refuerza sesiones, recuperación de cuenta, política de credenciales y control de membresía activa, suspendida o vencida.
+* Endurece el guardado y revisión de perfiles, privacidad y exclusión de perfiles no elegibles del Directorio y las recomendaciones.
+* Amplía Contacto, microeventos, recordatorios, reconfirmación de eventos y lista de espera con ofertas persistentes y vencimiento.
+* Conserva mensajes transmitidos, aplica esperas de reconexión y bloqueo, y mejora la visibilidad de conversaciones según la relación.
+* Incorpora auditoría ampliada mediante el esquema 14, conservando los datos existentes.
+* Sincroniza metadatos de versión, SonarQube, pruebas de cierre, documentación y paquete instalable con 1.10.6.
+
+= 1.10.5 =
+* Completa CU009 directamente en Inicio mediante carruseles accesibles y responsivos de personas y materiales recomendados.
+* Genera lotes automáticos cada siete días de hasta cinco perfiles elegibles, sin actualización manual.
+* Registra el recálculo semanal como trabajo recommendations en wp_ascla_jobs para conservar estado, auditoría y reintentos.
+* Exige membresía activa, consentimiento y perfil mínimo con 70% de completitud; respeta privacidad y bloqueos.
+* Explica afinidad y complementariedad, muestra baja coincidencia y ordena recursos publicados por relevancia.
+* Registra No me interesa de forma privada y permite restituir perfiles desde Perfil > Privacidad y avisos.
+* Mantiene el esquema 13 y los contratos anteriores de matching.
 
 = 1.10.4 =
 * Reorganiza Mi perfil en cuatro pestañas: Información, Intereses, Privacidad y avisos, y Cuenta y seguridad, reduciendo el desplazamiento vertical y conservando el guardado existente.
