@@ -1,77 +1,68 @@
 const assert = require("node:assert/strict");
+/* The player/manual-generation flow was replaced by transcript timing and queued preparation. */
 module.exports = async function videoScenarios({test, admin, request, base, fixtures}) {
-  let mode = "success", durationWrites = 0, multimediaJobs = 0;
-  const jobs = async route => {
-    if (route.request().method() === "POST" && route.request().postDataJSON()?.kind === "multimedia") {
-      multimediaJobs++;
-      return route.fulfill({json: {id: 990000001}});
-    }
-    return route.continue();
-  };
-  const jobResult = route => route.fulfill({json: {status: "error", error: "Metadata <b>unavailable</b>"}});
-  const loader = async route => {
-    if (mode === "network-error") return route.abort();
-    return route.fulfill({contentType: "application/javascript", body: [
-      "window.YT={Player:function(host,config){",
-      "this.getDuration=()=>125.6;this.mute=()=>{};this.cueVideoById=()=>{};",
-      "this.destroy=()=>{window.__ytDestroyed=(window.__ytDestroyed||0)+1;};",
-      "setTimeout(()=>window.__ytPlayerError?config.events.onError():config.events.onReady({target:this}),10);",
-      "}};window.onYouTubeIframeAPIReady();",
-    ].join("")});
-  };
-  const onRequest = req => { if (req.method() === "POST" && req.url().includes("/video-duration")) durationWrites++; };
+  const transcript = "00:00:06,160 --> 00:00:10,040\nLa junta supervisa los riesgos.\n\n00:01:58,000 --> 00:02:05,600\nCierre con acuerdos de gobernanza.";
   const resource = async () => {
     const response = await request(admin, "content/resource", {
-      title: "E2E automatic YouTube metadata", body: "Prueba local del reproductor", status: "publish",
-      meta: {resource_type: "Video", youtube_url: "https://www.youtube.com/watch?v=abcdefghijk"},
+      title: "E2E transcript duration and preparation", body: "Prueba local del recurso", status: "publish",
+      meta: {resource_type: "Video", youtube_url: "https://www.youtube.com/watch?v=abcdefghijk", transcript, summary: "Resumen previo conservado.", chatham: false},
     });
     assert.equal(response.status, 200, JSON.stringify(response.body));
     fixtures.push(response.body.id);
-    await admin.goto(base + "/centro-conocimiento/?item=" + response.body.id);
-    await admin.locator('.modal [data-action="generate"]').waitFor();
-    assert.equal(await admin.locator('[data-action="video-metadata"]').count(), 0);
-    assert.equal(await admin.getByText("Actualizar datos de YouTube", {exact: true}).count(), 0);
-    return response.body.id;
+    return response.body;
   };
-  const generate = async () => {
-    await admin.locator('.modal [data-action="generate"]').click();
-    await admin.locator("#job-result .error").waitFor();
+  const visit = async id => {
+    await admin.goto(base + "/centro-conocimiento/?item=" + id);
+    await admin.locator('.modal [data-action="resource-regenerate"]').waitFor();
   };
-  admin.on("request", onRequest);
   await admin.route("https://www.youtube-nocookie.com/**", route => route.abort());
-  await admin.route("https://www.youtube.com/iframe_api", loader);
-  await admin.route("**/ascla/v1/jobs", jobs);
-  await admin.route("**/ascla/v1/jobs/990000001", jobResult);
   try {
-    await test("YouTube refresh button is absent and processing automatically stores measured duration", async () => {
-      const id = await resource(); await generate();
-      const saved = await request(admin, "items/" + id);
+    await test("Transcript timing supplies duration without player metadata or manual preparation buttons", async () => {
+      const data = await resource(); await visit(data.id);
+      const saved = await request(admin, "items/" + data.id);
       assert.equal(saved.body.meta.duration_seconds, 126);
-      assert.equal(durationWrites, 1); assert.equal(multimediaJobs, 1);
-      assert.equal(await admin.evaluate(() => window.__ytDestroyed), 1);
-      assert.equal(await admin.locator('script[data-ascla-youtube-api]').getAttribute("src"), "https://www.youtube.com/iframe_api");
-      assert.ok(await admin.locator('script[data-ascla-youtube-api]').evaluate(script => Boolean(script.nonce)));
-    });
-    await test("Failed automatic player preserves duration and still submits processing without unsafe error HTML", async () => {
-      await resource(); await admin.evaluate(() => { window.__ytPlayerError = true; }); await generate();
-      const error = admin.locator("#job-result .error");
-      assert.match(await error.innerText(), /Metadata <b>unavailable<\/b>/);
-      assert.equal(await error.locator("b").count(), 0);
-      assert.equal(durationWrites, 1); assert.equal(multimediaJobs, 2);
-      assert.equal(await admin.evaluate(() => window.__ytDestroyed), 1);
-    });
-    await test("A failed automatic YouTube loader can retry on the same page", async () => {
-      const id = await resource(); mode = "network-error"; await generate();
+      assert.equal(await admin.locator('[data-action="generate"],[data-action="transcript"],[data-action="video-metadata"]').count(), 0);
       assert.equal(await admin.locator('script[data-ascla-youtube-api]').count(), 0);
-      mode = "success"; await admin.locator('.modal-top [data-action="close"]').click();
-      await admin.locator('[data-action="item"][data-id="' + id + '"]').first().click(); await generate();
-      assert.equal(durationWrites, 2); assert.equal(multimediaJobs, 4);
+      assert.equal(await admin.getByText("Actualizar datos de YouTube", {exact: true}).count(), 0);
     });
-  } finally {
-    admin.off("request", onRequest);
-    await admin.unroute("**/ascla/v1/jobs", jobs);
-    await admin.unroute("**/ascla/v1/jobs/990000001", jobResult);
-    await admin.unroute("https://www.youtube.com/iframe_api", loader);
-    await admin.unroute("https://www.youtube-nocookie.com/**");
-  }
+    await test("A simulated preparation error is escaped and does not change the stored duration", async () => {
+      const data = await resource();
+      const pattern = "**/ascla/v1/items/" + data.id;
+      const failed = async route => {
+        const response = await route.fetch(), item = await response.json();
+        item.meta.video_preparation = {status: "error", job_id: 990000001, error: "Metadata <b>unavailable</b>"};
+        return route.fulfill({response, json: item});
+      };
+      await admin.route(pattern, failed);
+      try {
+        await visit(data.id);
+        const error = admin.locator('[data-video-preparation].error');
+        assert.match(await error.innerText(), /Metadata <b>unavailable<\/b>/);
+        assert.equal(await error.locator("b").count(), 0);
+        assert.equal(await admin.locator('[data-action="resource-regenerate"]').isEnabled(), true);
+      } finally { await admin.unroute(pattern, failed); }
+      assert.equal((await request(admin, "items/" + data.id)).body.meta.duration_seconds, 126);
+    });
+    await test("Editorial refresh runs a real queued job and preserves transcript-derived duration", async () => {
+      const data = await resource(); await visit(data.id);
+      const response = admin.waitForResponse(r => r.request().method() === "POST" && r.url().endsWith("/resources/" + data.id + "/regenerate"));
+      await admin.locator('[data-action="resource-regenerate"]').click();
+      const queued = await response; assert.equal(queued.status(), 200);
+      const job = await queued.json(); assert.ok(job.id > 0);
+      let state;
+      for (let i=0;i<120;i++) {
+        state=(await request(admin,'jobs/'+job.id)).body;
+        if (['completed','error'].includes(state.status)) break;
+        await new Promise(resolve=>setTimeout(resolve,1000));
+      }
+      assert.equal(state.status,'completed','Queued preparation: '+JSON.stringify(state));
+      await admin.locator('.knowledge-reading-summary').waitFor({timeout: 15000});
+      const saved = (await request(admin, "items/" + data.id)).body;
+      assert.equal(saved.meta.video_preparation.status, "completed");
+      assert.equal(saved.meta.duration_seconds, 126);
+      assert.equal(saved.meta.transcript, transcript);
+      assert.ok(saved.meta.summary && saved.meta.technical_note && saved.meta.ai_enriched);
+      assert.equal((await request(admin, "jobs/" + job.id)).body.status, "completed");
+    });
+  } finally { await admin.unroute("https://www.youtube-nocookie.com/**"); }
 };

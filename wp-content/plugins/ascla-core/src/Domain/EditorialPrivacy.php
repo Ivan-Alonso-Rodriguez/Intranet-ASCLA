@@ -25,7 +25,7 @@ final class EditorialPrivacy
                 if(isset($meta[$field]) && is_array($meta[$field])){$meta[$field]=Transcript::videoLinks($meta[$field],(string)($meta['video_id']??''));}
             }
         }
-        unset($meta['transcript'],$meta['identities'],$meta['transcript_error'],$meta['transcript_mode'],$meta['transcript_checked_at']);
+        unset($meta['transcript'],$meta['identities'],$meta['transcript_error'],$meta['transcript_mode'],$meta['transcript_checked_at'],$meta['transcript_video_id'],$meta['transcript_language']);
         return ['title'=>$title,'body'=>$body,'meta'=>$meta];
     }
 }

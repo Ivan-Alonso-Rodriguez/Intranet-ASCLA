@@ -9,6 +9,7 @@ final class NotificationEmail
         'connection'=>'connections','connection_accepted'=>'connections',
         'conversation_request'=>'messages','conversation_accepted'=>'messages','conversation_group'=>'messages','message'=>'messages',
         'event'=>'events','event_reminder'=>'events','event_waitlist_available'=>'events','event_cancelled'=>'events','event_updated'=>'events','microevent'=>'events',
+        'event_reactivated'=>'events',
         'support_received'=>'support','support_request'=>'support','support_update'=>'support',
     ];
 
@@ -35,6 +36,7 @@ final class NotificationEmail
             'event'=>'Tienes una nueva invitación a un evento de ASCLA.',
             'event_waitlist_available'=>'Se liberó un cupo para ti en un evento de ASCLA. Entra para confirmar tu asistencia.',
             'event_cancelled'=>'Un evento en el que participabas o estabas en espera fue cancelado. Revisa los detalles en ASCLA.',
+            'event_reactivated'=>'Un evento relacionado contigo vuelve a estar activo. Revisa la fecha y el estado de tu inscripción en ASCLA.',
             'event_updated'=>'Un evento relacionado contigo cambió información importante. Revisa los detalles actualizados en ASCLA.',
             'event_reminder'=>'Se acerca un encuentro en el que confirmaste tu participación. Revisa el horario y los detalles en ASCLA.',
             'microevent'=>'Tienes una nueva invitación a un círculo ASCLA.',

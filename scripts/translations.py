@@ -35,7 +35,10 @@ def read_po(path):
 def compile_catalogs():
     for locale in ('es_ES', 'en_US'):
         path = LANGUAGES / f'ascla-core-{locale}.po'
-        messages = read_po(path)
+        original = read_po(path)
+        # Gettext already falls back to the source for identity translations.
+        # Keep editable PO entries and the header; preserve every custom value.
+        messages = {key: value for key, value in original.items() if not key or key != value}
         entries = sorted((key.encode('utf-8'), value.encode('utf-8')) for key, value in messages.items())
         count = len(entries)
         offset = 28 + count * 16
@@ -52,9 +55,9 @@ def compile_catalogs():
         binary += b''.join(struct.pack('<2I', *row) for row in id_table + value_table) + ids + values
         # Parse our output with an independent, standard GNU gettext reader.
         catalog = gettext.GNUTranslations(io.BytesIO(binary))
-        assert all(catalog.gettext(key) == value for key, value in messages.items() if key)
+        assert all(catalog.gettext(key) == value for key, value in original.items() if key)
         path.with_suffix('.mo').write_bytes(binary)
-        print(f'{locale}: {count - 1} gettext messages compiled')
+        print(f'{locale}: {count - 1} gettext messages compiled; {len(original) - len(messages)} identity entries use source fallback')
 
 
 def sync_catalogs():

@@ -9,6 +9,16 @@ final class AccountRecovery
     {
         add_action('login_form_lostpassword',[self::class,'controller']);
         add_action('login_form_retrievepassword',[self::class,'controller']);
+        add_action('login_form_checkemail',[self::class,'controller']);
+        add_filter('lostpassword_redirect',static fn()=>self::confirmationUrl());
+    }
+    public static function confirmationUrl(): string
+    {
+        return add_query_arg(['action'=>'lostpassword','ascla_recovery'=>'sent','wp_lang'=>Language::requested()?:Language::current()],network_site_url('wp-login.php','login'));
+    }
+    public static function confirmationMessage(): string
+    {
+        return Language::text('Si existe una cuenta asociada, recibirás un enlace de recuperación. Revisa también la carpeta de spam.','If an account matches, you will receive a recovery link. Please also check your spam folder.');
     }
     public static function request(string $identifier): true|\WP_Error
     {
@@ -33,16 +43,20 @@ final class AccountRecovery
     }
     public static function controller(): void
     {
-        if (($_SERVER['REQUEST_METHOD']??'GET')!=='POST') { return; }
+        $posted=($_SERVER['REQUEST_METHOD']??'GET')==='POST';
+        $confirmed=($_GET['ascla_recovery']??'')==='sent'||($_GET['checkemail']??'')==='confirm';
+        if (!$posted&&!$confirmed) { return; }
+        $GLOBALS['action']='lostpassword';
         $identifier=isset($_POST['user_login']) && is_string($_POST['user_login'])?wp_unslash($_POST['user_login']):'';
-        $result=self::request($identifier);
+        $result=$posted?self::request($identifier):true;
+        nocache_headers();
+        if ($posted&&$result===true) { wp_safe_redirect(self::confirmationUrl(),303);exit; }
         if ($result===true) {
-            $copy=Language::text('Si existe una cuenta asociada, recibirás un enlace de recuperación. Revisa también la carpeta de spam.','If an account matches, you will receive a recovery link. Please also check your spam folder.');
-            login_header(Language::text('Recuperar contraseña','Reset password'),'<p class="message">'.esc_html($copy).'</p>');
+            login_header(Language::text('Recuperar contraseña','Reset password'),'<p class="message" role="status">'.esc_html(self::confirmationMessage()).'</p>');
         } else {
             login_header(Language::text('Recuperar contraseña','Reset password'),'',$result);
-            self::form($identifier);
         }
+        self::form($identifier);
         echo '<p id="nav"><a href="'.esc_url(Login::url()).'">'.esc_html(Language::text('Volver al inicio de sesión','Back to sign in')).'</a></p>';
         login_footer();exit;
     }

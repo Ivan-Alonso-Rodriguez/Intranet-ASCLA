@@ -2,12 +2,18 @@
 namespace ASCLA\Core\Integrations;
 final class Secrets
 {
-    public const SERVICE_KEYS=['ai_key','openai_key','deepseek_key','google_client_secret','turnstile_secret','smtp_password'];
+    public const SERVICE_KEYS=['ai_key','openai_key','deepseek_key','supadata_key','google_client_secret','turnstile_secret','smtp_password'];
+    private static function requiresExternal(string $name): bool
+    {
+        // Supadata supports encrypted WordPress configuration unless the operator explicitly enforces external-only secrets.
+        $flag=defined('ASCLA_EXTERNAL_SECRETS_ONLY')?constant('ASCLA_EXTERNAL_SECRETS_ONLY'):getenv('ASCLA_EXTERNAL_SECRETS_ONLY');
+        return in_array($name,self::SERVICE_KEYS,true)&&self::externalOnly()&&($name!=='supadata_key'||($flag!==false&&$flag!==''));
+    }
     public static function externalOnly(): bool
     {
         $value=defined('ASCLA_EXTERNAL_SECRETS_ONLY')?constant('ASCLA_EXTERNAL_SECRETS_ONLY'):getenv('ASCLA_EXTERNAL_SECRETS_ONLY');
         if ($value===false || $value==='') {
-            foreach (self::SERVICE_KEYS as $name) { if (self::hasLegacy($name)) { return false; } }
+            foreach (self::SERVICE_KEYS as $name) { if ($name!=='supadata_key' && self::hasLegacy($name)) { return false; } }
             return true;
         }
         // An invalid server flag must not silently enable writes to the legacy store.
@@ -19,7 +25,7 @@ final class Secrets
         if (defined($constant)) { return 'constant'; }
         if (getenv($constant)!==false) { return 'environment'; }
         $fallback=self::hasLegacy($name)?'encrypted_option':'absent';
-        return self::externalOnly() && in_array($name,self::SERVICE_KEYS,true)?'external_required':$fallback;
+        return self::requiresExternal($name)?'external_required':$fallback;
     }
     public static function hasLegacy(string $name): bool { return get_option('ascla_secret_'.$name,'')!==''; }
     public static function managedExternally(string $name): bool { return in_array(self::source($name),['constant','environment','external_required'],true); }
@@ -38,7 +44,7 @@ final class Secrets
         if (defined($constant)) { return (string)constant($constant); }
         $environment=getenv($constant);
         if ($environment!==false) { return $environment; }
-        return self::externalOnly() && in_array($name,self::SERVICE_KEYS,true)?'':self::legacy($name);
+        return self::requiresExternal($name)?'':self::legacy($name);
     }
     private static function legacy(string $name): string
     {

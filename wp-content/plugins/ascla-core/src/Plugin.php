@@ -53,6 +53,7 @@ final class Plugin
         Integrations\Mailer::boot();
         add_action('transition_comment_status',[Services\Content::class,'commentTransition'],10,3);
         add_action('transition_post_status', [Services\Content::class, 'published'], 10, 3);
+        add_action('transition_post_status', [Services\VideoPreparation::class, 'published'], 20, 3);
         add_filter('wp_insert_post_data', [Services\Content::class, 'guardPublication'], 10, 2);
         add_filter('preprocess_comment', static function ($comment) {
             if (str_starts_with((string)get_post_type((int)($comment['comment_post_ID']??0)),'ascla_')) {

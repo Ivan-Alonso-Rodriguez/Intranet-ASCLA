@@ -1,5 +1,7 @@
 # Frontend: E2E de interfaz con Playwright
 
+El código actual prepara Core **1.11.0**. Esta entrega de reportes conserva su ejecución histórica de **1.10.9**; no se ha sustituido con resultados locales nuevos. La validación local de 1.11.0 se identifica en el manifiesto y la evidencia de `docs/evidence/release-1.11.0/`. Para renovar esta carpeta, ejecuta ambos clientes contra el mismo destino y paquete, con los seis flujos de `tests/qa-flow-contract.json`.
+
 El [dashboard de Playwright](dashboard.html) muestra únicamente la ejecución publicada más reciente de los seis flujos principales, con su resultado, videos, capturas y reportes. Los pasos principales usan clics, formularios y navegación reales; las llamadas REST auxiliares solo preparan, verifican identidad y limpian datos propios.
 
 El [ZAP local de páginas](../seguridad/frontend-zap.html), los [controles CSP y de navegador](../seguridad/dashboard.html) y sus [fuentes de ejecución](../seguridad/fuentes.html) también forman parte de la entrega. La [guía de sustento](../seguridad/sustento.html) compara 20/20 controles HTTP/CSP locales con 19/20 en QA, sin mezclar estos controles de seguridad con los seis flujos funcionales de Playwright.

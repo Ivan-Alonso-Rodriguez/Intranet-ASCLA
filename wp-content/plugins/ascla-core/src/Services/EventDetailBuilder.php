@@ -23,6 +23,7 @@ final class EventDetailBuilder
     {
         $registration=Store::rows('registrations',self::REGISTRATION,[$id,get_current_user_id()],'LIMIT 1')[0]??null;
         $item['registered']=$registration['status']??'none';
+        $item['calendar_status']=EventCalendar::status($id);
         $item['offer_expires_at']=$item['registered']==='offered'?EventParticipation::deadline($id,(int)$registration['id']):null;
         $item['attending']=Store::count('registrations',self::REGISTRATION_STATUS,[$id,'accepted']);
         $item['capacity']=max(0,(int)($meta['capacity']??0));
@@ -50,6 +51,9 @@ final class EventDetailBuilder
         $item['google_url']='';
         if(!$item['is_past'] && !$item['cancelled']){
             $description=!empty($meta['chatham'])?'Sesión bajo la Regla de Chatham House.':$post->post_content;
+            if ($item['registered']==='accepted' && !empty($item['meta']['url'])) {
+                $description.="\n\n".$item['meta']['url'];
+            }
             $item['google_url']=Calendar::google($item['title'],$item['meta'],$description);
         }
     }

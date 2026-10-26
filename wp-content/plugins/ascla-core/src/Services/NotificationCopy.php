@@ -21,6 +21,7 @@ final class NotificationCopy
             'event'=>self::tr('Tienes una invitación a un evento','You have an event invitation'),
             'event_waitlist_available'=>self::tr('Se liberó un cupo para ti','A spot is available for you'),
             'event_cancelled'=>self::tr('Un evento fue cancelado','An event was cancelled'),
+            'event_reactivated'=>self::tr('Un evento vuelve a estar activo','An event is active again'),
             'event_updated'=>self::tr('Un evento cambió información importante','An event has important updates'),
             'microevent'=>self::tr('Tu círculo ASCLA te espera','Your ASCLA circle is waiting'),
             default=>$default,
@@ -53,6 +54,7 @@ final class NotificationCopy
             return match($kind) {
                 'event_waitlist_available'=>self::tr('Confirmar cupo','Confirm spot'),
                 'event_cancelled'=>self::tr('Ver evento cancelado','View cancelled event'),
+                'event_reactivated'=>self::tr('Revisar encuentro','Review event'),
                 'event_updated'=>self::tr('Revisar cambios','Review updates'),
                 default=>self::tr('Ver encuentro e invitación','View event and invitation'),
             };

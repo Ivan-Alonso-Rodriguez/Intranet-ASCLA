@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.10.9
+Stable tag: 1.11.0
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,31 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.11.0 =
+* Revisar contenido a todo el ancho en WordPress y página independiente, con pestañas compactas, filas legibles, borradores plegados y estados vacíos renovados.
+* Resumen de participación por actividad, personas y asistencias, con explicación de ceros y listas pendientes. Revisión editorial en tarjetas con borradores separados; Pendiente de revisión neutro en ambos temas y decisiones con motivo conservadas.
+* Encuentros con pasos de preparación, condiciones y siguiente acción por propuesta. Estadísticas con resumen más claro, gráfico de asistencia y barras de intereses y comparación de períodos; distingue cero de falta de datos y conserva filtros, tablas y permisos.
+* Conversaciones compactas y plegadas, con un único nivel visual. Cabecera Autor ▸ destinatario y respuestas agrupadas bajo el comentario respondido, sin menciones automáticas; expansión de cinco en cinco y conservación de borradores, notificaciones y moderación.
+* Confirmación de recuperación genérica y persistente con formulario conservado; identidad propia del Ejecutivo. PDF compatible con más navegadores, respaldo sin worker, reintentos y errores detallados de carga, acceso y archivo.
+* Duración calculada con los tiempos de la transcripción. La IA recibe todo el texto hablado sin marcas temporales ni numeración de subtítulos; el original y los enlaces temporales se conservan.
+* Limpieza de traducciones antiguas, código de interfaz retirado y estilos sin uso. Catálogos gettext compactos con los mismos textos y archivos PO editables conservados.
+* Resumen más desarrollado y regeneración editorial con fuente reutilizada y versión previa conservada. Transcripción completa oculta en la ficha; marcos de trabajo en etiquetas a todo el ancho.
+* Subtítulos y resumen automáticos al publicar un video, sin botones manuales; continúa en segundo plano y notifica errores. PDF abierto al entrar, controles refinados y sin texto duplicado; Galería sin nombre de archivo y con zonas laterales amplias para cambiar de foto.
+* Resumen editorial más legible: párrafos, conclusiones numeradas, referencias agrupadas y conceptos compactos; adaptable a móvil y ambos temas sin regenerar contenido.
+* Supadata para subtítulos públicos sin Google OAuth, clave cifrada desde WordPress, caché y trabajos asíncronos. Conserva transcripciones completas, prioriza subtítulos existentes y admite generación opcional.
+* Lector PDF privado integrado con páginas, zoom, texto para tecnologías de asistencia y descarga; PDF.js local con licencia incluida.
+* Perfiles compactos y usuario de acceso en Mi perfil; barras de desplazamiento refinadas, Galería con flechas laterales, eventos relacionados con búsqueda paginada y limpieza de adjuntos al eliminar. Notificaciones sin contador duplicado.
+* Reactivación de eventos cancelados con historial, inscripciones, avisos, recordatorios y calendario. Bandeja de notificaciones renovada y adaptable.
+* Inscripción con sincronización automática de Google Calendar; enlace del encuentro reservado a inscritos.
+* Enter envía mensajes; Shift+Enter conserva el salto de línea.
+* Eliminación de notificaciones por cuenta y confirmación de comentarios sin publicar.
+* Navegación entre ventanas emergentes, selección de texto y ajustes de contraste y alineación.
+* Indicadores del inicio navegables, estados y Chatham House en tonos neutros, botones del Directorio uniformes y nuevas tarjetas de eventos con fecha destacada.
+* Borradores neutros, etiquetas con mayúscula inicial y estados de inscripción adaptados al tema oscuro.
+* Opción manual de Google Calendar para inscritos sin cuenta vinculada, con el enlace del encuentro; Galería con portadas amplias y accesos desde imagen, título y botón.
+* Visor de Galería con imagen amplia sin recortar, miniaturas, controles y acceso al original; Centro de Conocimiento con tarjetas, títulos y portadas más legibles.
+* Restaura la portada predeterminada ilustrada del Centro de Conocimiento cuando no existe fotografía o falla la miniatura.
 
 = 1.10.9 =
 * Retira el botón de actualización de YouTube y conserva la obtención automática de metadatos y duración.

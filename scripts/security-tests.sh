@@ -18,7 +18,15 @@ NETWORK="${PROJECT}_scan"
 ENV_FILE="$OUT/private.env"
 ZAP_IMAGE='ghcr.io/zaproxy/zaproxy:stable@sha256:5ccfff9a411743ab2615136a2edd7416bec9ce41572fa94e935df38c14adb2b6'
 BROWSER_IMAGE='mcr.microsoft.com/playwright:v1.62.1-noble'
-dc(){ docker compose -f "$ROOT/compose.yaml" -f "$OUT/compose-security.yaml" --env-file "$ENV_FILE" -p "$PROJECT" "$@"; }
+BASE_COMPOSE="$ROOT/compose.yaml"
+CI_COMPOSE=()
+if [ "${ASCLA_CI_SECURITY:-0}" = 1 ]; then
+  python3 "$ROOT/scripts/ci-security.py" env >/dev/null
+  BASE_COMPOSE="$ROOT/ci/compose.runtime.yaml"
+  CI_COMPOSE=(-f "$ROOT/ci/compose.security.yaml")
+fi
+dc(){ docker compose --project-directory "$ROOT" -f "$BASE_COMPOSE" "${CI_COMPOSE[@]}" -f "$OUT/compose-security.yaml" --env-file "$ENV_FILE" -p "$PROJECT" "$@"; }
+export COMPOSE_PROJECT_NAME="$PROJECT"
 cleanup(){
   local status=$?
   trap - EXIT INT TERM
@@ -96,6 +104,9 @@ ASCLA_LOCAL_MAIL_CAPTURE=true
 ASCLA_EXTERNAL_SECRETS_ONLY=0
 ASCLA_SEED_DATA=true
 EOF_ENV
+if [ "${ASCLA_CI_SECURITY:-0}" = 1 ]; then
+  python3 "$ROOT/scripts/ci-security.py" env >>"$ENV_FILE"
+fi
 trap cleanup EXIT
 trap 'exit 3' INT TERM
 docker network inspect proxy_net >/dev/null 2>&1 || docker network create proxy_net >/dev/null

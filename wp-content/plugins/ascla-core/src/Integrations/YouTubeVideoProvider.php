@@ -74,13 +74,6 @@ final class YouTubeVideoProvider implements VideoProviderInterface
     }
     public function transcript(string $videoId): array
     {
-        $token=GoogleOAuth::accessToken(get_current_user_id());
-        $response=wp_remote_get('https://www.googleapis.com/youtube/v3/captions?'.http_build_query(['part'=>'snippet','videoId'=>$videoId]),['headers'=>['Authorization'=>self::BEARER.$token],'timeout'=>25,'redirection'=>0,'limit_response_size'=>1048576]);
-        if (is_wp_error($response)||wp_remote_retrieve_response_code($response)!==200) { throw new IntegrationException('YouTube: permisos insuficientes o API no configurada. Puede cargar una transcripción autorizada manualmente.'); }
-        $data=json_decode(wp_remote_retrieve_body($response),true); $caption=$data['items'][0]['id']??'';
-        if (!$caption) { throw new IntegrationException('No se encontraron subtítulos accesibles para este video.'); }
-        $response=wp_remote_get('https://www.googleapis.com/youtube/v3/captions/'.rawurlencode($caption).'?tfmt=srt',['headers'=>['Authorization'=>self::BEARER.$token],'timeout'=>30,'redirection'=>0,'limit_response_size'=>524288]);
-        if (is_wp_error($response)||wp_remote_retrieve_response_code($response)!==200) { throw new IntegrationException('No tiene permisos para descargar estos subtítulos.'); }
-        return ['mode'=>'API REAL YouTube','text'=>wp_strip_all_tags(wp_remote_retrieve_body($response))];
+        return (new SupadataVideoProvider())->transcript($videoId);
     }
 }

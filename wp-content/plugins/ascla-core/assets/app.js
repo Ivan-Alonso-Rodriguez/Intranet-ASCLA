@@ -1,7 +1,6 @@
 /* ASCLA frontend. WordPress owns authentication and authorization; this UI never grants permissions. */
 (() => {
   "use strict";
-  const scriptNonce = document.currentScript?.nonce || "";
   const root = document.getElementById("ascla-root");
   if (!root || !globalThis.ASCLA) return;
   const C = globalThis.ASCLA;
@@ -168,6 +167,7 @@
   const empty = (title, text = "") =>
     `<div class="empty">${I("users")}<strong>${E(T(title))}</strong><p>${E(T(text))}</p></div>`;
   const UI = globalThis.ASCLAContent({ escape: E, icon: I, config: C, T });
+  const pdfPreview=globalThis.ASCLAPdfPreview({root,config:C,T});
   function apiURL(path) {
     const url = new URL(C.api, location.href);
     const [route, query = ""] = path.split("?", 2);
@@ -180,112 +180,6 @@
     for (const key of new Set(params.keys())) url.searchParams.delete(key);
     params.forEach((value, key) => url.searchParams.append(key, value));
     return url.href;
-  }
-  let youtubeIframeApiPromise = null;
-  function youtubeIframeApi() {
-    if (globalThis.YT?.Player) return Promise.resolve(globalThis.YT);
-    if (!youtubeIframeApiPromise) {
-      youtubeIframeApiPromise = requestYouTubeIframeApi().catch(error => {
-        youtubeIframeApiPromise = null;
-        throw error;
-      });
-    }
-    return youtubeIframeApiPromise;
-  }
-  function requestYouTubeIframeApi() {
-    return new Promise((resolve, reject) => {
-      const previous = globalThis.onYouTubeIframeAPIReady;
-      let settled = false, timer;
-      let script = document.querySelector('script[data-ascla-youtube-api]');
-      const settle = (error) => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timer);
-        if (globalThis.onYouTubeIframeAPIReady === finish) globalThis.onYouTubeIframeAPIReady = previous;
-        if (script) script.onerror = null;
-        if (error) {
-          script?.remove();
-          reject(error);
-        } else resolve(globalThis.YT);
-      };
-      const finish = () => {
-        if (settled) return;
-        try { if (typeof previous === "function") previous(); } catch { /* Preserve other integrations without blocking this loader. */ }
-        settle(globalThis.YT?.Player ? null : new Error(T("No se pudo cargar el reproductor de YouTube.")));
-      };
-      globalThis.onYouTubeIframeAPIReady = finish;
-      timer = setTimeout(() => {
-        if (globalThis.YT?.Player) finish();
-        else settle(new Error(T("YouTube tardó demasiado en responder.")));
-      }, 12000);
-      if (!script) {
-        script = document.createElement("script");
-        // Unversioned official loader: a fixed SRI hash would block upstream updates.
-        // Keep this HTTPS URL literal; CSP and integration notes: MANUAL_QA_UAT.md.
-        script.src = "https://www.youtube.com/iframe_api";
-        if (scriptNonce) script.nonce = scriptNonce;
-        script.referrerPolicy = "strict-origin-when-cross-origin";
-        script.async = true;
-        script.dataset.asclaYoutubeApi = "1";
-        script.onerror = () => settle(new Error(T("No se pudo cargar el reproductor de YouTube.")));
-        document.head.appendChild(script);
-      }
-    });
-  }
-  async function detectYouTubeDuration(videoId) {
-    if (!/^[A-Za-z0-9_-]{11}$/.test(String(videoId || ""))) throw new Error(T("Video de YouTube no válido."));
-    const YT = await youtubeIframeApi();
-    return new Promise((resolve, reject) => {
-      const host = document.createElement("iframe");
-      host.className = "youtube-duration-probe";
-      host.setAttribute("credentialless", "");
-      host.title = "YouTube";
-      host.tabIndex = -1;
-      host.setAttribute("aria-hidden", "true");
-      host.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?enablejsapi=1&controls=0&playsinline=1&origin=${encodeURIComponent(location.origin)}`;
-      document.body.appendChild(host);
-      let player = null, timer = null, checks = 0, finished = false;
-      const cleanup = () => {
-        if (timer) clearInterval(timer);
-        try { player?.destroy?.(); } catch {}
-        host.remove();
-      };
-      const done = (fn, value) => {
-        if (finished) return;
-        finished = true;
-        cleanup();
-        fn(value);
-      };
-      const poll = () => {
-        let duration = 0;
-        try { duration = Math.round(Number(player?.getDuration?.() || 0)); } catch {}
-        if (duration > 0 && duration <= 604800) return done(resolve, duration);
-        if (++checks >= 24) done(reject, new Error(T("YouTube no entregó la duración al reproductor.")));
-      };
-      try {
-        player = new YT.Player(host, {
-          width: "2", height: "2", videoId,
-          playerVars: { controls: 0, playsinline: 1, rel: 0, origin: location.origin },
-          events: {
-            onReady: event => {
-              try { event.target.mute(); event.target.cueVideoById(videoId); } catch {}
-              timer = setInterval(poll, 350);
-              poll();
-            },
-            onError: () => done(reject, new Error(T("YouTube no pudo abrir este video para leer su duración."))),
-          },
-        });
-      } catch (error) { done(reject, error); }
-    });
-  }
-  async function ensureYouTubeDuration(id) {
-    const item = await api("items/" + Number(id));
-    const videoId = item?.meta?.video_id || "";
-    if (!videoId) return null;
-    if (Number(item?.meta?.duration_seconds || 0) > 0) return Number(item.meta.duration_seconds);
-    const seconds = await detectYouTubeDuration(videoId);
-    const saved = await api("items/" + Number(id) + "/video-duration", { duration_seconds: seconds });
-    return Number(saved.duration_seconds || seconds);
   }
   const pendingReads = new Map();
   function api(path, body, method) {
@@ -347,6 +241,7 @@
     return [...new Set([...scope.querySelectorAll("[data-pending-media]")].map(node => Number(node.dataset.pendingMedia || 0)).filter(Boolean))];
   }
   function discardPendingWithin(scope, keepalive = false) {
+    pdfPreview.release(scope);
     const ids = pendingMediaIds(scope);
     scope?.querySelectorAll?.("[data-pending-media]").forEach(node => { delete node.dataset.pendingMedia; });
     ids.forEach(id => { void discardTemporaryMedia(id, keepalive); });
@@ -360,7 +255,35 @@
     else delete node.dataset.pendingMedia;
   }
   const modalUnsavedBaselines = new WeakMap();
+  const modalHistory = [];
+  const modalContexts = new WeakMap();
+  let commentExitResolver = null;
   let accessibility;
+  const activeModal = () => root.querySelector('.modal-backdrop:not(.modal-decision-backdrop)');
+  function bindBackdropDismiss(backdrop, dismiss) {
+    let start = null;
+    backdrop.addEventListener('pointerdown', event => {
+      start = event.target === backdrop && event.button === 0 ? {x:event.clientX,y:event.clientY} : null;
+    });
+    backdrop.addEventListener('click', event => {
+      const intentional = start && event.target === backdrop
+        && Math.hypot(event.clientX-start.x,event.clientY-start.y) < 6;
+      start = null;
+      if (intentional) dismiss();
+    });
+  }
+  function dirtyComments(scope = activeModal()) {
+    return [...(scope?.querySelectorAll('form[data-form="comment"],form[data-form="comment-reply"]') || [])]
+      .filter(form => form.elements.body?.value.trim());
+  }
+  function confirmCommentExit(forms) {
+    if (!forms.length) return Promise.resolve(true);
+    if (commentExitResolver) return Promise.resolve(false);
+    return new Promise(resolve => {
+      commentExitResolver = resolve;
+      modalDecision(T('Comentario sin publicar'), `<p>${E(T('Tu comentario todavía no se ha publicado. Puedes seguir escribiendo o descartarlo para salir.'))}</p><div class="form-actions">${btn(T('Seguir escribiendo'),'comment-exit-stay')}${btn(T('Descartar comentario'),'comment-exit-discard','','danger')}</div>`);
+    });
+  }
   function modalDecision(title, body) {
     document.querySelector(".modal-decision-backdrop")?.remove();
     const div = document.createElement("div");
@@ -368,26 +291,49 @@
     div.innerHTML = `<section role="alertdialog" aria-modal="true" aria-label="${E(title)}" class="modal modal-decision"><div class="modal-top"><h2>${E(title)}</h2>${btn(I("close"), "modal-unsaved-stay", ("aria-label=\"" + (E(T("Seguir editando"))) + "\""), "ghost")}</div><div class="modal-content">${body}</div></section>`;
     root.append(div);
     accessibility?.refresh();
-    div.addEventListener("click", event => { if (event.target === div) closeModalDecision(); });
+    bindBackdropDismiss(div, closeModalDecision);
     div.querySelector("button")?.focus();
   }
   function closeModalDecision() {
     document.querySelector(".modal-decision-backdrop")?.remove();
+    const resolve = commentExitResolver;
+    commentExitResolver = null;
+    resolve?.(false);
     accessibility?.refresh();
     S.modalUnsavedForm?.querySelector("button,input,textarea,select")?.focus();
   }
   function modalHasUnsavedChanges(form) {
-    if (!form?.isConnected || !modalUnsavedBaselines.has(form)) return false;
+    if (!form || !modalUnsavedBaselines.has(form)) return false;
     return modalUnsavedBaselines.get(form) !== formSnapshot(form);
+  }
+  function anyModalUnsaved() {
+    return [activeModal(),...modalHistory.map(entry=>entry.node)].filter(Boolean).some(modalNodeUnsaved);
+  }
+  function modalNodeUnsaved(node) {
+    return dirtyComments(node).length || [...node.querySelectorAll('form[data-guard-modal-unsaved]')].some(modalHasUnsavedChanges);
   }
   function canSaveContentAsDraft(form) {
     return form?.dataset.form === "editor" && form.dataset.type !== "contact"
       && (!Number(form.dataset.id) || S.edit?.status === "draft");
   }
-  function requestModalClose() {
-    const backdrop = [...document.querySelectorAll(".modal-backdrop")].find(node => !node.classList.contains("modal-decision-backdrop"));
-    const form = backdrop?.querySelector("form[data-guard-modal-unsaved]");
-    if (!modalHasUnsavedChanges(form)) { closeModal(); return; }
+  async function requestModalClose(all = true) {
+    const backdrop = activeModal();
+    const form = backdrop?.querySelector('form[data-guard-modal-unsaved]');
+    S.modalUnsavedCloseAll = all;
+    if (all && modalHistory.length) {
+      if (modalHistory.some(entry=>modalNodeUnsaved(entry.node))) {
+        modalDecision(T('Cambios sin guardar'),`<p>${E(T('Hay comentarios o cambios sin guardar en estas ventanas. Puedes volver a revisarlos o descartarlos para cerrar.'))}</p><div class="form-actions">${btn(T('Volver a las ventanas'),'modal-unsaved-stay')}${btn(T('Descartar y cerrar'),'modal-history-discard','','danger')}</div>`);
+        return;
+      }
+      if (!modalHasUnsavedChanges(form)) {
+        if (await confirmCommentExit(dirtyComments(backdrop))) closeAllModals();
+        return;
+      }
+    }
+    if (!modalHasUnsavedChanges(form)) {
+      if (await confirmCommentExit(dirtyComments(backdrop))) closeModal(!all);
+      return;
+    }
     S.modalUnsavedForm = form;
     const saveDraft = canSaveContentAsDraft(form);
     const question = saveDraft ? "Puedes guardar el progreso como borrador antes de salir." : "¿Quieres guardar los cambios antes de cerrar esta ventana?";
@@ -396,33 +342,59 @@
       : `${btn(T("Seguir editando"), "modal-unsaved-stay")}${btn(T("Descartar cambios"), "modal-unsaved-discard", "", "danger")}${btn(I("check")+" "+T("Guardar cambios"), "modal-unsaved-save", "", "primary")}`;
     modalDecision(T("Cambios sin guardar"), `<p class="detail-body">${E(T("Has realizado cambios que todavía no se han guardado."))}</p><p class="private-note">${E(T(question))}</p><div class="form-actions">${actions}</div>`);
   }
-  function modal(title, body, wide = false) {
-    closeModal();
-    S.focus = S.actionFocus?.isConnected ? S.actionFocus : document.activeElement;
+  function modal(title, body, wide = false, key = title) {
+    closeModalDecision();
+    const previous = activeModal();
+    const launcher = S.actionFocus?.isConnected ? S.actionFocus : document.activeElement;
+    const returnFocus = previous?.dataset.modalKey === key ? modalContexts.get(previous)?.focus : launcher;
+    if (previous) {
+      if (previous.dataset.modalKey === key) {
+        discardPendingWithin(previous); previous.remove();
+      } else {
+        modalHistory.push({node:previous, focus:document.activeElement});
+        previous.remove();
+      }
+    }
+    S.focus = returnFocus;
     const div = document.createElement("div");
     div.className = "modal-backdrop";
-    div.innerHTML = `<section role="dialog" aria-modal="true" aria-label="${E(title)}" class="modal ${wide ? "wide" : ""}"><div class="modal-top"><h2>${E(title)}</h2>${btn(I("close"), "close", ("aria-label=\"" + (E(T("Cerrar"))) + "\""), "ghost")}</div><div class="modal-content">${body}</div></section>`;
+    div.dataset.modalKey = key;
+    div.innerHTML = `<section role="dialog" aria-modal="true" aria-label="${E(title)}" class="modal ${wide ? "wide" : ""}"><div class="modal-top">${modalHistory.length ? btn('← '+T('Volver'),'modal-back','','ghost modal-back') : ''}<h2>${E(title)}</h2>${btn(I("close"), "close", ("aria-label=\"" + (E(T("Cerrar"))) + "\""), "ghost")}</div><div class="modal-content">${body}</div></section>`;
+    modalContexts.set(div, {item:S.item, event:S.event, edit:S.edit, focus:S.focus});
     root.append(div);
+    pdfPreview.mount(div);
     accessibility?.refresh();
     const guarded = div.querySelector("form[data-guard-modal-unsaved]");
     if (guarded) modalUnsavedBaselines.set(guarded, formSnapshot(guarded));
-    div.addEventListener("click", (event) => {
-      if (event.target === div) requestModalClose();
-    });
+    bindBackdropDismiss(div, requestModalClose);
     div.querySelector("button,input")?.focus();
     return div;
   }
-  function closeModal() {
-    const focus = S.focus;
+  function closeModal(restorePrevious = modalHistory.some(entry=>modalNodeUnsaved(entry.node))) {
+    const current = activeModal();
+    const outer = restorePrevious ? current : modalHistory[0]?.node || current;
+    const focus = modalContexts.get(outer)?.focus || S.focus;
     S.focus = null;
     const pending = S.pendingUnsavedResolver;
     S.pendingUnsavedResolver = null;
     S.pendingUnsavedSaveForm = null;
     S.modalUnsavedForm = null;
     document.querySelectorAll(".modal-backdrop").forEach(node => { discardPendingWithin(node); node.remove(); });
+    const previous = restorePrevious ? modalHistory.pop() : null;
+    if (!restorePrevious) {
+      for (const entry of modalHistory.splice(0)) discardPendingWithin(entry.node);
+    }
+    if (previous) {
+      root.append(previous.node);
+      Object.assign(S, modalContexts.get(previous.node));
+    }
     accessibility?.refresh();
-    if (focus?.isConnected) focus.focus();
+    const restore = previous?.focus || focus;
+    if (restore?.isConnected) restore.focus();
     if (pending) pending(false);
+  }
+  function closeAllModals() {
+    closeModal(false);
   }
   let fieldSequence = 0;
   const requiredTextErrors = new WeakSet();
@@ -758,6 +730,12 @@
     return unsavedGuard.dirty;
   }
   function confirmUnsavedExit() {
+    const comments = [...dirtyComments(), ...modalHistory.flatMap(entry=>dirtyComments(entry.node))];
+    if (comments.length) return confirmCommentExit(comments).then(leave=>{
+      if (!leave) return false;
+      for (const form of comments) form.reset();
+      return confirmUnsavedExit();
+    });
     if (!hasUnsavedChanges()) return Promise.resolve(true);
     if (S.pendingUnsavedResolver) return Promise.resolve(false);
     return new Promise(resolve => {
@@ -852,7 +830,7 @@
       return `<a class="nav-link ${active ? 'active' : ''}" href="${E(url)}">${I(icon)}<span>${E(label)}</span></a>`;
     }).join('');
     const adminLink = S.boot.admin_area && !S.boot.admin ? `<a class="nav-link" href="${E(C.adminUrl)}">${I("settings")}${E(T("Administración"))}</a>` : "";
-    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(homeUrl)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></a><div class="brand-sub">${E(T("COMUNIDAD DE ASOCIADOS"))}</div><nav aria-label="${E(T("Navegación principal"))}">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}${E(T("Cerrar sesión"))}</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(homeUrl)}" aria-label="${E(T("ASCLA inicio"))}"><img class="brand-logo-normal" src="${E(C.logo)}" alt="ASCLA"><img class="brand-logo-inverse" src="${E(C.logoWhite || C.logo)}" alt="" aria-hidden="true"></a>${btn(I("menu"), "menu", ("aria-label=\"" + (E(T("Abrir navegación"))) + "\""), "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="${E(T("Buscar en ASCLA"))}" placeholder="${E(T("Buscar en tu comunidad…"))}" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${C.page === "admin" ? adminLanguageControl() + btn(themeIcons(), "theme-menu", ("aria-label=\"" + (E(T("Apariencia"))) + "\""), "icon-button theme-button") : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", ("aria-label=\"" + (E(T("Notificaciones"))) + "\""), "icon-button")}<a class="header-profile" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(p.member_type || T("Comunidad ASCLA"))}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap" tabindex="-1"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || T("Administración"))}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · ${E(T("Conectamos conocimiento, fortalecemos la gobernanza."))}${S.boot.demo ? " · " + E(T("Datos ficticios de demostración.")) : ""}</div></main></div>`;
+    root.innerHTML = `<aside class="ascla-sidebar"><a class="brand" href="${E(homeUrl)}" aria-label="${E(T("ASCLA inicio"))}"><img src="${E(C.logoWhite || C.logo)}" alt="ASCLA"></a><div class="brand-sub">${E(T("COMUNIDAD DE ASOCIADOS"))}</div><nav aria-label="${E(T("Navegación principal"))}">${links}</nav><div class="nav-bottom">${adminLink}<a class="nav-link" href="${E(C.logout)}">${I("logout")}${E(T("Cerrar sesión"))}</a></div></aside><div class="ascla-main"><header class="ascla-header"><a class="header-brand" href="${E(homeUrl)}" aria-label="${E(T("ASCLA inicio"))}"><img class="brand-logo-normal" src="${E(C.logo)}" alt="ASCLA"><img class="brand-logo-inverse" src="${E(C.logoWhite || C.logo)}" alt="" aria-hidden="true"></a>${btn(I("menu"), "menu", ("aria-label=\"" + (E(T("Abrir navegación"))) + "\""), "icon-button mobile-menu")}<form class="header-search" data-form="global-search">${I("search")}<input name="q" aria-label="${E(T("Buscar en ASCLA"))}" placeholder="${E(T("Buscar en tu comunidad…"))}" autocomplete="off"></form><div class="header-right">${S.boot.demo ? '<span class="demo-badge">DEMO MODE</span>' : ""}${C.page === "admin" ? adminLanguageControl() + btn(themeIcons(), "theme-menu", ("aria-label=\"" + (E(T("Apariencia"))) + "\""), "icon-button theme-button") : ""}${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", ("aria-label=\"" + (E(T("Notificaciones"))) + "\""), "icon-button")}<a class="header-profile" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(T((S.boot.admin_area && p.role_label) || p.member_type || "Comunidad ASCLA"))}</small></span>${I("chevron")}</a></div></header><main id="main" class="page-wrap" tabindex="-1"><div class="breadcrumb">ASCLA ${I("chevron")} ${E(C.pages[S.page]?.label || T("Administración"))}</div><div id="page-content"></div><div class="demo-footer">© ${new Date().getFullYear()} ASCLA · ${E(T("Conectamos conocimiento, fortalecemos la gobernanza."))}${S.boot.demo ? " · " + E(T("Datos ficticios de demostración.")) : ""}</div></main></div>`;
     refreshNotifications();
   }
   function heading(title, subtitle, action = "") {
@@ -1128,7 +1106,8 @@
     if (!labels.length) labels.push(T("Seleccionado para ti"));
     return `<div class="recommendation-context" title="${E(T("Por qué te lo recomendamos"))}">${I("spark")}<span>${E(labels.slice(0, 2).join(" · "))}</span></div>`;
   }
-  function resourceCard(p, i = 0) {
+  function resourceCard(p, i = 0, catalog = false) {
+    if (catalog === true) return knowledgeCard(p, i);
     const durationLabel = p.meta.duration_seconds ? E(UI.duration(p.meta.duration_seconds)) : E(T("Duración por confirmar"));
     const resourceIcon = p.meta.resource_type === "Video" ? "play" : "book";
     const cover = p.meta.thumbnail_url
@@ -1136,6 +1115,18 @@
       : `<a href="${E(p.url)}" class="resource-cover v${i % 3}"><div class="cover-label">${E(T("ASCLA · CONOCIMIENTO"))}</div><strong>${E(p.title.split(":")[0])}</strong><span class="cover-icon">${I(resourceIcon)}</span></a>`;
     const editorialState = p.status === "publish" ? "" : status(p.status);
     return `<article class="card resource-card">${cover}<div class="resource-content"><div class="resource-card-badges"><span class="tag">${E(T(p.meta.resource_type || "Artículo"))}</span>${editorialState}</div>${resourceRecommendation(p.recommendation)}<h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E((p.meta.summary || p.body).slice(0, 115))}${(p.meta.summary || p.body).length > 115 ? "…" : ""}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Explorar " + I("arrow"), "item", ("data-id=\"" + (p.id) + "\""), "ghost")}</div></div></article>`;
+  }
+  function knowledgeCard(p, i = 0) {
+    const type = p.meta.resource_type || 'Artículo';
+    const video = type === 'Video';
+    const duration = p.meta.duration_seconds ? UI.duration(p.meta.duration_seconds) : T('Duración por confirmar');
+    const coverTitle = p.title.split(':')[0];
+    const visual = `<span class="knowledge-cover-empty resource-cover v${i%3}"><span class="cover-label">${E(T('ASCLA · CONOCIMIENTO'))}</span> <strong>${E(coverTitle)}</strong><span class="cover-icon">${I(video?'play':'book')}</span></span>`
+      + (p.meta.thumbnail_url ? `<img class="resource-thumbnail" src="${E(p.meta.thumbnail_url)}" alt="" loading="lazy">` : '');
+    const durationBadge = video?`<span class="knowledge-duration">${I('play')} ${E(duration)}</span>`:'';
+    const cover = `<a class="knowledge-cover" href="${E(p.url)}" aria-label="${E(T('Explorar'))}: ${E(T('ASCLA · CONOCIMIENTO'))} ${E(coverTitle)}${video?' '+E(duration):''}"><span class="knowledge-cover-visual" aria-hidden="true">${visual}${durationBadge}</span></a>`;
+    const summary = p.meta.summary || p.body;
+    return `<article class="card resource-card knowledge-card">${cover}<div class="resource-content"><div class="resource-card-badges"><span class="tag">${I(video?'play':'book')} ${E(T(type))}</span>${p.status==='publish'?'':status(p.status)}</div>${resourceRecommendation(p.recommendation)}<h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(summary.slice(0,190))}${summary.length>190?'…':''}</p><div class="resource-footer"><span class="knowledge-date">${I('calendar')}<time datetime="${E(p.date)}">${date(p.date)}</time></span>${btn('Explorar '+I('arrow'),'item','data-id="'+Number(p.id)+'"','small primary')}</div></div></article>`;
   }
   function recommendationsHome(result, resources) {
     if (!result.eligible) {
@@ -1150,7 +1141,7 @@
     }
     const updated=result.generated_at ? date(result.generated_at,{day:"numeric",month:"long",year:"numeric"}) : T("esta semana");
     const lowMatchCopy=T("Encontramos {count} de hasta {limit} perfiles que cumplen los criterios. Te mostraremos nuevas opciones en la siguiente actualización automática.").replace("{count}",String(result.people.length)).replace("{limit}",String(result.limit));
-    const lowMatch=result.low_match ? `<div class="recommendation-low-match" role="status">${I("spark")}<div><strong>${E(T("Pocas coincidencias esta semana"))}</strong><p>${E(lowMatchCopy)}</p></div></div>` : "";
+    const lowMatch=result.low_match ? `<div class="recommendation-low-match" role="status">${I("users")}<div><strong>${E(T("Pocas coincidencias esta semana"))}</strong><p>${E(lowMatchCopy)}</p></div></div>` : "";
     const people=result.people.length ? result.people.map(recommendationMemberCard).join("") : empty("Aún no hay coincidencias disponibles", "Tus descartes no volverán a aparecer. La próxima actualización buscará nuevas afinidades.");
     const knowledge=resources.items.length ? resources.items.map((item,index)=>resourceCard(item,index)).join("") : empty("Aún no encontramos contenidos afines", "Cuando se publiquen recursos vinculados con tus intereses aparecerán aquí.");
     return `<section class="home-recommendations" id="recomendaciones" aria-labelledby="home-recommendations-title"><div class="home-recommendations-heading"><div><span class="eyebrow">${E(T("RECOMENDACIONES PARA TI"))}</span><h2 id="home-recommendations-title">${E(T("Conexiones que suman"))}</h2><p>${E(T("Hasta cinco perfiles vigentes, ordenados por afinidad y complementariedad. Desliza para ver todas las sugerencias."))}</p></div><div class="recommendations-heading-actions">${link("directorio", T("Ver directorio") + " " + I("arrow"), "ghost")}<div class="recommendation-cycle">${I("clock")}<span><strong>${E(T("Actualización automática semanal"))}</strong>${E(T("Lista generada"))} ${E(updated)} · ${E(T("sin actualización manual"))}</span></div></div></div>${lowMatch}<div class="recommendation-strip" tabindex="0" role="region" aria-label="${E(T("Perfiles recomendados"))}">${people}</div><div class="home-recommendation-group recommendation-content-section"><div class="section-top"><div><span class="eyebrow">${E(T("CONOCIMIENTO"))}</span><h3>${E(T("Materiales seleccionados para ti"))}</h3><p>${E(T("Recursos publicados y autorizados, ordenados por su relación con tus intereses."))}</p></div>${link("centro-conocimiento", T("Ver Centro de Conocimiento") + " " + I("arrow"), "ghost")}</div><div class="recommendation-strip recommendation-content-strip" tabindex="0" role="region" aria-label="${E(T("Materiales recomendados"))}">${knowledge}</div></div></section>`;
@@ -1226,23 +1217,22 @@
     const heroText = birthdayToday ? E(T("Todo ASCLA te desea un gran día y un nuevo año lleno de buenas conexiones, aprendizajes y proyectos.")) : E(T("Un espacio para compartir experiencias, fortalecer tu red y construir el futuro del gobierno corporativo."));
     const hero=`<section class="hero ${birthdayToday ? "hero-birthday" : ""}"><div class="hero-copy"><div class="eyebrow">${E(T(birthdayToday ? "HOY CELEBRAMOS CONTIGO" : "TU COMUNIDAD, MÁS CERCA"))}</div><h1>${heroTitle}</h1><p>${heroText}</p>${link("directorio", "Explorar la comunidad " + I("arrow"), "white small")}</div><svg class="hero-art" viewBox="0 0 300 260" fill="none" aria-hidden="true"><g stroke="#7ac0e5" stroke-width=".7"><circle cx="160" cy="130" r="105"/><circle cx="160" cy="130" r="77"/><ellipse cx="160" cy="130" rx="45" ry="105"/><path d="M55 130h210M80 64l170 134M80 196 247 65M68 80l191 89M70 173l180-89"/></g><g fill="#8dc4e3" stroke="#c7edff" stroke-width="4"><circle cx="90" cy="76" r="9"/><circle cx="236" cy="70" r="7"/><circle cx="160" cy="130" r="11"/><circle cx="87" cy="195" r="7"/><circle cx="244" cy="193" r="10"/><circle cx="181" cy="27" r="5"/></g></svg><div class="hero-tag"><i></i> ${E(T("Una red que crece contigo"))}</div></section>`;
     const stats=`<div class="stat-grid">${[
-      [directory.total, "Asociados en la comunidad", "users"],
-      [events.total, "Próximos encuentros", "calendar"],
-      [recentResources.total, "Recursos para aprender", "book"],
-      [notes.unread_total, "Nuevas notificaciones", "bell"],
-    ]
-      .map(
-        ([num, label, icon]) =>
-          ("<div class=\"stat\"><span class=\"stat-icon\">" + (I(icon)) + "</span><div><strong>" + (num) + "</strong><small>" + (E(T(label))) + "</small></div></div>"),
-      )
-      .join(
-        "",
-      )}</div>`;
+      [directory.total, "Asociados en la comunidad", "users", "directorio"],
+      [events.total, "Próximos encuentros", "calendar", "eventos"],
+      [recentResources.total, "Recursos para aprender", "book", "centro-conocimiento"],
+      [notes.unread_total, "Nuevas notificaciones", "bell", ""],
+    ].map(([num,label,icon,page])=>dashboardStat(num,label,icon,page)).join('')}</div>`;
     const aside=`<aside class="dashboard-aside"><div><div class="section-top"><h2>${E(T("Tu agenda ASCLA"))}</h2>${I("calendar")}</div><div class="card calendar-card"><div id="calendar-body">${calendar(monthEvents)}</div><div class="dashboard-agenda-upcoming">${upcoming.slice(0, 2).map(eventMini).join("") || ("<p class=\"muted\">" + E(T("Sin próximos eventos.")) + "</p>")}</div></div></div><div class="notice-card">${I("spark")}<h3>${E(T("El conocimiento, a una pregunta"))}</h3><p>${E(T("Encuentra respuestas en los recursos de nuestra comunidad con el Asistente ASCLA."))}</p>${link("asistente", "Hacer una pregunta " + I("arrow"), "ghost small")}</div><div class="notice-card trust-card">${I("shield")}<h3>${E(T("Un espacio de confianza"))}</h3><p>${E(T("Compartimos conocimiento con respeto, confidencialidad y bajo la Regla de Chatham House."))}</p>${btn("Normas de la comunidad " + I("arrow"), "rules", "", "ghost small")}</div></aside>`;
     const recommendationsLayout=`<div class="dashboard-recommendations-layout"><div id="dashboard-recommendations"><section class="card" role="status"><span class="loading-dot"></span> ${E(T("Cargando recomendaciones…"))}</section></div>${aside}</div>`;
     const activity=`<div class="dashboard-activity"><div class="section-top"><h2>${E(T("Conocimiento reciente"))}</h2>${link("centro-conocimiento", "Ver todo " + I("arrow"), "ghost")}</div><div class="cards two">${recentResources.items.slice(0, 2).map(resourceCard).join("") || empty("Tu biblioteca está por comenzar")}</div><div class="section-gap"><div class="section-top"><h2>${E(T("La conversación en nuestra comunidad"))}</h2>${link("hub", "Ir al Hub " + I("arrow"), "ghost")}</div>${hub.items.slice(0, 1).map(feedCard).join("") || empty("Comparte la primera idea")}</div></div>`;
     content().innerHTML=hero+stats+recommendationsLayout+activity;
     void dashboardRecommendations(recommendations, resources, version);
+  }
+  function dashboardStat(num,label,icon,page) {
+    const body=`<span class="stat-icon">${I(icon)}</span><span class="stat-copy"><strong>${Number(num)||0}</strong><small>${E(T(label))}</small></span><span class="stat-arrow" aria-hidden="true">${I('arrow')}</span>`;
+    return page
+      ? `<a class="stat stat-link" href="${E(C.pages[page].url)}">${body}</a>`
+      : `<button type="button" class="stat stat-link" data-action="notifications">${body}</button>`;
   }
   function commentCountText(count) {
     return `${count} ${T(count === 1 ? "comentario" : "comentarios")}`;
@@ -1325,7 +1315,7 @@
     await refreshConnectionsPanel();
   }
   async function member(id) {
-    const dialog = modal(T("Perfil"), `<div class="view-loading" role="status"><span class="loading-dot"></span>${E(T("Cargando perfil…"))}</div>`);
+    const dialog = modal(T("Perfil"), `<div class="view-loading" role="status"><span class="loading-dot"></span>${E(T("Cargando perfil…"))}</div>`,false,'member-'+id);
     const other = Number(id) !== S.boot.me.id;
     // Data and deterministic affinity are independent; neither waits for the AI provider.
     const matchRequest = other && S.boot.me.community_participant!==false ? api("matching/" + id + "?explain=0").catch(() => null) : Promise.resolve(null);
@@ -1339,7 +1329,10 @@
     if (!dialog.isConnected) return;
     const suggested = other && p.networking && p.directory && S.boot.me.networking && !p.connection?.blocked;
     const actions = (other ? connectionActions(p, suggested, false, true) : link("perfil", "Editar perfil", "primary")) + directoryAdminActions(p);
-    const terms = Object.entries(p.terms || {}).filter(([, v]) => v.length).map(([k, v]) => `<h3>${E(T(profileLabels[k] || k))}</h3><div class="tag-row">${v.map((t) => ("<span class=\"tag\">" + (E(t)) + "</span>")).join("")}</div>`).join("");
+    const terms = Object.entries(p.terms || {}).filter(([, v]) => v.length).map(([k, v]) => {
+      const tags=v.map(t=>`<span class="tag">${E(t)}</span>`).join("");
+      return `<section class="member-topic-group"><h3>${E(T(profileLabels[k] || k))}</h3><div class="tag-row">${tags}</div></section>`;
+    }).join("");
     const sources = ["linkedin", "twitter", "website"].filter((k) => p[k]).map((k) => `<a href="${E(safeURL(p[k]))}" target="_blank" rel="noopener noreferrer">${E({ linkedin: "LinkedIn", twitter: "X / Twitter", website: T("Sitio personal") }[k])} ↗</a>`).join("");
     dialog.querySelector(".modal-top h2").textContent = p.name;
     dialog.querySelector('[role="dialog"]').setAttribute("aria-label", p.name);
@@ -1353,7 +1346,7 @@
     const phoneSection = p.phone
       ? `<p><strong>${E(T("Teléfono"))}:</strong> <a href="tel:${E(p.phone.replaceAll(/[^+0-9]/g, ""))}">${E(p.phone)}</a></p>`
       : "";
-    dialog.querySelector(".modal-content").innerHTML = `<div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.position || T("Miembro ASCLA"))}</h2><p class="muted">${E(p.company || "")}</p><p class="muted">${E(p.country || "")} ${E(p.city || "")}</p><span data-profile-affinity-score></span></div></div>${affinitySection}<p class="detail-body">${E(p.bio || T("Este miembro aún no ha añadido su biografía."))}</p>${experienceSection}${phoneSection}${terms}<div class="sources">${sources}</div><div class="form-actions">${actions}</div>`;
+    dialog.querySelector(".modal-content").innerHTML = `<div class="profile-summary">${avatar(p, "xl")}<div><h2>${E(p.position || T("Miembro ASCLA"))}</h2><p class="muted">${E(p.company || "")}</p><p class="muted">${E(p.country || "")} ${E(p.city || "")}</p><span data-profile-affinity-score></span></div></div>${affinitySection}<p class="detail-body">${E(p.bio || T("Este miembro aún no ha añadido su biografía."))}</p>${experienceSection}${phoneSection}<div class="member-topic-grid">${terms}</div><div class="sources">${sources}</div><div class="form-actions">${actions}</div>`;
     if (showAffinity) void memberAffinity(dialog, id, matchRequest);
   }
   function affinityDetails(match, pending = false, unavailable = false) {
@@ -1590,7 +1583,7 @@
       profileTabs() +
       `<form class="card profile-tab-form" data-form="profile" data-guard-unsaved><p class="profile-required-note">${requiredMark()} ${E(T("Los campos marcados son obligatorios. En Intereses, elige al menos un sector, un interés y un objetivo."))}</p>
         <section class="profile-tab-panel" id="profile-panel-info" data-profile-panel="info" role="tabpanel" aria-labelledby="profile-tab-info">
-          <div class="profile-summary">${avatar(p, "xl")}<div class="profile-summary-person"><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p><label class="btn small profile-photo-button">${I("edit")} ${E(T("Cambiar fotografía"))}<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">${E(T("JPG, PNG o WebP. Podrás mover, ampliar y recortar antes de guardar; ASCLA optimiza la imagen automáticamente."))}</div></div>${profileMemberType(p)}</div>
+          <div class="profile-summary">${avatar(p, "xl")}<div class="profile-summary-person"><h2>${E(p.name)}</h2><p class="muted">${E(p.email || "")}</p>${p.username?`<p class="profile-username"><span>${E(T("Nombre de usuario"))}:</span> <strong>${E(p.username)}</strong></p>`:""}<label class="btn small profile-photo-button">${I("edit")} ${E(T("Cambiar fotografía"))}<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" hidden data-upload="photo"></label><input type="hidden" name="photo_id" value="${p.photo_id || 0}"><div id="photo-status" class="private-note">${E(T("JPG, PNG o WebP. Podrás mover, ampliar y recortar antes de guardar; ASCLA optimiza la imagen automáticamente."))}</div></div>${profileMemberType(p)}</div>
           <div class="form-section">${E(T("Información personal y profesional"))}</div>
           <div class="form-grid">${["first_name", "last_name", "position", "company"].map((k) => field(k, profileLabels[k], p[k] || "", "text", 'required maxlength="200"')).join("")}${profileLocationFields(p)}${profileBirthdayField(p)}${profilePhoneFields(p)}${["linkedin", "twitter"].map((k) => field(k, profileLabels[k], p[k] || "", "url", 'maxlength="200"')).join("")}<div class="full profile-website-field">${field("website", profileLabels.website, p.website || "", "url", 'maxlength="200"')}</div><div class="full">${field("bio", "Biografía", p.bio || "", "textarea", 'required maxlength="3000"')}${field("experience", "Experiencia profesional", p.experience || "", "textarea", 'maxlength="3000"')}</div></div>
         </section>
@@ -1606,7 +1599,7 @@
         <div class="profile-account-heading"><span class="preference-emblem">${I("shield")}</span><div><h2>${E(T("Cuenta y seguridad"))}</h2><p>${E(T("Administra tu contraseña, tus archivos y las integraciones de tu cuenta."))}</p></div></div>
         <div class="profile-account-grid">
           <div class="profile-account-section account-security"><div class="form-section">${E(T("Seguridad de la cuenta"))}</div><h3>${E(T("Cambiar contraseña"))}</h3><p class="private-note">${E(T("Para cambiarla desde la intranet, confirma primero tu contraseña actual."))}</p><form data-form="password-change"><div class="password-current">${field("current_password", "Contraseña actual", "", "password", 'required autocomplete="current-password"')}</div><div class="form-grid password-new-grid">${field("new_password", "Nueva contraseña", "", "password", 'required minlength="'+S.boot.password_min_length+'" autocomplete="new-password"')}${field("confirm_password", "Confirmar nueva contraseña", "", "password", 'required minlength="'+S.boot.password_min_length+'" autocomplete="new-password"')}</div><p class="private-note">${E(T("Combina mayúsculas, minúsculas, números y símbolos. Evita secuencias y datos personales."))}</p><div class="form-actions"><button class="btn primary">${E(T("Cambiar contraseña"))}</button></div></form><div class="password-recovery"><h3>${E(T("¿No recuerdas tu contraseña actual?"))}</h3><p class="private-note">${E(T("Puedes recibir un enlace seguro de recuperación en"))} <strong>${E(p.email || S.boot.me.email || T("tu correo registrado"))}</strong>.</p>${btn(I("mail") + " Enviar enlace de recuperación", "password-reset-email", "", "small")}</div></div>
-          <div class="profile-account-section profile-account-tools"><div class="form-section">${E(T("Archivos e integraciones"))}</div><h3>${E(T("Mis archivos"))}</h3><p class="private-note">${E(T("Consulta tus archivos y elimina los que ya no necesitas. Los archivos eliminados también se retiran de las publicaciones y de tu fotografía de perfil."))}</p>${btn("Administrar mis archivos", "files", 'data-scope="mine"', "small")}<div class="profile-account-divider"></div><h3>${E(T("Mi calendario"))}</h3><p class="private-note">${E(T(S.boot.google_connected ? "Tu calendario Google está conectado." : "Integración Google Calendar no configurada para tu cuenta. Puedes conectarlo para guardar próximos eventos."))}</p><div class="admin-actions">${btn("Conectar Google Calendar", "google-connect", 'data-service="calendar"')}${S.boot.google_connected ? btn("Desconectar", "google-disconnect", 'data-service="calendar"') : ""}</div></div>
+          <div class="profile-account-section profile-account-tools"><div class="form-section">${E(T("Archivos e integraciones"))}</div><h3>${E(T("Mis archivos"))}</h3><p class="private-note">${E(T("Consulta tus archivos y elimina los que ya no necesitas. Los archivos eliminados también se retiran de las publicaciones y de tu fotografía de perfil."))}</p>${btn("Administrar mis archivos", "files", 'data-scope="mine"', "small")}<div class="profile-account-divider"></div><h3>${E(T("Mi calendario"))}</h3><p class="private-note">${E(T(S.boot.google_connected ? "Tu calendario Google está conectado." : "Integración Google Calendar no configurada para tu cuenta. Puedes conectarlo para guardar próximos eventos."))}</p><div class="admin-actions">${!S.boot.google_connected ? btn("Conectar Google Calendar", "google-connect", 'data-service="calendar"') : ""}${S.boot.google_connected ? btn("Desconectar", "google-disconnect", 'data-service="calendar"') : ""}</div></div>
         </div>
       </section>`;
     const profileForm = content().querySelector('[data-form="profile"]');
@@ -1635,6 +1628,10 @@
     ally: "aliado",
     contact: "solicitud",
   };
+  function contentTypeTitle(type) {
+    const label = T(typeLabel[type] || type);
+    return label.charAt(0).toLocaleUpperCase() + label.slice(1);
+  }
   async function allContent(type, filter = {}) {
     const first = await api("content/" + type + "?" + new URLSearchParams({ ...filter, per_page: 100 }));
     const items = [...first.items];
@@ -1696,14 +1693,14 @@
     return `<div class="tabs">${allButton}${pastButton}${mineButton}${draftsButton}${commentsButton}</div>`;
   }
   function listingDrafts(items) {
-    const cards = items.map(p => `<article class="card draft-card" data-draft-id="${Number(p.id)}"><div class="section-top">${status('draft')}<span class="tag">${E(T(typeLabel[p.type] || p.type))}</span></div><h3>${E(p.title)}</h3><p class="detail-body">${E(p.body.slice(0,160))}</p><div class="form-actions">${btn('Continuar borrador', 'editor', 'data-type="' + E(p.type) + '" data-id="' + Number(p.id) + '"', 'primary small')}</div></article>`).join('');
+    const cards = items.map(p => `<article class="card draft-card" data-draft-id="${Number(p.id)}"><div class="section-top">${status('draft')}<span class="tag">${E(contentTypeTitle(p.type))}</span></div><h3>${E(p.title)}</h3><p class="detail-body">${E(p.body.slice(0,160))}</p><div class="form-actions">${btn('Continuar borrador', 'editor', 'data-type="' + E(p.type) + '" data-id="' + Number(p.id) + '"', 'primary small')}</div></article>`).join('');
     return `<section class="draft-list"><h2>${E(T('Mis borradores'))}</h2><p class="private-note">${E(T('Aquí encontrarás tus borradores, separados del contenido publicado.'))}</p><div class="cards two">${cards}</div>${items.length ? '' : empty('No tienes borradores guardados', 'Puedes guardar contenido incompleto y retomarlo desde aquí.')}</section>`;
   }
   function listingItems(type, items) {
     const renderers = {
-      resource: () => `<div class="cards">${items.map(resourceCard).join("")}</div>`,
+      resource: () => `<div class="cards knowledge-grid">${items.map((p,i)=>resourceCard(p,i,true)).join("")}</div>`,
       event: () => `<div class="cards two">${items.map(eventCard).join("")}</div>`,
-      gallery: () => `<div class="cards">${items.map(galleryCard).join("")}</div>`,
+      gallery: () => `<div class="cards gallery-grid">${items.map(galleryCard).join("")}</div>`,
     };
     return (renderers[type] || (() => items.map(feedCard).join("")))();
   }
@@ -1771,13 +1768,25 @@
     if (p.meta.cancelled) state = `<span class="tag">${E(T("Cancelado"))}</span>`;
     else if (p.status !== "publish") state = status(p.status);
     const cover = UI.images(p)[0];
-    return `<article class="card event-card">${cover ? ("<button type=\"button\" class=\"event-card-cover\" data-action=\"item\" data-id=\"" + (Number(p.id)) + "\" aria-label=\"" + (E(T("Ver evento"))) + ": " + (E(p.title)) + "\"><img src=\"" + (E(cover.url)) + "\" alt=\"" + (E(p.title)) + "\" loading=\"lazy\"></button>") : ""}<div class="section-top"><span class="tag">${I("calendar")} ${E(T(p.meta.modality || "Virtual"))}</span>${state}</div><h3>${E(p.title)}</h3><p class="detail-body event-card-description">${E(p.body.slice(0, 160))}</p><div class="detail-meta"><span>${I("calendar")} ${date(p.meta.start)}</span><span>${I("clock")} ${time(p.meta.start)}</span></div><div class="form-actions event-card-actions">${p.meta.chatham ? '<span class="tag">Chatham House</span>' : "<span></span>"}${btn("Ver encuentro " + I("arrow"), "item", ("data-id=\"" + (p.id) + "\""), "small primary")}</div></article>`;
+    const scheduled=!!p.meta.start && Number.isFinite(Date.parse(p.meta.start));
+    const calendar=scheduled
+      ? `<time class="event-card-date" datetime="${E(p.meta.start)}"><strong>${date(p.meta.start,{day:'numeric'})}</strong><span>${date(p.meta.start,{month:'short'})}</span></time>`
+      : `<div class="event-card-date is-pending">${I('calendar')}<span>${E(T('Por confirmar'))}</span></div>`;
+    const endTime=p.meta.end && Number.isFinite(Date.parse(p.meta.end))?' – '+time(p.meta.end):'';
+    const hours=scheduled ? time(p.meta.start)+endTime : T('Por confirmar');
+    const image=cover ? `<button type="button" class="event-card-cover" data-action="item" data-id="${Number(p.id)}" aria-label="${E(T('Ver evento'))}: ${E(p.title)}"><img src="${E(cover.url)}" alt="${E(p.title)}" loading="lazy"></button>` : '';
+    const location=p.meta.location?`<span class="event-card-location">${I('pin')}${E(p.meta.location)}</span>`:'';
+    const confidentiality=p.meta.chatham?`<span class="event-card-confidentiality">${I('shield')} Chatham House</span>`:'<span></span>';
+    const open=btn('Ver encuentro '+I('arrow'),'item',`data-id="${Number(p.id)}"`,'small primary');
+    return `<article class="card event-card${p.meta.cancelled?' is-cancelled':''}">${image}<div class="event-card-layout">${calendar}<div class="event-card-content"><div class="event-card-heading"><span class="event-modality">${E(T(p.meta.modality || 'Virtual'))}</span>${state}</div><h3>${E(p.title)}</h3><p class="detail-body event-card-description">${E(p.body.slice(0,160))}</p><div class="detail-meta event-card-meta"><span>${I('clock')}${E(hours)}</span>${location}</div></div></div><div class="form-actions event-card-actions">${confidentiality}${open}</div></article>`;
   }
   function galleryCard(p) {
-    const cover = p.meta.media_ids?.length
-      ? `<img src="${E(C.mediaUrl + p.meta.media_ids[0])}" alt="${E(p.title)}" class="gallery-card-image" loading="lazy">`
-      : `<div class="resource-cover v1"><div class="cover-label" aria-hidden="true">${E(T("ASCLA · ENCUENTROS"))}</div><strong>${E(p.title)}</strong><span class="cover-icon">${I("gallery")}</span></div>`;
-    return `<article class="card resource-card"><button type="button" class="gallery-card-cover" data-action="item" data-id="${Number(p.id)}"><span class="screen-reader-text">${E(T('Ver galería'))}: </span>${cover}</button><div class="resource-content"><h3>${E(p.title)}</h3><p>${E(p.body.slice(0, 120))}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Ver galería", "item", 'data-id="' + Number(p.id) + '"', "ghost")}</div></div></article>`;
+    const images = UI.images(p);
+    const cover = images.length
+      ? `<img src="${E(images[0].url)}" alt="" class="gallery-card-image" loading="lazy">`
+      : `<span class="gallery-card-placeholder" aria-hidden="true">${I('gallery')}<span>${E(T('Galería'))}</span></span>`;
+    const count = images.length ? `<span class="gallery-card-count" aria-label="${E(T('Imágenes'))}: ${images.length}">${I('gallery')} ${images.length}</span>` : '';
+    return `<article class="card gallery-card"><button type="button" class="gallery-card-cover" data-action="item" data-id="${Number(p.id)}" aria-label="${E(T('Abrir'))} ${E(T('Galería'))}: ${E(p.title)}${images.length?' · '+E(T('Imágenes'))+': '+images.length:''}">${cover}${count}</button><div class="gallery-card-content"><h3><button type="button" class="gallery-card-title" data-action="item" data-id="${Number(p.id)}">${E(p.title)}</button></h3><p>${E(p.body.slice(0,160))}</p><div class="gallery-card-footer"><span class="gallery-card-date">${I('calendar')}<time datetime="${E(p.date)}">${date(p.date)}</time></span>${btn('Abrir '+I('arrow'), 'item', 'data-id="'+Number(p.id)+'"', 'primary small')}</div></div></article>`;
   }
   function commentOverflow(c, postId) {
     const items = [];
@@ -1799,40 +1808,134 @@
     container.outerHTML = reactionButtons(result, id, comment);
     root.querySelector('.reaction-picker [data-id="'+id+'"][data-comment="'+comment+'"][data-reaction="'+key+'"]')?.focus();
   }
-  function commentsHTML(comments, postId) {
-    if (!comments.length) return `<p class="private-note">${E(T('Sé la primera persona en compartir una idea.'))}</p>`;
-    const children = new Map();
+  const commentViews = new WeakMap();
+  const COMMENT_BATCH = 10, REPLY_BATCH = 5;
+  function commentThreads(comments) {
+    const byId = new Map(comments.map(c => [Number(c.id), c])), groups = new Map();
     for (const c of comments) {
-      const parent = Number(c.parent || 0);
-      if (!children.has(parent)) children.set(parent, []);
-      children.get(parent).push(c);
+      const head = commentRoot(c,byId);
+      const id = Number(head.id);
+      if (!groups.has(id)) groups.set(id, {root:head, replies:[]});
+      if (Number(c.id) !== id) groups.get(id).replies.push(c);
     }
-    const seen = new Set();
-    const renderOne = (c, depth = 0) => {
-      if (seen.has(Number(c.id))) return '';
-      seen.add(Number(c.id));
-      const menu = commentOverflow(c, postId);
-      const canReply = c.status === 'publish';
-      const actions = `<div class="comment-actions">${canReply ? reactionButtons(c, c.id, true) : ""}${canReply ? btn(I('reply') + ' ' + T('Responder'), 'comment-reply', ("data-id=\"" + (Number(c.id)) + "\" data-post=\"" + (Number(postId)) + "\" data-author=\"" + (E(c.author)) + "\""), 'ghost small') : ''}${c.status === 'pending' ? status(c.status) : ''}</div>`;
-      const replies = (children.get(Number(c.id)) || []).map(child => renderOne(child, depth + 1)).join('');
-      const authorName = Number(c.author_id) > 0
-        ? `<button type="button" class="comment-author" data-action="member" data-id="${Number(c.author_id)}" aria-label="${E(T('Ver perfil de'))} ${E(c.author)}">${E(c.author)}</button>`
-        : `<strong>${E(c.author)}</strong>`;
-      return `<article class="comment ${depth ? 'comment-reply' : ''} comment-depth-${Math.min(depth, 4)}" data-comment-id="${Number(c.id)}"><div class="comment-head"><div>${authorName} <small class="muted">${date(c.date)}</small></div>${menu}</div><p>${E(c.body)}</p>${actions}<div class="comment-reply-slot"></div>${replies}</article>`;
-    };
-    let html = (children.get(0) || []).map(c => renderOne(c, 0)).join('');
-    for (const c of comments) if (!seen.has(Number(c.id))) html += renderOne(c, 0);
-    return html;
+    for (const thread of groups.values()) orderCommentReplies(thread);
+    return [...groups.values()];
   }
-  function openCommentReply(button) {
+  function commentRoot(comment,byId) {
+    let head=comment;const visited=new Map();
+    while (byId.has(Number(head.parent))) {
+      visited.set(Number(head.id),visited.size);
+      const next=byId.get(Number(head.parent));
+      if (visited.has(Number(next.id))) {
+        head=byId.get(Math.min(...[...visited.keys()].slice(visited.get(Number(next.id)))));
+        break;
+      }
+      head=next;
+    }
+    return head;
+  }
+  function orderCommentReplies(thread) {
+      const children = new Map(), ordered = [], seen = new Set([Number(thread.root.id)]);
+      for (const c of thread.replies) {
+        const parent = Number(c.parent);
+        if (!children.has(parent)) children.set(parent, []);
+        children.get(parent).push(c);
+      }
+      // Parent first, then its newest replies, without introducing another visual level.
+      const visit = items => {
+        const stack = [...items];
+        while (stack.length) {
+          const c = stack.pop(), id = Number(c.id);
+          if (seen.has(id)) continue;
+          seen.add(id); ordered.push(c);
+          stack.push(...(children.get(id) || []));
+        }
+      };
+      visit(children.get(Number(thread.root.id)) || []);
+      for (const c of thread.replies) if (!seen.has(Number(c.id))) visit([c]);
+      thread.replies = ordered;
+  }
+  function commentBody(c, recipient) {
+    let body = String(c.body || '');
+    // Suppress a matching prefix from the previous UI without changing the saved message.
+    if (recipient) {
+      const token = '@' + (String(recipient.author || '').normalize('NFKC').trim().replace(/\s+/gu, '.').replace(/[^\p{L}\p{N}_.-]/gu, '') || 'ASCLA');
+      const rest = body.slice(token.length);
+      if (body.startsWith(token) && /^\s/u.test(rest) && rest.trim()) body = rest.trimStart();
+    }
+    return E(body);
+  }
+  function commentCard(c, view, threadId) {
+    const isReply = Number(c.id) !== threadId, canReply = c.status === 'publish';
+    const postId = view.postId, recipient = view.byId.get(Number(c.parent));
+    const authorName = Number(c.author_id) > 0
+      ? `<button type="button" class="comment-author" data-action="member" data-id="${Number(c.author_id)}" aria-label="${E(T('Ver perfil de'))} ${E(c.author)}">${E(c.author)}</button>`
+      : `<strong>${E(c.author)}</strong>`;
+    const replyData=`data-id="${Number(c.id)}" data-thread="${threadId}" data-post="${Number(postId)}" data-author="${E(c.author)}"`;
+    const actions = `<div class="comment-actions">${canReply ? reactionButtons(c, c.id, true) : ''}${canReply ? btn(T('Responder'), 'comment-reply', replyData, 'ghost small') : ''}${c.status === 'pending' ? status(c.status) : ''}</div>`;
+    const context = Number(c.parent) > 0 ? `<span class="comment-reply-context"><span aria-hidden="true">▸</span><span class="screen-reader-text">${E(T('En respuesta a'))} </span><span class="comment-recipient-name">${E(recipient?.author || T('Comentario no disponible'))}</span></span>` : '';
+    return `<article class="comment${isReply ? ' comment-reply' : ''}" data-comment-id="${Number(c.id)}" data-reply-to="${Number(c.parent) || 0}"><span class="comment-avatar" aria-hidden="true">${avatar({name:c.author})}</span><div class="comment-copy"><div class="comment-head"><div class="comment-identity"><span class="comment-authors">${authorName}${context}</span><time class="muted" datetime="${E(String(c.date).replace(' ', 'T'))}Z">${date(c.date)}</time></div>${commentOverflow(c, postId)}</div><p>${commentBody(c,recipient)}</p>${actions}<div class="comment-reply-slot"></div></div></article>`;
+  }
+  function commentThreadControls(thread, shown) {
+    const id = Number(thread.root.id), total = thread.replies.length;
+    if (!total) return '';
+    const remaining = total - shown;
+    let label=total === 1 ? 'Ver 1 respuesta' : 'Ver las %s respuestas';
+    if (shown) label=remaining === 1 ? 'Ver 1 respuesta más' : 'Ver %s respuestas más';
+    const replyCount=shown ? remaining : total;
+    const more = remaining ? btn(T(label).replace('%s', String(replyCount)), 'comment-expand', `data-id="${id}" aria-expanded="${shown > 0}" aria-controls="comment-replies-${id}"`, 'ghost small comment-thread-toggle') : '';
+    const hide = shown ? btn('Ocultar respuestas', 'comment-collapse', `data-id="${id}" aria-expanded="true" aria-controls="comment-replies-${id}"`, 'ghost small comment-thread-toggle') : '';
+    return more + hide;
+  }
+  function commentThreadMarkup(thread, view) {
+    const id = Number(thread.root.id), shown = Math.min(view.expanded.get(id) || 0, thread.replies.length);
+    return `<div class="comment-thread" data-comment-thread="${id}">${commentCard(thread.root, view, id)}<div class="comment-replies" id="comment-replies-${id}" ${shown ? '' : 'hidden'}>${thread.replies.slice(0, shown).map(c => commentCard(c, view, id)).join('')}</div><div class="comment-thread-controls">${commentThreadControls(thread, shown)}</div></div>`;
+  }
+  function commentsHTML(view) {
+    if (!view.threads.length) return `<p class="comment-empty">${E(T('Sé la primera persona en compartir una idea.'))}</p>`;
+    return view.threads.slice(0, view.visible).map(thread => commentThreadMarkup(thread, view)).join('')
+      + (view.threads.length > view.visible ? btn('Ver más comentarios', 'comment-more', '', 'small comment-more') : '');
+  }
+  async function changeCommentThread(action, button) {
+    const list = button.closest('#comments-list'), view = commentViews.get(list);
+    if (!view) return;
+    if (action === 'comment-more') {
+      const next = view.threads.slice(view.visible, view.visible + COMMENT_BATCH);
+      button.insertAdjacentHTML('beforebegin', next.map(thread => commentThreadMarkup(thread, view)).join(''));
+      view.visible += next.length;
+      if (view.visible >= view.threads.length) button.remove();
+      list.querySelector(`[data-comment-thread="${Number(next[0]?.root.id)}"] .comment-author`)?.focus();
+      return;
+    }
+    const id = Number(button.dataset.id), thread = view.threads.find(t => Number(t.root.id) === id);
+    const node = button.closest('.comment-thread'), replies = node?.querySelector('.comment-replies');
+    if (!thread || !replies) return;
+    const before = view.expanded.get(id) || 0;
+    if (action === 'comment-collapse') {
+      if (!(await confirmCommentExit(dirtyComments(replies)))) return;
+      replies.replaceChildren(); replies.hidden = true;
+      view.expanded.delete(id);
+    } else {
+      const shown = Math.min(before + REPLY_BATCH, thread.replies.length);
+      replies.insertAdjacentHTML('beforeend', thread.replies.slice(before, shown).map(c => commentCard(c, view, id)).join(''));
+      replies.hidden = false; view.expanded.set(id, shown);
+    }
+    const controls = node.querySelector('.comment-thread-controls');
+    controls.innerHTML = commentThreadControls(thread, view.expanded.get(id) || 0);
+    controls.querySelector('button')?.focus();
+  }
+  async function openCommentReply(button) {
     const comment = button.closest('.comment');
     if (!comment) return;
-    document.querySelectorAll('.comment-reply-form').forEach(form => form.remove());
-    const slot = comment.querySelector(':scope > .comment-reply-slot');
+    const previous=[...root.querySelectorAll('.comment-reply-form')];
+    if (!(await confirmCommentExit(previous.filter(form=>form.elements.body?.value.trim())))) return;
+    previous.forEach(form => form.remove());
+    const slot = comment.querySelector(':scope > .comment-copy > .comment-reply-slot');
     if (!slot) return;
     const replyId = `reply-body-${++fieldSequence}`;
-    slot.innerHTML = `<form class="comment-reply-form" data-form="comment-reply" data-id="${Number(button.dataset.post)}" data-parent="${Number(button.dataset.id)}"><label for="${replyId}">${E(T("Responder a"))} ${E(button.dataset.author || T('este comentario'))}</label><textarea id="${replyId}" name="body" required maxlength="5000" placeholder="${E(T("Escribe una respuesta…"))}"></textarea><div class="form-actions">${btn('Cancelar','comment-reply-cancel','','ghost small')}<button class="btn primary small">${E(T("Responder"))}</button></div></form>`;
-    slot.querySelector('textarea')?.focus();
+    slot.innerHTML = `<form class="comment-reply-form" data-form="comment-reply" data-id="${Number(button.dataset.post)}" data-parent="${Number(button.dataset.id)}" data-thread="${Number(button.dataset.thread)}"><label for="${replyId}">${E(T("Responder a"))} ${E(button.dataset.author || T('este comentario'))}</label><textarea id="${replyId}" name="body" required maxlength="5000" placeholder="${E(T("Escribe una respuesta…"))}"></textarea><div class="form-actions">${btn('Cancelar','comment-reply-cancel','','ghost small')}<button class="btn primary small">${E(T("Responder"))}</button></div></form>`;
+    const input = slot.querySelector('textarea');
+    input?.focus(); input?.setSelectionRange(input.value.length, input.value.length);
   }
   function eventAttendees(d) {
     if (!Array.isArray(d.attendees)) return '';
@@ -1842,7 +1945,7 @@
     const cards = people.map(person => {
       const role = [person.position, person.company].filter(Boolean).join(' · ');
       const mine = person.is_me ? `<span class="event-attendee-you">${E(T('Tú'))}</span>` : '';
-      return `<article class="event-attendee-card${person.is_me ? ' is-me' : ''}"><button type="button" class="event-attendee-profile" data-action="member" data-id="${Number(person.id)}" aria-label="${E(T('Ver perfil de'))} ${E(person.name)}">${avatar(person)}<span class="event-attendee-copy"><span class="event-attendee-name">${E(person.name)}${mine}</span><small>${E(role || T('Miembro ASCLA'))}</small></span><span class="event-attendee-arrow" aria-hidden="true">${I('arrow')}</span></button></article>`;
+      return `<article class="event-attendee-card${person.is_me ? ' is-me' : ''}"><button type="button" class="event-attendee-profile" data-action="member" data-id="${Number(person.id)}"><span class="screen-reader-text">${E(T('Ver perfil de'))} </span>${avatar(person)}<span class="event-attendee-copy"><span class="event-attendee-name">${E(person.name)}${mine}</span><small>${E(role || T('Miembro ASCLA'))}</small></span><span class="event-attendee-arrow" aria-hidden="true">${I('arrow')}</span></button></article>`;
     }).join('');
     const hiddenLabel = hidden === 1
       ? 'persona no se muestra por sus preferencias de privacidad.'
@@ -1904,10 +2007,10 @@
     return ` · ${p.meta.capacity} ${E(T("cupos"))}${availabilitySummary}`;
   }
   const microStates={pending:"Pendiente de revisión",approved:"Aprobada",published:"Publicada",insufficient:"Inscripciones insuficientes",denied:"Denegada",cancelled:"Cancelada",finished:"Finalizada"};
-  function microEventHistory(meta) {
+  function microEventHistory(meta, showState = true) {
     if (!meta.micro) return "";
     const rows=(meta.micro_history || []).map(h=>'<li><strong>'+E(T(microStates[h.state] || h.state))+'</strong> · '+date(h.at)+'<p>'+E(h.reason || "")+'</p></li>').join("");
-    return '<p class="private-note">'+E(T(microStates[meta.micro_state] || "Pendiente de revisión"))+'</p>'+
+    return (showState?'<p class="private-note">'+E(T(microStates[meta.micro_state] || "Pendiente de revisión"))+'</p>':'')+
       (rows?'<details><summary>'+E(T("Historial de microeventos"))+'</summary><ol>'+rows+'</ol></details>':"");
   }
   function microInvitationRoster(d) {
@@ -1940,18 +2043,16 @@
   function eventStateSummary(d) {
     if (d.cancelled) return ` · ${E(T("Cancelado"))}`;
     if (d.is_past) return ` · ${E(T("Finalizado"))}`;
-    return ` · ${status(d.registered)}`;
+    return d.registered && d.registered !== 'none' ? ` · ${status(d.registered)}` : '';
   }
   function eventGoogleActions(d, id) {
-    const calendarAction = !d.is_past && !d.cancelled && d.google_url
+    const calendarAction = d.registered === 'accepted' && !d.is_past && !d.cancelled && d.google_url && !S.boot.google_connected
       ? `<a class="btn small" href="${E(d.google_url)}" target="_blank" rel="noopener noreferrer">${E(T("Añadir a Google Calendar ↗"))}</a>`
       : "";
-    let connectedActions = "";
-    if (!d.is_past && !d.cancelled && S.boot.google_connected) {
-      if (d.google_managed) connectedActions = `<span class="status accepted">${E(T("Sincronizado como organizador en Google Calendar"))}</span>`;
-      else connectedActions = btn("Guardar en Google conectado", "google-event", `data-id="${id}" data-operation="save"`, "small")
-        + btn("Quitar de Google", "google-event", `data-id="${id}" data-operation="cancel"`, "small");
-    }
+    const messages={synced:T('Guardado en tu Google Calendar'),invited:T('Invitación enviada por Google Calendar. Revisa tu correo para aceptarla.'),organizer:T('Sincronizado como organizador en Google Calendar'),pending:T('Sincronización con Google Calendar pendiente.'),failed:T('No se pudo sincronizar con Google Calendar. Puedes reintentar.')};
+    let connectedActions = d.registered === 'accepted' && !d.cancelled && !d.is_past && messages[d.calendar_status]
+      ? `<span class="private-note calendar-sync-status" role="status">${E(messages[d.calendar_status])}</span>` : '';
+    if (d.registered === 'accepted' && d.calendar_status === 'failed') connectedActions += btn('Reintentar sincronización','calendar-retry',`data-id="${id}"`,'small');
     return { calendarAction, connectedActions };
   }
   function eventParticipantsSection(d) {
@@ -2000,7 +2101,11 @@
     return actions;
   }
   function itemEventActions(p,id,eventIsPast,eventCancelled) {
-    if(p.type!=='event'||eventCancelled||p.meta.cancelled)return '';
+    if(p.type!=='event')return '';
+    if(eventCancelled||p.meta.cancelled) {
+      const canReactivate=p.meta.micro?S.boot.admin:(S.boot.admin||S.boot.executive)&&p.status==='publish';
+      return canReactivate?btn(I('calendar')+' '+T('Reactivar evento'),'event-reactivate-request',`data-id="${Number(id)}" data-title="${E(p.title)}" data-draft="${p.status!=='publish'}"`,'primary'):'';
+    }
     const allowed=p.meta.micro
       ? S.boot.admin&&(p.status!=='publish'||!eventIsPast)
       : (S.boot.admin||S.boot.executive)&&p.status==='publish'&&!eventIsPast;
@@ -2009,9 +2114,38 @@
     const invite=p.meta.micro?'':btn('Invitar asociados','event-invite','data-id="'+id+'"');
     return cancel+invite;
   }
+  function videoPreparationMarkup(p) {
+    const state=p.meta.video_preparation;
+    if (!state||!['pending','processing','error'].includes(state.status)) return '';
+    const failed=state.status==='error';
+    return `<div class="video-preparation-note ${failed?'error':'alert'} spaced-notice" role="status" data-video-preparation>${E(failed?state.error:T('Estamos preparando los subtítulos y el resumen automáticamente.'))}</div>`;
+  }
+  function watchVideoPreparation(p,dialog) {
+    const state=p.meta.video_preparation,target=dialog.querySelector('[data-video-preparation]');
+    if (!target||!['pending','processing'].includes(state?.status)||!state.job_id) return;
+    let checks=0;const deadline=Date.now()+86400000;
+    const again=(delay=checks<12?5000:30000)=>{if(Date.now()<deadline)setTimeout(poll,delay);};
+    const poll=async()=>{
+      if(!target.isConnected){
+        if(modalHistory.some(entry=>entry.node===dialog)){again();}
+        return;
+      }
+      try {
+        const job=await api('jobs/'+state.job_id);checks++;
+        if(!target.isConnected){
+          if(modalHistory.some(entry=>entry.node===dialog)){again();}
+          return;
+        }
+        if(['completed','error'].includes(job.status)){await item(p.id);return;}
+        again();
+      } catch(error){target.textContent=error.message;again(30000);}
+    };
+    setTimeout(poll,2500);
+  }
   function itemResourceActions(p,id) {
-    if(!(S.boot.admin||S.boot.executive)||p.type!=='resource')return '';
-    return btn(I('spark')+' Generar resumen y nota','generate','data-id="'+id+'"');
+    if (!(S.boot.admin||S.boot.executive)||p.type!=='resource'||p.status!=='publish'||(!p.meta.video_id&&!p.meta.transcript)) return '';
+    const pending=['pending','processing'].includes(p.meta.video_preparation?.status);
+    return btn(T(pending?'Actualizando resumen…':'Actualizar resumen y nota'),'resource-regenerate',`data-id="${Number(id)}" ${pending?'disabled aria-busy="true"':''}`,'small');
   }
   function itemModerationActions(p,id) {
     if (['gallery','resource'].includes(p.type) && p.can_moderate && !p.meta.publish_at && ['publish','ascla_hidden'].includes(p.status)) {
@@ -2038,12 +2172,27 @@
   function microHistoryCard(p) {
     const archiveLabel=p.meta.micro_archived?'Restaurar en el panel':'Archivar del panel';
     const archive=p.meta.can_archive?btn(T(archiveLabel),'micro-archive','data-id="'+Number(p.id)+'" data-archived="'+!p.meta.micro_archived+'"','small'):'';
-    return '<article class="card" data-micro-id="'+Number(p.id)+'"><h3>'+E(p.title)+'</h3>'+microEventHistory(p.meta)+'<div class="form-actions">'+btn('Ver','item','data-id="'+p.id+'"','small')+archive+'</div></article>';
+    let state=p.meta.micro_state||'pending';
+    if (p.status==='scheduled') state='scheduled';
+    if (p.meta.cancelled) state='cancelled';
+    const titles={...microStates,scheduled:'Programada'};
+    const guidance={pending:'Revisa el grupo, la fecha y la agenda para decidir su publicación.',approved:'La propuesta está aprobada. Revisa la fecha y publica cuando esté lista.',scheduled:'La publicación está programada para la fecha indicada.',published:'El encuentro está publicado. Puedes consultar sus inscripciones.',cancelled:'El encuentro fue cancelado. Su historial se conserva.',denied:'La propuesta no fue aprobada. Puedes consultar la decisión.',finished:'El encuentro finalizó. Puedes consultar su historial.',insufficient:'Revisa las inscripciones y las condiciones del encuentro.'};
+    const label=state==='pending'?'Revisar propuesta':'Ver encuentro';
+    const dateLabel=p.meta.start?date(p.meta.start,{day:'numeric',month:'short',year:'numeric'})+' · '+time(p.meta.start):T('Fecha por definir');
+    const people=Array.isArray(p.meta.invitees)?p.meta.invitees.length:null;
+    const group=people===null?'':`<span>${I('users')}${people} ${E(T('candidatos del grupo'))}</span>`;
+    const capacity=p.meta.capacity?`<span>${I('users')}${Number(p.meta.capacity)} ${E(T('cupos'))}</span>`:'';
+    const open=btn(T(label)+' '+I('arrow'),'item',`data-id="${Number(p.id)}"`,'small'+(state==='pending'?' primary':''));
+    return `<article class="card micro-history-card" data-micro-id="${Number(p.id)}"><div class="micro-card-heading"><span class="micro-card-icon" aria-hidden="true">${I('hub')}</span><div><span class="micro-state${['pending','approved','published','scheduled'].includes(state)?' active':''}">${E(T(titles[state]||titles.pending))}</span><h3>${E(p.title)}</h3></div></div><div class="micro-card-meta"><span>${I('calendar')}${E(dateLabel)}</span>${group}${capacity}</div><p class="micro-next-step">${E(T(guidance[state]||guidance.pending))}</p><div class="micro-card-footer"><div class="micro-card-history">${microEventHistory(p.meta,false)}</div><div class="form-actions">${archive}${open}</div></div></article>`;
   }
   function microHistoryMarkup(proposals) {
     const archived=!!S.microShowArchived,shown=proposals.filter(p=>!!p.meta.micro_archived===archived);
     const emptyText=archived?'No hay microeventos archivados.':'No hay microeventos en este listado.';
-    return '<h3>'+E(T('Historial de microeventos'))+'</h3>'+microHistoryTabs(archived)+shown.map(microHistoryCard).join('')+(shown.length?'':empty(emptyText));
+    const closed=p=>p.meta.cancelled||['denied','finished','cancelled'].includes(p.meta.micro_state);
+    const pending=shown.filter(p=>!closed(p)&&!p.meta.micro_approved&&['draft','pending'].includes(p.status)).length;
+    const finished=shown.filter(closed).length;
+    const counts=[['Por revisar',pending,'shield'],['En preparación o publicados',shown.length-pending-finished,'calendar'],['Cerrados',finished,'check']].map(([name,value,icon])=>`<div><span class="micro-count-icon" aria-hidden="true">${I(icon)}</span><span>${E(T(name))}<strong>${value}</strong></span></div>`).join('');
+    return `<section class="micro-history"><div class="micro-history-heading"><div><h3>${E(T('Historial de microeventos'))}</h3><p>${E(T('Consulta el estado de cada propuesta y el siguiente paso.'))}</p></div><span class="tag">${shown.length} ${E(T('en este listado'))}</span></div>${microHistoryTabs(archived)}<div class="micro-counts">${counts}</div><div class="micro-history-list">${shown.map(microHistoryCard).join('')||(empty(emptyText))}</div></section>`;
   }
   function itemActionButtons(p, id, eventIsPast, eventCancelled) {
     const actionButtons = itemEditingActions(p,id) + itemEventActions(p,id,eventIsPast,eventCancelled)
@@ -2069,13 +2218,15 @@
     const video = p.meta.video_id ? `<div class="video-wrap"><iframe credentialless loading="lazy" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/${E(p.meta.video_id)}${clipQuery}" title="${E(p.title)}" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen></iframe></div><div class="video-metadata"><span>${videoDuration}</span>${videoModeTag}</div>` : "";
     const eventCover = p.type === "event" ? UI.images(p)[0] : null;
     const eventCoverMarkup = eventCover ? `<figure class="event-detail-cover"><img src="${E(eventCover.url)}" alt="${E(p.title)}"></figure>` : "";
-    const attachmentsMarkup = p.type === "event" ? "" : UI.attachments(p);
+    let attachmentsMarkup='';
+    if (p.type==='gallery') attachmentsMarkup=UI.gallery(p);
+    else if (p.type!=='event') attachmentsMarkup=UI.attachments(p);
     const deleteMedia = (p.media || []).filter(m => m.can_delete).map(m => btn(`${T("Eliminar archivo")}: ${E(m.name)}`, "delete-media", `data-id="${m.id}" data-post="${id}" data-name="${E(m.name)}"`, "ghost danger small")).join("");
     return { video, eventCoverMarkup, attachmentsMarkup, deleteMedia };
   }
   function itemSupplementalMarkup(p) {
     return {
-      external: p.meta.url ? `<a class="btn" href="${E(safeURL(p.meta.url))}" target="_blank" rel="noopener noreferrer">${E(T("Abrir enlace ↗"))}</a>` : "",
+      external: itemExternalLink(p),
       benefits: p.meta.benefits ? `<h3>${E(T("Beneficios"))}</h3><p class="detail-body">${E(p.meta.benefits)}</p>` : "",
       initiatives: p.meta.initiatives ? `<h3>${E(T("Iniciativas"))}</h3><p class="detail-body">${E(p.meta.initiatives)}</p>` : "",
       clip: p.meta.clip ? `<div class="alert">${E(T("Cápsula sugerida"))}: ${p.meta.clip.start}s – ${p.meta.clip.end}s · ${E(T("Referencia temporal al video de origen. No existe un archivo recortado."))}</div>` : "",
@@ -2083,17 +2234,42 @@
       demoSource: p.meta.demo_source_note ? `<p class="alert">${E(p.meta.demo_source_note)}</p>` : "",
     };
   }
+  function itemExternalLink(p) {
+    if (!p.meta.url) return '';
+    let label=T('Abrir enlace ↗');
+    if (p.type === 'event') {
+      if (S.event?.registered !== 'accepted' || S.event?.cancelled) return '';
+      const host=new URL(safeURL(p.meta.url),location.href).hostname.toLowerCase();
+      label=host==='zoom.us'||host.endsWith('.zoom.us')||host==='zoom.com'||host.endsWith('.zoom.com')
+        ? T('Abrir enlace de Zoom ↗') : T('Abrir enlace del encuentro ↗');
+    }
+    return `<a class="btn event-join-link" href="${E(safeURL(p.meta.url))}" target="_blank" rel="noopener noreferrer">${E(label)}</a>`;
+  }
   function itemCommentsMarkup(p, id) {
     if (p.status !== "publish") return "";
-    return `<section class="comments"><h3>${E(T("Conversación"))}</h3><div id="comments-list">${E(T("Cargando comentarios…"))}</div><form class="comment-form" data-form="comment" data-id="${id}">${field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')}<button class="btn primary small">${E(T("Publicar comentario"))}</button></form></section>`;
+    return `<section class="comments"><div class="comments-heading"><span class="comments-icon" aria-hidden="true">${I('hub')}</span><h3>${E(T("Conversación"))}</h3></div><div id="comments-list">${E(T("Cargando comentarios…"))}</div><form class="comment-form" data-form="comment" data-id="${id}">${field("body", "Comparte tu opinión", "", "textarea", 'required maxlength="5000"')}<button class="btn primary small">${E(T("Publicar comentario"))}</button></form></section>`;
   }
-  async function loadItemComments(p, id) {
+  async function loadItemComments(p, id, previous, drafts = []) {
     if (p.status !== "publish") return;
     const comments = await api("items/" + id + "/comments");
-    const target = document.getElementById("comments-list");
-    if (target) target.innerHTML = commentsHTML(comments, id);
+    const target = activeModal()?.querySelector('#comments-list');
+    if (!target || !activeModal()?.querySelector(`form[data-form="comment"][data-id="${Number(id)}"]`)) return;
+    const view = {postId:Number(id), threads:commentThreads(comments), byId:new Map(comments.map(c=>[Number(c.id),c])), visible:previous?.visible || COMMENT_BATCH, expanded:new Map(previous?.expanded || []), latest:previous?.latest};
+    const latest = view.threads.findIndex(t => Number(t.root.id) === view.latest);
+    if (latest > 0) view.threads.unshift(...view.threads.splice(latest, 1));
+    for (const draft of drafts) {
+      const index = view.threads.findIndex(t => Number(t.root.id) === draft.parent || t.replies.some(c => Number(c.id) === draft.parent));
+      if (index < 0) continue;
+      view.visible = Math.max(view.visible, index + 1);
+      const thread = view.threads[index], replyIndex = thread.replies.findIndex(c => Number(c.id) === draft.parent);
+      if (replyIndex >= 0) view.expanded.set(Number(thread.root.id), Math.max(view.expanded.get(Number(thread.root.id)) || 0, replyIndex + 1));
+    }
+    commentViews.set(target, view); target.innerHTML = commentsHTML(view);
   }
   async function item(id) {
+    const existing = commentViews.get(activeModal()?.querySelector('#comments-list'));
+    const commentView = existing?.postId === Number(id) ? existing : null;
+    const drafts=dirtyComments().filter(form=>Number(form.dataset.id)===Number(id)).map(form=>({parent:Number(form.dataset.parent)||0,body:form.elements.body.value}));
     const p = await api("items/" + id);
     S.item = p;
     syncCommentCount(p);
@@ -2102,8 +2278,8 @@
     const reviewedLabel = T(p.meta.reviewed ? "Revisado" : "Requiere revisión de fuentes, anonimización y derechos.");
     const eventIsPast = p.type === "event" && !!S.event?.is_past;
     const eventCancelled = p.type === "event" && !!S.event?.cancelled;
-    const transcriptWarning = (S.boot.admin || S.boot.executive) && p.type === "resource" && p.meta.video_id && p.meta.transcript_status === "unavailable"
-      ? `<div class="error spaced-notice">${E(T("No se pudo obtener una transcripción verificable para este video. ASCLA no generará resumen, nota ni temas hasta que agregues una transcripción autorizada o YouTube pueda entregar subtítulos accesibles."))}</div>`
+    const transcriptWarning = (S.boot.admin || S.boot.executive) && p.type === "resource" && p.meta.video_id && p.meta.transcript_status === "unavailable" && p.meta.video_preparation?.status !== "error"
+      ? `<div class="error spaced-notice">${E(p.meta.transcript_error || T("No hay una transcripción disponible. Revisa Supadata en Ajustes o añade una transcripción autorizada."))}</div>`
       : "";
     const demoTag = p.meta.demo ? `<span class="demo-badge">${E(T("DATOS DEMO"))}</span>` : "";
     const chatham = p.meta.chatham ? `<div class="alert chatham spaced-notice">${I("shield")} ${E(T("Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones."))}</div>` : "";
@@ -2114,31 +2290,43 @@
     const commentsSection = itemCommentsMarkup(p, id);
     const dialog = modal(
       p.title,
-      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${demoTag}</div>${media.eventCoverMarkup}${chatham}${generated}<p class="detail-body">${E(p.body)}</p>${media.video}${transcriptWarning}${extra}${media.attachmentsMarkup}${media.deleteMedia}${UI.generated(p)}${UI.agenda(p)}${supplemental.demoSource}${supplemental.external}${supplemental.benefits}${supplemental.initiatives}${supplemental.clip}${supplemental.copyright}${actions}${commentsSection}`,
-      true,
+      `<div class="detail-meta"><span>${E(p.author.name)}</span><span>${date(p.date)}</span>${status(p.status)}${demoTag}</div>${media.eventCoverMarkup}${chatham}${generated}<p class="detail-body">${E(p.body)}</p>${media.video}${videoPreparationMarkup(p)}${transcriptWarning}${extra}${media.attachmentsMarkup}${media.deleteMedia}${UI.generated(p)}${UI.agenda(p)}${supplemental.demoSource}${supplemental.external}${supplemental.benefits}${supplemental.initiatives}${supplemental.clip}${supplemental.copyright}${actions}${commentsSection}`,
+      true, 'item-'+id,
     );
     void interestLearning().watch(p,dialog,S.page==="admin");
-    await loadItemComments(p, id);
+    watchVideoPreparation(p,dialog);
+    await loadItemComments(p, id, commentView, drafts);
+    await restoreCommentDrafts(drafts);
+  }
+  async function restoreCommentDrafts(drafts) {
+    for (const draft of drafts) {
+      if (draft.parent) {
+        const reply=activeModal()?.querySelector(`[data-action="comment-reply"][data-id="${draft.parent}"]`);
+        if (reply) await openCommentReply(reply);
+      }
+      const form=activeModal()?.querySelector(draft.parent?`form[data-form="comment-reply"][data-parent="${draft.parent}"]`:'form[data-form="comment"]');
+      if (form) form.elements.body.value=draft.body;
+    }
   }
   function resourceEditorExtra(m) {
     let videoNote = "";
     if (m.video_id) {
       let durationText;
       if (m.duration_seconds) durationText = ": " + E(UI.duration(m.duration_seconds));
-      else durationText = ". " + E(T("Si YouTube no la expone públicamente, conecta YouTube OAuth y vuelve a intentar."));
+      else durationText = ". " + E(T("Si YouTube no la expone públicamente, abre el reproductor para verificarla."));
       videoNote = `<p class="private-note">${E(T("Duración detectada automáticamente"))}${durationText}</p>`;
     }
     let moderatorFields = "";
     if (S.boot.moderator || S.boot.executive || S.boot.admin) {
       let transcriptWarning = "";
       if (m.video_id && !m.transcript) {
-        transcriptWarning = `<div class="alert">${E(T("No hay una transcripción guardada. ASCLA intentará obtener una transcripción autorizada de YouTube al generar el resumen. Si no puede obtenerla, la generación se detendrá para evitar inventar información."))}</div>`;
+        transcriptWarning = `<div class="alert">${E(T("ASCLA consultará Supadata para obtener subtítulos públicos. Los videos largos pueden continuar en segundo plano. También puedes añadir una transcripción manual."))}</div>`;
       }
-      moderatorFields = field("transcript", "Transcripción autorizada (opcional)", m.transcript || "", "textarea", 'maxlength="100000"')
+      moderatorFields = field("transcript", "Transcripción autorizada (opcional)", m.transcript || "", "textarea", 'maxlength="2000000"')
         + transcriptWarning
         + field("identities", "Identidades y afiliaciones que deben anonimizarse (una por línea)", m.identities || "", "textarea");
     }
-    return `<div class="form-grid">${select("resource_type", "Tipo de recurso", ["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"], m.resource_type || "Artículo")}${field("source", "Fuente / autoría", m.source || "")}${field("youtube_url", "URL de YouTube", m.youtube_url || "", "url")}${field("url", "URL del recurso externo", m.url || "", "url")}</div>${videoNote}${field("copyright", "Propiedad intelectual", m.copyright || "© ASCLA – Asociación de Secretarios Corporativos de América Latina")}${field("summary", "Resumen", m.summary || "", "textarea")}${moderatorFields}<p class="private-note">Las conferencias completas permanecen en YouTube. La duración se consulta directamente desde los metadatos del video y nunca se estima a partir de la transcripción.</p>`;
+    return `<div class="form-grid">${select("resource_type", "Tipo de recurso", ["Artículo", "Video", "Podcast", "Nota técnica", "Infografía", "Documento"], m.resource_type || "Artículo")}${field("source", "Fuente / autoría", m.source || "")}${field("youtube_url", "URL de YouTube", m.youtube_url || "", "url")}${field("url", "URL del recurso externo", m.url || "", "url")}</div>${videoNote}${field("copyright", "Propiedad intelectual", m.copyright || "© ASCLA – Asociación de Secretarios Corporativos de América Latina")}${field("summary", "Resumen", m.summary || "", "textarea")}${moderatorFields}<p class="private-note">${E(T('La duración se obtiene de los tiempos de la transcripción; si no hay tiempos válidos, se conserva la duración disponible del video.'))}</p>`;
   }
   function editorStatusOptions(type, m, directResourcePublisher, directContentPublisher) {
     if (directContentPublisher && ['gallery','resource'].includes(type)) return [['draft','Borrador'],['pending','Pendiente de revisión'],['publish','Publicado'],['ascla_hidden','Oculto']];
@@ -2157,7 +2345,7 @@
     if (type === 'hub' && !m.generated) return id ? p.status : 'publish';
     const directPublishType = ["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated);
     if (directPublishType) return id && p.status === "draft" ? "draft" : "publish";
-    if ((!id && type === "resource" && directResourcePublisher) || (p.status === "publish" && directContentPublisher)) return "publish";
+    if ((!id && ["gallery","resource"].includes(type) && directContentPublisher) || (p.status === "publish" && directContentPublisher)) return "publish";
     return p.status;
   }
   function allyEditorStatus(id,p,m) {
@@ -2254,8 +2442,7 @@
       return select("parent", "Foro", [[0, "Conversación general"], ...forums.items.map((f) => [f.id, f.title])], p.parent || 0);
     }
     if (type === "gallery") {
-      const events = { items: await allContent("event") };
-      return select("event_id", "Evento relacionado", [[0, "Sin evento"], ...events.items.map((f) => [f.id, f.title])], m.event_id || 0);
+      return relatedEventPicker(m.event_id || 0);
     }
     return "";
   }
@@ -2283,7 +2470,7 @@
     if(type==='ally')return alliesUI().editorMarkup({id,p,m,statusOptions,statusValue,publicationControl,draftAction});
     const eventWorkflow = type === "event" ? `<section class="event-editor-status">${statusControl}${publicationControl}<p class="private-note">${E(T("Puedes guardar un borrador aunque todavía falten datos. Para publicar, completa los campos obligatorios."))}</p></section>` : "";
     const trailingWorkflow = type === "event" ? "" : statusControl + publicationControl + `<p class="private-note">${E(T("Puedes guardar un borrador aunque todavía falten datos. Para publicar, completa los campos obligatorios."))}</p>`;
-    return `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", type === "event" ? "Descripción del evento" : "Contenido", p.body, "textarea", 'required maxlength="30000"')}${eventWorkflow}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => ("<label class=\"chip-check\"><input type=\"checkbox\" name=\"interest\" value=\"" + (t.id) + "\" " + (p.tags.some((x) => x.id === t.id) ? "checked" : "") + ">" + (E(t.name)) + "</label>")).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? ("<label class=\"btn small\">" + (I("plus")) + " " + (E(T("Adjuntar imagen o PDF"))) + "<input type=\"file\" data-upload=\"content\" accept=\"image/jpeg,image/png,image/webp,application/pdf\" hidden></label><div id=\"attachments\">" + ((m.media_ids || []).map((mid) => ("<span class=\"attached-file\" data-media=\"" + (mid) + "\">Archivo #" + (mid) + "" + (btn("Quitar", "detach-media", ("data-id=\"" + (mid) + "\""), "ghost small")) + "</span>")).join("")) + "</div><p class=\"private-note\">" + (E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))) + "</p>") : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${trailingWorkflow}${m.generated && directResourcePublisher ? ("<p class=\"private-note\">" + (E(T("Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."))) + "</p>") : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}${draftAction}<button class="btn primary" data-editor-primary>Guardar ${typeLabel[type]}</button></div></form>`;
+    return `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", type === "event" ? "Descripción del evento" : "Contenido", p.body, "textarea", 'required maxlength="30000"')}${eventWorkflow}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => ("<label class=\"chip-check\"><input type=\"checkbox\" name=\"interest\" value=\"" + (t.id) + "\" " + (p.tags.some((x) => x.id === t.id) ? "checked" : "") + ">" + (E(t.name)) + "</label>")).join("")}</div>${["hub", "gallery", "resource", "ally"].includes(type) ? ("<label class=\"btn small\">" + (I("plus")) + " " + (E(T("Adjuntar imagen o PDF"))) + "<input type=\"file\" data-upload=\"content\" accept=\"image/jpeg,image/png,image/webp,application/pdf\" hidden></label><div id=\"attachments\">" + (m.media_ids || []).map(mid=>attachedFileMarkup((p.media||[]).find(file=>Number(file.id)===Number(mid))||{id:mid,name:T('Archivo')+' #'+mid})).join("") + "</div><p class=\"private-note\">" + (E(T("Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."))) + "</p>") : ""}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${trailingWorkflow}${m.generated && directResourcePublisher ? ("<p class=\"private-note\">" + (E(T("Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."))) + "</p>") : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div><div class="form-actions">${btn("Cancelar", "close")}${draftAction}<button class="btn primary" data-editor-primary>Guardar ${typeLabel[type]}</button></div></form>`;
   }
   async function editor(type, id = 0) {
     const p = id
@@ -2305,6 +2492,36 @@
     const formMarkup = editorFormMarkup({type, id, p, m, extra, eventCoverEditor, statusOptions, statusValue, canSchedule, directResourcePublisher});
     const dialog = modal((id ? "Editar " : "Crear ") + typeLabel[type], formMarkup, true);
     syncEditorRequirements(dialog.querySelector('[data-form="editor"]'));
+    const picker=dialog.querySelector('.related-event-picker');
+    if(picker) void loadRelatedEvents(picker);
+  }
+  async function relatedEventPicker(id) {
+    const current=id?await api('items/'+Number(id)).catch(()=>null):null;
+    const relatedDate=current?.meta.start?' · '+date(current.meta.start):'';
+    const label=current?current.title+relatedDate:T('Sin evento');
+    return `<div class="field related-event-field"><span>${E(T('Evento relacionado'))}</span><input type="hidden" name="event_id" value="${Number(id)}"><details class="related-event-picker"><summary><span data-related-event-label>${E(label)}</span>${I('chevron')}</summary><div class="related-event-panel"><label for="related-event-search">${E(T('Buscar evento'))}</label><input type="search" id="related-event-search" data-event-search maxlength="150" autocomplete="off" placeholder="${E(T('Escribe el nombre del evento…'))}"><div class="related-event-results" role="group" aria-label="${E(T('Eventos disponibles'))}"></div><div class="related-event-pagination"></div></div></details></div>`;
+  }
+  const eventPickerRequests=new WeakMap();
+  const eventPickerTimers=new WeakMap();
+  async function loadRelatedEvents(picker,page=1,focusResults=false) {
+    const request=(eventPickerRequests.get(picker)||0)+1;eventPickerRequests.set(picker,request);
+    const results=picker.querySelector('.related-event-results'),pagination=picker.querySelector('.related-event-pagination');
+    const query=picker.querySelector('[data-event-search]').value.trim();
+    results.setAttribute('aria-busy','true');pagination.replaceChildren();
+    try {
+      const feed=await api('content/event?'+new URLSearchParams({q:query,page,per_page:8}));
+      if(!picker.isConnected||eventPickerRequests.get(picker)!==request)return;
+      const selected=Number(picker.closest('.related-event-field').querySelector('[name="event_id"]').value);
+      results.innerHTML=btn(T('Sin evento'),'related-event-select','data-id="0" data-label="'+E(T('Sin evento'))+'" aria-pressed="'+(selected===0)+'"','related-event-option')
+        +feed.items.map(p=>{const label=p.title+(p.meta.start?' · '+date(p.meta.start):'');return btn(`<span><strong>${E(p.title)}</strong><small>${p.meta.start?E(date(p.meta.start)):E(T('Fecha por confirmar'))} · #${Number(p.id)}</small></span>${status(p.status)}`,'related-event-select',`data-id="${Number(p.id)}" data-label="${E(label)}" aria-pressed="${selected===Number(p.id)}"`,'related-event-option');}).join('')
+        +(feed.items.length?'':`<p class="private-note" role="status">${E(T('No se encontraron eventos.'))}</p>`);
+      const previous=btn(I('arrow'),'related-event-page',`data-page="${feed.page-1}" aria-label="${E(T('Página anterior'))}" ${feed.page<=1?'disabled':''}`,'event-picker-prev ghost');
+      const next=btn(I('arrow'),'related-event-page',`data-page="${feed.page+1}" aria-label="${E(T('Página siguiente'))}" ${feed.page>=feed.pages?'disabled':''}`,'ghost');
+      pagination.innerHTML=`<span role="status">${E(T('Página'))} ${feed.page} ${E(T('de'))} ${feed.pages}</span><div>${previous}${next}</div>`;
+      if(focusResults)results.querySelector('button')?.focus();
+    } catch(error) {
+      if(picker.isConnected&&eventPickerRequests.get(picker)===request)results.innerHTML=`<p class="error" role="alert">${E(error.message)}</p>${btn('Reintentar','related-event-page','data-page="1"','small')}`;
+    } finally {if(eventPickerRequests.get(picker)===request)results.removeAttribute('aria-busy');}
   }
   function fileOwnerFilter(list, scope) {
     return scope === "all" ? `<div class="field"><label for="file-owner">${E(T("Usuario propietario"))}</label><select id="file-owner" name="owner"><option value="0">${E(T("Todos los usuarios"))}</option>${(list.owners || []).map(u => ("<option value=\"" + (Number(u.id)) + "\" " + (Number(S.files.owner)===Number(u.id)?"selected":"") + ">" + (E(u.name)) + " · " + (E(u.email)) + "</option>")).join("")}</select></div>` : "";
@@ -2327,13 +2544,13 @@
     if (inline) panel.innerHTML = `<div class="admin-section-heading"><div><span class="eyebrow">${E(T('BIBLIOTECA PRIVADA'))}</span><h2>${E(T('Archivos de la comunidad'))}</h2><p>${E(T('Consulta los archivos privados de todos los asociados y elimina los que corresponda.'))}</p></div></div><section class="card file-library-panel">${markup}</section>`;
     else modal(scope === "all" ? "Archivos de la comunidad" : "Mis archivos", markup, true);
   }
-  function confirmDeletion(kind, id, {post = 0, title = "", library = false, forum = false, conversation = 0} = {}) {
+  function confirmDeletion(kind, id, {post = 0, title = "", library = false, forum = false, gallery = false, conversation = 0} = {}) {
     const descriptions = {
       media: 'El archivo se eliminará permanentemente, junto con su copia maestra si existe, y se retirará de las publicaciones y de la foto de perfil que lo utilicen.',
       comment: 'El comentario dejará de mostrarse en la conversación.',
       message: 'El mensaje se eliminará de esta conversación para ambos participantes.',
     };
-    const description = descriptions[kind] || 'El contenido dejará de estar disponible en la comunidad.';
+    const description = gallery?'La galería dejará de estar disponible y se eliminarán permanentemente sus imágenes y archivos adjuntos, incluidas las copias maestras que ya no se utilicen.':descriptions[kind] || 'El contenido dejará de estar disponible en la comunidad.';
     modal(T('Confirmar eliminación'), `<p class="detail-body">${E(title)}</p><p>${E(T(description))}</p>${forum?'<p>Los temas de este foro se conservarán en la lista general.</p>':''}<div class="form-actions">${btn('Cancelar','delete-cancel',("data-kind=\"" + (kind) + "\" data-id=\"" + (id) + "\" data-post=\"" + (post) + "\" data-library=\"" + (library) + "\" data-conversation=\"" + (conversation) + "\""))}${btn('Eliminar','delete-confirm',("data-kind=\"" + (kind) + "\" data-id=\"" + (id) + "\" data-post=\"" + (post) + "\" data-library=\"" + (library) + "\" data-conversation=\"" + (conversation) + "\""),'danger primary')}</div>`);
   }
   async function inviteMembers(id, page = 1, query = "") {
@@ -2697,7 +2914,8 @@
         if (j.status === 'completed') { onDone(j.result);return; }
         if (j.status === 'error') { await showJobError(target,id,j.error,onError);return; }
         const jobStatusLabel = j.status === 'processing' ? 'Procesando' : 'Pendiente';
-        target.innerHTML = assistantMode ? assistantLoadingBody(j.status) : `<div class="alert">${I('clock')} ${jobStatusLabel} · Trabajo #${id}</div>`;
+        const jobError=j.error?'<p>'+E(j.error)+'</p>':'';
+        target.innerHTML = assistantMode ? assistantLoadingBody(j.status) : `<div class="alert">${I('clock')} ${jobStatusLabel} · Trabajo #${id}${jobError}</div>`;
         if (++attempts < 90) setTimeout(poll, 2500);
         else target.innerHTML = assistantMode ? `<div class="assistant-message-meta"><span>${I('spark')} ASCLA</span></div><div class="assistant-message-copy">${E(T('La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta.'))}</div>` : '<div class="alert">El trabajo continúa en segundo plano. Recibirás una notificación cuando esté listo.</div>';
       } catch (error) { target.innerHTML = `<div class="error">${E(error.message)}</div>`; }
@@ -3047,16 +3265,18 @@
   function adminUserFilters(roles, f) {
     return `<form class="card directory-search admin-user-filters" data-form="admin-filter" data-area="users" role="search" aria-label="${E(T('Buscar usuarios'))}"><div class="directory-search-row"><div class="field"><label for="admin-user-search">${E(T('Buscar usuarios'))}</label><input type="search" id="admin-user-search" name="q" maxlength="100" placeholder="${E(T('Nombre, usuario, correo, cargo, empresa o experiencia…'))}" value="${E(f.q||'')}"></div><div class="field"><label for="admin-user-country">${E(T('País'))}</label><input type="search" id="admin-user-country" name="country" maxlength="120" placeholder="${E(T('Todos los países'))}" value="${E(f.country||'')}"></div><button class="btn primary">${I('search')} ${E(T('Buscar'))}</button>${btn('Limpiar filtros','admin-users-reset','','ghost')}</div><div class="directory-facets">${directoryTermFilter('industries','Industria',S.boot.catalogs.industry,f)}${directoryTermFilter('interests','Interés',S.boot.catalogs.interest,f)}${directoryTermFilter('areas','Área de conocimiento',S.boot.catalogs.area,f)}<span class="private-note">${E(T('Puedes elegir varias opciones en cada filtro.'))}</span></div><div class="form-grid admin-user-access-filters">${select('role','Rol',[['','Todos los roles'],...roles.map(r=>[r.id,r.name])],f.role||'')}${select('state','Acceso',[['','Todos'],['active','Activo'],['suspended','Suspendido'],['expired','Vencido']],f.state||'')}</div></form>`;
   }
-  function adminPendingRow(p) {
-    let badges = "";
-    if (p.meta.generated) badges += " · IA";
-    if (p.meta.chatham) badges += " · Chatham House";
+  function adminPendingCard(p) {
+    const icons={event:'calendar',gallery:'gallery',resource:'book',hub:'hub',forum:'hub',topic:'hub',ally:'star'};
+    const badge = p.meta.chatham ? `<span class="moderation-content-tag">${I('shield')} Chatham House</span>` : '';
+    const generated = p.meta.generated ? `<span class="moderation-content-tag">${I('spark')} IA</span>` : '';
     let publicationNote = "";
     if (!S.boot.admin && !S.boot.executive && ["gallery", "resource"].includes(p.type)) {
-      publicationNote = "<small>Publicación administrativa</small>";
+      publicationNote = `<small>${E(T('Publicación administrativa'))}</small>`;
     }
-    const review = btn("Revisar", "item", 'data-id="' + p.id + '"', "small");
-    return `<tr role="row"><td role="cell"><strong>${E(p.title)}</strong><br><small>${E(typeLabel[p.type])}${badges}</small></td><td role="cell" data-label="${E(T('Autor'))}">${E(p.author.name)}</td><td role="cell">${status(p.status)}</td><td role="cell">${review}${publicationNote}</td></tr>`;
+    const review = btn(T(p.status==='draft'?'Abrir borrador':'Revisar publicación')+' '+I('arrow'), 'item', `data-id="${Number(p.id)}"`, 'small'+(p.status==='pending'?' primary':''));
+    const excerptSuffix=p.body?.length>180?'…':'';
+    const excerpt = p.body ? `<p class="moderation-excerpt">${E(p.body.slice(0,180))}${excerptSuffix}</p>` : '';
+    return `<article class="moderation-publication" data-moderation-item="${Number(p.id)}"><span class="moderation-kind-icon" aria-hidden="true">${I(icons[p.type]||'book')}</span><div class="moderation-publication-main"><span class="moderation-content-type">${E(contentTypeTitle(p.type))}</span><h4><button type="button" class="moderation-item-title" data-action="item" data-id="${Number(p.id)}">${E(p.title)}</button></h4>${excerpt}<div class="moderation-publication-meta"><span>${I('users')}${E(p.author.name)}</span><time datetime="${E(p.date)}">${I('clock')}${date(p.date)}</time>${badge}${generated}</div></div><div class="moderation-publication-footer">${status(p.status)}${publicationNote}${review}</div></article>`;
   }
   function adminReportCard(r) {
     const cardClass = r.reviewed ? "is-reviewed" : "";
@@ -3077,37 +3297,39 @@
     const remove = r.can_delete
       ? btn("Eliminar reporte", "admin-delete", 'data-kind="report" data-id="' + r.id + '"', "danger small")
       : "";
-    return `<div class="admin-report ${cardClass}"><div><div class="admin-report-heading"><strong>${E(title)}</strong><span class="tag ${stateClass}">${E(T(stateLabel))}</span></div>${excerpt}<p class="private-note"><b>Motivo:</b> ${E(r.reason_label || "Sin motivo registrado")}${detail}${reviewedBy}</p></div><div class="form-actions">${open}${markReviewed}${remove}</div></div>`;
+    return `<article class="admin-report ${cardClass}"><span class="moderation-kind-icon" aria-hidden="true">${I('shield')}</span><div class="moderation-report-main"><div class="admin-report-heading"><h4>${E(title)}</h4><span class="tag ${stateClass}">${E(T(stateLabel))}</span></div>${excerpt}<p class="private-note"><b>Motivo:</b> ${E(r.reason_label || "Sin motivo registrado")}${detail}${reviewedBy}</p></div><div class="form-actions">${open}${markReviewed}${remove}</div></article>`;
   }
   function adminCommentCard(c) {
     const remove = c.can_delete
       ? btn("Eliminar comentario", "delete-comment", 'data-id="' + c.id + '"', "danger small")
       : "";
-    const approve = btn("Aprobar", "comment-moderate", 'data-id="' + c.id + '" data-decision="approve"', "small");
-    const reject = btn("Mantener oculto", "comment-moderate", 'data-id="' + c.id + '" data-decision="reject"', "small");
-    return `<div class="comment"><strong>${E(c.author)}</strong><p>${E(c.body)}</p>${approve}${reject}${remove}</div>`;
+    const approve = btn("Aprobar", "comment-moderate", 'data-id="' + c.id + '" data-decision="approve"', "primary small");
+    const reject = btn("Mantener oculto", "comment-moderate", 'data-id="' + c.id + '" data-decision="reject"', "ghost small");
+    return `<article class="moderation-comment" data-moderation-comment="${Number(c.id)}"><span class="moderation-comment-avatar" aria-hidden="true">${avatar({name:c.author})}</span><div class="moderation-comment-main"><div class="moderation-comment-heading"><strong>${E(c.author)}</strong>${status('pending')}</div><p>${E(c.body)}</p><div class="form-actions">${approve}${reject}${remove}</div></div></article>`;
   }
   function adminModeration(d) {
     const views = [['publicaciones','Publicaciones',d.pending.filter(p=>p.status==='pending').length,'book']];
     if (S.boot.moderator) views.push(['comentarios','Comentarios',d.comments.length,'hub'],['reportes','Reportes recibidos',d.reports.filter(r=>!r.reviewed).length,'shield']);
     if (!views.some(([key])=>key===S.moderationView)) S.moderationView='publicaciones';
-    const navigation=views.map(([key,label,count,icon])=>`<button type="button" class="moderation-choice${S.moderationView===key?' active':''}" data-moderation-view="${key}" aria-pressed="${S.moderationView===key}">${I(icon)}<span>${E(T(label))}</span><strong>${Number(count)}</strong></button>`).join('');
-    return `<div class="admin-section-heading"><div><h2>${E(T('Revisar contenido'))}</h2><p>${E(T('Elige qué quieres revisar. Cada sección muestra las acciones disponibles para tu rol.'))}</p></div></div><nav class="moderation-choices" aria-label="${E(T('Qué quieres revisar'))}">${navigation}</nav><section class="card moderation-queue" aria-live="polite">${moderationQueue(d,S.moderationView)}</section>`;
+    const navigation=views.map(([key,label,count,icon])=>`<button type="button" class="moderation-choice${S.moderationView===key?' active':''}" data-moderation-view="${key}" aria-pressed="${S.moderationView===key}" aria-controls="moderation-queue">${I(icon)}<span>${E(T(label))}</span><strong>${Number(count)}</strong></button>`).join('');
+    return `<div class="moderation-workspace"><div class="admin-section-heading"><div><span class="eyebrow">${E(T('REVISIÓN DE LA COMUNIDAD'))}</span><h2>${E(T('Revisar contenido'))}</h2><p>${E(T('Elige qué quieres revisar. Cada sección muestra las acciones disponibles para tu rol.'))}</p></div></div><div class="moderation-inbox"><nav class="moderation-choices" aria-label="${E(T('Qué quieres revisar'))}">${navigation}</nav><section id="moderation-queue" class="moderation-queue" aria-live="polite">${moderationQueue(d,S.moderationView)}</section></div></div>`;
   }
-  function moderationTable(items) {
-    return `<div class="table-wrap"><table class="data-table moderation-publications" role="table"><thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">${E(T('Contenido'))}</th><th scope="col" role="columnheader">${E(T('Autor'))}</th><th scope="col" role="columnheader">${E(T('Estado'))}</th><th scope="col" role="columnheader">${E(T('Acción'))}</th></tr></thead><tbody role="rowgroup">${items.map(adminPendingRow).join('')}</tbody></table></div>`;
+  function moderationCards(items) {
+    return `<div class="moderation-publications">${items.map(adminPendingCard).join('')}</div>`;
+  }
+  function moderationEmpty(icon, title, description) {
+    return `<div class="moderation-empty"><span aria-hidden="true">${I(icon)}</span><h4>${E(T(title))}</h4><p>${E(T(description))}</p></div>`;
   }
   function moderationQueue(d, view) {
-    if (view==='comentarios') return `<h3>${E(T('Comentarios por aprobar'))}</h3><p class="moderation-help">${E(T('Aprobar hace visible el comentario. Mantener oculto lo conserva sin publicar.'))}</p>${d.comments.map(adminCommentCard).join('') || empty('No hay comentarios por aprobar.')}`;
+    if (view==='comentarios') return `<header class="moderation-queue-heading"><h3>${E(T('Comentarios por aprobar'))}</h3><p class="moderation-help">${E(T('Aprobar hace visible el comentario. Mantener oculto lo conserva sin publicar.'))}</p></header><div class="moderation-comment-list">${d.comments.map(adminCommentCard).join('') || moderationEmpty('hub','No hay comentarios por aprobar.','Los nuevos comentarios que necesiten aprobación aparecerán aquí.')}</div>`;
     if (view==='reportes') {
       const pending=d.reports.filter(r=>!r.reviewed),reviewed=d.reports.filter(r=>r.reviewed);
       const history=reviewed.length?`<details class="moderation-history"><summary>${E(T('Reportes ya revisados'))} <span>${reviewed.length}</span></summary>${reviewed.map(adminReportCard).join('')}</details>`:'';
-      return `<h3>${E(T('Contenido reportado por la comunidad'))}</h3><p class="moderation-help">${E(T('Abre el contenido para comprobar el motivo. Marca el reporte como revisado cuando termines; esto no elimina la publicación ni el comentario.'))}</p>${pending.map(adminReportCard).join('') || empty('No hay reportes por revisar.')}${history}`;
+      return `<header class="moderation-queue-heading"><h3>${E(T('Contenido reportado por la comunidad'))}</h3><p class="moderation-help">${E(T('Abre el contenido para comprobar el motivo. Marca el reporte como revisado cuando termines; esto no elimina la publicación ni el comentario.'))}</p></header><div class="moderation-report-list">${pending.map(adminReportCard).join('') || moderationEmpty('shield','No hay reportes por revisar.','Los reportes de la comunidad aparecerán aquí para que puedas revisarlos.')}</div>${history}`;
     }
     const pending=d.pending.filter(p=>p.status==='pending'),drafts=d.pending.filter(p=>p.status==='draft');
-    const expanded=pending.length?'':'open';
-    const saved=drafts.length?`<details class="moderation-history" ${expanded}><summary>${E(T('Borradores guardados'))} <span>${drafts.length}</span></summary><p class="moderation-help">${E(T('Están sin publicar y aún se pueden editar. No son solicitudes de aprobación.'))}</p>${moderationTable(drafts)}</details>`:'';
-    return `<h3>${E(T('Publicaciones por aprobar'))}</h3><p class="moderation-help">${E(T('Abre una publicación para revisar el texto y decidir si se publica.'))}</p>${pending.length?moderationTable(pending):empty('No hay publicaciones por aprobar.')}${saved}`;
+    const saved=drafts.length?`<details class="moderation-history"><summary>${E(T('Borradores guardados'))} <span>${drafts.length}</span></summary><p class="moderation-help">${E(T('Están sin publicar y aún se pueden editar. No son solicitudes de aprobación.'))}</p>${moderationCards(drafts)}</details>`:'';
+    return `<header class="moderation-queue-heading"><h3>${E(T('Publicaciones por aprobar'))}</h3><p class="moderation-help">${E(T('Abre una publicación para revisar el texto y decidir si se publica.'))}</p></header>${pending.length?moderationCards(pending):moderationEmpty('check','No hay publicaciones por aprobar.','Cuando haya contenido pendiente de aprobación, aparecerá aquí.')}${saved}`;
   }
   let statisticsPanel, interestImports, memberInsights, alliesView;
   function alliesUI(){
@@ -3127,8 +3349,13 @@
     input.setCustomValidity(valid?'':T(message));
   }
   function editorialStateButton(p) {
-    if (!p.can_moderate || p.meta.publish_at || !['publish','ascla_hidden'].includes(p.status)) return '';
-    return btn(T(p.status==='publish'?'Ocultar':'Volver a publicar'),'editorial-state','data-id="'+p.id+'"','small '+(p.status==='publish'?'ghost danger':'primary'));
+    const items=[];
+    if (p.can_moderate && !p.meta.publish_at && ['publish','ascla_hidden'].includes(p.status)) {
+      items.push(btn(T(p.status==='publish'?'Ocultar':'Volver a publicar'),'editorial-state','data-id="'+p.id+'"','overflow-item'));
+    }
+    if (p.can_delete) items.push(btn(T('Eliminar'),'delete-content','data-id="'+p.id+'"','overflow-item danger-text'));
+    if (!items.length) return '';
+    return `<details class="overflow-menu"><summary aria-label="${E(T('Más opciones'))}: ${E(p.title)}">${I('more')}</summary><div class="overflow-popover">${items.join('')}</div></details>`;
   }
   function editorialRegistryPager(list) {
     if (list.pages<=1) return '';
@@ -3191,7 +3418,7 @@
       return `<div class="admin-nav-group"><span>${E(T(group))}</span>${entries.map(([key,label,icon])=>btn(I(icon)+E(T(label)),'admin-tab',("data-tab=\"" + (key) + "\" aria-pressed=\"" + (tab===key) + "\""),'admin-tab'+(tab===key?' active':''))).join('')}</div>`;
     }).join('');
     const wordpress = C.wpAdminUrl ? `<a class="btn ghost admin-wordpress-link" href="${E(C.wpAdminUrl)}">${I('settings')}${E(T('Administrar WordPress'))}</a>` : '';
-    return `<div class="admin-workspace admin-workspace-v108"><header class="admin-hero"><div class="admin-hero-main"><div class="admin-hero-copy"><span class="eyebrow">${E(T("GESTIÓN DE LA COMUNIDAD"))}</span><h1>${E(T("Administración ASCLA"))}</h1><p>${E(T("Personas, contenido y atención en un mismo lugar."))}</p></div></div><div class="admin-hero-actions">${S.boot.admin?'':link('intranet',E(T('Ver intranet'))+' '+I('arrow'),'ghost admin-intranet-link')}${wordpress}</div></header><div class="admin-workspace-body"><nav class="admin-tabs" aria-label="${E(T("Secciones de administración"))}">${navigation}</nav><section id="admin-panel" class="admin-panel" aria-live="polite"></section></div></div>`;
+    return `<div class="admin-workspace admin-workspace-v108"><header class="admin-hero"><div class="admin-hero-main"><div class="admin-hero-copy"><span class="eyebrow">${E(T("GESTIÓN DE LA COMUNIDAD"))}</span><h1>${E(T(S.boot.me.role_label === "Ejecutivo ASCLA" ? "Panel Ejecutivo" : "Administración ASCLA"))}</h1><p>${E(T("Personas, contenido y atención en un mismo lugar."))}</p></div></div><div class="admin-hero-actions">${S.boot.admin?'':link('intranet',E(T('Ver intranet'))+' '+I('arrow'),'ghost admin-intranet-link')}${wordpress}</div></header><div class="admin-workspace-body"><nav class="admin-tabs" aria-label="${E(T("Secciones de administración"))}">${navigation}</nav><section id="admin-panel" class="admin-panel" aria-live="polite"></section></div></div>`;
   }
   function adminOverview(panel,d) {
     const metrics=[[d.counts.members,'Cuentas ASCLA','users','usuarios'],[d.pending.length,'Borradores y pendientes','shield','moderacion'],[d.reports.filter(r=>!r.reviewed).length,'Reportes por revisar','bell','moderacion']];
@@ -3234,14 +3461,15 @@
     });
   }
   function aiTaskLabel(kind) {
-    return {answer:'Respuesta del asistente',multimedia:'Materiales de un video',video_metadata:'Información de un video',microevents:'Propuestas de encuentros',social:'Sugerencias de redes sociales',form_interests:'Intereses de formularios',interest_import:'Intereses de formularios',resource_notifications:'Avisos de nuevos recursos',recommendations:'Recomendaciones',discovery:'Recomendaciones'}[kind] || 'Tarea de ASCLA';
+    return {answer:'Respuesta del asistente',transcript:'Subtítulos de un video',multimedia:'Materiales de un video',video_metadata:'Información de un video',microevents:'Propuestas de encuentros',social:'Sugerencias de redes sociales',form_interests:'Intereses de formularios',interest_import:'Intereses de formularios',resource_notifications:'Avisos de nuevos recursos',recommendations:'Recomendaciones',discovery:'Recomendaciones'}[kind] || 'Tarea de ASCLA';
   }
   function adminJobsTab(panel, d) {
     const rows=d.jobs.map(j=>`<tr><td><strong>${E(T(aiTaskLabel(j.kind)))}</strong><br><small>#${Number(j.id)}</small></td><td>${status(j.status)}</td><td>${E(j.error || date(j.created_at))}</td><td>${btn('Ver','job-detail','data-id="'+Number(j.id)+'"','small')}${j.status==='error'?btn('Reintentar','retry-job','data-id="'+Number(j.id)+'"','small'):''}</td></tr>`).join('');
-    panel.innerHTML=`<div class="admin-section-heading"><div><h2>${E(T('Tareas de IA'))}</h2><p>${E(T('Consulta lo que ASCLA está preparando. Si una tarea falla, puedes abrirla y volver a intentarlo.'))}</p></div></div><div class="alert">${E(T('El contenido creado con ayuda de IA debe revisarse antes de publicarlo.'))}</div><div class="admin-actions">${link('centro-conocimiento','Ver recursos','primary')}${S.boot.moderator?btn('Probar sugerencias de redes sociales','social-job'):''}${(S.boot.admin||S.boot.executive)?btn('Conectar YouTube','google-connect','data-service="youtube"'):''}${btn('Actualizar estados','admin-refresh')}</div><div class="card table-wrap"><table class="data-table"><thead><tr><th>${E(T('Tarea'))}</th><th>${E(T('Estado'))}</th><th>${E(T('Detalle'))}</th><th>${E(T('Acción'))}</th></tr></thead><tbody>${rows || '<tr><td colspan="4">'+E(T('Todavía no hay tareas de IA.'))+'</td></tr>'}</tbody></table></div>`;
+    panel.innerHTML=`<div class="admin-section-heading"><div><h2>${E(T('Tareas de IA'))}</h2><p>${E(T('Consulta lo que ASCLA está preparando. Si una tarea falla, puedes abrirla y volver a intentarlo.'))}</p></div></div><div class="alert">${E(T('El contenido creado con ayuda de IA debe revisarse antes de publicarlo.'))}</div><div class="admin-actions">${link('centro-conocimiento','Ver recursos','primary')}${S.boot.moderator?btn('Probar sugerencias de redes sociales','social-job'):''}${btn('Actualizar estados','admin-refresh')}</div><div class="card table-wrap"><table class="data-table"><thead><tr><th>${E(T('Tarea'))}</th><th>${E(T('Estado'))}</th><th>${E(T('Detalle'))}</th><th>${E(T('Acción'))}</th></tr></thead><tbody>${rows || '<tr><td colspan="4">'+E(T('Todavía no hay tareas de IA.'))+'</td></tr>'}</tbody></table></div>`;
   }
   async function adminMicroeventsTab(panel) {
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">ENCUENTROS ENTRE ASOCIADOS</span><h2>Círculos de conversación</h2><p>Grupos con intereses comunes y cupos configurables, con una agenda para conversar.</p></div></div><div class="card"><h3>Preparar los próximos encuentros</h3><p class="detail-body">Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.</p><div class="admin-actions">${(S.boot.admin||S.boot.executive)?btn(I('spark')+' Preparar propuestas del período','micro-job','','primary'):''}${link('eventos','Ver encuentros','small')}</div><div id="micro-job-result"></div></div>`;
+    const steps=[['Reunir al grupo','Se buscan intereses compartidos entre asociados elegibles.'],['Revisar la propuesta','Confirma el grupo y ajusta la fecha y la agenda.'],['Publicar el encuentro','La publicación abre el proceso de invitaciones e inscripción.']].map(([title,description])=>`<li><strong>${E(T(title))}</strong><span>${E(T(description))}</span></li>`).join('');
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T('ENCUENTROS ENTRE ASOCIADOS'))}</span><h2>${E(T('Círculos de conversación'))}</h2><p>${E(T('Grupos con intereses comunes y cupos configurables, con una agenda para conversar.'))}</p></div></div><section class="card micro-planning"><div class="micro-planning-intro"><span class="micro-planning-icon" aria-hidden="true">${I('hub')}</span><h3>${E(T('Preparar los próximos encuentros'))}</h3><p>${E(T('Se consideran el consentimiento y el historial de grupos. Revisa las propuestas y ajusta fecha y agenda antes de publicar.'))}</p><div class="admin-actions">${(S.boot.admin||S.boot.executive)?btn(I('spark')+' '+T('Preparar propuestas del período'),'micro-job','','primary'):''}${link('eventos','Ver encuentros','small')}</div></div><ol class="micro-planning-steps">${steps}</ol><div id="micro-job-result"></div></section>`;
     const [proposals,diagnostics]=await Promise.all([allContent("event",{micro:1,...(S.boot.admin?{}:{mine:1})}),api("microevents/diagnostics").catch(error=>({error:error.message}))]);
     panel.querySelector('#micro-job-result').innerHTML=microDiagnosticsHTML(diagnostics);
     panel.insertAdjacentHTML("beforeend",microHistoryMarkup(proposals));
@@ -3249,7 +3477,9 @@
   function microDiagnosticsHTML(d) {
     if (!d || d.error) return '<div class="error">'+E(T('No se pudieron comprobar las condiciones para generar microeventos.'))+'</div>';
     const messages={ready:'Hay candidatos para preparar propuestas.',insufficient_candidates:'No hay suficientes asociados elegibles para alcanzar el mínimo.',insufficient_shared_interest:'Ningún interés visible reúne el mínimo de asociados requerido.',incompatible_group:'No se encontró un grupo compatible con los bloqueos actuales.',no_group:'No se encontró un grupo que cumpla las condiciones actuales.'};
-    return '<div class="alert micro-diagnostics" role="status"><strong>'+E(T(messages[d.reason] || messages.no_group))+'</strong><p>'+E(T('Asociados elegibles'))+': '+Number(d.eligible)+' · '+E(T('Mínimo por grupo'))+': '+Number(d.minimum)+' · '+E(T('Mayor grupo con un interés común'))+': '+Number(d.max_shared_interest)+'</p><details><summary>'+E(T('Revisar condiciones'))+'</summary><p>'+E(T('Se respetan la membresía activa, el consentimiento para microeventos, el perfil completo, la privacidad de intereses y los bloqueos.'))+'</p><p>'+E(T('Excluidos por membresía'))+': '+Number(d.excluded?.inactive || 0)+' · '+E(T('Sin consentimiento'))+': '+Number(d.excluded?.no_consent || 0)+' · '+E(T('Perfil incompleto'))+': '+Number(d.excluded?.incomplete || 0)+'</p><p>'+E(T('Revisa los mínimos en Configuración → Participación y revisión y los intereses autorizados de los perfiles.'))+'</p></details></div>';
+    const metrics=[['eligible','Asociados elegibles',d.eligible,'Con membresía, consentimiento y perfil completo.'],['minimum','Mínimo por grupo',d.minimum,'Personas necesarias para preparar una propuesta.'],['shared','Mayor grupo con un interés común',d.max_shared_interest,'Asociados que comparten un interés visible.']].map(([key,title,value,description])=>`<div data-micro-stat="${key}"><strong>${Number(value)}</strong><span>${E(T(title))}</span><small>${E(T(description))}</small></div>`).join('');
+    const excluded=[['Excluidos por membresía',d.excluded?.inactive],['Sin consentimiento',d.excluded?.no_consent],['Perfil incompleto',d.excluded?.incomplete]].map(([title,value])=>`<div><span>${E(T(title))}</span><strong>${Number(value||0)}</strong></div>`).join('');
+    return `<div class="micro-diagnostics"><div class="micro-readiness" role="status"><span aria-hidden="true">${I(d.reason==='ready'?'check':'users')}</span><div><strong>${E(T(messages[d.reason]||messages.no_group))}</strong><p>${E(T(d.reason==='ready'?'Preparar propuestas no las publica. Podrás revisarlas antes de continuar.':'Revisa las condiciones o ajusta los mínimos antes de preparar propuestas.'))}</p></div></div><div class="micro-diagnostic-metrics">${metrics}</div><details><summary>${E(T('Revisar condiciones'))}</summary><p>${E(T('Se respetan la membresía activa, el consentimiento para microeventos, el perfil completo, la privacidad de intereses y los bloqueos.'))}</p><div class="micro-exclusions">${excluded}</div><p>${E(T('Revisa los mínimos en Configuración → Participación y revisión y los intereses autorizados de los perfiles.'))}</p></details></div>`;
   }
   async function handleMicroArchive(a,b,id) {
     if (a === 'micro-archive-tab') { S.microShowArchived=b.dataset.archived==='true';await admin();return; }
@@ -3258,7 +3488,7 @@
     toast(T(archived?'Microevento archivado. Su historial se conserva.':'Microevento restaurado en el panel.'));await admin();
   }
   function adminAuditActionName(action) {
-    const labels={editorial_state_changed:'Estado de galería o recurso actualizado',board_role_authorization:'Autorización de roles de la Junta',member_roles_updated:'Roles de cuenta actualizados',account_permissions_changed:'Permisos de cuenta actualizados',technical_error:'Error técnico',settings_updated:'Configuración actualizada',content_saved:'Contenido guardado',content_trashed:'Contenido eliminado',comment_trashed:'Comentario eliminado',content_reported:'Contenido reportado',comment_reported:'Comentario reportado',report_reviewed:'Reporte revisado',moderation:'Decisión de moderación',comment_moderation:'Comentario moderado',member_created:'Usuario creado',member_updated:'Usuario actualizado',professional_profile_updated:'Datos profesionales actualizados',member_deleted:'Usuario eliminado',member_suspended:'Acceso suspendido',member_reactivated:'Acceso reactivado',contact_status:'Solicitud actualizada',event_registration:'Inscripción a evento',event_invited:'Invitaciones a evento',event_cancelled:'Evento cancelado',connection_requested:'Solicitud de conexión',connection_accepted:'Conexión aceptada',connection_rejected:'Conexión rechazada',connection_cancelled:'Solicitud de conexión cancelada',connection_removed:'Conexión eliminada',conversation_requested:'Solicitud de conversación',conversation_request_accepted:'Conversación autorizada',conversation_request_rejected:'Solicitud de conversación rechazada',conversation_request_cancelled:'Solicitud de conversación cancelada',conversation_started:'Conversación iniciada',group_conversation_created:'Grupo de mensajería creado',group_conversation_updated:'Grupo de mensajería actualizado',group_conversation_deleted:'Grupo de mensajería eliminado',message_deleted:'Mensaje eliminado',password_changed:'Contraseña cambiada',password_reset_requested:'Recuperación solicitada',media_deleted:'Archivo eliminado',oauth_connected:'Servicio Google conectado',oauth_disconnected:'Servicio Google desconectado',calendar_create:'Evento añadido a Google Calendar',calendar_delete:'Evento retirado de Google Calendar',calendar_save:'Evento guardado en Google Calendar',calendar_cancel:'Evento retirado o cancelado en Google Calendar',calendar_organize:'Evento organizador creado en Google Calendar',calendar_update:'Evento organizador actualizado en Google Calendar',turnstile_passed:'Verificación de seguridad superada',turnstile_failed:'Verificación de seguridad fallida',turnstile_error:'Error de verificación de seguridad',request_failed:'Solicitud con error',job_completed:'Trabajo en segundo plano completado',job_failed:'Trabajo en segundo plano con error',ai_generated:'Contenido asistido por IA creado'};
+    const labels={editorial_state_changed:'Estado de galería o recurso actualizado',board_role_authorization:'Autorización de roles de la Junta',member_roles_updated:'Roles de cuenta actualizados',account_permissions_changed:'Permisos de cuenta actualizados',technical_error:'Error técnico',settings_updated:'Configuración actualizada',content_saved:'Contenido guardado',content_trashed:'Contenido eliminado',comment_trashed:'Comentario eliminado',content_reported:'Contenido reportado',comment_reported:'Comentario reportado',report_reviewed:'Reporte revisado',moderation:'Decisión de moderación',comment_moderation:'Comentario moderado',member_created:'Usuario creado',member_updated:'Usuario actualizado',professional_profile_updated:'Datos profesionales actualizados',member_deleted:'Usuario eliminado',member_suspended:'Acceso suspendido',member_reactivated:'Acceso reactivado',contact_status:'Solicitud actualizada',event_registration:'Inscripción a evento',event_invited:'Invitaciones a evento',event_cancelled:'Evento cancelado',event_reactivated:'Evento reactivado',connection_requested:'Solicitud de conexión',connection_accepted:'Conexión aceptada',connection_rejected:'Conexión rechazada',connection_cancelled:'Solicitud de conexión cancelada',connection_removed:'Conexión eliminada',conversation_requested:'Solicitud de conversación',conversation_request_accepted:'Conversación autorizada',conversation_request_rejected:'Solicitud de conversación rechazada',conversation_request_cancelled:'Solicitud de conversación cancelada',conversation_started:'Conversación iniciada',group_conversation_created:'Grupo de mensajería creado',group_conversation_updated:'Grupo de mensajería actualizado',group_conversation_deleted:'Grupo de mensajería eliminado',message_deleted:'Mensaje eliminado',password_changed:'Contraseña cambiada',password_reset_requested:'Recuperación solicitada',media_deleted:'Archivo eliminado',oauth_connected:'Servicio Google conectado',oauth_disconnected:'Servicio Google desconectado',calendar_create:'Evento añadido a Google Calendar',calendar_delete:'Evento retirado de Google Calendar',calendar_save:'Evento guardado en Google Calendar',calendar_cancel:'Evento retirado o cancelado en Google Calendar',calendar_organize:'Evento organizador creado en Google Calendar',calendar_update:'Evento organizador actualizado en Google Calendar',turnstile_passed:'Verificación de seguridad superada',turnstile_failed:'Verificación de seguridad fallida',turnstile_error:'Error de verificación de seguridad',request_failed:'Solicitud con error',job_completed:'Trabajo en segundo plano completado',job_failed:'Trabajo en segundo plano con error',ai_generated:'Contenido asistido por IA creado'};
     return labels[action]||String(action||'Actividad del sistema').replaceAll('_',' ');
   }
   function adminLogsTab(panel, d) {
@@ -3357,17 +3587,17 @@
     }
   }
   function serverSecretsStatus(settings) {
-    const descriptions = {constant: 'Constante del servidor', environment: 'Variable de entorno', external_required: 'Pendiente de configurar en el servidor', encrypted_option: 'Almacenamiento cifrado anterior', absent: 'Sin configurar'};
+    const descriptions = {constant: 'Constante del servidor', environment: 'Variable de entorno', external_required: 'Pendiente de configurar en el servidor', encrypted_option: 'Almacenamiento cifrado en WordPress', absent: 'Sin configurar'};
     const rows = Object.values(settings.secret_sources || {}).map(source => `<tr><td><code>${E(source.variable)}</code></td><td>${E(T(descriptions[source.source] || 'Sin configurar'))}</td></tr>`).join('');
-    return settingsSection('shield', 'Custodia de credenciales', 'Origen de las credenciales de servicio, sin mostrar sus valores.', `<p>${E(T(settings.external_secrets_only ? 'Modo externo: las claves de servicio se administran en el servidor.' : 'Compatibilidad activa con claves cifradas anteriores. Configura las variables en el servidor antes de activar el modo externo.'))}</p><div class="table-wrap"><table class="data-table"><thead><tr><th>${E(T('Variable'))}</th><th>${E(T('Origen'))}</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+    return settingsSection('shield', 'Custodia de credenciales', 'Origen de las credenciales de servicio, sin mostrar sus valores.', `<p>${E(T(settings.external_secrets_only ? 'Las credenciales siguen la política del servidor. Consulta el origen de cada clave en la tabla.' : 'Compatibilidad activa con claves cifradas anteriores. Configura las variables en el servidor antes de activar el modo externo.'))}</p><div class="table-wrap"><table class="data-table"><thead><tr><th>${E(T('Variable'))}</th><th>${E(T('Origen'))}</th></tr></thead><tbody>${rows}</tbody></table></div>`);
   }
   async function settings(panel) {
     const s = await api("settings");
     const participation=settingsSection('users','Participación y revisión','Define cómo se publica, modera y organiza la participación dentro de la comunidad.',`${check("demo", "Modo demo (datos e integraciones identificados)", s.demo)}${check("moderation_required", "Revisar publicaciones del Hub antes de publicarlas", s.moderation_required)}${check("moderate_comments", "Revisar comentarios del Hub y otras secciones (excepto Foros)", s.moderate_comments)}${check("chatham_default", "Aplicar Chatham House por defecto", s.chatham_default)}${check("micro_enabled", "Preparar microeventos automáticamente", s.micro_enabled)}<p>${E(T("Todas las propuestas requieren aprobación administrativa."))}</p><div class="form-grid">${field("micro_interval_days","Generar propuestas cada (días)",s.micro_interval_days || 7,"number",'min="7" max="90" required')}${field("micro_min","Mínimo de participantes",s.micro_min,"number",'min="2" max="50" required')}${field("micro_capacity","Cupos por microevento",s.micro_capacity,"number",'min="2" max="100" required')}${field("micro_limit","Máximo de propuestas por período",s.micro_limit,"number",'min="1" max="4" required')}${field("micro_priority_hours","Horas de inscripción prioritaria",s.micro_priority_hours,"number",'min="0" max="168" required')}</div>`,true);
     const security=settingsSection('shield','Seguridad','Protección adaptativa del acceso con Cloudflare y validación real en el servidor.',`${credentialSettings(s)}${check("turnstile_enabled", "Activar Cloudflare Turnstile", s.turnstile_enabled)}<p class="private-note">El widget debe crearse en Cloudflare con modo <strong>Managed</strong>. En el login normal no aparece ningún desafío al inicio. Al alcanzar el umbral configurado, ASCLA muestra el widget oficial de Cloudflare y valida el token nuevamente en el servidor.</p><div class="form-grid">${field("turnstile_site_key", "Turnstile Site Key", s.turnstile_site_key || "", "text", 'autocomplete="off" placeholder="0x4AAAA..."')}${field("turnstile_secret", s.has_turnstile_secret ? "Turnstile Secret Key (guardada; vacío para conservar)" : "Turnstile Secret Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_turnstile_secret", "Eliminar Turnstile Secret Key guardada", false)}<div class="turnstile-protection-options"><strong>Formularios protegidos</strong>${check("turnstile_login", "Inicio de sesión · desafío adaptativo según el umbral configurado", s.turnstile_login)}${check("turnstile_recovery", "Recuperación de contraseña · exigir después de 2 solicitudes seguidas", s.turnstile_recovery)}${check("turnstile_public", "Otros formularios públicos ASCLA · activar solo ante señales sospechosas o demasiados envíos", s.turnstile_public)}</div><p class="private-note">Al alcanzar el máximo de fallos del mismo usuario/correo se aplica la espera configurada. Una ráfaga mayor de intentos desde la misma IP también puede bloquear el acceso temporalmente. Cuando Turnstile aparece, la marca “Success” confirma solo la comprobación anti-bot; ASCLA todavía valida usuario y contraseña.</p>`,true);
     const matching=settingsSection('spark','Motor de afinidad','Define el umbral y la cantidad máxima del lote semanal de recomendaciones.',`<div class="form-grid matching-threshold-setting">${field("matching_min_affinity", "Afinidad mínima para recomendar (%)", s.matching_min_affinity ?? 30, "number", 'min="0" max="100" step="1"')}${field("matching_max_suggestions", "Perfiles por lote semanal", s.matching_max_suggestions ?? 5, "number", 'min="1" max="5" step="1"')}</div><p class="private-note">${E(T("Solo se muestran perfiles elegibles que alcancen el umbral. El lote se recalcula cada siete días y nunca supera cinco personas."))}</p>`);
-    const ai=settingsSection('spark','Inteligencia artificial','Elige un único proveedor activo. ASCLA utilizará solo ese proveedor para redactar respuestas y sugerencias.',`<div class="ai-provider-config">${select("ai_provider","Proveedor activo",[["mock","DEMO MODE · sin API"],["gemini","Google Gemini · API real"],["openai","OpenAI / ChatGPT · API real"],["deepseek","DeepSeek · API real"]],s.ai_provider)}<div class="ai-provider-panel" data-ai-provider-panel="mock"><div class="alert">Modo de demostración: ASCLA usa respuestas simuladas y no envía información a un proveedor externo.</div></div><div class="ai-provider-panel" data-ai-provider-panel="gemini"><div class="form-grid">${field("ai_model", "ID del modelo Gemini", s.ai_model, "text", 'placeholder="gemini-2.5-flash" autocomplete="off"')}${field("ai_key", s.has_ai_key ? "Gemini API Key (guardada; vacío para conservar)" : "Gemini API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_ai_key", "Eliminar Gemini API Key guardada", false)}</div><div class="ai-provider-panel" data-ai-provider-panel="openai"><div class="form-grid">${field("openai_model", "ID del modelo OpenAI", s.openai_model || "gpt-5.6-luna", "text", 'placeholder="gpt-5.6-luna" autocomplete="off"')}${field("openai_key", s.has_openai_key ? "OpenAI API Key (guardada; vacío para conservar)" : "OpenAI API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_openai_key", "Eliminar OpenAI API Key guardada", false)}</div><div class="ai-provider-panel" data-ai-provider-panel="deepseek"><div class="form-grid">${field("deepseek_model", "ID del modelo DeepSeek", s.deepseek_model || "deepseek-flash", "text", 'placeholder="deepseek-flash" autocomplete="off"')}${field("deepseek_key", s.has_deepseek_key ? "DeepSeek API Key (guardada; vacío para conservar)" : "DeepSeek API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_deepseek_key", "Eliminar DeepSeek API Key guardada", false)}</div><div class="ai-secondary-setting">${select("youtube_mode","Transcripciones YouTube",[["mock","Transcripción manual"],["real","YouTube OAuth real · subtítulos autorizados"]],s.youtube_mode)}<p class="private-note">YouTube permite descargar subtítulos por API solo cuando la cuenta conectada tiene permisos suficientes sobre el video. Para otros videos, pega una transcripción autorizada manualmente.</p></div><p class="private-note">Las claves permanecen protegidas en el servidor. Guarda la configuración antes de probar la conexión. Los datos internos autorizados de ASCLA se preparan antes de consultar al proveedor activo.</p><div class="settings-actions-row" data-ai-test-actions>${btn("Probar conexión", "ai-test", "", "small")}<p id="ai-test-result" class="private-note" role="status" aria-live="polite"></p></div></div>`,true);
-    const google=settingsSection('calendar','Google OAuth','Credenciales para que cada asociado conecte servicios autorizados de Google desde su cuenta.',`<div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert settings-code-alert"><span>URI de redirección</span><code>${E(s.google_redirect)}</code></div><p class="private-note">Cada asociado conecta su calendario desde Perfil. YouTube se conecta desde IA y trabajos.</p>`);
+    const ai=settingsSection('spark','Inteligencia artificial','Elige un único proveedor activo. ASCLA utilizará solo ese proveedor para redactar respuestas y sugerencias.',`<div class="ai-provider-config">${select("ai_provider","Proveedor activo",[["mock","DEMO MODE · sin API"],["gemini","Google Gemini · API real"],["openai","OpenAI / ChatGPT · API real"],["deepseek","DeepSeek · API real"]],s.ai_provider)}<div class="ai-provider-panel" data-ai-provider-panel="mock"><div class="alert">Modo de demostración: ASCLA usa respuestas simuladas y no envía información a un proveedor externo.</div></div><div class="ai-provider-panel" data-ai-provider-panel="gemini"><div class="form-grid">${field("ai_model", "ID del modelo Gemini", s.ai_model, "text", 'placeholder="gemini-2.5-flash" autocomplete="off"')}${field("ai_key", s.has_ai_key ? "Gemini API Key (guardada; vacío para conservar)" : "Gemini API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_ai_key", "Eliminar Gemini API Key guardada", false)}</div><div class="ai-provider-panel" data-ai-provider-panel="openai"><div class="form-grid">${field("openai_model", "ID del modelo OpenAI", s.openai_model || "gpt-5.6-luna", "text", 'placeholder="gpt-5.6-luna" autocomplete="off"')}${field("openai_key", s.has_openai_key ? "OpenAI API Key (guardada; vacío para conservar)" : "OpenAI API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_openai_key", "Eliminar OpenAI API Key guardada", false)}</div><div class="ai-provider-panel" data-ai-provider-panel="deepseek"><div class="form-grid">${field("deepseek_model", "ID del modelo DeepSeek", s.deepseek_model || "deepseek-flash", "text", 'placeholder="deepseek-flash" autocomplete="off"')}${field("deepseek_key", s.has_deepseek_key ? "DeepSeek API Key (guardada; vacío para conservar)" : "DeepSeek API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_deepseek_key", "Eliminar DeepSeek API Key guardada", false)}</div><div class="ai-secondary-setting">${select("youtube_mode","Transcripciones YouTube",[["mock","Transcripción manual"],["supadata","Supadata · videos públicos sin Google OAuth"]],s.youtube_mode)}${field("supadata_key",s.has_supadata_key ? "Supadata API Key (guardada; vacío para conservar)" : "Supadata API Key","","password",'autocomplete="new-password"')}${check("clear_supadata_key","Eliminar Supadata API Key guardada",false)}${field("supadata_language","Idioma preferido de los subtítulos",s.supadata_language || "es","text",'maxlength="12" pattern="[a-z]{2,3}(-[A-Za-z0-9]{2,8})?" required')}${check("supadata_generate","Generar la transcripción si no existen subtítulos (consume más créditos)",s.supadata_generate)}<p class="private-note">Primero se buscan subtítulos existentes. La generación opcional usa el modo auto de Supadata. Las transcripciones completas se guardan con caché de 7 días; los trabajos largos continúan en segundo plano. Solo se envía la URL pública del video, sin comentarios ni datos de asociados.</p><p class="private-note">La clave se guarda cifrada en WordPress y nunca se devuelve al navegador. También puedes definir ASCLA_SUPADATA_KEY en el servidor. Si el servidor exige claves externas, ese ajuste tiene prioridad.</p></div><p class="private-note">Las claves permanecen protegidas en el servidor. Guarda la configuración antes de probar la conexión. Los datos internos autorizados de ASCLA se preparan antes de consultar al proveedor activo.</p><div class="settings-actions-row" data-ai-test-actions>${btn("Probar conexión", "ai-test", "", "small")}<p id="ai-test-result" class="private-note" role="status" aria-live="polite"></p></div></div>`,true);
+    const google=settingsSection('calendar','Google OAuth','Credenciales para que cada asociado conecte servicios autorizados de Google desde su cuenta.',`<div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert settings-code-alert"><span>URI de redirección</span><code>${E(s.google_redirect)}</code></div><p class="private-note">Cada asociado conecta su calendario desde Perfil. Los subtítulos públicos se consultan con Supadata sin Google OAuth.</p>`);
     const social=settingsSection('contact','Social Listening','Estado de conectores sociales y restricciones de integración externa.',`<div class="alert">LinkedIn y X permanecen en DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; ASCLA no realiza scraping ni envía respuestas externas.</div>`);
     const legal=settingsSection('book','Identidad y propiedad intelectual','Texto institucional mostrado en las áreas correspondientes de la intranet.',`${field("copyright", "Propiedad intelectual", s.copyright)}`);
     panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PREFERENCIAS Y SERVICIOS</span><h2>Configuración</h2><p>Gestiona las reglas de comunidad, recomendaciones, seguridad e integraciones. Cada bloque agrupa opciones relacionadas para evitar configuraciones ambiguas.</p></div><span class="admin-config-status">${I('shield')} Cambios protegidos</span></div><form class="admin-settings" data-form="settings" data-guard-unsaved><div class="settings-grid">${participation}${settingsSection("mail","Categorías de Contacto","Opciones vigentes del formulario de solicitudes.",field("support_categories","Una categoría por línea",(s.support_categories || []).join("\n"),"textarea",'required rows="6"'))}${settingsSection("users","Perfiles y directorio","Frecuencia de revisión y tamaño de los resultados.", '<div class="form-grid">'+field("profile_review_days","Revisar el perfil cada (días)",s.profile_review_days,"number",'min="1" max="730" required')+field("profile_snooze_days","Posponer avisos durante (días)",s.profile_snooze_days,"number",'min="1" max="30" required')+field("directory_page_size","Perfiles por página",s.directory_page_size,"number",'min="12" max="12" readonly')+"</div>"+profileCompletionSettings(s))}${matching}${social}${serverSecretsStatus(s)}${security}${ai}${google}${legal}${mailSettings(s)}</div><div class="settings-savebar"><div><strong>Configuración de ASCLA</strong><span>Los cambios se aplican al guardar.</span></div><button class="btn primary">Guardar configuración</button></div></form><form class="card section-gap demo-settings-card" data-form="demo"><div class="admin-feature-icon">${I('spark')}</div><div><h2>Preparar datos de demostración</h2><p class="private-note">Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes.</p>${field("password", "Contraseña para nuevas cuentas demo", "", "password", 'required minlength="12" autocomplete="new-password"')}</div><button class="btn">Crear / completar demo</button></form>`;
@@ -3440,7 +3670,7 @@
   function prepareView(page) {
     discardPendingWithin(content());
     S.controller.abort(); pendingReads.clear(); S.controller = new AbortController(); S.viewVersion++;
-    stopChat(); closeModal(); document.querySelector('.feedback-toast')?.remove();
+    stopChat(); closeAllModals(); document.querySelector('.feedback-toast')?.remove();
     S.page = page; S.filter = {}; S.item = null; S.conversation = 0; S.messagesLoaded = false;
     const q = new URLSearchParams(location.search); if (q.has('q')) S.filter.q = q.get('q');
     accessibility?.setMenu(false);
@@ -3465,7 +3695,7 @@
   // Guard every same-tab link while Perfil or Configuración contains unsaved changes.
   // Internal SPA links, wp-admin links, logout and other page changes all use the same ASCLA dialog.
   document.addEventListener("click", async (event) => {
-    if (!hasUnsavedChanges()) return;
+    if (!hasUnsavedChanges() && !dirtyComments().length && !modalHistory.some(entry=>dirtyComments(entry.node).length)) return;
     const anchor = event.target.closest?.("a[href]");
     if (!anchor || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     if (anchor.target === "_blank" || anchor.hasAttribute("download")) return;
@@ -3490,6 +3720,33 @@
   });
 
   root.addEventListener("keydown", event => {
+    if(event.target.matches?.('[data-event-search]')&&event.key==='Enter'){
+      event.preventDefault();const picker=event.target.closest('.related-event-picker');
+      clearTimeout(eventPickerTimers.get(picker));void loadRelatedEvents(picker,1,true);return;
+    }
+    if (galleryKeyboard(event)||connectionTabKeyboard(event)) return;
+    const input = event.target.closest?.('.assistant-compose textarea[name="question"],form[data-form="message"] textarea[name="body"]');
+    if (!input || event.key !== "Enter" || event.shiftKey || event.isComposing) return;
+    event.preventDefault();
+    if (event.repeat || input.form?.dataset.sending === 'true' || input.form?.querySelector('button[type="submit"],button:not([type])')?.disabled) return;
+    input.form?.requestSubmit();
+  });
+  function galleryKeyboard(event) {
+    const thumbnail=event.target.closest?.('.gallery-thumbnail');
+    if (thumbnail && ['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) {
+      event.preventDefault();
+      const viewer = thumbnail.closest('.gallery-viewer');
+      const count = viewer.querySelectorAll('.gallery-thumbnail').length;
+      let next=Math.max(0,Math.min(count-1,Number(thumbnail.dataset.index)+(event.key==='ArrowRight'?1:-1)));
+      if (event.key==='Home') next=0;
+      if (event.key==='End') next=count-1;
+      UI.selectGallery(thumbnail,next);
+      viewer.querySelectorAll('.gallery-thumbnail')[next].focus();
+      return true;
+    }
+    return false;
+  }
+  function connectionTabKeyboard(event) {
     const connectionTab = event.target.closest?.('[data-action="connection-tab"]');
     if (connectionTab && ['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) {
       event.preventDefault();
@@ -3498,17 +3755,15 @@
       let next=(index+direction+CONNECTION_TABS.length)%CONNECTION_TABS.length;
       if(event.key==='Home')next=0;
       if(event.key==='End')next=CONNECTION_TABS.length-1;
-      selectConnectionTab(CONNECTION_TABS[next][0],true);return;
+      selectConnectionTab(CONNECTION_TABS[next][0],true);return true;
     }
-    const input = event.target.closest?.('.assistant-compose textarea[name="question"]');
-    if (!input || event.key !== "Enter" || event.shiftKey || event.isComposing) return;
-    event.preventDefault();
-    input.form?.requestSubmit();
-  });
+    return false;
+  }
+
 
     async function handleClickActions01(a, _b, _id, _event) {
     if (a === "close") {
-      requestModalClose();
+      await requestModalClose();
     }
     else if (a === "modal-unsaved-stay") {
       closeModalDecision();
@@ -3516,7 +3771,9 @@
   }
   async function handleClickActions02(a, b, _id, _event) {
     if (a === "modal-unsaved-discard") {
-      closeModalDecision(); S.modalUnsavedForm = null; closeModal();
+      closeModalDecision(); S.modalUnsavedForm = null;
+      if (S.modalUnsavedCloseAll) closeAllModals();
+      else closeModal(true);
     }
     else if (a === "modal-unsaved-save") {
       const guarded = S.modalUnsavedForm;
@@ -3610,7 +3867,7 @@
   }
   async function handleClickActions10(a, b, id, _event) {
     if (a === "delete-content") {
-      const p = await api('items/' + id); confirmDeletion('content',id,{title:p.title,forum:p.type==='forum'});
+      const p = await api('items/' + id); confirmDeletion('content',id,{title:p.title,forum:p.type==='forum',gallery:p.type==='gallery'});
     }
     else if (a === "delete-comment") {
       confirmDeletion('comment',id,{post:Number(b.dataset.post)||0});
@@ -3621,12 +3878,16 @@
       confirmDeletion('message',id,{conversation:Number(b.dataset.conversation)||S.conversation});
     }
     else if (a === "comment-reply") {
-      openCommentReply(b);
+      await openCommentReply(b);
     }
   }
   async function handleClickActions12(a, b, id, _event) {
-    if (a === "comment-reply-cancel") {
-      b.closest('.comment-reply-form')?.remove();
+    if (['comment-expand','comment-collapse','comment-more'].includes(a)) {
+      await changeCommentThread(a, b);
+    }
+    else if (a === "comment-reply-cancel") {
+      const form=b.closest('.comment-reply-form');
+      if (!form?.elements.body?.value.trim() || await confirmCommentExit([form])) form?.remove();
     }
     else if (a === "report-comment") {
       reportDialog(id, "comment");
@@ -3644,11 +3905,12 @@
     }
   }
   async function cancelDeletionAction(b, id) {
+    if (modalHistory.length) { closeModal(true); return; }
     if (b.dataset.kind === 'message') closeModal();
     else if (b.dataset.library === 'true') { closeModal(); await files(S.files.page, S.files.q, S.files.scope, S.files.owner || 0); }
     else if (Number(b.dataset.post)) await item(Number(b.dataset.post));
     else if (b.dataset.kind === 'content') await item(id);
-    else closeModal();
+    else closeModal(true);
   }
   function deletionEndpoint(kind, id, conversation) {
     if (kind === 'content') return 'items/' + id;
@@ -3677,7 +3939,8 @@
     const library = b.dataset.library === 'true';
     const conversation = Number(b.dataset.conversation) || 0;
     await api(deletionEndpoint(kind, id, conversation), {}, 'DELETE');
-    closeModal();
+    if (kind === 'content') closeAllModals();
+    else closeModal(true);
     toast(T('Eliminado correctamente.'));
     await refreshAfterDeletion(kind, id, post, library);
   }
@@ -4125,14 +4388,9 @@
     modal(T(title), `<p>${E(T(label))}</p><form data-form="review-decision" data-kind="${kind}" data-id="${id}" data-decision="${decision}">${field('reason', 'Motivo de la decisión', '', 'textarea', 'required maxlength="1000"')}<div class="form-actions">${btn('Cancelar', 'close')}<button class="btn primary">${E(T('Guardar decisión'))}</button></div></form>`);
   }
   async function handleClickActions46(a, _b, id, _event) {
-    if (a === "generate") {
-      try { await ensureYouTubeDuration(id); } catch { /* Server-side metadata remains the primary path. */ }
-      const j = await api("jobs", { kind: "multimedia", resource_id: id });
-      modal("Procesar conferencia", '<div id="job-result"></div>');
-      watchJob(j.id, document.getElementById("job-result"), (r) => {
-      document.getElementById("job-result").innerHTML =
-      `<div class="alert">${E(r.message)} · ${E(r.mode)}</div>${btn("Abrir publicación actualizada", "item", ("data-id=\"" + (r.resource_id) + "\""), "primary")}`;
-      });
+    if (a === "resource-regenerate") {
+      await api('resources/'+id+'/regenerate',{});
+      await item(id);
     }
     else if (a === "event-invite") {
       S.invite = null;
@@ -4204,10 +4462,49 @@
     else if (a === "delivery-list") { await deliveryList(); }
     else if (a === "delivery-retry") { await api(`admin/deliveries/${id}/retry`,{}); await deliveryList(); }
   }
-  async function handleClickActions52(a, _b, _id, _event) {
-    if (a === "infographic") {
-      infographic();
-    }
+  async function handleExperienceAction(a,b,id) {
+      if (await reactivationAction(a,b,id)) return true;
+      if(a==='related-event-page'){await loadRelatedEvents(b.closest('.related-event-picker'),Number(b.dataset.page)||1,true);return true;}
+      if(a==='related-event-select'){
+        const picker=b.closest('.related-event-picker'),input=picker.closest('.related-event-field').querySelector('[name="event_id"]');
+        input.value=String(id);input.dispatchEvent(new Event('input',{bubbles:true}));
+        picker.querySelector('[data-related-event-label]').textContent=b.dataset.label;
+        picker.querySelectorAll('[data-action="related-event-select"]').forEach(option=>option.setAttribute('aria-pressed',String(Number(option.dataset.id)===id)));
+        picker.open=false;picker.querySelector('summary').focus();return true;
+      }
+      if (a === 'modal-back') { await requestModalClose(false);return true; }
+      if (a === 'modal-history-discard') { closeModalDecision();closeAllModals();return true; }
+      if (a === 'comment-exit-stay' || a === 'comment-exit-discard') {
+        const resolve=commentExitResolver;commentExitResolver=null;closeModalDecision();resolve?.(a==='comment-exit-discard');return true;
+      }
+      if (a === 'calendar-retry') { await api(`events/${id}/calendar-sync`,{});await item(id);return true; }
+      if (a === 'notifications-delete-all-request') {
+        const snapshot=await api('notifications/summary');
+        const confirm=btn(T('Eliminar todas'),'notifications-delete-all-confirm',`data-through="${Number(snapshot.latest_id)}"`,'danger');
+        modal(T('Eliminar todas las notificaciones'),`<p>${E(T('Se eliminarán todas tus notificaciones actuales, incluidas las que están en otras páginas. Las nuevas notificaciones seguirán llegando.'))}</p><div class="form-actions">${btn(T('Conservar notificaciones'),'close')}${confirm}</div>`);return true;
+      }
+      if (a === 'notifications-delete-all-confirm') {
+        await api('notifications',{through:Number(b.dataset.through)},'DELETE');closeModal();S.noticePage=1;
+        await notifications();await refreshNotifications();toast('Notificaciones eliminadas.');return true;
+      }
+    return false;
+  }
+  async function reactivationAction(a,b,id) {
+      if (a === 'event-reactivate-request') {
+        const explanation=b.dataset.draft==='true'
+          ?'La propuesta volverá a borrador para su revisión. Podrás editarla y aprobarla antes de publicarla.'
+          :'Se conservarán las inscripciones y la lista de espera. Se avisará a las personas relacionadas y se volverán a programar los recordatorios y la sincronización del calendario.';
+        const confirm=btn('Reactivar evento','event-reactivate-confirm',`data-id="${id}"`,'primary');
+        modal(T('Reactivar evento'),`<p class="detail-body">${E(b.dataset.title||'')}</p><p>${E(T(explanation))}</p><p class="private-note">${E(T('Revisa que la fecha y los datos del encuentro sigan vigentes. Si cambió el horario o la modalidad, se solicitará confirmar nuevamente la asistencia.'))}</p><div class="form-actions">${btn('Volver','modal-back')}${confirm}</div>`);return true;
+      }
+      if (a === 'event-reactivate-confirm') {
+        const updated=await api(`events/${id}/reactivate`,{});
+        closeModal(true);
+        toast(updated.status==='draft'?'Propuesta reactivada. Revisa el borrador antes de publicarla.':'Evento reactivado. Las personas relacionadas fueron notificadas.');
+        if(S.page==='eventos')await listing();else if(S.page==='admin')await admin();
+        await item(id);return true;
+      }
+    return false;
   }
   const HANDLECLICKACTIONS_DISPATCH = [
     { test: a => ['micro-archive','micro-archive-tab'].includes(a), run: handleMicroArchive },
@@ -4223,7 +4520,7 @@
     { test: (a) => (a === "delete-content") || (a === "delete-comment"), run: handleClickActions10 },
     { test: (a) => a === 'chat-hide', run: async (a,b) => { await api(`conversations/${Number(b.dataset.id)}/hide`, {}); stopChat(); S.conversation = 0; history.replaceState(null, '', location.pathname); await messages(); } },
     { test: (a) => (a === "delete-message") || (a === "comment-reply"), run: handleClickActions11 },
-    { test: (a) => (a === "comment-reply-cancel") || (a === "report-comment"), run: handleClickActions12 },
+    { test: (a) => ['comment-reply-cancel','report-comment','comment-expand','comment-collapse','comment-more'].includes(a), run: handleClickActions12 },
     { test: (a) => (a === "comment-like") || (a === "content-reaction") || (a === "delete-media"), run: handleClickActions13 },
     { test: (a) => (a === "delete-cancel") || (a === "delete-confirm"), run: handleClickActions14 },
     { test: (a) => (a === "editor") || (a === "notifications"), run: handleClickActions15 },
@@ -4257,25 +4554,37 @@
     { test: (a) => (a === "user-delete-confirm") || (a === "admin-tab") || (a === "admin-users-reset"), run: handleClickActions43 },
     { test: (a) => (a === "admin-refresh") || (a === "moderate"), run: handleClickActions44 },
     { test: (a) => (a === "comment-moderate") || (a === "contact-status"), run: handleClickActions45 },
-    { test: (a) => (a === "generate") || (a === "event-invite"), run: handleClickActions46 },
+    { test: (a) => (a === "resource-regenerate") || (a === "event-invite"), run: handleClickActions46 },
     { test: (a) => (a === "invite-page"), run: handleClickActions47 },
     { test: (a) => (a === "micro-job") || (a === "social-job"), run: handleClickActions48 },
     { test: (a) => (a === "job-detail") || (a === "retry-job"), run: handleClickActions49 },
     { test: (a) => (a === "google-connect") || (a === "google-disconnect"), run: handleClickActions50 },
     { test: (a) => ["google-event","mail-test","delivery-list","delivery-retry"].includes(a), run: handleClickActions51 },
-    { test: (a) => (a === "infographic"), run: handleClickActions52 },
   ];
+  function galleryClick(event,button) {
+    if (!['gallery-select','gallery-step'].includes(button.dataset.action)) return false;
+    event.preventDefault();
+    if (button.disabled) return true;
+    const current=Number(button.closest('.gallery-viewer').dataset.galleryIndex);
+    UI.selectGallery(button,button.dataset.action==='gallery-select'?Number(button.dataset.index):current+Number(button.dataset.direction));
+    return true;
+  }
+  function modifiedNotificationClick(event,button) {
+    return button.dataset.action==='notification-open' && (event.ctrlKey||event.metaKey||event.shiftKey||event.altKey);
+  }
 root.addEventListener("click", async (event) => {
     const b = event.target.closest("[data-action]");
     if (!b) return;
+    if (galleryClick(event,b)) return;
     if (b.dataset.action === "board-role-approval") { event.preventDefault(); boardApprovalEditor(Number(b.dataset.id)); return; }
-    if (b.dataset.action === "notification-open" && (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)) return;
+    if (modifiedNotificationClick(event,b)) return;
     event.preventDefault();
     const a = b.dataset.action,
       id = Number(b.dataset.id || 0);
     S.actionFocus = b;
     b.disabled = true;
     try {
+      if (await handleExperienceAction(a,b,id)) return;
       if (a==='editorial-state' || a==='editorial-history') { await editorialAction(a,id);return; }
       if (a==='editorial-page') { S.editorialFilters={...S.editorialFilters,page:Number(b.dataset.page)};await adminEditorialRegistry(document.getElementById('admin-panel'));return; }
       const actionHandler = HANDLECLICKACTIONS_DISPATCH.find((entry) => entry.test(a));
@@ -4329,7 +4638,7 @@ root.addEventListener("click", async (event) => {
   }
   async function submitEventInvites(form) {
     const result = await api("events/" + form.dataset.id + "/invite", { users: [...S.invite.selected] });
-    closeModal();
+    closeModal(true);
     S.invite = null;
     toast(`${result.sent} invitaciones enviadas; ${result.skipped} asociados ya tenían una inscripción o invitación.${googleInviteNote(result)}`);
     await item(Number(form.dataset.id));
@@ -4455,7 +4764,7 @@ root.addEventListener("click", async (event) => {
         calendarMessage = ` El evento se guardó en ASCLA, pero Google Calendar no pudo sincronizarse: ${error.message}`;
       }
     }
-    closeModal();
+    closeAllModals();
     toast(type==='ally'&&p.meta.ally_status==='inactive'?'Aliado guardado como inactivo. Su registro se conserva.':editorSavedMessage(p.status, p.meta) + calendarMessage);
     if (p.status === 'draft' && typeByPage[S.page] === (type === 'forum' ? 'topic' : type)) S.filter = {mine:1, drafts:1, page:1};
     S.boot = await api("bootstrap");
@@ -4467,6 +4776,9 @@ root.addEventListener("click", async (event) => {
     } else if (action === "comment") {
       const r = await api("items/" + form.dataset.id + "/comments", { body: data.body });
       toast(r.status === "pending" ? "Comentario enviado a revisión." : "Comentario publicado.");
+      const view = commentViews.get(activeModal()?.querySelector('#comments-list'));
+      if (view) view.latest = Number(r.id);
+      form.reset();
       await item(Number(form.dataset.id));
     }
   }
@@ -4477,6 +4789,12 @@ root.addEventListener("click", async (event) => {
       parent: Number(form.dataset.parent),
       });
       toast(r.status === "pending" ? "Respuesta enviada a revisión." : "Respuesta publicada.");
+      const view = commentViews.get(form.closest('#comments-list'));
+      const thread = view?.threads.find(t => Number(t.root.id) === Number(form.dataset.thread));
+      if (thread) {
+        view.expanded.set(Number(thread.root.id), Math.max(REPLY_BATCH, view.expanded.get(Number(thread.root.id)) || 0) + 1);
+      }
+      form.reset();
       await item(Number(form.dataset.id));
     }
     else if (action === "message") {
@@ -4649,6 +4967,8 @@ root.addEventListener("click", async (event) => {
       "moderate_comments",
       "chatham_default",
       "micro_enabled",
+      "supadata_generate",
+      "clear_supadata_key",
       "clear_smtp_password",
       "turnstile_enabled",
       "turnstile_login",
@@ -4712,10 +5032,17 @@ root.addEventListener("click", async (event) => {
     }
     return true;
   }
+  function cancelUnsavedSave(saveAndLeave) {
+    if (saveAndLeave) {
+      S.pendingUnsavedSaveForm=null;
+      resolveUnsavedExit(false);
+    }
+  }
 root.addEventListener("submit", async (event) => {
     const form = event.target.closest("[data-form]");
     if (!form) return;
     event.preventDefault();
+    if (form.dataset.submitting === 'true') return;
     if (!validSocialLinks(form)) return;
     const action = form.dataset.form,
       data = formData(form),
@@ -4727,21 +5054,25 @@ root.addEventListener("submit", async (event) => {
     }
     if (!validRequiredText(form, saveAndLeave)) return;
     if (submit) submit.disabled = true;
+    form.dataset.submitting = 'true';
     try {
       const actionHandler = HANDLESUBMITACTIONS_DISPATCH.find((entry) => entry.test(action));
       if (actionHandler) await actionHandler.run(action, form, data, submit, event);
       if (saveAndLeave && S.pendingUnsavedResolver) resolveUnsavedExit(true);
     } catch (e) {
-      if (saveAndLeave) {
-        S.pendingUnsavedSaveForm = null;
-        resolveUnsavedExit(false);
-      }
+      cancelUnsavedSave(saveAndLeave);
       if (e.name !== "AbortError") toast(e.message);
     } finally {
+      delete form.dataset.submitting;
       if (submit) submit.disabled = false;
     }
   });
   root.addEventListener("input", (event) => {
+    if(event.target.matches?.('[data-event-search]')){
+      const picker=event.target.closest('.related-event-picker');clearTimeout(eventPickerTimers.get(picker));
+      eventPickerRequests.set(picker,(eventPickerRequests.get(picker)||0)+1);
+      eventPickerTimers.set(picker,setTimeout(()=>{if(picker.isConnected)void loadRelatedEvents(picker);},250));
+    }
     if (event.target.matches?.('[data-social-link]')) validateSocialLinkInput(event.target);
     if (requiredTextErrors.has(event.target)) {
       event.target.setCustomValidity("");
@@ -4803,8 +5134,11 @@ root.addEventListener("submit", async (event) => {
       },
     });
   }
-  function preparedImageMarkup(media) {
-    return `<span class="attached-file image-ready" data-media="${media.id}" data-pending-media="${media.id}"><img src="${E(media.url)}" alt=""><span>${E(media.name)}</span>${btn("Quitar", "detach-media", ("data-id=\"" + (media.id) + "\""), "ghost small")}</span>`;
+  function attachedFileMarkup(media,pending=false,preview=false) {
+    const pendingAttribute=pending?`data-pending-media="${Number(media.id)}"`:'';
+    const image=preview?`<img src="${E(media.url)}" alt="">`:'';
+    const remove=btn('Quitar','detach-media',`data-id="${Number(media.id)}"`,'ghost small');
+    return `<span class="attached-file ${preview?'image-ready':''}" data-media="${Number(media.id)}" ${pendingAttribute}>${image}<span class="attached-file-name">${E(media.name)}</span>${remove}</span>`;
   }
   function humanFileSize(bytes) {
     const value = Number(bytes) || 0;
@@ -4853,9 +5187,7 @@ root.addEventListener("submit", async (event) => {
   async function applyAttachmentUpload(_input, media) {
     const attachments = document.getElementById("attachments");
     if (!attachments) { await discardTemporaryMedia(media.id); return; }
-    const markup = media.mime?.startsWith("image/")
-      ? preparedImageMarkup(media)
-      : `<span class="attached-file" data-media="${media.id}" data-pending-media="${media.id}">${E(media.name)}${btn("Quitar", "detach-media", ("data-id=\"" + (media.id) + "\""), "ghost small")}</span>`;
+    const markup=attachedFileMarkup(media,true,media.mime?.startsWith('image/'));
     attachments.insertAdjacentHTML("beforeend", markup);
   }
   const UPLOAD_RESULT_HANDLERS = [
@@ -4914,11 +5246,14 @@ root.addEventListener("submit", async (event) => {
   themeMedia?.addEventListener?.("change", () => { if (themeMode() === "system") applyTheme("system"); });
   globalThis.addEventListener("storage", (event) => { if (event.key === THEME_KEY) applyTheme(themeMode()); });
   globalThis.addEventListener("beforeunload", (event) => {
-    if (!hasUnsavedChanges() && ![...document.querySelectorAll("form[data-guard-modal-unsaved]")].some(modalHasUnsavedChanges)) return;
+    if (!hasUnsavedChanges() && !anyModalUnsaved()) return;
     event.preventDefault();
   });
   globalThis.addEventListener("pagehide", (event) => {
-    if (!event.persisted) discardPendingWithin(root, true);
+    if (!event.persisted) {
+      discardPendingWithin(root, true);
+      for (const entry of modalHistory) discardPendingWithin(entry.node,true);
+    }
   });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {

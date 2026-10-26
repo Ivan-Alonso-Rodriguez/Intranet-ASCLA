@@ -1,0 +1,142 @@
+{
+  "version": "1.11.0",
+  "schema": 15,
+  "date": "2026-10-23T04:36:45.988145+00:00",
+  "status": "passed_local_validation",
+  "environment": "isolated local WordPress 6.8.3 / PHP 8.3; Microsoft Edge and Chromium",
+  "base_commit": "2daf0d9e5b0da8eee8b21076f2dc3915c77a4e3f",
+  "working_tree": "uncommitted; source identified by complete package hashes",
+  "package": {
+    "manifest": "docs/evidence/release-1.11.0/package-initial.json",
+    "sha256": "82257e08299f7fed9ad7d3e9c259e0440d483af40e3879472e7071038be42385"
+  },
+  "targeted_php": {
+    "tests": 8,
+    "assertions": 34,
+    "included_in_full_php": true,
+    "source": "tests/php/UserExperience1110Test.php"
+  },
+  "full_php": {
+    "tests": 752,
+    "assertions": 8366,
+    "failures": 0,
+    "report": "coverage/junit.xml"
+  },
+  "browser": {
+    "checks": 13,
+    "errors": 0,
+    "cases": [
+      "Recordarme centrado en el acceso nativo",
+      "Enlace de Zoom reservado a inscritos y una sola alternativa de calendario",
+      "Seleccionar texto arrastrando fuera no cierra la ventana",
+      "Volver conserva la ventana y el comentario; cerrar desde una ventana anidada protege los cambios anteriores",
+      "Cerrar permite continuar o descartar el comentario sin publicar",
+      "Las respuestas también solicitan confirmación al descartarse",
+      "La navegación protege el comentario y descartar permite salir",
+      "Calendario conectado muestra Desconectar sin repetir Conectar (estado OAuth simulado)",
+      "Enter envía el mensaje y Shift+Enter inserta un salto de línea",
+      "Borrado masivo confirmado abarca páginas; cancelar conserva todos los avisos",
+      "Oculto legible en ambos temas y menú con volver a publicar y eliminar",
+      "Temas del evento alineados verticalmente con sus casillas",
+      "Pocas coincidencias usa el color azul de la interfaz; inicio sin desbordamiento en móvil y ambos temas (escenario de coincidencias simulado)"
+    ],
+    "report": "test-results/usability1110/summary.json"
+  },
+  "general_browser": {
+    "cases": 27,
+    "errors": 0,
+    "report": "test-results/e2e.json"
+  },
+  "accessibility": {
+    "scans": 138,
+    "errors": 0,
+    "report": "test-results/accessibility107.json"
+  },
+  "other_browser_suites": [
+    {
+      "suite": "analysis-filters107",
+      "checks": 7,
+      "errors": 0,
+      "report": "test-results/analysis-filters107.json"
+    },
+    {
+      "suite": "governance107",
+      "checks": 10,
+      "errors": 0,
+      "report": "test-results/governance107.json"
+    },
+    {
+      "suite": "delivery107",
+      "checks": 6,
+      "errors": 0,
+      "report": "test-results/delivery107.json"
+    },
+    {
+      "suite": "comment-history107",
+      "checks": 5,
+      "errors": 0,
+      "report": "test-results/comment-history107.json"
+    },
+    {
+      "suite": "forms107",
+      "checks": 7,
+      "errors": 0,
+      "report": "test-results/forms107.json"
+    },
+    {
+      "suite": "forms108",
+      "checks": 7,
+      "errors": 0,
+      "report": "test-results/forms108.json"
+    },
+    {
+      "suite": "events108",
+      "checks": 9,
+      "errors": 0,
+      "report": "test-results/events108.json"
+    },
+    {
+      "suite": "privacy108",
+      "checks": 6,
+      "errors": 0,
+      "report": "test-results/privacy108.json"
+    },
+    {
+      "suite": "dashboard-loading108",
+      "checks": 5,
+      "errors": 0,
+      "report": "test-results/dashboard-loading108.json"
+    }
+  ],
+  "shared_business_flows": {
+    "contract": "tests/qa-flow-contract.json",
+    "same_contract": true,
+    "bruno": {
+      "requests": 81,
+      "checks": 149,
+      "cleanup": "passed",
+      "report": "test-results/backend-publicable-2026-10-23T04-27-15-104Z"
+    },
+    "playwright": {
+      "flows": 6,
+      "videos": 12,
+      "cleanup": "passed",
+      "report": "test-results/playwright-usuarios-2026-10-23T04-27-59-746Z/index.html"
+    }
+  },
+  "validation_phases": {
+    "php": "test-results/sonar-preparation/release1110-quality-final.log",
+    "general_browser": "test-results/sonar-preparation/release1110-browser-final.log",
+    "date_filters": "test-results/sonar-preparation/release1110-browser-remaining.log",
+    "remaining_suites_and_coverage_validation": "test-results/sonar-preparation/release1110-browser-last.log",
+    "note": "PHP sources were unchanged during browser repairs and reruns. Initial failed attempts remain in local logs; results above refer to completed passing phases. Date tests now use the WordPress time zone."
+  },
+  "limitations": [
+    "Google Calendar HTTP responses and OAuth display state are simulated; real invitation delivery, receipt and acceptance were not exercised.",
+    "The low-match browser scenario uses a simulated recommendation response.",
+    "Assistant business flow uses the local mock provider.",
+    "No deployment, live ZAP scan or SonarQube analysis was performed for 1.11.0. Historical reports keep their original scope.",
+    "Coverage/source-revision is not certified from an uncommitted working tree."
+  ],
+  "temporary_environment_cleanup": "completed; isolated containers, volumes and private access file removed"
+}

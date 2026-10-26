@@ -9,11 +9,13 @@ final class ContentMeta
     public static function sanitize(string $type,array $input,int $id=0,bool $allowIncomplete=false): array
     {
         $data=$id?(array)get_post_meta($id,'_ascla',true):[];
+        $previousVideo=$data['video_id']??'';
         $mod=current_user_can('ascla_moderate');
         $editorial=$mod||($type==='resource'&&Access::canPublish());
         self::texts($data,$input,$editorial);
         if ($type==='contact') { SupportCategories::validate($data,$input); }
         self::urls($data,$input);
+        self::clearPreviousCaptions($data,$previousVideo);
         if ($editorial && isset($input['chatham'])) { $data['chatham']=rest_sanitize_boolean($input['chatham']); }
         elseif (!isset($data['chatham'])) { $data['chatham']=Settings::get()['chatham_default']; }
         if ($type==='ally') { Allies::metadata($data,$input); }
@@ -27,18 +29,27 @@ final class ContentMeta
         self::eventReference($data,$input);
         self::duration($data,$input);
         $data['thumbnail_url']=\ASCLA\Core\Integrations\YouTubeVideoProvider::thumbnail($data['video_id']??'');
-        if ($type==='resource') { self::resource($data); }
+        if ($type==='resource') { self::resource($data);$data=VideoTranscripts::withDuration($data); }
         return $data;
+    }
+    private static function clearPreviousCaptions(array &$data,mixed $previousVideo): void
+    {
+        if (($data['video_id']??'')!==$previousVideo && ($data['transcript_status']??'')==='supadata') {
+            foreach (['transcript','transcript_status','transcript_video_id','transcript_mode','transcript_language','transcript_checked_at','transcript_error'] as $field) { unset($data[$field]); }
+        }
     }
 
     private static function texts(array &$data,array $input,bool $editorial): void
     {
         $texts=['source','copyright','description','agenda','location','modality','resource_type','alliance_type','benefits','initiatives','summary'];
+        $previousTranscript=(string)($data['transcript']??'');
         if ($editorial) { $texts=array_merge($texts,['transcript','identities']); }
         foreach ($texts as $key) {
-            if (isset($input[$key])) { $data[$key]=Access::text($input[$key],$key==='transcript'?100000:10000); }
+            if ($key==='transcript'&&($data['transcript_status']??'')==='supadata'&&($input[$key]??null)===$previousTranscript) { continue; }
+            if (isset($input[$key])) { $data[$key]=Access::text($input[$key],$key==='transcript'?VideoTranscripts::MAX_CHARACTERS:10000); }
         }
         if (!$editorial || !array_key_exists('transcript',$input)) { return; }
+        if (($data['transcript']??'')===$previousTranscript && ($data['transcript_status']??'')==='supadata') { return; }
         if (trim((string)($data['transcript']??''))!=='') {
             $data['transcript_status']='manual';
             $data['transcript_mode']='Transcripción manual autorizada';

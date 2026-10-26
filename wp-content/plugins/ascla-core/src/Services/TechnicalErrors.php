@@ -6,7 +6,7 @@ use ASCLA\Core\Repositories\{RepositoryException,Store};
 /** RNF-027: a closed diagnostic vocabulary excludes arbitrary messages and credentials. */
 final class TechnicalErrors
 {
-    private const MODULES=['application','database','content','profiles','messaging','administration','jobs','delivery','smtp','gemini','openai','deepseek','google','youtube','turnstile'];
+    private const MODULES=['application','database','content','profiles','messaging','administration','jobs','delivery','smtp','gemini','openai','deepseek','google','youtube','supadata','turnstile'];
     private const DESCRIPTIONS=[
         'request_failed'=>'ASCLA request failed.',
         'job_failed'=>'Background task failed.',
@@ -15,7 +15,7 @@ final class TechnicalErrors
         'mail_failed'=>'WordPress mail delivery failed.',
         'fatal_error'=>'Fatal PHP error in ASCLA.',
     ];
-    private const PROVIDERS=['generativelanguage.googleapis.com'=>'gemini','api.openai.com'=>'openai','api.deepseek.com'=>'deepseek','www.googleapis.com'=>'google','oauth2.googleapis.com'=>'google','accounts.google.com'=>'google','www.youtube.com'=>'youtube','challenges.cloudflare.com'=>'turnstile'];
+    private const PROVIDERS=['generativelanguage.googleapis.com'=>'gemini','api.openai.com'=>'openai','api.deepseek.com'=>'deepseek','api.supadata.ai'=>'supadata','www.googleapis.com'=>'google','oauth2.googleapis.com'=>'google','accounts.google.com'=>'google','www.youtube.com'=>'youtube','challenges.cloudflare.com'=>'turnstile'];
 
     public static function boot(): void
     {

@@ -4,12 +4,12 @@ if(process.env.ASCLA_E2E_EPHEMERAL!=='1')throw Error('Disposable environment req
 const base=process.env.ASCLA_SITE_URL,checks=[],errors=[];let initialViolations=[];
 if(!base)throw Error('ASCLA_SITE_URL is required');
 (async()=>{
- const browser=await chromium.launch({headless:true});
+ const browser=await chromium.launch({headless:true});let page,finalCsp='',diagnostic=null;const consoleErrors=[];
  try{
-  const context=await browser.newContext(),page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
+  const context=await browser.newContext();page=await context.newPage();page.on('pageerror',error=>errors.push(error.stack||error.message));page.on('console',message=>{if(message.type()==='error')consoleErrors.push(message.text());});
   await context.addInitScript(()=>{window.__nativeViolations=[];document.addEventListener('securitypolicyviolation',event=>{if(event.disposition==='enforce')window.__nativeViolations.push(event.effectiveDirective);});});
   const response=await page.goto(base+'/wp-login.php');assert.equal(response.status(),200);
-  await page.waitForFunction(()=>typeof jQuery==='function'&&typeof wp?.hooks?.addAction==='function'&&typeof wp?.i18n?.__==='function');
+  await page.waitForFunction(()=>typeof jQuery==='function'&&typeof globalThis.wp?.hooks?.addAction==='function'&&typeof globalThis.wp?.i18n?.__==='function');
   const csp=response.headers()['content-security-policy'];assert.ok(csp.includes("'strict-dynamic'"));assert.ok(!/unsafe-inline|unsafe-eval/.test(csp));
   assert.equal(await page.locator('script[src*="load-scripts.php"]').count(),0);
   // strict-dynamic also allows dependencies created by an already trusted loader.
@@ -27,16 +27,27 @@ if(!base)throw Error('ASCLA_SITE_URL is required');
   // Preserve that observation while requiring every script dependency to load without a CSP block.
   assert.deepEqual(errors,[]);assert.ok(initialViolations.every(directive=>directive==='style-src-attr'));
   checks.push('El formulario conserva CSRF y carga sin errores JavaScript ni bloqueos CSP de scripts');
-  await page.route(base+'/wp-login.php',async route=>{
-    const original=await route.fetch();
-    const body=(await original.text()).replace('</body>','<script>globalThis.__untrustedNativeScriptExecuted=true</script></body>');
-    await route.fulfill({response:original,body});
+  // Keep the real document/network origin. Fulfilling its HTML creates a
+  // synthetic public address space in Chromium and can block local assets.
+  finalCsp=(await page.goto(base+'/wp-login.php')).headers()['content-security-policy'];
+  await page.waitForFunction(()=>typeof globalThis.wp?.i18n?.__==='function');
+  await page.evaluate(()=>{
+    // document.write creates a parser-inserted script, unlike a trusted
+    // DevTools-created dynamic script to which strict-dynamic may delegate.
+    document.open();window.__nativeViolations=[];
+    document.addEventListener('securitypolicyviolation',event=>{if(event.disposition==='enforce')window.__nativeViolations.push(event.effectiveDirective);});
+    document.write('<!doctype html><title>CSP parser probe</title><script>globalThis.__untrustedNativeScriptExecuted=true<\/script>');
+    document.close();
   });
-  await page.goto(base+'/wp-login.php');
   await page.waitForFunction(()=>window.__nativeViolations.some(directive=>directive.startsWith('script-src')));
   assert.equal(await page.evaluate(()=>globalThis.__untrustedNativeScriptExecuted),undefined);
-  checks.push('CSP sigue bloqueando un script inyectado sin nonce');
+  checks.push('CSP sigue bloqueando un script insertado por el parser sin nonce');
+  assert.deepEqual(errors,[]);
   for(const check of checks)console.log('PASS '+check);
  }catch(error){errors.push(error.message);console.error(error.stack);process.exitCode=1;}
- finally{await browser.close();fs.writeFileSync(path.join(__dirname,'../test-results/native-login-security.json'),JSON.stringify({date:new Date().toISOString(),target:base,checks,errors,status:errors.length?'FAIL':'PASS',initial_csp_violations:initialViolations,intentional_untrusted_script_probe:true},null,2)+'\n');}
+ finally{
+  if(page)diagnostic=await page.evaluate(policy=>({scripts:[...document.scripts].map(n=>({id:n.id,src:n.src,nonce_matches:n.nonce===policy.match(/nonce-([^']+)/)?.[1],integrity:n.integrity})),violations:window.__nativeViolations}),finalCsp).catch(()=>null);
+  if(errors.length)process.exitCode=1;
+  await browser.close();fs.writeFileSync(path.join(__dirname,'../test-results/native-login-security.json'),JSON.stringify({date:new Date().toISOString(),target:base,checks,errors,status:errors.length?'FAIL':'PASS',initial_csp_violations:initialViolations,intentional_untrusted_script_probe:true,console_errors:consoleErrors,diagnostic},null,2)+'\n');
+ }
 })().catch(error=>{console.error(error.stack);process.exitCode=1;});
