@@ -37,6 +37,19 @@ class ImagePolicyTest(unittest.TestCase):
                     before=ci.source_hash();path.write_text('changed')
                     self.assertNotEqual(before,ci.source_hash(),relative)
 
+    def test_reused_jenkins_build_tag_cannot_reuse_package_upgrade_layer(self):
+        with tempfile.TemporaryDirectory(dir=ROOT / 'test-results') as directory:
+            commands = []
+            pinned = {key: 'fixture@' + IMAGE for key in ('trivy', 'wordpress', 'cli', 'db', 'db_entrypoint', 'mail_runtime')}
+            with patch.object(ci, 'PRIVATE', Path(directory)), patch.object(ci, 'read', return_value=pinned), patch.object(ci, 'source_hash', return_value='same-source'), patch.object(ci, 'output', return_value='same-commit'), patch.object(ci, 'image_id', return_value=IMAGE), patch.object(ci, 'run', side_effect=commands.append), patch.dict(ci.os.environ, {'BUILD_TAG': 'jenkins-restored-job-1'}):
+                ci.build()
+                ci.build()
+            refreshes = [next(arg for arg in command if arg.startswith('SECURITY_REFRESH=')) for command in commands]
+            self.assertEqual(len(refreshes), 8)
+            self.assertEqual(len(set(refreshes[:4])), 1)
+            self.assertEqual(len(set(refreshes[4:])), 1)
+            self.assertNotEqual(refreshes[0], refreshes[4])
+
     def test_low_is_allowed_and_reported(self):
         actual = ci.evaluate(report('LOW'), IMAGE)
         self.assertEqual(actual['status'], 'PASS')
