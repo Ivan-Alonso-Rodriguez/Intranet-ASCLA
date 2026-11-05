@@ -1,6 +1,54 @@
 # Guía práctica de QA, SonarQube y UAT
 
-Versión documentada: **1.11.0**, esquema **15**. Este proyecto WordPress ofrece el flujo manual de esta guía y un [pipeline de Jenkins operativo](ci/README.md), comprobado en laboratorio local. Aquí se explica cómo ejecutar las herramientas, revisar sus resultados e instalar la entrega. Las pruebas y los Quality Gates deben satisfacer los criterios de la entrega; Jenkins aplica los controles antes de permitir un despliegue.
+Versión documentada: **1.11.1**, esquema **15**.
+
+## Estadísticas y carga · 1.11.1
+
+En Administración → Estadísticas → Resumen comprobar el orden Actividad, Asistencias y Personas. Personas cuenta usuarios distintos con inscripción confirmada en los eventos filtrados (por su fecha de finalización); excluye lista de espera, cancelaciones y usuarios sin acceso asignado. Una persona con tres reservas suma tres inscripciones y una persona. Una asistencia directa sin reserva aumenta asistentes/asistencias, pero no inscritos. Asistencias suma el estado Asistió por persona/evento; promedio y tasa mantienen las listas verificadas como base.
+
+Ejecutar [StatisticsLoad1111Test.php](tests/php/StatisticsLoad1111Test.php), [StatisticsTest.php](tests/php/StatisticsTest.php) y la regresión completa. Verificar filtros alternados, caducidad individual, límite de ocho contextos, aislamiento entre cuentas y bypass dentro de transacciones, conservando rollback, privacidad y permisos.
+
+La [prueba de carga](tests/statistics-load1111.py) exige `ASCLA_E2E_EPHEMERAL=1`, URL loopback y credenciales de los 32 actores sintéticos de [optimization-fixture.php](tests/optimization-fixture.php). Su conjunto se prepara con [nice-to-have-fixture.php](tests/nice-to-have-fixture.php). Comparar el mismo conjunto antes/después con sesiones 1/4/12/24/32, fase de 60 segundos con 12 sesiones y cuatro sesiones administrativas alternando tres contextos. El runner comprueba ocho guardados concurrentes, 16 solicitudes para dos plazas, lista de espera, acceso anónimo, permisos, nonce y `no-store`. No desactivar límites ni controles para obtener una aprobación. Las credenciales quedan en archivos privados ignorados por Git. El [probe](tests/statistics-load1111-probe.php) conserva mediciones de SQL y los resultados; no es una ruta pública.
+
+El [recorrido visual](tests/statistics-load1111.cjs) comprueba cifras, posición, escritorio/móvil, temas y axe sobre datos sintéticos. La [evidencia](docs/evidence/release-1.11.1/statistics-load1111.json) identifica versiones y ZIP; la carga local es acotada y no garantiza capacidad o tiempos del hosting. No constituye un nuevo análisis de SonarQube, Trivy o ZAP.
+
+## Importación de intereses · 1.11.1
+
+En Administración → Importar intereses carga una exportación CSV (512 KB) o PDF tabular, HTML o ZIP de una sola hoja (5 MB). El PDF permite hasta 40 páginas y toda tabla hasta 5000 filas/512 KB. Usa la hoja completa CSV/HTML cuando las columnas del PDF estén repartidas entre páginas; los documentos narrativos y PDF escaneados se rechazan. El ZIP admite una sola hoja HTML/CSV y no procesa CSS ni archivos anidados.
+
+Revisa el mapeo de correo, código y nombres/apellidos, las respuestas explícitas y la columna de eventos. Conserva marcada la opción de procesar solo cuentas existentes salvo que necesites asociar casos manualmente. Las cuentas identificadas aparecen primero, con su fila de origen conservada. Un nombre ambiguo nunca se asigna automáticamente y las coincidencias por nombre exigen revisar la advertencia. No se crean cuentas.
+
+Si el formulario solo registra un evento, verifica su tema y elige hasta tres intereses del catálogo para proponer, o usa la propuesta opcional de IA en una fila con cuenta identificada. Es contexto de baja confianza, no una declaración del asociado. No mapees empresa, cargo, membresía, consentimiento ni asistencia como intereses. Revisa/acepta o ignora las filas antes de Confirmar y aplicar; una respuesta vacía nunca borra intereses, aunque el modo sea sustituir. El perfil conserva sus otros campos. Una edición concurrente o pérdida de permiso obliga a revisar el conflicto.
+
+Ejecuta [InterestImport1111Test.php](tests/php/InterestImport1111Test.php), la regresión PHP y [interest-import1111.cjs](tests/interest-import1111.cjs) en un WordPress local desechable con datos sintéticos. Prepara sus archivos de prueba con `python tests/interest-import1111-files.py` (requiere reportlab). El runner de navegador comprueba conversión, revisión y aplicación sin usar respuestas personales en capturas. Ver [evidencia de 1.11.1](docs/evidence/release-1.11.1/interest-import1111.json). No sustituye la aceptación humana del hosting.
+
+## Perfil y asistencia del 5 de noviembre de 2026
+
+Ejecuta [ProfileAttendance1110Test.php](tests/php/ProfileAttendance1110Test.php) y la suite PHP completa en una instalación local desechable con `wp ascla seed` ya ejecutado. Comprueba reset de foto propio/administrativo, permisos, identidad/contraseña al renombrar, rechazo de usuarios duplicados, coincidencias de nombre únicas y ambiguas, ausencia de escrituras en vista previa, solapamientos y fechas ambiguas.
+
+Prepara [el fixture](tests/profile-attendance1110-fixture.php) con `ASCLA_E2E_EPHEMERAL=1`. Guarda actores y entorno exclusivamente bajo `test-results/profile-attendance-20261105/private/`. Ejecuta [el recorrido Playwright](tests/profile-attendance1110.cjs) contra localhost con Chrome. Revisa recuperación desde ambos accesos, persistencia del avatar, edición administrativa, encabezado, navegación y confirmación del CSV. [Evidencia](docs/evidence/release-1.11.0/profile-attendance1110.json). El CSV real se lee en privado para validar su formato; los videos usan participantes sintéticos.
+
+## Última repetición completa — 29 de octubre
+
+La [evidencia final](docs/evidence/release-1.11.0/full-validation1110.json) reúne QA/UAT técnicos independientes, cobertura PHP/JavaScript de la misma revisión, Quality Gates reales de ASCLA-QA y ASCLA-UAT, Bruno, seis E2E con video, los últimos controles UI, Trivy, ZAP, Jenkins y estrés local. Los JUnit completos están en [QA](docs/evidence/release-1.11.0/full-validation1110-qa-junit.xml) y [UAT](docs/evidence/release-1.11.0/full-validation1110-uat-junit.xml). Se conserva una omisión histórica por carecer de la instantánea original de traducciones; no es una excepción a controles de seguridad.
+
+En la búsqueda administrativa espera la respuesta de `admin/users` y el reemplazo del formulario anterior antes de abrir las acciones de la fila. `tests/acceptance-ui.cjs` utiliza ese estado real, sin clics forzados ni cambios a los permisos. Para repetir en un snapshot de Windows con fuentes CRLF, prepara el índice Git con `git add --renormalize wp-content/plugins/ascla-core` y comprueba que esté limpio antes de iniciar la cobertura; no escribas a mano `coverage/source-revision` ni reutilices cobertura de PHP de otra revisión.
+
+Las ejecuciones y los análisis activos se realizaron en laboratorios desechables. La consulta al asistente utiliza el mock configurado para pruebas. Jenkins comprueba Trivy/HTML/JSON y retención en un snapshot privado main sin despliegue; QA/UAT y Sonar se ejecutan con los scripts del manual. El informe no sustituye la aceptación humana del entorno instalado.
+
+## Perfil, conversación y revisión de microeventos — 29 de octubre
+
+En un WordPress desechable ejecuta la regresión `MicroEventsTest` y prepara `tests/workflow1110-fixture.php` con `ASCLA_E2E_EPHEMERAL=1`. Conserva los actores en un archivo privado y usa `tests/workflow1110.cjs` para el recorrido con Chrome.
+
+1. En Perfil elimina todos los intereses, vuelve a Información y guarda. Debe abrir Intereses, desplegar el grupo pendiente y enfocar una opción sin perder los demás cambios. Repite con un campo personal vacío desde Privacidad; corrige y guarda.
+2. Abre una publicación con muchos comentarios. El formulario para publicar debe estar arriba; las respuestas permanecen dentro de su hilo.
+3. Cambia entre Galerías y recursos, Encuentros, Revisar contenido y Estadísticas. Recarga cada sección: la URL debe conservar `section` y la misma pestaña debe seguir seleccionada.
+4. Adjunta una imagen a una galería y comprueba su miniatura en administración. El archivo continúa protegido por sus permisos originales.
+5. En una propuesta pendiente pulsa Editar candidatos, quita una persona, busca otra, agrégala y registra el motivo. Antes de guardar se revalidan tamaño, membresía, consentimiento, perfil y bloqueos. Los cambios quedan en auditoría y requieren aprobación; aún no envían invitaciones. Si la propuesta estaba programada, el cambio cancela esa programación y debe elegirse otra vez la fecha. Asociados sin permisos no deben consultar ni cambiar esta selección.
+6. Aprobar y publicar debe dejar el microevento en Publicado y generar las invitaciones una sola vez. Si hay una fecha de publicación futura, continúa oculto y programado hasta esa fecha. Tras enviar invitaciones no se permite sustituir el grupo desde este selector; se conservan sus respuestas e historial.
+
+
+Este proyecto WordPress ofrece el flujo manual de esta guía y un [pipeline de Jenkins operativo](ci/README.md), comprobado en laboratorio local. Aquí se explica cómo ejecutar las herramientas, revisar sus resultados e instalar la entrega. Las pruebas y los Quality Gates deben satisfacer los criterios de la entrega; Jenkins aplica los controles antes de permitir un despliegue.
 
 Todos los comandos se ejecutan **desde la raíz del repositorio**, en una terminal Bash; en Windows, usa WSL con Docker Desktop operativo e integrado con esa distribución. Las rutas de los ejemplos son relativas al repositorio. Los dominios publicados corresponden a servicios del proyecto; `localhost` y `127.0.0.1` son ejemplos genéricos de acceso local.
 
@@ -13,6 +61,14 @@ La [corrección posterior de imágenes](docs/evidence/release-1.11.0/trivy-remed
 La [validación anterior de QA y UAT](docs/evidence/release-1.11.0/full-qa1110.json) ejecutó 810 pruebas PHP por entorno, las suites de navegador y SonarQube real del curso: ambos Quality Gates aprobaron con 0 incidencias abiertas y cobertura global de 91.2 %. En esa ejecución anterior Trivy y ZAP bloquearon el despliegue; ese resultado histórico no describe las imágenes corregidas. No se atribuye un nuevo análisis remoto de SonarQube a la corrección de infraestructura ni se acredita despliegue remoto o aceptación humana de UAT.
 
 ## Validar los cambios de 1.11.0
+
+La [evidencia de optimización](docs/evidence/release-1.11.0/optimization1110.json) identifica la comparación anterior/posterior, las fuentes finales, los resultados de estrés y el ZIP actual. `tests/php/QueryOptimizationTest.php` comprueba aislamiento de lecturas, cambios inmediatos de bloqueo, rollback, fallos de permisos, reacciones, estadísticas heredadas y cuatro procesos compitiendo por el contador de perfiles. La suite completa mantiene la comprobación de sesiones, roles, privacidad, medios y transacciones.
+
+`tests/optimization-fixture.php` y `tests/optimization-stress.py` están restringidos al laboratorio local desechable y requieren `ASCLA_E2E_EPHEMERAL=1`. El ejecutor usa sesiones independientes, los campos CSRF reales del login y los nonces de cada usuario; conserva los límites del plugin. Realiza carga progresiva hasta 32 sesiones, una fase sostenida acotada a 60 segundos, recuperación, ocho guardados de perfil e inscripciones simultáneas a dos cupos. Los 409 por aforo completo se comprueban como conflictos esperados, separados de errores de lectura. `tests/optimization1110.cjs` recorre los módulos comunitarios y comprueba que la carga selectiva mantenga el panel administrativo. Estas herramientas nunca deben apuntar al hosting compartido.
+
+La [revisión de los 61 NICE TO HAVE](docs/evidence/release-1.11.0/nice-to-have1110.json) del 28 de octubre identifica el ZIP actual, sus fuentes y las comprobaciones por requisito. Incluye estadísticas de conexiones/interacción, invalidación de caché, transacciones, cumpleaños privados y publicación automática programada. Los originales de las 27 fotografías se conservan por separado; los requisitos marcados fuera de alcance mantienen esa condición.
+
+Las nuevas pruebas PHP están en `tests/php/NiceToHaveStatisticsTest.php`, `NiceToHaveBirthdayTest.php` y `NiceToHaveSchedulingTest.php`. El recorrido `tests/nice-to-have1110.cjs` verifica roles, cifras, ambos temas, móvil, accesibilidad y tiempos; el conjunto de carga está en `tests/nice-to-have-fixture.php`. Este último solo se ejecuta en WordPress local desechable con `ASCLA_E2E_EPHEMERAL=1`: genera cuentas ficticias sin contraseñas reutilizables y datos sintéticos. Los tiempos registrados no sustituyen una medición en el servidor de destino. Para validar los automatismos en el despliegue, mantén operativo el ejecutor de cron descrito en la configuración local/CI y comprueba allí las entregas reales de correo y del proveedor IA configurado.
 
 Para la separación de estilos del acceso, ejecuta [LoginAssetsTest.php](tests/php/LoginAssetsTest.php) y [login-assets1110.cjs](tests/login-assets1110.cjs) en un WordPress local desechable. `ASCLA_LOGIN_FIXTURE` señala el JSON privado del fixture compartido, `ASCLA_AXE_PATH` la copia de axe y `ASCLA_E2E_EPHEMERAL=1` habilita este recorrido. Comprueba ocho combinaciones de tema, idioma y tamaño, contraste del botón, mostrar contraseña, teclado, Recordarme, los cuatro accesos y la conservación de recuperación/login nativo. [zap-timestamp-control.py](tests/zap-timestamp-control.py) se ejecuta por separado en la misma imagen oficial de ZAP, sin red externa, con un directorio `/results` escribible: exige que la regla 10096 esté activa y detecte un timestamp real sintético. No modifica el análisis ni las reglas de la aplicación. Repite el análisis ZAP completo sobre la imagen construida; un control positivo no acredita por sí solo que el sitio aprueba.
 
@@ -199,7 +255,7 @@ Si habías exportado `SONAR_TOKEN` en la terminal padre, ejecuta `unset SONAR_TO
 
 ## 5. Ejecutar integración y E2E con Bruno y Playwright
 
-La [entrega vigente](pruebas/README.md) reúne **81 peticiones y 149 comprobaciones de Bruno**, y **seis recorridos de Playwright aprobados el 22 de octubre en el QA publicado**, con 12 videos y 12 capturas. El asistente devuelve **Google Gemini · API real**. La comparación SHA-256 acredita coincidencia del JavaScript y CSS con el paquete local, y las pruebas API/UI verifican el comportamiento observado del backend; no se descargan todos los PHP privados.
+La [entrega vigente](pruebas/README.md) reúne **81 peticiones y 149 comprobaciones de Bruno**, y **seis recorridos de Playwright aprobados el 22 de octubre en el QA publicado**, con 12 videos y 12 capturas. El asistente devuelve **Google Gemini · API**. La comparación SHA-256 acredita coincidencia del JavaScript y CSS con el paquete local, y las pruebas API/UI verifican el comportamiento observado del backend; no se descargan todos los PHP privados.
 
 La [regresión reciente](pruebas/actualizacion/index.html) añade 14 controles aprobados con 16 videos/16 capturas. Incluye borradores, roles, filtros, Directorio de 4 × 3, tipo de asociado, Foros, Galería, biblioteca integrada y menú de Aliados. La seguridad remota aprueba seis controles en 42 vistas y 19 de 20 controles HTTP: falta ocultar la versión de Apache en el hosting. ZAP activo se identifica por separado como ejecución HTTPS aislada. Estas selecciones no aumentan los CP únicos ni sustituyen UAT.
 
@@ -333,7 +389,7 @@ La regresión automatizada está en [DraftWorkflowTest.php](tests/php/DraftWorkf
 
 ### Cómo exponer las pruebas publicadas
 
-1. Abre el [dashboard general](pruebas/index.html). Identifica fecha, rama, revisión y destino: los flujos principales se ejecutaron el 22 de octubre en el QA publicado. Muestra la comparación de JavaScript/CSS y explica su alcance; el trabajo del asistente devuelve Google Gemini · API real.
+1. Abre el [dashboard general](pruebas/index.html). Identifica fecha, rama, revisión y destino: los flujos principales se ejecutaron el 22 de octubre en el QA publicado. Muestra la comparación de JavaScript/CSS y explica su alcance; el trabajo del asistente devuelve Google Gemini · API.
 2. En [Bruno Run Dashboard](pruebas/backend/dashboard.html), muestra las 18 peticiones de integración y los rechazos esperados de acceso y networking administrativo. Los HTTP 400/401/403/404/409 previstos son comprobaciones aprobadas.
 3. Explica los seis flujos compartidos con las flechas del [README de backend](pruebas/backend/README.md). Muestra un ID obtenido por una petición y utilizado por la siguiente; no son valores inventados.
 4. En el [dashboard de Playwright](pruebas/frontend/dashboard.html), reproduce los seis recorridos. Son clics y formularios reales; también verifican el inicio administrativo y el logo único.

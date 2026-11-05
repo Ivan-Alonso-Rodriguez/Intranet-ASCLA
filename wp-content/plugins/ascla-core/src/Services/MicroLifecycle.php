@@ -78,6 +78,7 @@ final class MicroLifecycle
             Access::require(empty($meta['cancelled']),'Una propuesta cancelada conserva su historial y no puede aprobarse.',409);
             $meta=self::defaults($meta);
             MicroEvents::validateInvitees($meta);
+            Access::require(strtotime($meta['start']??'')>time(),'Actualiza la fecha de inicio antes de aprobar.',400);
             Access::require(strtotime($meta['registration_deadline'])>time(),'Amplía el plazo de inscripción antes de aprobar.',400);
             $meta['micro_approved']=true;self::history($id,'approved',$reason);
         } else { $meta['micro_approved']=false;self::history($id,'denied',$reason); }

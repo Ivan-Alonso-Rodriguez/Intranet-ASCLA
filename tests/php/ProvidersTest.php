@@ -36,7 +36,7 @@ final class ProvidersTest extends TestCase
             self::assertSame('answer',json_decode($body['contents'][0]['parts'][0]['text'],true)['task']);
             return self::response(['candidates'=>[['content'=>['parts'=>[['text'=>wp_json_encode(['answer'=>'Respuesta de prueba','source_ids'=>[22]])]]],'finishReason'=>'STOP']]]);
         });
-        $r=(new RealAIProvider())->generate('answer',['sources'=>[['id'=>22]]]);self::assertSame('Google Gemini · API real',$r['mode']);self::assertSame([22],$r['source_ids']);
+        $r=(new RealAIProvider())->generate('answer',['sources'=>[['id'=>22]]]);self::assertSame('Google Gemini · API',$r['mode']);self::assertSame([22],$r['source_ids']);
     }
     public function testOpenAITransportUsesResponsesEndpointBearerKeyAndConfiguredModel(): void
     {
@@ -50,7 +50,7 @@ final class ProvidersTest extends TestCase
             self::assertSame('answer',json_decode($body['input'],true)['task']);
             return self::response(['status'=>'completed','output'=>[['type'=>'message','content'=>[['type'=>'output_text','text'=>wp_json_encode(['answer'=>'Respuesta OpenAI','source_ids'=>[22]])]]]]]);
         });
-        $r=(new OpenAIProvider())->generate('answer',['sources'=>[['id'=>22]]]);self::assertSame('OpenAI · API real',$r['mode']);self::assertSame([22],$r['source_ids']);
+        $r=(new OpenAIProvider())->generate('answer',['sources'=>[['id'=>22]]]);self::assertSame('OpenAI · API',$r['mode']);self::assertSame([22],$r['source_ids']);
     }
     public function testDeepSeekTransportUsesOfficialEndpointBearerKeyAndConfiguredModel(): void
     {
@@ -65,7 +65,7 @@ final class ProvidersTest extends TestCase
             self::assertSame('answer',json_decode($body['messages'][1]['content'],true)['task']);
             return self::response(['choices'=>[['finish_reason'=>'stop','message'=>['content'=>wp_json_encode(['answer'=>'Respuesta DeepSeek','source_ids'=>[22]])]]]]);
         });
-        $r=(new DeepSeekProvider())->generate('answer',['sources'=>[['id'=>22]]]);self::assertSame('DeepSeek · API real',$r['mode']);self::assertSame([22],$r['source_ids']);
+        $r=(new DeepSeekProvider())->generate('answer',['sources'=>[['id'=>22]]]);self::assertSame('DeepSeek · API',$r['mode']);self::assertSame([22],$r['source_ids']);
     }
     public function testRealAIPropagatesSafeQuotaError(): void
     {
@@ -93,7 +93,7 @@ final class ProvidersTest extends TestCase
     {
         Secrets::set('google_youtube_'.$this->user,wp_json_encode(['access_token'=>'fake','expires_at'=>time()+3600]));
         $this->mock(static function($args,$url){self::assertStringStartsWith('https://www.googleapis.com/youtube/v3/videos?',$url);self::assertSame('Bearer fake',$args['headers']['Authorization']);return self::response(['items'=>[['snippet'=>['title'=>'Video autorizado'],'contentDetails'=>['duration'=>'PT1H2M3S']]]]);});
-        $data=(new YouTubeVideoProvider())->metadata('abcdefghijk');self::assertSame(3723,$data['duration_seconds']);self::assertSame('API REAL YouTube',$data['mode']);self::assertSame('https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg',$data['thumbnail_url']);
+        $data=(new YouTubeVideoProvider())->metadata('abcdefghijk');self::assertSame(3723,$data['duration_seconds']);self::assertSame('API YouTube',$data['mode']);self::assertSame('https://i.ytimg.com/vi/abcdefghijk/hqdefault.jpg',$data['thumbnail_url']);
     }
     public function testYouTubeMetadataReportsMissingVideoWithoutInventingDuration(): void
     {

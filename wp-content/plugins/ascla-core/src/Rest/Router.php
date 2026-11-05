@@ -111,7 +111,10 @@ final class RouterRoutes
         Router::route('/events/(?P<id>\d+)/invite','POST',static fn($r)=>Events::invite((int)$r['id'],(array)$r['users']),'ascla_publish');
         Router::route('/events/(?P<id>\d+)/cancel','POST',static fn($r)=>Events::cancel((int)$r['id'],(string)($r['reason']??'')),'ascla_publish');
         Router::route('/events/(?P<id>\d+)/reactivate','POST',static fn($r)=>\ASCLA\Core\Services\EventReactivation::run((int)$r['id']),'ascla_publish');
-        Router::route('/events/(?P<id>\d+)/candidates','POST',static fn($r)=>\ASCLA\Core\Services\MicroEligibility::review((int)$r['id']),'ascla_manage');
+        Router::route('/events/(?P<id>\d+)/candidates','POST',static fn($r)=>$r->has_param('invitees')
+            ? \ASCLA\Core\Services\MicroEligibility::replace((int)$r['id'],$r->get_param('invitees'),(string)$r->get_param('reason'))
+            : \ASCLA\Core\Services\MicroEligibility::review((int)$r['id']),'ascla_manage');
+        Router::route('/events/(?P<id>\d+)/candidates/options','GET',static fn($r)=>\ASCLA\Core\Services\MicroEligibility::options((int)$r['id'],(string)$r->get_param('q'),(int)$r->get_param('page')),'ascla_manage');
         Router::route('/events/(?P<id>\d+)/archive','POST',static fn($r)=>\ASCLA\Core\Services\MicroArchive::set((int)$r['id'],\ASCLA\Core\Services\FormRules::boolean($r['archived'])),'ascla_manage');
         Router::route('/microevents/diagnostics','GET',static fn()=>\ASCLA\Core\Services\MicroEvents::diagnostics(),'ascla_publish');
         Router::route('/events/(?P<id>\d+)/register','POST',static fn($r)=>Events::register((int)$r['id'],(string)$r['status']),'ascla_write');

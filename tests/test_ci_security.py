@@ -142,6 +142,41 @@ class ImagePolicyTest(unittest.TestCase):
             self.assertIn('FAIL', outputs)
             self.assertIn('/path', outputs)
 
+    def test_zap_report_keeps_branding_counts_and_diagnostics_without_http_secrets(self):
+        spec = importlib.util.spec_from_file_location('publish_security', ROOT / 'scripts/ci-publish-security.py')
+        publisher = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(publisher)
+        with tempfile.TemporaryDirectory(dir=ROOT / 'test-results') as directory, patch.object(publisher, 'SOURCE', Path(directory) / 'raw'), patch.object(publisher, 'OUT', Path(directory) / 'public'):
+            ci.write(publisher.SOURCE / 'security-summary.json', {'date': 'fixture', 'status': 'FAIL', 'phases': [{'phase': 'frontend', 'status': 'FAIL'}]})
+            counts = {'0': 0, '1': 0, '2': 1, '3': 0}
+            ci.write(publisher.SOURCE / 'frontend-result.json', {'status': 'FAIL', 'risk_counts': counts})
+            private_url = 'https://user:PRIVATE_BASIC@fixture.invalid/path?token=PRIVATE_QUERY#PRIVATE_FRAGMENT'
+            ci.write(publisher.SOURCE / 'frontend-zap.json', {
+                '@version': '2.17.0', 'created': '2026-10-29T22:59:54Z',
+                'insights': [{'level': 'Low', 'reason': 'Warning', 'description': 'Diagnostic ' + private_url, 'statistic': '11', 'site': private_url}],
+                'site': [{'@name': private_url, 'alerts': [{
+                    'alertRef': 'test-1', 'name': '<script>Untrusted</script>', 'riskcode': '2',
+                    'desc': '<p>Check ' + private_url + '</p><p>nonce-AAAAAAAAAAAA</p>',
+                    'solution': 'Update', 'count': '2', 'cweid': '79',
+                    'instances': [{'uri': private_url, 'request-header': 'PRIVATE_COOKIE', 'response-body': 'PRIVATE_BODY'}],
+                }]}],
+            })
+            publisher.publish()
+            report = json.loads((publisher.OUT / 'frontend.json').read_text(encoding='utf-8'))
+            html = (publisher.OUT / 'frontend.html').read_text(encoding='utf-8')
+            outputs = ''.join(p.read_text(encoding='utf-8') for p in publisher.OUT.iterdir())
+            for secret in ('PRIVATE_BASIC', 'PRIVATE_QUERY', 'PRIVATE_FRAGMENT', 'PRIVATE_COOKIE', 'PRIVATE_BODY', 'nonce-AAAAAAAAAAAA'):
+                self.assertNotIn(secret, outputs)
+            self.assertEqual(report['risk_counts'], counts)
+            self.assertEqual(report['status'], 'FAIL')
+            self.assertEqual(report['insights'][0]['statistic'], '11')
+            self.assertEqual(report['alerts'][0]['count'], 2)
+            self.assertEqual(report['sites'], ['https://fixture.invalid'])
+            for expected in ('data:image/png;base64,', 'ZAP by Checkmarx', 'ZAP Scanning Report', 'Summary of Alerts', 'Insights', 'Alert Detail', '2.17.0', 'href="#alert-1"', 'color-scheme: light'):
+                self.assertIn(expected, html)
+            self.assertNotIn('<script>', html)
+            self.assertNotIn('<script>', (publisher.OUT / 'index.html').read_text(encoding='utf-8'))
+
     def test_pipeline_keeps_security_and_has_no_skip_parameter(self):
         source = (ROOT / 'Jenkinsfile').read_text(encoding='utf-8')
         for text in ('ci-security.py build', 'ci-security.py scan', 'ci-security.py verify', 'ci-security.py deploy', 'waitForQualityGate abortPipeline: true', 'bash scripts/security-tests.sh', 'removeLastBuild: true', "artifactNumToKeepStr: '1'", 'archiveArtifacts'):

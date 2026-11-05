@@ -116,7 +116,8 @@ globalThis.ASCLAContent = function ({ escape: E, icon: I, config: C, T = (text) 
   function agenda(p) {
     const data = p.meta.agenda_ai;
     if (!data) return "";
-    const mode = `<span class="tag">${E(data.mode || "DEMO MODE")}</span>`;
+    const modeName=String(data.mode || "DEMO MODE").replace(/\bAPI\s+real\b/gi,'API');
+    const mode = `<span class="tag">${E(modeName)}</span>`;
     return `<section class="generated-results"><h3>${E(T("Agenda de conversación"))} ${mode}</h3><p>${E(data.objective)}</p><p><strong>${E(T("Para comenzar"))}:</strong> ${E(data.icebreaker)}</p><p><strong>${E(T("Para cerrar"))}:</strong> ${E(data.closing_question)}</p><p class="private-note">${E(T("Propuesta de"))} ${Number(data.duration_minutes)} ${E(T("minutos. Revisa la agenda y la fecha antes de aprobar."))}</p></section>`;
   }
   function value(data, depth = 0) {

@@ -21,9 +21,13 @@ final class Matching
         $rightParticipation=$includeParticipation?MatchingParticipation::topics($b):[];
         $left['participation']=$leftParticipation;$right['participation']=$rightParticipation;
         $weights=Settings::get()['matching_weights'];
-        $key='ascla_match_'.hash('sha256',wp_json_encode([$a,$b,$left['revision']??0,$right['revision']??0,$weights,$leftParticipation,$rightParticipation,$includeParticipation]));
-        $result=get_transient($key);
-        if (!$result) { $result=MatchScore::calculate($left,$right,$weights);set_transient($key,$result,HOUR_IN_SECONDS); }
+        // Plain shortlist scores cost less CPU than a database cache read/write per pair.
+        $key=($explain || $includeParticipation)?'ascla_match_'.hash('sha256',wp_json_encode([$a,$b,$left['revision']??0,$right['revision']??0,$weights,$leftParticipation,$rightParticipation,$includeParticipation])):'';
+        $result=$key!==''?get_transient($key):false;
+        if (!$result) {
+            $result=MatchScore::calculate($left,$right,$weights);
+            if ($key!=='') { set_transient($key,$result,HOUR_IN_SECONDS); }
+        }
         $names=MatchingExplanation::sharedNames($result);
         $signals=MatchingExplanation::signals($result);
         $affinity=['score'=>$result['score'],'shared'=>$names,'signals'=>$signals,'explanation'=>MatchingExplanation::explanation($names,$signals)];
@@ -32,6 +36,10 @@ final class Matching
     }
 
     public static function recommendations(): array
+    {
+        return \ASCLA\Core\Repositories\RelationReads::run(get_current_user_id(),static fn()=>self::recommendationsRead());
+    }
+    private static function recommendationsRead(): array
     {
         $me=get_current_user_id();
         if (!self::eligibility($me,true)['eligible']) { return []; }
@@ -96,7 +104,7 @@ final class Matching
             $previous=get_current_user_id();$ids=[];
             try {
                 wp_set_current_user($userId);
-                if (self::eligibility($userId,true)['eligible']) { $ids=self::rankedCandidateIds($userId); }
+                if (self::eligibility($userId,true)['eligible']) { $ids=\ASCLA\Core\Repositories\RelationReads::run($userId,static fn()=>self::rankedCandidateIds($userId)); }
                 $generated=time();$batch=['ids'=>$ids,'generated_at'=>gmdate('c',$generated),'generated_timestamp'=>$generated,'next_update'=>gmdate('c',$generated+self::BATCH_SECONDS),'signature'=>self::batchSignature($userId)];
                 update_user_meta($userId,self::BATCH_META,$batch);
                 return $batch;
@@ -142,17 +150,28 @@ final class Matching
 
     private static function recommendationShortlist(int $me,int $preMinimum): array
     {
-        $shortlist=[];
-        foreach (get_users(['capability'=>'ascla_access']) as $candidate) {
-            $id=(int)$candidate->ID;
-            if ($id===$me || self::isDismissed($me,$id) || !self::eligibility($id,false)['eligible'] || !self::hasRequiredCommonFactor($me,$id)) { continue; }
-            try {
-                $affinity=self::between($me,$id,false,false);
-                if ((int)$affinity['score']>=$preMinimum) { $shortlist[]=['id'=>$id,'score'=>(int)$affinity['score']]; }
-            } catch (\ASCLA\Core\Rest\ApiException) { continue; }
-        }
-        usort($shortlist,static fn($a,$b)=>($b['score']<=>$a['score'])?:($a['id']<=>$b['id']));
+        $shortlist=[];$page=1;
+        do {
+            $candidates=get_users(['capability'=>'ascla_access','number'=>200,'paged'=>$page++,'orderby'=>'ID','order'=>'ASC']);
+            cache_users(array_map(static fn($user)=>(int)$user->ID,$candidates));
+            foreach ($candidates as $candidate) {
+                $id=(int)$candidate->ID;
+                if (!self::shortlistEligible($me,$id)) { continue; }
+                try {
+                    $affinity=self::between($me,$id,false,false);
+                    if ((int)$affinity['score']>=$preMinimum) { $shortlist[]=['id'=>$id,'score'=>(int)$affinity['score']]; }
+                } catch (\ASCLA\Core\Rest\ApiException) { continue; }
+            }
+            usort($shortlist,static fn($a,$b)=>($b['score']<=>$a['score'])?:($a['id']<=>$b['id']));
+            $shortlist=array_slice($shortlist,0,40);
+        } while (count($candidates)===200);
         return $shortlist;
+    }
+
+    private static function shortlistEligible(int $viewer,int $target): bool
+    {
+        return $target!==$viewer && !self::isDismissed($viewer,$target) && self::eligibility($target,false)['eligible']
+            && self::hasRequiredCommonFactor($viewer,$target);
     }
 
     private static function hasRequiredCommonFactor(int $leftId,int $rightId): bool
@@ -167,6 +186,8 @@ final class Matching
 
     private static function isDismissed(int $viewer,int $target): bool
     {
+        $rows=\ASCLA\Core\Repositories\RelationReads::pair($viewer,$target);
+        if ($rows!==null) { return (bool)array_filter($rows,static fn($row)=>$row['kind']===self::DISMISS_KIND && (int)$row['user_id']===$viewer); }
         return Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',[$viewer,$target,self::DISMISS_KIND])>0;
     }
 

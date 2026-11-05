@@ -226,6 +226,7 @@
   color: var(--ink);
 }
 .header-right {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 20px;
@@ -4102,7 +4103,7 @@ html[data-ascla-theme="dark"] #ascla-root .live-toast-close:hover,html[data-ascl
   #ascla-root .header-language select{min-width:70px;max-width:80px}
 }
 
-#ascla-root .import-progress{margin-bottom:20px}#ascla-root .import-progress progress{display:block;width:100%;height:18px;margin-top:10px}#ascla-root .import-rows{display:grid;gap:16px}#ascla-root .import-row dl{display:grid;grid-template-columns:180px minmax(0,1fr);gap:10px;font-size:13px}#ascla-root .import-row dd{margin:0;overflow-wrap:anywhere;white-space:pre-wrap}#ascla-root .import-row select[multiple]{min-height:145px;width:100%}#ascla-root .import-warnings{border-left:3px solid #b4770f;padding:12px 12px 12px 30px;background:var(--bg)}#ascla-root .admin-panel .import-row .table-wrap{overflow-x:auto}@media(max-width:680px){#ascla-root .import-row dl{grid-template-columns:1fr}}
+#ascla-root .import-progress{margin-bottom:20px}#ascla-root .import-progress progress{display:block;width:100%;height:18px;margin-top:10px}#ascla-root .import-rows{display:grid;gap:16px}#ascla-root .import-row dl{display:grid;grid-template-columns:180px minmax(0,1fr);gap:10px;font-size:13px}#ascla-root .import-row dd{margin:0;overflow-wrap:anywhere;white-space:pre-wrap}#ascla-root .import-row select[multiple]{min-height:145px;width:100%}#ascla-root .import-warnings{border-left:3px solid var(--primary);padding:12px 12px 12px 30px;background:var(--bg)}#ascla-root .admin-panel .import-row .table-wrap{overflow-x:auto}@media(max-width:680px){#ascla-root .import-row dl{grid-template-columns:1fr}}
 
 /* RF-013 / CP-021: numeric directory pagination and visible result limit */
 .directory-pagination {
@@ -4645,7 +4646,15 @@ html[data-ascla-theme="dark"] #ascla-root .directory-pagination-summary select {
 #ascla-root .ally-registry-row .form-actions { margin:0; gap:7px; }
   #ascla-root .editorial-registry-row { margin-bottom:12px; }
   #ascla-root .editorial-registry-row h3 { overflow-wrap:anywhere; }
-  #ascla-root .editorial-registry-row .ally-registry-logo { background:var(--surface); color:var(--ink); }
+  #ascla-root .editorial-registry-row .ally-registry-logo { background:var(--surface); color:var(--ink); overflow:hidden;position:relative; }
+  #ascla-root .editorial-registry-row .ally-registry-logo img { width:100%;height:100%;object-fit:cover;position:absolute;inset:0;background:var(--surface); }
+  #ascla-root .comments > #comments-list { margin-top:22px; }
+  #ascla-root .micro-selection-panel { border:1px solid var(--line);border-radius:14px;padding:16px;margin:16px 0; }
+  #ascla-root .micro-selection-panel h3 { margin:0 0 10px; }
+  #ascla-root .micro-candidate-row { display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line); }
+  #ascla-root .micro-candidate-row > span { overflow-wrap:anywhere;min-width:0; }
+  #ascla-root .micro-candidate-search { display:flex;align-items:center;gap:8px;margin-bottom:12px; }
+  #ascla-root .micro-candidate-search input { min-width:0;flex:1;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:inherit; }
   #ascla-root form.editorial-registry-filters { display:grid; grid-template-columns:minmax(160px,.8fr) minmax(0,1.6fr) minmax(160px,.8fr) auto; gap:12px; align-items:end; }
   #ascla-root form.editorial-registry-filters .field { min-width:0; width:auto; }
   #ascla-root form.editorial-registry-filters .field input,
@@ -4962,6 +4971,7 @@ html[data-ascla-theme="dark"] #ascla-root .support-status-filter.active,html[dat
 #ascla-root .stats-view-intro p,#ascla-root .stats-subheading p{margin:7px 0 0;color:var(--muted);font-size:13px}
 #ascla-root .stats-grid.stats-primary{grid-template-columns:repeat(3,minmax(0,1fr))}
 #ascla-root .stats-grid.stats-secondary{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:14px}
+#ascla-root .stats-grid.stats-interaction{margin-top:14px}
 #ascla-root .stats-metric{display:flex;flex-direction:column;margin:0;gap:12px;padding:20px;box-shadow:none;min-width:0}
 #ascla-root .stats-metric-label{display:flex;align-items:center;gap:9px;color:var(--ink);font-size:12px;font-weight:600}
 #ascla-root .stats-metric-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;border-radius:10px;background:var(--blue-soft);color:var(--blue)}
@@ -5064,7 +5074,7 @@ html[data-ascla-theme="dark"] #ascla-root .support-status-filter.active,html[dat
   #ascla-root .stats-view-button{padding:12px 10px;gap:8px}
   #ascla-root .stats-view-button small{font-size:10px}
   #ascla-root .stats-coverage{display:flex;align-items:stretch;gap:14px;padding:16px}
-  #ascla-root .stats-grid.stats-primary,#ascla-root .stats-grid.stats-secondary{grid-template-columns:1fr}
+  #ascla-root .stats-grid.stats-primary,#ascla-root .stats-grid.stats-secondary,#ascla-root .stats-grid.stats-interaction{grid-template-columns:1fr}
   #ascla-root .stats-metric{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:14px;padding:16px}
   #ascla-root .stats-metric-label{grid-column:1;align-self:center}
   #ascla-root .stats-metric>strong{grid-column:2;grid-row:1;font-size:28px!important;align-self:center}
@@ -5426,6 +5436,7 @@ html[data-ascla-theme="dark"] #ascla-root .pdf-page{background:#101b24}
 #ascla-root .stats-summary-main>strong{font-size:38px;line-height:1.15;letter-spacing:-1px;font-weight:700;font-variant-numeric:tabular-nums}
 #ascla-root .stats-summary-main>span{font-size:13px;line-height:1.6;color:var(--ink)}
 #ascla-root .stats-summary-support{display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid var(--line);margin-top:auto}
+#ascla-root .stats-summary-support+.stats-summary-support{margin-top:12px;padding-top:0;border-top:0}
 #ascla-root .stats-summary-support>strong{font-size:23px;line-height:1.3;flex-shrink:0;font-variant-numeric:tabular-nums}
 #ascla-root .stats-summary-support>span{font-size:12px;line-height:1.6;color:var(--muted)}
 #ascla-root .stats-summary-card>p{font-size:12px;line-height:1.75;color:var(--muted);margin:16px 0 0}

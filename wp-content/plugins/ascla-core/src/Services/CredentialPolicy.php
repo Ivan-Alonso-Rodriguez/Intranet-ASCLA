@@ -23,6 +23,15 @@ final class CredentialPolicy
         }
         Access::require($data['login_challenge_after']<$data['login_lock_after'],'El captcha debe activarse antes del bloqueo.',400);
     }
+    public static function username(mixed $input,int $id): string
+    {
+        $login=trim(Access::text($input,60));
+        Access::require($login!=='' && sanitize_user($login,true)===$login && validate_username($login) && !preg_match('/\s/u',$login),'Use un nombre de usuario válido, sin espacios ni caracteres especiales no permitidos.',400);
+        $existing=username_exists($login);
+        Access::require(!$existing || (int)$existing===$id,'Ese nombre de usuario ya está registrado.',409);
+        return $login;
+    }
+
     public static function error(string $password,object $user): string
     {
         $minimum=Settings::get()['password_min_length'];

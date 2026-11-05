@@ -2,13 +2,13 @@
 namespace ASCLA\Core\Domain;
 use ASCLA\Core\Services\Access;
 
-/** Parses Zoom participant exports without evaluating cells or guessing identities by name. */
+/** Parses participant evidence; identity resolution belongs to the attendance preview. */
 final class ZoomCsv
 {
     private const COLUMNS=[
         'email'=>['email','useremail','emailaddress','correo','correoelectronico','correoelectronicodelusuario'],
         'minutes'=>['durationminutes','durationmins','durationmin','duration','duracionminutos','duracionmin','duracion','totaldurationminutes','totaldurationmins','tiempoenlasesionminutos'],
-        'name'=>['name','nameoriginalname','username','nombre','nombreoriginal','nombreusuario','nombreoriginalnombre'],
+        'name'=>['name','nameoriginalname','username','nombre','nombreoriginal','nombreusuario','nombreoriginalnombre','nombrenombreoriginal'],
         'join'=>['jointime','jointimestamp','horadeentrada','horadeingreso','horadeunion'],
         'leave'=>['leavetime','leavetimestamp','horadesalida'],
     ];
@@ -26,7 +26,7 @@ final class ZoomCsv
         while (($raw=fgets($stream))!==false && ++$line<=30) {
             foreach ([',',';',"\t"] as $separator) {
                 $cells=str_getcsv($raw,$separator,'"','');$keys=array_map([self::class,'key'],$cells);
-                if (!array_intersect($keys,self::COLUMNS['email'])) { continue; }
+                if (!array_intersect($keys,self::COLUMNS['email']) && !(array_intersect($keys,self::COLUMNS['name']) && array_intersect($keys,array_merge(self::COLUMNS['minutes'],self::COLUMNS['join'])))) { continue; }
                 Access::require(count($keys)<=100,'Cabecera CSV no válida.',400);
                 return [self::columnMap($keys),$separator];
             }
@@ -45,7 +45,8 @@ final class ZoomCsv
     }
     private static function participantRow(array $cells,array $header,int $line): array
     {
-        $email=strtolower(trim((string)($cells[$header['email']]??'')));
+        $email=$header['email']===false?'':strtolower(trim((string)($cells[$header['email']]??'')));
+        $name=mb_substr(sanitize_text_field((string)($header['name']===false?'':($cells[$header['name']]??''))),0,160);
         $duration=$header['minutes']===false?'':trim((string)($cells[$header['minutes']]??''));
         $minutes=null;$seconds=null;
         if ($duration!=='') {
@@ -54,11 +55,11 @@ final class ZoomCsv
             else { $minutes=(int)ceil($value);$seconds=(int)round($value*60); }
         }
         $reason='';
-        if (!is_email($email)) { $reason='Correo ausente o no válido'; }
+        if (!is_email($email) && !Access::hasText($name)) { $reason='Correo y nombre ausentes o no válidos'; }
         elseif ($minutes!==null && ($minutes<0 || $minutes>10080)) { $reason='Duración no válida'; }
         return [
             'signature'=>hash('sha256',wp_json_encode($cells)),'line'=>$line,'email'=>$email,
-            'name'=>mb_substr(sanitize_text_field((string)($header['name']===false?'':($cells[$header['name']]??''))),0,160),
+            'name'=>$name,
             'minutes'=>$minutes,'seconds'=>$seconds,
             'join'=>$header['join']===false?'':trim((string)($cells[$header['join']]??'')),
             'leave'=>$header['leave']===false?'':trim((string)($cells[$header['leave']]??'')),'error'=>$reason,
@@ -83,7 +84,7 @@ final class ZoomCsv
         $stream=fopen('php://temp','r+');fwrite($stream,$csv);rewind($stream);$line=0;
         try {
             [$header,$delimiter]=self::participantHeader($stream,$line);
-            Access::require($header!==null,'No se encontró la columna de correo del participante en el CSV.',400);
+            Access::require($header!==null,'No se encontró una columna de correo o nombre del participante en el CSV.',400);
             $rows=self::participantRows($stream,$header,$delimiter,$line);
             Access::require(!empty($rows),'El CSV no contiene participantes.',400);
             return $rows;

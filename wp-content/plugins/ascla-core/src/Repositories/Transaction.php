@@ -6,7 +6,10 @@ final class Transaction
 {
     private static int $depth=0;
     private static array $afterCommit=[];
+    private static array $afterCommitKeys=[];
     private static bool $enginesChecked=false;
+
+    public static function active(): bool { return self::$depth>0; }
 
     public static function boot(): void
     {
@@ -87,6 +90,7 @@ final class Transaction
         global $wpdb;
         $wpdb->query($level?'ROLLBACK TO SAVEPOINT '.$savepoint:'ROLLBACK');
         self::$afterCommit=array_slice(self::$afterCommit,0,$queued);
+        self::$afterCommitKeys=array_filter(self::$afterCommitKeys,static fn($position)=>$position<$queued);
         // A savepoint rollback invalidates only this transaction's local view.
         if ($GLOBALS['wp_object_cache'] instanceof TransactionCache) {
             if ($checkpoint) { $GLOBALS['wp_object_cache']->rollback($checkpoint); }
@@ -104,6 +108,14 @@ final class Transaction
         else { $callback(); }
     }
 
+    public static function afterCommitOnce(string $key,callable $callback): void
+    {
+        if (!self::$depth) { $callback();return; }
+        if (isset(self::$afterCommitKeys[$key])) { return; }
+        self::$afterCommitKeys[$key]=count(self::$afterCommit);
+        self::$afterCommit[]=$callback;
+    }
+
     private static function finishCache(TransactionCache $cache,bool $committed,int $recovery): void
     {
         try { $cache->finish($committed);if ($committed) { CacheRecovery::complete($recovery); } }
@@ -116,7 +128,7 @@ final class Transaction
 
     private static function deliver(): void
     {
-        $callbacks=self::$afterCommit;self::$afterCommit=[];
+        $callbacks=self::$afterCommit;self::$afterCommit=[];self::$afterCommitKeys=[];
         foreach ($callbacks as $callback) {
             try { $callback(); }
             catch (\Throwable $error) { \ASCLA\Core\Services\TechnicalErrors::record('delivery','delivery_failed',$error); }

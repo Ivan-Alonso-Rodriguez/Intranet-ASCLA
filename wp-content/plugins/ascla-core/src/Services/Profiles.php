@@ -34,10 +34,12 @@ final class Profiles
     }
     public static function searchableAuthors(string $query): array
     {
-        $ids=[];
-        foreach(get_users(['capability'=>'ascla_access','fields'=>'ID']) as $id) {
-            if (mb_stripos(self::publicName((int)$id),$query)!==false) { $ids[]=(int)$id; }
-        }
+        $ids=[];$page=1;
+        do {
+            $users=get_users(['capability'=>'ascla_access','number'=>200,'paged'=>$page++,'orderby'=>'ID','order'=>'ASC']);
+            cache_users(array_map(static fn($user)=>(int)$user->ID,$users));
+            foreach ($users as $user) { if (mb_stripos(self::publicName((int)$user->ID),$query)!==false) { $ids[]=(int)$user->ID; } }
+        } while (count($users)===200);
         return $ids;
     }
     public static function raw(int $id): array
@@ -51,7 +53,7 @@ final class Profiles
         }
         return $profile;
     }
-    public static function visible(int $id): array
+    public static function visible(int $id,bool $administration=true): array
     {
         if ($id===get_current_user_id()) { AutomaticInterests::synchronize($id); }
         $data=self::raw($id);
@@ -60,7 +62,7 @@ final class Profiles
         $data=self::applyVisibility($data,$id,$own);
         $data['member_type_code']=MemberTypes::code((string)($data['member_type']??''));
         $data['member_type']=\ASCLA\Core\Frontend\Language::label(MemberTypes::OPTIONS[$data['member_type_code']]??'');
-        if (current_user_can('ascla_manage')) { $data['administration']=Administration::permissions($id); }
+        if ($administration && current_user_can('ascla_manage')) { $data['administration']=Administration::permissions($id); }
         unset($data['revision']);
         $data['photo_url']=!empty($data['photo_id'])?Media::profilePhotoUrl((int)$data['photo_id'],$id):'';
         if ($own) {

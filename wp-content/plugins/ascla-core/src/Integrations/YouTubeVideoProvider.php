@@ -29,7 +29,7 @@ final class YouTubeVideoProvider implements VideoProviderInterface
             $interval=new \DateInterval($item['contentDetails']['duration']??'PT0S');
             $duration=$interval->d*86400+$interval->h*3600+$interval->i*60+$interval->s;
         } catch (\Exception $e) { throw new IntegrationException('YouTube devolvió una duración no válida.'); }
-        return ['mode'=>'API REAL YouTube','duration_seconds'=>$duration,'thumbnail_url'=>self::thumbnail($videoId),'source_title'=>sanitize_text_field($item['snippet']['title']??'')];
+        return ['mode'=>'API YouTube','duration_seconds'=>$duration,'thumbnail_url'=>self::thumbnail($videoId),'source_title'=>sanitize_text_field($item['snippet']['title']??'')];
     }
     private static function publicDurationFromBody(string $body): int
     {

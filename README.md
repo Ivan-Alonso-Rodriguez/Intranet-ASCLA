@@ -1,6 +1,8 @@
 # ASCLA Core — Intranet ASCLA
 
-## Versión actual: 1.11.0 · esquema 15
+## Versión actual: 1.11.1 · esquema 15
+
+Incluye importación revisada de intereses desde exportaciones CSV, PDF tabular, HTML y ZIP de una hoja de Forms/Sheets, priorizando cuentas existentes. Añade claridad a las cifras de inscritos y asistencias y una caché acotada de estadísticas, con [pruebas de carga local](docs/evidence/release-1.11.1/statistics-load1111.json). También reúne los cambios del 5 de noviembre en fotografía, edición administrativa, recuperación de acceso y asistencia Zoom. Ver el [historial de 1.11.1](VERSION_HISTORY.md#1111-importación-revisada-y-perfiles) y la [evidencia de esta entrega](docs/evidence/release-1.11.1/interest-import1111.json).
 
 Plugin WordPress para una comunidad profesional privada: perfiles, Directorio, conexiones, mensajería, Hub, foros, eventos, microeventos, Centro de Conocimiento, Galería, Aliados, Contacto y administración. Elementor es opcional; no se modifica WordPress Core.
 
@@ -35,7 +37,7 @@ python3 scripts/build.py
 python3 scripts/verify-package.py
 ```
 
-Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto actual de 1.11.0](docs/evidence/release-1.11.0/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
+Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto actual de 1.11.1](docs/evidence/release-1.11.1/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
 
 ## Calidad y entrega
 

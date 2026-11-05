@@ -181,7 +181,13 @@ module.exports=async function({fixture,out}) {
         await admin.locator('.ascla-sidebar').getByRole('link',{name:'Administración',exact:true}).click();
         await admin.getByRole('button',{name:'Usuarios e intereses',exact:true}).click();
         const search=admin.locator('[data-form="admin-filter"][data-area="users"]');
-        await search.locator('[name=q]').fill(actor.login);await search.getByRole('button',{name:'Buscar',exact:true}).click();
+        await search.locator('[name=q]').fill(actor.login);
+        const previousSearch=await search.elementHandle();
+        await Promise.all([
+          admin.waitForResponse(r=>r.request().method()==='GET' && r.url().includes('/admin/users?') && new URL(r.url()).searchParams.get('q')===actor.login),
+          search.getByRole('button',{name:'Buscar',exact:true}).click(),
+        ]);
+        await previousSearch.waitForElementState('hidden');
         async function changeAccess(suspended){
           const card=admin.locator('[data-admin-user="'+actor.id+'"]');await card.waitFor();
           await card.locator('.admin-user-more > summary').click();

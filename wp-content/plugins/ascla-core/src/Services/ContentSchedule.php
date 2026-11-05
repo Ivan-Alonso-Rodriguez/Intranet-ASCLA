@@ -49,8 +49,7 @@ final class ContentSchedule
             $meta['publish_actor_id']=get_current_user_id();
             return 'ascla_hidden';
         }
-        // Approval is retained; an administrator must choose when to publish.
-        return !empty($meta['micro'])?'ascla_hidden':$status;
+        return $status;
     }
 
     public static function cancel(int $id): void

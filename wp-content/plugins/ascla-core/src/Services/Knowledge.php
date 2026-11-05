@@ -464,7 +464,7 @@ final class KnowledgeVideoMetadata
     {
         try {
             $data=(new YouTubeVideoProvider())->metadata($videoId);
-            return [max(0,min(604800,(int)($data['duration_seconds']??0))),(string)($data['mode']??'API REAL YouTube'),sanitize_text_field($data['source_title']??'')];
+            return [max(0,min(604800,(int)($data['duration_seconds']??0))),(string)($data['mode']??'API YouTube'),sanitize_text_field($data['source_title']??'')];
         } catch (\Throwable) {
             return [0,'',''];
         }

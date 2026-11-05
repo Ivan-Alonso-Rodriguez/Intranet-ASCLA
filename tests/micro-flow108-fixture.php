@@ -59,8 +59,8 @@ foreach (['pending','scheduled','changed','insufficient'] as $name) {
     if (is_wp_error($id)) { throw new RuntimeException($id->get_error_message()); }
     $fixture['posts'][]=$id;update_option($key,$fixture,false);update_post_meta($id,'_ascla',$meta);MicroLifecycle::history($id,'pending');wp_update_post(['ID'=>$id,'post_status'=>'pending']);$posts[$name]=$id;
     if ($name==='scheduled') {
-        Content::moderate($id,'approve','Agenda revisada en prueba local');
         Content::save('event',['title'=>get_the_title($id),'body'=>get_post_field('post_content',$id),'status'=>'scheduled','publish_at'=>gmdate('c',time()+3600)],$id);
+        Content::moderate($id,'approve','Agenda revisada en prueba local');
     }
 }
 $profile=get_user_meta($fixture['users']['changed1'],'_ascla_profile',true);$profile['bio']='';update_user_meta($fixture['users']['changed1'],'_ascla_profile',$profile);
