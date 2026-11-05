@@ -1,6 +1,6 @@
 /* Browser regression for selective assets and all ordinary community pages. */
 const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
-const base=process.env.ASCLA_SITE_URL,out=path.resolve('test-results/optimization-20261028');
+const base=process.env.ASCLA_SITE_URL,out=path.resolve(process.env.ASCLA_TEST_OUT||'test-results/optimization-20261028');
 if(process.env.ASCLA_E2E_EPHEMERAL!=='1'||!['127.0.0.1','localhost'].includes(new URL(base).hostname))throw Error('Disposable loopback required');
 const settings=Object.fromEntries(fs.readFileSync(process.env.ASCLA_ENV_FILE,'utf8').split(/\r?\n/).filter(s=>s.includes('=')).map(s=>[s.slice(0,s.indexOf('=')),s.slice(s.indexOf('=')+1)]));
 const checks=[],errors=[],serverErrors=[],views=[];let browser,page;

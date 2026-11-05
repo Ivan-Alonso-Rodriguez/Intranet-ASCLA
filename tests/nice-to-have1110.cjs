@@ -1,7 +1,7 @@
 /* Live DOM, permissions and RNF-010 timings on a disposable loopback WordPress. */
 const {chromium}=require('playwright');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
-const base=process.env.ASCLA_SITE_URL,out=path.resolve('test-results/nice-to-have-20261028');
+const base=process.env.ASCLA_SITE_URL,out=path.resolve(process.env.ASCLA_TEST_OUT||'test-results/nice-to-have-20261028');
 if(process.env.ASCLA_E2E_EPHEMERAL!=='1'||!['127.0.0.1','localhost'].includes(new URL(base).hostname))throw Error('Explicitly disposable loopback required');
 const fixture=JSON.parse(fs.readFileSync(process.env.ASCLA_STATISTICS_FIXTURE,'utf8'));
 const checks=[],errors=[],scans=[],timings=[],contexts=[];let browser,page;

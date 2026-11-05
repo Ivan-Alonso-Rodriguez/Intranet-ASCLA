@@ -3,8 +3,8 @@ const {chromium}=require('playwright');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const fixture=JSON.parse(fs.readFileSync(process.env.ASCLA_UX_FIXTURE||'test-results/sonar-preparation/release1110-users.json','utf8'));
 if(fixture.origin!=='ascla-local-test-users'||!['localhost','127.0.0.1'].includes(new URL(fixture.base).hostname))throw Error('Disposable loopback fixture required');
-const out=path.resolve('test-results/readers-auto1110');fs.mkdirSync(out,{recursive:true});
-const manifest=JSON.parse(fs.readFileSync('docs/evidence/release-1.11.0/package.json','utf8'));
+const out=path.resolve(process.env.ASCLA_TEST_OUT||'test-results/readers-auto1110');fs.mkdirSync(out,{recursive:true});
+const manifest=JSON.parse(fs.readFileSync(process.env.ASCLA_PACKAGE_MANIFEST||'docs/evidence/release-1.11.0/package.json','utf8'));
 const checks=[],scans=[],errors=[],posts=[],contexts=[];let browser,admin,member;
 function pass(name){checks.push(name);console.log('PASS '+name);}
 async function api(page,route,body,method){return page.evaluate(async({route,body,method})=>{const response=await fetch(ASCLA.api+route,{method:method||(body?'POST':'GET'),headers:{'X-WP-Nonce':ASCLA.nonce,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});return{status:response.status,body:await response.json()};},{route,body,method});}

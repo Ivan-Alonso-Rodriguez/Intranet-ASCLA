@@ -1,10 +1,10 @@
 /* Actual local WordPress data, no chart mocks; browser checks for administrative planning and analytics. */
 const {chromium}=require('playwright');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{execFileSync}=require('node:child_process');
-const fixture=JSON.parse(fs.readFileSync('test-results/sonar-preparation/release1110-users.json','utf8'));
-const f=JSON.parse(fs.readFileSync('test-results/sonar-preparation/admin-insights1110-fixture.json','utf8'));
+const fixture=JSON.parse(fs.readFileSync(process.env.ASCLA_UX_FIXTURE||'test-results/sonar-preparation/release1110-users.json','utf8'));
+const f=JSON.parse(fs.readFileSync(process.env.ASCLA_INSIGHTS_FIXTURE||'test-results/sonar-preparation/admin-insights1110-fixture.json','utf8'));
 if(fixture.origin!=='ascla-local-test-users'||f.origin!=='admin-insights1110-local-fixture'||!['127.0.0.1','localhost'].includes(new URL(fixture.base).hostname))throw Error('Disposable loopback required');
-const out=path.resolve('test-results/admin-insights1110');fs.mkdirSync(out,{recursive:true});
+const out=path.resolve(process.env.ASCLA_TEST_OUT||'test-results/admin-insights1110');fs.mkdirSync(out,{recursive:true});
 const checks=[],scans=[],errors=[],contexts=[];let browser,page;
 const pass=name=>{checks.push(name);console.log('PASS '+name);};
 async function api(p,route,body){return p.evaluate(async({route,body})=>{const r=await fetch(ASCLA.api+route,{method:body?'POST':'GET',headers:{'X-WP-Nonce':ASCLA.nonce,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});return{status:r.status,body:await r.json()};},{route,body});}
@@ -39,7 +39,10 @@ const micro=id=>page.locator(`[data-micro-id="${id}"]`);
  await ok('settings',{micro_min:50,micro_capacity:100});await go('microeventos');await page.locator('.micro-readiness').getByText('No hay suficientes asociados elegibles para alcanzar el mínimo.',{exact:true}).waitFor();await page.locator('.micro-diagnostics details').evaluate(n=>n.open=true);await capture('encuentros-condiciones','#admin-panel');
  if(process.env.ASCLA_RUN_LOCAL_QUEUE==='1'){
   const pending=page.waitForResponse(r=>r.request().method()==='POST'&&r.url().endsWith('/jobs'));await page.locator('[data-action=micro-job]').click();assert.equal((await pending).status(),200);
-  execFileSync('docker',['compose','--env-file','.env.release1110','-f','compose.yaml','-f','test-results/sonar-preparation/flows-ports.yaml','-p','ascla_release1110','exec','-T','wordpress','php','-r','require "/var/www/html/wp-load.php"; for($i=0;$i<12;$i++){ASCLA\\Core\\Jobs\\Queue::run();}'],{stdio:'pipe'});
+  const localContainer=process.env.ASCLA_LOCAL_QUEUE_CONTAINER;
+  if(localContainer&&!/^ascla_[a-z0-9_]+-wordpress-1$/.test(localContainer))throw Error('Owned local test container required');
+  if(localContainer)execFileSync('docker',['exec',localContainer,'php','-r','require "/var/www/html/wp-load.php"; for($i=0;$i<12;$i++){ASCLA\\Core\\Jobs\\Queue::run();}'],{stdio:'pipe'});
+  else execFileSync('docker',['compose','--env-file','.env.release1110','-f','compose.yaml','-f','test-results/sonar-preparation/flows-ports.yaml','-p','ascla_release1110','exec','-T','wordpress','php','-r','require "/var/www/html/wp-load.php"; for($i=0;$i<12;$i++){ASCLA\\Core\\Jobs\\Queue::run();}'],{stdio:'pipe'});
   await page.locator('#micro-job-result').getByText('No se generaron propuestas con las condiciones actuales.',{exact:false}).waitFor({timeout:30000});pass('El trabajo de preparación real conserva el diagnóstico y explica un resultado sin propuestas');
  }
  await ok('settings',{micro_min:2,micro_capacity:4});await go('microeventos');await theme('dark');await capture('encuentros-oscuro','#admin-panel');await page.setViewportSize({width:390,height:844});await capture('encuentros-movil-oscuro','#admin-panel');pass('Encuentros y Estadísticas se adaptan a móvil y ambos temas con revisión automática de accesibilidad');
