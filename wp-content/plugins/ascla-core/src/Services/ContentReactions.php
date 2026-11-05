@@ -14,6 +14,24 @@ final class ContentReactions
         $kind=$comment?'comment_like':'like';
         $rows=$wpdb->get_results($wpdb->prepare('SELECT reason,COUNT(*) AS total,SUM(user_id=%d) AS mine FROM '.Store::table('relations').' WHERE target_id=%d AND kind=%s GROUP BY reason',get_current_user_id(),$id,$kind),ARRAY_A)?:[];
         if ($wpdb->last_error!=='') { throw new \ASCLA\Core\Repositories\RepositoryException('No se pudieron consultar las reacciones.'); }
+        return self::format($rows);
+    }
+
+    /** Only the IDs already authorized for the visible page, scoped to this viewer. */
+    public static function summaries(array $ids): array
+    {
+        global $wpdb;$ids=array_values(array_unique(array_filter(array_map('absint',$ids))));
+        if (!$ids) { return []; }
+        $list=implode(',',$ids);
+        $rows=$wpdb->get_results($wpdb->prepare('SELECT target_id,reason,COUNT(*) AS total,SUM(user_id=%d) AS mine FROM '.Store::table('relations')." WHERE target_id IN ($list) AND kind='like' GROUP BY target_id,reason",get_current_user_id()),ARRAY_A)?:[];
+        if ($wpdb->last_error!=='') { throw new \ASCLA\Core\Repositories\RepositoryException('No se pudieron consultar las reacciones.'); }
+        $groups=[];foreach ($rows as $row) { $groups[(int)$row['target_id']][]=$row; }
+        $result=[];foreach ($ids as $id) { $result[$id]=self::format($groups[$id]??[]); }
+        return $result;
+    }
+
+    private static function format(array $rows): array
+    {
         $counts=array_fill_keys(self::TYPES,0);$mine='';
         foreach ($rows as $row) {
             $type=in_array($row['reason'],self::TYPES,true)?$row['reason']:'like';

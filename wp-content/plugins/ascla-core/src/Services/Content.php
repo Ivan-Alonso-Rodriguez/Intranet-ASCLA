@@ -168,21 +168,19 @@ final class Content
 
 final class ContentPublishing
 {
-    public static function serialize(\WP_Post $post): array
+    public static function serialize(\WP_Post $post,?array $reactions=null,?array $terms=null): array
     {
         $meta=self::serializedMeta($post);
         $title=!empty($meta['generated'])?\ASCLA\Core\Domain\EntityRedactor::cleanLabels($post->post_title):$post->post_title;
         $title=\ASCLA\Core\Domain\MicroeventTitle::display($title,$meta);
         if ($title!==$post->post_title && isset($meta['agenda_ai']['title'])) { $meta['agenda_ai']['title']=$title; }
         $body=!empty($meta['generated'])?\ASCLA\Core\Domain\EntityRedactor::cleanLabels($post->post_content):$post->post_content;
-        return self::serializedPayload($post,$meta,$title,$body);
+        return self::serializedPayload($post,$meta,$title,$body,$reactions,$terms);
     }
 
     public static function listing(string $type,array $filter=[]): array
     {
-        [$args,$page,$recommended]=ContentListingQuery::build($type,$filter);
-        if ($recommended) { return self::recommendedListing($args,$page,$filter); }
-        return self::standardListing($args,$page,$filter);
+        return ContentListing::listing($type,$filter);
     }
 
     public static function save(string $type,array $input,int $id=0): array
@@ -229,7 +227,7 @@ final class ContentPublishing
         return $meta;
     }
 
-    private static function serializedPayload(\WP_Post $post,array $meta,mixed $title,mixed $body): array
+    private static function serializedPayload(\WP_Post $post,array $meta,mixed $title,mixed $body,?array $reactions,?array $terms): array
     {
         [$title,$body,$meta]=EditorialPayload::reader($post,$meta,$title,$body);
         if ($post->post_type==='ascla_ally') { $meta['ally_status']=Allies::state($post,$meta); }
@@ -248,8 +246,8 @@ final class ContentPublishing
         $author=get_userdata($post->post_author);
         $date=$post->post_date_gmt;
         if (!$date || str_starts_with($date,'0000-')) { $date=get_gmt_from_date($post->post_date); }
-        $terms=wp_get_object_terms($post->ID,['ascla_interest','ascla_category','ascla_tag']);
-        $reactions=ContentReactions::summary($post->ID);
+        $terms??=wp_get_object_terms($post->ID,['ascla_interest','ascla_category','ascla_tag']);
+        $reactions??=ContentReactions::summary($post->ID);
         return ['id'=>$post->ID,'can_delete'=>self::canDelete($post),'can_edit'=>Content::canEdit($post),'can_moderate'=>Content::canModerate($post),'type'=>substr($post->post_type,6),'title'=>$title,'body'=>$body,'status'=>$post->post_status,'author'=>['id'=>(int)$post->post_author,'name'=>$author?Profiles::publicName((int)$author->ID):'ASCLA'],'date'=>$date,'parent'=>(int)$post->post_parent,'meta'=>$meta,'media'=>Media::metadata($post->ID,(array)($meta['media_ids']??[])),'tags'=>is_wp_error($terms)?[]:array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name,'taxonomy'=>$t->taxonomy],$terms),...$reactions,'reactions'=>$reactions['reaction_total'],'liked'=>$reactions['reaction']!=='','comments'=>(int)$post->comment_count,'url'=>Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$post->ID])];
     }
 
@@ -261,42 +259,6 @@ final class ContentPublishing
             if (!$accepted || !empty($meta['cancelled'])) { unset($meta['url']); }
         }
     }
-    private static function recommendedListing(array $args,int $page,array $filter): array
-    {
-        $perPage=max(1,min(100,(int)($filter['per_page']??18)));
-        $args['posts_per_page']=-1;$args['paged']=1;$args['no_found_rows']=true;
-        $query=new \WP_Query($args);$ranked=[];
-        foreach ($query->posts as $post) {
-            if (!Content::canRead($post)) { continue; }
-            $rank=KnowledgeRecommendations::score($post);
-            if (($rank['relevance']??0)<=0) { continue; }
-            $meta=(array)get_post_meta($post->ID,'_ascla',true);
-            if (!empty($filter['resource_type']) && ($meta['resource_type']??'')!==$filter['resource_type']) { continue; }
-            $ranked[]=['post'=>$post,'score'=>(int)$rank['score'],'reasons'=>array_values((array)($rank['reasons']??[])),'timestamp'=>strtotime($post->post_date_gmt.' UTC')?:0];
-        }
-        usort($ranked,static fn($a,$b)=>$b['score']<=>$a['score'] ?: $b['timestamp']<=>$a['timestamp'] ?: $b['post']->ID<=>$a['post']->ID);
-        $total=count($ranked);$pages=max(1,(int)ceil($total/$perPage));$page=min($page,$pages);$offset=($page-1)*$perPage;
-        $items=array_map(static fn($row)=>self::serialize($row['post'])+['recommendation'=>['score'=>$row['score'],'reasons'=>$row['reasons']]],array_slice($ranked,$offset,$perPage));
-        return ['items'=>$items,'page'=>$page,'per_page'=>$perPage,'total'=>$total,'pages'=>$pages];
-    }
-
-    private static function standardListing(array $args,int $page,array $filter): array
-    {
-        $query=new \WP_Query($args);$items=[];
-        // WordPress does not calculate found_posts when an offset returns no rows.
-        if (!$query->posts && $page>1) { $args['paged']=1;$query=new \WP_Query($args); }
-        $pages=max(1,(int)$query->max_num_pages);
-        $page=min($page,$pages);
-        if ((int)$args['paged']!==$page) { $args['paged']=$page;$query=new \WP_Query($args); }
-        foreach ($query->posts as $post) {
-            if (!Content::canRead($post)) { continue; }
-            $item=self::serialize($post);
-            if (!empty($filter['resource_type']) && ($item['meta']['resource_type']??'')!==$filter['resource_type']) { continue; }
-            $items[]=$item;
-        }
-        return ['items'=>$items,'page'=>$page,'per_page'=>(int)$args['posts_per_page'],'total'=>(int)$query->found_posts,'pages'=>$pages];
-    }
-
     private static function saveBase(string $type,array $input,int $id): array
     {
         Access::require(isset(Catalog::TYPES[$type]),'Tipo no válido.',400);
@@ -352,6 +314,9 @@ final class ContentPublishing
 
     private static function afterSave(int $saved,array $context): void
     {
+        if ($context['type']==='event' && $context['id'] && !empty($context['meta']['micro'])) {
+            Audit::changes('microevent_updated',$saved,$context['old_meta'],$context['meta']);
+        }
         ContentSchedule::sync($saved);
         if ($context['type']==='ally') { Allies::recordState($saved,$context['old_ally_state']); }
         EditorialRegistry::recordState($saved,$context['old_status']);
@@ -363,10 +328,14 @@ final class ContentPublishing
         if ($context['type']==='contact' && !$context['id']) { self::notifySupportCreated($saved); }
         if ($context['type']==='resource' && !empty($context['meta']['video_id'])) { Transaction::afterCommit(static fn()=>Knowledge::autoVideoMetadata($saved)); }
         Audit::record('content_saved',$saved,$context['status']);
-        if ($context['status']==='publish' && in_array($context['type'],['hub','topic','resource','gallery'],true)) {
-            $savedPost=get_post($saved);
-            if ($savedPost) { KnowledgeRecommendations::invalidateActivity((int)$savedPost->post_author); }
-        }
+        self::invalidatePublishedActivity($saved,$context);
+    }
+
+    private static function invalidatePublishedActivity(int $saved,array $context): void
+    {
+        if ($context['status']!=='publish' || !in_array($context['type'],['hub','topic','resource','gallery'],true)) { return; }
+        $savedPost=get_post($saved);
+        if ($savedPost) { KnowledgeRecommendations::invalidateActivity((int)$savedPost->post_author); }
     }
 
     private static function notifySupportCreated(int $postId): void
@@ -480,6 +449,75 @@ final class ContentPublishing
 }
 
 
+
+/** Read-side ranking, pagination and batch serialization. */
+final class ContentListing
+{
+    public static function listing(string $type,array $filter=[]): array
+    {
+        [$args,$page,$recommended]=ContentListingQuery::build($type,$filter);
+        if ($recommended) { return self::recommendedListing($args,$page,$filter); }
+        return self::standardListing($args,$page,$filter);
+    }
+
+    private static function recommendedListing(array $args,int $page,array $filter): array
+    {
+        $perPage=max(1,min(100,(int)($filter['per_page']??18)));
+        $args['posts_per_page']=-1;$args['paged']=1;$args['no_found_rows']=true;
+        $query=new \WP_Query($args);$ranked=[];
+        foreach ($query->posts as $post) {
+            if (!Content::canRead($post)) { continue; }
+            $rank=KnowledgeRecommendations::score($post);
+            if (($rank['relevance']??0)<=0) { continue; }
+            $meta=(array)get_post_meta($post->ID,'_ascla',true);
+            if (!empty($filter['resource_type']) && ($meta['resource_type']??'')!==$filter['resource_type']) { continue; }
+            $ranked[]=['post'=>$post,'score'=>(int)$rank['score'],'reasons'=>array_values((array)($rank['reasons']??[])),'timestamp'=>strtotime($post->post_date_gmt.' UTC')?:0];
+        }
+        usort($ranked,static fn($a,$b)=>$b['score']<=>$a['score'] ?: $b['timestamp']<=>$a['timestamp'] ?: $b['post']->ID<=>$a['post']->ID);
+        $total=count($ranked);$pages=max(1,(int)ceil($total/$perPage));$page=min($page,$pages);$offset=($page-1)*$perPage;
+        $selected=array_slice($ranked,$offset,$perPage);$cards=self::listCards(array_column($selected,'post'));
+        $items=self::recommendedCards($selected,$cards);
+        return ['items'=>$items,'page'=>$page,'per_page'=>$perPage,'total'=>$total,'pages'=>$pages];
+    }
+
+    private static function recommendedCards(array $selected,array $cards): array
+    {
+        $items=[];
+        foreach ($selected as $row) {
+            if (isset($cards[$row['post']->ID])) { $items[]=$cards[$row['post']->ID]+['recommendation'=>['score'=>$row['score'],'reasons'=>$row['reasons']]]; }
+        }
+        return $items;
+    }
+
+    private static function standardListing(array $args,int $page,array $filter): array
+    {
+        $query=new \WP_Query($args);$items=[];
+        // WordPress does not calculate found_posts when an offset returns no rows.
+        if (!$query->posts && $page>1) { $args['paged']=1;$query=new \WP_Query($args); }
+        $pages=max(1,(int)$query->max_num_pages);
+        $page=min($page,$pages);
+        if ((int)$args['paged']!==$page) { $args['paged']=$page;$query=new \WP_Query($args); }
+        foreach (self::listCards($query->posts) as $item) {
+            if (!empty($filter['resource_type']) && ($item['meta']['resource_type']??'')!==$filter['resource_type']) { continue; }
+            $items[]=$item;
+        }
+        return ['items'=>$items,'page'=>$page,'per_page'=>(int)$args['posts_per_page'],'total'=>(int)$query->found_posts,'pages'=>$pages];
+    }
+
+    private static function listCards(array $posts): array
+    {
+        $posts=array_values(array_filter($posts,[Content::class,'canRead']));
+        if (!$posts) { return []; }
+        $ids=array_map(static fn($post)=>(int)$post->ID,$posts);
+        cache_users(array_map(static fn($post)=>(int)$post->post_author,$posts));
+        $reactions=ContentReactions::summaries($ids);$terms=[];
+        $all=wp_get_object_terms($ids,['ascla_interest','ascla_category','ascla_tag'],['fields'=>'all_with_object_id']);
+        if (!is_wp_error($all)) { foreach ($all as $term) { $terms[(int)$term->object_id][]=$term; } }
+        $cards=[];foreach ($posts as $post) { $cards[$post->ID]=Content::serialize($post,$reactions[$post->ID],$terms[$post->ID]??[]); }
+        return $cards;
+    }
+
+}
 
 final class ContentListingQuery
 {

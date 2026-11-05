@@ -166,7 +166,7 @@ final class AttendanceCsv
 {
     public static function partitionRows(array $rows): array
     {
-        $matched=[];$unmatched=[];$duplicates=0;$seen=[];$lookup=[];
+        $matched=[];$unmatched=[];$duplicates=0;$seen=[];$lookup=new AttendanceIdentity();
         foreach ($rows as $row) {
             if (isset($seen[$row['signature']])) { ++$duplicates;continue; }
             $seen[$row['signature']]=true;
@@ -175,20 +175,17 @@ final class AttendanceCsv
         return [$matched,$unmatched,$duplicates];
     }
 
-    private static function appendRow(array $row,array &$matched,array &$unmatched,array &$lookup): void
+    private static function appendRow(array $row,array &$matched,array &$unmatched,AttendanceIdentity $lookup): void
     {
-        // Invalid evidence must not cache a failed identity lookup for later valid rows.
-        $user=false;
-        if ($row['error']==='') {
-            if (!array_key_exists($row['email'],$lookup)) { $lookup[$row['email']]=get_user_by('email',$row['email']); }
-            $user=$lookup[$row['email']];
-        }
-        if ($row['error']!=='' || !$user || !user_can($user,'ascla_access')) {
-            $unmatched[]=['line'=>$row['line'],'email'=>Access::excerpt($row['email'],100),'name'=>$row['name'],'reason'=>$row['error']?:'Correo sin cuenta ASCLA','sessions'=>[$row]];
+        $identity=$lookup->resolve($row);$user=$identity['user'];
+        if (!$user) {
+            $unmatched[]=['line'=>$row['line'],'email'=>Access::excerpt($row['email'],100),'name'=>$row['name'],'reason'=>$identity['reason'],'sessions'=>[$row]];
             return;
         }
         $uid=(int)$user->ID;
-        if (!isset($matched[$uid])) { $matched[$uid]=['id'=>$uid,'name'=>Profiles::publicName($uid),'email'=>$user->user_email,'rows'=>[]]; }
+        if (!isset($matched[$uid])) { $matched[$uid]=['id'=>$uid,'name'=>Profiles::publicName($uid),'email'=>$user->user_email,'rows'=>[],'identity_methods'=>[],'csv_names'=>[]]; }
+        $matched[$uid]['identity_methods']=array_values(array_unique([...$matched[$uid]['identity_methods'],$identity['method']]));
+        $matched[$uid]['csv_names']=array_values(array_unique([...$matched[$uid]['csv_names'],$row['name']]));
         $matched[$uid]['rows'][]=$row;
     }
 }

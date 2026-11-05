@@ -232,7 +232,8 @@ final class Administration
 
     public static function updateUser(int $id,array $input): array
     {
-        return Store::atomic('profile-interests:'.$id,static fn()=>self::updateUserUnlocked($id,$input));
+        $save=static fn()=>Store::atomic('profile-interests:'.$id,static fn()=>self::updateUserUnlocked($id,$input));
+        return array_key_exists('login',$input)?Store::atomic('admin-create-user',$save):$save();
     }
 
     private static function updateUserUnlocked(int $id,array $input): array
@@ -240,6 +241,7 @@ final class Administration
         clean_user_cache($id);
         $user=self::editableMember($id);
         Access::require(Access::canManageAccount('edit_user',$id),'No puedes editar esta cuenta.',403);
+        $login=CredentialPolicy::username($input['login']??$user->user_login,$id);
         $email=sanitize_email(Access::text($input['email']??'',100));
         Access::require($email!==''&&is_email($email),'Correo electrónico no válido.',400);
         $existing=email_exists($email);
@@ -252,10 +254,7 @@ final class Administration
         Access::require(Access::hasText($first.$last),'Indica al menos un nombre o apellido.',400);
         $membership=Membership::validate($input,$id);
         $previousProfile=(array)get_user_meta($id,'_ascla_profile',true)+['first_name'=>$user->first_name,'last_name'=>$user->last_name,'phone_visibility'=>'private'];
-        if (array_key_exists('profile_revision',$input)) {
-            $revision=FormRules::bounded($input['profile_revision'],0,PHP_INT_MAX);
-            Access::require($revision===(int)($previousProfile['revision']??0),'El perfil cambió mientras lo editabas. Cierra y vuelve a abrir Editar usuario para cargar los datos actuales.',409);
-        }
+        ProfileValidation::validateRevision($input,$previousProfile);
         $phone=\ASCLA\Core\Domain\Phone::normalize($input['phone']??($previousProfile['phone']??''));
         $phoneVisibility=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']??($previousProfile['phone_visibility']??'private'));
         $profile=Profiles::details($previousProfile,$input);
@@ -264,13 +263,21 @@ final class Administration
         $profile=self::professionalFields($profile,$previousProfile,$input);
         $profile=MemberTypes::profile($profile,$input,$id);
         $profile['birth_date']=Birthdays::normalize($input['birth_date']??($previousProfile['birth_date']??''));
+        if (array_key_exists('photo_id',$input)) {
+            Access::require(FormRules::bounded($input['photo_id'],0,PHP_INT_MAX)===0,'Solo puedes restablecer la fotografía del asociado.',400);
+            $profile['photo_id']=0;
+        }
         $changed=ProfessionalChanges::changed($previousProfile,$profile);
         if ($email!==$user->user_email) { $changed[]='email'; }
         if ($changed) { ProfileValidation::validateRequired(array_intersect_key($profile,array_flip($changed))); }
         $profile['revision']=(int)($profile['revision']??0)+1;
-        $save=static function()use($id,$user,$email,$first,$last,$role,$profile,$previousProfile,$input,$membership,$permissionPlan): void {
+        $save=static function()use($id,$user,$login,$email,$first,$last,$role,$profile,$previousProfile,$input,$membership,$permissionPlan): void {
             $display=trim($first.' '.$last)?:$user->display_name;
             WordPressWrites::user(['ID'=>$id,'user_email'=>$email,'first_name'=>$first,'last_name'=>$last,'display_name'=>$display]);
+            if ($login!==$user->user_login) {
+                WordPressWrites::renameUser($id,$login);
+                Audit::changes('member_login_updated',$id,[],['profile_fields'=>['login']]);
+            }
             AccountPermissions::apply($id,$permissionPlan);
             Membership::apply($id,$membership);
             if (array_key_exists('interests',$input)) { AutomaticInterests::manual($id,(array)($previousProfile['interests']??[]),(array)$profile['interests']); }
@@ -293,6 +300,7 @@ final class Administration
         }
         return $profile;
     }
+
 
     public static function deleteUser(int $id): array
     {

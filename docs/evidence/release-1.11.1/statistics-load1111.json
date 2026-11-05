@@ -1,0 +1,1838 @@
+{
+  "date": "2026-11-05T15:09:42.107272+00:00",
+  "version": "1.11.1",
+  "schema": 15,
+  "status": "PASS",
+  "package": {
+    "bytes": 2135813,
+    "files": 219,
+    "sha256": "531d5facd572f4ac93dd7f0cd9db0834265839fbd3d242470498463d39ee1c90"
+  },
+  "baseline_package": {
+    "version": "1.11.1",
+    "bytes": 2134308,
+    "files": 219,
+    "sha256": "c3a5fc7c61f2bea69455611f3c2a430dbf4982b3dd41f31b3a08bf96ae86a5cb"
+  },
+  "ui": {
+    "order": [
+      "Actividad",
+      "Asistencias",
+      "Personas"
+    ],
+    "personas": "Distinct accounts with an accepted reservation in the same authorized, published, finished, non-cancelled event cohort. Repeated registrations count once. Waitlisted, cancelled and attendance-only people do not count as registrants.",
+    "attendees_unchanged": true,
+    "attendance_average_rate_and_recurring_unchanged": true
+  },
+  "optimization": {
+    "bounded_contexts_per_account": 8,
+    "per_entry_ttl_seconds": 30,
+    "transaction_bypass_and_post_commit_invalidation_preserved": true,
+    "profile_names_not_stored": true,
+    "same_operation_fingerprints": 8,
+    "changes": {
+      "admin_p95_before_ms": 564.673,
+      "admin_p95_after_ms": 25.079,
+      "admin_p95_reduction_percent": 95.56,
+      "repeated_context_queries_before": 39.0,
+      "repeated_context_queries_after": 11.0,
+      "repeated_context_ms_before": 254.946,
+      "repeated_context_ms_after": 3.413
+    }
+  },
+  "environment": {
+    "wordpress": "7.1.3",
+    "php": "8.3.36",
+    "opcache_enabled": true,
+    "native_plugin_volume": true,
+    "docker_version": "29.7.2",
+    "docker_cpus": 28,
+    "docker_memory_bytes": 16650006528,
+    "disposable_local_only": true,
+    "no_remote_deployment": true
+  },
+  "dataset": {
+    "synthetic_users": 250,
+    "finished_events": 100,
+    "registrations": 5000,
+    "attendances": 3000,
+    "connections": 200,
+    "publications": 40,
+    "comments": 200,
+    "extra_resources": 800,
+    "stress_actors": 32,
+    "extra_notifications": 300
+  },
+  "load_before": {
+    "phase": "baseline",
+    "scope": "Loopback HTTP, native plugin volume, 32 independent sessions, same fixture; 7 routes per worker, 14 measured requests per worker after equal warm-up; 60-second soak at twelve sessions and optional four independent admin sessions alternating three contexts. Concurrency is closed-loop, not a production capacity guarantee.",
+    "profiles": [
+      {
+        "name": "load-1",
+        "concurrency": 1,
+        "requests": 14,
+        "seconds": 0.634,
+        "requests_per_second": 22.074,
+        "errors": 0,
+        "p50_ms": 39.412,
+        "p95_ms": 111.667,
+        "max_ms": 112.86,
+        "routes": {
+          "profiles": {
+            "p50_ms": 111.942,
+            "p95_ms": 112.768,
+            "max_ms": 112.86
+          },
+          "content/resource": {
+            "p50_ms": 23.462,
+            "p95_ms": 24.224,
+            "max_ms": 24.309
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 52.945,
+            "p95_ms": 54.418,
+            "max_ms": 54.582
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 16.137,
+            "p95_ms": 16.575,
+            "max_ms": 16.624
+          },
+          "matching": {
+            "p50_ms": 40.933,
+            "p95_ms": 45.555,
+            "max_ms": 46.069
+          },
+          "bootstrap": {
+            "p50_ms": 23.712,
+            "p95_ms": 24.522,
+            "max_ms": 24.612
+          },
+          "@page": {
+            "p50_ms": 44.93,
+            "p95_ms": 46.643,
+            "max_ms": 46.833
+          }
+        }
+      },
+      {
+        "name": "load-4",
+        "concurrency": 4,
+        "requests": 56,
+        "seconds": 0.895,
+        "requests_per_second": 62.566,
+        "errors": 0,
+        "p50_ms": 47.258,
+        "p95_ms": 173.429,
+        "max_ms": 176.532,
+        "routes": {
+          "profiles": {
+            "p50_ms": 141.965,
+            "p95_ms": 148.713,
+            "max_ms": 151.179
+          },
+          "content/resource": {
+            "p50_ms": 26.522,
+            "p95_ms": 28.435,
+            "max_ms": 28.998
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 125.722,
+            "p95_ms": 175.81,
+            "max_ms": 176.532
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 18.938,
+            "p95_ms": 24.693,
+            "max_ms": 25.623
+          },
+          "matching": {
+            "p50_ms": 47.258,
+            "p95_ms": 48.454,
+            "max_ms": 48.555
+          },
+          "bootstrap": {
+            "p50_ms": 27.74,
+            "p95_ms": 29.136,
+            "max_ms": 29.149
+          },
+          "@page": {
+            "p50_ms": 51.933,
+            "p95_ms": 54.734,
+            "max_ms": 55.907
+          }
+        }
+      },
+      {
+        "name": "load-12",
+        "concurrency": 12,
+        "requests": 168,
+        "seconds": 1.562,
+        "requests_per_second": 107.578,
+        "errors": 0,
+        "p50_ms": 84.55,
+        "p95_ms": 247.661,
+        "max_ms": 402.889,
+        "routes": {
+          "profiles": {
+            "p50_ms": 204.03,
+            "p95_ms": 381.29,
+            "max_ms": 402.889
+          },
+          "content/resource": {
+            "p50_ms": 87.647,
+            "p95_ms": 181.539,
+            "max_ms": 186.137
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 137.113,
+            "p95_ms": 171.477,
+            "max_ms": 177.817
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 56.897,
+            "p95_ms": 76.698,
+            "max_ms": 82.504
+          },
+          "matching": {
+            "p50_ms": 81.589,
+            "p95_ms": 94.876,
+            "max_ms": 100.107
+          },
+          "bootstrap": {
+            "p50_ms": 54.362,
+            "p95_ms": 65.235,
+            "max_ms": 67.172
+          },
+          "@page": {
+            "p50_ms": 85.782,
+            "p95_ms": 156.75,
+            "max_ms": 211.09
+          }
+        }
+      },
+      {
+        "name": "load-24",
+        "concurrency": 24,
+        "requests": 336,
+        "seconds": 2.611,
+        "requests_per_second": 128.704,
+        "errors": 0,
+        "p50_ms": 147.042,
+        "p95_ms": 355.863,
+        "max_ms": 577.018,
+        "routes": {
+          "profiles": {
+            "p50_ms": 344.68,
+            "p95_ms": 558.52,
+            "max_ms": 577.018
+          },
+          "content/resource": {
+            "p50_ms": 201.947,
+            "p95_ms": 310.528,
+            "max_ms": 332.697
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 223.171,
+            "p95_ms": 262.653,
+            "max_ms": 269.39
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 108.964,
+            "p95_ms": 128.708,
+            "max_ms": 131.349
+          },
+          "matching": {
+            "p50_ms": 136.519,
+            "p95_ms": 156.895,
+            "max_ms": 176.494
+          },
+          "bootstrap": {
+            "p50_ms": 107.024,
+            "p95_ms": 121.845,
+            "max_ms": 127.649
+          },
+          "@page": {
+            "p50_ms": 143.197,
+            "p95_ms": 226.303,
+            "max_ms": 268.838
+          }
+        }
+      },
+      {
+        "name": "load-32",
+        "concurrency": 32,
+        "requests": 448,
+        "seconds": 3.416,
+        "requests_per_second": 131.15,
+        "errors": 0,
+        "p50_ms": 198.245,
+        "p95_ms": 465.266,
+        "max_ms": 695.78,
+        "routes": {
+          "profiles": {
+            "p50_ms": 398.255,
+            "p95_ms": 601.774,
+            "max_ms": 695.78
+          },
+          "content/resource": {
+            "p50_ms": 259.486,
+            "p95_ms": 404.053,
+            "max_ms": 406.689
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 292.899,
+            "p95_ms": 379.227,
+            "max_ms": 388.828
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 156.303,
+            "p95_ms": 266.126,
+            "max_ms": 272.28
+          },
+          "matching": {
+            "p50_ms": 166.8,
+            "p95_ms": 213.226,
+            "max_ms": 226.371
+          },
+          "bootstrap": {
+            "p50_ms": 147.825,
+            "p95_ms": 183.13,
+            "max_ms": 187.453
+          },
+          "@page": {
+            "p50_ms": 186.104,
+            "p95_ms": 233.389,
+            "max_ms": 450.768
+          }
+        }
+      },
+      {
+        "name": "duration",
+        "concurrency": 12,
+        "requests": 6070,
+        "seconds": 60.083,
+        "think_seconds": 0.05,
+        "errors": 0,
+        "requests_per_second": 101.026,
+        "p50_ms": 57.522,
+        "p95_ms": 174.901,
+        "max_ms": 335.375
+      },
+      {
+        "name": "recovery",
+        "concurrency": 1,
+        "requests": 14,
+        "seconds": 0.717,
+        "requests_per_second": 19.535,
+        "errors": 0,
+        "p50_ms": 44.828,
+        "p95_ms": 125.719,
+        "max_ms": 126.721,
+        "routes": {
+          "profiles": {
+            "p50_ms": 125.951,
+            "p95_ms": 126.644,
+            "max_ms": 126.721
+          },
+          "content/resource": {
+            "p50_ms": 27.343,
+            "p95_ms": 27.969,
+            "max_ms": 28.038
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 59.865,
+            "p95_ms": 61.225,
+            "max_ms": 61.376
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 19.056,
+            "p95_ms": 19.166,
+            "max_ms": 19.178
+          },
+          "matching": {
+            "p50_ms": 44.828,
+            "p95_ms": 44.862,
+            "max_ms": 44.866
+          },
+          "bootstrap": {
+            "p50_ms": 27.09,
+            "p95_ms": 27.504,
+            "max_ms": 27.55
+          },
+          "@page": {
+            "p50_ms": 53.069,
+            "p95_ms": 53.829,
+            "max_ms": 53.913
+          }
+        }
+      },
+      {
+        "name": "admin-filter-churn",
+        "concurrency": 4,
+        "requests": 48,
+        "seconds": 4.944,
+        "errors": 0,
+        "requests_per_second": 9.708,
+        "p50_ms": 384.928,
+        "p95_ms": 564.673,
+        "max_ms": 569.698
+      }
+    ],
+    "write_and_security_checks": [],
+    "total_measured_reads": 7154,
+    "warmup_requests": 224,
+    "status": "PASS"
+  },
+  "load_after": {
+    "phase": "optimized",
+    "scope": "Loopback HTTP, native plugin volume, 32 independent sessions, same fixture; 7 routes per worker, 14 measured requests per worker after equal warm-up; 60-second soak at twelve sessions and optional four independent admin sessions alternating three contexts. Concurrency is closed-loop, not a production capacity guarantee.",
+    "profiles": [
+      {
+        "name": "load-1",
+        "concurrency": 1,
+        "requests": 14,
+        "seconds": 0.743,
+        "requests_per_second": 18.835,
+        "errors": 0,
+        "p50_ms": 48.188,
+        "p95_ms": 125.754,
+        "max_ms": 127.988,
+        "routes": {
+          "profiles": {
+            "p50_ms": 126.269,
+            "p95_ms": 127.816,
+            "max_ms": 127.988
+          },
+          "content/resource": {
+            "p50_ms": 27.209,
+            "p95_ms": 28.268,
+            "max_ms": 28.386
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 58.477,
+            "p95_ms": 58.869,
+            "max_ms": 58.913
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 18.968,
+            "p95_ms": 18.993,
+            "max_ms": 18.996
+          },
+          "matching": {
+            "p50_ms": 57.554,
+            "p95_ms": 67.728,
+            "max_ms": 68.858
+          },
+          "bootstrap": {
+            "p50_ms": 27.66,
+            "p95_ms": 28.001,
+            "max_ms": 28.039
+          },
+          "@page": {
+            "p50_ms": 50.969,
+            "p95_ms": 51.729,
+            "max_ms": 51.813
+          }
+        }
+      },
+      {
+        "name": "load-4",
+        "concurrency": 4,
+        "requests": 56,
+        "seconds": 0.971,
+        "requests_per_second": 57.675,
+        "errors": 0,
+        "p50_ms": 54.723,
+        "p95_ms": 150.555,
+        "max_ms": 251.889,
+        "routes": {
+          "profiles": {
+            "p50_ms": 139.076,
+            "p95_ms": 218.738,
+            "max_ms": 251.889
+          },
+          "content/resource": {
+            "p50_ms": 33.861,
+            "p95_ms": 48.024,
+            "max_ms": 48.417
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 64.221,
+            "p95_ms": 110.113,
+            "max_ms": 119.089
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 35.588,
+            "p95_ms": 55.847,
+            "max_ms": 61.746
+          },
+          "matching": {
+            "p50_ms": 61.443,
+            "p95_ms": 74.436,
+            "max_ms": 76.061
+          },
+          "bootstrap": {
+            "p50_ms": 33.13,
+            "p95_ms": 47.357,
+            "max_ms": 48.002
+          },
+          "@page": {
+            "p50_ms": 63.172,
+            "p95_ms": 93.344,
+            "max_ms": 101.599
+          }
+        }
+      },
+      {
+        "name": "load-12",
+        "concurrency": 12,
+        "requests": 168,
+        "seconds": 1.929,
+        "requests_per_second": 87.071,
+        "errors": 0,
+        "p50_ms": 111.861,
+        "p95_ms": 297.868,
+        "max_ms": 409.033,
+        "routes": {
+          "profiles": {
+            "p50_ms": 267.277,
+            "p95_ms": 408.922,
+            "max_ms": 409.033
+          },
+          "content/resource": {
+            "p50_ms": 174.317,
+            "p95_ms": 304.219,
+            "max_ms": 307.153
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 154.671,
+            "p95_ms": 219.649,
+            "max_ms": 220.838
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 94.447,
+            "p95_ms": 162.21,
+            "max_ms": 162.734
+          },
+          "matching": {
+            "p50_ms": 105.803,
+            "p95_ms": 142.647,
+            "max_ms": 142.776
+          },
+          "bootstrap": {
+            "p50_ms": 84.144,
+            "p95_ms": 121.128,
+            "max_ms": 121.885
+          },
+          "@page": {
+            "p50_ms": 102.5,
+            "p95_ms": 122.677,
+            "max_ms": 123.065
+          }
+        }
+      },
+      {
+        "name": "load-24",
+        "concurrency": 24,
+        "requests": 336,
+        "seconds": 2.999,
+        "requests_per_second": 112.047,
+        "errors": 0,
+        "p50_ms": 162.732,
+        "p95_ms": 476.621,
+        "max_ms": 598.818,
+        "routes": {
+          "profiles": {
+            "p50_ms": 395.713,
+            "p95_ms": 593.293,
+            "max_ms": 598.818
+          },
+          "content/resource": {
+            "p50_ms": 238.56,
+            "p95_ms": 474.342,
+            "max_ms": 476.645
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 217.115,
+            "p95_ms": 323.14,
+            "max_ms": 328.632
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 125.226,
+            "p95_ms": 250.787,
+            "max_ms": 257.131
+          },
+          "matching": {
+            "p50_ms": 145.913,
+            "p95_ms": 186.159,
+            "max_ms": 200.409
+          },
+          "bootstrap": {
+            "p50_ms": 121.512,
+            "p95_ms": 163.285,
+            "max_ms": 182.877
+          },
+          "@page": {
+            "p50_ms": 157.675,
+            "p95_ms": 199.911,
+            "max_ms": 220.687
+          }
+        }
+      },
+      {
+        "name": "load-32",
+        "concurrency": 32,
+        "requests": 448,
+        "seconds": 3.579,
+        "requests_per_second": 125.171,
+        "errors": 0,
+        "p50_ms": 203.089,
+        "p95_ms": 529.378,
+        "max_ms": 666.875,
+        "routes": {
+          "profiles": {
+            "p50_ms": 469.215,
+            "p95_ms": 659.586,
+            "max_ms": 666.875
+          },
+          "content/resource": {
+            "p50_ms": 284.727,
+            "p95_ms": 528.053,
+            "max_ms": 529.747
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 247.746,
+            "p95_ms": 376.776,
+            "max_ms": 389.578
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 168.163,
+            "p95_ms": 275.282,
+            "max_ms": 282.042
+          },
+          "matching": {
+            "p50_ms": 194.991,
+            "p95_ms": 236.625,
+            "max_ms": 255.848
+          },
+          "bootstrap": {
+            "p50_ms": 161.055,
+            "p95_ms": 187.115,
+            "max_ms": 201.95
+          },
+          "@page": {
+            "p50_ms": 190.961,
+            "p95_ms": 236.964,
+            "max_ms": 273.964
+          }
+        }
+      },
+      {
+        "name": "duration",
+        "concurrency": 12,
+        "requests": 6130,
+        "seconds": 60.178,
+        "think_seconds": 0.05,
+        "errors": 0,
+        "requests_per_second": 101.865,
+        "p50_ms": 57.716,
+        "p95_ms": 171.171,
+        "max_ms": 329.552
+      },
+      {
+        "name": "recovery",
+        "concurrency": 1,
+        "requests": 14,
+        "seconds": 0.73,
+        "requests_per_second": 19.172,
+        "errors": 0,
+        "p50_ms": 48.273,
+        "p95_ms": 129.826,
+        "max_ms": 131.73,
+        "routes": {
+          "profiles": {
+            "p50_ms": 130.265,
+            "p95_ms": 131.583,
+            "max_ms": 131.73
+          },
+          "content/resource": {
+            "p50_ms": 26.116,
+            "p95_ms": 26.508,
+            "max_ms": 26.551
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 59.064,
+            "p95_ms": 59.323,
+            "max_ms": 59.352
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 19.983,
+            "p95_ms": 20.151,
+            "max_ms": 20.17
+          },
+          "matching": {
+            "p50_ms": 48.273,
+            "p95_ms": 50.058,
+            "max_ms": 50.256
+          },
+          "bootstrap": {
+            "p50_ms": 27.432,
+            "p95_ms": 27.742,
+            "max_ms": 27.777
+          },
+          "@page": {
+            "p50_ms": 52.966,
+            "p95_ms": 53.792,
+            "max_ms": 53.884
+          }
+        }
+      },
+      {
+        "name": "admin-filter-churn",
+        "concurrency": 4,
+        "requests": 48,
+        "seconds": 0.288,
+        "errors": 0,
+        "requests_per_second": 166.56,
+        "p50_ms": 23.67,
+        "p95_ms": 25.079,
+        "max_ms": 25.439
+      }
+    ],
+    "write_and_security_checks": [
+      {
+        "name": "Eight concurrent profile writes, correct owner and restored data",
+        "status": "PASS",
+        "p50_ms": 548.192,
+        "p95_ms": 573.319,
+        "max_ms": 577.146
+      },
+      {
+        "name": "Sixteen simultaneous RSVPs: exactly two accepted, fourteen capacity conflicts, fourteen waitlisted",
+        "status": "PASS",
+        "accepted": 2,
+        "expected_conflicts": 14,
+        "waitlisted": 14
+      },
+      {
+        "name": "Anonymous access, staff-only statistics and missing nonce rejected; private responses stay no-store",
+        "status": "PASS"
+      }
+    ],
+    "total_measured_reads": 7214,
+    "warmup_requests": 224,
+    "status": "PASS"
+  },
+  "sql_context_before": {
+    "scope": "Nine alternating dashboard requests, identical dataset, current account and permissions; request cache flushed between samples.",
+    "samples": [
+      {
+        "filter": [],
+        "ms": 256.202,
+        "queries": 39,
+        "sql_ms": 248.873,
+        "summary": {
+          "registrations": 5000,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": {
+          "page": 2
+        },
+        "ms": 258.788,
+        "queries": 39,
+        "sql_ms": 254.174,
+        "summary": {
+          "registrations": 5000,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": {
+          "event_page": 2
+        },
+        "ms": 250.467,
+        "queries": 39,
+        "sql_ms": 245.766,
+        "summary": {
+          "registrations": 5000,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": [],
+        "ms": 250.929,
+        "queries": 39,
+        "sql_ms": 246.408,
+        "summary": {
+          "registrations": 5000,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": {
+          "page": 2
+        },
+        "ms": 252.452,
+        "queries": 39,
+        "sql_ms": 247.781,
+        "summary": {
+          "registrations": 5000,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": {
+          "event_page": 2
+        },
+        "ms": 258.285,
+        "queries": 39,
+        "sql_ms": 253.487,
+        "summary": {
+          "registrations": 5000,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": [],
+        "ms": 257.695,
+        "queries": 39,
+        "sql_ms": 252.885,
+        "summary": {
+          "registrations": 5000,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": {
+          "page": 2
+        },
+        "ms": 257.439,
+        "queries": 39,
+        "sql_ms": 252.662,
+        "summary": {
+          "registrations": 5000,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": {
+          "event_page": 2
+        },
+        "ms": 251.4,
+        "queries": 39,
+        "sql_ms": 246.605,
+        "summary": {
+          "registrations": 5000,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      }
+    ]
+  },
+  "sql_context_after": {
+    "scope": "Nine alternating dashboard requests, identical dataset, current account and permissions; request cache flushed between samples.",
+    "samples": [
+      {
+        "filter": [],
+        "ms": 235.081,
+        "queries": 39,
+        "sql_ms": 227.757,
+        "summary": {
+          "registrations": 5000,
+          "registrants": 250,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": {
+          "page": 2
+        },
+        "ms": 233.388,
+        "queries": 39,
+        "sql_ms": 228.557,
+        "summary": {
+          "registrations": 5000,
+          "registrants": 250,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": {
+          "event_page": 2
+        },
+        "ms": 233.047,
+        "queries": 39,
+        "sql_ms": 227.582,
+        "summary": {
+          "registrations": 5000,
+          "registrants": 250,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": [],
+        "ms": 4.208,
+        "queries": 11,
+        "sql_ms": 2.867,
+        "summary": {
+          "registrations": 5000,
+          "registrants": 250,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": {
+          "page": 2
+        },
+        "ms": 3.148,
+        "queries": 11,
+        "sql_ms": 2.126,
+        "summary": {
+          "registrations": 5000,
+          "registrants": 250,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": {
+          "event_page": 2
+        },
+        "ms": 3.623,
+        "queries": 11,
+        "sql_ms": 2.501,
+        "summary": {
+          "registrations": 5000,
+          "registrants": 250,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": [],
+        "ms": 3.266,
+        "queries": 11,
+        "sql_ms": 2.243,
+        "summary": {
+          "registrations": 5000,
+          "registrants": 250,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": {
+          "page": 2
+        },
+        "ms": 2.746,
+        "queries": 11,
+        "sql_ms": 1.821,
+        "summary": {
+          "registrations": 5000,
+          "registrants": 250,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      },
+      {
+        "filter": {
+          "event_page": 2
+        },
+        "ms": 3.561,
+        "queries": 11,
+        "sql_ms": 2.451,
+        "summary": {
+          "registrations": 5000,
+          "registrants": 250,
+          "attendees": 250,
+          "attendances": 3000,
+          "events_with_records": 100,
+          "rate_registered": 5000,
+          "rate_attended": 3000,
+          "minutes": 135000,
+          "duration_known": 3000,
+          "events": 101,
+          "complete_events": 100,
+          "rate": 60,
+          "average": 30,
+          "recurring": 250,
+          "users": 304,
+          "new_users": 304,
+          "active_users": 218
+        }
+      }
+    ]
+  },
+  "operation_profile_before": {
+    "environment": {
+      "wordpress": "7.1.3",
+      "php": "8.3.36",
+      "opcache_enabled": true,
+      "native_plugin_volume": true
+    },
+    "dataset": {
+      "synthetic_users": 250,
+      "finished_events": 100,
+      "registrations": 5000,
+      "attendances": 3000,
+      "connections": 200,
+      "publications": 40,
+      "comments": 200,
+      "extra_resources": 800,
+      "stress_actors": 32,
+      "extra_notifications": 300
+    },
+    "measurements": [
+      {
+        "operation": "directory",
+        "ms": 131.324,
+        "queries": 71,
+        "sql_ms": 21.304,
+        "peak_memory_mb": 40.5,
+        "fingerprint": {
+          "ids": [
+            14,
+            8,
+            17,
+            7,
+            11,
+            6,
+            18,
+            5,
+            13,
+            10,
+            3,
+            12
+          ],
+          "total": 303
+        },
+        "slowest_sql_ms": [
+          1.684,
+          1.556,
+          1.075,
+          1.008,
+          0.969
+        ]
+      },
+      {
+        "operation": "resource_list",
+        "ms": 14.697,
+        "queries": 14,
+        "sql_ms": 5.128,
+        "peak_memory_mb": 40.5,
+        "fingerprint": {
+          "ids": [
+            1015,
+            1014,
+            1013,
+            1012,
+            1011,
+            1010,
+            1009,
+            1008,
+            1007,
+            1006,
+            1005,
+            1004,
+            1003,
+            1002,
+            1001,
+            1000,
+            999,
+            998
+          ],
+          "total": 807
+        },
+        "slowest_sql_ms": [
+          1.933,
+          0.586,
+          0.355,
+          0.309,
+          0.269
+        ]
+      },
+      {
+        "operation": "resource_search",
+        "ms": 48.544,
+        "queries": 18,
+        "sql_ms": 24.727,
+        "peak_memory_mb": 48.5,
+        "fingerprint": {
+          "ids": [
+            1015,
+            1014,
+            1013,
+            1012,
+            1011,
+            1010,
+            1009,
+            1008,
+            1007,
+            1006,
+            1005,
+            1004,
+            1003,
+            1002,
+            1001,
+            1000,
+            999,
+            998
+          ],
+          "total": 800
+        },
+        "slowest_sql_ms": [
+          5.912,
+          4.002,
+          3.487,
+          2.929,
+          1.324
+        ]
+      },
+      {
+        "operation": "matching_cold",
+        "ms": 358.379,
+        "queries": 693,
+        "sql_ms": 195.893,
+        "peak_memory_mb": 48.5,
+        "fingerprint": {
+          "ids": [
+            14,
+            8,
+            17,
+            7,
+            11
+          ],
+          "scores": [
+            95,
+            77,
+            68,
+            58,
+            55
+          ]
+        },
+        "slowest_sql_ms": [
+          2.705,
+          2.394,
+          2.309,
+          1.852,
+          1.742
+        ]
+      },
+      {
+        "operation": "matching_warm",
+        "ms": 17.895,
+        "queries": 56,
+        "sql_ms": 9.846,
+        "peak_memory_mb": 48.5,
+        "fingerprint": {
+          "ids": [
+            14,
+            8,
+            17,
+            7,
+            11
+          ],
+          "scores": [
+            95,
+            77,
+            68,
+            58,
+            55
+          ]
+        },
+        "slowest_sql_ms": [
+          0.41,
+          0.311,
+          0.308,
+          0.3,
+          0.278
+        ]
+      },
+      {
+        "operation": "notification_summary",
+        "ms": 0.186,
+        "queries": 1,
+        "sql_ms": 0.152,
+        "peak_memory_mb": 48.5,
+        "fingerprint": {
+          "unread_total": 2,
+          "latest_id": 4,
+          "total_all": 3
+        },
+        "slowest_sql_ms": [
+          0.152
+        ]
+      },
+      {
+        "operation": "statistics_cold",
+        "ms": 262.182,
+        "queries": 38,
+        "sql_ms": 255.374,
+        "peak_memory_mb": 48.5,
+        "fingerprint": {
+          "summary": {
+            "registrations": 5000,
+            "attendees": 250,
+            "attendances": 3000,
+            "events_with_records": 100,
+            "rate_registered": 5000,
+            "rate_attended": 3000,
+            "minutes": 135000,
+            "duration_known": 3000,
+            "events": 101,
+            "complete_events": 100,
+            "rate": 60,
+            "average": 30,
+            "recurring": 250,
+            "users": 304,
+            "new_users": 304,
+            "active_users": 218
+          },
+          "community": {
+            "active_connections": 201,
+            "accepted_connections": 201,
+            "publications": 858,
+            "forum_topics": 23,
+            "comments": 206,
+            "forum_comments": 100
+          }
+        },
+        "slowest_sql_ms": [
+          47.503,
+          46.822,
+          41.966,
+          37.028,
+          14.4
+        ]
+      },
+      {
+        "operation": "statistics_warm",
+        "ms": 3.995,
+        "queries": 11,
+        "sql_ms": 2.693,
+        "peak_memory_mb": 48.5,
+        "fingerprint": {
+          "summary": {
+            "registrations": 5000,
+            "attendees": 250,
+            "attendances": 3000,
+            "events_with_records": 100,
+            "rate_registered": 5000,
+            "rate_attended": 3000,
+            "minutes": 135000,
+            "duration_known": 3000,
+            "events": 101,
+            "complete_events": 100,
+            "rate": 60,
+            "average": 30,
+            "recurring": 250,
+            "users": 304,
+            "new_users": 304,
+            "active_users": 218
+          },
+          "community": {
+            "active_connections": 201,
+            "accepted_connections": 201,
+            "publications": 858,
+            "forum_topics": 23,
+            "comments": 206,
+            "forum_comments": 100
+          }
+        },
+        "slowest_sql_ms": [
+          0.549,
+          0.301,
+          0.261,
+          0.234,
+          0.225
+        ]
+      }
+    ]
+  },
+  "operation_profile_after": {
+    "environment": {
+      "wordpress": "7.1.3",
+      "php": "8.3.36",
+      "opcache_enabled": true,
+      "native_plugin_volume": true
+    },
+    "dataset": {
+      "synthetic_users": 250,
+      "finished_events": 100,
+      "registrations": 5000,
+      "attendances": 3000,
+      "connections": 200,
+      "publications": 40,
+      "comments": 200,
+      "extra_resources": 800,
+      "stress_actors": 32,
+      "extra_notifications": 300
+    },
+    "measurements": [
+      {
+        "operation": "directory",
+        "ms": 134.746,
+        "queries": 71,
+        "sql_ms": 22.459,
+        "peak_memory_mb": 40.5,
+        "fingerprint": {
+          "ids": [
+            14,
+            8,
+            17,
+            7,
+            11,
+            6,
+            18,
+            5,
+            13,
+            10,
+            3,
+            12
+          ],
+          "total": 303
+        },
+        "slowest_sql_ms": [
+          1.821,
+          1.737,
+          1.454,
+          1.099,
+          0.922
+        ]
+      },
+      {
+        "operation": "resource_list",
+        "ms": 12.775,
+        "queries": 14,
+        "sql_ms": 5.047,
+        "peak_memory_mb": 40.5,
+        "fingerprint": {
+          "ids": [
+            1015,
+            1014,
+            1013,
+            1012,
+            1011,
+            1010,
+            1009,
+            1008,
+            1007,
+            1006,
+            1005,
+            1004,
+            1003,
+            1002,
+            1001,
+            1000,
+            999,
+            998
+          ],
+          "total": 807
+        },
+        "slowest_sql_ms": [
+          1.818,
+          0.593,
+          0.348,
+          0.341,
+          0.306
+        ]
+      },
+      {
+        "operation": "resource_search",
+        "ms": 46.63,
+        "queries": 18,
+        "sql_ms": 24.18,
+        "peak_memory_mb": 48.5,
+        "fingerprint": {
+          "ids": [
+            1015,
+            1014,
+            1013,
+            1012,
+            1011,
+            1010,
+            1009,
+            1008,
+            1007,
+            1006,
+            1005,
+            1004,
+            1003,
+            1002,
+            1001,
+            1000,
+            999,
+            998
+          ],
+          "total": 800
+        },
+        "slowest_sql_ms": [
+          4.939,
+          4.093,
+          3.939,
+          1.901,
+          1.585
+        ]
+      },
+      {
+        "operation": "matching_cold",
+        "ms": 253.451,
+        "queries": 541,
+        "sql_ms": 106.622,
+        "peak_memory_mb": 48.5,
+        "fingerprint": {
+          "ids": [
+            14,
+            8,
+            17,
+            7,
+            11
+          ],
+          "scores": [
+            95,
+            77,
+            68,
+            58,
+            55
+          ]
+        },
+        "slowest_sql_ms": [
+          1.537,
+          1.055,
+          0.978,
+          0.945,
+          0.896
+        ]
+      },
+      {
+        "operation": "matching_warm",
+        "ms": 17.893,
+        "queries": 56,
+        "sql_ms": 9.913,
+        "peak_memory_mb": 48.5,
+        "fingerprint": {
+          "ids": [
+            14,
+            8,
+            17,
+            7,
+            11
+          ],
+          "scores": [
+            95,
+            77,
+            68,
+            58,
+            55
+          ]
+        },
+        "slowest_sql_ms": [
+          0.439,
+          0.354,
+          0.315,
+          0.294,
+          0.273
+        ]
+      },
+      {
+        "operation": "notification_summary",
+        "ms": 0.151,
+        "queries": 1,
+        "sql_ms": 0.124,
+        "peak_memory_mb": 48.5,
+        "fingerprint": {
+          "unread_total": 2,
+          "latest_id": 4,
+          "total_all": 3
+        },
+        "slowest_sql_ms": [
+          0.124
+        ]
+      },
+      {
+        "operation": "statistics_cold",
+        "ms": 235.055,
+        "queries": 43,
+        "sql_ms": 227.507,
+        "peak_memory_mb": 48.5,
+        "fingerprint": {
+          "summary": {
+            "registrations": 5000,
+            "registrants": 250,
+            "attendees": 250,
+            "attendances": 3000,
+            "events_with_records": 100,
+            "rate_registered": 5000,
+            "rate_attended": 3000,
+            "minutes": 135000,
+            "duration_known": 3000,
+            "events": 101,
+            "complete_events": 100,
+            "rate": 60,
+            "average": 30,
+            "recurring": 250,
+            "users": 304,
+            "new_users": 304,
+            "active_users": 218
+          },
+          "community": {
+            "active_connections": 201,
+            "accepted_connections": 201,
+            "publications": 858,
+            "forum_topics": 23,
+            "comments": 206,
+            "forum_comments": 100
+          }
+        },
+        "slowest_sql_ms": [
+          45.16,
+          45.143,
+          37.808,
+          33.944,
+          14.504
+        ]
+      },
+      {
+        "operation": "statistics_warm",
+        "ms": 4.283,
+        "queries": 11,
+        "sql_ms": 2.911,
+        "peak_memory_mb": 48.5,
+        "fingerprint": {
+          "summary": {
+            "registrations": 5000,
+            "registrants": 250,
+            "attendees": 250,
+            "attendances": 3000,
+            "events_with_records": 100,
+            "rate_registered": 5000,
+            "rate_attended": 3000,
+            "minutes": 135000,
+            "duration_known": 3000,
+            "events": 101,
+            "complete_events": 100,
+            "rate": 60,
+            "average": 30,
+            "recurring": 250,
+            "users": 304,
+            "new_users": 304,
+            "active_users": 218
+          },
+          "community": {
+            "active_connections": 201,
+            "accepted_connections": 201,
+            "publications": 858,
+            "forum_topics": 23,
+            "comments": 206,
+            "forum_comments": 100
+          }
+        },
+        "slowest_sql_ms": [
+          0.405,
+          0.374,
+          0.311,
+          0.285,
+          0.274
+        ]
+      }
+    ]
+  },
+  "php": {
+    "tests": 855,
+    "assertions": 9071,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "browser": {
+    "status": "PASS",
+    "checks": [
+      "Asistencias ocupa el centro; Personas muestra inscritos únicos y conserva la comparación con asistentes reales",
+      "Resumen legible en móvil y ambos temas, sin desbordamiento ni incidencias automáticas WCAG A/AA",
+      "Participación, intereses, comparación de períodos y resumen conservan la navegación"
+    ],
+    "errors": [],
+    "accessibility": [
+      {
+        "name": "resumen-claro",
+        "violations": []
+      },
+      {
+        "name": "resumen-oscuro",
+        "violations": []
+      },
+      {
+        "name": "resumen-movil-oscuro",
+        "violations": []
+      },
+      {
+        "name": "resumen-movil-claro",
+        "violations": []
+      }
+    ],
+    "screenshots": [
+      "resumen-claro.png",
+      "resumen-oscuro.png",
+      "resumen-movil-oscuro.png",
+      "resumen-movil-claro.png"
+    ],
+    "video": "videos/page@e8e121f910636450ab32f0927936866b.webm",
+    "scope": "Owned disposable loopback WordPress with synthetic registrations and attendance"
+  },
+  "runtime_byte_match": {
+    "all_production_files_match_zip": true,
+    "files": 219,
+    "sha256": "531d5facd572f4ac93dd7f0cd9db0834265839fbd3d242470498463d39ee1c90"
+  },
+  "limits": [
+    "Local closed-loop load, not a hosting capacity guarantee or a browser page-render benchmark.",
+    "60-second sustained phase uses 12 independent member sessions; burst phases reach 32. Four independent sessions of the same admin account exercise filter/context reuse.",
+    "General route timings vary between runs; the measured optimization targets repeated statistics contexts.",
+    "Expected RSVP capacity conflicts and denied unauthorized/CSRF probes are security checks, not successful writes.",
+    "One historical translation-snapshot test skipped. No new remote SonarQube, Trivy or ZAP scans.",
+    "Synthetic seed dataset includes 100 finished events plus the existing demo; no real user data or paid AI/API calls."
+  ],
+  "tests": [
+    "tests/php/StatisticsLoad1111Test.php",
+    "tests/php/StatisticsTest.php",
+    "tests/statistics-load1111.py",
+    "tests/statistics-load1111-probe.php",
+    "tests/statistics-load1111.cjs"
+  ]
+}

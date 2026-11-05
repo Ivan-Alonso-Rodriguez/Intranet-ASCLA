@@ -1,8 +1,52 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 23 de octubre de 2026. Plugin **1.11.0**, esquema **15**. Este documento describe el estado del código y la evidencia por etapa. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado.
+Revisión documental: 5 de noviembre de 2026. Plugin **1.11.1**, esquema **15**. Este documento describe el estado del código y la evidencia por etapa. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado.
 
-## Validación completa de QA y UAT del 26 de octubre de 2026
+## Perfil, recuperación e importación del 5 de noviembre de 2026
+
+El asociado puede restablecer su fotografía desde Información; el administrador puede hacerlo al editar una cuenta comunitaria. Se aplica al guardar y recupera el avatar predeterminado sin eliminar archivos que puedan reutilizarse. La administración puede cambiar el nombre de usuario conservando ID, contraseña, perfil e historial; se valida formato y unicidad, se invalidan las cachés del login anterior y la operación queda registrada. El editor conserva rol y membresía, retira Permisos avanzados y mantiene las restricciones y comprobaciones de autorización del servidor.
+
+Se retiran el buscador superior y el apartado administrativo Archivos, conservando los archivos y Galerías y recursos. Las etiquetas actuales de proveedores indican API. La recuperación conserva el origen: desde /login/ vuelve al acceso de comunidad y desde la recuperación técnica conserva wp-login.php, incluida la confirmación y los enlaces de restablecimiento.
+
+La importación reconoce la cabecera española de Zoom, participantes sin correo y nombres únicos normalizados por acentos, mayúsculas y orden. Solo se propone una errata pequeña si supera el umbral y está separada de otras coincidencias; los casos ambiguos permanecen sin asociar. La vista previa identifica el método y el nombre original, no registra asistencia hasta confirmar, conserva correcciones manuales y une reconexiones sin sumar intervalos solapados. El formato automático reconoce fechas inequívocas del CSV adjunto; los días/meses ambiguos requieren elegir formato. Se comprueba la lectura de sus 159 registros, 149 sin correo, sin publicar los datos personales del archivo. El Excel se consulta como referencia de estructura; no se modifica ni se añade una importación XLSX.
+
+La [evidencia de esta revisión](docs/evidence/release-1.11.0/profile-attendance1110.json) distingue la regresión PHP del recorrido con cuentas sintéticas en WordPress local. Los resultados históricos de SonarQube, Trivy y ZAP conservan su propia fecha y ZIP; esta revisión no acredita un nuevo escaneo ni despliegue en el hosting.
+
+## Validación completa del 29 de octubre de 2026
+
+La [evidencia final](docs/evidence/release-1.11.0/full-validation1110.json) corresponde al ZIP analizado el 29 de octubre y a sus 217 archivos de producción. QA y UAT ejecutan, cada uno, **836 casos PHP/8.969 aserciones**, cero fallos y errores y una omisión histórica de traducciones; las suites ampliadas de navegador y sus coberturas terminan correctamente. SonarQube real del curso aprueba **ASCLA-QA y ASCLA-UAT con cero incidencias abiertas**, cobertura global **91,7 %**, cobertura nueva **94,9 %** y duplicación **0,1 %**.
+
+Bruno aprueba **81 peticiones/149 comprobaciones**; Playwright repite los mismos **seis flujos**, con **12 videos/12 capturas**, y los **13 controles** de los últimos cambios. Trivy aprueba las **cuatro imágenes reales con cero vulnerabilidades**, sin exclusiones ni cambios al umbral. OWASP ZAP aprueba páginas y API, sin alertas bajas, medias ni altas; también aprueban CSP, navegador y coherencia de fuentes. La carga final ejecuta **3.257 lecturas**, hasta 32 sesiones, ocho guardados concurrentes y una disputa por dos cupos, sin errores de lectura ni sobreventa.
+
+Jenkins ejecuta Trivy dentro del pipeline y conserva sus cinco HTML y cinco JSON; se verifica la retención de la última ejecución. El job de laboratorio utiliza una exportación Git privada main con despliegue omitido; la validación técnica QA/UAT y Sonar sigue los scripts del manual. No se acredita despliegue remoto ni aceptación humana UAT, ni llamadas reales nuevas al proveedor IA/Supadata. Las credenciales y los reportes HTTP originales permanecen privados.
+
+Se corrige una carrera de la prueba E2E al esperar los resultados de búsqueda antes de abrir acciones de usuario. Los hallazgos de mantenibilidad se resuelven mediante métodos más pequeños, plantillas/condiciones claras, un mensaje de permiso centralizado y una clase de listado separada de publicación; se mantienen las reglas de acceso y las transacciones. Los informes previos conservan su alcance propio y el [manifiesto anterior](docs/evidence/release-1.11.0/package-pre-full-validation.json) identifica el ZIP previo a esta validación.
+
+## Perfil y administración del 29 de octubre de 2026
+
+La [evidencia de esta revisión](docs/evidence/release-1.11.0/workflow1110.json) cubre seis cambios: localizar el dato obligatorio entre pestañas del perfil, escribir antes de los comentarios, conservar la sección administrativa al recargar, mostrar miniaturas privadas de galerías, publicar al aprobar microeventos y buscar/agregar/quitar candidatos antes de enviar invitaciones. Las propuestas con fecha futura siguen programadas; cambiar su selección exige nueva aprobación y cancela esa programación, con aviso en el editor. Los cambios preservan las respuestas e historial de convocatorias ya publicadas.
+
+La regresión completa registra **836 casos PHP/8.968 aserciones**, **cero fallos y errores**, con **una omisión histórica** por faltar la instantánea anterior de traducciones. Una revisión final de **20 casos/199 aserciones** comprueba además sustituir candidatos de una propuesta aprobada y programada, consentimiento, bloqueos, permisos y rollback. El recorrido de **13 comprobaciones en Chrome** aprueba; **seis vistas con axe** no presentan infracciones automáticas WCAG A/AA. La verificación es local, con datos sintéticos: no renueva los análisis de seguridad externos ni la aceptación humana del hosting. El [manifiesto vigente](docs/evidence/release-1.11.0/package.json) identifica el ZIP revisado.
+
+## Optimización y concurrencia del 28 de octubre de 2026
+
+La [evidencia de optimización](docs/evidence/release-1.11.0/optimization1110.json) compara ocho operaciones con el paquete anterior y los mismos datos sintéticos. El Directorio pasa de 1.629 a 71 consultas SQL y de 924 a 140 ms; la búsqueda de recursos, de 654 a 18 consultas y de 162 a 47 ms. Las tarjetas agrupan reacciones, autores y etiquetas; el cálculo inicial de estadísticas baja de 523 a 258 ms. Son muestras locales instrumentadas; los resultados funcionales comparados coinciden y no constituyen una garantía de rendimiento del hosting.
+
+Se precargan perfiles y se mantienen filas compactas al ordenar el Directorio. Las relaciones se consultan por operación de lectura, se descartan al terminar, se invalidan ante escrituras y no se utilizan dentro de transacciones. Las recomendaciones recorren lotes de 200 candidatos y calculan las puntuaciones simples sin guardar una entrada de base de datos por pareja. Notificaciones agrega sus contadores en una consulta. Estadísticas evita reagrupar cada inscripción, precarga nombres y conserva la caché ante cambios ajenos a sus cifras. Los asociados dejan de descargar tres módulos administrativos: 70.368 bytes sin comprimir. El plugin conserva su instalación independiente de Redis y no modifica PHP.ini.
+
+El primer estrés detectó un bloqueo al promover los bloqueos compartidos de `INSERT IGNORE` sobre el contador global de perfiles. Se corrige adquiriendo directamente el bloqueo exclusivo antes del incremento, conservando rollback, invalidación y permisos. La repetición verifica ocho guardados simultáneos y cuatro procesos independientes sin perder incrementos. Pasan **3.153 lecturas HTTP medidas**, hasta **32 sesiones simultáneas**, una fase sostenida de 60 segundos y recuperación; el percentil 95 con 32 sesiones es **496 ms**, con cero errores de lectura. La disputa por dos cupos acepta exactamente dos inscripciones; las otras catorce reciben el conflicto esperado y pueden entrar en lista de espera.
+
+La regresión completa registra **832 casos PHP/8.938 aserciones**, cero fallos/errores y una prueba histórica omitida por faltar su instantánea anterior de traducciones. Se comprueban permisos, CSRF, respuestas privadas sin caché HTTP, cambios de bloqueo, rollback, reacciones y metadatos heredados. El recorrido de navegador y sus resultados están en la evidencia. Se conservan los resultados de seguridad anteriores con su fecha; esta etapa no renueva SonarQube, Trivy, ZAP ni aceptación humana de UAT.
+
+## Revisión de NICE TO HAVE del 28 de octubre de 2026
+
+Se revisan las 27 fotografías recibidas y los **61 NICE TO HAVE** de la matriz: 59 aparecen en las fotografías y se incluyen también RF-127/RF-128. Las fotografías 23 a 27 contienen requisitos fuera de alcance y conservan esa clasificación. La [evidencia por requisito](docs/evidence/release-1.11.0/nice-to-have1110.json) relaciona originales, fuentes, pruebas ejecutadas y SHA del ZIP; los textos y prioridades del documento original se mantienen.
+
+Se completan las métricas agregadas de conexiones e interacción, la caché analítica mediante Transients y el registro de cambios de fecha de microeventos con sus valores anteriores/nuevos y actor. La caché dura 30 segundos, se limita a un espacio por usuario autorizado, se invalida después de confirmar cambios y no guarda nombres de perfiles. Las pruebas verifican privacidad, permisos, reversión de transacciones y actualización de los indicadores. También se comprueban cumpleaños y publicación automática a la hora programada.
+
+La regresión completa registra **822 casos**, 8.869 aserciones, cero fallos/errores y una prueba histórica omitida por faltar su instantánea anterior de catálogos. La prueba adicional de publicación programada aprueba **1 caso/17 aserciones**; en conjunto quedan 822 aprobados y uno omitido. Los **22 controles de navegador** aprueban; cuatro vistas del panel pasan WCAG A/AA, ambos temas y móvil. Con 250 cuentas sintéticas, 100 eventos, 5.000 inscripciones y 3.000 asistencias, las consultas frías, con caché y el renderizado terminan en menos de tres segundos. También lo hacen cinco consultas simultáneas y un guardado de perfil. RNF-010 pasa a Código revisado con alcance local; debe medirse nuevamente en el hosting de destino. Esta revisión no renueva SonarQube, Trivy, ZAP, Jenkins ni aceptación humana de UAT.
+
+## Validaciones de QA, UAT e imágenes del 25 y 26 de octubre de 2026
 
 La [corrección posterior de imágenes](docs/evidence/release-1.11.0/trivy-remediation1110.json) elimina los 379 hallazgos bloqueantes anteriores mediante runtimes Alpine actualizados y un buzón MailDev con dependencias corregidas. Trivy analiza las cuatro imágenes reales dentro de Jenkins y aprueba con cero hallazgos, sin exclusiones ni cambios a los umbrales. Se conservan WordPress, PHP, Apache y la rama de MariaDB; se comprueban la migración de datos, el correo y la regresión del plugin. Informe local: `test-results/trivy-remediation/index.html`.
 
@@ -54,7 +98,7 @@ Las suites de QA distinguen el inicio y las acciones de cada rol, el botón Guar
 
 La [guía para sustentar seguridad](pruebas/seguridad/sustento.html) enlaza autenticación, reglas completas, severidades, CSP, videos y huellas. Una nueva lectura pública confirma el mismo pendiente de Apache en cinco rutas. Solo se dispone de administración WordPress, por lo que queda pendiente la intervención del operador del hosting para aplicar `ServerTokens Prod`/`ServerSignature Off` y repetir el chequeo. No se modifica el criterio ni se declara 20/20 en QA.
 
-La [entrega de pruebas](pruebas/README.md) se renueva contra `https://wordpress.ingsoftware.lat`: **81/81 peticiones y 149/149 comprobaciones Bruno**, **6/6 recorridos principales Playwright** con 12 videos/12 capturas y **14/14 controles recientes** con 16 videos/16 capturas. Se comprueban los borradores en seis secciones, roles administrativos y sus excepciones, filtros de usuarios, tipo de asociado, Directorio de 4 × 3, Foros en lista única, Galería, Archivos y Aliados. Los nueve contenidos ficticios propios de la regresión reciente se retiran a la papelera. El trabajo del asistente devuelve **Google Gemini · API real** y conserva pregunta/respuesta/hilo; no acredita OpenAI ni evaluación semántica integral.
+La [entrega de pruebas](pruebas/README.md) se renueva contra `https://wordpress.ingsoftware.lat`: **81/81 peticiones y 149/149 comprobaciones Bruno**, **6/6 recorridos principales Playwright** con 12 videos/12 capturas y **14/14 controles recientes** con 16 videos/16 capturas. Se comprueban los borradores en seis secciones, roles administrativos y sus excepciones, filtros de usuarios, tipo de asociado, Directorio de 4 × 3, Foros en lista única, Galería, Archivos y Aliados. Los nueve contenidos ficticios propios de la regresión reciente se retiran a la papelera. El trabajo del asistente devuelve **Google Gemini · API** y conserva pregunta/respuesta/hilo; no acredita OpenAI ni evaluación semántica integral.
 
 La comparación SHA-256 verifica que JavaScript y CSS del despliegue coinciden con el paquete local actual; el comportamiento del backend se contrasta con las pruebas, sin descargar sus PHP privados. La revisión remota de seguridad aprueba **seis controles en 42 vistas de cuatro roles**, sin errores JavaScript ni infracciones CSP. Los controles HTTP aprueban **19/20**: el hosting expone la versión de Apache en `Server`, pendiente de corregir. El ZAP activo aislado tiene fecha, entorno y resultado propios en el [dashboard de seguridad](pruebas/seguridad/dashboard.html). No se atribuye su configuración de servidor temporal al QA compartido.
 
@@ -245,20 +289,30 @@ La etapa del 16 de octubre aprobó 81 peticiones y 149 comprobaciones de Bruno, 
 
 <a id="estado"></a>
 
+## Estadísticas y carga · 1.11.1
+
+La [revisión local](docs/evidence/release-1.11.1/statistics-load1111.json) distingue inscripciones, personas inscritas únicas, asistentes y asistencias. Asistencias ocupa la tarjeta central. El nuevo recuento usa el mismo alcance autorizado de eventos y estados de inscripción; no redefine asistentes, tasa ni promedio. La caché conserva hasta ocho contextos por cuenta con caducidad individual de 30 segundos, no guarda nombres de perfiles y se invalida tras confirmar cambios. La suite cubre aislamiento, rollback, expiración y permisos.
+
+El conjunto incluye 250 asociados sintéticos, 100 eventos finalizados, 5.000 inscripciones y 3.000 asistencias, más recursos, notificaciones y los datos demo existentes. La carga usa sesiones independientes y no desactiva límites, autenticación o nonce. La mejora medida se concentra en el cambio de filtros/páginas de Estadísticas; las otras rutas se mantienen dentro de los resultados de carga publicados. Estas muestras locales no prueban capacidad del hosting ni sustituyen aceptación humana de UAT o análisis de seguridad externos.
+
+## Importación y consolidación · 1.11.1
+
+La [evidencia de la entrega](docs/evidence/release-1.11.1/interest-import1111.json) registra la conversión local de formularios tabulares, prioridad a cuentas existentes, revisión obligatoria de inferencias contextuales, permisos y conservación del resto del perfil. Los documentos de referencia y tablas con columnas divididas se rechazan para evitar asignaciones incorrectas. La importación no crea usuarios ni interpreta empresa, membresía o cargo como intereses. Mantiene esquema 15 e incorpora los cambios de perfil/asistencia del 5 de noviembre también documentados en esta entrega. El [manifiesto 1.11.1](docs/evidence/release-1.11.1/package.json) identifica el ZIP actual; los análisis históricos de SonarQube, Trivy y ZAP mantienen su alcance propio.
+
 ## Estado de los requisitos
 
 | Estado | Cantidad | Interpretación |
 |---|---:|---|
-| Código revisado | 263 | Implementación y evidencia registradas, con el alcance de cada etapa. |
+| Código revisado | 264 | Implementación y evidencia registradas, con el alcance de cada etapa. |
 | Ajustado por decisión del usuario | 5 | Excepciones autorizadas; no son cumplimiento literal del PDF. |
 | Parcial | 7 | Hay implementación y brechas por cerrar. |
 | Validación pendiente | 2 | Falta revisión transversal. |
-| Externo | 8 | Requiere evidencia del entorno o de proveedores. |
+| Externo | 7 | Requiere evidencia del entorno o de proveedores. |
 | Fuera de alcance | 17 | Exclusiones conservadas del alcance acordado. |
 
 Inventario: **302 requisitos**, incluidos 62 RN, 213 RF y 27 RNF, con 240 prioridades RF/RNF. RF-214 se menciona pero no está definido; RF-93 se normaliza a RF-093. Los estados no equivalen a aceptación integral, cobertura de pruebas ni una estimación de horas restantes.
 
-Sobre el PDF íntegro, 263/302 (**87,1 %**) están marcados Código revisado. Excluyendo los 17 fuera de alcance e incluyendo las cinco decisiones autorizadas, el avance documental es 268/285 (**94,0 %**); quedan 17 (**6,0 %**). Estos porcentajes no aumentan por repetir pruebas o corregir una parte de un requisito transversal.
+Sobre el PDF íntegro, 264/302 (**87,4 %**) están marcados Código revisado. Excluyendo los 17 fuera de alcance e incluyendo las cinco decisiones autorizadas, el avance documental es 269/285 (**94,4 %**); quedan 16 (**5,6 %**). Estos porcentajes no aumentan por repetir pruebas o corregir una parte de un requisito transversal.
 
 <a id="decisiones"></a>
 
@@ -271,7 +325,7 @@ Sobre el PDF íntegro, 263/302 (**87,1 %**) están marcados Código revisado. Ex
 - Ejecutivo y Administrador pueden crear y revisar propuestas de microeventos; se requiere revisión antes de publicarlas.
 - Administración puede editar directamente los datos del asociado. Contacto queda como referencia opcional de uso único; excepción autorizada a RN-001 y RN-032, con auditoría y preferencias personales conservadas.
 - La única reacción es **Me gusta**. Las reacciones heredadas retiradas se contabilizan de manera compatible y pueden quitarse.
-- El flujo Git y las pruebas vigentes son manuales. El [Jenkinsfile](Jenkinsfile) conserva las etapas existentes; ZAP y CSP en `qa`, su archivado, la retención de un build y la limpieza final están pendientes. La instalación de plugins queda a cargo del responsable del entorno.
+- La promoción Git conserva el orden `development → qa → uat → main`. Las pruebas pueden ejecutarse manualmente y el [Jenkinsfile](Jenkinsfile) aplica Trivy antes del despliegue y pruebas, SonarQube/Quality Gate y ZAP/CSP en QA/UAT. Su archivado, retención y limpieza están implementados; la [guía de CI](ci/README.md) distingue su validación local de la configuración y aprobación del entorno de destino. La instalación manual de plugins queda a cargo de su responsable.
 - El aprendizaje de intereses es automático y respeta las desmarcaciones guardadas del usuario.
 - Administración asigna el tipo Individual o Empresa asociada; por ahora esta clasificación no administra grupos ni cupos empresariales.
 
@@ -459,13 +513,13 @@ Cada fila conserva su propia revisión: no se suman ejecuciones repetidas como p
 | CSV de asistencia | 156 PHP/729 aserciones, incluidos 33 casos nuevos. Sin despliegue automático. | [Resumen](docs/evidence/release-1.10.8/zoominput108.json), [JUnit](docs/evidence/release-1.10.8/zoominput108-junit.xml) |
 | Correo y credenciales | 186 PHP/924 aserciones, incluidos 45 casos nuevos; 49 controles portables y sintaxis JS. Sin envío SMTP real ni despliegue automático. | [Resumen](docs/evidence/release-1.10.8/mailinput108.json), [JUnit](docs/evidence/release-1.10.8/mailinput108-junit.xml) |
 | Contacto y accesos de administración | Ocho controles de navegador con datos locales reales, ocho vistas en dos temas y dos tamaños, sin desbordamiento ni infracciones automáticas WCAG A/AA en los componentes revisados; 49 controles portables. Sin nueva suite PHP, cobertura ni despliegue en QA. | [Resumen](docs/evidence/release-1.10.8/contact-layout108.json), [recorrido](tests/contact-layout108.cjs) |
-| Reinicio del Asistente CP 071 | Once controles de navegador, seis pruebas PHP/55 aserciones y 49 controles portables. Gemini interceptado; sin consumo de API real, nueva cobertura o aceptación remota completa. | [Resumen](docs/evidence/release-1.10.8/assistant-reset108.json), [JUnit](docs/evidence/release-1.10.8/assistant-reset108-junit.xml) |
+| Reinicio del Asistente CP 071 | Once controles de navegador, seis pruebas PHP/55 aserciones y 49 controles portables. Gemini interceptado; sin consumo de API, nueva cobertura o aceptación remota completa. | [Resumen](docs/evidence/release-1.10.8/assistant-reset108.json), [JUnit](docs/evidence/release-1.10.8/assistant-reset108-junit.xml) |
 | Contadores de comentarios | Ocho controles de navegador con envíos, respuestas, borrado, moderación y totales reales en WordPress local; 49 controles portables. Sin cambios de backend, nueva suite PHP, cobertura ni instalación en QA. | [Resumen](docs/evidence/release-1.10.8/comment-count108.json) |
 | Panel de conexiones compacto | Catorce controles de navegador y seis vistas: pestañas, búsqueda, acciones reales, teclado, privacidad y traducción; sin desbordamiento ni infracciones automáticas WCAG A/AA en el panel. 49 controles portables; sin nueva suite PHP, cobertura ni despliegue remoto. | [Resumen](docs/evidence/release-1.10.8/connections-panel108.json) |
 | Correcciones de SonarQube | Las 137 incidencias exportadas se reproducen exactamente en SonarQube local 26.9; el código corregido obtiene cero. 677 pruebas PHP/7.565 aserciones, 49 controles portables y doce recorridos de navegador/110 controles aprobados; 148 estados axe registrados sin infracciones automáticas ni desbordamiento. Sin casos nuevos, nueva cobertura, cambios de reglas, exclusiones o umbrales. | [Resumen verificable](docs/evidence/release-1.10.8/sonar-fixes108.json) |
 | Integración y E2E desde UAT, 15 de octubre | Bruno: 10 peticiones/15 comprobaciones de integración y 23/38 del backend E2E; Playwright: tres recorridos, cinco videos y cinco capturas aprobados. Rama `uat`, base `c525b99`, ajustes del ejecutor sin commit y fuentes capturadas. WordPress local desechable, limpieza confirmada; sin Jenkins, nueva cobertura ni despliegue público. Conserva el intento inicial con un recorrido fallido y su evidencia. | [Resumen](docs/evidence/release-1.10.8/uat-acceptance108.json), [guía para exponer](MANUAL_QA_UAT.md#exponer-pruebas) |
 
-El [manifiesto actual](docs/evidence/release-1.10.9/package.json) identifica el ZIP 1.10.9, esquema 15; el [manifiesto provisional anterior](docs/evidence/release-1.10.8/package.json) se conserva como evidencia histórica. Las correcciones quedan preparadas para instalación manual; no se presentan como ya instaladas en QA. La última aceptación HTTP/UI completa tampoco certifica los ZIP posteriores. No se midió nueva cobertura en esas etapas ni se exige el 100 %. El análisis estático local no acredita el Quality Gate publicado: debe repetirse el flujo de QA sobre el commit que incluya estas correcciones. Los reportes de cobertura anteriores conservan su revisión original.
+El [manifiesto actual](docs/evidence/release-1.11.0/package.json) identifica el ZIP 1.11.0, esquema 15. Los manifiestos [1.10.9](docs/evidence/release-1.10.9/package.json) y [1.10.8](docs/evidence/release-1.10.8/package.json) conservan sus paquetes históricos. Las ejecuciones HTTP/UI, SonarQube y ZAP acreditan únicamente las revisiones identificadas en cada resumen; no certifican un ZIP posterior ni su instalación remota. Los resultados de QA/UAT y la corrección posterior de imágenes se distinguen al inicio de este documento. Esta revisión documental no genera cobertura ni cambia las huellas o la revisión de los reportes existentes.
 
 La consolidación documental no cambia el código del plugin, su ZIP, los resultados anteriores ni los estados de requisitos. La [verificación documental](scripts/check-docs.py) comprueba inventario, enlaces, Git y sincronización de la matriz.
 

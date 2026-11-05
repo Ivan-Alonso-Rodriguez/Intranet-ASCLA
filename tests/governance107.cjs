@@ -7,46 +7,37 @@ const checks=[],errors=[],posts=[];let browser,admin,member;
 async function api(page,route,body,method){return page.evaluate(async({route,body,method})=>{const url=route.startsWith('native:')?ASCLA.api.replace(/ascla\/v1\/?$/,'wp/v2/')+route.slice(7):ASCLA.api+route;const r=await fetch(url,{method:method||(body?'POST':'GET'),headers:{'X-WP-Nonce':ASCLA.nonce,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});return{status:r.status,body:await r.json()};},{route,body,method});}
 async function ok(page,route,body,method){const r=await api(page,route,body,method);assert.ok(r.status>=200&&r.status<300,route+': '+r.status);return r.body;}
 async function login(name,password){const context=await browser.newContext({viewport:{width:1440,height:1000}}),p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(base+'/wp-login.php');await p.locator('#user_login').fill(name);await p.locator('#user_pass').fill(password);await Promise.all([p.waitForNavigation({waitUntil:'domcontentloaded'}),p.locator('#wp-submit').click()]);await p.goto(base+'/intranet/');await require('./helpers/browser.cjs').waitForHome(p);await p.keyboard.press('Escape');return p;}
-async function edit(){await admin.goto(base+'/administracion/?section=usuarios');await admin.locator('[data-form="admin-filter"][data-area="users"]').waitFor();const search=admin.locator('[data-form="admin-filter"][data-area="users"]');await search.locator('[name="q"]').fill(member.username);await search.locator('button:not([type])').first().click();await admin.locator('[data-action="user-edit"][data-id="'+member.id+'"]').click();const form=admin.locator('[data-form="admin-user-edit"]');await form.waitFor();if(!await form.locator('[name="member_type"]').inputValue())await form.locator('[name="member_type"]').selectOption('independent');await form.locator('.admin-edit-section > summary').filter({hasText:'Acceso y membresía'}).click();await form.locator('.admin-edit-section > summary').filter({hasText:'Permisos avanzados'}).click();return form;}
+async function edit(){
+ await admin.goto(base+'/administracion/?section=usuarios');const search=admin.locator('[data-form="admin-filter"][data-area="users"]');await search.waitFor();await search.locator('[name="q"]').fill(member.username);const previous=await search.elementHandle();
+ await Promise.all([admin.waitForResponse(r=>r.request().method()==='GET'&&new URL(r.url()).pathname.endsWith('/admin/users')&&new URL(r.url()).searchParams.get('q')===member.username),search.locator('button:not([type])').first().click()]);await previous.waitForElementState('hidden');
+ await admin.locator('[data-action="user-edit"][data-id="'+member.id+'"]').click();const form=admin.locator('[data-form="admin-user-edit"]');await form.waitFor();if(!await form.locator('[name="member_type"]').inputValue())await form.locator('[name="member_type"]').selectOption('independent');await form.locator('.admin-edit-section > summary').filter({hasText:'Acceso y membresía'}).click();return form;
+}
 async function save(form){const response=admin.waitForResponse(r=>r.url().endsWith('/admin/users/'+member.id)&&r.request().method()==='POST');await form.locator('button:not([type])').last().click();const r=await response;assert.equal(r.status(),200);await form.waitFor({state:'detached'});return r.json();}
 function pass(name){checks.push(name);console.log('PASS '+name);}
 (async()=>{try{
- browser=await chromium.launch({headless:true});admin=await login('ascla.admin',env.ASCLA_ADMIN_PASSWORD);
+ browser=await chromium.launch({headless:true,...(process.env.ASCLA_BROWSER_CHANNEL?{channel:process.env.ASCLA_BROWSER_CHANNEL}:{})});admin=await login('ascla.admin',env.ASCLA_ADMIN_PASSWORD);
  const zone=(await ok(admin,'native:settings')).timezone || 'UTC';const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  const suffix=crypto.randomBytes(4).toString('hex'),password='J9!sK4#'+crypto.randomBytes(18).toString('base64url'),username='governance_'+suffix;
  member=await ok(admin,'native:users',{username,password,email:username+'@example.invalid',first_name:'Gestión',last_name:suffix,roles:['ascla_member']});member.username=username;member.page=await login(username,password);
  const boot=await ok(member.page,'bootstrap');await ok(member.page,'profiles/me',{first_name:'Gestión',last_name:suffix,position:'Analista',company:'Organización',city:'Lima',bio:'Descripción profesional',industries:[Number(boot.catalogs.industry[0].id)],interests:[Number(boot.catalogs.interest[0].id)],goals:[Number(boot.catalogs.goal[0].id)]});
- let form=await edit();await form.locator('[name="permission_ascla_write"]').selectOption('deny');await save(form);
- const denied=await api(member.page,'content/hub',{title:'No autorizado',body:'Sin permiso de escritura',status:'publish'});if(denied.status===200)posts.push(denied.body.id);assert.equal(denied.status,403);
+ let form=await edit();
+ assert.equal(await form.locator('[name="assigned_roles"],[name^="permission_"]').count(),0);
+ assert.equal(await form.getByText('Permisos avanzados',{exact:true}).count(),0);
+ assert.equal(await form.locator('[name="login"]').isEditable(),true);
+ await save(form);
+ pass('El editor conserva rol y membresía, permite editar el usuario y retira los permisos avanzados');
+ await ok(admin,'admin/users/'+member.id,{email:member.email,first_name:'Gestión',last_name:suffix,role:'ascla_member',permission_overrides:{ascla_write:false}});
+ form=await edit();await save(form);
  let state=await ok(admin,'admin/users/'+member.id);assert.equal(state.permission_overrides.ascla_write,false);
- pass('Denegar escritura se persiste desde el formulario y bloquea publicaciones en el servidor');
- form=await edit();await form.locator('[name="permission_ascla_access"]').selectOption('deny');await form.locator('[name="permission_ascla_write"]').selectOption('');await save(form);
- assert.equal((await api(member.page,'bootstrap')).status,403);state=await ok(admin,'admin/users/'+member.id);assert.equal(state.permission_overrides.ascla_access,false);
- assert.equal(state.access_enabled,false);await admin.locator('[data-admin-user="'+member.id+'"] .request-status').getByText('Acceso restringido por permisos',{exact:true}).waitFor();
- form=await edit();await form.locator('[name="permission_ascla_access"]').selectOption('');await save(form);assert.equal((await api(member.page,'bootstrap')).status,200);
- pass('La administración puede restringir y restaurar el acceso sin perder la cuenta editable');
- form=await edit();await form.locator('[name="assigned_roles"][value="ascla_moderator"]').check();assert.equal(await form.locator('[name="board_reference"]').getAttribute('required'),'');assert.equal(await form.locator('[name="board_confirmed"]').getAttribute('required'),'');
- const pending=await ok(admin,'admin/users/'+member.id);const payload=Object.fromEntries(['email','role','first_name','last_name','position','company','phone','phone_visibility','membership_status','membership_until'].map(k=>[k,pending[k]]));
- assert.equal((await api(admin,'admin/users/'+member.id,{...payload,assigned_roles:['ascla_member','ascla_moderator']})).status,403);
- pass('Elegir varios roles exige autorización en la interfaz y la API rechaza una solicitud sin ella');
- await form.locator('[name="board_reference"]').fill('Acta de Junta 2026-'+suffix);await form.locator('[name="board_date"]').fill(today());await form.locator('[name="board_confirmed"]').check();await save(form);
- state=await ok(admin,'admin/users/'+member.id);assert.deepEqual(state.assigned_roles,['ascla_member','ascla_moderator']);assert.ok(state.role_approval.reference.endsWith(suffix));assert.ok(state.role_approval.recorded_by);assert.equal((await api(member.page,'admin')).status,200);
- const audit=(await ok(admin,'admin')).audit.find(row=>row.action==='board_role_authorization'&&Number(row.object_id)===member.id);assert.ok(audit);assert.deepEqual(JSON.parse(audit.detail).role_approval.after,state.role_approval);
- pass('La autorización registra acta, fecha, actor y roles; su alcance y auditoría habilitan moderación');
- form=await edit();await form.locator('[name="assigned_roles"][value="ascla_executive"]').check();assert.equal(await form.locator('[name="board_reference"]').getAttribute('required'),'');await form.locator('[name="assigned_roles"][value="ascla_executive"]').uncheck();
- await form.locator('[name="permission_ascla_moderate"]').selectOption('deny');await save(form);assert.equal((await api(member.page,'admin/comments/1',{decision:'approve',reason:'No autorizado'})).status,403);
- pass('Una aprobación no permite ampliar roles sin registrar otra; los permisos individuales limitan roles aprobados');
- form=await edit();await form.locator('[name="assigned_roles"][value="ascla_moderator"]').uncheck();await form.locator('[name="permission_ascla_moderate"]').selectOption('');await save(form);state=await ok(admin,'admin/users/'+member.id);assert.deepEqual(state.assigned_roles,['ascla_member']);assert.equal((await api(member.page,'admin')).status,403);
- pass('Reducir a un rol elimina las capacidades adicionales y conserva la evidencia de la Junta');
- await admin.locator('[data-action="board-role-approval"][data-id="'+member.id+'"]').click();const board=admin.locator('[data-form="board-approval"]');await board.waitFor();
- await board.locator('[name="roles"][value="administrator"]').check();await board.locator('[name="roles"][value="ascla_moderator"]').check();await board.locator('[name="board_reference"]').fill('Acta técnica '+suffix);await board.locator('[name="board_date"]').fill(today());await board.locator('[name="board_confirmed"]').check();
- const registered=admin.waitForResponse(r=>r.url().endsWith('/admin/users/'+member.id+'/role-approval')&&r.request().method()==='POST');await board.locator('button:not([type])').click();assert.equal((await registered).status(),200);await board.waitFor({state:'detached'});
- state=await ok(admin,'admin/users/'+member.id);assert.deepEqual(state.assigned_roles,['ascla_member']);assert.deepEqual(state.role_approval.roles,['administrator','ascla_moderator']);
- pass('Registro separado para decisiones sobre los cuatro roles: conserva la cuenta y no asigna privilegios');
- form=await edit();await admin.screenshot({path:root+'/test-results/governance-desktop.png'});await admin.setViewportSize({width:390,height:844});await form.locator('[name="assigned_roles"]').first().scrollIntoViewIfNeeded();await admin.screenshot({path:root+'/test-results/governance-mobile.png'});
- const widths=await admin.evaluate(()=>({width:innerWidth,document:document.documentElement.scrollWidth,overflow:[...document.querySelectorAll('#ascla-root *')].filter(el=>{const b=el.getBoundingClientRect();return !el.closest(".admin-tabs")&&b.width>0&&b.left>=0&&b.right>innerWidth+1;}).slice(0,18).map(el=>({tag:el.tagName,classes:el.className,width:Math.round(el.getBoundingClientRect().width),right:Math.round(el.getBoundingClientRect().right)}))}));if(widths.document>widths.width+1)console.log(JSON.stringify(widths));assert.equal(widths.document<=widths.width+1,true);
- pass('El formulario administrativo conserva roles/permisos legibles sin desbordamiento móvil');
- await admin.setViewportSize({width:1440,height:1000});
+ assert.equal((await api(member.page,'content/hub',{title:'No permitido',body:'Prueba',status:'publish'})).status,403);
+ pass('Editar el perfil conserva las restricciones existentes y el servidor sigue rechazando escrituras no autorizadas');
+ await ok(admin,'admin/users/'+member.id,{email:member.email,first_name:'Gestión',last_name:suffix,role:'ascla_member',permission_overrides:{}});
+ assert.equal((await api(admin,'admin/users/'+member.id,{email:member.email,first_name:'Gestión',last_name:suffix,role:'ascla_member',assigned_roles:['ascla_member','ascla_moderator']})).status,403);
+ pass('La retirada del menú no permite asignar roles adicionales sin autorización');
+ await admin.setViewportSize({width:390,height:844});form=await edit();
+ assert.equal(await admin.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+ await admin.screenshot({path:root+'/test-results/governance-mobile.png'});await admin.setViewportSize({width:1440,height:1000});
+ await save(form);pass('Editor administrativo sin desbordamiento móvil');
  const settingsRoute='**/ascla/v1/settings';
  await admin.route(settingsRoute,async route=>{
   if(route.request().method()!=='GET')return route.continue();

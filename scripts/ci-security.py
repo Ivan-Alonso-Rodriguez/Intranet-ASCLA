@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import re
+import secrets
 import subprocess
 import sys
 import tarfile
@@ -80,8 +81,9 @@ def build():
     pinned = read(ROOT / 'ci/images.json')
     if any(not re.search(r'@sha256:[a-f0-9]{64}\Z', ref) for ref in pinned.values()):
         raise ValueError('All base and scanner images must be pinned by digest')
-    # Jenkins BUILD_TAG is unique across jobs/builds, with no shell interpolation.
+    # A restored Jenkins controller can reuse BUILD_TAG; refresh package indexes on every build.
     label = re.sub('[^a-z0-9_.-]', '-', os.environ.get('BUILD_TAG', 'local-' + str(time.time_ns())).lower())[:110]
+    refresh = label + '-' + secrets.token_hex(12)
     before = source_hash()
     images = {}
     lock = {'run': label, 'commit': output(['git', '-C', str(ROOT), 'rev-parse', 'HEAD']),
@@ -91,7 +93,7 @@ def build():
         tag = 'ascla-ci-' + role + ':' + label
         extra = ['--build-arg', 'ENTRYPOINT_IMAGE=' + pinned['db_entrypoint']] if role == 'db' else []
         run(['docker', 'build', '--pull', '--label', 'org.ascla.ci=true', '--tag', tag,
-             '--build-arg', 'BASE_IMAGE=' + pinned[base], '--build-arg', 'SECURITY_REFRESH=' + label,
+             '--build-arg', 'BASE_IMAGE=' + pinned[base], '--build-arg', 'SECURITY_REFRESH=' + refresh,
              *extra, '-f', str(ROOT / ('ci/Dockerfile.' + role)), str(ROOT)])
         images[role] = {'reference': tag, 'id': image_id(tag), 'built': True}
         write(PRIVATE / 'images.json', lock)

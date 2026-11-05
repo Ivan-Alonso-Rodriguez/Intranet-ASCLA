@@ -6,7 +6,7 @@ use ASCLA\Core\Rest\ApiException;
 /** DeepSeek REST transport using the OpenAI-compatible Chat Completions API. */
 final class DeepSeekProvider implements AIProviderInterface
 {
-    public function mode(): string { return 'DeepSeek · API real'; }
+    public function mode(): string { return 'DeepSeek · API'; }
 
     public static function model(string $value): string
     {

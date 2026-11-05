@@ -7,6 +7,7 @@ use ASCLA\Core\Repositories\WordPressWrites;
 /** Pending proposals must still have a consenting, eligible group before publication. */
 final class MicroEligibility
 {
+    private const REVIEW_PERMISSION='La revisión del microevento requiere administración.';
     public static function boot(): void
     {
         add_action('init',[self::class,'schedule'],22);
@@ -42,7 +43,7 @@ final class MicroEligibility
     /** Refresh the group synchronously when an administrator opens a proposal review. */
     public static function review(int $id): array
     {
-        Access::require(Access::member() && current_user_can('ascla_manage'),'La revisión del microevento requiere administración.',403);
+        Access::require(Access::member() && current_user_can('ascla_manage'),self::REVIEW_PERMISSION,403);
         return Store::atomic('event:'.$id,static function()use($id){
             clean_post_cache($id);$post=Content::get($id);$before=(array)get_post_meta($id,'_ascla',true);
             Access::require($post->post_type==='ascla_event' && !empty($before['micro']),'Seleccione una propuesta de microevento.',400);
@@ -67,6 +68,60 @@ final class MicroEligibility
             if (!$blocked) { $eligible[]=$id; }
         }
         return $eligible;
+    }
+
+    /** Only unpublished, unsent proposals can have their selection changed. */
+    private static function editable(int $id): array
+    {
+        Access::require(Access::member() && current_user_can('ascla_manage'),self::REVIEW_PERMISSION,403);
+        $post=Content::get($id);$meta=(array)get_post_meta($id,'_ascla',true);
+        Access::require($post->post_type==='ascla_event' && !empty($meta['micro']),'Seleccione una propuesta de microevento.',400);
+        Access::require(in_array($post->post_status,['draft','pending','ascla_hidden'],true) && empty($meta['invited']) && empty($meta['cancelled']),
+            'Solo puedes cambiar candidatos antes de publicar las invitaciones.',409);
+        return $meta;
+    }
+
+    /** Search a bounded page of eligible replacements; names stay within administration. */
+    public static function options(int $id,string $query='',int $page=1): array
+    {
+        self::editable($id);$query=mb_strtolower(trim(Access::text($query,100)));
+        $items=[];$offset=0;
+        do {
+            $users=get_users(['capability'=>'ascla_access','number'=>200,'offset'=>$offset,'orderby'=>'ID','order'=>'ASC']);
+            cache_users(array_map(static fn($user)=>(int)$user->ID,$users));
+            foreach ($users as $user) {
+                $uid=(int)$user->ID;
+                if ($query!=='' && !str_contains(mb_strtolower($user->display_name),$query)) { continue; }
+                if (self::candidates([$uid])!==[$uid]) { continue; }
+                $items[]=['id'=>$uid,'name'=>$user->display_name];
+            }
+            $offset+=200;
+        } while(count($users)===200);
+        $pages=max(1,(int)ceil(count($items)/12));$page=max(1,min($pages,$page));
+        return ['items'=>array_slice($items,($page-1)*12,12),'total'=>count($items),'page'=>$page,'pages'=>$pages];
+    }
+
+    public static function replace(int $id,mixed $ids,string $reason): array
+    {
+        Access::require(Access::member() && current_user_can('ascla_manage'),self::REVIEW_PERMISSION,403);
+        Access::require(is_array($ids) && count($ids)<=50,'Selecciona una lista de candidatos válida.',400);
+        foreach($ids as $uid) { Access::require((is_int($uid) || (is_string($uid) && ctype_digit($uid))) && (int)$uid>0,'Selecciona una lista de candidatos válida.',400); }
+        $ids=array_values(array_unique(array_map('intval',$ids)));
+        $reason=trim(Access::text($reason,1000));Access::require($reason!=='','Indica el motivo del cambio de candidatos.',400);
+        return Store::atomic('event:'.$id,static function()use($id,$ids,$reason){
+            clean_post_cache($id);$meta=self::editable($id);$before=array_values(array_map('intval',$meta['invitees']??[]));
+            $updated=$meta;$updated['invitees']=$ids;MicroEvents::validateInvitees($updated);
+            if ($before!==$ids) {
+                $updated['micro_approved']=false;
+                unset($updated['public_at'],$updated['publish_at'],$updated['publish_actor_id'],$updated['schedule_error']);
+                WordPressWrites::meta('post',$id,'_ascla',$updated);ContentSchedule::cancel($id);
+                WordPressWrites::post(['ID'=>$id,'post_status'=>'pending']);MicroLifecycle::history($id,'pending',$reason);
+                Audit::changes('microevent_candidates_updated',$id,['invitees'=>$before],['invitees'=>$ids,'reason'=>$reason]);
+            }
+            $item=Content::serialize(get_post($id));
+            MicroInvitations::apply($item,$id,(array)get_post_meta($id,'_ascla',true));
+            return ['item'=>$item,'candidates'=>count($ids),'removed'=>count(array_diff($before,$ids))];
+        });
     }
 
     private static function proposal(int $id): void

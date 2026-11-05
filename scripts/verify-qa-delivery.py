@@ -23,6 +23,27 @@ def require(condition, message):
         raise RuntimeError(message)
 
 
+def verify_original(item):
+    location = item.get('source_relative')
+    if not location:
+        # A replaced private alias is a historical location, not the original
+        # artifact. Published hashes remain mandatory and are checked separately.
+        location = item.get('source_location_at_export', '')
+        require(item.get('native_original_available') is False
+                and location.startswith('test-results/')
+                and re.fullmatch(r'[a-f0-9]{64}', item.get('source_sha256', '')),
+                'Unavailable native source must retain its export location and original hash.')
+        original = (ROOT / location).resolve()
+        require(original.is_relative_to(ROOT.resolve()), 'Original source outside repository.')
+        return False
+    original = (ROOT / location).resolve()
+    require(original.is_relative_to(ROOT.resolve()), 'Original source outside repository.')
+    if original.is_file():
+        require(hashlib.sha256(original.read_bytes()).hexdigest() == item['source_sha256'],
+                'The original source no longer matches its recorded hash: ' + location)
+    return original.is_file()
+
+
 class Links(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -86,11 +107,8 @@ def main():
         published = DELIVERY / item['published']
         require(published.is_file() and hashlib.sha256(published.read_bytes()).hexdigest()
                 == item['published_sha256'], 'Published copy differs from its provenance.')
-        if item.get('source_relative'):
-            original = ROOT / item['source_relative']
-            if original.is_file():
-                require(hashlib.sha256(original.read_bytes()).hexdigest() == item['source_sha256'],
-                        'The original source no longer matches its recorded hash.')
+        if item.get('source_relative') or item.get('source_location_at_export'):
+            verify_original(item)
 
     source_backend = read(DELIVERY / 'backend/resultados' / provenance['backend']['run'] / 'summary.json')
     groups = [r for r in source_backend['results'] if r['name'] != 'runner']
@@ -179,11 +197,7 @@ def main():
                 'A failed CSP check is presented as approved.')
     security_provenance = read(security_folder / 'procedencia.json')
     for item in security_provenance['sources']:
-        original = (ROOT / item['source_relative']).resolve()
-        require(original.is_relative_to(ROOT.resolve()), 'Security source outside repository.')
-        if original.is_file():
-            require(hashlib.sha256(original.read_bytes()).hexdigest() == item['source_sha256'],
-                    'The original security source changed: ' + item['source_relative'])
+        verify_original(item)
     for artifact in security_folder.glob('*'):
         if artifact.suffix not in ('.json', '.html'):
             continue
@@ -301,6 +315,11 @@ def main():
     require(len(attributes) == 3 * len(names)
             and all(value == b'unset' for value in attributes[2::3]),
             'Git newline conversion could invalidate evidence hashes or ZIP contents.')
+    unavailable = sum(item.get('native_original_available') is False
+                      for item in security_provenance['sources'])
+    if unavailable:
+        print(f'Historical native security sources unavailable: {unavailable}; '
+              'recorded hashes preserved; published copies verified independently.')
     print(f'QA delivery OK: {len(names)} files, {totals[0]} Bruno requests, {totals[1]} checks, '
           f'{len(expected_flows)} shared frontend/backend flows, ZAP/CSP evidence, 103 CP identifiers, latest execution only '
           f'and {checked_links} local HTML links verified.')

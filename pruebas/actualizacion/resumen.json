@@ -26,7 +26,7 @@
   "backend": {
     "requests": 81,
     "checks": 149,
-    "assistant_provider": "Google Gemini · API real"
+    "assistant_provider": "DEMO MODE"
   },
   "latest_ui": {
     "tests": 14,
@@ -61,12 +61,18 @@
       "csp_violations": 0
     },
     "server": "Apache/2.4.68 (Debian)",
-    "active_zap_rerun": {
+    "original_review_active_zap_rerun": {
       "status": "PASS",
       "date": "2026-10-22T09:11:27.133208+00:00",
       "environment": "local-ephemeral-https",
       "reason": "Nueva ejecución completada con el código actual: 14 rutas HTML y 18 operaciones GET REST. Cero alertas altas, medias o bajas; nueve informativas en páginas y una en API. El entorno y las credenciales temporales se retiraron.",
       "report": "seguridad/dashboard.html"
+    },
+    "active_zap_rerun": {
+      "status": "PASS",
+      "date": "2026-11-05T16:28:54.082062+00:00",
+      "source_sha256": "8726ea30d4cb94a1f71b2328594955b18a54cba410b6d51a255863c1a7e9fbe3",
+      "reason": "Último análisis activo local, con fecha y alcance propios; no es una nueva ejecución en el QA publicado."
     }
   },
   "test_sources": [
@@ -88,7 +94,7 @@
     },
     {
       "file": "scripts/qa-target-provenance.cjs",
-      "sha256": "a633b0f6b20328981d18e21fd0248b412090cb9e790ec351fc5ab864b399ad16"
+      "sha256": "d74c53a451e1786fc6b13ec6456eae8e32034151e9138f610567df870fe021f4"
     }
   ],
   "limitations": [

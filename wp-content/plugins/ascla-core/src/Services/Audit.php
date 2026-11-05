@@ -12,7 +12,7 @@ final class Audit
     public static function changes(string $action,int $id,array $before,array $after,array $context=[]): void
     {
         $diff=[];
-        foreach (['roles','capabilities','role_approval','membership_status','membership_until','invitees','state','reason','reviewed_by','reviewed_at','profile_fields'] as $field) {
+        foreach (['roles','capabilities','role_approval','membership_status','membership_until','invitees','state','reason','reviewed_by','reviewed_at','profile_fields','start','end','modality','registration_deadline','micro_min','capacity','change_reason'] as $field) {
             if (($before[$field]??null)!==($after[$field]??null)) { $diff[$field]=['before'=>$before[$field]??null,'after'=>$after[$field]??null]; }
         }
         if (!$diff) { return; }

@@ -3,8 +3,8 @@ const {chromium}=require('playwright');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const fixture=JSON.parse(fs.readFileSync(process.env.ASCLA_UX_FIXTURE||'test-results/sonar-preparation/release1110-users.json','utf8'));
 if(fixture.origin!=='ascla-local-test-users'||!['localhost','127.0.0.1'].includes(new URL(fixture.base).hostname))throw Error('Disposable loopback fixture required');
-const out=path.resolve('test-results/readers-auto1110');fs.mkdirSync(out,{recursive:true});
-const manifest=JSON.parse(fs.readFileSync('docs/evidence/release-1.11.0/package.json','utf8'));
+const out=path.resolve(process.env.ASCLA_TEST_OUT||'test-results/readers-auto1110');fs.mkdirSync(out,{recursive:true});
+const manifest=JSON.parse(fs.readFileSync(process.env.ASCLA_PACKAGE_MANIFEST||'docs/evidence/release-1.11.0/package.json','utf8'));
 const checks=[],scans=[],errors=[],posts=[],contexts=[];let browser,admin,member;
 function pass(name){checks.push(name);console.log('PASS '+name);}
 async function api(page,route,body,method){return page.evaluate(async({route,body,method})=>{const response=await fetch(ASCLA.api+route,{method:method||(body?'POST':'GET'),headers:{'X-WP-Nonce':ASCLA.nonce,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});return{status:response.status,body:await response.json()};},{route,body,method});}
@@ -17,7 +17,7 @@ async function capture(page,name){assert.ok(await page.evaluate(()=>document.doc
 
 const crypto=require('node:crypto');
 const digest=data=>crypto.createHash('sha256').update(data).digest('hex');
-async function upload(name,bytes,mimeType='application/pdf'){const c=await admin.evaluate(()=>({api:ASCLA.api,nonce:ASCLA.nonce}));const r=await admin.request.post(c.api+'media',{headers:{'X-WP-Nonce':c.nonce},multipart:{file:{name,mimeType,buffer:bytes}}});assert.ok(r.ok());return r.json();}
+async function upload(name,bytes,mimeType='application/pdf'){const c=await admin.evaluate(()=>({api:ASCLA.api,nonce:ASCLA.nonce}));const r=await admin.request.post(c.api+'media',{headers:{'X-WP-Nonce':c.nonce},multipart:{file:{name,mimeType,buffer:bytes}}});assert.ok(r.ok(),name+': '+r.status()+' '+(r.ok()?'':await r.text()));return r.json();}
 async function create(type,file){const p=await ok(admin,'content/'+type,{title:type==='resource'?'Guía práctica de networking para asociados ASCLA':'Documentos de nuestro encuentro',body:'Lee el documento sin salir de la comunidad. Puedes consultar sus páginas o descargar el original.',status:'publish',meta:{media_ids:[file.id],resource_type:'Documento',chatham:false}});posts.push(p.id);return p;}
 async function ready(page,number=1){await page.waitForFunction(number=>{const n=document.querySelector('.pdf-preview');return n?.dataset.pdfPage===String(number)&&n.querySelector('.pdf-page').getAttribute('aria-busy')==='false';},number);}
 async function canvasHash(){return digest(await member.locator('.pdf-canvas').evaluate(c=>c.toDataURL()));}

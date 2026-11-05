@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.11.0
+Stable tag: 1.11.1
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,14 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.11.1 =
+* Estadísticas: Asistencias en el centro; Personas muestra inscritos distintos con confirmación, separados de asistentes y reservas. Definiciones y cifras anteriores conservadas.
+* Caché analítica limitada a ocho contextos por cuenta, con caducidad individual de 30 segundos e invalidación tras cambios confirmados. Carga local con sesiones independientes y comprobación de guardados, cupos y controles de acceso.
+* Importación revisada desde CSV, PDF tabular, HTML y ZIP de una hoja de Forms/Sheets. Conversión local sin enviar el documento a terceros, sin ejecutar contenido y con límites de tamaño/filas/páginas.
+* Prioridad a cuentas ASCLA existentes por código/correo; nombres únicos o erratas claras con advertencia. Omisión predeterminada de personas no identificadas, sin crear usuarios. Temas de evento como propuestas de baja confianza con confirmación, nunca deducidos del cargo o membresía.
+* Restablecimiento de foto para asociado/administración y edición administrativa del nombre de usuario conservando la cuenta. Recuperación vuelve al acceso de origen; CSV Zoom reconoce nombres y fechas inequívocas.
+* Retirada del buscador superior, apartado Archivos y permisos avanzados del editor; etiquetas API simplificadas. Conserva archivos, seguridad y esquema 15.
 
 = 1.11.0 =
 * Revisar contenido a todo el ancho en WordPress y página independiente, con pestañas compactas, filas legibles, borradores plegados y estados vacíos renovados.

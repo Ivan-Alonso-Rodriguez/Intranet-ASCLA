@@ -3,9 +3,9 @@ const {chromium}=require('playwright');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const fixture=JSON.parse(fs.readFileSync(process.env.ASCLA_UX_FIXTURE||'test-results/sonar-preparation/release1110-users.json','utf8'));
 if(fixture.origin!=='ascla-local-test-users'||!['localhost','127.0.0.1'].includes(new URL(fixture.base).hostname))throw Error('Disposable shared users required');
-const out=path.resolve('test-results/visual1110');fs.mkdirSync(out,{recursive:true});
+const out=path.resolve(process.env.ASCLA_TEST_OUT||'test-results/visual1110');fs.mkdirSync(out,{recursive:true});
 const checks=[],scans=[],errors=[],posts=[],contexts=[];let browser,admin,member;
-const manifest=JSON.parse(fs.readFileSync('docs/evidence/release-1.11.0/package.json','utf8'));
+const manifest=JSON.parse(fs.readFileSync(process.env.ASCLA_PACKAGE_MANIFEST||'docs/evidence/release-1.11.0/package.json','utf8'));
 function pass(name){checks.push(name);console.log('PASS '+name);}
 async function api(page,route,body,method){return page.evaluate(async({route,body,method})=>{
  const response=await fetch(ASCLA.api+route,{method:method||(body?'POST':'GET'),headers:{'X-WP-Nonce':ASCLA.nonce,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
@@ -46,7 +46,7 @@ async function neutral(locator){const colors=await locator.evaluate(n=>{const s=
   await go(member,'eventos/');await member.locator('.event-card').first().waitFor();assert.ok(await member.locator('.event-card-date strong').count());assert.ok(await member.locator('.event-card-location').count());await capture(member,'eventos-'+name);
   await go(member,'eventos/?item='+posts[0]);await member.locator('.alert.chatham').waitFor();const published=await neutral(member.locator('.modal .status.publish').first()),chatham=await neutral(member.locator('.alert.chatham'));assert.equal(published.actual,chatham.actual);await capture(member,'detalle-'+name);await member.keyboard.press('Escape');pass('Eventos: fecha destacada, horario y lugar; Publicado y Chatham House neutros: '+name);
  }
- await go(member,'eventos/');await member.locator('.event-card.is-cancelled').waitFor();assert.equal(await member.locator('.event-card.is-cancelled').filter({hasText:'Cancelado'}).count(),1);await capture(member,'evento-cancelado');pass('El evento cancelado conserva su estado visible y una tarjeta legible');
+ await go(member,'eventos/');const cancelled=member.locator('.event-card.is-cancelled').filter({has:member.locator(`[data-action="item"][data-id="${posts[2]}"]`)});await cancelled.waitFor();assert.equal(await cancelled.filter({hasText:'Cancelado'}).count(),1);await capture(member,'evento-cancelado');pass('El evento cancelado conserva su estado visible y una tarjeta legible');
  assert.deepEqual(errors,[]);
 }catch(error){errors.push(error.stack);console.error(error.stack);process.exitCode=1;if(member)await member.screenshot({path:path.join(out,'failure.png'),fullPage:true}).catch(()=>{});
 }finally{

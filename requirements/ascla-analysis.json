@@ -1,10 +1,10 @@
 {
-  "review_date": "2026-10-22",
-  "baseline_commit": "877568c",
-  "plugin_version": "1.11.0",
+  "review_date": "2026-11-05",
+  "baseline_commit": "ca9b784c82cff6d790f7c081aa8a60a17096727d",
+  "plugin_version": "1.11.1",
   "source_name": "DOCUMENTO DE ANALISIS Y DISEÑO ASCLA .pdf",
   "source_sha256": "ac78f208de1c9ef07ec09cd9cfacb8993524ad2926e26c6f51d082a230c5c14a",
-  "scope": "Entrega 1.10.9: agrupa los cambios del 17 de octubre de 2026 en carga, perfil, Directorio, interfaz administrativa, Contacto, estadísticas, privacidad/RAG e invitados de microeventos. Conserva esquema 15, estados de requisitos y evidencias históricas de las pruebas ejecutadas antes de renumerar. Continuidad del PDF 1.10.8: filtros/paginación de eventos, asistencia, etiquetas de privacidad heredadas, proyección segura a Calendar y validación de importación Forms. Conserva esquema 15, textos y prioridades originales, decisiones y evidencias históricas. Revisión de código basada en 877568c con los cambios de la entrega; no certifica aceptación UAT ni Quality Gate remoto. RF-077: búsqueda de aliados por tipo de convenio, migración del índice y comprobación de lectura en QA. Revisión del 17 de octubre: guardado administrativo, mínimos visibles, clasificación del asociado solo por administración y gestión desde Directorio. No cambia los estados ni acredita despliegue o aceptación. Decisión del 17 de octubre: edición administrativa directa de datos del asociado; RN-001/RN-032 pasan a Ajustado por decisión del usuario, sin modificar sus textos originales. Revisión del 19 de octubre: endurecimiento de CSP/cookies/acceso y análisis local de ZAP con HTTPS temporal, alcance HTML/API y validación independiente; sin cambio de estados ni acreditación del hosting publicado. Revisión documental del 21 de octubre: enlaces e inventario publicable comprobados, evidencias históricas diferenciadas del paquete 1.10.9 actual y accesos privados preparados desde un ejemplo. Incluye los ajustes del 20 de octubre en enlaces profesionales, clasificación Individual, mensajería y retiro editorial; no modifica los textos, prioridades ni estados de los requisitos y conserva los reportes de cobertura anteriores. Revisión del 22 de octubre: pruebas Bruno/Playwright sobre los mismos seis flujos en QA y ZAP activo en HTTPS aislado, con fuentes y resultados publicables en pruebas/seguridad. La seguridad local aprueba 20/20 controles HTTP/CSP; el QA conserva 19/20 por la versión de Apache expuesta y requiere al operador del hosting. No se elevan estados ni se acredita Jenkins, Quality Gate o UAT.",
+  "scope": "Entrega 1.10.9: agrupa los cambios del 17 de octubre de 2026 en carga, perfil, Directorio, interfaz administrativa, Contacto, estadísticas, privacidad/RAG e invitados de microeventos. Conserva esquema 15, estados de requisitos y evidencias históricas de las pruebas ejecutadas antes de renumerar. Continuidad del PDF 1.10.8: filtros/paginación de eventos, asistencia, etiquetas de privacidad heredadas, proyección segura a Calendar y validación de importación Forms. Conserva esquema 15, textos y prioridades originales, decisiones y evidencias históricas. Revisión de código basada en 877568c con los cambios de la entrega; no certifica aceptación UAT ni Quality Gate remoto. RF-077: búsqueda de aliados por tipo de convenio, migración del índice y comprobación de lectura en QA. Revisión del 17 de octubre: guardado administrativo, mínimos visibles, clasificación del asociado solo por administración y gestión desde Directorio. No cambia los estados ni acredita despliegue o aceptación. Decisión del 17 de octubre: edición administrativa directa de datos del asociado; RN-001/RN-032 pasan a Ajustado por decisión del usuario, sin modificar sus textos originales. Revisión del 19 de octubre: endurecimiento de CSP/cookies/acceso y análisis local de ZAP con HTTPS temporal, alcance HTML/API y validación independiente; sin cambio de estados ni acreditación del hosting publicado. Revisión documental del 21 de octubre: enlaces e inventario publicable comprobados, evidencias históricas diferenciadas del paquete 1.10.9 actual y accesos privados preparados desde un ejemplo. Incluye los ajustes del 20 de octubre en enlaces profesionales, clasificación Individual, mensajería y retiro editorial; no modifica los textos, prioridades ni estados de los requisitos y conserva los reportes de cobertura anteriores. Revisión del 22 de octubre: pruebas Bruno/Playwright sobre los mismos seis flujos en QA y ZAP activo en HTTPS aislado, con fuentes y resultados publicables en pruebas/seguridad. La seguridad local aprueba 20/20 controles HTTP/CSP; el QA conserva 19/20 por la versión de Apache expuesta y requiere al operador del hosting. No se elevan estados ni se acredita Jenkins, Quality Gate o UAT. Revisión documental del 26 de octubre: nueve Markdown, incluida la guía de CI, inventario obtenido de Git y referencias al paquete 1.11.0. Las limitaciones de Jenkins/Quality Gate citadas en revisiones previas corresponden a esas fechas: full-qa1110.json documenta la validación técnica posterior con SonarQube real y controles de Jenkins, y trivy-remediation1110.json identifica la corrección posterior de imágenes. Se conservan sus resultados, textos originales, prioridades y estados; esta revisión no ejecuta pruebas de producto, modifica cobertura ni acredita despliegue remoto o aceptación humana de UAT. Revisión del 28 de octubre de los 61 NICE TO HAVE y las 27 fotografías recibidas: se completan métricas de conexiones/interacción, caché analítica y auditoría de fechas. RNF-010 pasa a Código revisado por implementación y medición local con carga; se conservan los textos y prioridades originales, los requisitos fuera de alcance y los resultados históricos. Las fuentes finales se identifican mediante SHA-256 en nice-to-have1110.json; no acredita nuevo SonarQube, Jenkins, ZAP, despliegue ni aceptación humana de UAT. Optimización del 28 de octubre: lectura de relaciones por operación, precarga de perfiles, lotes de tarjetas, consultas estadísticas y notificaciones agregadas, caché invalidada selectivamente, módulos administrativos selectivos y contador de revisiones sin promoción de bloqueo compartido. Ver optimization1110.json para perfilado A/B, regresión y estrés local; no cambia textos, prioridades ni estados.",
   "requirements": {
     "RN": [
       {
@@ -582,7 +582,7 @@
         "page": 48,
         "requirement": "El sistema debe permitir al asociado habilitar o deshabilitar, mediante controles independientes, las recomendaciones de conexiones y su inclusión entre los miembros recomendados para microeventos.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -591,7 +591,7 @@
         "page": 48,
         "requirement": "El sistema debe solicitar periódicamente al asociado confirmar, actualizar o posponer la revisión de su perfil, según la frecuencia configurada por el Administrador.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/ProfileReview.php; wp-content/plugins/ascla-core/src/Services/Settings.php; wp-content/plugins/ascla-core/src/Rest/Router.php; wp-content/plugins/ascla-core/assets/app.js",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/ProfileReview.php; wp-content/plugins/ascla-core/src/Services/Settings.php; wp-content/plugins/ascla-core/src/Rest/Router.php; wp-content/plugins/ascla-core/assets/app.js; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Revisión periódica configurable, confirmación o posposición persistidas por usuario. Guardar el propio perfil completo confirma vigencia. Regresiones PHP incluidas en la ejecución completa del 8 de octubre; ver alcance de validación en COMPLIANCE.md.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -807,7 +807,7 @@
         "page": 50,
         "requirement": "El sistema debe permitir al asociado ejecutar el bloqueo de otro miembro de la comunidad previa confirmación de la acción.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Messaging.php; wp-content/plugins/ascla-core/src/Services/ConversationVisibility.php; wp-content/plugins/ascla-core/src/Services/ConnectionPolicy.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Messaging.php; wp-content/plugins/ascla-core/src/Services/ConversationVisibility.php; wp-content/plugins/ascla-core/src/Services/ConnectionPolicy.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Historial, remitente y fecha, lectura explícita, bloqueo confirmado y desbloqueo sin restaurar consentimiento.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -816,7 +816,7 @@
         "page": 50,
         "requirement": "El sistema debe permitir al asociado retirar el bloqueo sobre un usuario registrado en su lista de miembros bloqueados.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Messaging.php; wp-content/plugins/ascla-core/src/Services/ConversationVisibility.php; wp-content/plugins/ascla-core/src/Services/ConnectionPolicy.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Messaging.php; wp-content/plugins/ascla-core/src/Services/ConversationVisibility.php; wp-content/plugins/ascla-core/src/Services/ConnectionPolicy.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Historial, remitente y fecha, lectura explícita, bloqueo confirmado y desbloqueo sin restaurar consentimiento.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -843,7 +843,7 @@
         "page": 50,
         "requirement": "El sistema debe mostrar para cada asociado recomendado la justificación textual de afinidad y complementariedad calculada por el motor de IA.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Matching.php; wp-content/plugins/ascla-core/src/Services/KnowledgeRecommendations.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Matching.php; wp-content/plugins/ascla-core/src/Services/KnowledgeRecommendations.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Afinidad, señales autorizadas, explicación, descarte y contenido relevante. Un cambio de perfil invalida lotes dependientes.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -852,7 +852,7 @@
         "page": 50,
         "requirement": "El sistema debe permitir al asociado descartar un perfil sugerido mediante la opción \"No me interesa\", excluyéndolo de recomendaciones posteriores.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Matching.php; wp-content/plugins/ascla-core/src/Services/KnowledgeRecommendations.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Matching.php; wp-content/plugins/ascla-core/src/Services/KnowledgeRecommendations.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Afinidad, señales autorizadas, explicación, descarte y contenido relevante. Un cambio de perfil invalida lotes dependientes.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -879,7 +879,7 @@
         "page": 50,
         "requirement": "El sistema debe ejecutar un proceso programado, según la periodicidad configurada, para analizar los intereses de los asociados activos y formular propuestas de microeventos.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEligibility.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; tests/workflows-ui.cjs",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEligibility.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; tests/workflows-ui.cjs; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Periodicidad configurable de 7 a 90 días, semanal por defecto, y hasta cuatro propuestas por período. Revalida consentimiento, membresía, completitud y bloqueos antes de publicar; cancela con motivo si pierde el mínimo de candidatos, o exige nueva revisión si cambia el grupo. Cron real de cancelación comprobado localmente.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -888,7 +888,7 @@
         "page": 50,
         "requirement": "El sistema debe generar propuestas automáticas de microeventos hasta alcanzar el límite máximo de volumen establecido por ejecución.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -897,7 +897,7 @@
         "page": 50,
         "requirement": "El sistema debe suspender la generación de una propuesta de microevento cuando la cantidad de candidatos disponibles no alcance el cupo mínimo configurado.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -906,7 +906,7 @@
         "page": 50,
         "requirement": "El sistema debe permitir al miembro recomendado confirmar su inscripción al microevento durante la ventana de tiempo de acceso prioritario.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/assets/app.js",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/assets/app.js; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Confirmación o rechazo por recomendados en la ventana prioritaria; luego apertura a miembros activos.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -915,7 +915,7 @@
         "page": 51,
         "requirement": "El sistema debe permitir al miembro recomendado rechazar la invitación al microevento durante la ventana de tiempo de acceso prioritario.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/assets/app.js",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/assets/app.js; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Confirmación o rechazo por recomendados en la ventana prioritaria; luego apertura a miembros activos.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1032,7 +1032,7 @@
         "page": 52,
         "requirement": "El sistema debe permitir al asociado solicitar su registro en la lista de espera cuando un evento haya alcanzado el aforo máximo configurado.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Events.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Events.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Lista voluntaria y oferta FIFO; no asigna asistencia automática.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1041,7 +1041,7 @@
         "page": 52,
         "requirement": "El sistema debe registrar las incorporaciones a la lista de espera asignando un número de turno ordenado estrictamente por marca de fecha y hora.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Events.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Events.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Lista voluntaria y oferta FIFO; no asigna asistencia automática.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1050,7 +1050,7 @@
         "page": 52,
         "requirement": "El sistema debe notificar internamente al primer asociado de la lista de espera al momento en que se libere un cupo en el evento.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Events.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Events.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Lista voluntaria y oferta FIFO; no asigna asistencia automática.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1059,7 +1059,7 @@
         "page": 52,
         "requirement": "El sistema debe conceder una ventana de tiempo límite para que el asociado notificado en lista de espera confirme su participación.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/EventParticipation.php; wp-content/plugins/ascla-core/src/Jobs/Queue.php; tests/php/EventParticipationTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/EventParticipation.php; wp-content/plugins/ascla-core/src/Jobs/Queue.php; tests/php/EventParticipationTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Ofertas de cupo con vencimiento configurable por evento, 24 horas predeterminadas (1–168). Al vencer se libera el cupo y se ofrece al siguiente en FIFO; requiere worker de cron operativo.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1068,7 +1068,7 @@
         "page": 52,
         "requirement": "El sistema debe ocultar la lista de participantes de un evento a cualquier asociado que no cuente con un registro RSVP confirmado.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/src/Services/Notifications.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/src/Services/Notifications.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Asistentes tras confirmar, privacidad, roster de gestores y notificaciones de conexión.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1077,7 +1077,7 @@
         "page": 52,
         "requirement": "El sistema debe mostrar la lista de participantes visibles al asociado únicamente después de que este confirme su asistencia mediante RSVP.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/src/Services/Notifications.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/src/Services/Notifications.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Asistentes tras confirmar, privacidad, roster de gestores y notificaciones de conexión.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1086,7 +1086,7 @@
         "page": 52,
         "requirement": "El sistema debe permitir al Administrador y Ejecutivo consultar la nómina completa de participantes inscritos y en lista de espera de cualquier evento.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/src/Services/Notifications.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/src/Services/Notifications.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Asistentes tras confirmar, privacidad, roster de gestores y notificaciones de conexión.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1113,7 +1113,7 @@
         "page": 52,
         "requirement": "El sistema debe permitir al Administrador configurar la frecuencia y anticipación de los recordatorios automáticos para cada evento.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/ContentMeta.php; wp-content/plugins/ascla-core/assets/app.js",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/ContentMeta.php; wp-content/plugins/ascla-core/assets/app.js; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Administración configura de uno a cinco recordatorios por evento. WP-Cron avisa solo a confirmados activos y evita duplicados; microeventos fijan anticipación antes de publicar. Regresiones PHP incluidas en la ejecución completa del 8 de octubre; ver alcance de validación en COMPLIANCE.md.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1257,7 +1257,7 @@
         "page": 54,
         "requirement": "El sistema debe permitir al asociado consultar el historial de sus solicitudes de soporte enviadas, visualizando el estado actual en su ciclo de vida.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/SupportRequests.php; tests/php/SupportRequestsTest.php; tests/admin-compliance.cjs; tests/statistics.cjs; docs/evidence/release-1.10.8/contact-inbox108.json",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/SupportRequests.php; tests/php/SupportRequestsTest.php; tests/admin-compliance.cjs; tests/statistics.cjs; docs/evidence/release-1.10.8/contact-inbox108.json; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Acceso del emisor y responsable activo asignado. Pendiente → En revisión → Resuelta → Cerrada, respuesta, reasignación y archivo sin borrar historial; moderador sin acceso. Legado Resuelta se conserva como resolved.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1266,7 +1266,7 @@
         "page": 54,
         "requirement": "El sistema debe permitir al Administrador o Ejecutivo asignado realizar transiciones en el estado de una solicitud, respetando los estados operativos configurados.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/SupportRequests.php; tests/php/SupportRequestsTest.php; tests/admin-compliance.cjs; tests/statistics.cjs; docs/evidence/release-1.10.8/contact-inbox108.json",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/SupportRequests.php; tests/php/SupportRequestsTest.php; tests/admin-compliance.cjs; tests/statistics.cjs; docs/evidence/release-1.10.8/contact-inbox108.json; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Acceso del emisor y responsable activo asignado. Pendiente → En revisión → Resuelta → Cerrada, respuesta, reasignación y archivo sin borrar historial; moderador sin acceso. Legado Resuelta se conserva como resolved.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1275,7 +1275,7 @@
         "page": 54,
         "requirement": "El sistema debe permitir al Administrador o Ejecutivo asignado registrar y almacenar la respuesta o dictamen resolutivo sobre la solicitud de soporte.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/SupportRequests.php; tests/php/SupportRequestsTest.php; tests/admin-compliance.cjs; tests/statistics.cjs; docs/evidence/release-1.10.8/contact-inbox108.json",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/SupportRequests.php; tests/php/SupportRequestsTest.php; tests/admin-compliance.cjs; tests/statistics.cjs; docs/evidence/release-1.10.8/contact-inbox108.json; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Acceso del emisor y responsable activo asignado. Pendiente → En revisión → Resuelta → Cerrada, respuesta, reasignación y archivo sin borrar historial; moderador sin acceso. Legado Resuelta se conserva como resolved.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1284,7 +1284,7 @@
         "page": 54,
         "requirement": "El sistema debe notificar al asociado cuando su solicitud de soporte cambie de estado o reciba una respuesta administrativa.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/SupportRequests.php; tests/php/SupportRequestsTest.php; tests/admin-compliance.cjs; tests/statistics.cjs",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/SupportRequests.php; tests/php/SupportRequestsTest.php; tests/admin-compliance.cjs; tests/statistics.cjs; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Acceso del emisor y responsable activo asignado. Pendiente → En revisión → Resuelta → Cerrada, respuesta, reasignación y archivo sin borrar historial; moderador sin acceso. Legado Resuelta se conserva como resolved.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1383,7 +1383,7 @@
         "page": 55,
         "requirement": "El sistema debe registrar las propuestas semanales de microeventos en estado Pendiente de revisión.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; wp-content/plugins/ascla-core/src/Services/MicroArchive.php; tests/php/MicroGeneration108Test.php; tests/micro-admin108.cjs; docs/evidence/release-1.10.8/micro-admin108.json",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; wp-content/plugins/ascla-core/src/Services/MicroArchive.php; tests/php/MicroGeneration108Test.php; tests/micro-admin108.cjs; docs/evidence/release-1.10.8/micro-admin108.json; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado. En 1.10.8, el panel distingue falta de candidatos, interés común insuficiente y bloqueos, con conteos agregados y sin usar intereses privados. Cero resultados no se almacena como un bloqueo: se puede reintentar al corregir las condiciones. Se identifican los lotes recuperados del período. Los encuentros cancelados, denegados o finalizados pueden archivarse y recuperarse del panel sin eliminar su registro ni cambiar su estado. Validación local de esta etapa: 29 pruebas PHP/230 aserciones, nueve controles de navegador y 49 portables.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1392,7 +1392,7 @@
         "page": 55,
         "requirement": "El sistema debe permitir al Administrador modificar los datos propuestos de un microevento en estado Pendiente de revisión.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado. La revisión de candidatos es inmediata y administrativa; si cambia una convocatoria aprobada se retira la aprobación y la programación para requerir otra revisión.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1401,7 +1401,7 @@
         "page": 55,
         "requirement": "El sistema debe permitir al Administrador aprobar una propuesta de microevento, habilitando su programación de publicación.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/ContentSchedule.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/Content.php; tests/workflows-ui.cjs; tests/php/MicroEventsTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/ContentSchedule.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/Content.php; tests/workflows-ui.cjs; tests/php/MicroEventsTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Aprobación administrativa separada de publicación. Ejecutivo puede preparar/programar una propuesta pendiente; solo tras aprobarla se agenda el cron. La prioridad y las invitaciones comienzan al publicar, no al aprobar. Flujo completo comprobado con cron real. La interfaz dice Aprobar propuesta; después permite Editar y publicar. Actualizar candidatos de una propuesta aprobada no duplica la aprobación cuando el grupo sigue vigente.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1410,7 +1410,7 @@
         "page": 55,
         "requirement": "El sistema debe permitir al Administrador denegar una propuesta de microevento exigiendo el ingreso de una justificación textual.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado. La revisión ofrece Aprobar propuesta y Denegar propuesta, con motivo obligatorio. Ocultar o suspender no se usan como cancelación implícita del microevento.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1419,7 +1419,7 @@
         "page": 55,
         "requirement": "El sistema debe restringir la inscripción al microevento exclusivamente a los miembros recomendados durante el periodo prioritario configurado.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1428,7 +1428,7 @@
         "page": 55,
         "requirement": "El sistema debe habilitar los cupos remanentes del microevento a todos los asociados activos una vez finalizado el periodo de inscripción prioritaria.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1437,7 +1437,7 @@
         "page": 55,
         "requirement": "El sistema debe estructurar cada propuesta automática de microevento con título, objetivo, fecha, horario, modalidad, ubicación/enlace, aforo mínimo, aforo máximo, agenda sugerida y lista de miembros convocados.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1446,8 +1446,8 @@
         "page": 55,
         "requirement": "El sistema debe registrar en una bitácora de auditoría los cambios de estado, fecha, responsable y motivo de denegación o cancelación de cada microevento.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos",
-        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado. Cancelación con motivo, actor y fecha bajo la misma transacción del evento; una escritura fallida revierte estado, historial y programación. No se borra la trazabilidad.",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos; docs/evidence/release-1.11.0/nice-to-have1110.json",
+        "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado. Cancelación con motivo, actor y fecha bajo la misma transacción del evento; una escritura fallida revierte estado, historial y programación. No se borra la trazabilidad. Revisión del 28 de octubre: los cambios de inicio, fin y plazo se registran además como diferencias antes/después en la auditoría administrativa, con actor y fecha.",
         "pdf_priority": "NICE TO HAVE"
       },
       {
@@ -1455,7 +1455,7 @@
         "page": 56,
         "requirement": "El sistema debe permitir al Administrador consultar el historial de microeventos denegados, cancelados y finalizados junto con sus motivos registrados.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos; wp-content/plugins/ascla-core/src/Services/MicroArchive.php; tests/php/MicroGeneration108Test.php; tests/micro-admin108.cjs; docs/evidence/release-1.10.8/micro-admin108.json",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos; wp-content/plugins/ascla-core/src/Services/MicroArchive.php; tests/php/MicroGeneration108Test.php; tests/micro-admin108.cjs; docs/evidence/release-1.10.8/micro-admin108.json; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado. Las propuestas canceladas y denegadas siguen en el historial; no se eliminan ni se vuelven a generar duplicadas dentro del mismo período. En 1.10.8, el panel distingue falta de candidatos, interés común insuficiente y bloqueos, con conteos agregados y sin usar intereses privados. Cero resultados no se almacena como un bloqueo: se puede reintentar al corregir las condiciones. Se identifican los lotes recuperados del período. Los encuentros cancelados, denegados o finalizados pueden archivarse y recuperarse del panel sin eliminar su registro ni cambiar su estado. Validación local de esta etapa: 29 pruebas PHP/230 aserciones, nueve controles de navegador y 49 portables.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1464,7 +1464,7 @@
         "page": 56,
         "requirement": "El sistema debe clasificar automáticamente en estado \"Inscripciones insuficientes\" a los microeventos cuya cantidad de inscritos confirmados sea inferior al aforo mínimo al expirar el plazo de convocatoria.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1473,7 +1473,7 @@
         "page": 56,
         "requirement": "El sistema debe permitir al Administrador ampliar la fecha y hora límite de inscripción de un microevento con inscripciones insuficientes.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1482,7 +1482,7 @@
         "page": 56,
         "requirement": "El sistema debe permitir al Administrador reducir el valor del aforo mínimo requerido de un microevento con inscripciones insuficientes.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1491,7 +1491,7 @@
         "page": 56,
         "requirement": "El sistema debe permitir al Administrador registrar la cancelación definitiva de un microevento, exigiendo el ingreso de una justificación textual.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado. Administración puede cancelar microeventos pendientes, aprobados/programados y publicados vigentes. El motivo ocupa una fila completa y los botones quedan debajo en ambos temas y tamaños; se retira la programación y se conservan las inscripciones.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1500,7 +1500,7 @@
         "page": 56,
         "requirement": "El sistema debe notificar internamente y por correo electrónico a los participantes inscritos cuando un microevento sea reprogramado o cancelado.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventParticipation.php; wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; tests/php/MicroEventsTest.php; tests/php/EventParticipationTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventParticipation.php; wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; tests/php/MicroEventsTest.php; tests/php/EventParticipationTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Inscripciones insuficientes al vencer el plazo; ampliar/reducir mínimo, reprogramar con motivo e invalidar RSVP, cancelar conservando datos; recordatorios fijados antes de publicar, internos y correo según preferencias.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1509,7 +1509,7 @@
         "page": 56,
         "requirement": "El sistema debe actualizar el estado de los participantes inscritos a \"Pendiente de reconfirmación\" cuando se modifique la fecha, horario o modalidad del microevento.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventParticipation.php; wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; tests/php/MicroEventsTest.php; tests/php/EventParticipationTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventParticipation.php; wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; tests/php/MicroEventsTest.php; tests/php/EventParticipationTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Inscripciones insuficientes al vencer el plazo; ampliar/reducir mínimo, reprogramar con motivo e invalidar RSVP, cancelar conservando datos; recordatorios fijados antes de publicar, internos y correo según preferencias.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1518,7 +1518,7 @@
         "page": 56,
         "requirement": "El sistema debe publicar el motivo de la reprogramación o cancelación en la ficha descriptiva del microevento.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventParticipation.php; wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; tests/php/MicroEventsTest.php; tests/php/EventParticipationTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventParticipation.php; wp-content/plugins/ascla-core/src/Services/Events.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; tests/php/MicroEventsTest.php; tests/php/EventParticipationTest.php; tests/micro-flow108.cjs; docs/evidence/release-1.10.8/micro-flow108.json; COMPLIANCE.md#microeventos; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Inscripciones insuficientes al vencer el plazo; ampliar/reducir mínimo, reprogramar con motivo e invalidar RSVP, cancelar conservando datos; recordatorios fijados antes de publicar, internos y correo según preferencias. La ficha conserva y muestra el motivo registrado de cancelación; el recorrido local comprueba también reprogramación y reconfirmación.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1527,7 +1527,7 @@
         "page": 56,
         "requirement": "El sistema debe permitir al asociado cancelar voluntariamente su inscripción confirmada en un microevento.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1536,7 +1536,7 @@
         "page": 56,
         "requirement": "El sistema debe notificar la disponibilidad de cupo al primer asociado de la lista de espera inmediatamente después de que un participante cancele su asistencia.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1545,7 +1545,7 @@
         "page": 56,
         "requirement": "El sistema debe despachar recordatorios automáticos (internos y por correo) sobre el microevento exclusivamente a los participantes con estado confirmado.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1554,7 +1554,7 @@
         "page": 56,
         "requirement": "El sistema debe permitir al Administrador configurar la anticipación de los recordatorios automáticos previo a la publicación del microevento.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php; wp-content/plugins/ascla-core/src/Services/MicroEvents.php; wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php; wp-content/plugins/ascla-core/src/Services/EventReminders.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Services/Events.php; tests/php/MicroEventsTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Hasta cuatro propuestas semanales por intereses distintos, consentimiento independiente, mínimo/cupo configurables y aprobación obligatoria. Prioridad temporal, apertura posterior, estados e historial conservados, denegación/cancelación motivada; plazo y mínimo editables; recordatorios previos solo a confirmados. Correo respeta preferencias del asociado.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1572,7 +1572,7 @@
         "page": 57,
         "requirement": "El sistema debe permitir al asociado ocultar una conversación de su bandeja personal sin alterar la bandeja del receptor ni suprimir el historial de mensajes.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Messaging.php; wp-content/plugins/ascla-core/src/Services/ConnectionPolicy.php; wp-content/plugins/ascla-core/src/Services/ConversationVisibility.php; tests/bugs-ui.cjs",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Messaging.php; wp-content/plugins/ascla-core/src/Services/ConnectionPolicy.php; wp-content/plugins/ascla-core/src/Services/ConversationVisibility.php; tests/bugs-ui.cjs; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Mensajes enviados inmutables; historial de desconexión en solo lectura, ocultamiento personal y reaparición con nuevo mensaje. Bloquear revoca acceso. Cancelar solicitudes o intentar borrar grupos no elimina mensajes. Pruebas PHP de inmutabilidad e historial adecuadas y aprobadas en la ejecución completa del 8 de octubre.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1581,7 +1581,7 @@
         "page": 57,
         "requirement": "El sistema debe restablecer automáticamente la visibilidad de una conversación oculta en la bandeja del asociado en el momento en que se reciba un nuevo mensaje en dicha conversación.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Messaging.php; wp-content/plugins/ascla-core/src/Services/ConnectionPolicy.php; wp-content/plugins/ascla-core/src/Services/ConversationVisibility.php; tests/bugs-ui.cjs",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Messaging.php; wp-content/plugins/ascla-core/src/Services/ConnectionPolicy.php; wp-content/plugins/ascla-core/src/Services/ConversationVisibility.php; tests/bugs-ui.cjs; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Mensajes enviados inmutables; historial de desconexión en solo lectura, ocultamiento personal y reaparición con nuevo mensaje. Bloquear revoca acceso. Cancelar solicitudes o intentar borrar grupos no elimina mensajes. Pruebas PHP de inmutabilidad e historial adecuadas y aprobadas en la ejecución completa del 8 de octubre.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1644,7 +1644,7 @@
         "page": 57,
         "requirement": "El sistema debe permitir al Administrador configurar la cantidad máxima de perfiles afines que se presentarán semanalmente al asociado.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Matching.php; wp-content/plugins/ascla-core/src/Jobs/Queue.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Matching.php; wp-content/plugins/ascla-core/src/Jobs/Queue.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Lotes semanales, cinco sugerencias configurables, cambios de perfil, umbral y descartes reversibles sin actualización manual.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1653,7 +1653,7 @@
         "page": 57,
         "requirement": "El sistema debe mostrar un aviso informativo de baja coincidencia cuando la cantidad de candidatos elegibles sea menor a la cuota máxima configurada.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Matching.php; wp-content/plugins/ascla-core/src/Jobs/Queue.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Matching.php; wp-content/plugins/ascla-core/src/Jobs/Queue.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Lotes semanales, cinco sugerencias configurables, cambios de perfil, umbral y descartes reversibles sin actualización manual.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1662,7 +1662,7 @@
         "page": 57,
         "requirement": "El sistema debe permitir al asociado marcar un perfil sugerido con la opción «No me interesa», excluyéndolo de forma permanente de futuras recomendaciones.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Matching.php; wp-content/plugins/ascla-core/src/Jobs/Queue.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Matching.php; wp-content/plugins/ascla-core/src/Jobs/Queue.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Lotes semanales, cinco sugerencias configurables, cambios de perfil, umbral y descartes reversibles sin actualización manual.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1671,7 +1671,7 @@
         "page": 58,
         "requirement": "El sistema debe permitir al asociado consultar y restituir la elegibilidad de los perfiles que haya descartado previamente mediante la opción «No me interesa».",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Matching.php; wp-content/plugins/ascla-core/src/Jobs/Queue.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Matching.php; wp-content/plugins/ascla-core/src/Jobs/Queue.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Lotes semanales, cinco sugerencias configurables, cambios de perfil, umbral y descartes reversibles sin actualización manual.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1878,8 +1878,8 @@
         "page": 60,
         "requirement": "El sistema debe permitir al asociado eliminar su fotografía de perfil actual, restableciendo el avatar institucional por defecto.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Media.php; wp-content/plugins/ascla-core/src/Services/Birthdays.php; wp-content/plugins/ascla-core/assets/image-editor.js",
-        "note": "Foto, recorte, eliminación, cumpleaños y saludo; verificar visibilidad y destinatarios administrativos en despliegue.",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Profiles.php; wp-content/plugins/ascla-core/src/Services/Administration.php; wp-content/plugins/ascla-core/assets/app.js; tests/php/ProfileAttendance1110Test.php; tests/profile-attendance1110.cjs",
+        "note": "Restablecer fotografía disponible en el perfil propio y en la edición administrativa autorizada. Al guardar retira photo_id y recupera el avatar predeterminado; conserva los archivos reutilizados y las preferencias de privacidad. Regresión de servidor y navegador local; no acredita despliegue ni aceptación humana UAT.",
         "pdf_priority": "MUST HAVE"
       },
       {
@@ -1887,7 +1887,7 @@
         "page": 60,
         "requirement": "El sistema debe permitir al asociado registrar o actualizar su fecha de nacimiento desde la edición de su perfil.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Media.php; wp-content/plugins/ascla-core/src/Services/Birthdays.php; wp-content/plugins/ascla-core/assets/image-editor.js",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Media.php; wp-content/plugins/ascla-core/src/Services/Birthdays.php; wp-content/plugins/ascla-core/assets/image-editor.js; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Foto, recorte, eliminación, cumpleaños y saludo; verificar visibilidad y destinatarios administrativos en despliegue.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1896,7 +1896,7 @@
         "page": 60,
         "requirement": "El sistema debe mostrar un saludo conmemorativo en el panel de Inicio al asociado durante el día de su cumpleaños.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Media.php; wp-content/plugins/ascla-core/src/Services/Birthdays.php; wp-content/plugins/ascla-core/assets/image-editor.js",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Media.php; wp-content/plugins/ascla-core/src/Services/Birthdays.php; wp-content/plugins/ascla-core/assets/image-editor.js; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Foto, recorte, eliminación, cumpleaños y saludo; verificar visibilidad y destinatarios administrativos en despliegue.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -1905,7 +1905,7 @@
         "page": 60,
         "requirement": "El sistema debe emitir una notificación interna a los administradores autorizados informando sobre el cumpleaños de un asociado.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Media.php; wp-content/plugins/ascla-core/src/Services/Birthdays.php; wp-content/plugins/ascla-core/assets/image-editor.js",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Media.php; wp-content/plugins/ascla-core/src/Services/Birthdays.php; wp-content/plugins/ascla-core/assets/image-editor.js; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Foto, recorte, eliminación, cumpleaños y saludo; verificar visibilidad y destinatarios administrativos en despliegue.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -2004,8 +2004,8 @@
         "page": 61,
         "requirement": "El sistema debe permitir al asociado iniciar una nueva sesión de conversación con el Asistente IA, restableciendo el contexto de diálogo.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Jobs/Queue.php; wp-content/plugins/ascla-core/src/Services/Knowledge.php; wp-content/plugins/ascla-core/src/Integrations/OpenAIProvider.php; wp-content/plugins/ascla-core/assets/app.js; tests/assistant-reset108.cjs; tests/php/AssistantReset108Test.php; docs/evidence/release-1.10.8/assistant-reset108.json; tests/php/RagIntegration108Test.php; docs/evidence/release-1.10.8/usability-rag108.json; docs/evidence/release-1.10.8/ai-privacy108.json",
-        "note": "CP 071 / QA 508: nueva conversación limpia mensajes y borrador de inmediato, elimina el enlace de la consulta anterior y genera otro hilo sin depender de que el navegador acepte guardar el identificador. Descarta cargas, recuperaciones y errores tardíos. El worker filtra por usuario e hilo; seis pruebas PHP/55 aserciones comprueban también que Gemini recibe history vacío en el hilo nuevo, con transporte interceptado. Once controles de navegador locales; sin API real ni despliegue remoto de esta corrección.",
+        "evidence": "wp-content/plugins/ascla-core/src/Jobs/Queue.php; wp-content/plugins/ascla-core/src/Services/Knowledge.php; wp-content/plugins/ascla-core/src/Integrations/OpenAIProvider.php; wp-content/plugins/ascla-core/assets/app.js; tests/assistant-reset108.cjs; tests/php/AssistantReset108Test.php; docs/evidence/release-1.10.8/assistant-reset108.json; tests/php/RagIntegration108Test.php; docs/evidence/release-1.10.8/usability-rag108.json; docs/evidence/release-1.10.8/ai-privacy108.json; docs/evidence/release-1.11.0/nice-to-have1110.json",
+        "note": "CP 071 / QA 508: nueva conversación limpia mensajes y borrador de inmediato, elimina el enlace de la consulta anterior y genera otro hilo sin depender de que el navegador acepte guardar el identificador. Descarta cargas, recuperaciones y errores tardíos. El worker filtra por usuario e hilo; seis pruebas PHP/55 aserciones comprueban también que Gemini recibe history vacío en el hilo nuevo, con transporte interceptado. Once controles de navegador locales; sin API ni despliegue remoto de esta corrección.",
         "pdf_priority": "NICE TO HAVE"
       },
       {
@@ -2013,7 +2013,7 @@
         "page": 61,
         "requirement": "El sistema debe permitir al asociado consultar su historial cronológico de sesiones y mensajes intercambiados con el Asistente IA.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Jobs/Queue.php; wp-content/plugins/ascla-core/src/Services/Knowledge.php; wp-content/plugins/ascla-core/src/Integrations/OpenAIProvider.php; wp-content/plugins/ascla-core/assets/app.js; tests/assistant-reset108.cjs; tests/php/AssistantReset108Test.php; docs/evidence/release-1.10.8/assistant-reset108.json; docs/evidence/release-1.10.8/ai-privacy108.json",
+        "evidence": "wp-content/plugins/ascla-core/src/Jobs/Queue.php; wp-content/plugins/ascla-core/src/Services/Knowledge.php; wp-content/plugins/ascla-core/src/Integrations/OpenAIProvider.php; wp-content/plugins/ascla-core/assets/app.js; tests/assistant-reset108.cjs; tests/php/AssistantReset108Test.php; docs/evidence/release-1.10.8/assistant-reset108.json; docs/evidence/release-1.10.8/ai-privacy108.json; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Historial privado por usuario conservado al iniciar otro hilo. Elegir una consulta recupera explícitamente su conversación; reiniciar retira ese enlace y una recarga no la reabre. Las respuestas y recuperaciones tardías no sustituyen la sesión nueva. Verificación local de historial, envíos REST, recarga y aislamiento por usuario/hilo; proveedor real y aceptación de esta corrección siguen pendientes en destino.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -2121,7 +2121,7 @@
         "page": 62,
         "requirement": "El sistema debe permitir al asociado consultar el historial diferenciado de los temas y comentarios creados por su propia cuenta",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Rest/Router.php; wp-content/plugins/ascla-core/assets/app.js; wp-content/plugins/ascla-core/src/Services/CommentHistory.php; tests/php/CommentHistoryTest.php; tests/comment-history107.cjs",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/src/Rest/Router.php; wp-content/plugins/ascla-core/assets/app.js; wp-content/plugins/ascla-core/src/Services/CommentHistory.php; tests/php/CommentHistoryTest.php; tests/comment-history107.cjs; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Historial diferenciado en Foros: Mis temas y Mis comentarios. Solo aportes del usuario actual, incluso con parámetros de otra cuenta o siendo administrador. Aprobados/pendientes propios; títulos/contexto visibles y permisos vigentes antes del total y la paginación. Búsqueda por texto/tema y fechas locales inclusivas; enlaces a la conversación. Regresión con 205 comentarios, contextos ocultos/huérfanos, cuentas suspendidas y navegador escritorio/móvil. Se conserva la prioridad NICE TO HAVE del PDF.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -2283,8 +2283,8 @@
         "page": 63,
         "requirement": "El sistema debe presentar a Ejecutivos y Administradores un panel con métricas agregadas y disociadas sobre interacción comunitaria, asistencia a eventos y volumen de conexiones.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Statistics.php; wp-content/plugins/ascla-core/assets/admin-statistics.js; tests/statistics.cjs; docs/evidence/release-1.10.8/statistics-layout108.json",
-        "note": "Analítica agregada con pruebas de paginación; rendimiento requiere carga y hardware del despliegue. Mejora visual del 17 de octubre: estadísticas por tarea, explicación de indicadores/filtros y asistencia guiada. Evidencia local de esta etapa separada de la aceptación transversal; conserva cálculos, requisitos originales y estado.",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Statistics.php; wp-content/plugins/ascla-core/assets/admin-statistics.js; tests/statistics.cjs; docs/evidence/release-1.10.8/statistics-layout108.json; docs/evidence/release-1.11.0/nice-to-have1110.json; docs/evidence/release-1.11.0/optimization1110.json",
+        "note": "Revisión del 28 de octubre: conexiones actuales deduplicadas, aceptaciones del período, publicaciones/comentarios y participación en foros, junto con la asistencia existente. Acceso de Administración y Ejecutivo; no se consulta el contenido de mensajes privados. Caché breve por usuario; pruebas REST, roles, transacciones, navegador, ambos temas y móvil.",
         "pdf_priority": "NICE TO HAVE"
       },
       {
@@ -2301,7 +2301,7 @@
         "page": 63,
         "requirement": "El sistema debe revocar la sesión y redirigir a la pantalla de acceso cuando el usuario alcance el tiempo límite de inactividad establecido",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/SessionPolicy.php; wp-content/plugins/ascla-core/assets/session.js; tests/php/SessionPolicyTest.php",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/SessionPolicy.php; wp-content/plugins/ascla-core/assets/session.js; tests/php/SessionPolicyTest.php; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Backend invalida token tras 30 minutos; la interfaz redirige al acceso ante sesión expirada. Recordarme no evita el timeout.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -2319,7 +2319,7 @@
         "page": 63,
         "requirement": "El sistema debe permitir al Ejecutivo y al Administrador asignar una fecha y hora futura para diferir la divulgación de un contenido institucional.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/ContentSchedule.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/assets/app.js; tests/directory-publication.cjs; tests/workflows-ui.cjs",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/ContentSchedule.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/assets/app.js; tests/directory-publication.cjs; tests/workflows-ui.cjs; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Fecha futura desde editor/API para eventos, galerías, recursos, Hub y aliados según permisos. Conserva Oculto hasta publicación, revalida permisos y revisión, permite cancelar/reprogramar y registra errores. Cron real comprobado con evento y microevento; el despliegue debe mantener su disparador de WP-Cron.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -2328,7 +2328,7 @@
         "page": 63,
         "requirement": "El sistema debe clasificar y conservar en estado Oculto el contenido institucional programado hasta que se alcance la fecha y hora establecida.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/ContentSchedule.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/assets/app.js; tests/directory-publication.cjs; tests/workflows-ui.cjs",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/ContentSchedule.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/assets/app.js; tests/directory-publication.cjs; tests/workflows-ui.cjs; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Fecha futura desde editor/API para eventos, galerías, recursos, Hub y aliados según permisos. Conserva Oculto hasta publicación, revalida permisos y revisión, permite cancelar/reprogramar y registra errores. Cron real comprobado con evento y microevento; el despliegue debe mantener su disparador de WP-Cron.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -2337,7 +2337,7 @@
         "page": 64,
         "requirement": "El sistema debe transicionar automáticamente al estado Publicado el contenido institucional programado al cumplirse la fecha y hora configurada.",
         "status": "Código revisado",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/ContentSchedule.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/assets/app.js; tests/directory-publication.cjs; tests/workflows-ui.cjs",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/ContentSchedule.php; wp-content/plugins/ascla-core/src/Services/Content.php; wp-content/plugins/ascla-core/assets/app.js; tests/directory-publication.cjs; tests/workflows-ui.cjs; docs/evidence/release-1.11.0/nice-to-have1110.json",
         "note": "Fecha futura desde editor/API para eventos, galerías, recursos, Hub y aliados según permisos. Conserva Oculto hasta publicación, revalida permisos y revisión, permite cancelar/reprogramar y registra errores. Cron real comprobado con evento y microevento; el despliegue debe mantener su disparador de WP-Cron.",
         "pdf_priority": "NICE TO HAVE"
       },
@@ -2509,9 +2509,9 @@
         "id": "RNF-010",
         "page": 66,
         "requirement": "Rendimiento y Mitigación de Sobrecarga en Estadísticas: Las consultas analíticas de métricas de interacción para Ejecutivos y Administradores no deben penalizar la operatividad transaccional de la plataforma, debiendo procesarse y renderizarse en un tiempo inferior a 3.0 segundos mediante el uso de tablas agregadas en MariaDB o la API de Transients de WordPress.",
-        "status": "Externo",
-        "evidence": "wp-content/plugins/ascla-core/src/Services/Statistics.php",
-        "note": "Medir <3 segundos, caché y consultas agregadas bajo carga.",
+        "status": "Código revisado",
+        "evidence": "wp-content/plugins/ascla-core/src/Services/Statistics.php; docs/evidence/release-1.11.0/nice-to-have1110.json; wp-content/plugins/ascla-core/src/Repositories/StatisticsCache.php; tests/php/NiceToHaveStatisticsTest.php; tests/nice-to-have-fixture.php; tests/nice-to-have1110.cjs; docs/evidence/release-1.11.0/optimization1110.json",
+        "note": "Transients de WordPress durante 30 segundos, un espacio por usuario autorizado, agregación SQL e invalidación tras cambios confirmados. Medición local con 250 cuentas sintéticas, 100 eventos, 5.000 inscripciones y 3.000 asistencias: renderizado frío y con caché inferior a 3 s; cinco consultas simultáneas y guardado de perfil también inferiores a 3 s. Esta muestra local no certifica el hardware o latencia del hosting ni su aceptación UAT.",
         "pdf_priority": "NICE TO HAVE"
       },
       {
@@ -2789,7 +2789,7 @@
         "RNF-011",
         "RNF-012"
       ],
-      "browser_note": "Cinco comprobaciones del panel de entregas (filas fallidas/reintento simulados), cinco del historial propio con API real y 26 regresiones editoriales, filtros y gobierno. PHP prueba SMTP/Calendar con transporte simulado y recuperación en un proceso nuevo.",
+      "browser_note": "Cinco comprobaciones del panel de entregas (filas fallidas/reintento simulados), cinco del historial propio con API y 26 regresiones editoriales, filtros y gobierno. PHP prueba SMTP/Calendar con transporte simulado y recuperación en un proceso nuevo.",
       "evidence": "docs/evidence/release-1.10.7/completion107.json",
       "package": {
         "path": "dist/ascla-core.zip",

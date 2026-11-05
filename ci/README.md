@@ -41,6 +41,7 @@ En el build de Jenkins:
 - Sus JSON originales y `summary.json`: evidencia verificable, versiones, digest y conteos.
 - El enlace lateral **Trivy · seguridad de imágenes** publica el HTML. También puede descargarse y abrirse localmente; no se debilita la CSP de Jenkins para visualizarlo.
 - En QA/UAT, **ZAP y CSP · seguridad web** y sus HTML/JSON publicables. Se excluyen cookies, sesiones, credenciales, cuerpos HTTP y valores de consulta del material archivado.
+- Los HTML publicables de ZAP conservan el logo integrado, la presentación clara del reporte tradicional, las tablas de severidad, los diagnósticos del motor y el detalle de alertas. Los diagnósticos se muestran separados de los conteos de alertas. La presentación se genera a partir del análisis original y no cambia su fecha, resultado ni alcance; el logo y los estilos están incluidos para abrir el archivo sin conexión.
 - Cobertura, resultados JUnit y `coverage/source-revision` se conservan cuando se generan, para comprobar la revisión exacta de las pruebas importadas.
 
 La retención utiliza `numToKeepStr: '1'`, `artifactNumToKeepStr: '1'`, `removeLastBuild: true` y HTML Publisher sin historial adicional. Los volúmenes de una aplicación desplegada y las cachés de herramientas no son reportes y no se destruyen para cumplir la retención.

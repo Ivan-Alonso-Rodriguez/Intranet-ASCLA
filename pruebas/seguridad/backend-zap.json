@@ -1,12 +1,12 @@
 {
   "format": "ascla-public-zap-summary-v1",
   "kind": "backend",
-  "date": "2026-10-22T09:11:27.133208+00:00",
+  "date": "2026-11-05T16:28:54.082062+00:00",
   "status": "PASS",
   "tool": {
     "name": "ZAP",
     "version": "2.17.0",
-    "generated": "Thu, 22 Oct 2026 09:11:22"
+    "generated": "Thu, 5 Nov 2026 16:28:50"
   },
   "scope": [
     "/wp-json/ascla/v1/bootstrap",
@@ -54,7 +54,7 @@
       "id": "6",
       "name": "Path Traversal",
       "status": "Complete",
-      "requests": 164
+      "requests": 170
     },
     {
       "id": "7",
@@ -66,7 +66,7 @@
       "id": "10045",
       "name": "Source Code Disclosure - /WEB-INF Folder",
       "status": "Complete",
-      "requests": 156
+      "requests": 148
     },
     {
       "id": "10048",
@@ -357,7 +357,7 @@
       "requests": 6
     }
   ],
-  "active_request_count": 3686,
+  "active_request_count": 3684,
   "not_applicable_active_rules": [
     {
       "id": "40043",

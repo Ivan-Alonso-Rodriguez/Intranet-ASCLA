@@ -34,6 +34,7 @@ final class Plugin
         Services\AccountPermissions::boot();
         add_action('init',[Services\MicroPlanning::class,'schedule'],21);
         Services\SessionPolicy::boot();
+        Repositories\StatisticsCache::boot();
         Repositories\CacheRecovery::boot();
         Admin\Panel::boot();
         Rest\Router::boot();

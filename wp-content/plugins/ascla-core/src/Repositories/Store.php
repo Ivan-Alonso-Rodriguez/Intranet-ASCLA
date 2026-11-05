@@ -14,17 +14,26 @@ final class Store
     {
         global $wpdb;
         if ($wpdb->insert(self::table($table),$data)===false) { throw new RepositoryException('No se pudo guardar. Reintente la operación.'); }
-        return (int)$wpdb->insert_id;
+        $id=(int)$wpdb->insert_id;
+        if ($wpdb->rows_affected>0) { self::changed($table); }
+        return $id;
     }
     public static function update(string $table,array $data,array $where): void
     {
         global $wpdb;
         if ($wpdb->update(self::table($table),$data,$where)===false) { throw new RepositoryException('No se pudo actualizar.'); }
+        if ($wpdb->rows_affected>0) { self::changed($table); }
     }
     public static function delete(string $table,array $where): void
     {
         global $wpdb;
         if ($wpdb->delete(self::table($table),$where)===false) { throw new RepositoryException('No se pudo eliminar el registro.'); }
+        if ($wpdb->rows_affected>0) { self::changed($table); }
+    }
+    private static function changed(string $table): void
+    {
+        if ($table==='relations') { RelationReads::changed(); }
+        StatisticsCache::changed($table);
     }
     public static function rows(string $table,string $where='1=1',array $args=[],string $suffix='ORDER BY id DESC LIMIT 100'): array
     {

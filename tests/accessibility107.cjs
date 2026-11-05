@@ -15,11 +15,11 @@ async function changeLocale(locale){
 }
 async function goto(route,administrative=false){page=administrative||route==='administracion'?adminPage:memberPage;await page.goto(base+'/'+route+'/');await page.locator('#page-content h1').waitFor();await page.locator('#page-content[aria-busy="true"]').waitFor({state:'hidden'});await page.keyboard.press('Escape');await page.evaluate(()=>document.fonts.ready);}
 async function scan(name){
- await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
+ await page.addScriptTag({path:process.env.ASCLA_AXE_PATH||require.resolve('axe-core/axe.min.js')});
  const result=await page.evaluate(async()=>{
   const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});
   const simplify=v=>({id:v.id,impact:v.impact,help:v.help,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))});
-  return {violations:r.violations.map(simplify),incomplete:r.incomplete.map(simplify),passes:r.passes.map(v=>v.id),overflow:document.documentElement.scrollWidth>innerWidth+1,
+  return {axe_version:axe.version,violations:r.violations.map(simplify),incomplete:r.incomplete.map(simplify),passes:r.passes.map(v=>v.id),overflow:document.documentElement.scrollWidth>innerWidth+1,
    documentWidth:document.documentElement.scrollWidth,viewport:innerWidth,
    overflowing:[...document.querySelectorAll('body *')].filter(n=>n.getClientRects().length&&n.getBoundingClientRect().right>innerWidth+1&&!n.closest('.table-wrap,script,style')).slice(0,8).map(n=>({tag:n.tagName,class:typeof n.className==='string'?n.className:'',width:n.getBoundingClientRect().width,right:n.getBoundingClientRect().right,inert:!!n.closest('[inert]')}))};
  });
@@ -66,7 +66,7 @@ async function trap(selector){
  assert.ok(await page.locator('.ascla-main').evaluate(n=>n.inert));
 }
 (async()=>{try{
- browser=await chromium.launch({headless:true});await nestedAdminDialogs();
+ browser=await chromium.launch({headless:true,...(process.env.ASCLA_BROWSER_CHANNEL?{channel:process.env.ASCLA_BROWSER_CHANNEL}:{})});await nestedAdminDialogs();
  for(const [role,login,password] of [['admin',env.ASCLA_ADMIN_USER||'ascla.admin',env.ASCLA_ADMIN_PASSWORD],['member','demo.asociado',env.ASCLA_DEMO_PASSWORD]]){
  page=await browser.newPage();page.on('pageerror',e=>errors.push(e.message));
  // Enable interception before navigation; toggling it at the same time as a
@@ -128,8 +128,8 @@ async function trap(selector){
  await page.keyboard.press('Escape');assert.equal(await menu.getAttribute('aria-expanded'),'false');assert.ok(await menu.evaluate(n=>n===document.activeElement));
  await page.locator('.skip-link').focus();await page.keyboard.press('Enter');assert.equal(await page.evaluate(()=>document.activeElement.id),'main');
  pass('Menú móvil cerrado fuera del teclado, apertura/cierre accesibles y salto al contenido');
- await page.locator('.header-search input[name="q"]').fill('gobierno');await page.locator('.header-search input[name="q"]').press('Enter');await page.waitForURL(/centro-conocimiento.*q=gobierno/);await page.locator('#page-content h1').waitFor();
- pass('Búsqueda global disponible y operativa también a 360 px');
+ assert.equal(await page.locator('.header-search').count(),0);
+ pass('El encabezado móvil conserva navegación y foco sin el buscador global retirado');
  await goto('contacto');const form=page.locator('[data-form="contact"]');let requests=0;const observe=r=>{if(r.request().method()==='POST'&&r.url().endsWith('/content/contact'))requests++;};page.on('response',observe);
  await form.locator('button').click();assert.equal(requests,0);assert.equal(await form.locator('[name="title"]').evaluate(n=>n.validity.valueMissing),true);
  const forced=await api('content/contact',{title:'',body:'',category:'Consulta'});assert.equal(forced.status,400);page.off('response',observe);
@@ -155,5 +155,5 @@ async function trap(selector){
   }
  }finally{
  for(const [actorPage,originalLocale] of originalLocales){page=actorPage;await changeLocale(originalLocale).catch(error=>{errors.push(error.message);process.exitCode=1;});}
- fs.writeFileSync(root+'/test-results/accessibility107.json',JSON.stringify({axe:require('axe-core/package.json').version,checks,errors,scans},null,2));if(browser)await browser.close();
+ fs.writeFileSync(root+'/test-results/accessibility107.json',JSON.stringify({axe:scans[0]?.axe_version||null,checks,errors,scans},null,2));if(browser)await browser.close();
 }})();

@@ -1,0 +1,1417 @@
+{
+  "date": "2026-10-29T23:03:31.278591+00:00",
+  "version": "1.11.0",
+  "status": "PASS",
+  "scope": "QA y UAT técnicos aislados del código actual; SonarQube real del curso; imágenes reales y ZAP activo solo en laboratorio local. Sin despliegue remoto ni aceptación humana UAT.",
+  "source": {
+    "commit": "3d42740cb2007c96bf4a3d72d77ed0ea90c1454c",
+    "package_sha256": "0836fe17c9c3b06e3a4d28310382a6bb23bd30c4f104f3552952c1493e824698",
+    "branch": "qa",
+    "original_head": "ca9b784c82cff6d790f7c081aa8a60a17096727d",
+    "source_is_snapshot_of_uncommitted_work": true
+  },
+  "package": {
+    "date": "2026-10-29T22:42:44.355599+00:00",
+    "version": "1.11.0",
+    "bytes": 2116182,
+    "sha256": "0836fe17c9c3b06e3a4d28310382a6bb23bd30c4f104f3552952c1493e824698",
+    "files": 217,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "forbidden_paths": [],
+    "known_local_secrets_absent": true,
+    "translation_catalog_included": true,
+    "production_hashes": {
+      "ascla-core/ascla-core.php": "11a4063738efce9b30257d22effcc3a29e464246c15fd8c79eaccab2f9e3a103",
+      "ascla-core/assets/accessibility.js": "8c9f855fde2562785eba704361f8067c9e4748b50f85875ca4b82dd1e52a3bd2",
+      "ascla-core/assets/admin-members.js": "b726977b3487200acfd265061197761ec39d102c2afb2254d3d61b9b5714b22a",
+      "ascla-core/assets/admin-statistics.js": "85fbe18c44ba8307634cc4cb64e2b5f6304e620d301f6b38ed770fbed4605a1c",
+      "ascla-core/assets/allies-ui.js": "de069214ee6d99f1b5f70315b181c13302099b39027eb812ecc0064a2fff46f2",
+      "ascla-core/assets/app.css": "db70dc8c76a46f2e4181155e0e2218a43e9077cb9f9be19d35fea4fb61a80306",
+      "ascla-core/assets/app.js": "b75902b1c51d28f6bc8bd6fd70de8645d8916a8ca9b5d3bfc4a5a0fef3970acd",
+      "ascla-core/assets/ascla-logo-white.png": "79bcce9cef8bb70852fbaf7437cb87e4ea273793b2463bad59dd318af43d3cc2",
+      "ascla-core/assets/ascla-logo.png": "e6facb1b81990a71658f5655a556dab75efe822d3f5cefb583b1648e14e0ff25",
+      "ascla-core/assets/content-ui.js": "70f43bc7b5c910050f29dfa3818d7d8a1b09ee29dca52b3cfd22dadd79e74963",
+      "ascla-core/assets/image-editor.js": "c439c679fc41597072f7c9c2c020e13ffba40d2aa22823c47b688284e24c09e7",
+      "ascla-core/assets/interest-imports.js": "668005f5b67e7677ac2da1f6cbc4345a42ff7df250109656389cf2c482841de5",
+      "ascla-core/assets/interest-learning.js": "6bfbd332fe9fb0e26c758364fec65a0fd9e372827ad1c67616e9b603a382fb03",
+      "ascla-core/assets/live-toasts.js": "a04b86b72df82039875220ca38f1b92eaeeb8aca512eadcea4a02fd9429a8b01",
+      "ascla-core/assets/login-layout.css": "66d153734705767f1cc61f47dfa2b6660c9fe9abfaf5e9fd2506ff0e3c708458",
+      "ascla-core/assets/login.css": "f8fbbbf6b739e42c6b26994bfee11a8d047a54232fbab009b651fab32e4bff39",
+      "ascla-core/assets/navigation.js": "d8a097f96dd38f484b490fa7602871f31cc21d213709961bf2c46697a10db432",
+      "ascla-core/assets/notifications-ui.js": "ee8e49c3888207081f4c14c84f6637567ed584a2133098876e531422f31106cd",
+      "ascla-core/assets/pdf-preview.js": "337d61568a95c90d85fd54505d220af3212df9f42e996f21958b8700153e9cd5",
+      "ascla-core/assets/pdfjs/LICENSE.txt": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "ascla-core/assets/pdfjs/NOTICE.txt": "7e98a0cf0541738e9e35abd976c34b979832d778932ea04e8b4ac6e59eef5ce9",
+      "ascla-core/assets/pdfjs/pdf.min.js": "bccc24ea711db8e44503629519904a5292d73b9daaa214bbe7cdcc282b0f4259",
+      "ascla-core/assets/pdfjs/pdf.worker.min.js": "145d2dd3ab0c86151011dba95acfa2d5336e2accd59388ea43dbee0efddaaec6",
+      "ascla-core/assets/phone/countries-29.5.3.js": "448e246169480551ce795253039db2e60f3d95521668064294dba941f86ece4a",
+      "ascla-core/assets/phone/flags-29.5.3.css": "e48074a6bb21e013fe46721f3f33b103fb5b6c6f8ec5cdecebc4398a075e02cd",
+      "ascla-core/assets/phone/flags.webp": "ed164ab32687531059bf7fd23cca87b8ad1fe5fa7ab9b0dd974ad362716c086a",
+      "ascla-core/assets/phone/flags@2x.webp": "c8b020b385c0e5fb025ce404f4d3ff4e94d002f18fc5c684fc2aaed7ac6ba00f",
+      "ascla-core/assets/phone/LICENSE.txt": "cf73c26f3430cdb778415da427dfec99303332d0ab691f1e43e024b9cb81e1be",
+      "ascla-core/assets/phone-input.js": "a43d149efcb04396c3ce73f97a3e70efc2d9c3a49268cf0e755180391db9b6f1",
+      "ascla-core/assets/session.js": "4ce685cc9325c0501cf3660e02200477ca3bd37f8dcaea22633e613ff8cfd58f",
+      "ascla-core/languages/ascla-core-en_US.mo": "a5505e60d7b49c04e980434ef9c5b239eefd58a94558d9ec1fb806989a505113",
+      "ascla-core/languages/ascla-core-en_US.po": "9783a55fc6cc6738bcd2007ffc96180b0cb943cd92bcfd17c1d6d9b358a517a9",
+      "ascla-core/languages/ascla-core-es_ES.mo": "a8a17d740fe02bee0490742f93eeb805d218d57a4cb4f9d24d6cdb412f6959fc",
+      "ascla-core/languages/ascla-core-es_ES.po": "e45802e537d744fde735dd8de45efb7ee9e7b216328afbc6fcf941e6b2b6e760",
+      "ascla-core/languages/en.json": "01e6207b0045ae1d0f8a6b0b8835978245d11c1414e8b463222e254ddeecf86f",
+      "ascla-core/readme.txt": "87ad59fe02f2ffda99c4ac80580df36c6420abecb28d3690c98ee6278a5c85c8",
+      "ascla-core/src/Admin/Panel.php": "c769fb0b12c2d78825681887a6c4a7cc92955373edbc74c87701c3dee772a88e",
+      "ascla-core/src/Database/AllySearchMigration.php": "abad8157c1c10cbcfacbe3cd42ca1ff668146f70a45be22f54613f24eb5ee409",
+      "ascla-core/src/Database/AuditMigration.php": "fdb13783aeae9fb36e416a0198db8a6fac12b363dcff9f445dc8ef1205f8adfb",
+      "ascla-core/src/Database/EventFiltersMigration.php": "0845b28b9f07f9ab9fd556af378205bb679d930abb997d26e6d397956ac0041a",
+      "ascla-core/src/Database/Installer.php": "ad8aae15f2e159fdc4a7feed6824b247eae0cbc0910ba5faef7f05e908398beb",
+      "ascla-core/src/Database/MigrationException.php": "e739ac03660477c6381244e39dae366d79ac09cfbdf5ee70fb56eea086f5711e",
+      "ascla-core/src/Database/MigrationSchema.php": "ecb7736a9bd72f5338b7b266f3652a41cb392378455aa46f318dbd86f6f61f35",
+      "ascla-core/src/Domain/Anonymizer.php": "640ab7c11da2d447d7a2bc96ef2d1501ccac5eb65a8d735e005160d1de7619fe",
+      "ascla-core/src/Domain/AttendanceSessions.php": "c5454ea2c9c0cd3b45eea754a09032a443ace1bc2aa8508e91cbe5a48dcab5b0",
+      "ascla-core/src/Domain/Calendar.php": "de7da0042cb2b8dabc74b54fcaf0685fb1279a17b6a32845de8831d2af94b45b",
+      "ascla-core/src/Domain/Catalog.php": "0774b0a049fa87a47fc3b0a6828587617ac3f07813be50bdc60cbbd5e72cde35",
+      "ascla-core/src/Domain/DelimitedFile.php": "0c4be174337e2f96740dcd9edb6aaae8ce89860e51f6d2db2ee9fe194d9a74a6",
+      "ascla-core/src/Domain/EditorialPrivacy.php": "647fc5efbfea62bacf1730277f6694e8bbafc5ee7b2a368a0133488acb91d017",
+      "ascla-core/src/Domain/EntityRedactor.php": "05a45c1f19deea2d925a0a296c05eb1a843ef953999727692165d4c73d3f454e",
+      "ascla-core/src/Domain/Grounding.php": "5e98418ea02e1306aa19e462a924e70bc126b8eda1bcc59157753c96d275167c",
+      "ascla-core/src/Domain/GroupPlanner.php": "60b649f177e17396a3d34c41a868b28671d130d7f3de2e4f07a34de9e5439bef",
+      "ascla-core/src/Domain/InterestCatalog.php": "b10b16dc37fc39345688e1a5633eb988c35205ea4e0fba2ff87ae4e2342cb616",
+      "ascla-core/src/Domain/MatchScore.php": "61ec686ba7fdc1236468d20b546eef29aa185da2dcd1eb1226ad4d49e66aa6c6",
+      "ascla-core/src/Domain/MicroeventTitle.php": "ecb0516c7b370677975dfb170fd8853b1f53f3e3b6396de911ccdb126a472554",
+      "ascla-core/src/Domain/Phone.php": "60c3487332e3237c87035caf7f01172fbc8c16e5f581ae24525afc65e6139bcb",
+      "ascla-core/src/Domain/Roles.php": "fc1d13c95f29a909fc0aa042a2ae3ae8ccfec6afa68eb5120bc6ba00576bb16a",
+      "ascla-core/src/Domain/StatisticsPeriod.php": "dcec8a541c5b0997afbe2afc31c0e7be3fe92cf29da27ce8cf3c310e6c870e9a",
+      "ascla-core/src/Domain/Transcript.php": "1900ab8fc111b2392159fdb110d97d77e006edef0ea92d8844cfc6d7b636f1d7",
+      "ascla-core/src/Domain/ZoomCsv.php": "61df23a113bc8f2733558863e36d95f75ce8bdd0839284db7daecdd1178e7d7b",
+      "ascla-core/src/Frontend/App.php": "7950459e6972a688c8e272c85a7e604e783230e2011537930cf4492a535e1796",
+      "ascla-core/src/Frontend/Icons.php": "9d0651903d579f3b49c95c645d83e331aebe990fd068b9fcd72f182defebabab",
+      "ascla-core/src/Frontend/Language.php": "f38a44752b3b99e61d2c168b7e2a45fc8abb8774af7f34b1cf0bf910ba00fe43",
+      "ascla-core/src/Frontend/Login.php": "45ad784f337a9ca255a1cecc1b729cc361185406e2e9f5abcbd711d0f892625f",
+      "ascla-core/src/Frontend/LoginCsrf.php": "309466ce1d0b2ec2fb15d1909b71802e6ab86008138af7acab1020b4a64386b4",
+      "ascla-core/src/Frontend/LoginHooks.php": "365da865b7edf58fadf29a20b07cc550c95d904cc57280b9e3b95bfd1be7844d",
+      "ascla-core/src/Frontend/LoginRedirect.php": "de10639e8f154951ffb4f12857304ddf8c269f1fcb95abe253c59b3d58333e91",
+      "ascla-core/src/Frontend/LoginRequest.php": "96e9d28ff876cfc17a2bf68465a14f3678c86ba8d36a0e1b5323234ed1f778f6",
+      "ascla-core/src/Frontend/SecurityHeaders.php": "3b7ba7e18888520e5f04148ee543f1f49709f752bfb509b17afce4d27e8a72f9",
+      "ascla-core/src/Frontend/Theme.php": "7e9f6ad6ba6f294ec30d8d83979c025e5d8b37436a25d5d2f69025e3d97696fd",
+      "ascla-core/src/Frontend/Translations.php": "36012e13561f70b0dcd8f88688659381ec3cba035598b99d6f227cd25326038f",
+      "ascla-core/src/Integrations/AIProviderInterface.php": "dc9ae84dd066580fc33597d03d4798e88f61f8479b2aff77dc64bff74f79e114",
+      "ascla-core/src/Integrations/AIProviderSupport.php": "719454f7834d6364026a2c1adad2ff27a06618e08bc9f94e54742c14d9d9ecee",
+      "ascla-core/src/Integrations/DeepSeekProvider.php": "d6916dc603211620b0647ebc808de1a91c0b2c8f8c4826c0cbdc6b1e5c8c7174",
+      "ascla-core/src/Integrations/EmailTemplate.php": "0badc92e93a84c033678df9762a334f8c72d088c16b637bd62cfab1423707670",
+      "ascla-core/src/Integrations/GoogleCalendarTransport.php": "f8617c593929483195138e7f973ad228b230414cd5e12f2215f86836fdbba0c0",
+      "ascla-core/src/Integrations/GoogleOAuth.php": "97631766807d7d89f8b0c1db1390a563f61b97c469cb093f1d6cf315e7972018",
+      "ascla-core/src/Integrations/IntegrationException.php": "3367df700caaa8b62bb638570362ac84f19e94fb3f1827df9ba66268dfb75c42",
+      "ascla-core/src/Integrations/LinkedInProvider.php": "66fcab6f4edea82a9d8c4f459f2e4418d88ed2a41eba9119113d9889c5d0081d",
+      "ascla-core/src/Integrations/Mailer.php": "46c4ee41dcb16c95ac927ceca327cd4c1b90c8a13097d9cbbbda4f3aa87e7662",
+      "ascla-core/src/Integrations/MockAIProvider.php": "434aefbb653bdc1b2373d6002626e7480a8935f7a60f3bbc3d9e9004b3deea97",
+      "ascla-core/src/Integrations/MockSocialProvider.php": "7b82b7e70b8382ca2ebadf9c686f7b52f276d0b89167c27cafe58cb458bb8488",
+      "ascla-core/src/Integrations/MockVideoProvider.php": "cc1b7251adece9a0c6a660787c3cad837deef183c6ca87087fcb958939756a97",
+      "ascla-core/src/Integrations/OpenAIProvider.php": "81098da6ddd34878a48406fa4c3e73a8b9a7ca8a4d9a5fb6c821cd5c0d333170",
+      "ascla-core/src/Integrations/RealAIProvider.php": "0aac745589767b04f59e0a676fb9c0b043153df194480e7839823bfeee732998",
+      "ascla-core/src/Integrations/Secrets.php": "7ace28d76d8642a32a50336d4b0498b86251617e0eba77d82e5aad20aef9a249",
+      "ascla-core/src/Integrations/SocialProviderInterface.php": "e8439ffb24338d0f3e611b0d178ab77dfa6abea5875e21ead42df457361b0a13",
+      "ascla-core/src/Integrations/SupadataVideoProvider.php": "2d7fa569020aaa314f0b833e3e5c35d4457918f0f3b52e6b7d4ddc9015b553d6",
+      "ascla-core/src/Integrations/VideoProviderInterface.php": "ecec069b29c5864e6166fa01cf5e25171904cf3a19a9339c51484493cf1c86c3",
+      "ascla-core/src/Integrations/XProvider.php": "5cf8b0e4163a22bf80920746ad0309cb1985c87517e56096f9f23f6f21b87225",
+      "ascla-core/src/Integrations/YouTubeVideoProvider.php": "fc799e3d0aaa7c7b41964c075e7f3d13a2ef7812e7be7445701f1a0a70cc1a1a",
+      "ascla-core/src/Jobs/DeferredJob.php": "007b1a106a9a43ee6e3e2c6479169312007b9799c9ddf542721081aa1c9ba05f",
+      "ascla-core/src/Jobs/Deliveries.php": "0c471a51bddffe5cfd873f38f90f473e9b5aa218a6de18cafbaab8846b965749",
+      "ascla-core/src/Jobs/DeliveryException.php": "5c64a7075dd9d29ae30ff0fc050493c2b9a57bc7bcbd16ddbd9d5e65d4260ed8",
+      "ascla-core/src/Jobs/DeliveryHandlers.php": "f23a4dd85bbefd5ecd90e03f4b611b9487977c5dffcda64237d5df6d6647bf66",
+      "ascla-core/src/Jobs/DeliveryMail.php": "78b34d8efe453639aa562d1f202680f6cb4f806bb8e0e93633ad0931ae970826",
+      "ascla-core/src/Jobs/DeliveryPayload.php": "9a564966e74e00c726e3166fc433cfc32fccae2377986b96a596623e7afbf2c6",
+      "ascla-core/src/Jobs/Queue.php": "1469bd8cf190d9948bd033946c28183fccd00355aa1ede6ec352d2c08d6619ff",
+      "ascla-core/src/Plugin.php": "be61d307f6a9801172fb61b941eef1cad66965f5de1071790e96d741bb59e7c4",
+      "ascla-core/src/Repositories/AllySearch.php": "8df81bebb02435621edbc8335177d4f66bde0d7fb87d52746887a03fb0bbde94",
+      "ascla-core/src/Repositories/AttendanceRecords.php": "8e60a28eca7cdf6c3178c8efcfd08d27d8b60398de1e5000f8e034df378e3015",
+      "ascla-core/src/Repositories/CacheJournal.php": "819ebf29700dec44e05ad32798ff7b628464be0dbb49f307f696089c765dfa3a",
+      "ascla-core/src/Repositories/CacheRecovery.php": "7d320adf984ec42903c389ec9781f0f91f2916dc3952ec25d22dca3b20461e54",
+      "ascla-core/src/Repositories/CacheStatistics.php": "8a1aa7ce5549b981b4fb6fbb6d5ea300cb985d7386a23ac830a0637d3141e5e5",
+      "ascla-core/src/Repositories/ContentDateRange.php": "555209a2c12b22fbadd184eca45f013d3d9f74e7ad9be1be1cabe73b951773ef",
+      "ascla-core/src/Repositories/ContentQuery.php": "23980ea18b69d00761b9a7d89a7f81498d63ef414fc1cde935f64eb4efed66f5",
+      "ascla-core/src/Repositories/ContentVisibility.php": "7e9f4cbba818d37ca3e6b66f793e8fc283843368597ff945a6400b86987199d7",
+      "ascla-core/src/Repositories/DatabaseCache.php": "6c8f8c1102286d4a98179d9a08f89369582af2c448a3315d68794bfb3d6105f0",
+      "ascla-core/src/Repositories/EditorialSearch.php": "3997b07efc64ffa06cb22a891637a2fe5aed178972adfc8447334363bc53e761",
+      "ascla-core/src/Repositories/ImportRecords.php": "a022f23a21c007fbf1bd7d53b1f9288c519b8fe6ef68de5f2f85d4f5f61f020f",
+      "ascla-core/src/Repositories/InterestSignals.php": "904fe6e98a2d5ce9e0d9029042c8f0ad194268eeb9b8c59868f25cda26f54467",
+      "ascla-core/src/Repositories/KnowledgeSearch.php": "c54c7606dd696ec57eebae017af531fb11f17ba5e8551c909d234ae46af08495",
+      "ascla-core/src/Repositories/MemberActivity.php": "f3c0ae6f3deb0e9998e4e782efde363a711cafb8219ed2a6495ccbb7da2230c6",
+      "ascla-core/src/Repositories/NetworkingCache.php": "0c3d8c04ea40032ee9830a41e4b8d63d225eb06ca5cea6767240136878e99bb7",
+      "ascla-core/src/Repositories/RelationReads.php": "5ccd363150bfc00acbca31570b8c92493307643e0363a453ba31f17d33ae0437",
+      "ascla-core/src/Repositories/RepositoryException.php": "1ebe80e6c42b0eb98ca7a9f9858aa12996177e7640f591345d5c8424c4f72136",
+      "ascla-core/src/Repositories/StatisticsCache.php": "dbb040e162dcf0c3beb08ab43298978b20e66ecc64552ed053904cf31dc08166",
+      "ascla-core/src/Repositories/StatisticsQueries.php": "fac6d1857207db1deeb4bfe84e2ebe8f81e1a685d6e0619c2808ebf0d6851c98",
+      "ascla-core/src/Repositories/StatisticsRepository.php": "2128e358d4fbc2cad405c924ec9076d7b287196c0417da1cf9b0968c3f66ccd9",
+      "ascla-core/src/Repositories/Store.php": "a632114cbb8e504099b898a08aa9758bb2e6450862dd2f94e97a559accaa71b4",
+      "ascla-core/src/Repositories/Transaction.php": "5e7b2d24246109e7e9826d9ba0ec7b0cd0d42b3419ab992e04e0f2b5f78bf037",
+      "ascla-core/src/Repositories/TransactionCache.php": "7a87e580c5d44f18967491cd552cccd9f899ad8932e765c47c998e1077ffdea4",
+      "ascla-core/src/Repositories/WordPressWrites.php": "918b700ee5ddd5fff650d95724aea8c982161549936c1472f2b7d3f338f48c30",
+      "ascla-core/src/Rest/ApiException.php": "2d516f71536fa6265696ac6df5c2e607ce95cf15f1e1465ad4a3635d36a00771",
+      "ascla-core/src/Rest/RequestValidation.php": "77c75b423038fec4f6ed3b51c008f776fb0fd24c923ff012deb48ecd5d7ef1ed",
+      "ascla-core/src/Rest/Router.php": "97d270eed744731ca111ef2bede66027fb201dc12b367e545189054b20731155",
+      "ascla-core/src/Services/Access.php": "9b89127bb67468c91f8ddeeaf8acb407f04a6c784af813cbee2a5aac3909d8bd",
+      "ascla-core/src/Services/Account.php": "fadb68bfd5d4ca0b5de68fe0382454bf9d76f924590b31b000e0ec4952781bd0",
+      "ascla-core/src/Services/AccountAudit.php": "d22b130cef470b024e2eb37c9150bfd903694c0bd3b51484aa2e7aa6079d7fc6",
+      "ascla-core/src/Services/AccountPermissions.php": "0067911282b0a9fe6b6c84094cec910a26ca9858f7e19785f748e12d141d7ba6",
+      "ascla-core/src/Services/AccountRecovery.php": "30d96d23c9638b73f1671f0e47d8c045d1d3562ce651119cbb557d1b13c11158",
+      "ascla-core/src/Services/Administration.php": "e5c0c4a3ddc0fb333fde9a7261fb0c6860a5bb57303a8646f5430d45a09e9a75",
+      "ascla-core/src/Services/Allies.php": "1f97b3ef2534dd68f3d756e096a495c4bda64bede622ee15280796ca84b9e9cd",
+      "ascla-core/src/Services/AssistantContext.php": "dacd6c7b16dfadd1b073d6d35f8de2ce3c409390d294591297271f3f43694d0d",
+      "ascla-core/src/Services/Attendance.php": "2cde0b12503c2620086f23e5211c500683ca3f86f1f26bd97f006a040de65d4b",
+      "ascla-core/src/Services/Audit.php": "c73e97333fd76682c63b80015650519297243e2be28c04f27fa1408ca314ebcd",
+      "ascla-core/src/Services/AutomaticInterests.php": "f4ef23fbb899da25428bd8a37b85e1b7ef161f66915870c79bd513c72f2afa78",
+      "ascla-core/src/Services/Birthdays.php": "ce1763dfc71283d7df4e58509ffd017f004852962c78d0a2a5272ff7511c1d0d",
+      "ascla-core/src/Services/Bootstrap.php": "5c9df18964dfa7435e2da16981377e472f2a3e51353fff47da3e6a72ca2fee7b",
+      "ascla-core/src/Services/ChallengeStateException.php": "36c5758d9305648f84a62324a098f895a8333c42e4868772d3bc4ec063443a34",
+      "ascla-core/src/Services/CommentHistory.php": "f5b37b7596014716d17cecdaee3af1a070249748c79e9affea82c6c495635443",
+      "ascla-core/src/Services/CommentModeration.php": "7f7e96b99dc9ac7cc99dcb89ab05357ce62294874793f140efef1ababc713d2d",
+      "ascla-core/src/Services/ConnectionPolicy.php": "ef86f746a4ea52d86f8c7296253607e52e43f37ec7984238d4cc72e010969256",
+      "ascla-core/src/Services/Connections.php": "232b067f3b7443e7d5e60d0e75a8ea2dcaa7017b0a9a6c16da48badc8fcb2032",
+      "ascla-core/src/Services/Content.php": "b962c84b01cce97f9cf4de441c552b51f334afeebca16ebefd988fc2eb077782",
+      "ascla-core/src/Services/ContentMeta.php": "7d1904107ec5918b074307bdfb4eca58899dea77ed836f32769291e86647b41d",
+      "ascla-core/src/Services/ContentReactions.php": "826a916883d2f724102a9618bebbb328b345d938e2b11afa1b02631b2df1257f",
+      "ascla-core/src/Services/ContentSchedule.php": "801520aa3135b125d2d6d264734b159f8fe06af08ca237029ca9bca0844b3d4d",
+      "ascla-core/src/Services/ConversationRequests.php": "5109546719194dd224148f7c5a744ac1b0eaf3c53a888bf024fb6e214214ee7b",
+      "ascla-core/src/Services/ConversationVisibility.php": "d647ce8ce71f5bf009b1e8af54a68537e98cd00a814f33cd5c9016ba8701b66f",
+      "ascla-core/src/Services/CredentialPolicy.php": "0d8155761381e28624318efff4a4d99ff8f3308d9c4c76e0c0b162e98d23ebc6",
+      "ascla-core/src/Services/Demo.php": "c2fd90e079ac692716df420a755f9e93d383c04575d2fe9a6bf1011651f611ad",
+      "ascla-core/src/Services/DemoShowcase.php": "bb812d0faef715485dbdbc144eeaaf2f9c0908dff48149014f9fb066f5e22588",
+      "ascla-core/src/Services/DemoUser.php": "458c656c137d76149958ade2ef0b73979f69490d1c983328a0148df866612580",
+      "ascla-core/src/Services/Discovery.php": "b9be8f3d2bdaf6d0e7d2ceb001acbfb2ecfdfc8a58c206f13716fdf4a0c8ee32",
+      "ascla-core/src/Services/EditorialPayload.php": "d2d5a50c06eca88ae1f34fcff563b85783e129e99dd207176cd1199577bd265a",
+      "ascla-core/src/Services/EditorialRegistry.php": "ce3ba3537aa3817c66c401f5f6d59d3be13855bb823a7b752e6c74fbeed4b221",
+      "ascla-core/src/Services/EventCalendar.php": "230385d4f3c5b936c0b5dab24272b6777b89cf1d868b78898d8e4f67bab6fa15",
+      "ascla-core/src/Services/EventDetailBuilder.php": "581c5d930b57d5ba75cadc1d7c8d4b20103fabb5b237df5df3963122ea442fa8",
+      "ascla-core/src/Services/EventParticipation.php": "6c1865810103a1048fd7bb83a12f0657df1a848ac03b6aff7a357500801aeac5",
+      "ascla-core/src/Services/EventReactivation.php": "763e11943fc80b308410c4563dbc9ff215548eee35c577dee8a78d887574ba5a",
+      "ascla-core/src/Services/EventReminders.php": "7b045dfaf97621efec45afb6ea5eeb8ba2be30da3af1b014804052a772a7f424",
+      "ascla-core/src/Services/Events.php": "8632eebfc23d1168baccfca4f3d19b9094b1caa1ef72000e63e278a44c35f0a4",
+      "ascla-core/src/Services/FormRules.php": "dfbc2d2ca1bd5fc17054c614eb99a834ae5daeefd038299e88ba7212beb1218b",
+      "ascla-core/src/Services/InterestImportAccounts.php": "6c880e372d58653e9062bbce95aa3ffd5da47011020d8ed3ca7a595da86f90a7",
+      "ascla-core/src/Services/InterestImports.php": "a5c22d52620124bb8339ed76acd870a63ca18105a24428bbeb32fcdd21576416",
+      "ascla-core/src/Services/InterestIndex.php": "58e5446fd4f99c81adb22ec5126f6b8b30843000a4165e262941c2008208876d",
+      "ascla-core/src/Services/Knowledge.php": "fc2b668ab714911ddf86dd99efff41de2ee074a686d06115052d25a1b5b5c996",
+      "ascla-core/src/Services/KnowledgeRecommendations.php": "81dca42a01142dae1ace9ac552d48d618a19b32fce13c566fbc17d975d6d2689",
+      "ascla-core/src/Services/LearnedInterests.php": "2cc6ece1d4600598fb301fdc329e8590aee14c6bc94edf6c8afd3e68369bf2f2",
+      "ascla-core/src/Services/Locations.php": "fa19a7435db364c2ac984eb3d992210f1245c46cd63283698b41fe83ca9f423f",
+      "ascla-core/src/Services/Matching.php": "6c1050a7659241dfc1af92b592f0ea4d53538893f7a8baef6539a35552b90c1f",
+      "ascla-core/src/Services/MatchingExplanation.php": "874e9cbdc5d34975b718a7e6df5e009d3d1f6b9dd15ed68c8810f53a00e7110d",
+      "ascla-core/src/Services/MatchingParticipation.php": "d663455de51996bfbecf04b2ac076068545b3c49c626d46d8e61426ce38a38f3",
+      "ascla-core/src/Services/Media.php": "044f6207b835b168a884dc3ea1d4bfefaf093225ba34eb9258b76fc608b8a202",
+      "ascla-core/src/Services/MediaRemoval.php": "e67b139f7c18ffa23f69121ac0bc6737214985b14354954e8d23fbb95de4cb75",
+      "ascla-core/src/Services/MemberInsights.php": "90fb86c61866e765b202b03e5312eda22ffbf41cc9491e1940c6723cdcb04f8f",
+      "ascla-core/src/Services/Membership.php": "643172d1b7bb1f4450209ad20458624ab5cfc1f660f02c3c8a227ba564b66e60",
+      "ascla-core/src/Services/MemberTypes.php": "d0d3f4b96f6f8796b1a31b8e1a4cbe3fe95de5363d521fa9952967ff9126ebfe",
+      "ascla-core/src/Services/Messaging.php": "d937e375137edf5769d51736ed61be4fe9e241e4d6a19b09151c1410866d86ff",
+      "ascla-core/src/Services/MicroArchive.php": "1e48dc22026c9be9352cb2a3c84e0467a19a9897eae2ea9bcb2a17a84f4beece",
+      "ascla-core/src/Services/MicroEligibility.php": "54cb8f7847830a9d6bbe6b9bf6c190523cb37e5a2cc122af730906ac51196e6d",
+      "ascla-core/src/Services/MicroEvents.php": "1cc40d9f6981fc20469cfc75265b24ac65cbd66abaa61324c828bf6a9141ccae",
+      "ascla-core/src/Services/MicroInvitations.php": "dcf49cc227b27fd4e0c3713805d6a8770282d039e4ddd157220785591f6fe452",
+      "ascla-core/src/Services/MicroLifecycle.php": "19813f25789b49e4d3bcd876cf268868760c0da0ece862cabf69468bb370a717",
+      "ascla-core/src/Services/MicroPlanning.php": "f6951370379297f0ad6769d6b67d1807d8f50c5f706e4677927f16fd137a7f85",
+      "ascla-core/src/Services/NativeAccountPolicy.php": "cffc0eb7d6d32affe6d8fc441fed94f99c2243945a5baa576e08462446dd4f97",
+      "ascla-core/src/Services/NetworkingAI.php": "b701a2726fb0987a4a5b35f20ce26fa457f808769d6d4dddfd8a874fd7b6ad43",
+      "ascla-core/src/Services/NotificationCopy.php": "990cc464bc77c0ac3cc326deae98226243edf72fbe1aa37f435f0dd019592913",
+      "ascla-core/src/Services/NotificationEmail.php": "d410746837254ed723234cec6d180f0da0794f7c339ce6a3fff08aab372f721a",
+      "ascla-core/src/Services/Notifications.php": "05254bd3025caf0d9a4c46612494eb5e38c5e54bb673139f4f402ae149eadffc",
+      "ascla-core/src/Services/NotificationTarget.php": "b33f32a8553ad2e87e4ae1d6676ae7beee1281f0ee2f8804cd6df14263a69ef0",
+      "ascla-core/src/Services/ProfessionalChanges.php": "db0e58b678aa60b6a8caeb87597d0313caf40a1675dc714d942163027338ab29",
+      "ascla-core/src/Services/ProfileDirectory.php": "3b80dd7360f4fb8c3d02af8639bcb0118730a6cfe146874246d565fc77164700",
+      "ascla-core/src/Services/ProfileRequirements.php": "3445b6356c8ae0ee99f38f54e8121f4fa01991bc3d6f97459d1bbc9c5291b1d7",
+      "ascla-core/src/Services/ProfileReview.php": "cdffeca5ddc382bad7cee1e9299672daebcdedf04a2c444fc4990bf499067656",
+      "ascla-core/src/Services/Profiles.php": "25bdc94c23ab15c185a1eb346cad844742e014962e95623248d8a20f87becdbc",
+      "ascla-core/src/Services/ProfileValidation.php": "baf805394515a1e1db302a244965bdb107a43eda35250de64f2313f279410cd8",
+      "ascla-core/src/Services/Reports.php": "c715ea24529e6a45599e285f3edb7a0eca29118904c3d549bc983b13be841960",
+      "ascla-core/src/Services/RoleApprovals.php": "915b1f4b211c349586c3070d292cca2092dbeb1f8f3ea8630a8fab28ee91fbf9",
+      "ascla-core/src/Services/ServiceException.php": "5514c58c2f8472e2ac2d8fdbe7afb00e112ae8603e62cc3832943cdeeddbf059",
+      "ascla-core/src/Services/SessionPolicy.php": "2cb3e046893b1ba6a52cf4c2625205042e84ece42a8dc6150fd1038ecb88d9af",
+      "ascla-core/src/Services/Settings.php": "ff98d89cee627bc6f3629b634ff16d47b2c5fc8df61406451c96ca9e6b6b79b1",
+      "ascla-core/src/Services/Statistics.php": "4af13f471354bca31ed013923144b8c53e4c4fb1dbfc9f2c8d2d7dc5af975e95",
+      "ascla-core/src/Services/SupportCategories.php": "99fa7dd53d90e8cfcb9e9d9dee1f363262ad906ca913d76e6d1d64275466417e",
+      "ascla-core/src/Services/SupportRequests.php": "9d02cec4f226005488f84cb70554b135efe019f05c04a3b5b9333c78bd4e41e7",
+      "ascla-core/src/Services/TechnicalErrors.php": "3b95af5c6c6e698fc06fc68de2ddc8c8e075cecd3324caa51f38fe5686c909f1",
+      "ascla-core/src/Services/TopicInsights.php": "d1cb26b220e651590fcb29a84d89f5051d943b33c9ce973f3bc99683e0f713f7",
+      "ascla-core/src/Services/Turnstile.php": "2c98f0b6614a372fcb3f56c354dc2b2cf49c606e461d93e20ff5c2d0fdd0f144",
+      "ascla-core/src/Services/TurnstileCookie.php": "392f8363aa057f6a03fe96ca6a4b342f0f0144d3f0e63a9904345ab6af1c1369",
+      "ascla-core/src/Services/VideoPreparation.php": "88b9f10e3b78925433477603e06091705ae5db211b3cfaa2804fbd57956e326d",
+      "ascla-core/src/Services/VideoTranscripts.php": "d2025ae022753ca2e7b553833c28262aa77c69ad01adf68ce0a29cac5871a9bc",
+      "ascla-core/templates/app.php": "a91ad7f3a398208c9998c9fa039a8c43f1978be17b0faad89b8a9b4ba01e6961",
+      "ascla-core/templates/login-welcome.php": "624186a2f1f2bdf06a53450a29d1da30edd248df1666b852472d22dbe90585ed",
+      "ascla-core/templates/login.php": "3c5a853e5049cc52be7fef149d92cb6c70f5479e2db5f1d4f6d85a0669caff96",
+      "ascla-core/templates/shell.php": "8794d6f9e2ae1859691c5cdd70bdd829df79d5790416591b7f7fa135b4d1a0eb",
+      "ascla-core/uninstall.php": "bd0f1258ebe9f30ec3b8143a10f966616c50ac6016ff72009cea7d1089a0bd21"
+    }
+  },
+  "php": {
+    "qa": {
+      "tests": 836,
+      "assertions": 8969,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "uat": {
+      "tests": 836,
+      "assertions": 8969,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    }
+  },
+  "sonarqube": {
+    "qa": {
+      "project": "ASCLA-QA",
+      "commit": "3d42740cb2007c96bf4a3d72d77ed0ea90c1454c",
+      "task": "7ef24c08-0573-43c0-89e6-4fc0006fac92",
+      "analysis": "31e4698e-e40a-4fe8-a9db-28a2ad8e1e76",
+      "status": "OK",
+      "conditions": [
+        {
+          "status": "OK",
+          "metricKey": "new_coverage",
+          "comparator": "LT",
+          "errorThreshold": "80",
+          "actualValue": "94.9"
+        },
+        {
+          "status": "OK",
+          "metricKey": "coverage",
+          "comparator": "LT",
+          "errorThreshold": "80",
+          "actualValue": "91.7"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_duplicated_lines_density",
+          "comparator": "GT",
+          "errorThreshold": "2",
+          "actualValue": "0.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "duplicated_lines_density",
+          "comparator": "GT",
+          "errorThreshold": "2",
+          "actualValue": "0.1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_software_quality_maintainability_rating",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "actualValue": "1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_violations",
+          "comparator": "GT",
+          "errorThreshold": "0",
+          "actualValue": "0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "software_quality_maintainability_rating",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "actualValue": "1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "test_success_density",
+          "comparator": "LT",
+          "errorThreshold": "100",
+          "actualValue": "100.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "violations",
+          "comparator": "GT",
+          "errorThreshold": "0",
+          "actualValue": "0"
+        }
+      ],
+      "measures": [
+        {
+          "metric": "coverage",
+          "value": "91.7",
+          "bestValue": false
+        },
+        {
+          "metric": "bugs",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "duplicated_lines_density",
+          "value": "0.1",
+          "bestValue": false
+        },
+        {
+          "metric": "code_smells",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "new_coverage",
+          "period": {
+            "index": 1,
+            "value": "94.9",
+            "bestValue": false
+          }
+        },
+        {
+          "metric": "violations",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "vulnerabilities",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "security_hotspots",
+          "value": "0",
+          "bestValue": true
+        }
+      ],
+      "open_issues": 0,
+      "issues": [],
+      "scanner_exit": 0
+    },
+    "uat": {
+      "project": "ASCLA-UAT",
+      "commit": "3d42740cb2007c96bf4a3d72d77ed0ea90c1454c",
+      "task": "778f8e67-6afe-46d8-abd1-7950e1c75ce8",
+      "analysis": "05cc1ce0-4df8-4d4a-b51d-dd592bb9dc3c",
+      "status": "OK",
+      "conditions": [
+        {
+          "status": "OK",
+          "metricKey": "new_coverage",
+          "comparator": "LT",
+          "errorThreshold": "80",
+          "actualValue": "94.9"
+        },
+        {
+          "status": "OK",
+          "metricKey": "coverage",
+          "comparator": "LT",
+          "errorThreshold": "80",
+          "actualValue": "91.7"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_duplicated_lines_density",
+          "comparator": "GT",
+          "errorThreshold": "2",
+          "actualValue": "0.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "duplicated_lines_density",
+          "comparator": "GT",
+          "errorThreshold": "2",
+          "actualValue": "0.1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_software_quality_maintainability_rating",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "actualValue": "1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_violations",
+          "comparator": "GT",
+          "errorThreshold": "0",
+          "actualValue": "0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "software_quality_maintainability_rating",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "actualValue": "1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "test_success_density",
+          "comparator": "LT",
+          "errorThreshold": "100",
+          "actualValue": "100.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "violations",
+          "comparator": "GT",
+          "errorThreshold": "0",
+          "actualValue": "0"
+        }
+      ],
+      "measures": [
+        {
+          "metric": "coverage",
+          "value": "91.7",
+          "bestValue": false
+        },
+        {
+          "metric": "bugs",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "duplicated_lines_density",
+          "value": "0.1",
+          "bestValue": false
+        },
+        {
+          "metric": "code_smells",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "new_coverage",
+          "period": {
+            "index": 1,
+            "value": "94.9",
+            "bestValue": false
+          }
+        },
+        {
+          "metric": "violations",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "vulnerabilities",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "security_hotspots",
+          "value": "0",
+          "bestValue": true
+        }
+      ],
+      "open_issues": 0,
+      "issues": [],
+      "scanner_exit": 0
+    }
+  },
+  "trivy": {
+    "date": "2026-10-29T22:46:45.219185+00:00",
+    "status": "PASS",
+    "images": [
+      {
+        "role": "app",
+        "reference": "ascla-ci-app:full-validation-20261029-3d42740cb200",
+        "id": "sha256:d5b66af372fc6f54ab8bb0f569ac237c09caae521d1a9f140db3dca46d308a4f",
+        "built": true,
+        "status": "PASS",
+        "config_id": "sha256:f8a29da507f6f5a9193fc966926ee7f572c200a178f394607594df5fe7c0391b",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 0,
+        "report_sha256": "0342a6e09a5deb163922242a786657d5b6b33412418d607e6ffe5157486e382f"
+      },
+      {
+        "role": "cli",
+        "reference": "ascla-ci-cli:full-validation-20261029-3d42740cb200",
+        "id": "sha256:a51e265e176b39770f00bc1611f9494d4f874213816a738fe3dd62c6238f5423",
+        "built": true,
+        "status": "PASS",
+        "config_id": "sha256:612412898bbdc28edea1222273e4eac9dc202686893ada0898f893eb8e0f292b",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 0,
+        "report_sha256": "c7d1494742ef343ade2c9cdbd0c025d1084e86b93e1617f1cf1fa8309147065a"
+      },
+      {
+        "role": "db",
+        "reference": "ascla-ci-db:full-validation-20261029-3d42740cb200",
+        "id": "sha256:302dec650ad9222da26b6d83701d40bd6d27499bf9a9db396f9898ba3697ca23",
+        "built": true,
+        "status": "PASS",
+        "config_id": "sha256:d1d91eeef54ab19f4afcc07bfb7c4b197dbd180fd6d1869e6d056640cfe38cc5",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 0,
+        "report_sha256": "b9c1c86dd61495554c96cf80b554c76cd4ff510bd888cf22db4fc351b2c7ea48"
+      },
+      {
+        "role": "mailpit",
+        "reference": "ascla-ci-mailpit:full-validation-20261029-3d42740cb200",
+        "id": "sha256:ba914b3dde50147ba5d5081ffde1bc9e8a7a8fc1c54e87eae7b0ea023db00f28",
+        "built": true,
+        "status": "PASS",
+        "config_id": "sha256:0e903c8d4782270615f5d0dda3d91290822bc8c4b2cc53db2010f4c49da16d5b",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 0,
+        "report_sha256": "cbf3543f353b5e6cc45e2d5f3218111774999073b0794d1af56836ac2ef2d2d9"
+      }
+    ],
+    "commit": "3d42740cb2007c96bf4a3d72d77ed0ea90c1454c",
+    "source_sha256": "91dcac69807de8c9d5f8149b3575bdcc0083f6fcadbbcdc7c69009fbfe7737f4",
+    "scanner": "aquasec/trivy:0.76.1@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c",
+    "run": "full-validation-20261029-3d42740cb200"
+  },
+  "zap": {
+    "date": "2026-10-29T23:01:17.139926+00:00",
+    "status": "PASS",
+    "scope_note": "ASCLA-owned HTML routes and 18 documented GET REST operations in disposable local QA. Excludes native WordPress admin, arbitrary CMS/theme/plugin routes, destructive writes and live external integrations. No universal absence-of-vulnerabilities claim.",
+    "phases": [
+      {
+        "phase": "frontend",
+        "status": "PASS",
+        "risk_counts": {
+          "0": 9,
+          "1": 0,
+          "2": 0,
+          "3": 0
+        }
+      },
+      {
+        "phase": "backend",
+        "status": "PASS",
+        "risk_counts": {
+          "0": 1,
+          "1": 0,
+          "2": 0,
+          "3": 0
+        }
+      },
+      {
+        "phase": "CSP",
+        "status": "PASS"
+      },
+      {
+        "phase": "Browser",
+        "status": "PASS"
+      },
+      {
+        "phase": "Source consistency",
+        "status": "PASS"
+      }
+    ]
+  },
+  "bruno": {
+    "requests": 81,
+    "checks": 149,
+    "status": "PASS"
+  },
+  "playwright": {
+    "flows": 6,
+    "videos": 12,
+    "screenshots": 12,
+    "status": "PASS"
+  },
+  "latest_workflow": {
+    "checks": 13,
+    "axe_views": 6,
+    "status": "PASS"
+  },
+  "stress": {
+    "phase": "optimized",
+    "scope": "Loopback HTTP, native plugin volume, 32 independent sessions, same fixture; 7 routes per worker, 14 measured requests per worker after equal warm-up. Concurrency is closed-loop, not a production capacity guarantee.",
+    "profiles": [
+      {
+        "name": "load-1",
+        "concurrency": 1,
+        "requests": 14,
+        "seconds": 0.818,
+        "requests_per_second": 17.123,
+        "errors": 0,
+        "p50_ms": 48.008,
+        "p95_ms": 137.712,
+        "max_ms": 140.114,
+        "routes": {
+          "profiles": {
+            "p50_ms": 138.913,
+            "p95_ms": 137.712,
+            "max_ms": 140.114
+          },
+          "content/resource": {
+            "p50_ms": 39.041,
+            "p95_ms": 27.489,
+            "max_ms": 50.594
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 74.291,
+            "p95_ms": 69.356,
+            "max_ms": 79.227
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 34.157,
+            "p95_ms": 26.453,
+            "max_ms": 41.861
+          },
+          "matching": {
+            "p50_ms": 42.54,
+            "p95_ms": 38.886,
+            "max_ms": 46.193
+          },
+          "bootstrap": {
+            "p50_ms": 25.163,
+            "p95_ms": 24.48,
+            "max_ms": 25.846
+          },
+          "@page": {
+            "p50_ms": 50.147,
+            "p95_ms": 49.822,
+            "max_ms": 50.471
+          }
+        }
+      },
+      {
+        "name": "load-4",
+        "concurrency": 4,
+        "requests": 56,
+        "seconds": 1.137,
+        "requests_per_second": 49.232,
+        "errors": 0,
+        "p50_ms": 58.191,
+        "p95_ms": 205.189,
+        "max_ms": 272.189,
+        "routes": {
+          "profiles": {
+            "p50_ms": 188.108,
+            "p95_ms": 264.865,
+            "max_ms": 272.189
+          },
+          "content/resource": {
+            "p50_ms": 46.21,
+            "p95_ms": 51.576,
+            "max_ms": 65.792
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 100.331,
+            "p95_ms": 114.363,
+            "max_ms": 156.127
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 24.493,
+            "p95_ms": 41.244,
+            "max_ms": 42.662
+          },
+          "matching": {
+            "p50_ms": 59.1,
+            "p95_ms": 66.604,
+            "max_ms": 68.785
+          },
+          "bootstrap": {
+            "p50_ms": 43.276,
+            "p95_ms": 43.396,
+            "max_ms": 43.4
+          },
+          "@page": {
+            "p50_ms": 70.507,
+            "p95_ms": 76.196,
+            "max_ms": 84.8
+          }
+        }
+      },
+      {
+        "name": "load-12",
+        "concurrency": 12,
+        "requests": 168,
+        "seconds": 1.807,
+        "requests_per_second": 92.973,
+        "errors": 0,
+        "p50_ms": 87.482,
+        "p95_ms": 272.467,
+        "max_ms": 573.299,
+        "routes": {
+          "profiles": {
+            "p50_ms": 213.405,
+            "p95_ms": 431.857,
+            "max_ms": 573.299
+          },
+          "content/resource": {
+            "p50_ms": 108.428,
+            "p95_ms": 271.142,
+            "max_ms": 275.551
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 160.844,
+            "p95_ms": 239.301,
+            "max_ms": 246.484
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 56.904,
+            "p95_ms": 82.635,
+            "max_ms": 158.106
+          },
+          "matching": {
+            "p50_ms": 76.025,
+            "p95_ms": 94.683,
+            "max_ms": 116.451
+          },
+          "bootstrap": {
+            "p50_ms": 54.547,
+            "p95_ms": 64.936,
+            "max_ms": 76.32
+          },
+          "@page": {
+            "p50_ms": 82.788,
+            "p95_ms": 102.158,
+            "max_ms": 146.443
+          }
+        }
+      },
+      {
+        "name": "load-24",
+        "concurrency": 24,
+        "requests": 336,
+        "seconds": 2.712,
+        "requests_per_second": 123.901,
+        "errors": 0,
+        "p50_ms": 161.327,
+        "p95_ms": 360.272,
+        "max_ms": 535.386,
+        "routes": {
+          "profiles": {
+            "p50_ms": 345.364,
+            "p95_ms": 506.897,
+            "max_ms": 535.386
+          },
+          "content/resource": {
+            "p50_ms": 200.625,
+            "p95_ms": 251.877,
+            "max_ms": 284.908
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 260.81,
+            "p95_ms": 304.567,
+            "max_ms": 316.226
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 116.514,
+            "p95_ms": 156.896,
+            "max_ms": 170.041
+          },
+          "matching": {
+            "p50_ms": 157.188,
+            "p95_ms": 181.186,
+            "max_ms": 186.307
+          },
+          "bootstrap": {
+            "p50_ms": 108.219,
+            "p95_ms": 149.639,
+            "max_ms": 157.04
+          },
+          "@page": {
+            "p50_ms": 142.071,
+            "p95_ms": 247.752,
+            "max_ms": 279.603
+          }
+        }
+      },
+      {
+        "name": "load-32",
+        "concurrency": 32,
+        "requests": 448,
+        "seconds": 3.698,
+        "requests_per_second": 121.14,
+        "errors": 0,
+        "p50_ms": 207.953,
+        "p95_ms": 532.019,
+        "max_ms": 789.844,
+        "routes": {
+          "profiles": {
+            "p50_ms": 449.862,
+            "p95_ms": 636.45,
+            "max_ms": 789.844
+          },
+          "content/resource": {
+            "p50_ms": 293.36,
+            "p95_ms": 450.925,
+            "max_ms": 462.572
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 316.106,
+            "p95_ms": 437.223,
+            "max_ms": 467.681
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 168.17,
+            "p95_ms": 312.933,
+            "max_ms": 327.786
+          },
+          "matching": {
+            "p50_ms": 164.555,
+            "p95_ms": 208.443,
+            "max_ms": 230.308
+          },
+          "bootstrap": {
+            "p50_ms": 153.31,
+            "p95_ms": 188.953,
+            "max_ms": 248.767
+          },
+          "@page": {
+            "p50_ms": 206.763,
+            "p95_ms": 263.832,
+            "max_ms": 545.133
+          }
+        }
+      },
+      {
+        "name": "duration",
+        "concurrency": 4,
+        "requests": 2221,
+        "seconds": 60.138,
+        "think_seconds": 0.05,
+        "errors": 0,
+        "requests_per_second": 36.932,
+        "p50_ms": 46.714,
+        "p95_ms": 145.538,
+        "max_ms": 227.456
+      },
+      {
+        "name": "recovery",
+        "concurrency": 1,
+        "requests": 14,
+        "seconds": 0.676,
+        "requests_per_second": 20.698,
+        "errors": 0,
+        "p50_ms": 37.623,
+        "p95_ms": 124.218,
+        "max_ms": 128.02,
+        "routes": {
+          "profiles": {
+            "p50_ms": 126.119,
+            "p95_ms": 124.218,
+            "max_ms": 128.02
+          },
+          "content/resource": {
+            "p50_ms": 28.133,
+            "p95_ms": 22.409,
+            "max_ms": 33.856
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 49.663,
+            "p95_ms": 47.888,
+            "max_ms": 51.438
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 17.5,
+            "p95_ms": 15.813,
+            "max_ms": 19.188
+          },
+          "matching": {
+            "p50_ms": 41.486,
+            "p95_ms": 31.842,
+            "max_ms": 51.13
+          },
+          "bootstrap": {
+            "p50_ms": 20.916,
+            "p95_ms": 20.634,
+            "max_ms": 21.198
+          },
+          "@page": {
+            "p50_ms": 53.066,
+            "p95_ms": 41.39,
+            "max_ms": 64.742
+          }
+        }
+      }
+    ],
+    "write_and_security_checks": [
+      {
+        "name": "Eight concurrent profile writes, correct owner and restored data",
+        "status": "PASS",
+        "p50_ms": 401.844,
+        "p95_ms": 779.207,
+        "max_ms": 784.326
+      },
+      {
+        "name": "Sixteen simultaneous RSVPs: exactly two accepted, fourteen capacity conflicts, fourteen waitlisted",
+        "status": "PASS",
+        "accepted": 2,
+        "expected_conflicts": 14,
+        "waitlisted": 14
+      },
+      {
+        "name": "Anonymous access, staff-only statistics and missing nonce rejected; private responses stay no-store",
+        "status": "PASS"
+      }
+    ],
+    "total_measured_reads": 3257,
+    "warmup_requests": 224,
+    "status": "PASS"
+  },
+  "jenkins": {
+    "build": 2,
+    "status": "SUCCESS",
+    "deployment_skipped": true,
+    "retention_verified": true
+  },
+  "corrections": [
+    "Espera del E2E sincronizada con la respuesta y el reemplazo real de los resultados de búsqueda.",
+    "Funciones complejas separadas, plantillas y ternarios anidados simplificados, condición de navegación explicitada y mensaje de permisos centralizado.",
+    "Listado de contenido separado de publicación para cumplir el límite de métodos por clase."
+  ],
+  "limits": [
+    "Una comprobación histórica de traducciones se omite por faltar su instantánea original; se registra en JUnit.",
+    "La consulta al asistente usa el proveedor mock del laboratorio; no se acreditan nuevas llamadas reales a IA ni Supadata.",
+    "La carga es local y comparte recursos con otros laboratorios; no define la capacidad máxima del hosting.",
+    "Jenkins ejecuta la integración real de Trivy sobre una exportación Git privada main sin despliegue; QA/UAT y Sonar se ejecutan mediante los scripts del manual."
+  ],
+  "policy_tests": {
+    "tests": 21,
+    "status": "PASS"
+  },
+  "browser_suites": {
+    "qa": {
+      "commit": "3d42740cb2007c96bf4a3d72d77ed0ea90c1454c",
+      "quality_script_exit": 0,
+      "reports": [
+        {
+          "suite": "native-login-security.json",
+          "checks": [
+            "Las dependencias nativas cargan individualmente con nonce bajo CSP estricta",
+            "El nonce de CSP cambia entre respuestas del acceso nativo",
+            "El formulario conserva CSRF y carga sin errores JavaScript ni bloqueos CSP de scripts",
+            "CSP sigue bloqueando un script insertado por el parser sin nonce"
+          ],
+          "recorded_checks": 4
+        },
+        {
+          "suite": "e2e.json",
+          "checks": [
+            "Session warning, explicit extension and expired session redirect",
+            "Image editor rejects non-images, oversized and corrupt files without hanging",
+            "Image crop supports zoom, reset, keyboard movement and sanitized filenames",
+            "Full image mode produces one file and cancellation resolves to null",
+            "Transcript timing supplies duration without player metadata or manual preparation buttons",
+            "A simulated preparation error is escaped and does not change the stored duration",
+            "Editorial refresh runs a real queued job and preserves transcript-derived duration",
+            "Anonymous routes, REST nonce and cache isolation",
+            "All member routes load without JavaScript errors",
+            "Member profile edits persist and hidden fields are not searchable",
+            "Hub author can request review and moderator publishes with reason",
+            "Comments, reactions and reporting work without following",
+            "Native WordPress endpoints do not expose or bypass private comments",
+            "Forum and reply publish immediately",
+            "RF-034 allows preventive blocking from the directory profile with confirmation",
+            "Suggested introduction is editable and never auto-sends",
+            "Private message delivery, read state and blocking",
+            "Event registration and calendar controls",
+            "Authorized upload stays private before publication",
+            "Multimedia job enriches the resource without creating unsolicited drafts",
+            "Knowledge assistant shows verified sources and abstains",
+            "Contact request is private and admin can resolve it",
+            "Membresía: vencer, denegar acceso y reactivar conserva el perfil",
+            "Contacto: asignar ejecutivo revoca acceso del responsable anterior",
+            "Admin configuration saves without returning secrets",
+            "Desktop and mobile layouts fit viewport",
+            "JavaScript runtime errors"
+          ],
+          "recorded_checks": 27
+        },
+        {
+          "suite": "editorial107.json",
+          "checks": [
+            "Hub: publicación explícita inmediata, borrador privado, editor e historial propio",
+            "Solo Me gusta: API rechaza las reacciones retiradas; concurrencia sin duplicados y retiro",
+            "Temas y comentarios muestran únicamente Me gusta, con estado accesible",
+            "Hub y Centro de Conocimiento también conservan únicamente Me gusta",
+            "Moderación de comentarios: permisos, motivo obligatorio, formulario y auditoría antes/después",
+            "Reportes: justificación, actor y UTC obligatorios; la auditoría conserva el resultado después de eliminarlos",
+            "Reportes de publicaciones también registran resolución sin copiar la denuncia privada a la bitácora",
+            "Retirar contenido impide nuevas reacciones y registra estado/motivo antes y después",
+            "Inglés por cuenta, diccionario gettext para JavaScript y móvil sin desbordamiento"
+          ],
+          "recorded_checks": 9
+        },
+        {
+          "suite": "analysis-filters107.json",
+          "checks": [
+            "hub: rango inclusivo, controles persistentes, aviso de rango inválido, limpieza y ancho móvil",
+            "topic: rango inclusivo, controles persistentes, aviso de rango inválido, limpieza y ancho móvil",
+            "gallery: rango inclusivo, controles persistentes, aviso de rango inválido, limpieza y ancho móvil",
+            "Administración: criterios guardados desde casillas y reflejados en el cálculo tras autenticación",
+            "Aviso de completitud adicional: no bloquea la navegación y conserva la posposición",
+            "Desmarcar todos los criterios adicionales restaura los ocho mínimos y el 100 %",
+            "Sin errores JavaScript"
+          ],
+          "recorded_checks": 7
+        },
+        {
+          "suite": "governance107.json",
+          "checks": [
+            "Denegar escritura se persiste desde el formulario y bloquea publicaciones en el servidor",
+            "La administración puede restringir y restaurar el acceso sin perder la cuenta editable",
+            "Elegir varios roles exige autorización en la interfaz y la API rechaza una solicitud sin ella",
+            "La autorización registra acta, fecha, actor y roles; su alcance y auditoría habilitan moderación",
+            "Una aprobación no permite ampliar roles sin registrar otra; los permisos individuales limitan roles aprobados",
+            "Reducir a un rol elimina las capacidades adicionales y conserva la evidencia de la Junta",
+            "Registro separado para decisiones sobre los cuatro roles: conserva la cuenta y no asigna privilegios",
+            "El formulario administrativo conserva roles/permisos legibles sin desbordamiento móvil",
+            "Interfaz con metadatos externos: clave vacía e inmutable al alternar proveedores, sin mostrar su valor",
+            "Sin errores JavaScript"
+          ],
+          "recorded_checks": 10
+        },
+        {
+          "suite": "statistics.json",
+          "checks": [
+            "administrator: estadísticas y asistencia requieren capacidad en REST",
+            "administrator: acceso al menú y vistas",
+            "IA: clasificación explícita sin inventar asistencias",
+            "Vista previa CSV, corrección manual y cierre de asistencia",
+            "Forms: previsualizar, revisar y confirmar sin modificar antes",
+            "Reportes: revisar antes de eliminar y conservar la publicación",
+            "Solicitudes: archivar conserva el contenido y el historial",
+            "Estadísticas en wp-admin y adaptación móvil",
+            "ascla_executive: estadísticas y asistencia requieren capacidad en REST",
+            "ascla_executive: acceso al menú y vistas",
+            "ascla_moderator: estadísticas y asistencia requieren capacidad en REST",
+            "ascla_moderator: acceso al menú y vistas",
+            "ascla_member: estadísticas y asistencia requieren capacidad en REST"
+          ],
+          "recorded_checks": 13
+        },
+        {
+          "suite": "delivery107.json",
+          "checks": [
+            "Estado real protegido, sin destinatarios, credenciales ni contenido",
+            "Fallo simulado: identifica servicio, estado e intentos y permite reintentar",
+            "Actualización interna pendiente identificada sin claves ni datos privados",
+            "Controles de entrega legibles sin desbordamiento móvil",
+            "Reintento simulado: POST único y lista actualizada al finalizar",
+            "Sin errores JavaScript"
+          ],
+          "recorded_checks": 6
+        },
+        {
+          "suite": "comment-history107.json",
+          "checks": [
+            "Mis temas conserva las publicaciones propias separadas de comentarios",
+            "Mis comentarios busca aportes propios y muestra el tema original y fechas",
+            "Ver conversación abre el tema y conserva el comentario en su contexto",
+            "Limpiar filtros conserva la sección y el historial funciona en móvil",
+            "Sin errores JavaScript"
+          ],
+          "recorded_checks": 5
+        },
+        {
+          "suite": "accessibility107.json",
+          "checks": [
+            "Diálogos en wp-admin anidado: clic real, Tab/Shift+Tab, confirmación y restauración del fondo sin bloquear ancestros",
+            "13 pantallas en 360, 768 y 1024 px, ambos temas; administración y editores con análisis WCAG 2.1",
+            "Adjuntos accesibles con teclado y campos de editores sin identificadores duplicados",
+            "Diálogos anidados: Tab, Shift+Tab, Escape, fondo inerte y retorno al control de origen",
+            "Error de guardado anunciado dentro del diálogo activo; respuesta HTTP simulada sin publicar",
+            "Menú móvil cerrado fuera del teclado, apertura/cierre accesibles y salto al contenido",
+            "Búsqueda global disponible y operativa también a 360 px",
+            "Contacto vacío: bloqueo nativo con etiqueta y rechazo independiente del backend",
+            "Gettext inglés: navegación, salto al contenido y cierre del menú; idioma original restaurado",
+            "Sin infracciones automáticas A/AA ni desbordamiento en los estados examinados"
+          ],
+          "recorded_checks": 10
+        },
+        {
+          "suite": "forms107.json",
+          "checks": [
+            "Grupo en inglés: textos, ayuda, placeholders y límites coherentes",
+            "Editor de evento: límites compartidos, enteros obligatorios y bloqueo nativo sin guardar",
+            "REST forzado rechaza números y modalidad inválidos sin alterar el evento publicado",
+            "Errores REST y formatos con números se traducen según la cuenta",
+            "Respuesta a comentario: etiqueta única, foco, límite y traducción sin reescribir contenido",
+            "Acción de comentario conserva el foco después de la petición",
+            "Contacto conserva el mismo límite en navegador y servidor"
+          ],
+          "recorded_checks": 7
+        },
+        {
+          "suite": "forms108.json",
+          "checks": [
+            "Configuración: rangos compartidos y bloqueo de fracciones antes de enviar",
+            "REST forzado: pesos, números y banderas inválidas conservan la configuración",
+            "Metadatos y listas inválidos conservan el título público; false no activa privacidad",
+            "Perfil invisible bloqueado en interfaz y REST; mantiene el dato anterior y permite corregirlo",
+            "Biografía obligatoria: texto invisible rechazado en interfaz y REST sin perder el contenido anterior",
+            "Perfil corregido con nombre Unicode visible se guarda sin perder preferencias",
+            "Inglés: título del diálogo de grupo y error de configuración sin mezclar etiquetas"
+          ],
+          "recorded_checks": 7
+        },
+        {
+          "suite": "events108.json",
+          "checks": [
+            "Próximos: 18 por página, total visible de 23 y control Anterior deshabilitado",
+            "Siguiente/Anterior: sin duplicados, conserva búsqueda y recupera foco con teclado",
+            "Anteriores: filtro vuelve a página 1 y muestra la última fila en página 2",
+            "Ejecutivo: Comunidad solo incluye publicados; Mis publicaciones y Mis borradores recuperan el propio",
+            "RF-053: modalidad y fechas del evento combinadas con búsqueda, paginación y aviso de rango invertido",
+            "Limpiar filtros restaura fechas, modalidad, búsqueda y página inicial",
+            "Paginación accesible en escritorio y móvil, sin desbordamiento ni infracciones axe A/AA",
+            "Asistencia forzada: números e importación inválidos devuelven 400 y conservan registro completo",
+            "Inglés: paginación y resumen traducidos, títulos del evento sin modificar"
+          ],
+          "recorded_checks": 9
+        },
+        {
+          "suite": "privacy108.json",
+          "checks": [
+            "Microevento heredado: título natural en lista y búsqueda por Círculo ASCLA",
+            "Privacidad de asistencia: aviso con persona y contenido sin identidad reservada expuesta",
+            "Eventos conserva su ancho móvil tras el ajuste de etiquetas",
+            "Forms forzado: columnas booleanas, fraccionarias y con sufijos se rechazan antes de crear",
+            "Revisión forzada conserva fila y perfil ante intereses inválidos o advertencias sin confirmar",
+            "Formulario real: columnas válidas, selección y confirmación permiten aprobar la fila"
+          ],
+          "recorded_checks": 6
+        },
+        {
+          "suite": "dashboard-loading108.json",
+          "checks": [
+            "Inicio, estadísticas y agenda disponibles mientras recomendaciones permanece sin responder",
+            "Navegar a Perfil cancela la consulta y una respuesta tardía no reemplaza la nueva vista",
+            "Un error de recomendaciones queda limitado a su bloque y permite reintentar",
+            "Aviso de error y reintento sin desbordamiento en móvil",
+            "Reintentar sustituye el aviso por la respuesta y conserva el contenido de Inicio"
+          ],
+          "recorded_checks": 5
+        }
+      ]
+    },
+    "uat": {
+      "commit": "3d42740cb2007c96bf4a3d72d77ed0ea90c1454c",
+      "quality_script_exit": 0,
+      "reports": [
+        {
+          "suite": "native-login-security.json",
+          "checks": [
+            "Las dependencias nativas cargan individualmente con nonce bajo CSP estricta",
+            "El nonce de CSP cambia entre respuestas del acceso nativo",
+            "El formulario conserva CSRF y carga sin errores JavaScript ni bloqueos CSP de scripts",
+            "CSP sigue bloqueando un script insertado por el parser sin nonce"
+          ],
+          "recorded_checks": 4
+        },
+        {
+          "suite": "e2e.json",
+          "checks": [
+            "Session warning, explicit extension and expired session redirect",
+            "Image editor rejects non-images, oversized and corrupt files without hanging",
+            "Image crop supports zoom, reset, keyboard movement and sanitized filenames",
+            "Full image mode produces one file and cancellation resolves to null",
+            "Transcript timing supplies duration without player metadata or manual preparation buttons",
+            "A simulated preparation error is escaped and does not change the stored duration",
+            "Editorial refresh runs a real queued job and preserves transcript-derived duration",
+            "Anonymous routes, REST nonce and cache isolation",
+            "All member routes load without JavaScript errors",
+            "Member profile edits persist and hidden fields are not searchable",
+            "Hub author can request review and moderator publishes with reason",
+            "Comments, reactions and reporting work without following",
+            "Native WordPress endpoints do not expose or bypass private comments",
+            "Forum and reply publish immediately",
+            "RF-034 allows preventive blocking from the directory profile with confirmation",
+            "Suggested introduction is editable and never auto-sends",
+            "Private message delivery, read state and blocking",
+            "Event registration and calendar controls",
+            "Authorized upload stays private before publication",
+            "Multimedia job enriches the resource without creating unsolicited drafts",
+            "Knowledge assistant shows verified sources and abstains",
+            "Contact request is private and admin can resolve it",
+            "Membresía: vencer, denegar acceso y reactivar conserva el perfil",
+            "Contacto: asignar ejecutivo revoca acceso del responsable anterior",
+            "Admin configuration saves without returning secrets",
+            "Desktop and mobile layouts fit viewport",
+            "JavaScript runtime errors"
+          ],
+          "recorded_checks": 27
+        },
+        {
+          "suite": "editorial107.json",
+          "checks": [
+            "Hub: publicación explícita inmediata, borrador privado, editor e historial propio",
+            "Solo Me gusta: API rechaza las reacciones retiradas; concurrencia sin duplicados y retiro",
+            "Temas y comentarios muestran únicamente Me gusta, con estado accesible",
+            "Hub y Centro de Conocimiento también conservan únicamente Me gusta",
+            "Moderación de comentarios: permisos, motivo obligatorio, formulario y auditoría antes/después",
+            "Reportes: justificación, actor y UTC obligatorios; la auditoría conserva el resultado después de eliminarlos",
+            "Reportes de publicaciones también registran resolución sin copiar la denuncia privada a la bitácora",
+            "Retirar contenido impide nuevas reacciones y registra estado/motivo antes y después",
+            "Inglés por cuenta, diccionario gettext para JavaScript y móvil sin desbordamiento"
+          ],
+          "recorded_checks": 9
+        },
+        {
+          "suite": "analysis-filters107.json",
+          "checks": [
+            "hub: rango inclusivo, controles persistentes, aviso de rango inválido, limpieza y ancho móvil",
+            "topic: rango inclusivo, controles persistentes, aviso de rango inválido, limpieza y ancho móvil",
+            "gallery: rango inclusivo, controles persistentes, aviso de rango inválido, limpieza y ancho móvil",
+            "Administración: criterios guardados desde casillas y reflejados en el cálculo tras autenticación",
+            "Aviso de completitud adicional: no bloquea la navegación y conserva la posposición",
+            "Desmarcar todos los criterios adicionales restaura los ocho mínimos y el 100 %",
+            "Sin errores JavaScript"
+          ],
+          "recorded_checks": 7
+        },
+        {
+          "suite": "governance107.json",
+          "checks": [
+            "Denegar escritura se persiste desde el formulario y bloquea publicaciones en el servidor",
+            "La administración puede restringir y restaurar el acceso sin perder la cuenta editable",
+            "Elegir varios roles exige autorización en la interfaz y la API rechaza una solicitud sin ella",
+            "La autorización registra acta, fecha, actor y roles; su alcance y auditoría habilitan moderación",
+            "Una aprobación no permite ampliar roles sin registrar otra; los permisos individuales limitan roles aprobados",
+            "Reducir a un rol elimina las capacidades adicionales y conserva la evidencia de la Junta",
+            "Registro separado para decisiones sobre los cuatro roles: conserva la cuenta y no asigna privilegios",
+            "El formulario administrativo conserva roles/permisos legibles sin desbordamiento móvil",
+            "Interfaz con metadatos externos: clave vacía e inmutable al alternar proveedores, sin mostrar su valor",
+            "Sin errores JavaScript"
+          ],
+          "recorded_checks": 10
+        },
+        {
+          "suite": "statistics.json",
+          "checks": [
+            "administrator: estadísticas y asistencia requieren capacidad en REST",
+            "administrator: acceso al menú y vistas",
+            "IA: clasificación explícita sin inventar asistencias",
+            "Vista previa CSV, corrección manual y cierre de asistencia",
+            "Forms: previsualizar, revisar y confirmar sin modificar antes",
+            "Reportes: revisar antes de eliminar y conservar la publicación",
+            "Solicitudes: archivar conserva el contenido y el historial",
+            "Estadísticas en wp-admin y adaptación móvil",
+            "ascla_executive: estadísticas y asistencia requieren capacidad en REST",
+            "ascla_executive: acceso al menú y vistas",
+            "ascla_moderator: estadísticas y asistencia requieren capacidad en REST",
+            "ascla_moderator: acceso al menú y vistas",
+            "ascla_member: estadísticas y asistencia requieren capacidad en REST"
+          ],
+          "recorded_checks": 13
+        },
+        {
+          "suite": "delivery107.json",
+          "checks": [
+            "Estado real protegido, sin destinatarios, credenciales ni contenido",
+            "Fallo simulado: identifica servicio, estado e intentos y permite reintentar",
+            "Actualización interna pendiente identificada sin claves ni datos privados",
+            "Controles de entrega legibles sin desbordamiento móvil",
+            "Reintento simulado: POST único y lista actualizada al finalizar",
+            "Sin errores JavaScript"
+          ],
+          "recorded_checks": 6
+        },
+        {
+          "suite": "comment-history107.json",
+          "checks": [
+            "Mis temas conserva las publicaciones propias separadas de comentarios",
+            "Mis comentarios busca aportes propios y muestra el tema original y fechas",
+            "Ver conversación abre el tema y conserva el comentario en su contexto",
+            "Limpiar filtros conserva la sección y el historial funciona en móvil",
+            "Sin errores JavaScript"
+          ],
+          "recorded_checks": 5
+        },
+        {
+          "suite": "accessibility107.json",
+          "checks": [
+            "Diálogos en wp-admin anidado: clic real, Tab/Shift+Tab, confirmación y restauración del fondo sin bloquear ancestros",
+            "13 pantallas en 360, 768 y 1024 px, ambos temas; administración y editores con análisis WCAG 2.1",
+            "Adjuntos accesibles con teclado y campos de editores sin identificadores duplicados",
+            "Diálogos anidados: Tab, Shift+Tab, Escape, fondo inerte y retorno al control de origen",
+            "Error de guardado anunciado dentro del diálogo activo; respuesta HTTP simulada sin publicar",
+            "Menú móvil cerrado fuera del teclado, apertura/cierre accesibles y salto al contenido",
+            "Búsqueda global disponible y operativa también a 360 px",
+            "Contacto vacío: bloqueo nativo con etiqueta y rechazo independiente del backend",
+            "Gettext inglés: navegación, salto al contenido y cierre del menú; idioma original restaurado",
+            "Sin infracciones automáticas A/AA ni desbordamiento en los estados examinados"
+          ],
+          "recorded_checks": 10
+        },
+        {
+          "suite": "forms107.json",
+          "checks": [
+            "Grupo en inglés: textos, ayuda, placeholders y límites coherentes",
+            "Editor de evento: límites compartidos, enteros obligatorios y bloqueo nativo sin guardar",
+            "REST forzado rechaza números y modalidad inválidos sin alterar el evento publicado",
+            "Errores REST y formatos con números se traducen según la cuenta",
+            "Respuesta a comentario: etiqueta única, foco, límite y traducción sin reescribir contenido",
+            "Acción de comentario conserva el foco después de la petición",
+            "Contacto conserva el mismo límite en navegador y servidor"
+          ],
+          "recorded_checks": 7
+        },
+        {
+          "suite": "forms108.json",
+          "checks": [
+            "Configuración: rangos compartidos y bloqueo de fracciones antes de enviar",
+            "REST forzado: pesos, números y banderas inválidas conservan la configuración",
+            "Metadatos y listas inválidos conservan el título público; false no activa privacidad",
+            "Perfil invisible bloqueado en interfaz y REST; mantiene el dato anterior y permite corregirlo",
+            "Biografía obligatoria: texto invisible rechazado en interfaz y REST sin perder el contenido anterior",
+            "Perfil corregido con nombre Unicode visible se guarda sin perder preferencias",
+            "Inglés: título del diálogo de grupo y error de configuración sin mezclar etiquetas"
+          ],
+          "recorded_checks": 7
+        },
+        {
+          "suite": "events108.json",
+          "checks": [
+            "Próximos: 18 por página, total visible de 23 y control Anterior deshabilitado",
+            "Siguiente/Anterior: sin duplicados, conserva búsqueda y recupera foco con teclado",
+            "Anteriores: filtro vuelve a página 1 y muestra la última fila en página 2",
+            "Ejecutivo: Comunidad solo incluye publicados; Mis publicaciones y Mis borradores recuperan el propio",
+            "RF-053: modalidad y fechas del evento combinadas con búsqueda, paginación y aviso de rango invertido",
+            "Limpiar filtros restaura fechas, modalidad, búsqueda y página inicial",
+            "Paginación accesible en escritorio y móvil, sin desbordamiento ni infracciones axe A/AA",
+            "Asistencia forzada: números e importación inválidos devuelven 400 y conservan registro completo",
+            "Inglés: paginación y resumen traducidos, títulos del evento sin modificar"
+          ],
+          "recorded_checks": 9
+        },
+        {
+          "suite": "privacy108.json",
+          "checks": [
+            "Microevento heredado: título natural en lista y búsqueda por Círculo ASCLA",
+            "Privacidad de asistencia: aviso con persona y contenido sin identidad reservada expuesta",
+            "Eventos conserva su ancho móvil tras el ajuste de etiquetas",
+            "Forms forzado: columnas booleanas, fraccionarias y con sufijos se rechazan antes de crear",
+            "Revisión forzada conserva fila y perfil ante intereses inválidos o advertencias sin confirmar",
+            "Formulario real: columnas válidas, selección y confirmación permiten aprobar la fila"
+          ],
+          "recorded_checks": 6
+        },
+        {
+          "suite": "dashboard-loading108.json",
+          "checks": [
+            "Inicio, estadísticas y agenda disponibles mientras recomendaciones permanece sin responder",
+            "Navegar a Perfil cancela la consulta y una respuesta tardía no reemplaza la nueva vista",
+            "Un error de recomendaciones queda limitado a su bloque y permite reintentar",
+            "Aviso de error y reintento sin desbordamiento en móvil",
+            "Reintentar sustituye el aviso por la respuesta y conserva el contenido de Inicio"
+          ],
+          "recorded_checks": 5
+        }
+      ]
+    }
+  }
+}

@@ -42,6 +42,18 @@ final class MicroEventsTest extends TestCase
         $post=get_post($id);
         return Content::save('event',['title'=>$post->post_title,'body'=>$post->post_content,'status'=>'publish'],$id);
     }
+    private function approveLater(int $id,string $reason): array
+    {
+        $post=get_post($id);
+        Content::save('event',['title'=>$post->post_title,'body'=>$post->post_content,'status'=>'scheduled','publish_at'=>gmdate('c',time()+3600)],$id);
+        return Content::moderate($id,'approve',$reason);
+    }
+    private function replacementMember(): int
+    {
+        $name='micro_replacement_'.bin2hex(random_bytes(5));
+        $id=wp_insert_user(['user_login'=>$name,'user_email'=>$name.'@example.invalid','user_pass'=>wp_generate_password(32),'role'=>'ascla_member']);
+        $this->users[]=$id;update_user_meta($id,'_ascla_profile',ascla_test_profile(['microevents'=>true]));return $id;
+    }
     public function testWeeklyBatchIsIdempotentWithIndependentConsentAndMandatoryReview(): void
     {
         wp_set_current_user($this->users[1]);$id=$this->proposal();$result=MicroEvents::create($this->users);
@@ -50,13 +62,61 @@ final class MicroEventsTest extends TestCase
         wp_update_post(['ID'=>$id,'post_status'=>'publish']);self::assertSame('pending',get_post_status($id));
         wp_set_current_user($this->users[2]);$this->reject(fn()=>Content::moderate($id,'approve','Aprobar'),404);
         wp_set_current_user($this->users[0]);$approved=Content::moderate($id,'approve','Agenda revisada');
-        self::assertSame('ascla_hidden',$approved['status']);self::assertFalse($approved['meta']['invited']);
-        self::assertSame(0,Store::count('registrations','event_id=%d',[$id]));
-        self::assertSame(['pending','approved'],array_column(get_post_meta($id,'_ascla_micro_history',true),'state'));
+        self::assertSame('publish',$approved['status']);self::assertTrue($approved['meta']['invited']);
+        self::assertSame(count($approved['meta']['invitees']),Store::count('registrations','event_id=%d',[$id]));
+        self::assertSame(['pending','approved','published'],array_column(get_post_meta($id,'_ascla_micro_history',true),'state'));
         $approved=$this->publish($id);
         self::assertSame('publish',$approved['status']);self::assertTrue($approved['meta']['invited']);self::assertSame(count($approved['meta']['invitees']),Store::count('registrations','event_id=%d',[$id]));
         self::assertSame(['pending','approved','published'],array_column(get_post_meta($id,'_ascla_micro_history',true),'state'));
         MicroEvents::invite($id);self::assertSame(count($approved['meta']['invitees']),Store::count('registrations','event_id=%d',[$id]));
+    }
+    public function testCandidateReplacementIsAuditedAndApprovalPublishesOnlyTheNewGroup(): void
+    {
+        $id=$this->proposal();$before=get_post_meta($id,'_ascla',true)['invitees'];$new=$this->replacementMember();
+        $this->approveLater($id,'Selección inicialmente aprobada y programada');
+        $ids=$before;$removed=array_shift($ids);$ids[]=$new;
+        $result=MicroEligibility::replace($id,$ids,'Reemplazo por disponibilidad');
+        self::assertSame($ids,$result['item']['meta']['invitees']);self::assertSame('pending',$result['item']['status']);
+        self::assertFalse($result['item']['meta']['micro_approved']);self::assertArrayNotHasKey('publish_at',$result['item']['meta']);self::assertSame(0,Store::count('registrations','event_id=%d',[$id]));
+        self::assertSame(1,Store::count('audit',"object_id=%d AND action='microevent_candidates_updated'",[$id]));
+        $published=Content::moderate($id,'approve','Grupo verificado');self::assertSame('publish',$published['status']);
+        self::assertTrue($published['meta']['invited']);self::assertSame(count($ids),Store::count('registrations','event_id=%d',[$id]));
+        self::assertSame(0,Store::count('registrations','event_id=%d AND user_id=%d',[$id,$removed]));
+        $this->reject(fn()=>MicroEligibility::replace($id,$before,'Cambio tardío'),409);
+    }
+    public function testInvalidCandidatesCannotChangeTheGroupAndBlocksAreRecheckedAtSave(): void
+    {
+        $id=$this->proposal();$before=get_post_meta($id,'_ascla',true);$new=$this->replacementMember();
+        $ids=$before['invitees'];array_shift($ids);$ids[]=$new;
+        $this->reject(fn()=>MicroEligibility::replace($id,array_slice($ids,0,1),'Demasiado pequeño'),400);
+        $this->reject(fn()=>MicroEligibility::replace($id,[-1],'ID no válido'),400);
+        $this->reject(fn()=>MicroEligibility::replace($id,$ids,''),400);
+        $profile=get_user_meta($new,'_ascla_profile',true);$profile['microevents']=false;update_user_meta($new,'_ascla_profile',$profile);
+        $this->reject(fn()=>MicroEligibility::replace($id,$ids,'Sin consentimiento'),400);
+        $profile['microevents']=true;update_user_meta($new,'_ascla_profile',$profile);
+        Store::insert('relations',['user_id'=>$new,'target_id'=>$ids[0],'kind'=>'block','created_at'=>current_time('mysql',true)]);
+        $this->reject(fn()=>MicroEligibility::replace($id,$ids,'Bloqueo vigente'),400);
+        self::assertSame($before,get_post_meta($id,'_ascla',true));self::assertSame('pending',get_post_status($id));
+    }
+    public function testCandidateSearchIsPrivatePaginatedAndFiltersConsent(): void
+    {
+        $id=$this->proposal();$new=$this->replacementMember();$name=get_userdata($new)->display_name;
+        $options=MicroEligibility::options($id,$name,1000);self::assertSame(1,$options['page']);self::assertSame([$new],array_column($options['items'],'id'));
+        $profile=get_user_meta($new,'_ascla_profile',true);$profile['microevents']=false;update_user_meta($new,'_ascla_profile',$profile);
+        self::assertSame([],MicroEligibility::options($id,$name)['items']);
+        wp_set_current_user($this->users[2]);$this->reject(fn()=>MicroEligibility::options($id),403);
+        $this->reject(fn()=>MicroEligibility::replace($id,[],'Sin permiso'),403);
+    }
+    public function testCandidateReplacementRollsBackWhenTheDatabaseRefusesIt(): void
+    {
+        $id=$this->proposal();$before=get_post_meta($id,'_ascla',true);$ids=$before['invitees'];array_shift($ids);$ids[]=$this->replacementMember();
+        $fail=static fn($result,$object,$key)=>$object===$id && $key==='_ascla'?false:$result;
+        add_filter('update_post_metadata',$fail,10,3);
+        try { MicroEligibility::replace($id,$ids,'Prueba de fallo');self::fail('Write must fail'); }
+        catch(ASCLA\Core\Repositories\RepositoryException $error) { self::assertNotSame('',$error->getMessage()); }
+        finally { remove_filter('update_post_metadata',$fail,10); }
+        self::assertSame($before,get_post_meta($id,'_ascla',true));self::assertSame('pending',get_post_status($id));
+        self::assertSame(0,Store::count('audit',"object_id=%d AND action='microevent_candidates_updated'",[$id]));
     }
     public function testPriorityWindowOpensToMembersWhoOptedOutAndCannotBeBypassedByAuthor(): void
     {
@@ -126,7 +186,7 @@ final class MicroEventsTest extends TestCase
 
     public function testCancellingAnApprovedScheduledProposalStopsFuturePublication(): void
     {
-        $id=$this->proposal();Content::moderate($id,'approve','Convocatoria revisada');$post=get_post($id);
+        $id=$this->proposal();$this->approveLater($id,'Convocatoria revisada');$post=get_post($id);
         $at=time()+3600;
         Content::save('event',['title'=>$post->post_title,'body'=>$post->post_content,'status'=>'scheduled','publish_at'=>gmdate('c',$at)],$id);
         self::assertNotFalse(wp_next_scheduled('ascla_publish_content',[$id,$at]));
@@ -142,13 +202,13 @@ final class MicroEventsTest extends TestCase
     public function testReviewRefreshReopensAnApprovedGroupAfterRemovingAnIncompleteCandidate(): void
     {
         $id=$this->proposal();$meta=get_post_meta($id,'_ascla',true);$meta['micro_min']=2;update_post_meta($id,'_ascla',$meta);
-        Content::moderate($id,'approve','Grupo inicialmente revisado');self::assertSame('approved',get_post_meta($id,'_ascla_micro_state',true));
+        $this->approveLater($id,'Grupo inicialmente revisado');self::assertSame('approved',get_post_meta($id,'_ascla_micro_state',true));
         $removed=$meta['invitees'][0];$profile=get_user_meta($removed,'_ascla_profile',true);$profile['bio']='';update_user_meta($removed,'_ascla_profile',$profile);
         $review=MicroEligibility::review($id);
         self::assertSame(1,$review['removed']);self::assertSame(count($meta['invitees'])-1,$review['candidates']);
         self::assertNotContains($removed,$review['item']['meta']['invitees']);self::assertFalse($review['item']['meta']['micro_approved']);
         self::assertSame('pending',$review['item']['status']);
-        Content::moderate($id,'approve','Grupo actualizado y revisado');$saved=$this->publish($id);
+        $saved=Content::moderate($id,'approve','Grupo actualizado y revisado');
         self::assertSame('publish',$saved['status']);self::assertSame($review['candidates'],Store::count('registrations','event_id=%d',[$id]));
         self::assertSame(0,Store::count('registrations','event_id=%d AND user_id=%d',[$id,$removed]));
     }
@@ -194,7 +254,7 @@ final class MicroEventsTest extends TestCase
 
     public function testFailedCancellationRollsBackTheProposalHistoryAndPublicationSchedule(): void
     {
-        $id=$this->proposal();Content::moderate($id,'approve','Revisado');$post=get_post($id);$at=time()+3600;
+        $id=$this->proposal();$this->approveLater($id,'Revisado');$post=get_post($id);$at=time()+3600;
         Content::save('event',['title'=>$post->post_title,'body'=>$post->post_content,'status'=>'scheduled','publish_at'=>gmdate('c',$at)],$id);
         $meta=get_post_meta($id,'_ascla',true);$history=get_post_meta($id,'_ascla_micro_history',true);
         $fail=static fn($result,$object,$key,$value)=>$object===$id && $key==='_ascla' && !empty($value['cancelled'])?false:$result;

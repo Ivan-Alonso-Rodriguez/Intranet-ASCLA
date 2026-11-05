@@ -6,7 +6,7 @@ use ASCLA\Core\Rest\ApiException;
 /** OpenAI Responses API transport. ASCLA builds and authorizes the context before it reaches this provider. */
 final class OpenAIProvider implements AIProviderInterface
 {
-    public function mode(): string { return 'OpenAI · API real'; }
+    public function mode(): string { return 'OpenAI · API'; }
 
     public static function model(string $value): string
     {

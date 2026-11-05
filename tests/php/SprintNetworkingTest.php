@@ -26,7 +26,7 @@ final class SprintNetworkingTest extends TestCase
             return ['response'=>['code'=>200],'headers'=>[],'body'=>wp_json_encode(['candidates'=>[['content'=>['parts'=>[['text'=>wp_json_encode($r)]]],'finishReason'=>'STOP']]])];
         };add_filter('pre_http_request',$this->http,10,3);
         wp_set_current_user($this->users[1]);
-        $before=Store::count('messages','1=1',[]);$m=Matching::between($this->users[1],$this->users[2]);self::assertSame('Google Gemini · API real',$m['mode']);self::assertSame('Explicación devuelta por el proveedor.',$m['explanation']);
+        $before=Store::count('messages','1=1',[]);$m=Matching::between($this->users[1],$this->users[2]);self::assertSame('Google Gemini · API',$m['mode']);self::assertSame('Explicación devuelta por el proveedor.',$m['explanation']);
         $intro=Matching::intro($this->users[2]);self::assertSame('Mensaje devuelto por el proveedor.',$intro['text']);self::assertFalse($intro['sent']);self::assertSame($before,Store::count('messages','1=1',[]));
         $agenda=NetworkingAI::agenda(array_slice($this->users,1));self::assertSame(30,$agenda['duration_minutes']);self::assertSame(['matching','intro','microagenda'],$tasks);
     }

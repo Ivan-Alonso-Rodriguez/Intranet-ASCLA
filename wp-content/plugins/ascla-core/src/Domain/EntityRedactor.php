@@ -25,7 +25,7 @@ final class EntityRedactor
             '/(?i:\b(?:en|desde)\h+)('.$organization.')(?=\h+(?i:trabajamos|hicimos|aplicamos|tomamos|implementamos|decidimos))/u',
             '/^\h*((?i:orador(?:a)?|ponente)\h+'.$name.'):\h*/mu',
         ];
-        $public=array_map('mb_strtolower',['COSO ERM','API REAL','ASCLA','Círculo ASCLA','Chatham House','Centro de Conocimiento','Gobierno Corporativo','Inteligencia Artificial','Gestión de Riesgos','Gobierno de IA','Secretaría Corporativa']);
+        $public=array_map('mb_strtolower',['COSO ERM','API','ASCLA','Círculo ASCLA','Chatham House','Centro de Conocimiento','Gobierno Corporativo','Inteligencia Artificial','Gestión de Riesgos','Gobierno de IA','Secretaría Corporativa']);
         $entities=array_merge($entities,self::patternEntities($text,$patterns,$public));
         preg_match_all('~https?://[^\s<>]+~iu',$text,$urls);
         foreach($urls[0] as $url){

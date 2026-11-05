@@ -11,8 +11,18 @@ final class ConnectionPolicy
 
     public static function retryAt(int $sender,int $target): int
     {
-        $rows=Store::rows('relations',"kind='connection_cooldown' AND user_id=%d AND target_id=%d",[$sender,$target],'ORDER BY created_at DESC LIMIT 1');
-        return $rows?max(0,(int)strtotime($rows[0]['created_at'].' UTC')+30*DAY_IN_SECONDS):0;
+        $row=self::cooldownRow($sender,$target);
+        return $row?max(0,(int)strtotime($row['created_at'].' UTC')+30*DAY_IN_SECONDS):0;
+    }
+
+    private static function cooldownRow(int $sender,int $target): ?array
+    {
+        $rows=\ASCLA\Core\Repositories\RelationReads::pair($sender,$target);
+        if ($rows!==null) {
+            foreach ($rows as $row) { if ($row['kind']==='connection_cooldown' && (int)$row['user_id']===$sender) { return $row; } }
+            return null;
+        }
+        return Store::rows('relations',"kind='connection_cooldown' AND user_id=%d AND target_id=%d",[$sender,$target],'ORDER BY created_at DESC LIMIT 1')[0]??null;
     }
 
     public static function cooldown(int $sender,int $target,string $reason='rejected'): void
@@ -24,7 +34,7 @@ final class ConnectionPolicy
 
     public static function visibleRetryAt(int $sender,int $target): ?string
     {
-        $row=Store::rows('relations',"kind='connection_cooldown' AND user_id=%d AND target_id=%d",[$sender,$target],'LIMIT 1')[0]??null;
+        $row=self::cooldownRow($sender,$target);
         $retry=$row?strtotime($row['created_at'].' UTC')+30*DAY_IN_SECONDS:0;
         return $retry>time() && ($row['reason']??'')==='disconnected'?gmdate('c',$retry):null;
     }

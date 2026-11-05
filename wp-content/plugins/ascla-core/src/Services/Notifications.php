@@ -105,17 +105,19 @@ final class Notifications
     }
     public static function summary(): array
     {
-        return ['unread_total'=>Store::count('notifications','user_id=%d AND read_at IS NULL',[get_current_user_id()]),'latest_id'=>self::latestId(),
-            'total_all'=>Store::count('notifications',self::USER_FILTER,[get_current_user_id()])];
+        global $wpdb;
+        $row=$wpdb->get_row($wpdb->prepare('SELECT COUNT(*) total_all,COALESCE(SUM(read_at IS NULL),0) unread_total,COALESCE(MAX(id),0) latest_id FROM '.Store::table('notifications').' WHERE user_id=%d',get_current_user_id()),ARRAY_A);
+        if (!$row || $wpdb->last_error!=='') { throw new \ASCLA\Core\Repositories\RepositoryException('No se pudieron consultar las notificaciones.'); }
+        return ['unread_total'=>(int)$row['unread_total'],'latest_id'=>(int)$row['latest_id'],'total_all'=>(int)$row['total_all']];
     }
     public static function feed(array $filter): array
     {
         $where=self::USER_FILTER; $args=[get_current_user_id()];
         if (($filter['filter']??'')==='unread') { $where.=' AND read_at IS NULL'; }
-        $total=Store::count('notifications',$where,$args); $pages=max(1,(int)ceil($total/20));
+        $summary=self::summary();$total=($filter['filter']??'')==='unread'?$summary['unread_total']:$summary['total_all'];$pages=max(1,(int)ceil($total/20));
         $page=min($pages,max(1,(int)($filter['page']??1))); $offset=($page-1)*20;
         $items=Store::rows('notifications',$where,$args,'ORDER BY id DESC LIMIT 20 OFFSET '.$offset);
-        return ['items'=>array_map([NotificationTarget::class,'view'],$items),'total'=>$total,'pages'=>$pages,'page'=>$page]+self::summary();
+        return ['items'=>array_map([NotificationTarget::class,'view'],$items),'total'=>$total,'pages'=>$pages,'page'=>$page]+$summary;
     }
     public static function read(int $id): array
     {

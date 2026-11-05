@@ -18,26 +18,30 @@ final class InterestImports
     public static function start(array $input): array
     {
         self::authorize();$filename=Access::text($input['filename']??'intereses.csv',255);$file=DelimitedFile::read($input['csv']??'',$filename,Access::text($input['mime']??'text/csv',100));$map=$input['columns']??[];Access::require(is_array($map)&&($map===[]||!array_is_list($map)),'Selecciona las columnas.',400);
-        $columns=[];foreach(['email','code','structured','free'] as $key){$columns[$key]=FormRules::bounded(array_key_exists($key,$map)?$map[$key]:-1,-1,count($file['headers'])-1,'Columna no válida.');}
-        Access::require(($columns['email']>=0 || $columns['code']>=0) && ($columns['structured']>=0 || $columns['free']>=0),'Selecciona identidad y respuestas.',400);
+        $columns=[];foreach(['email','code','person_name','name_extra','last_name','last_extra','structured','free','event_text'] as $key){$columns[$key]=FormRules::bounded(array_key_exists($key,$map)?$map[$key]:-1,-1,count($file['headers'])-1,'Columna no válida.');}
+        $context=Access::text($input['context']??'',1000);Access::require(is_array($input['context_topics']??[]),'Selecciona los intereses revisados.',400);$topics=InterestCatalog::validate($input['context_topics']??[]);
+        Access::require(count($topics)<=self::MAX_FORM_INTERESTS,'Selecciona como máximo 3 intereses provenientes del formulario.',400);
+        Access::require(($columns['email']>=0 || $columns['code']>=0 || $columns['person_name']>=0) && ($columns['structured']>=0 || $columns['free']>=0 || $columns['event_text']>=0 || $context!=='' || $topics),'Selecciona identidad y respuestas o un tema de evento para revisión.',400);
         $mode=Access::text($input['mode']??'merge',20);Access::require(in_array($mode,['merge','replace'],true),'Modo de importación no válido.',400);
-        $rows=self::importRows($file['rows'],$columns);
-        return Store::atomic('interest-import-create:'.get_current_user_id(),static function()use($filename,$mode,$rows) {
-            $id=ImportRecords::create('interests',$filename,['mode'=>$mode],$rows);Audit::record('interests_import_created',$id,'rows='.count($rows));return self::detail($id);
+        $config=['mode'=>$mode,'only_existing'=>FormRules::boolean($input['only_existing']??false),'context'=>$context,'context_topics'=>$topics,'source_filename'=>Access::text($input['source_filename']??$filename,255),'source_type'=>Access::text($input['source_type']??'csv',10)];
+        $rows=self::importRows($file['rows'],$columns,$config);
+        return Store::atomic('interest-import-create:'.get_current_user_id(),static function()use($filename,$config,$rows) {
+            $id=ImportRecords::create('interests',$filename,$config,$rows);Audit::record('interests_import_created',$id,'rows='.count($rows));return self::detail($id);
         });
     }
-    private static function importRows(array $source,array $columns): array
+    private static function importRows(array $source,array $columns,array $config): array
     {
-        $rows=[];
+        $rows=[];$accounts=new InterestImportAccounts();
         foreach($source as $row) {
             $p=['line'=>$row['line']];
             foreach($columns as $key=>$n) {
-                $limit=in_array($key,['email','code'],true)?200:6000;
+                $limit=in_array($key,['email','code','person_name','name_extra','last_name','last_extra'],true)?200:6000;
                 $p[$key]=$n<0?'':Access::text($row['values'][$n],$limit);
             }
-            $rows[]=$p;
+            $p['context']=$config['context'];$p['context_topics']=$config['context_topics'];$p['only_existing']=$config['only_existing'];
+            [$uid]=$accounts->match($p);$p['priority']=$uid>0?0:1;$rows[]=$p;
         }
-        return $rows;
+        usort($rows,static fn($a,$b)=>[$a['priority'],$a['line']]<=>[$b['priority'],$b['line']]);return $rows;
     }
     public static function process(int $id): array
     {
@@ -45,22 +49,27 @@ final class InterestImports
         return Store::lock('interest-import:'.$id,static function()use($id){
             $import=ImportRecords::get($id,'interests');
             Access::require($import['status']==='processing','La importación ya fue analizada.',409);
-            foreach (ImportRecords::rows($id,'pending',50) as $row) { self::processRow($row); }
+            $accounts=new InterestImportAccounts();foreach (ImportRecords::rows($id,'pending',50) as $row) { self::processRow($row,$accounts); }
             if (empty(ImportRecords::counts($id)['pending'])) { Store::update('imports',['status'=>'review'],['id'=>$id]); }
             return self::detail($id);
         });
     }
 
-    private static function processRow(array $row): void
+    private static function processRow(array $row,InterestImportAccounts $accounts): void
     {
         $p=$row['payload'];
-        [$uid,$warning]=InterestImportAccounts::resolve($p);
+        [$uid,$warning,$identityMethod]=array_pad($accounts->match($p),3,'');$p['identity_method']=$identityMethod;
+        if(!$uid&&!empty($p['only_existing'])){$p['warnings']=[$warning];$p['topics']=[];ImportRecords::save($row,'ignored',$p,0);return;}
         $proposal=InterestCatalog::propose($p['structured']);
         $p+=['topics'=>$proposal['ids'],'classification'=>$proposal['items'],'unknown'=>$proposal['unknown'],'selected_count'=>$proposal['selected_count'],'warnings'=>[],'method'=>'deterministic','confidence'=>'high'];
         if ($warning!=='') { $p['warnings'][]=$warning; }
         if ($proposal['selected_count']>3) { $p['warnings'][]='La respuesta contiene más de tres opciones.'; }
         if ($proposal['unknown']) { $p['warnings'][]='Hay categorías sin correspondencia en el catálogo.'; }
         if (trim($p['free'])!=='') { $p['warnings'][]='Texto libre pendiente de clasificación o revisión.'; }
+        if(!empty($p['context'])||!empty($p['event_text'])||!empty($p['context_topics'])){
+            $p['topics']=array_slice(array_values(array_unique(array_merge($p['topics'],$p['context_topics']??[]))),0,self::MAX_FORM_INTERESTS);
+            $p['warnings'][]='El tema del evento es una propuesta contextual, no un interés declarado. Revisa antes de aceptar.';$p['confidence']='baja';
+        }
         if ($uid) {
             $p['name']=Profiles::publicName($uid);
             $p['profile_hash']=InterestImportAccounts::fingerprint($uid);
@@ -96,11 +105,13 @@ final class InterestImports
     {
         self::authorize();Access::limit('forms_ai',15,300);
         return Store::lock('interest-import:'.$id,static function()use($id,$rowId,$provider){
-            $row=self::editable($id,$rowId);$p=$row['payload'];Access::require(trim($p['free'])!=='','Esta fila no tiene respuesta abierta.',400);$terms=InterestCatalog::terms();$text=EntityRedactor::redact($p['free']);$settings=Settings::get();$hash=hash('sha256',wp_json_encode([$text,$terms,$settings['ai_provider']??'mock',$settings['ai_model']??'',$settings['openai_model']??'',$settings['deepseek_model']??'']));
+            $row=self::editable($id,$rowId);$p=$row['payload'];$uid=(int)$row['user_id'];Access::require($uid>0 && user_can($uid,'ascla_access') && Access::canManageAccount('edit_user',$uid),'Asocia primero una cuenta ASCLA existente antes de interpretar con IA.',400);
+            $contextOnly=trim($p['free'])==='';$source=$contextOnly?trim(($p['context']??'').' '.($p['event_text']??'')):$p['free'];
+            Access::require($source!=='','Esta fila no tiene respuesta abierta ni tema de evento.',400);$terms=InterestCatalog::terms();$text=EntityRedactor::redact($source);$settings=Settings::get();$hash=hash('sha256',wp_json_encode([$text,$terms,$settings['ai_provider']??'mock',$settings['ai_model']??'',$settings['openai_model']??'',$settings['deepseek_model']??'',$contextOnly]));
             if(($p['ai_hash']??'')!==$hash){$provider??=Knowledge::provider();$result=self::validateAIResult($provider->generate('form_interests',['text'=>$text,'catalog'=>$terms]),$terms);
                 $p['ai_topics']=$result['intereses'];$p['ai_hash']=$hash;$p['ai_confidence']=$result['confianza'];$p['ai_provider']=$provider->mode();
             }
-            $base=InterestCatalog::propose($p['structured']);$p['topics']=array_slice(array_values(array_unique(array_merge($base['ids'],$p['ai_topics']))),0,self::MAX_FORM_INTERESTS);$p['method']='deterministic+ai';$p['confidence']=$p['ai_confidence'];
+            $base=InterestCatalog::propose($p['structured']);$p['topics']=array_slice(array_values(array_unique(array_merge($base['ids'],$p['context_topics']??[],$p['ai_topics']))),0,self::MAX_FORM_INTERESTS);$p['method']=$contextOnly?'context+ai':'deterministic+ai';$p['confidence']=$contextOnly?'baja':$p['ai_confidence'];
             ImportRecords::save($row,'review',$p,(int)$row['user_id']);return ['row_id'=>$rowId,'topics'=>$p['topics'],'confidence'=>$p['confidence'],'provider'=>$p['ai_provider']];
         },0);
     }

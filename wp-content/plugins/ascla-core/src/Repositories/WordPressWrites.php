@@ -33,6 +33,21 @@ final class WordPressWrites
         return (int)$result;
     }
 
+    /** WordPress deliberately ignores user_login in wp_update_user. */
+    public static function renameUser(int $id,string $login): void
+    {
+        global $wpdb;
+        $old=get_userdata($id);
+        if (!$old) { throw new RepositoryException(self::FAILED); }
+        if ($old->user_login===$login) { return; }
+        clean_user_cache($old);
+        if ($wpdb->update($wpdb->users,['user_login'=>$login,'user_activation_key'=>''],['ID'=>$id],['%s','%s'],['%d'])!==1) {
+            throw new RepositoryException(self::FAILED);
+        }
+        clean_user_cache($old);clean_user_cache($id);
+        if (get_userdata($id)->user_login!==$login) { throw new RepositoryException(self::FAILED); }
+    }
+
     public static function option(string $key,mixed $value): void
     {
         if (update_option($key,$value,false)===false && get_option($key)!=$value) { throw new RepositoryException(self::FAILED); }
@@ -43,7 +58,9 @@ final class WordPressWrites
     {
         Transaction::run(static function() {
             global $wpdb;$key='ascla_profile_revision';
-            if ($wpdb->query($wpdb->prepare("INSERT IGNORE INTO {$wpdb->options} (option_name,option_value,autoload) VALUES (%s,'0','off')",$key))===false) { throw new RepositoryException(self::FAILED); }
+            // Acquire the exclusive row lock directly. INSERT IGNORE takes a shared
+            // duplicate-key lock that concurrent writers can deadlock upgrading.
+            if ($wpdb->query($wpdb->prepare("INSERT INTO {$wpdb->options} (option_name,option_value,autoload) VALUES (%s,'0','off') ON DUPLICATE KEY UPDATE option_value=option_value",$key))===false) { throw new RepositoryException(self::FAILED); }
             $value=$wpdb->get_var($wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name=%s FOR UPDATE",$key));
             if ($value===null || $wpdb->last_error!=='') { throw new RepositoryException(self::FAILED); }
             // A transaction may have read the generation before waiting for the row lock.

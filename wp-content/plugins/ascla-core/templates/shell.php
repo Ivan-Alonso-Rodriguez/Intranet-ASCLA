@@ -28,7 +28,6 @@ $initials=implode('',array_map(static fn($word)=>mb_substr($word,0,1),array_slic
 <div class="ascla-main"><header class="ascla-header">
 <a class="header-brand" href="<?php echo esc_url($homeUrl); ?>" aria-label="<?php echo esc_attr(Language::label('ASCLA inicio')); ?>"><img class="brand-logo-normal" src="<?php echo esc_url($logo); ?>" alt="ASCLA" width="1343" height="382"><img class="brand-logo-inverse" src="<?php echo esc_url($logoWhite); ?>" alt="" aria-hidden="true" width="1608" height="472"></a>
 <button type="button" class="btn icon-button mobile-menu" data-action="menu" aria-label="<?php echo esc_attr(Language::label('Abrir navegación')); ?>"><?php echo Icons::html('menu'); ?></button>
-<form class="header-search" data-form="global-search"><?php echo Icons::html('search'); ?><input name="q" aria-label="<?php echo esc_attr(Language::label('Buscar en ASCLA')); ?>" placeholder="<?php echo esc_attr(Language::label('Buscar en tu comunidad…')); ?>" autocomplete="off"></form>
 <div class="header-right"><?php if($settings['demo']): ?><span class="demo-badge">DEMO MODE</span><?php endif; ?>
 <form class="header-language" method="post" action="" aria-label="<?php echo esc_attr(Language::text('Cambiar idioma','Change language')); ?>">
 <label class="screen-reader-text" for="ascla-app-language"><?php echo esc_html(Language::text('Idioma','Language')); ?></label>

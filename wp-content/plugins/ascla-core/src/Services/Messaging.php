@@ -17,6 +17,8 @@ final class Messaging
 
     public static function blocked(int $a,int $b): bool
     {
+        $rows=\ASCLA\Core\Repositories\RelationReads::pair($a,$b);
+        if ($rows!==null) { return (bool)array_filter($rows,static fn($row)=>$row['kind']==='block'); }
         return Store::count('relations',"kind='block' AND ((user_id=%d AND target_id=%d) OR (user_id=%d AND target_id=%d))",[$a,$b,$b,$a])>0;
     }
 

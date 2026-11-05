@@ -7,13 +7,18 @@ final class ProfileDirectory
     public const PAGE_SIZE=12;
     public static function search(array $filter=[]): array
     {
+        return \ASCLA\Core\Repositories\RelationReads::run(get_current_user_id(),static fn()=>self::searchRead($filter));
+    }
+    private static function searchRead(array $filter): array
+    {
         $page=max(1,(int)($filter['page']??1));$perPage=self::PAGE_SIZE;
         $query=self::normalize(Access::text($filter['q']??'',120));$results=[];$offset=0;
         do {
             $users=get_users(['number'=>200,'offset'=>$offset,'orderby'=>'display_name','order'=>'ASC','capability'=>'ascla_access']);$offset+=200;
+            cache_users(array_map(static fn($user)=>(int)$user->ID,$users));
             foreach ($users as $user) {
                 $data=self::candidate((int)$user->ID,$filter,$query);
-                if ($data!==null) { $results[]=$data; }
+                if ($data!==null) { $results[]=['id'=>$data['id'],'name'=>$data['name'],'_rank'=>$data['_rank']]; }
             }
         } while (count($users)===200);
         usort($results,static function(array $a,array $b): int {
@@ -23,14 +28,13 @@ final class ProfileDirectory
             return strcmp(self::normalize($a['name']),self::normalize($b['name'])) ?: $a['id']<=>$b['id'];
         });
         $total=count($results);$pages=max(1,(int)ceil($total/$perPage));$page=min($page,$pages);
-        $items=array_slice($results,($page-1)*$perPage,$perPage);
-        foreach ($items as &$item) { unset($item['_rank']); } unset($item);
+        $items=array_map(static fn($ranked)=>self::candidateData($ranked['id']),array_slice($results,($page-1)*$perPage,$perPage));
         return ['items'=>Connections::attach($items),'total'=>$total,'page'=>$page,'pages'=>$pages,'per_page'=>$perPage];
     }
     private static function candidate(int $id,array $filter,string $query): ?array
     {
         if (!self::eligibleCandidate($id)) { return null; }
-        $data=self::candidateData($id);
+        $data=self::candidateData($id,false);
         $rank=self::candidateRank($id,$data,$filter,$query);
         if ($rank===null) { return null; }
         $data['_rank']=$rank;
@@ -46,10 +50,10 @@ final class ProfileDirectory
         return !empty($raw['directory']);
     }
 
-    private static function candidateData(int $id): array
+    private static function candidateData(int $id,bool $administration=true): array
     {
         $raw=Profiles::raw($id);
-        $data=Profiles::visible($id);
+        $data=Profiles::visible($id,$administration);
         // Administrators can inspect private data on the individual administrative form,
         // but a directory search must not infer it from membership in a result set.
         foreach ((array)($raw['hidden']??[]) as $field) { unset($data[$field]); }

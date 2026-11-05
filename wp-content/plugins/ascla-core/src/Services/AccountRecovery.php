@@ -11,10 +11,42 @@ final class AccountRecovery
         add_action('login_form_retrievepassword',[self::class,'controller']);
         add_action('login_form_checkemail',[self::class,'controller']);
         add_filter('lostpassword_redirect',static fn()=>self::confirmationUrl());
+        add_filter('login_url',[self::class,'loginUrl'],20,1);
+        add_filter('lostpassword_url',[self::class,'lostPasswordUrl'],20,2);
+        add_action('lostpassword_form',[self::class,'contextField']);
+        add_action('resetpass_form',[self::class,'contextField']);
+        add_filter('retrieve_password_message',[self::class,'resetMessage'],20,3);
     }
     public static function confirmationUrl(): string
     {
-        return add_query_arg(['action'=>'lostpassword','ascla_recovery'=>'sent','wp_lang'=>Language::requested()?:Language::current()],network_site_url('wp-login.php','login'));
+        $args=['action'=>'lostpassword','ascla_recovery'=>'sent','wp_lang'=>Language::requested()?:Language::current()];
+        if (self::communityContext()) { $args['ascla_login_context']='community'; }
+        return add_query_arg($args,network_site_url('wp-login.php','login'));
+    }
+    private static function communityContext(): bool
+    {
+        $context=$_POST['ascla_login_context']??$_GET['ascla_login_context']??'';
+        if ($context==='community') { return true; }
+        $redirect=$_POST['redirect_to']??$_GET['redirect_to']??'';
+        return is_string($redirect) && untrailingslashit(wp_unslash($redirect))===untrailingslashit(Login::url());
+    }
+    public static function lostPasswordUrl(string $url,string $redirect): string
+    {
+        return untrailingslashit($redirect)===untrailingslashit(Login::url())?add_query_arg('ascla_login_context','community',$url):$url;
+    }
+    public static function loginUrl(string $url): string
+    {
+        return ($GLOBALS['pagenow']??'')==='wp-login.php' && in_array($GLOBALS['action']??'',['lostpassword','retrievepassword','rp','resetpass','checkemail'],true) && self::communityContext()?Login::url():$url;
+    }
+    public static function contextField(): void
+    {
+        if (self::communityContext()) { echo '<input type="hidden" name="ascla_login_context" value="community">'; }
+    }
+    public static function resetMessage(string $message,string $key,string $login): string
+    {
+        if (!self::communityContext()) { return $message; }
+        $url=network_site_url('wp-login.php?action=rp&key='.$key.'&login='.rawurlencode($login),'login');
+        return str_replace($url,add_query_arg('ascla_login_context','community',$url),$message);
     }
     public static function confirmationMessage(): string
     {
@@ -57,7 +89,7 @@ final class AccountRecovery
             login_header(Language::text('Recuperar contraseña','Reset password'),'',$result);
         }
         self::form($identifier);
-        echo '<p id="nav"><a href="'.esc_url(Login::url()).'">'.esc_html(Language::text('Volver al inicio de sesión','Back to sign in')).'</a></p>';
+        echo '<p id="nav"><a href="'.esc_url(self::communityContext()?Login::url():site_url('wp-login.php','login')).'">'.esc_html(Language::text('Volver al inicio de sesión','Back to sign in')).'</a></p>';
         login_footer();exit;
     }
     private static function form(string $identifier): void
