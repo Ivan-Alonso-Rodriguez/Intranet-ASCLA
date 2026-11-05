@@ -1,0 +1,23 @@
+meta {
+  name: 05. Rechazar administración sin permiso
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/admin/users
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAsociado}}
+  X-WP-Nonce: {{nonceAsociado}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("Asociado no accede a administraci\u00f3n", function () { expect(res.getStatus()).to.equal(403); });
+}

@@ -20,12 +20,16 @@ final class Language
         return self::valid(get_user_meta(get_current_user_id(),'locale',true))?:'es_ES';
     }
     public static function english(): bool {return str_starts_with(self::current(),'en_');}
-    public static function text(string $es,string $en): string {return self::english()?$en:$es;}
+    public static function text(string $es,string $en): string
+    {
+        $translated=Translations::text($es);
+        return $translated===$es && self::english()?$en:$translated;
+    }
     public static function labels(): array
     {
-        static $labels=null;return $labels??=json_decode(file_get_contents(ASCLA_PATH.'languages/en.json'),true)?:[];
+        return Translations::labels();
     }
-    public static function label(string $text): string {return self::english()?(self::labels()[$text]??$text):$text;}
+    public static function label(string $text): string {return Translations::text($text);}
     public static function remember(string $login,\WP_User $user): void
     {
         unset($login);

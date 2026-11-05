@@ -1,0 +1,26 @@
+meta {
+  name: 08. Reabrir el evento y comprobar sus fechas
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/items/{{eventoPublicacionId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAdministrador}}
+  X-WP-Nonce: {{nonceAdministrador}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Validación: 08. Reabrir el evento y comprobar sus fechas", function () { expect(res.getBody().status).to.equal("publish");expect(Date.parse(res.getBody().meta.start)).to.equal(Date.parse(bru.getCollectionVar("inicioPublicacion")));expect(Date.parse(res.getBody().meta.end)).to.equal(Date.parse(bru.getCollectionVar("finPublicacion"))); });
+}

@@ -1,0 +1,200 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-24T00:12:08.788Z",
+  "scope": "WordPress local desechable; REST, cola, WP-Cron, errores y permisos reales. Supadata e IA simulados; ejemplos editoriales sintéticos para revisar el diseño. No acredita uso de la cuenta real ni despliegue.",
+  "package_sha256": "95b9571134f4f6e4162b166068f743f3baff49c62d1aeb831314ae5926b30e37",
+  "package_manifest": "docs/evidence/release-1.11.0/package-summary-refresh.json",
+  "installer": {
+    "version": "1.11.0",
+    "artifact": "dist/ascla-core-instalable.zip",
+    "sha256": "cd96723c17dc5ccd067bacc43e292fa03d8dbc7355ae8390b68aa6e1dfe822d2",
+    "bytes": 2028055,
+    "files": 212,
+    "upload_limit_bytes": 2097152,
+    "below_2MiB": true,
+    "crc_valid": true,
+    "all_retained_files_identical_to_complete_release": true,
+    "complete_release_sha256": "95b9571134f4f6e4162b166068f743f3baff49c62d1aeb831314ae5926b30e37",
+    "complete_release_unchanged": true,
+    "omitted_translation_sources": [
+      "ascla-core/languages/ascla-core-en_US.po",
+      "ascla-core/languages/ascla-core-es_ES.po"
+    ],
+    "runtime_translation_catalogs_retained": true,
+    "scope": "Packaging-only variant; existing PHP, JavaScript, PDF.js, CSS and compiled translations remain byte-identical to the verified complete release. No server settings were changed and no new functional test run is claimed."
+  },
+  "phpunit": {
+    "tests": 166,
+    "assertions": 1507,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "phpunit_report": "docs/evidence/release-1.11.0/summary-refresh1110-junit.xml",
+  "ui": {
+    "version": "1.11.0",
+    "date": "2026-10-24T00:12:08.788Z",
+    "scope": "WordPress local desechable; REST, cola, WP-Cron, errores y permisos reales. Supadata e IA simulados; ejemplos editoriales sintéticos para revisar el diseño. No acredita uso de la cuenta real ni despliegue.",
+    "package_sha256": "95b9571134f4f6e4162b166068f743f3baff49c62d1aeb831314ae5926b30e37",
+    "checks": [
+      "La preparación automática conserva la fuente completa y el administrador ya no ve el desplegable de transcripción",
+      "Actualizar resumen y nota inicia una sola tarea, conserva la versión anterior y el comentario, y reutiliza la transcripción",
+      "La regeneración y la fuente interna conservan sus permisos editoriales; el asociado sigue leyendo el resumen",
+      "Si falla la IA, el resumen y la nota anteriores permanecen, aparece el error y la acción vuelve a estar habilitada",
+      "Corregir la configuración recupera la tarea sin volver a descargar subtítulos",
+      "Tres párrafos legibles y marcos a todo el ancho con etiquetas, sin desbordes: desktop-light",
+      "Tres párrafos legibles y marcos a todo el ancho con etiquetas, sin desbordes: mobile-light",
+      "Tres párrafos legibles y marcos a todo el ancho con etiquetas, sin desbordes: desktop-dark",
+      "Tres párrafos legibles y marcos a todo el ancho con etiquetas, sin desbordes: mobile-dark",
+      "Las etiquetas y listas largas conservan todas las entradas y se ajustan al móvil",
+      "Se conserva el contenido seguro y la presentación de recursos con solo un resumen"
+    ],
+    "scans": [
+      {
+        "name": "actualizando-con-version-anterior",
+        "engine": {
+          "name": "axe-core",
+          "version": "4.14.0"
+        },
+        "violations": [],
+        "incomplete": 0
+      },
+      {
+        "name": "error-con-resumen-conservado",
+        "engine": {
+          "name": "axe-core",
+          "version": "4.14.0"
+        },
+        "violations": [],
+        "incomplete": 0
+      },
+      {
+        "name": "resumen-ampliado-desktop-light",
+        "engine": {
+          "name": "axe-core",
+          "version": "4.14.0"
+        },
+        "violations": [],
+        "incomplete": 0
+      },
+      {
+        "name": "marcos-de-trabajo-desktop-light",
+        "engine": {
+          "name": "axe-core",
+          "version": "4.14.0"
+        },
+        "violations": [],
+        "incomplete": 1
+      },
+      {
+        "name": "resumen-ampliado-mobile-light",
+        "engine": {
+          "name": "axe-core",
+          "version": "4.14.0"
+        },
+        "violations": [],
+        "incomplete": 1
+      },
+      {
+        "name": "marcos-de-trabajo-mobile-light",
+        "engine": {
+          "name": "axe-core",
+          "version": "4.14.0"
+        },
+        "violations": [],
+        "incomplete": 1
+      },
+      {
+        "name": "resumen-ampliado-desktop-dark",
+        "engine": {
+          "name": "axe-core",
+          "version": "4.14.0"
+        },
+        "violations": [],
+        "incomplete": 0
+      },
+      {
+        "name": "marcos-de-trabajo-desktop-dark",
+        "engine": {
+          "name": "axe-core",
+          "version": "4.14.0"
+        },
+        "violations": [],
+        "incomplete": 1
+      },
+      {
+        "name": "resumen-ampliado-mobile-dark",
+        "engine": {
+          "name": "axe-core",
+          "version": "4.14.0"
+        },
+        "violations": [],
+        "incomplete": 1
+      },
+      {
+        "name": "marcos-de-trabajo-mobile-dark",
+        "engine": {
+          "name": "axe-core",
+          "version": "4.14.0"
+        },
+        "violations": [],
+        "incomplete": 1
+      },
+      {
+        "name": "etiquetas-extensas-mobile-dark",
+        "engine": {
+          "name": "axe-core",
+          "version": "4.14.0"
+        },
+        "violations": [],
+        "incomplete": 0
+      }
+    ],
+    "errors": []
+  },
+  "source_hashes": {
+    "tests/summary-refresh1110.cjs": "adeac917508cb3a2842cc8ef2742fe4b186b45dd3a47633802ec1c1235085be6",
+    "tests/summary-refresh1110-fixture.php": "b0a59f2fa18370e5b4063e57be750dfc3b5f24b873944715e787a66f97e0c031",
+    "tests/php/VideoPreparationTest.php": "35d2386917d46ca710f41505a1338e491fe4ac39a8ce11be65fc61811993a593",
+    "tests/supadata1110-fixture.php": "1c89d51392032354f9a0dc8cc091513642303e54aceaba18ef453ed9a4177bc9"
+  },
+  "production_files_changed_since_readers": [
+    "ascla-core/assets/app.js",
+    "ascla-core/assets/content-ui.js",
+    "ascla-core/languages/ascla-core-en_US.mo",
+    "ascla-core/languages/ascla-core-en_US.po",
+    "ascla-core/languages/ascla-core-es_ES.mo",
+    "ascla-core/languages/ascla-core-es_ES.po",
+    "ascla-core/languages/en.json",
+    "ascla-core/readme.txt",
+    "ascla-core/src/Integrations/AIProviderSupport.php",
+    "ascla-core/src/Integrations/MockAIProvider.php",
+    "ascla-core/src/Rest/Router.php",
+    "ascla-core/src/Services/VideoPreparation.php"
+  ],
+  "source_matches_verified_zip": true,
+  "summary_policy": "Shared prompt requests 3–5 paragraphs, approximately 220–350 words if supported by the source, with context, key arguments and practical implications. Short material stays proportional; no padding or new facts. Existing saved summaries change only when regenerated. Real AI output length is not verified with the user account.",
+  "regeneration": "Explicit editorial action. Reuses the stored source, deduplicates an active job, preserves old summary and note until valid success, refreshes the item and preserves unsaved comments. A failure keeps previous material, notifies editors/admins and re-enables the action. Automatic publication processing remains active.",
+  "transcript_policy": "Source remains stored for processing and authorized editing/API access. The transcript accordion is removed from the item view for all roles.",
+  "frameworks_layout": "Full width, wrapping tags matching concepts; norms retain their own full-width section.",
+  "limitations": [
+    "Providers and source material simulated in disposable loopback WordPress; no real API account or remote deployment tested.",
+    "No new full security audit, load test, SonarQube, ZAP or complete historical workflow run. Axe is automated checking, not a full manual WCAG audit."
+  ],
+  "native_report": "test-results/summary-refresh1110/index.html",
+  "temporary_environment_cleanup": "completed; isolated ascla_release1110 containers, volumes, test users, source cache and private environment/access files removed",
+  "working_tree": "uncommitted; existing user work preserved",
+  "base_commit": "2daf0d9e5b0da8eee8b21076f2dc3915c77a4e3f",
+  "simulated_provider_metrics": {
+    "simulated_provider": true,
+    "requests": [
+      "https://api.supadata.ai/v1/transcript?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DASCLA_SD001&lang=es&text=false&mode=native",
+      "https://api.supadata.ai/v1/transcript/job-fixture-long",
+      "https://api.supadata.ai/v1/transcript/job-fixture-long"
+    ],
+    "creates": 1,
+    "polls": 2
+  },
+  "simulation_metrics_scope": "Fixture lifecycle including cache priming; the successful browser rerun reused the primed complete transcript. One simulated create and two polls in total; regeneration made no new transcript request.",
+  "visual_review": "Capturas de marcos en escritorio claro y móvil oscuro, y resumen ampliado en móvil claro revisadas: etiquetas adaptables, tarjetas completas y párrafos legibles."
+}

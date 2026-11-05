@@ -1,0 +1,18 @@
+meta {
+  name: ASCLA - QA manual
+}
+
+script:pre-request {
+  if (String(req.getMethod()).toUpperCase() === "POST" && req.getUrl().includes("/wp-login.php")) {
+    const form = await bru.sendRequest({method:"GET",url:bru.interpolate("{{base}}")+"/wp-login.php"});
+    const nonce = String(form.data).match(/name="_ascla_native_login_nonce"\s+value="([^"]+)"/);
+    if (form.status !== 200 || !nonce) throw Error("No se pudo preparar el formulario de acceso protegido");
+    const cookies = form.headers["set-cookie"] || [];
+    const cookie = (Array.isArray(cookies)?cookies:[cookies]).flatMap(value=>value.split(/,(?=\s*[^;,=\s]+=)/)).map(value=>value.trim().split(";")[0]).join("; ");
+    if (!cookie.includes("ascla_login_guest=")) throw Error("Falta la cookie del formulario protegido");
+    req.setHeader("Cookie",cookie);
+    req.setBody(req.getBody().map(field=>field.name==="_ascla_native_login_nonce"?{...field,value:nonce[1]}:field));
+    bru.setVar("asclaAccessCookie",cookie);
+    bru.setVar("asclaAccessNonce",nonce[1]);
+  }
+}

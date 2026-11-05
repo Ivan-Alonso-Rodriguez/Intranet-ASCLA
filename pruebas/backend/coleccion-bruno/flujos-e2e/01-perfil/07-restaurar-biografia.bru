@@ -1,0 +1,35 @@
+meta {
+  name: 07. Restaurar la biografía de la cuenta dedicada
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/profiles/me
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionCarla}}
+  X-WP-Nonce: {{nonceCarla}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:pre-request {
+  req.setBody({bio:bru.getCollectionVar("perfilBiografiaOriginal")});
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Validación: 07. Restaurar la biografía de la cuenta dedicada", function () { expect(res.getBody().bio).to.equal(bru.getCollectionVar("perfilBiografiaOriginal")); });
+}

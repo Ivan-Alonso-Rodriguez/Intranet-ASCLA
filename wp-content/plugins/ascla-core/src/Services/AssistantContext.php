@@ -1,7 +1,7 @@
 <?php
 namespace ASCLA\Core\Services;
 
-use ASCLA\Core\Domain\{Anonymizer,Catalog};
+use ASCLA\Core\Domain\{EditorialPrivacy,EntityRedactor,Catalog};
 use ASCLA\Core\Frontend\Language;
 use ASCLA\Core\Repositories\Store;
 
@@ -16,19 +16,7 @@ final class AssistantContext
     public static function build(string $question): array
     {
         $plain=mb_strtolower(remove_accents($question));
-        $intents=[
-            'events'=>(bool)preg_match('/\b(evento|eventos|reunion|reuniones|encuentro|encuentros|capacitacion|capacitaciones|agenda|calendario|proximo|proximos|pronto|semana|mes|inscrito|inscripcion)\b/u',$plain),
-            'recent'=>(bool)preg_match('/\b(reciente|recientes|nuevo|nuevos|nueva|nuevas|publicado|publicados|publicacion|publicaciones|novedad|novedades)\b/u',$plain)
-                || (bool)preg_match('/\b(contenido|contenidos|recurso|recursos|articulo|articulos|hub|conocimiento|ultimo|ultimos)\b/u',$plain),
-            'people'=>(bool)preg_match('/\b(recomiend|recomendad|conectar|conexion|conexiones|persona|personas|asociado|asociados|networking|afinidad|contactar|conocer)\w*/u',$plain),
-            'notifications'=>(bool)preg_match('/\b(notificacion|notificaciones|aviso|avisos|pendiente|pendientes|sin leer)\b/u',$plain),
-        ];
-        // English UI questions are supported too.
-        $intents['events']=$intents['events']||(bool)preg_match('/\b(event|events|meeting|meetings|training|calendar|upcoming|soon|week|month|registered)\b/u',$plain);
-        $intents['recent']=$intents['recent']||(bool)preg_match('/\b(recent|new|latest|published|posts|content|resources|knowledge)\b/u',$plain);
-        $intents['people']=$intents['people']||(bool)preg_match('/\b(recommend|recommended|connect|connection|connections|people|member|members|networking|affinity|meet)\w*/u',$plain);
-        $intents['notifications']=$intents['notifications']||(bool)preg_match('/\b(notification|notifications|unread|alerts?)\b/u',$plain);
-
+        $intents=self::intents($plain);
         $live=[
             'current_datetime'=>current_datetime()->format(DATE_ATOM),
             'timezone'=>wp_timezone_string()?:'UTC',
@@ -37,15 +25,50 @@ final class AssistantContext
             'intents'=>$intents,
         ];
         $sources=[];
+        self::appendIntentContext($live,$sources,$intents);
+        [$safe,$protected,$identities]=self::safeSources($sources);
+        return ['live'=>$live,'sources'=>array_slice($safe,0,8),'answerable'=>in_array(true,$intents,true),'protected'=>$protected,'identities'=>$identities];
+    }
 
+    private static function intents(string $plain): array
+    {
+        return [
+            'events'=>self::matchesAny($plain,[
+                '/\b(evento|eventos|reunion|reuniones|encuentro|encuentros|capacitacion|capacitaciones|agenda|calendario|proximo|proximos|pronto|semana|mes|inscrito|inscripcion)\b/u',
+                '/\b(event|events|meeting|meetings|training|calendar|upcoming|soon|week|month|registered)\b/u',
+            ]),
+            'recent'=>self::matchesAny($plain,[
+                '/\b(reciente|recientes|nuevo|nuevos|nueva|nuevas|publicado|publicados|publicacion|publicaciones|novedad|novedades)\b/u',
+                '/\b(contenido|contenidos|recurso|recursos|articulo|articulos|hub|conocimiento|ultimo|ultimos)\b/u',
+                '/\b(recent|new|latest|published|posts|content|resources|knowledge)\b/u',
+            ]),
+            'people'=>self::matchesAny($plain,[
+                '/\b(recomiend|recomendad|conectar|conexion|conexiones|persona|personas|asociado|asociados|networking|afinidad|contactar|conocer)\w*/u',
+                '/\b(recommend|recommended|connect|connection|connections|people|member|members|networking|affinity|meet)\w*/u',
+            ]),
+            'notifications'=>self::matchesAny($plain,[
+                '/\b(notificacion|notificaciones|aviso|avisos|pendiente|pendientes|sin leer)\b/u',
+                '/\b(notification|notifications|unread|alerts?)\b/u',
+            ]),
+        ];
+    }
+
+    private static function matchesAny(string $plain,array $patterns): bool
+    {
+        foreach($patterns as $pattern){
+            if(preg_match($pattern,$plain)) {return true; }
+        }
+        return false;
+    }
+
+    private static function appendIntentContext(array &$live,array &$sources,array $intents): void
+    {
         if($intents['events']){
-            [$events,$eventSources]=self::events();
-            $live['upcoming_events']=$events;
+            [$live['upcoming_events'],$eventSources]=self::events();
             $sources=array_merge($sources,$eventSources);
         }
         if($intents['recent']){
-            [$recent,$recentSources]=self::recent();
-            $live['recent_content']=$recent;
+            [$live['recent_content'],$recentSources]=self::recent();
             $sources=array_merge($sources,$recentSources);
         }
         if($intents['people']){
@@ -61,41 +84,58 @@ final class AssistantContext
                 'url'=>$item['url']??'',
             ],array_slice($feed['items']??[],0,5));
         }
+    }
 
-        $seen=[];$safe=[];
+    private static function safeSources(array $sources): array
+    {
+        $seen=[];$safe=[];$protected=false;$identities=[];
         foreach($sources as $source){
             $id=(int)($source['id']??0);
             if($id<=0||isset($seen[$id])) {continue; }
             $seen[$id]=true;$safe[]=$source;
+            $meta=(array)get_post_meta($id,'_ascla',true);
+            if (!empty($meta['chatham'])) {
+                $protected=true;
+                $identities=array_merge($identities,preg_split(self::IDENTITIES_SEPARATOR,(string)($meta['identities']??''))?:[]);
+            }
         }
-        return ['live'=>$live,'sources'=>array_slice($safe,0,8),'answerable'=>in_array(true,$intents,true)];
+        return [$safe,$protected,array_values(array_unique($identities))];
     }
 
     private static function events(): array
     {
-        $posts=get_posts([
-            'post_type'=>'ascla_event','post_status'=>'publish','numberposts'=>30,
-            'meta_key'=>'_ascla_start','orderby'=>'meta_value','order'=>'ASC',
-        ]);
-        $items=[];$sources=[];$now=time();$me=get_current_user_id();
-        foreach($posts as $post){
-            if(!Content::canRead($post)) {continue; }
-            $meta=(array)get_post_meta($post->ID,'_ascla',true);
-            $end=strtotime((string)($meta['end']??''));
-            if($end!==false&&$end<=$now) {continue; }
-            $start=strtotime((string)($meta['start']??''));
-            if($start===false) {continue; }
-            $registration=Store::rows('registrations','event_id=%d AND user_id=%d',[$post->ID,$me],'LIMIT 1')[0]['status']??'none';
-            [$title,$body]=self::safeText($post,$meta);
-            $url=Content::serialize($post)['url'];
-            $humanStart=wp_date('Y-m-d H:i T',$start,wp_timezone());
-            $humanEnd=$end!==false?wp_date('Y-m-d H:i T',$end,wp_timezone()):'';
-            $item=['id'=>(int)$post->ID,'title'=>$title,'start'=>$humanStart,'end'=>$humanEnd,'modality'=>$meta['modality']??'','location'=>$meta['location']??'','registration'=>$registration,'url'=>$url];
-            $items[]=$item;
-            $sources[]=['id'=>(int)$post->ID,'title'=>$title,'body'=>trim("Evento ASCLA. Inicio: {$humanStart}. Fin: {$humanEnd}. Modalidad: ".($meta['modality']??'').". Lugar: ".($meta['location']??'').". Estado de inscripción del usuario: {$registration}. ".$body),'score'=>100,'url'=>$url,'kind'=>'event'];
-            if(count($items)>=8) {break; }
-        }
+        $items=[];$sources=[];$now=time();$offset=0;
+        do {
+            $posts=get_posts([
+                'post_type'=>'ascla_event','post_status'=>'publish','numberposts'=>30,'offset'=>$offset,
+                'meta_key'=>'_ascla_start','orderby'=>['meta_value'=>'ASC','ID'=>'ASC'],
+                'meta_query'=>[['key'=>'_ascla_end','value'=>gmdate('c',$now),'compare'=>'>']],
+            ]);
+            $offset+=30;
+            foreach($posts as $post){
+                $event=self::eventData($post,$now);
+                if (!$event) { continue; }
+                [$item,$source]=$event;$items[]=$item;$sources[]=$source;
+                if(count($items)>=8) {break; }
+            }
+        } while (count($posts)===30 && count($items)<8);
         return [$items,$sources];
+    }
+
+    private static function eventData(\WP_Post $post,int $now): ?array
+    {
+        if(!Content::canRead($post)) {return null; }
+        $meta=(array)get_post_meta($post->ID,'_ascla',true);
+        $start=strtotime((string)($meta['start']??''));$end=strtotime((string)($meta['end']??''));
+        if (!$start || !$end || $end<=$now || !empty($meta['cancelled'])) { return null; }
+        $view=EditorialPrivacy::reader($post->post_title,wp_strip_all_tags($post->post_content),$meta);
+        $title=$view['title'];$body=$view['body'];$meta=$view['meta'];
+        $registration=Store::rows('registrations','event_id=%d AND user_id=%d',[$post->ID,get_current_user_id()],'LIMIT 1')[0]['status']??'none';
+        $url=Content::serialize($post)['url'];
+        $humanStart=wp_date('Y-m-d H:i T',$start,wp_timezone());$humanEnd=wp_date('Y-m-d H:i T',$end,wp_timezone());
+        $item=['id'=>(int)$post->ID,'title'=>$title,'start'=>$humanStart,'end'=>$humanEnd,'modality'=>$meta['modality']??'','location'=>$meta['location']??'','registration'=>$registration,'url'=>$url];
+        $source=['id'=>(int)$post->ID,'title'=>$title,'body'=>trim("Evento ASCLA. Inicio: {$humanStart}. Fin: {$humanEnd}. Modalidad: ".($meta['modality']??'').". Lugar: ".($meta['location']??'').". Estado de inscripción del usuario: {$registration}. ".$body),'score'=>100,'url'=>$url,'kind'=>'event'];
+        return [$item,$source];
     }
 
     private static function recent(): array
@@ -139,7 +179,7 @@ final class AssistantContext
         $title=$post->post_title;$body=wp_strip_all_tags($post->post_content);
         if(!empty($meta['chatham'])){
             $identities=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];
-            $title=Anonymizer::redact($title,$identities);$body=Anonymizer::redact($body,$identities);
+            $title=EditorialPrivacy::title($title,$meta);$body=EntityRedactor::redact($body,$identities,[$title]);
         }
         return [$title,$body];
     }

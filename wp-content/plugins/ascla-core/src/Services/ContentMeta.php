@@ -6,32 +6,50 @@ final class ContentMeta
 
 {
 
-    public static function sanitize(string $type,array $input,int $id=0): array
+    public static function sanitize(string $type,array $input,int $id=0,bool $allowIncomplete=false): array
     {
         $data=$id?(array)get_post_meta($id,'_ascla',true):[];
+        $previousVideo=$data['video_id']??'';
         $mod=current_user_can('ascla_moderate');
         $editorial=$mod||($type==='resource'&&Access::canPublish());
         self::texts($data,$input,$editorial);
+        if ($type==='contact') { SupportCategories::validate($data,$input); }
         self::urls($data,$input);
+        self::clearPreviousCaptions($data,$previousVideo);
         if ($editorial && isset($input['chatham'])) { $data['chatham']=rest_sanitize_boolean($input['chatham']); }
         elseif (!isset($data['chatham'])) { $data['chatham']=Settings::get()['chatham_default']; }
+        if ($type==='ally') { Allies::metadata($data,$input); }
         self::media($data,$input,$id);
-        if ($type==='event') { self::event($data,$input); }
+        if ($type==='event') {
+            self::event($data,$input);
+            MicroLifecycle::sanitize($data,$input,$id,$allowIncomplete);
+            EventReminders::sanitize($data,$input,$id);
+            EventParticipation::validateChange($id,$id?(array)get_post_meta($id,'_ascla',true):[],$data,$input);
+        }
         self::eventReference($data,$input);
         self::duration($data,$input);
         $data['thumbnail_url']=\ASCLA\Core\Integrations\YouTubeVideoProvider::thumbnail($data['video_id']??'');
-        if ($type==='resource') { self::resource($data); }
+        if ($type==='resource') { self::resource($data);$data=VideoTranscripts::withDuration($data); }
         return $data;
+    }
+    private static function clearPreviousCaptions(array &$data,mixed $previousVideo): void
+    {
+        if (($data['video_id']??'')!==$previousVideo && ($data['transcript_status']??'')==='supadata') {
+            foreach (['transcript','transcript_status','transcript_video_id','transcript_mode','transcript_language','transcript_checked_at','transcript_error'] as $field) { unset($data[$field]); }
+        }
     }
 
     private static function texts(array &$data,array $input,bool $editorial): void
     {
         $texts=['source','copyright','description','agenda','location','modality','resource_type','alliance_type','benefits','initiatives','summary'];
+        $previousTranscript=(string)($data['transcript']??'');
         if ($editorial) { $texts=array_merge($texts,['transcript','identities']); }
         foreach ($texts as $key) {
-            if (isset($input[$key])) { $data[$key]=Access::text($input[$key],$key==='transcript'?100000:10000); }
+            if ($key==='transcript'&&($data['transcript_status']??'')==='supadata'&&($input[$key]??null)===$previousTranscript) { continue; }
+            if (isset($input[$key])) { $data[$key]=Access::text($input[$key],$key==='transcript'?VideoTranscripts::MAX_CHARACTERS:10000); }
         }
         if (!$editorial || !array_key_exists('transcript',$input)) { return; }
+        if (($data['transcript']??'')===$previousTranscript && ($data['transcript_status']??'')==='supadata') { return; }
         if (trim((string)($data['transcript']??''))!=='') {
             $data['transcript_status']='manual';
             $data['transcript_mode']='Transcripción manual autorizada';
@@ -62,7 +80,7 @@ final class ContentMeta
     {
         if (!isset($input['media_ids'])) { return; }
         Access::require(is_array($input['media_ids'])&&count($input['media_ids'])<=12,'Máximo 12 archivos.',400);
-        $data['media_ids']=array_values(array_unique(array_map('absint',$input['media_ids'])));
+        $data['media_ids']=FormRules::ids($input['media_ids']);
         foreach ($data['media_ids'] as $media) {
             $file=\ASCLA\Core\Repositories\Store::one('media',$media);
             Access::require($file && ((int)$file['user_id']===get_current_user_id()||($id&&(int)$file['post_id']===$id)),'Archivo no autorizado.');
@@ -79,13 +97,19 @@ final class ContentMeta
         }
         $data['media_ids']=$eventMedia;
         foreach (['start','end'] as $key) {
-            $data[$key]=self::eventDate($input[$key]??$data[$key]??'');
+            $value=$input[$key]??$data[$key]??'';
+            if ($value==='') { unset($data[$key]); }
+            else { $data[$key]=self::eventDate($value); }
         }
-        Access::require(strtotime($data['end'])>strtotime($data['start']),'El fin debe ser posterior al inicio.',400);
-        $data['capacity']=max(0,min(100000,absint($input['capacity']??$data['capacity']??0)));
+        if (!empty($data['start']) && !empty($data['end'])) {
+            Access::require(strtotime($data['end'])>strtotime($data['start']),'El fin debe ser posterior al inicio.',400);
+        }
+        $data['offer_hours']=FormRules::integer('offer_hours',$input['offer_hours']??$data['offer_hours']??24);
+        $data['capacity']=FormRules::integer('capacity',$input['capacity']??$data['capacity']??0);
+        Access::require(in_array($data['modality']??'Virtual',['Virtual','Presencial','Híbrido'],true),'Modalidad no válida.',400);
     }
 
-    private static function eventDate(mixed $value): string
+    public static function eventDate(mixed $value): string
     {
         Access::require(is_string($value)&&preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,6})?)?(Z|[+-]\d{2}:\d{2})$/',$value),'Fechas de evento deben incluir zona horaria.',400);
         try { $dt=new \DateTimeImmutable($value); } catch (\Exception) { throw new \ASCLA\Core\Rest\ApiException('Fecha inválida.',400); }
@@ -105,8 +129,7 @@ final class ContentMeta
     private static function duration(array &$data,array $input): void
     {
         if (!isset($input['duration_seconds'])) { return; }
-        Access::require(is_numeric($input['duration_seconds']) && (int)$input['duration_seconds']>=0 && (int)$input['duration_seconds']<=604800,'Duración no válida.',400);
-        $data['duration_seconds']=(int)$input['duration_seconds'];
+        $data['duration_seconds']=FormRules::integer('duration_seconds',$input['duration_seconds']);
         $data['video_metadata_mode']='Datos manuales';
     }
 

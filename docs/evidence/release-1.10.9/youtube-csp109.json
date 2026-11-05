@@ -1,0 +1,105 @@
+{
+  "date": "2026-10-20T18:48:54.891492+00:00",
+  "plugin_version": "1.10.9",
+  "schema": 15,
+  "status": "PASS",
+  "scope": "Focused verification on disposable local HTTPS WordPress; no deployment or new full ZAP scan.",
+  "changes": [
+    "Removed manual YouTube metadata refresh button and dispatcher action.",
+    "Preserved automatic metadata synchronization on save and processing, and measured-duration browser fallback.",
+    "HTML script-src now contains only the per-response nonce and strict-dynamic; no host or self allowlist.",
+    "Official YouTube API loader receives the application nonce."
+  ],
+  "package": {
+    "version": "1.10.9",
+    "sha256": "b6dec58b308b3dd6de92cab50895174f3a04ffaa7f1bc67c4acab8153ebd709b",
+    "bytes": 1550523,
+    "files": 200,
+    "source_bytes_match": true,
+    "crc_valid": true
+  },
+  "source_sha256": "bff1edb2e2bd8ef636c27d902bf23edc291706bca919e8a167f134a3b744a63c",
+  "source_consistency": "PASS",
+  "csp_evaluator": {
+    "package": "csp_evaluator",
+    "version": "1.1.8",
+    "findings": []
+  },
+  "focused_browser": {
+    "checks": [
+      "CSP Evaluator finds no script allowlist or dangerous policy findings",
+      "Parser-inserted YouTube, same-origin and inline scripts without nonce are blocked",
+      "YouTube refresh button is absent and processing automatically stores measured duration",
+      "Failed automatic player preserves duration and still submits processing without unsafe error HTML",
+      "A failed automatic YouTube loader can retry on the same page"
+    ],
+    "findings": [],
+    "unexpected_csp": [],
+    "errors": [],
+    "status": "PASS"
+  },
+  "headers": {
+    "checks": 20,
+    "status": "PASS"
+  },
+  "module_browser": {
+    "checks": 8,
+    "views": 24,
+    "errors": [],
+    "violations": []
+  },
+  "external_compatibility": {
+    "public_dummy_key": true,
+    "turnstile_token_received": true,
+    "youtube_ready": true,
+    "youtube_duration": 1344,
+    "violations": [],
+    "errors": []
+  },
+  "php": {
+    "tests": 8,
+    "assertions": 40,
+    "failures": 0,
+    "errors": 0
+  },
+  "portable_checks": 49,
+  "reports_sha256": {
+    "youtube-csp.json": "355db38c7dd538fbbc9340bd08c5a24f9722c3e47cfddf5907463b83d3ef4d72",
+    "browser-security.json": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1",
+    "csp-validation.json": "f49bcc74abebd10d01d25ca3c321d8f4fcc0408506591ade53554d45e228c62e",
+    "integration-compatibility.json": "2dd00c96516208724bb5e3616e4283a63d269bdbf9a7abe32e33055f6aca6789",
+    "unit.xml": "665e8c615e8418424eeeea6644b4c0991348b1a6f6030507e66abdc8e5192709",
+    "portable.log": "8755860c11c8d3f9a1de749e02b68760d94f38c5cd87cadef867e4a455591434",
+    "cleanup.log": "6dec61a04c6f6d3c7ab4b066bb01abe95ec97aa4c10ce3a25d4e91ab1cec10a6",
+    "source-manifest.json": "e03688718b3accb897473abcf889bbac43e5ee34897af91a644a35795ef0de00"
+  },
+  "runner_sha256": {
+    "tests/youtube-csp109.cjs": "e2ae5765384d04e7410ed11b94fb913aa77ab2f733b633a700fb4d4d5019dc47",
+    "tests/video-metadata.cjs": "0be647b6fcc3b94eed6b7ce2f3cc15e341393898751c1861d27f8b4cf54e7da8",
+    "tests/security-integrations.cjs": "9c44b3a59ff98dfabadb96b35c4ca0aa181914911b4144cee683236968c86f1c",
+    "tests/php/SecurityHeadersTest.php": "eee3aa1d4b61f4a50d448d296f80be381d21b595f45c330cbc9f319f58bbb547",
+    "scripts/check-security-headers.cjs": "2ab14b0a0569b072bb74244e729d96e389aaead0981ccf6cb764e9242b83d1ad"
+  },
+  "cleanup": "Owned disposable services, volumes and private credentials removed.",
+  "coverage": {
+    "generated": false,
+    "unchanged": true,
+    "sha256": {
+      "coverage/clover.xml": "2008bce81b5693cc82662820d8ff8aa19004cdacc082295365e906b6b9d90709",
+      "coverage/junit.xml": "bea4733ddbfab15f29230c5b08f1c7aac5a9586fc4ad87c7ea4ad503c47440ae",
+      "coverage/lcov.info": "c68411ab949218a79986a9548e775a364d0535dfe58cb248f65389e8523adb10",
+      "coverage/source-revision": "5e9488a9dd2e9101025ac5963ac77c71771b7b8bc6d0ac170896e53374b6fa39"
+    }
+  },
+  "previous_full_zap": {
+    "evidence": "docs/evidence/release-1.10.9/security109.json",
+    "package_sha256": "4cb044f2c4bccc256974f3f07ac79b1107d1248e1ccc422500a2a5ae8d8c5f69",
+    "rerun_for_this_adjustment": false
+  },
+  "limitations": [
+    "Results apply to the owned local fixture and the recorded ZIP, not the published hosting.",
+    "Nonce/strict-dynamic requires a CSP3-capable browser.",
+    "The previous full ZAP results remain historical; this change received the focused checks above.",
+    "The legacy completion suite was adjusted to automatic metadata but not executed; its focused replacement scenarios passed without collecting coverage."
+  ]
+}

@@ -1,0 +1,26 @@
+meta {
+  name: 06. Conservar los datos tras el rechazo
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/profiles/{{idCarla}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionCarla}}
+  X-WP-Nonce: {{nonceCarla}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Validación: 06. Conservar los datos tras el rechazo", function () { expect(res.getBody().bio).to.equal(bru.getCollectionVar("perfilBioNueva"));expect(res.getBody().company).to.equal(bru.getCollectionVar("perfilEmpresaOriginal")); });
+}

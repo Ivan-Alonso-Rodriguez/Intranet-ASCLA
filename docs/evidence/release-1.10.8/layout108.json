@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-14",
+  "version": "1.10.8",
+  "schema": 15,
+  "scope": "CSS alignment only; no new functional/PHP acceptance claims",
+  "production_file_changed": "assets/app.css",
+  "compared_to_previous_package_sha256": "4fe8dd87f033585b53b294e7996e10ef6d50e38d0882306d1faa76218b04b79a",
+  "local": {
+    "filter_views": 20,
+    "home_views": 3,
+    "viewports": [
+      1440,
+      1024,
+      768,
+      390
+    ],
+    "home_fixture_scope": "20 real local section views; three home views with local read-only visual fixtures for varied covers and text. No database content created.",
+    "report": "test-results/layout108.json"
+  },
+  "published_qa": {
+    "target": "https://wordpress.ingsoftware.lat/",
+    "installed": true,
+    "filter_sections": [
+      "eventos",
+      "hub",
+      "galeria",
+      "foros",
+      "centro-conocimiento"
+    ],
+    "real_material_cards": 3,
+    "card_edges_and_footer_aligned": true,
+    "carousel_vertical_overflow": false,
+    "mobile_overflow": false,
+    "served_stylesheet_sha256_prefix": "4e47dfca2304",
+    "report": "test-results/layout108-qa.json"
+  },
+  "package": {
+    "version": "1.10.8",
+    "bytes": 1282868,
+    "sha256": "7737cc0d914bf933727599f56a62e39b3ea600fae8b4a6f0f05d6749a44a15bd",
+    "files": 172,
+    "crc_valid": true,
+    "source_bytes_match": true
+  },
+  "screenshots": [
+    "test-results/layout108-qa-materiales.jpg",
+    "test-results/layout108-qa-conocimiento.jpg",
+    "test-results/layout108-qa-mobile.jpg"
+  ],
+  "php_rerun": false,
+  "http_acceptance_rerun": false,
+  "new_coverage": false,
+  "requirements_states_changed": false
+}

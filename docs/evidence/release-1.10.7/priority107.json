@@ -1,0 +1,13 @@
+{
+  "stage": "Correcciones prioritarias del 12 de octubre",
+  "date": "2026-10-12",
+  "base_revision": "b04ebce532b9007c9335d9e7137116109c72dfa7",
+  "working_tree_modified": true,
+  "php_tests": 336,
+  "php_assertions": 5423,
+  "browser_checks": 9,
+  "php_line_coverage_percent": 83.02,
+  "new_javascript_coverage": false,
+  "full_quality_ci_rerun": false,
+  "evidence": "docs/evidence/release-1.10.7/priority107.json"
+}

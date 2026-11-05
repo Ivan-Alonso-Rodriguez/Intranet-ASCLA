@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-22T06:30:06.414675+00:00",
+  "environment": "Disposable local WordPress",
+  "version": "1.10.9",
+  "role_migration_version": 2,
+  "php": {
+    "tests": 740,
+    "assertions": 8296,
+    "errors": 0,
+    "failures": 0
+  },
+  "browser": {
+    "checks": 5,
+    "passed": [
+      "Ejecutivo inicia en Administración y comparte menú y secciones, excepto Configuración y WordPress",
+      "Configuración rechazada por REST y el acceso directo a WordPress regresa a Administración ASCLA",
+      "Ejecutivo accede a Usuarios, Importar intereses, Archivos, Aliados, Historial y Revisar contenido",
+      "Ejecutivo edita y guarda un asociado desde el formulario administrativo",
+      "Acciones de usuarios disponibles y panel adaptable a móvil y tema oscuro"
+    ],
+    "errors": []
+  },
+  "portable_checks": 49,
+  "package_sha256": "e701101471f78f4a5249e593f55ae727d5047d1b06813ef7c14bef6613b15810",
+  "package_files": 201,
+  "reports": {
+    "php-final-junit.xml": "446f63d99af36a9366bce295b175bacc0f42c51e64bbc5805944de17a031033f",
+    "browser-result.json": "3cb1eaf2320a73e9857c572f7b72b8972ef5b60566aabfffdfae2d39797625c0"
+  },
+  "test_sources": [
+    "tests/php/ExecutiveAdministrationTest.php",
+    "tests/php/CapabilityHierarchyTest.php",
+    "tests/executive-admin.cjs",
+    "tests/executive-admin-fixture.php"
+  ],
+  "scope": [
+    "Ejecutivo comparte gestión, inicio y navegación administrativa con Administrador ASCLA.",
+    "Configuración y sus rutas requieren ascla_configure; Ejecutivo no recibe capacidades nativas de WordPress.",
+    "Gestión de usuarios de ASCLA, perfiles, membresías, tipos de asociado, importaciones, contenido y aliados.",
+    "Migración de roles existentes que conserva identidad, contraseña, perfil y restricciones individuales.",
+    "Participación comunitaria de Asociado y Moderador; ambos roles de administración quedan excluidos.",
+    "Comparación de secciones, edición real de un asociado, URLs directas, REST, escritorio, móvil y modo oscuro."
+  ],
+  "temporary_environment_removed": true,
+  "temporary_credentials_removed": true,
+  "full_php_suite": true,
+  "coverage_collected": false,
+  "new_zap_scan": false,
+  "remote_deployment": false,
+  "limitations": [
+    "La ejecución local no acredita despliegue remoto, cobertura, Quality Gate ni aceptación UAT.",
+    "Las evidencias anteriores conservan su propia fecha, paquete y alcance."
+  ]
+}

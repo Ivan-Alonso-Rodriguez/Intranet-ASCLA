@@ -1,0 +1,37 @@
+meta {
+  name: 13. Directorio completo sin cuentas de administración
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/profiles?page=1
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAsociado}}
+  X-WP-Nonce: {{nonceAsociado}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:post-response {
+  const data=res.getBody();
+  const ids=(data.items||[]).map(item=>Number(item.id));
+  for(let page=2;page<=data.pages;page++){
+    const next=await bru.sendRequest({method:"GET",url:bru.getCollectionVar("base")+"/wp-json/ascla/v1/profiles?page="+page,headers:{Cookie:bru.getVar("sesionAsociado"),"X-WP-Nonce":bru.getVar("nonceAsociado")}});
+    if(next.status!==200)throw Error("No se pudo consultar la página "+page);
+    ids.push(...next.data.items.map(item=>Number(item.id)));
+  }
+  bru.setVar("idsDirectorioIntegracion",ids);
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("El directorio incluye a Ana y excluye al administrador en todas las páginas", function () { const ids=bru.getVar("idsDirectorioIntegracion");expect(ids).to.include(Number(bru.getCollectionVar("idAna")));expect(ids).not.to.include(Number(bru.getCollectionVar("idAdministrador"))); });
+}

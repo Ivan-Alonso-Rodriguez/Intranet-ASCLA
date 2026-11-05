@@ -1,0 +1,24 @@
+{
+  "checks": [
+    "Hub: publicación explícita inmediata, borrador privado, editor e historial propio",
+    "Solo Me gusta: API rechaza las reacciones retiradas; concurrencia sin duplicados y retiro",
+    "Temas y comentarios muestran únicamente Me gusta, con estado accesible",
+    "Hub y Centro de Conocimiento también conservan únicamente Me gusta",
+    "Moderación de comentarios: permisos, motivo obligatorio, formulario y auditoría antes/después",
+    "Reportes: justificación, actor y UTC obligatorios; la auditoría conserva el resultado después de eliminarlos",
+    "Reportes de publicaciones también registran resolución sin copiar la denuncia privada a la bitácora",
+    "Retirar contenido impide nuevas reacciones y registra estado/motivo antes y después",
+    "Inglés por cuenta, diccionario gettext para JavaScript y móvil sin desbordamiento"
+  ],
+  "errors": [],
+  "date": "2026-10-08T14:56:49.676941+00:00",
+  "version": "1.10.7",
+  "php": {
+    "tests": 43,
+    "assertions": 512,
+    "failures": 0,
+    "errors": 0,
+    "filter": "ContentLifecycleTest|IntegrationTest"
+  },
+  "compatibility": "Previous reactions remain removable likes; removed types rejected by REST."
+}

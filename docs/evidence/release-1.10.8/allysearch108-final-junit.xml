@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="AllySearchTest" file="/opt/ascla-tests/php/AllySearchTest.php" tests="12" assertions="58" errors="0" failures="0" skipped="0" time="12.239355">
+    <testcase name="testPublishedAgreementTypeIsSearchableWithoutAppearingInNameOrDescription" file="/opt/ascla-tests/php/AllySearchTest.php" line="29" class="AllySearchTest" classname="AllySearchTest" assertions="4" time="0.404907"/>
+    <testcase name="testSearchTreatsQuotesAndSqlWildcardsAsLiteralText" file="/opt/ascla-tests/php/AllySearchTest.php" line="35" class="AllySearchTest" classname="AllySearchTest" assertions="4" time="0.369241"/>
+    <testcase name="testCountsAndPaginationExcludeHiddenDraftAndInactiveAlliesBeforeLimiting" file="/opt/ascla-tests/php/AllySearchTest.php" line="41" class="AllySearchTest" classname="AllySearchTest" assertions="13" time="1.092961"/>
+    <testcase name="testAdministrativeRegistryCombinesAgreementTextWithStateIncludingOtherAuthorsDrafts" file="/opt/ascla-tests/php/AllySearchTest.php" line="51" class="AllySearchTest" classname="AllySearchTest" assertions="7" time="0.404326"/>
+    <testcase name="testTypeEditImmediatelyUpdatesSearchAndRetirementPreservesTypeForAdmin" file="/opt/ascla-tests/php/AllySearchTest.php" line="58" class="AllySearchTest" classname="AllySearchTest" assertions="4" time="0.348512"/>
+    <testcase name="testTranslatedSystemTypesAndVisibleFallbackAreSearchableInEnglish" file="/opt/ascla-tests/php/AllySearchTest.php" line="66" class="AllySearchTest" classname="AllySearchTest" assertions="4" time="0.390587"/>
+    <testcase name="testGlobalSearchIncludesAllyTypesWithoutMatchingAnUnrelatedPostTypeIndex" file="/opt/ascla-tests/php/AllySearchTest.php" line="73" class="AllySearchTest" classname="AllySearchTest" assertions="2" time="0.380503"/>
+    <testcase name="testMigrationRebuildsLegacyIndexesWithoutChangingOriginalDataAndIsIdempotent" file="/opt/ascla-tests/php/AllySearchTest.php" line="79" class="AllySearchTest" classname="AllySearchTest" assertions="6" time="0.321016"/>
+    <testcase name="testMigrationVisitsMoreThanOneBatchIncludingUnpublishedLegacyRecords" file="/opt/ascla-tests/php/AllySearchTest.php" line="87" class="AllySearchTest" classname="AllySearchTest" assertions="3" time="7.597477"/>
+    <testcase name="testFailedIndexWriteRollsBackEditAndFailedMigrationDoesNotClaimReadiness" file="/opt/ascla-tests/php/AllySearchTest.php" line="95" class="AllySearchTest" classname="AllySearchTest" assertions="5" time="0.320139"/>
+    <testcase name="testRemovingCanonicalMetadataDoesNotLeaveTheFormerTypeSearchable" file="/opt/ascla-tests/php/AllySearchTest.php" line="105" class="AllySearchTest" classname="AllySearchTest" assertions="2" time="0.312671"/>
+    <testcase name="testSearchShapeAndRegistryPermissionsAreValidatedOnTheServer" file="/opt/ascla-tests/php/AllySearchTest.php" line="110" class="AllySearchTest" classname="AllySearchTest" assertions="4" time="0.297017"/>
+  </testsuite>
+</testsuites>

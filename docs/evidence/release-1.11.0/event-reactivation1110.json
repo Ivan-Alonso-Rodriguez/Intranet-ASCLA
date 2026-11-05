@@ -1,0 +1,179 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-23T07:12:51.572Z",
+  "scope": "WordPress local desechable; acciones UI y REST reales; avisos de muestra locales; Google Calendar HTTP simulado en PHPUnit, sin OAuth externo ni despliegue.",
+  "package_sha256": "6627be3093dfa8282cbf8de6916fc9e4319a632e6cf4ba153b8bc57e60328d30",
+  "checks": [
+    "Cancelar → confirmar reactivación, conservar inscripción y acceso al encuentro; asociado sin permisos: desktop-light",
+    "Bandeja de actividad adaptable sin desbordamiento y con controles accesibles: desktop-light",
+    "Cancelar → confirmar reactivación, conservar inscripción y acceso al encuentro; asociado sin permisos: mobile-light",
+    "Bandeja de actividad adaptable sin desbordamiento y con controles accesibles: mobile-light",
+    "Cancelar → confirmar reactivación, conservar inscripción y acceso al encuentro; asociado sin permisos: desktop-dark",
+    "Bandeja de actividad adaptable sin desbordamiento y con controles accesibles: desktop-dark",
+    "Cancelar → confirmar reactivación, conservar inscripción y acceso al encuentro; asociado sin permisos: mobile-dark",
+    "Bandeja de actividad adaptable sin desbordamiento y con controles accesibles: mobile-dark",
+    "El aviso de reactivación abre el evento vigente y se marca leído",
+    "Paginación de notificaciones real: segunda página y regreso",
+    "Filtro sin leer, lectura individual, lectura global y estado vacío sincronizados",
+    "Borrado individual y masivo confirmado, con regreso sin borrar"
+  ],
+  "scans": [
+    {
+      "name": "evento-cancelado-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "evento-reactivado-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "notificaciones-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "evento-cancelado-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "evento-reactivado-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "notificaciones-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "evento-cancelado-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "evento-reactivado-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "notificaciones-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "evento-cancelado-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "evento-reactivado-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "notificaciones-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "sin-pendientes-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "bandeja-vacia-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    }
+  ],
+  "errors": [],
+  "status": "passed_local_targeted_validation",
+  "package_manifest": "docs/evidence/release-1.11.0/package-event-reactivation.json",
+  "report": "test-results/event-reactivation1110/index.html",
+  "phpunit": {
+    "tests": 54,
+    "assertions": 418,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "phpunit_report": "docs/evidence/release-1.11.0/event-reactivation1110-junit.xml",
+  "source_hashes": {
+    "tests/event-reactivation1110.cjs": "3f6841fcfeaa631baafa144baeb580fb99d7695c2d2ef3a9aaa59f1def7b7729",
+    "tests/event-reactivation1110-fixture.php": "5011b94f1e26fbad34fd8d9c2b7a18d1eaf39da5b6f9b34d166239048f63eb9f",
+    "tests/php/EventReactivationTest.php": "fa366dc9c7b3fe749def1a795f76d5c23c26b999bef99753314ee6d2e9b190bf",
+    "tests/php/UserExperience1110Test.php": "a153ada5c2e2b3d94404e1d2f2f8aa6bc79a482dff968b1e30ebde0a78e11e53",
+    "tests/php/EventParticipationTest.php": "67f515ebcc8c737d12efde9287a3dd74bd4cdfdda8878d1df5b562f6fcc72a4b",
+    "tests/php/EventRemindersTest.php": "fd8029285779a0a916dfadeb085b74b784fc3b61e658fdf1c6c0b211a22cb1df",
+    "tests/php/NotificationsTest.php": "0b593e8f106141d423478f1f9dd90b4be0774fff8300e3dcb50891ab4b5667fd",
+    "tests/php/MicroEventsTest.php": "3fb67c12fab28d8d42acc9304d3fb8b5577d480a7cd35a9824fb6defeac0f622"
+  },
+  "base_commit": "2daf0d9e5b0da8eee8b21076f2dc3915c77a4e3f",
+  "working_tree": "uncommitted; package verified against production source bytes",
+  "prior_stage": "docs/evidence/release-1.11.0/knowledge-cover1110.json; original package preserved in package-knowledge-cover.json",
+  "visual_review": "Capturas revisadas en claro/oscuro y escritorio/móvil: cabecera compacta, controles sin superposición, iconos neutros y botón de reactivación. Las reglas incompletas de axe se registran por separado; no se afirma una auditoría WCAG manual exhaustiva.",
+  "limitations": [
+    "Regresión local dirigida, sin nueva ejecución completa de Bruno/Playwright compartidos, seguridad ZAP, SonarQube ni despliegue QA/UAT.",
+    "Google Calendar y sus errores se prueban con HTTP simulado; no acredita entrega real de correos ni OAuth. Los mensajes de error SMTP/Google en el log corresponden a escenarios negativos controlados."
+  ],
+  "temporary_environment_cleanup": "completed; isolated containers, volumes, fixture users and private access files removed"
+}

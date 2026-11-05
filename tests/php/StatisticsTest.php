@@ -60,10 +60,11 @@ final class StatisticsTest extends TestCase
     {
         [$a,$b,$old]=$this->events;[$admin,$exec,$mod,$u,$v]=$this->users;
         $this->register($a,$u);$this->register($a,$v);$this->register($b,$u);$this->register($b,$v,'waitlisted');
-        $empty=Statistics::dashboard($this->filter);self::assertSame(3,$empty['summary']['registrations']);self::assertSame(0,$empty['summary']['attendances']);self::assertNull($empty['summary']['rate']);
+        $empty=Statistics::dashboard($this->filter);self::assertSame(3,$empty['summary']['registrations']);self::assertSame(2,$empty['summary']['registrants']);self::assertSame(0,$empty['summary']['attendances']);self::assertNull($empty['summary']['rate']);
         Attendance::save($a,['user_id'=>$u,'status'=>'present','minutes'=>40]);Attendance::save($a,['user_id'=>$exec,'status'=>'present','minutes'=>20]);Attendance::save($a,['user_id'=>$v,'status'=>'absent']);Attendance::save($b,['user_id'=>$u,'status'=>'present']);Attendance::save($old,['user_id'=>$u,'status'=>'present']);
         Attendance::complete($a,true);Attendance::complete($b,true);Attendance::complete($old,true);
         $d=Statistics::dashboard($this->filter);$s=$d['summary'];self::assertSame(2,$s['events']);self::assertSame(3,$s['attendances']);self::assertSame(2,$s['attendees']);self::assertSame(1,$s['recurring']);self::assertSame(66.7,$s['rate']);self::assertSame(1.5,$s['average']);self::assertSame(60,$s['minutes']);
+        self::assertSame(2,$s['registrants'],'Attendance without a reservation must not count as a registered person.');
         self::assertSame($u,$d['ranking'][0]['id']);self::assertSame(100.0,$d['ranking'][0]['rate']);self::assertSame(1,$d['topics'][0]['declared']);self::assertSame(2,$d['topics'][0]['attendees']);self::assertSame(3,$d['topics'][0]['attendances']);self::assertSame(200.0,$d['topics'][0]['change']);
         Attendance::save($b,['user_id'=>$u,'status'=>'unknown']);self::assertFalse(Attendance::roster($b)['complete']);self::assertSame(50.0,Statistics::dashboard($this->filter)['summary']['rate']);
     }
@@ -71,6 +72,16 @@ final class StatisticsTest extends TestCase
     {
         $category=wp_insert_term('Statistics category '.bin2hex(random_bytes(5)),'ascla_category');$cid=(int)$category['term_id'];
         try{wp_set_object_terms($this->events[0],[$cid],'ascla_category');$d=Statistics::dashboard($this->filter+['category'=>$cid]);self::assertSame(1,$d['summary']['events']);self::assertSame(1,$d['topics'][0]['declared']);$e=Statistics::dashboard($this->filter+['event'=>$this->events[1]]);self::assertSame(1,$e['summary']['events']);self::assertSame(0,$e['previous']['events']);}finally{wp_delete_term($cid,'ascla_category');}
+    }
+    public function testRegisteredPeopleAreUniqueWithinTheFilteredEventsAndCancelledReservationsAreExcluded(): void
+    {
+        [$a,$b,$old]=$this->events;$u=$this->users[3];$v=$this->users[4];
+        $this->register($a,$u);$this->register($b,$u);$this->register($a,$v);$this->register($old,$this->users[2]);$this->register($b,$v,'waitlisted');
+        $d=Statistics::dashboard($this->filter);self::assertSame(3,$d['summary']['registrations']);self::assertSame(2,$d['summary']['registrants']);
+        self::assertSame(2,Statistics::dashboard($this->filter+['event'=>$a])['summary']['registrants']);
+        self::assertSame(1,Statistics::dashboard($this->filter+['event'=>$b])['summary']['registrants']);
+        Store::update('registrations',['status'=>'cancelled'],['event_id'=>$a,'user_id'=>$v]);
+        self::assertSame(1,Statistics::dashboard($this->filter)['summary']['registrants']);
     }
     public function testCsvPreviewMatchesEmailMergesReconnectsAndIsIdempotent():void
     {
@@ -98,8 +109,8 @@ final class StatisticsTest extends TestCase
     {
         $future=$this->event(3);$cancelled=$this->event(-2,['cancelled'=>true]);$private=$this->event(-2,['micro'=>true,'invitees'=>[$this->users[3]]]);
         self::assertSame(409,$this->api('POST','admin/attendance/'.$future,['email'=>$this->email(3),'status'=>'present'])->get_status());self::assertSame(409,$this->api('GET','admin/attendance/'.$cancelled)->get_status());
-        wp_set_current_user($this->users[1]);self::assertSame(404,$this->api('GET','admin/attendance/'.$private)->get_status());
-        $ids=array_column(Statistics::dashboard($this->filter)['options']['events'],'id');self::assertNotContains($private,$ids);self::assertNotContains($future,$ids);self::assertNotContains($cancelled,$ids);
+        wp_set_current_user($this->users[1]);self::assertSame(200,$this->api('GET','admin/attendance/'.$private)->get_status());
+        $ids=array_column(Statistics::dashboard($this->filter)['options']['events'],'id');self::assertContains($private,$ids);self::assertNotContains($future,$ids);self::assertNotContains($cancelled,$ids);
         self::assertSame(400,$this->api('POST','admin/attendance/'.$this->events[0],['email'=>$this->email(3),'status'=>'present','minutes'=>61])->get_status());
     }
     public function testPeriodsUseLocalCalendarAndRejectInvalidOrUnboundedRanges():void
@@ -137,19 +148,20 @@ final class StatisticsTest extends TestCase
     {
         $p=Content::save('hub',['title'=>'Reporte de prueba','body'=>'Contenido','status'=>'publish']);$this->posts[]=$p['id'];
         wp_set_current_user($this->users[3]);Content::report($p['id'],'other','Prueba');$r=Store::rows('relations','target_id=%d AND kind=%s',[$p['id'],'report'],'LIMIT 1')[0];
-        self::assertSame(403,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());wp_set_current_user($this->users[2]);self::assertSame(409,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());Reports::review((int)$r['id']);
-        wp_set_current_user($this->users[3]);Content::report($p['id'],'other','Reabierto');wp_set_current_user($this->users[2]);self::assertSame(409,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());Reports::review((int)$r['id']);self::assertSame(200,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());self::assertNull(Store::one('relations',(int)$r['id']));self::assertSame('publish',get_post_status($p['id']));self::assertSame(404,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());
+        self::assertSame(403,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());wp_set_current_user($this->users[2]);self::assertSame(409,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());Reports::review((int)$r['id'],'Reporte revisado; se conserva el contenido original.');
+        wp_set_current_user($this->users[3]);Content::report($p['id'],'other','Reabierto');wp_set_current_user($this->users[2]);self::assertSame(409,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());Reports::review((int)$r['id'],'Reporte revisado; se conserva el contenido original.');self::assertSame(200,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());self::assertNull(Store::one('relations',(int)$r['id']));self::assertSame('publish',get_post_status($p['id']));self::assertSame(404,$this->api('DELETE','admin/reports/'.$r['id'])->get_status());
         $like=Store::insert('relations',['user_id'=>$this->users[3],'target_id'=>$p['id'],'kind'=>'like','created_at'=>current_time('mysql',true)]);self::assertSame(404,$this->api('DELETE','admin/reports/'.$like)->get_status());
     }
     public function testCommentReportsHaveTheSameDeletionGate():void
     {
         $p=Content::save('hub',['title'=>'Comentario reportado','body'=>'Contenido','status'=>'publish']);$this->posts[]=$p['id'];$comment=wp_insert_comment(['comment_post_ID'=>$p['id'],'user_id'=>$this->users[0],'comment_content'=>'Texto original','comment_approved'=>1]);
-        wp_set_current_user($this->users[3]);Content::reportComment($comment,'other','Revisar');$r=Store::rows('relations','target_id=%d AND kind=%s',[$comment,'comment_report'],'LIMIT 1')[0];wp_set_current_user($this->users[1]);Reports::review((int)$r['id']);Reports::remove((int)$r['id']);self::assertNotNull(get_comment($comment));self::assertNull(Store::one('relations',(int)$r['id']));
+        wp_set_current_user($this->users[3]);Content::reportComment($comment,'other','Revisar');$r=Store::rows('relations','target_id=%d AND kind=%s',[$comment,'comment_report'],'LIMIT 1')[0];wp_set_current_user($this->users[1]);Reports::review((int)$r['id'],'Reporte revisado; se conserva el contenido original.');Reports::remove((int)$r['id']);self::assertNotNull(get_comment($comment));self::assertNull(Store::one('relations',(int)$r['id']));
     }
-    public function testResolvedRequestsCanBeDeletedButGenericContentRouteCannotBypassState():void
+    public function testClosedRequestsArchiveWithoutDeletingTheirHistory():void
     {
         wp_set_current_user($this->users[3]);$p=Content::save('contact',['title'=>'Solicitud de prueba','body'=>'Detalle']);$id=$p['id'];$this->posts[]=$id;self::assertFalse($p['can_delete']);self::assertSame(403,$this->api('DELETE','items/'.$id)->get_status());
-        wp_set_current_user($this->users[2]);foreach(['admin/contact/','items/'] as $route)self::assertSame(409,$this->api('DELETE',$route.$id)->get_status());Administration::contactStatus($id,'closed');self::assertTrue(Content::serialize(Content::get($id))['can_delete']);Administration::contactStatus($id,'progress');self::assertSame(409,$this->api('DELETE','admin/contact/'.$id)->get_status());Administration::contactStatus($id,'closed');self::assertSame(200,$this->api('DELETE','admin/contact/'.$id)->get_status());self::assertSame('trash',get_post_status($id));self::assertSame(404,$this->api('POST','admin/contact/'.$id,['status'=>'open'])->get_status());
+        wp_set_current_user($this->users[2]);self::assertSame(403,$this->api('DELETE','admin/contact/'.$id)->get_status());
+        ascla_test_support_state($id,$this->users[0],'resolved');self::assertSame(409,$this->api('DELETE','admin/contact/'.$id)->get_status());Administration::contactStatus($id,'closed');self::assertTrue(Content::serialize(Content::get($id))['can_delete']);self::assertSame(200,$this->api('DELETE','admin/contact/'.$id)->get_status());self::assertSame('private',get_post_status($id));self::assertSame(409,$this->api('POST','admin/contact/'.$id,['status'=>'open'])->get_status());
     }
     public function testDeletingAUserOrEventCleansOnlyTheirAttendance():void
     {

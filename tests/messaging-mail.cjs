@@ -3,7 +3,12 @@ const { chromium } = require('playwright');
 const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
 const assert = require('node:assert/strict');
-const base = 'http://localhost:8088', mailbox = 'http://localhost:8025';
+const base = process.env.ASCLA_SITE_URL || 'http://localhost:8088', mailbox = process.env.ASCLA_MAILBOX_URL || 'http://localhost:8025';
+async function mailboxSearch(email) {
+ const response=await fetch(mailbox+'/api/email?sort=desc');assert.equal(response.status,200);
+ const messages=await response.json();assert.ok(Array.isArray(messages));
+ return messages.filter(mail=>(mail.to||[]).some(to=>to.address===email));
+}
 const results = [], errors = [], pollIntervalsMs = [];
 const fixture = input => JSON.parse(execFileSync('docker', ['compose','exec','-T','wordpress','php','/opt/ascla-tests/messaging-mail-fixture.php'], {input:JSON.stringify(input), encoding:'utf8'}));
 const sleep = ms => new Promise(resolve => setTimeout(resolve,ms));
@@ -116,7 +121,7 @@ async function login(browser,user) {
    await admin.locator('[name="smtp_host"]').waitFor();
    assert.equal(await admin.locator('[name="smtp_password"]').inputValue(),'');
    await admin.locator('[data-action="mail-test"]').click(); await until(()=>admin.locator('.toast').filter({hasText:'buzón local'}).count(),'Prueba SMTP sin confirmación');
-   const list=await (await fetch(mailbox+'/api/v1/search?query='+encodeURIComponent('to:'+users[3].email))).json(); assert.ok(list.messages.length>0);
+   assert.ok((await mailboxSearch(users[3].email)).length>0);
   });
   await test('Recuperación nativa: solicitar correo → SMTP → enlace → nueva contraseña → login',async()=>{
    const context=await browser.newContext(),p=await context.newPage();
@@ -125,10 +130,10 @@ async function login(browser,user) {
    await p.locator('#user_login').fill(users[1].email);
    await Promise.all([p.waitForNavigation(),p.locator('#wp-submit').click()]);
    assert.ok(p.url().includes('checkemail=confirm'),'Solicitud de recuperación no confirmada');
-   const list=await (await fetch(mailbox+'/api/v1/search?query='+encodeURIComponent('to:'+users[1].email))).json();
-   assert.ok(list.messages.length>0,'Correo SMTP no encontrado');
-   const mail=await (await fetch(mailbox+'/api/v1/message/'+list.messages[0].ID)).json();
-   const reset=(mail.Text||'').match(/http:\/\/localhost:8088\/wp-login\.php\?[^\s<>]+/g)?.find(url=>url.includes('action=rp'));
+   const messages=await mailboxSearch(users[1].email);
+   assert.ok(messages.length>0,'Correo SMTP no encontrado');
+   const mail=await (await fetch(mailbox+'/api/email/'+messages[0].id)).json();
+   const reset=(mail.text||'').match(/https?:\/\/[^\s<>]+\/wp-login\.php\?[^\s<>]+/g)?.find(url=>url.startsWith(base+'/')&&url.includes('action=rp'));
    assert.ok(reset,'No se encontró enlace de restablecimiento');
    await p.goto(reset.replace(/&amp;/g,'&')); await p.locator('#pass1').waitFor(); await p.waitForFunction(()=>typeof zxcvbn==='function' && document.querySelector('#pass1')?.type==='text');
    const newPassword='Recovery!'+require('node:crypto').randomBytes(15).toString('hex');
@@ -145,7 +150,7 @@ async function login(browser,user) {
  } finally {
   if(browser) await browser.close();
   if(users.length) {
-   for(const u of users) await fetch(mailbox+'/api/v1/search?query='+encodeURIComponent('to:'+u.email),{method:'DELETE'});
+   for(const u of users) for(const mail of await mailboxSearch(u.email)) await fetch(mailbox+'/api/email/'+mail.id,{method:'DELETE'});
    fixture({action:'cleanup',users:users.map(u=>u.id)});
   }
   fs.mkdirSync('test-results',{recursive:true}); fs.writeFileSync('test-results/messaging-mail.json',JSON.stringify({date:new Date().toISOString(),results,jsErrors:errors,pollIntervalsMs},null,2));

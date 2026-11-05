@@ -1,7 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 use ASCLA\Core\Integrations\Secrets;
-use ASCLA\Core\Services\{Settings,Turnstile};
+use ASCLA\Core\Services\{Settings,Turnstile,TurnstileCookie,TurnstileState,TurnstileTrust};
 
 final class TurnstileTest extends TestCase
 {
@@ -100,5 +100,29 @@ final class TurnstileTest extends TestCase
         wp_set_current_user($this->admin);
         self::assertFalse(Turnstile::protects('login'));
         self::assertFalse(Turnstile::protects('recovery'));
+    }
+    public function testChallengeCookiesHideTheirStateAndStillBindToTheClient(): void
+    {
+        $key=TurnstileState::stateKey('login','synthetic-account');TurnstileState::rememberHint('login',$key);
+        $hint=$_COOKIE[TurnstileState::hintCookie('login')];
+        self::assertStringStartsWith('v1.',$hint);self::assertStringNotContainsString($key,$hint);self::assertSame($key,TurnstileState::hintKey('login'));
+        TurnstileTrust::markTrusted();$trusted=$_COOKIE['ascla_turnstile_trust'];self::assertTrue(TurnstileTrust::trusted());
+        self::assertStringStartsWith('v1.',$trusted);self::assertStringNotContainsString(TurnstileTrust::shortHash(TurnstileTrust::clientIp()),$trusted);
+        $_SERVER['REMOTE_ADDR']='203.0.113.250';self::assertFalse(TurnstileTrust::trusted());self::assertSame('',TurnstileState::hintKey('login'));
+    }
+    public function testEncryptedChallengeCookiesRejectTamperingAndPurposeSwaps(): void
+    {
+        TurnstileTrust::markTrusted();$trusted=$_COOKIE['ascla_turnstile_trust'];
+        $_COOKIE[TurnstileState::hintCookie('login')]=$trusted;self::assertSame('',TurnstileState::hintKey('login'));
+        $_COOKIE['ascla_turnstile_trust']=substr_replace($trusted,$trusted[12]==='A'?'B':'A',12,1);self::assertFalse(TurnstileTrust::trusted());
+        self::assertSame('',TurnstileCookie::open('ascla_turnstile_trust','v1.invalid!'));
+        self::assertSame('',TurnstileCookie::open('ascla_turnstile_trust',str_repeat('x',2049)));
+    }
+    public function testLegacySignedHintsExpireAndEncryptedHintsCannotExtendTheirExpiry(): void
+    {
+        $key=TurnstileState::stateKey('login','legacy-account');$expiry=time()+60;
+        $sign=static fn($until)=>TurnstileTrust::sign('login|'.$key.'|'.$until.'|'.TurnstileTrust::shortHash(TurnstileTrust::clientIp()));
+        $name=TurnstileState::hintCookie('login');$_COOKIE[$name]=$key.'.'.$expiry.'.'.$sign($expiry);self::assertSame($key,TurnstileState::hintKey('login'));
+        $expired=time()-1;$_COOKIE[$name]=TurnstileCookie::seal($name,$key.'.'.$expired.'.'.$sign($expired));self::assertSame('',TurnstileState::hintKey('login'));
     }
 }

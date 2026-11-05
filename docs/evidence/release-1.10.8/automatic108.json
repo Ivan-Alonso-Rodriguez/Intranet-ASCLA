@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-15",
+  "recorded_at_utc": "2026-10-15T06:43:37.737682+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "scope": "Automatic selection and permanent precedence for saved manual removals. Focused local regressions, not complete quality-ci or new coverage.",
+  "supersedes_behavior": "The member-facing learning block and global reset/disable controls documented in the historical learning108 stage",
+  "php": {
+    "tests": 101,
+    "assertions": 611,
+    "errors": 0,
+    "failures": 0,
+    "junit": "test-results/automatic108-junit.xml",
+    "sha256": "474f3e93e72781bbd5b24b157374558a8fca64d66ab16a3bbc4c27983d6b8b0e"
+  },
+  "browser": {
+    "environment": "disposable-local",
+    "checks": [
+      "El perfil conserva las opciones normales y no muestra panel ni controles de aprendizaje",
+      "Una lectura real de 15 segundos aporta una señal sin seleccionar por sí sola un interés",
+      "Me gusta activa automáticamente un tema del catálogo al cargar el perfil",
+      "Administración mantiene el resumen automático y explica la prioridad de las desmarcaciones",
+      "Desmarcar y guardar conserva la exclusión tras recargar el perfil",
+      "Nuevas señales del mismo tema no reactivan un interés descartado manualmente",
+      "Solo una selección manual explícita vuelve a habilitar el interés",
+      "Opciones de intereses sin panel adicional: móvil sin desbordamientos y axe A/AA",
+      "El cambio de idioma conserva la selección y no recupera controles retirados"
+    ],
+    "errors": []
+  },
+  "portable_checks": 49,
+  "manual_rules": [
+    "Sufficient signals select canonical interest options",
+    "Saved manual removal persists across reloads, partial profile updates, new signals and a previously issued reading ticket",
+    "Only an explicit manual reselection removes the exclusion",
+    "Failed saves roll back profile and exclusion metadata together",
+    "Privacy and other profile fields are preserved"
+  ],
+  "package": {
+    "bytes": 1330401,
+    "sha256": "212f6b6202b3f2ccef7792cd3620b0a81f135a4e3c2c664ac9d231dde37e6528",
+    "files": 181,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true
+  },
+  "source_sha256": {
+    "wp-content/plugins/ascla-core/src/Services/AutomaticInterests.php": "f4ef23fbb899da25428bd8a37b85e1b7ef161f66915870c79bd513c72f2afa78",
+    "wp-content/plugins/ascla-core/src/Services/LearnedInterests.php": "6914319583b105d2e80aa67a633ead1597d821ef28d507dfa72e6a400e26fd2c",
+    "wp-content/plugins/ascla-core/src/Services/Profiles.php": "f510c77e07b5bdcb3d7f95d65abc1e90ad3f1ce8dfaba51d1f536d07f7f516ce",
+    "wp-content/plugins/ascla-core/src/Repositories/InterestSignals.php": "872b820abc0397f15ea222406a55a434c97f3ad4439f3dfe5bd1543458a83c69",
+    "wp-content/plugins/ascla-core/src/Rest/Router.php": "dc90587fcbe670a8e28f8b2ba0e3c87ac7a57d8f41b6ac21f0de361d19960019",
+    "wp-content/plugins/ascla-core/assets/interest-learning.js": "76308aeeeda449c33807331382658d8ba874e1f7b3c97e0d5dad995f64d0a53c",
+    "wp-content/plugins/ascla-core/assets/app.js": "e512b7343d5300b08359f6771dc6062a606c3e763be83f5aa98b44251db6133b",
+    "wp-content/plugins/ascla-core/assets/admin-members.js": "66cc0118aab0aac73ae6dbf8a79d0b64ce59a89e8249dc2b68b6b0e41bd8d74c",
+    "wp-content/plugins/ascla-core/assets/app.css": "30577a326eca75bd36e75217a5d8c7a0659acd5c0c52f8ee5c96beac2be18667",
+    "tests/php/AutomaticInterestsTest.php": "836b3f6e0012d0bfef2f24340e4905bedb9603b46cfa865b749994b390740ab4",
+    "tests/php/LearnedInterestsTest.php": "b6d91f7f46802fcfa15ba8febb6c7c757616c5274a6ff4e781869d4a44b534e7",
+    "tests/interest-learning108.cjs": "a41d6f3ac18c313df69313b8f7c515685e6db934b33fa5dddcb2b58045ae85d9",
+    "tests/interest-learning-fixture.php": "fe9319ed31f560b46a6b3eb1a0bace613e0749560b4b443ee93d8edf55f773cc"
+  },
+  "cleanup": {
+    "temporary_accounts_and_content_removed": true,
+    "private_fixture_removed": true
+  },
+  "followup": "Removed the unused legacy baseline-construction method after the focused regression; active query and retention logic unchanged. Portable, syntax and package checks then passed.",
+  "screenshots": [
+    "test-results/automatic108-profile-light.png",
+    "test-results/automatic108-profile-dark-mobile.png"
+  ],
+  "public_qa": "docs/evidence/release-1.10.8/automatic108-qa.json"
+}

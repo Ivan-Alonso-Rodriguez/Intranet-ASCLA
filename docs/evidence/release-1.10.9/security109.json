@@ -1,0 +1,1190 @@
+{
+  "date": "2026-10-20T03:25:44.797735+00:00",
+  "plugin_version": "1.10.9",
+  "schema": 15,
+  "status": "PASS",
+  "package": {
+    "version": "1.10.9",
+    "sha256": "4cb044f2c4bccc256974f3f07ac79b1107d1248e1ccc422500a2a5ae8d8c5f69",
+    "files": 200,
+    "bytes": 1550763
+  },
+  "scope": "Disposable local HTTPS WordPress. ASCLA-owned HTML routes and 18 documented GET REST operations. No active attacks on the published site.",
+  "source_sha256": "cca2085b214059c96d3a44e5df38785774107aea55f1f76c55e4216b63465024",
+  "zap_image": "ghcr.io/zaproxy/zaproxy:stable@sha256:5ccfff9a411743ab2615136a2edd7416bec9ce41572fa94e935df38c14adb2b6",
+  "zap_image_digest": "[\"ghcr.io/zaproxy/zaproxy@sha256:5ccfff9a411743ab2615136a2edd7416bec9ce41572fa94e935df38c14adb2b6\"]",
+  "source_consistency": "PASS",
+  "scans": {
+    "frontend": {
+      "status": "PASS",
+      "engine_version": "2.17.0",
+      "technology_profile": "WordPress/PHP, Apache, MariaDB; no Java application or Log4j runtime",
+      "installed_enabled_active_rule_ids": [
+        "6",
+        "7",
+        "10045",
+        "10048",
+        "20015",
+        "20017",
+        "20018",
+        "20019",
+        "40009",
+        "40012",
+        "40014",
+        "40018",
+        "40019",
+        "40020",
+        "40021",
+        "40022",
+        "40026",
+        "40027",
+        "40043",
+        "40045",
+        "40048",
+        "90019",
+        "90020",
+        "90021",
+        "90023",
+        "90024",
+        "90034",
+        "90035",
+        "90036",
+        "90037",
+        "0",
+        "10106",
+        "30001",
+        "30002",
+        "40003",
+        "40008",
+        "40028",
+        "40029",
+        "40032",
+        "40034",
+        "40035",
+        "40042",
+        "40044",
+        "90017",
+        "10047",
+        "10058",
+        "10104",
+        "40016",
+        "40017",
+        "50000",
+        "90026",
+        "90029",
+        "100043"
+      ],
+      "not_applicable_active_rules": [
+        {
+          "id": "40043",
+          "name": "Log4Shell",
+          "technology": "Java / Log4j",
+          "reason": "The owned application has no Java/Log4j runtime. Java OAST/DNS testing is outside this PHP application scope.",
+          "reference": "https://www.zaproxy.org/docs/desktop/addons/active-scan-rules/#log4shell-cve-2021-44228-and-cve-2021-45046"
+        }
+      ],
+      "browser_context_exclusions": [
+        "https://ascla\\-zap109\\-20261020025909\\-16692\\.test/wp-login\\.php(?:\\?.*)?$",
+        "https://ascla\\-zap109\\-20261020025909\\-16692\\.test/wp-admin/(?!css/).*",
+        "https://ascla\\-zap109\\-20261020025909\\-16692\\.test/wp-json/ascla/v1/account/password(?:-reset)?(?:\\?.*)?$"
+      ],
+      "phases": [
+        "traditional-spider",
+        "client-spider",
+        "active-scan",
+        "passive-scan"
+      ],
+      "active_strength": "LOW",
+      "active_threads_per_host": 8,
+      "dom_xss_threads_per_host": 1,
+      "enabled_active_rule_ids": [
+        "6",
+        "7",
+        "10045",
+        "10048",
+        "20015",
+        "20017",
+        "20018",
+        "20019",
+        "40009",
+        "40012",
+        "40014",
+        "40018",
+        "40019",
+        "40020",
+        "40021",
+        "40022",
+        "40026",
+        "40027",
+        "40045",
+        "40048",
+        "90019",
+        "90020",
+        "90021",
+        "90023",
+        "90024",
+        "90034",
+        "90035",
+        "90036",
+        "90037",
+        "0",
+        "10106",
+        "30001",
+        "30002",
+        "40003",
+        "40008",
+        "40028",
+        "40029",
+        "40032",
+        "40034",
+        "40035",
+        "40042",
+        "40044",
+        "90017",
+        "10047",
+        "10058",
+        "10104",
+        "40016",
+        "40017",
+        "50000",
+        "90026",
+        "90029",
+        "100043"
+      ],
+      "completed_active_rules": [
+        {
+          "id": "40026",
+          "name": "Cross Site Scripting (DOM Based)",
+          "status": "Complete",
+          "requests": 4681
+        },
+        {
+          "id": "6",
+          "name": "Path Traversal",
+          "status": "Complete",
+          "requests": 1400
+        },
+        {
+          "id": "7",
+          "name": "Remote File Inclusion",
+          "status": "Complete",
+          "requests": 1000
+        },
+        {
+          "id": "10045",
+          "name": "Source Code Disclosure - /WEB-INF Folder",
+          "status": "Complete",
+          "requests": 174
+        },
+        {
+          "id": "10048",
+          "name": "Remote Code Execution - Shell Shock",
+          "status": "Complete",
+          "requests": 400
+        },
+        {
+          "id": "20015",
+          "name": "Heartbleed OpenSSL Vulnerability",
+          "status": "Complete",
+          "requests": 3
+        },
+        {
+          "id": "20017",
+          "name": "Source Code Disclosure - CVE-2012-1823",
+          "status": "Complete",
+          "requests": 52
+        },
+        {
+          "id": "20018",
+          "name": "Remote Code Execution - CVE-2012-1823",
+          "status": "Complete",
+          "requests": 132
+        },
+        {
+          "id": "20019",
+          "name": "External Redirect",
+          "status": "Complete",
+          "requests": 600
+        },
+        {
+          "id": "40009",
+          "name": "Server Side Include",
+          "status": "Complete",
+          "requests": 800
+        },
+        {
+          "id": "40012",
+          "name": "Cross Site Scripting (Reflected)",
+          "status": "Complete",
+          "requests": 1096
+        },
+        {
+          "id": "40014",
+          "name": "Cross Site Scripting (Persistent)",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "40018",
+          "name": "SQL Injection",
+          "status": "Complete",
+          "requests": 1604
+        },
+        {
+          "id": "40019",
+          "name": "SQL Injection - MySQL (Time Based)",
+          "status": "Complete",
+          "requests": 1200
+        },
+        {
+          "id": "40020",
+          "name": "SQL Injection - Hypersonic SQL (Time Based)",
+          "status": "Complete",
+          "requests": 1200
+        },
+        {
+          "id": "40021",
+          "name": "SQL Injection - Oracle (Time Based)",
+          "status": "Complete",
+          "requests": 600
+        },
+        {
+          "id": "40022",
+          "name": "SQL Injection - PostgreSQL (Time Based)",
+          "status": "Complete",
+          "requests": 600
+        },
+        {
+          "id": "40027",
+          "name": "SQL Injection - MsSQL (Time Based)",
+          "status": "Complete",
+          "requests": 1200
+        },
+        {
+          "id": "40045",
+          "name": "Spring4Shell",
+          "status": "Complete",
+          "requests": 184
+        },
+        {
+          "id": "40048",
+          "name": "Remote Code Execution (React2Shell)",
+          "status": "Complete",
+          "requests": 1
+        },
+        {
+          "id": "90019",
+          "name": "Server Side Code Injection",
+          "status": "Complete",
+          "requests": 1600
+        },
+        {
+          "id": "90020",
+          "name": "Remote OS Command Injection",
+          "status": "Complete",
+          "requests": 1800
+        },
+        {
+          "id": "90021",
+          "name": "XPath Injection",
+          "status": "Complete",
+          "requests": 600
+        },
+        {
+          "id": "90023",
+          "name": "XML External Entity Attack",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "90024",
+          "name": "Generic Padding Oracle",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "90034",
+          "name": "Cloud Metadata Potentially Exposed",
+          "status": "Complete",
+          "requests": 13
+        },
+        {
+          "id": "90035",
+          "name": "Server Side Template Injection",
+          "status": "Complete",
+          "requests": 768
+        },
+        {
+          "id": "90036",
+          "name": "Server Side Template Injection (Blind)",
+          "status": "Complete",
+          "requests": 2400
+        },
+        {
+          "id": "90037",
+          "name": "Remote OS Command Injection (Time Based)",
+          "status": "Complete",
+          "requests": 1200
+        },
+        {
+          "id": "0",
+          "name": "Directory Browsing",
+          "status": "Complete",
+          "requests": 92
+        },
+        {
+          "id": "10106",
+          "name": "HTTP Only Site",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "30001",
+          "name": "Buffer Overflow",
+          "status": "Complete",
+          "requests": 200
+        },
+        {
+          "id": "30002",
+          "name": "Format String Error",
+          "status": "Complete",
+          "requests": 600
+        },
+        {
+          "id": "40003",
+          "name": "CRLF Injection",
+          "status": "Complete",
+          "requests": 1400
+        },
+        {
+          "id": "40008",
+          "name": "Parameter Tampering",
+          "status": "Complete",
+          "requests": 1400
+        },
+        {
+          "id": "40028",
+          "name": "ELMAH Information Leak",
+          "status": "Complete",
+          "requests": 1
+        },
+        {
+          "id": "40029",
+          "name": "Trace.axd Information Leak",
+          "status": "Complete",
+          "requests": 16
+        },
+        {
+          "id": "40032",
+          "name": ".htaccess Information Leak",
+          "status": "Complete",
+          "requests": 15
+        },
+        {
+          "id": "40034",
+          "name": ".env Information Leak",
+          "status": "Complete",
+          "requests": 15
+        },
+        {
+          "id": "40035",
+          "name": "Hidden File Finder",
+          "status": "Complete",
+          "requests": 52
+        },
+        {
+          "id": "40042",
+          "name": "Spring Actuator Information Leak",
+          "status": "Complete",
+          "requests": 2
+        },
+        {
+          "id": "40044",
+          "name": "Exponential Entity Expansion (Billion Laughs Attack)",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "90017",
+          "name": "XSLT Injection",
+          "status": "Complete",
+          "requests": 384
+        },
+        {
+          "id": "10047",
+          "name": "HTTPS Content Available via HTTP",
+          "status": "Complete",
+          "requests": 26
+        },
+        {
+          "id": "10058",
+          "name": "GET for POST",
+          "status": "Complete",
+          "requests": 26
+        },
+        {
+          "id": "10104",
+          "name": "User Agent Fuzzer",
+          "status": "Complete",
+          "requests": 1104
+        },
+        {
+          "id": "40016",
+          "name": "Cross Site Scripting (Persistent) - Prime",
+          "status": "Complete",
+          "requests": 200
+        },
+        {
+          "id": "40017",
+          "name": "Cross Site Scripting (Persistent) - Spider",
+          "status": "Complete",
+          "requests": 92
+        },
+        {
+          "id": "50000",
+          "name": "Script Active Scan Rules",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "90026",
+          "name": "SOAP Action Spoofing",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "90029",
+          "name": "SOAP XML Injection",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "100043",
+          "name": "Swagger UI Secret & Vulnerability Detector",
+          "status": "Complete",
+          "requests": 10
+        }
+      ],
+      "active_request_count": 30996,
+      "risk_counts": {
+        "0": 9,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "findings": [
+        {
+          "id": "10111",
+          "risk": 0,
+          "name": "Authentication Request Identified",
+          "classification": "INFO",
+          "reason": "Unlisted alert: security gate uses actual risk level.",
+          "instances": 1
+        },
+        {
+          "id": "10029",
+          "risk": 0,
+          "name": "Cookie Poisoning",
+          "classification": "INFO",
+          "reason": "Unlisted alert: security gate uses actual risk level.",
+          "instances": 1
+        },
+        {
+          "id": "10058",
+          "risk": 0,
+          "name": "GET for POST",
+          "classification": "INFO",
+          "reason": "Unlisted alert: security gate uses actual risk level.",
+          "instances": 1
+        },
+        {
+          "id": "120000-2",
+          "risk": 0,
+          "name": "Information Disclosure - Information in Browser sessionStorage",
+          "classification": "INFO",
+          "reason": "Unlisted alert: security gate uses actual risk level.",
+          "instances": 1
+        },
+        {
+          "id": "10027",
+          "risk": 0,
+          "name": "Information Disclosure - Suspicious Comments",
+          "classification": "INFO",
+          "reason": "Unlisted alert: security gate uses actual risk level.",
+          "instances": 5
+        },
+        {
+          "id": "10109",
+          "risk": 0,
+          "name": "Modern Web Application",
+          "classification": "INFO",
+          "reason": "Unlisted alert: security gate uses actual risk level.",
+          "instances": 5
+        },
+        {
+          "id": "10112",
+          "risk": 0,
+          "name": "Session Management Response Identified",
+          "classification": "INFO",
+          "reason": "Unlisted alert: security gate uses actual risk level.",
+          "instances": 2
+        },
+        {
+          "id": "10104",
+          "risk": 0,
+          "name": "User Agent Fuzzer",
+          "classification": "INFO",
+          "reason": "Unlisted alert: security gate uses actual risk level.",
+          "instances": 3
+        },
+        {
+          "id": "10031",
+          "risk": 0,
+          "name": "User Controllable HTML Element Attribute (Potential XSS)",
+          "classification": "INFO",
+          "reason": "Unlisted alert: security gate uses actual risk level.",
+          "instances": 7
+        }
+      ],
+      "authenticated_before": true,
+      "authenticated_after": true,
+      "entrypoints": 14,
+      "reports": {
+        "frontend-zap.html": "30250286333428d751477c2a550303ae8bd620248cb22811f8569177b8243c8e",
+        "frontend-zap.json": "4bc086fe3a0c5c4d47f6535b950f437cc69338ce01c20eea48523d0e2774a180"
+      },
+      "authenticated_traffic_verified": true,
+      "traffic_status_counts": {
+        "/login/": {
+          "200": 5
+        },
+        "/intranet/": {
+          "302": 4
+        },
+        "/perfil/": {
+          "200": 33
+        },
+        "/eventos/": {
+          "200": 5
+        },
+        "/hub/": {
+          "200": 5
+        },
+        "/galeria/": {
+          "200": 5
+        },
+        "/foros/": {
+          "200": 5
+        },
+        "/directorio/": {
+          "200": 5
+        },
+        "/centro-conocimiento/": {
+          "200": 5
+        },
+        "/asistente/": {
+          "200": 5
+        },
+        "/aliados/": {
+          "200": 5
+        },
+        "/mensajeria/": {
+          "200": 5
+        },
+        "/contacto/": {
+          "200": 5
+        },
+        "/administracion/": {
+          "200": 7
+        }
+      }
+    },
+    "backend": {
+      "status": "PASS",
+      "engine_version": "2.17.0",
+      "technology_profile": "WordPress/PHP, Apache, MariaDB; no Java application or Log4j runtime",
+      "installed_enabled_active_rule_ids": [
+        "6",
+        "7",
+        "10045",
+        "10048",
+        "20015",
+        "20017",
+        "20018",
+        "20019",
+        "40009",
+        "40012",
+        "40014",
+        "40018",
+        "40019",
+        "40020",
+        "40021",
+        "40022",
+        "40026",
+        "40027",
+        "40043",
+        "40045",
+        "40048",
+        "90019",
+        "90020",
+        "90021",
+        "90023",
+        "90024",
+        "90034",
+        "90035",
+        "90036",
+        "90037",
+        "0",
+        "10106",
+        "30001",
+        "30002",
+        "40003",
+        "40008",
+        "40028",
+        "40029",
+        "40032",
+        "40034",
+        "40035",
+        "40042",
+        "40044",
+        "90017",
+        "10047",
+        "10058",
+        "10104",
+        "40016",
+        "40017",
+        "50000",
+        "90026",
+        "90029",
+        "100043"
+      ],
+      "not_applicable_active_rules": [
+        {
+          "id": "40043",
+          "name": "Log4Shell",
+          "technology": "Java / Log4j",
+          "reason": "The owned application has no Java/Log4j runtime. Java OAST/DNS testing is outside this PHP application scope.",
+          "reference": "https://www.zaproxy.org/docs/desktop/addons/active-scan-rules/#log4shell-cve-2021-44228-and-cve-2021-45046"
+        }
+      ],
+      "browser_context_exclusions": [
+        "https://ascla\\-zap109\\-20261020025909\\-16692\\.test/wp-login\\.php(?:\\?.*)?$",
+        "https://ascla\\-zap109\\-20261020025909\\-16692\\.test/wp-admin/(?!css/).*",
+        "https://ascla\\-zap109\\-20261020025909\\-16692\\.test/wp-json/ascla/v1/account/password(?:-reset)?(?:\\?.*)?$"
+      ],
+      "phases": [
+        "openapi-import",
+        "active-scan",
+        "passive-scan"
+      ],
+      "active_strength": "LOW",
+      "active_threads_per_host": 8,
+      "dom_xss_threads_per_host": 1,
+      "enabled_active_rule_ids": [
+        "6",
+        "7",
+        "10045",
+        "10048",
+        "20015",
+        "20017",
+        "20018",
+        "20019",
+        "40009",
+        "40012",
+        "40014",
+        "40018",
+        "40019",
+        "40020",
+        "40021",
+        "40022",
+        "40026",
+        "40027",
+        "40045",
+        "40048",
+        "90019",
+        "90020",
+        "90021",
+        "90023",
+        "90024",
+        "90034",
+        "90035",
+        "90036",
+        "90037",
+        "0",
+        "10106",
+        "30001",
+        "30002",
+        "40003",
+        "40008",
+        "40028",
+        "40029",
+        "40032",
+        "40034",
+        "40035",
+        "40042",
+        "40044",
+        "90017",
+        "10047",
+        "10058",
+        "10104",
+        "40016",
+        "40017",
+        "50000",
+        "90026",
+        "90029",
+        "100043"
+      ],
+      "completed_active_rules": [
+        {
+          "id": "40026",
+          "name": "Cross Site Scripting (DOM Based)",
+          "status": "Complete",
+          "requests": 96
+        },
+        {
+          "id": "6",
+          "name": "Path Traversal",
+          "status": "Complete",
+          "requests": 164
+        },
+        {
+          "id": "7",
+          "name": "Remote File Inclusion",
+          "status": "Complete",
+          "requests": 115
+        },
+        {
+          "id": "10045",
+          "name": "Source Code Disclosure - /WEB-INF Folder",
+          "status": "Complete",
+          "requests": 156
+        },
+        {
+          "id": "10048",
+          "name": "Remote Code Execution - Shell Shock",
+          "status": "Complete",
+          "requests": 46
+        },
+        {
+          "id": "20015",
+          "name": "Heartbleed OpenSSL Vulnerability",
+          "status": "Complete",
+          "requests": 3
+        },
+        {
+          "id": "20017",
+          "name": "Source Code Disclosure - CVE-2012-1823",
+          "status": "Complete",
+          "requests": 26
+        },
+        {
+          "id": "20018",
+          "name": "Remote Code Execution - CVE-2012-1823",
+          "status": "Complete",
+          "requests": 54
+        },
+        {
+          "id": "20019",
+          "name": "External Redirect",
+          "status": "Complete",
+          "requests": 69
+        },
+        {
+          "id": "40009",
+          "name": "Server Side Include",
+          "status": "Complete",
+          "requests": 92
+        },
+        {
+          "id": "40012",
+          "name": "Cross Site Scripting (Reflected)",
+          "status": "Complete",
+          "requests": 115
+        },
+        {
+          "id": "40014",
+          "name": "Cross Site Scripting (Persistent)",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "40018",
+          "name": "SQL Injection",
+          "status": "Complete",
+          "requests": 161
+        },
+        {
+          "id": "40019",
+          "name": "SQL Injection - MySQL (Time Based)",
+          "status": "Complete",
+          "requests": 138
+        },
+        {
+          "id": "40020",
+          "name": "SQL Injection - Hypersonic SQL (Time Based)",
+          "status": "Complete",
+          "requests": 138
+        },
+        {
+          "id": "40021",
+          "name": "SQL Injection - Oracle (Time Based)",
+          "status": "Complete",
+          "requests": 69
+        },
+        {
+          "id": "40022",
+          "name": "SQL Injection - PostgreSQL (Time Based)",
+          "status": "Complete",
+          "requests": 69
+        },
+        {
+          "id": "40027",
+          "name": "SQL Injection - MsSQL (Time Based)",
+          "status": "Complete",
+          "requests": 138
+        },
+        {
+          "id": "40045",
+          "name": "Spring4Shell",
+          "status": "Complete",
+          "requests": 67
+        },
+        {
+          "id": "40048",
+          "name": "Remote Code Execution (React2Shell)",
+          "status": "Complete",
+          "requests": 1
+        },
+        {
+          "id": "90019",
+          "name": "Server Side Code Injection",
+          "status": "Complete",
+          "requests": 184
+        },
+        {
+          "id": "90020",
+          "name": "Remote OS Command Injection",
+          "status": "Complete",
+          "requests": 207
+        },
+        {
+          "id": "90021",
+          "name": "XPath Injection",
+          "status": "Complete",
+          "requests": 69
+        },
+        {
+          "id": "90023",
+          "name": "XML External Entity Attack",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "90024",
+          "name": "Generic Padding Oracle",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "90034",
+          "name": "Cloud Metadata Potentially Exposed",
+          "status": "Complete",
+          "requests": 13
+        },
+        {
+          "id": "90035",
+          "name": "Server Side Template Injection",
+          "status": "Complete",
+          "requests": 125
+        },
+        {
+          "id": "90036",
+          "name": "Server Side Template Injection (Blind)",
+          "status": "Complete",
+          "requests": 276
+        },
+        {
+          "id": "90037",
+          "name": "Remote OS Command Injection (Time Based)",
+          "status": "Complete",
+          "requests": 138
+        },
+        {
+          "id": "0",
+          "name": "Directory Browsing",
+          "status": "Complete",
+          "requests": 27
+        },
+        {
+          "id": "10106",
+          "name": "HTTP Only Site",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "30001",
+          "name": "Buffer Overflow",
+          "status": "Complete",
+          "requests": 23
+        },
+        {
+          "id": "30002",
+          "name": "Format String Error",
+          "status": "Complete",
+          "requests": 69
+        },
+        {
+          "id": "40003",
+          "name": "CRLF Injection",
+          "status": "Complete",
+          "requests": 161
+        },
+        {
+          "id": "40008",
+          "name": "Parameter Tampering",
+          "status": "Complete",
+          "requests": 161
+        },
+        {
+          "id": "40028",
+          "name": "ELMAH Information Leak",
+          "status": "Complete",
+          "requests": 1
+        },
+        {
+          "id": "40029",
+          "name": "Trace.axd Information Leak",
+          "status": "Complete",
+          "requests": 8
+        },
+        {
+          "id": "40032",
+          "name": ".htaccess Information Leak",
+          "status": "Complete",
+          "requests": 8
+        },
+        {
+          "id": "40034",
+          "name": ".env Information Leak",
+          "status": "Complete",
+          "requests": 8
+        },
+        {
+          "id": "40035",
+          "name": "Hidden File Finder",
+          "status": "Complete",
+          "requests": 52
+        },
+        {
+          "id": "40042",
+          "name": "Spring Actuator Information Leak",
+          "status": "Complete",
+          "requests": 2
+        },
+        {
+          "id": "40044",
+          "name": "Exponential Entity Expansion (Billion Laughs Attack)",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "90017",
+          "name": "XSLT Injection",
+          "status": "Complete",
+          "requests": 54
+        },
+        {
+          "id": "10047",
+          "name": "HTTPS Content Available via HTTP",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "10058",
+          "name": "GET for POST",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "10104",
+          "name": "User Agent Fuzzer",
+          "status": "Complete",
+          "requests": 324
+        },
+        {
+          "id": "40016",
+          "name": "Cross Site Scripting (Persistent) - Prime",
+          "status": "Complete",
+          "requests": 23
+        },
+        {
+          "id": "40017",
+          "name": "Cross Site Scripting (Persistent) - Spider",
+          "status": "Complete",
+          "requests": 27
+        },
+        {
+          "id": "50000",
+          "name": "Script Active Scan Rules",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "90026",
+          "name": "SOAP Action Spoofing",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "90029",
+          "name": "SOAP XML Injection",
+          "status": "Complete",
+          "requests": 0
+        },
+        {
+          "id": "100043",
+          "name": "Swagger UI Secret & Vulnerability Detector",
+          "status": "Complete",
+          "requests": 6
+        }
+      ],
+      "active_request_count": 3686,
+      "risk_counts": {
+        "0": 1,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "findings": [
+        {
+          "id": "10104",
+          "risk": 0,
+          "name": "User Agent Fuzzer",
+          "classification": "INFO",
+          "reason": "Unlisted alert: security gate uses actual risk level.",
+          "instances": 3
+        }
+      ],
+      "authenticated_before": true,
+      "authenticated_after": true,
+      "entrypoints": 18,
+      "reports": {
+        "backend-zap.html": "699143ac903b38a3ba2f01548561a9394bc215551e07a08235f13aeba3bef106",
+        "backend-zap.json": "27a0ab17e6fa6eb8e80791e578c32b384a163c332b164acb5cc3478fc081c1f2"
+      },
+      "authenticated_traffic_verified": true,
+      "traffic_status_counts": {
+        "/wp-json/ascla/v1/bootstrap": {
+          "200": 3
+        },
+        "/wp-json/ascla/v1/profiles": {
+          "200": 3
+        },
+        "/wp-json/ascla/v1/profiles/24": {
+          "200": 2
+        },
+        "/wp-json/ascla/v1/content/hub": {
+          "200": 3
+        },
+        "/wp-json/ascla/v1/content/topic": {
+          "200": 2
+        },
+        "/wp-json/ascla/v1/content/resource": {
+          "200": 3
+        },
+        "/wp-json/ascla/v1/content/event": {
+          "200": 3
+        },
+        "/wp-json/ascla/v1/content/gallery": {
+          "200": 2
+        },
+        "/wp-json/ascla/v1/content/ally": {
+          "200": 2
+        },
+        "/wp-json/ascla/v1/locations/countries": {
+          "200": 2
+        },
+        "/wp-json/ascla/v1/locations/cities": {
+          "400": 1,
+          "200": 1
+        },
+        "/wp-json/ascla/v1/recommendations": {
+          "200": 3
+        },
+        "/wp-json/ascla/v1/interests/learned": {
+          "200": 2
+        },
+        "/wp-json/ascla/v1/notifications": {
+          "200": 2
+        },
+        "/wp-json/ascla/v1/admin/users": {
+          "200": 2
+        },
+        "/wp-json/ascla/v1/admin/users/24": {
+          "200": 2
+        },
+        "/wp-json/ascla/v1/admin/users/24/insights": {
+          "200": 2
+        },
+        "/wp-json/ascla/v1/settings": {
+          "200": 2
+        }
+      }
+    }
+  },
+  "csp": {
+    "status": "PASS",
+    "checks": 20,
+    "report_sha256": "ee0cf819a3e33e318a4f4eeb17a0dcbc89de8a1cf1eac26c5b9250a12b327ff1"
+  },
+  "browser": {
+    "checks": 8,
+    "route_views": 24,
+    "javascript_errors": 0,
+    "enforced_csp_violations": 0,
+    "report_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1"
+  },
+  "php": {
+    "tests": 708,
+    "assertions": 7992,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "php_report_sha256": "bb54e256b1afb00ec506a7c8b7107c9886292ff0667cebad5f65bad9c88a4a78",
+  "regression": {
+    "integration_requests": 10,
+    "integration_checks": 16,
+    "business_e2e_requests": 23,
+    "business_e2e_checks": 38,
+    "native_http_login_checks": 1,
+    "ui_flows": 3,
+    "status": "PASS",
+    "summary_sha256": "beeffdc40f45384c6ac720a8c36d7790a9f4a01469504684e024e5d360d60953"
+  },
+  "external_compatibility": {
+    "public_dummy_key": true,
+    "turnstile_token_received": true,
+    "youtube_ready": true,
+    "youtube_duration": 1344,
+    "errors": []
+  },
+  "portable_checks": 49,
+  "coverage_collected": false,
+  "coverage_unchanged_sha256": {
+    "clover.xml": "2008bce81b5693cc82662820d8ff8aa19004cdacc082295365e906b6b9d90709",
+    "junit.xml": "bea4733ddbfab15f29230c5b08f1c7aac5a9586fc4ad87c7ea4ad503c47440ae",
+    "lcov.info": "c68411ab949218a79986a9548e775a364d0535dfe58cb248f65389e8523adb10",
+    "source-revision": "5e9488a9dd2e9101025ac5963ac77c71771b7b8bc6d0ac170896e53374b6fa39"
+  },
+  "manual_command": "bash scripts/security-tests.sh",
+  "raw_reports_directory": "test-results/security-latest",
+  "limitations": [
+    "No result certifies the deployed hosting configuration or guarantees universal absence of vulnerabilities.",
+    "DAST excludes native WordPress admin, arbitrary CMS/theme/plugin routes, destructive/write REST operations and live integration jobs. Integration/E2E complement this bounded scope.",
+    "All 52 applicable rules complete with LOW attack strength. Java/Log4j rule 40043 is explicitly not applicable to this PHP/Apache/MariaDB application; Java OAST testing is outside scope and no alerts are filtered. The Client Spider has a 60-second navigation limit.",
+    "Apache/PHP configuration and HSTS on static/error responses require hosting or proxy deployment outside the plugin ZIP.",
+    "The initial unauthenticated baseline also visited the generic WordPress homepage; its alert counts are not directly comparable with the authenticated ASCLA-only final scans.",
+    "The published Bruno/Playwright evidence from October 16 retains its original metadata; collection authentication changes on October 19 do not rewrite those historical reports."
+  ]
+}

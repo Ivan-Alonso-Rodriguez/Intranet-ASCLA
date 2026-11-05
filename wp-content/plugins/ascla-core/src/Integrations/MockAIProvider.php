@@ -188,7 +188,7 @@ final class MockAIProvider implements AIProviderInterface
         $text=trim($context['transcript']??'');
         $sentences=\ASCLA\Core\Domain\Grounding::sentences($text);
         $points=array_slice(array_map(static fn($s)=>mb_substr($s,0,400),$sentences),0,5);
-        $summary=implode(' ',array_slice($points,0,3));
+        $summary=implode("\n\n",array_map(static fn($part)=>implode(' ',$part),array_chunk(array_slice($sentences,0,8),2)));
         preg_match_all('/gobernanza|inteligencia artificial|supervisión|directorio|riesgos|responsabilidades|secretaría corporativa|cumplimiento|sostenibilidad|transformación digital|acuerdos/iu',$text,$keywords);
         $tags=array_slice(array_values(array_unique(array_map('mb_strtolower',$keywords[0]))),0,12);
         preg_match_all('/\b(?:ISO\s+\d+(?::\d+)?|COSO(?:\s+ERM)?|OCDE)\b/u',$text,$standards);

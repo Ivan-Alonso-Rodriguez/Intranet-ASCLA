@@ -1,0 +1,227 @@
+{
+  "prepared_at": "2026-11-05T19:21:12.450Z",
+  "date": "2026-11-05T16:28:54.082062+00:00",
+  "status": "PASS",
+  "source_sha256": "8726ea30d4cb94a1f71b2328594955b18a54cba410b6d51a255863c1a7e9fbe3",
+  "report": "seguridad/dashboard.html",
+  "retention": "latest-only",
+  "note": "Copias derivadas y revisadas; los HTML/JSON nativos completos permanecen privados. Se preservan las fechas, los estados y los conteos originales.",
+  "sources": [
+    {
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/security-summary.json",
+      "source_sha256": "bf3ee617849bcd11f0195e6bcda0bccb204d30f13da73eda274935ff88a7b76a"
+    },
+    {
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/source-manifest.json",
+      "source_sha256": "a915e2d72ceebaf5cc25e2ce697995dc114f77997642ad5057036b469b1cdb38"
+    },
+    {
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/csp-validation.json",
+      "source_sha256": "8212451a85abcaecf766404b6d48fafed42b6ba91883479422d50ae7bb69ef34"
+    },
+    {
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/browser-security.json",
+      "source_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1"
+    },
+    {
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/frontend-result.json",
+      "source_sha256": "b703539b0bd4b1b7b10c000df3e1bdebb685bec310af458d9afd209de5bb53bb"
+    },
+    {
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/frontend-zap.json",
+      "source_sha256": "85674e23ac332c221ca6abef50077d05b5f49310d408c33b0b013488a451532e"
+    },
+    {
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/backend-result.json",
+      "source_sha256": "5e7423030d31af831a5f1091dd62b281e95126d4ba79748de0f5ba6ea2073b74"
+    },
+    {
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/backend-zap.json",
+      "source_sha256": "3253629e983050ad3857ab1a382c72bd4c982b5367953ec2ac31aa84158612c6"
+    }
+  ],
+  "files": [
+    {
+      "published": "seguridad/frontend-zap.json",
+      "published_sha256": "a8cbdb69419c98a3b76826404c4e8ac27df78db8af54b0cca2dfc1d730c82444",
+      "transformed": true,
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/frontend-zap.json",
+      "source_sha256": "85674e23ac332c221ca6abef50077d05b5f49310d408c33b0b013488a451532e"
+    },
+    {
+      "published": "seguridad/frontend-zap.html",
+      "published_sha256": "e2e56d8879af874c0c886b41062ec20ae12b9415c52889c2dc2e4fa0b58a0b95",
+      "transformed": true,
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/frontend-zap.json",
+      "source_sha256": "85674e23ac332c221ca6abef50077d05b5f49310d408c33b0b013488a451532e"
+    },
+    {
+      "published": "seguridad/backend-zap.json",
+      "published_sha256": "d9e8ac7db5ef0c129b50c22b241305e0a106876f315299ca039503ba196e6890",
+      "transformed": true,
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/backend-zap.json",
+      "source_sha256": "3253629e983050ad3857ab1a382c72bd4c982b5367953ec2ac31aa84158612c6"
+    },
+    {
+      "published": "seguridad/backend-zap.html",
+      "published_sha256": "07a6d878ef6c5469ebb1f572a4cb81480700c510acd5011739522087a0f2e4fd",
+      "transformed": true,
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/backend-zap.json",
+      "source_sha256": "3253629e983050ad3857ab1a382c72bd4c982b5367953ec2ac31aa84158612c6"
+    },
+    {
+      "published": "seguridad/resumen.json",
+      "published_sha256": "7bbd0b2e1097e0b297113c67b7bb39ce292a55cb0693a03a41ed400153b15bc2",
+      "transformed": true,
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/security-summary.json",
+      "source_sha256": "bf3ee617849bcd11f0195e6bcda0bccb204d30f13da73eda274935ff88a7b76a"
+    },
+    {
+      "published": "seguridad/csp-validation.json",
+      "published_sha256": "8212451a85abcaecf766404b6d48fafed42b6ba91883479422d50ae7bb69ef34",
+      "transformed": true,
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/csp-validation.json",
+      "source_sha256": "8212451a85abcaecf766404b6d48fafed42b6ba91883479422d50ae7bb69ef34"
+    },
+    {
+      "published": "seguridad/browser-security.json",
+      "published_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1",
+      "transformed": true,
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/browser-security.json",
+      "source_sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1"
+    },
+    {
+      "published": "seguridad/source-manifest.json",
+      "published_sha256": "a915e2d72ceebaf5cc25e2ce697995dc114f77997642ad5057036b469b1cdb38",
+      "transformed": true,
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/source-manifest.json",
+      "source_sha256": "a915e2d72ceebaf5cc25e2ce697995dc114f77997642ad5057036b469b1cdb38"
+    },
+    {
+      "published": "seguridad/sources/config/security.conf",
+      "published_sha256": "046a5c3c4218d30b63d6bb3932f6006fec4c9deeb8a8f1f4491e9041977f9361",
+      "transformed": false,
+      "source_relative": "config/security.conf",
+      "source_sha256": "046a5c3c4218d30b63d6bb3932f6006fec4c9deeb8a8f1f4491e9041977f9361"
+    },
+    {
+      "published": "seguridad/sources/config/security.ini",
+      "published_sha256": "f20edcf8154edcf83c4efb8710000f928219f64ef3f1177f813efeb4c3715195",
+      "transformed": false,
+      "source_relative": "config/security.ini",
+      "source_sha256": "f20edcf8154edcf83c4efb8710000f928219f64ef3f1177f813efeb4c3715195"
+    },
+    {
+      "published": "seguridad/sources/config/uploads.ini",
+      "published_sha256": "37f5d881277cf3827e605ba5f048f5e88cf724ae95741eff698aa92c6d54c228",
+      "transformed": false,
+      "source_relative": "config/uploads.ini",
+      "source_sha256": "37f5d881277cf3827e605ba5f048f5e88cf724ae95741eff698aa92c6d54c228"
+    },
+    {
+      "published": "seguridad/sources/scripts/check-security-headers.cjs",
+      "published_sha256": "2ab14b0a0569b072bb74244e729d96e389aaead0981ccf6cb764e9242b83d1ad",
+      "transformed": false,
+      "source_relative": "scripts/check-security-headers.cjs",
+      "source_sha256": "2ab14b0a0569b072bb74244e729d96e389aaead0981ccf6cb764e9242b83d1ad"
+    },
+    {
+      "published": "seguridad/sources/security/zap-rules.tsv",
+      "published_sha256": "406b6c917a8140f74b2785f7a927c9988efb1599f95cfedb3f30a09a48d769f6",
+      "transformed": false,
+      "source_relative": "security/zap-rules.tsv",
+      "source_sha256": "406b6c917a8140f74b2785f7a927c9988efb1599f95cfedb3f30a09a48d769f6"
+    },
+    {
+      "published": "seguridad/sources/tests/security-browser.cjs",
+      "published_sha256": "4aed7b411d513118b2a7fa9df03cdb4c4e0c897e7f556ca168a7ee99df292621",
+      "transformed": false,
+      "source_relative": "tests/security-browser.cjs",
+      "source_sha256": "4aed7b411d513118b2a7fa9df03cdb4c4e0c897e7f556ca168a7ee99df292621"
+    },
+    {
+      "published": "seguridad/sources/tests/security-openapi.py",
+      "published_sha256": "a9db108d15c1152ff34664d6df4fb1291e39a005c0003f7005568d3d0ad9eb36",
+      "transformed": false,
+      "source_relative": "tests/security-openapi.py",
+      "source_sha256": "a9db108d15c1152ff34664d6df4fb1291e39a005c0003f7005568d3d0ad9eb36"
+    },
+    {
+      "published": "seguridad/sources/tests/zap-scan.py",
+      "published_sha256": "441db2be5d8bab1840fc907a81909e7253376a8dbbdfbe438dde7dc230d0238e",
+      "transformed": false,
+      "source_relative": "tests/zap-scan.py",
+      "source_sha256": "441db2be5d8bab1840fc907a81909e7253376a8dbbdfbe438dde7dc230d0238e"
+    },
+    {
+      "published": "seguridad/fuentes.html",
+      "published_sha256": "3e4fbb286754eac69dedc4dac7c2d43aeae1b30429aae55a52419cda26a5cb08",
+      "transformed": true,
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/source-manifest.json",
+      "source_sha256": "a915e2d72ceebaf5cc25e2ce697995dc114f77997642ad5057036b469b1cdb38"
+    },
+    {
+      "published": "seguridad/dashboard.html",
+      "published_sha256": "a8a78bc5adec678429aebcb0c80e17cd610c5970eca174f2e427c04df8722807",
+      "transformed": true,
+      "source_relative": "test-results/full-validation-20261105/private/security-native-ee2db6ff4fcd/security-summary.json",
+      "source_sha256": "bf3ee617849bcd11f0195e6bcda0bccb204d30f13da73eda274935ff88a7b76a"
+    },
+    {
+      "published": "seguridad/sustento.json",
+      "published_sha256": "99538f5bba96f2f43ba12803b52133013ee11a5e2b83bb61c54ba8e775f715e5",
+      "transformed": true
+    },
+    {
+      "published": "seguridad/sustento.html",
+      "published_sha256": "9b31f5a5ab0d1640daccc08ea3a830a7a4de1333c04492e9f6a9cd25b18146ec",
+      "transformed": true
+    }
+  ],
+  "remote_review": {
+    "report": "actualizacion/index.html#seguridad",
+    "date": "2026-10-22T08:21:15.775Z",
+    "target": "https://wordpress.ingsoftware.lat"
+  },
+  "explanation": {
+    "report": "seguridad/sustento.html",
+    "references": [
+      {
+        "file": "seguridad/resumen.json",
+        "sha256": "7bbd0b2e1097e0b297113c67b7bb39ce292a55cb0693a03a41ed400153b15bc2"
+      },
+      {
+        "file": "seguridad/frontend-zap.json",
+        "sha256": "a8cbdb69419c98a3b76826404c4e8ac27df78db8af54b0cca2dfc1d730c82444"
+      },
+      {
+        "file": "seguridad/backend-zap.json",
+        "sha256": "d9e8ac7db5ef0c129b50c22b241305e0a106876f315299ca039503ba196e6890"
+      },
+      {
+        "file": "seguridad/csp-validation.json",
+        "sha256": "8212451a85abcaecf766404b6d48fafed42b6ba91883479422d50ae7bb69ef34"
+      },
+      {
+        "file": "seguridad/browser-security.json",
+        "sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1"
+      },
+      {
+        "file": "actualizacion/deployment.json",
+        "sha256": "643be25a643e94a34b97abd396e5d0516ce2f05eddc12e0ac9ada5c7e3efb287"
+      },
+      {
+        "file": "actualizacion/remote-csp-validation.json",
+        "sha256": "9ae2a3470270243e8212a181d01655982cbc118a058d7899fe88b207b9c6a1de"
+      },
+      {
+        "file": "actualizacion/remote-browser-security.json",
+        "sha256": "375c3083eea1c08c7bc2c5e0b5ca8f32830076e4cf3ba076b96f6445737e6ebb"
+      },
+      {
+        "file": "actualizacion/server-exposure.json",
+        "sha256": "83d7c8c73669f7cd63db8c85f91ced516f3367afcef4a5295353a8f13d447915"
+      }
+    ]
+  }
+}

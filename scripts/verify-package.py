@@ -10,6 +10,9 @@ with zipfile.ZipFile(root/'dist/ascla-core.zip') as archive:
     assert archive.testzip() is None
     names=archive.namelist()
     assert 'ascla-core/languages/en.json' in names
+    for locale in ('es_ES', 'en_US'):
+        for extension in ('po', 'mo'):
+            assert f'ascla-core/languages/ascla-core-{locale}.{extension}' in names
     assert all(n.startswith('ascla-core/') for n in names)
     assert not any(any(p in {'.git','.env','node_modules','coverage','tests','vendor'} for p in Path(n).parts) for n in names)
     hashes={n:hashlib.sha256(archive.read(n)).hexdigest() for n in names}
@@ -29,5 +32,11 @@ with zipfile.ZipFile(root/'dist/ascla-core.zip') as archive:
     digest=hashlib.sha256(package.read_bytes()).hexdigest()
     assert (root/'dist/ascla-core.sha256').read_text().split()[0]==digest
     report={'date':datetime.datetime.now(datetime.timezone.utc).isoformat(),'version':version,'bytes':package.stat().st_size,'sha256':digest,'files':len(names),'crc_valid':True,'source_bytes_match':True,'forbidden_paths':[],'known_local_secrets_absent':True,'translation_catalog_included':True,'production_hashes':hashes}
-    (out/'package.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
+    manifest=out/'package.json'
+    previous=json.loads(manifest.read_text(encoding='utf-8')) if manifest.exists() else None
+    # The reviewed manifest is versioned. Rechecking the same artifact must not dirty it.
+    if previous and {k:v for k,v in previous.items() if k!='date'}=={k:v for k,v in report.items() if k!='date'}:
+        report['date']=previous['date']
+    if previous!=report:
+        manifest.write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8',newline='\n')
     print(json.dumps({k:v for k,v in report.items() if k!='production_hashes'},indent=2))

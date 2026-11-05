@@ -1,0 +1,45 @@
+{
+  "stage": "Recuperación durable de caché del 14 de octubre",
+  "date": "2026-10-14",
+  "completed_at_utc": "2026-10-14T05:51:52.550336+00:00",
+  "base_revision": "d01e3d12b6c404ba5aaa9fc4648f5989565bf590",
+  "base_branch": "development",
+  "working_tree_modified": true,
+  "plugin_version": "1.10.7",
+  "schema_version": 15,
+  "php_tests": 405,
+  "php_assertions": 5987,
+  "php_line_coverage_percent": 84.08,
+  "browser_checks": 37,
+  "phpunit_memory_limit": "256M",
+  "new_javascript_coverage": false,
+  "full_quality_ci_rerun": false,
+  "requirements_advanced": [
+    "RNF-011",
+    "RNF-012"
+  ],
+  "cache_note": "Diez pruebas/82 aserciones nuevas. Termina un proceso tras COMMIT; recupera desde otro proceso y cron. Proveedor de archivo compartido, no Redis/Memcached reales. Incluye fallos, backlog, permisos, reservas, retención y mutex real.",
+  "browser_note": "37 regresiones de navegador; la sexta del panel usa una fila de actualización interna simulada. PHP comprueba registros y recuperación reales en la base local.",
+  "evidence": "docs/evidence/release-1.10.7/recovery107.json",
+  "php_reports": [
+    "test-results/recovery107-php.log",
+    "test-results/recovery107-junit.xml",
+    "test-results/recovery107-clover.xml"
+  ],
+  "browser_reports": [
+    "test-results/editorial107.json",
+    "test-results/analysis-filters107.json",
+    "test-results/governance107.json",
+    "test-results/delivery107.json",
+    "test-results/comment-history107.json"
+  ],
+  "memory_note": "Panel probado con treinta payloads de 1 MiB y proceso independiente limitado a 64 MiB. El trabajador carga una entrega por vez.",
+  "package": {
+    "version": "1.10.7",
+    "bytes": 1263530,
+    "sha256": "7f757e91c410f46f58ca8e099172d7f2382088a0a303e8daf1897856029f991d",
+    "files": 166,
+    "path": "dist/ascla-core.zip",
+    "schema_version": 15
+  }
+}

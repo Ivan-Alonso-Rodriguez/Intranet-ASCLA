@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-15",
+  "recorded_at_utc": "2026-10-15T06:11:29.038158+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "scope": "Focused local regression and real disposable WordPress browser interactions; no new coverage or full quality-ci",
+  "php": {
+    "tests": 64,
+    "assertions": 495,
+    "failures": 0,
+    "errors": 0,
+    "junit": "test-results/learning108-junit.xml",
+    "sha256": "a98a7e61458e404be5c6e892e02d26c72b22602218199bb0dcf56d9d24701b15"
+  },
+  "browser": {
+    "environment": "disposable-local",
+    "checks": [
+      "La ficha empieza sin inventar intereses y separa el aprendizaje de la selección manual",
+      "Un Me gusta real se conserva al recargar y genera un tema aprendido",
+      "Administración ve los temas estimados separados del perfil y de las cifras de Me gusta",
+      "Quince segundos reales de lectura visible agregan una señal más débil que Me gusta",
+      "Reiniciar limpia las estimaciones y no vuelve a aprender del historial anterior",
+      "Desactivar se conserva entre páginas, detiene lecturas y funciona en móvil sin desbordamientos",
+      "El contenido protegido no inicia seguimiento ni genera intereses",
+      "El panel de aprendizaje pasa axe A/AA en el alcance revisado",
+      "El cambio real de idioma traduce el nuevo panel y sus controles"
+    ],
+    "errors": []
+  },
+  "portable_checks": 49,
+  "package": {
+    "bytes": 1330106,
+    "sha256": "9d5758b5e0779bf34600c7593ad2aaa0bffdb5a1051c274964d951b381e2fd05",
+    "files": 180,
+    "source_bytes_match": true,
+    "crc_valid": true,
+    "known_local_secrets_absent": true
+  },
+  "cleanup": {
+    "temporary_accounts_and_owned_content_removed": true,
+    "private_fixture_file_removed": true
+  },
+  "source_sha256": {
+    "wp-content/plugins/ascla-core/src/Services/LearnedInterests.php": "b1843be25dc4c145839f83d0c010985faed638c9e5a611451b303de8357cbdeb",
+    "wp-content/plugins/ascla-core/src/Repositories/InterestSignals.php": "420cc9dfee21a1cf188c27ecfd1bef7421278043a924d9a24e672c2128ebc66f",
+    "wp-content/plugins/ascla-core/src/Services/KnowledgeRecommendations.php": "e29e8b346fd6b7aca11266573d9b143b67228baad286e08345be21cb4765741c",
+    "wp-content/plugins/ascla-core/src/Services/MemberInsights.php": "a711a5276887dc1870e1ec2e313bbc1098b9ed1904fa7a817211a06ebb95dd2a",
+    "wp-content/plugins/ascla-core/src/Rest/Router.php": "04b7a24046eb3b3dc675e3748a6ef7286d3abae753273efb42f37e9e2e37962d",
+    "wp-content/plugins/ascla-core/src/Frontend/App.php": "248717f62803e40b81ef7eae6c91d8c9adee77b8b76f0aa9c68a46841df3e6c1",
+    "wp-content/plugins/ascla-core/assets/interest-learning.js": "aca3560097c5115d988ca690e9323e14ddd46219f7232f225c76bc80f9b94c30",
+    "wp-content/plugins/ascla-core/assets/admin-members.js": "5033929682c2f32ef7404a83a031ca98e118307a1242a8822ed9e2ab64c1d9da",
+    "wp-content/plugins/ascla-core/assets/app.js": "94c8fa4eb3508ad4ae36d83528d3cc88e84880d84d372801c83cff5387ebe757",
+    "wp-content/plugins/ascla-core/assets/app.css": "1ae5e0a5fd8eb8313292735a4937f50d98d6ef64a8c512148165e11fc50b0cab",
+    "tests/php/LearnedInterestsTest.php": "035002fc80aa27878221a6465cf87d96b0328bdbf2aaeee36fed4fab5c6a0c61",
+    "tests/interest-learning108.cjs": "12780d51c61a59040941035b782cdf7726cc2cd4ef2879c4ff59fedf06d47926",
+    "tests/interest-learning-fixture.php": "17312ac0162b66a4fb428a761c2f0afacccee9306e63d9d86c5c8bcd866c9c59"
+  },
+  "cosmetic_followup": "Singular/plural for administrative content count corrected after the nine browser checks; syntax and published module bytes verified.",
+  "screenshots": [
+    "test-results/learning108-profile-light.png",
+    "test-results/learning108-profile-dark-mobile.png",
+    "test-results/learning108-admin.png"
+  ],
+  "published_qa": "docs/evidence/release-1.10.8/learning108-qa.json"
+}

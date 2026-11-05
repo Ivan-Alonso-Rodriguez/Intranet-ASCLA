@@ -21,10 +21,14 @@ if (!phpFiles.length || !/<line\b[^>]*type="stmt"/.test(clover)) throw new Error
 phpFiles.forEach(checkPath);
 if (!/<testcase\b/.test(junit) || /<(?:failure|error)\b/.test(junit)) throw new Error("JUnit has no tests or has failures");
 [...junit.matchAll(/\bfile="([^"]+)"/g)].forEach(match => checkPath(match[1]));
+const executedTestFiles = new Set([...junit.matchAll(/<testcase\b[^>]*\bfile="([^"]+)"/g)].map(match => match[1]));
+for (const name of fs.readdirSync(path.join(root, "tests/php")).filter(name => name.endsWith("Test.php"))) {
+  if (!executedTestFiles.has("tests/php/" + name)) throw new Error("PHPUnit did not execute test file: " + name);
+}
 const jsFiles = [...lcov.matchAll(/^SF:(.+)$/gm)].map(match => match[1].trim());
 if (!jsFiles.length || !/^DA:\d+,\d+/m.test(lcov)) throw new Error("LCOV contains no lines");
 jsFiles.forEach(checkPath);
 for (const name of fs.readdirSync(path.join(root, "wp-content/plugins/ascla-core/assets")).filter(name => name.endsWith(".js"))) {
   if (!jsFiles.includes("wp-content/plugins/ascla-core/assets/" + name)) throw new Error("Missing JavaScript asset in LCOV: " + name);
 }
-console.log("Coverage validated: " + phpFiles.length + " PHP files, " + jsFiles.length + " JavaScript files and nonempty JUnit.");
+console.log("Coverage validated: " + phpFiles.length + " PHP files, " + jsFiles.length + " JavaScript files and " + executedTestFiles.size + " PHP test files executed.");

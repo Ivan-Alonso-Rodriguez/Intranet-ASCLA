@@ -198,12 +198,14 @@
       };
 
       const overlay = document.createElement('div');
+      const previousFocus = document.activeElement;
+      const host = document.getElementById('ascla-root') || document.body;
       overlay.className = 'ascla-image-editor-backdrop';
       overlay.innerHTML = `<section class="ascla-image-editor" role="dialog" aria-modal="true" aria-label="${escapeHTML(labels.title)}">
         <header class="ascla-image-editor-head"><div><h2>${escapeHTML(labels.title)}</h2><p>${escapeHTML(labels.hint)}</p></div><button type="button" class="image-editor-close" aria-label="${escapeHTML(labels.cancel)}">×</button></header>
         <div class="ascla-image-editor-body">
           <div class="image-editor-workspace">
-            <div class="image-editor-stage" tabindex="0" aria-label="${escapeHTML(labels.title)}"><img alt="" draggable="false"><div class="image-editor-crop-frame"><span></span></div></div>
+            <div class="image-editor-stage" role="group" tabindex="0" aria-label="${escapeHTML(labels.title)}"><img alt="" draggable="false"><div class="image-editor-crop-frame"><span></span></div></div>
             <div class="image-editor-tools">
               <button type="button" data-image-mode="crop" class="btn small primary">${escapeHTML(labels.crop)} · ${escapeHTML(config.label)}</button>
               ${config.allowFull ? `<button type="button" data-image-mode="full" class="btn small">${escapeHTML(labels.full)}</button>` : ''}
@@ -215,7 +217,8 @@
         </div>
         <footer class="ascla-image-editor-actions"><span class="image-editor-status" role="status" aria-live="polite"></span><button type="button" class="btn" data-image-cancel>${escapeHTML(labels.cancel)}</button><button type="button" class="btn primary" data-image-apply>${escapeHTML(labels.apply)}</button></footer>
       </section>`;
-      (document.getElementById('ascla-root') || document.body).append(overlay);
+      host.append(overlay);
+      host.dispatchEvent(new Event('ascla-dialog-change'));
 
       const stage = overlay.querySelector('.image-editor-stage');
       const cropFrame = overlay.querySelector('.image-editor-crop-frame');
@@ -322,6 +325,8 @@
         URL.revokeObjectURL(url);
         globalThis.removeEventListener('resize', layoutFrame);
         overlay.remove();
+        host.dispatchEvent(new Event('ascla-dialog-change'));
+        if (previousFocus?.isConnected) previousFocus.focus();
         if (error) reject(error); else resolve(value);
       }
 
@@ -388,7 +393,7 @@
       stage.addEventListener('pointercancel', endDrag);
       overlay.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); cleanup(null); return; }
-        if (mode !== 'crop') return;
+        if (mode !== 'crop' || event.target !== stage) return;
         const step = event.shiftKey ? 12 : 3;
         if (event.key === 'ArrowLeft') offsetX -= step;
         else if (event.key === 'ArrowRight') offsetX += step;

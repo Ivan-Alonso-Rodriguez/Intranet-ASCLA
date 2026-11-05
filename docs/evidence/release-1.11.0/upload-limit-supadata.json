@@ -1,0 +1,19 @@
+{
+  "version": "1.11.0",
+  "artifact": "dist/ascla-core-instalable.zip",
+  "sha256": "a2a3c85f6a68ff92227cb4ee753de20e9e5342ece96bc67d2bd0f05bc43e1ab2",
+  "bytes": 2023328,
+  "files": 211,
+  "upload_limit_bytes": 2097152,
+  "below_2MiB": true,
+  "crc_valid": true,
+  "all_retained_files_identical_to_complete_release": true,
+  "complete_release_sha256": "57b528f3b2731a3cb6c488c0b7e3d901c55fb26bc67e7551af11b87c6feb5dc2",
+  "complete_release_unchanged": true,
+  "omitted_translation_sources": [
+    "ascla-core/languages/ascla-core-en_US.po",
+    "ascla-core/languages/ascla-core-es_ES.po"
+  ],
+  "runtime_translation_catalogs_retained": true,
+  "scope": "Packaging-only variant; existing PHP, JavaScript, PDF.js, CSS and compiled translations remain byte-identical to the tested Supadata release. No server settings were changed and no new functional test run is claimed."
+}

@@ -1,0 +1,60 @@
+{
+  "stage": "Accesibilidad y navegación del 14 de octubre",
+  "date": "2026-10-14",
+  "completed_at_utc": "2026-10-14T07:03:52.819866+00:00",
+  "base_revision": "d01e3d12b6c404ba5aaa9fc4648f5989565bf590",
+  "base_branch": "development",
+  "working_tree_modified": true,
+  "plugin_version": "1.10.7",
+  "schema_version": 15,
+  "php_tests": 405,
+  "php_assertions": 5987,
+  "php_line_coverage_percent": 84.18,
+  "browser_checks": 46,
+  "accessibility_checks": 9,
+  "axe_version": "4.14.0",
+  "accessibility_states": 132,
+  "accessibility_violations": 0,
+  "accessibility_incomplete_rule_entries": 72,
+  "responsive_widths": [
+    360,
+    768,
+    1024
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "browser_engine": "Chromium",
+  "full_quality_ci_rerun": false,
+  "new_javascript_coverage": false,
+  "requirements_advanced": [
+    "RNF-015",
+    "RNF-016",
+    "RNF-013",
+    "RNF-017"
+  ],
+  "evidence": "docs/evidence/release-1.10.7/accessibility107.json",
+  "php_report": "test-results/accessibility107-junit.xml",
+  "clover_report": "test-results/accessibility107-clover.xml",
+  "browser_report": "test-results/accessibility107.json",
+  "limitations": "Sin certificación WCAG completa ni comprobación de todas las combinaciones/roles y contenido de terceros. Incomplete exige evaluación humana. Error HTTP 400 simulado; rechazo REST de Contacto vacío real. Proveedores y navegadores de destino pendientes.",
+  "package": {
+    "bytes": 1266848,
+    "sha256": "6d04d8ee135642377cb7499f5ba02079ab69595243022abfb79bcb45d8dabfa5",
+    "files": 167,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true
+  },
+  "source_hashes": {
+    "wp-content/plugins/ascla-core/assets/app.js": "b708ee31a148190bf7c2d0fb8e6449a2fc7207c50f334628ac7997a95d53ae6c",
+    "wp-content/plugins/ascla-core/assets/app.css": "b251d70731544baafba437e2a56244e185bd1806c175e03c459947721d8214e8",
+    "wp-content/plugins/ascla-core/assets/accessibility.js": "5d64730ead62d79928864091f3abfd6774d20bea87f386a765a7452761faf31b",
+    "wp-content/plugins/ascla-core/assets/image-editor.js": "c439c679fc41597072f7c9c2c020e13ffba40d2aa22823c47b688284e24c09e7",
+    "wp-content/plugins/ascla-core/src/Frontend/App.php": "c3ad5f2cc5f048741156fea6f5ea3f855864228beda569970dc9c6909e0938a9",
+    "wp-content/plugins/ascla-core/templates/app.php": "116109fbf9660a82e366ec022aff53089dba7795c844ab4aef14893a2838393d",
+    "wp-content/plugins/ascla-core/templates/shell.php": "ec77760007c3e146673be19f9c54d7ade1bb479d4d4bc29081482010f04998a0",
+    "tests/accessibility107.cjs": "b4bc45fb3107a80918e247fe699b61b320fddebe793086e6c9db0bc47c144915"
+  }
+}

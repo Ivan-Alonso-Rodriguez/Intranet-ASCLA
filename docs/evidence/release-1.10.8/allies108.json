@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-15",
+  "recorded_at_utc": "2026-10-15T05:40:18.226613+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "bugs": [
+    "506 / CP 066 / RF-081",
+    "507 / institutional ally detail"
+  ],
+  "scope": "Local focused lifecycle and content regression; no complete quality-ci or new coverage.",
+  "php": {
+    "tests": 98,
+    "assertions": 831,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "php_report": "test-results/allies108-junit.xml",
+  "browser": {
+    "scope": "Real disposable local WordPress; no remote deployment claim",
+    "checks": [
+      "Ficha institucional con beneficios, condiciones y contacto, sin plantilla de publicación ni desbordamiento móvil",
+      "Retirar desde la ficha elimina la tarjeta del catálogo y conserva el registro",
+      "Otro administrador puede editar una ficha inactiva sin publicarla ni perder los contactos",
+      "Reactivar conserva la identidad del registro y el listado incluye borradores de otros administradores",
+      "El asociado solo consulta aliados activos y no recibe controles administrativos",
+      "Detalle de asociado sin infracciones automáticas axe A/AA en el alcance revisado",
+      "La ficha también se presenta en inglés sin cambiar el contenido original"
+    ],
+    "errors": []
+  },
+  "portable_checks": 49,
+  "translations_per_locale": 1634,
+  "fixtures_cleaned": true,
+  "private_fixture_credentials_removed": true,
+  "remote_deployed_this_stage": true,
+  "screenshots": [
+    "test-results/allies108-catalog-light.png",
+    "test-results/allies108-detail-light.png",
+    "test-results/allies108-detail-dark-mobile.png",
+    "test-results/allies108-registry-dark.png"
+  ],
+  "source_sha256": {
+    "wp-content/plugins/ascla-core/src/Services/Allies.php": "fa71f7083e10f47564527de45f77866d59bf046c2f50b88ec9f84876402cf362",
+    "wp-content/plugins/ascla-core/src/Services/Content.php": "ea31dd53cda513a4774cecb73e4923284b2343db83d679de347f1df16013763d",
+    "wp-content/plugins/ascla-core/src/Services/ContentMeta.php": "0436f37a00c9e9c5d9f7469e849a5e6a841cde108fc026b46827f9a4fde662e2",
+    "wp-content/plugins/ascla-core/src/Services/FormRules.php": "7f7590785c664dedb3f2c923da67738c41d1cc2a195336ef6f5a87c887870341",
+    "wp-content/plugins/ascla-core/src/Rest/Router.php": "ccff092da6813feec896f82a357858bb276ece939b90d91ba4c08bfbc77546ac",
+    "wp-content/plugins/ascla-core/src/Frontend/App.php": "3aa547c7fb38d0c9f34eca79f8a8264c05be14d511b0d977032710a9aa9f28f2",
+    "wp-content/plugins/ascla-core/assets/app.js": "a52dfab6122392e68cbcfb2fb73f3e6e746518fba779c4fe3b56dd8c688662f7",
+    "wp-content/plugins/ascla-core/assets/app.css": "30cb900429fad41b529867be5f35a08e19ee5b04779a8206983df09d089ac82b",
+    "wp-content/plugins/ascla-core/assets/allies-ui.js": "f4df554ef0ffeb5aa19ce0acdf4b6482f5c8ea7bdf5c4dd57cf8652a420b9860",
+    "tests/php/AlliesLifecycleTest.php": "b9f3ad2a420e412d661b3af94ae1eb29e3cd911de703ea1f4761581b1ba9983d",
+    "tests/allies108.cjs": "ae6c3c924d2dd8a929f7ff672865d09cdef8a9fcae3420a1fdbff151630b048c",
+    "tests/allies108-fixture.php": "56cfb956837b5678ecf9106d495d87c6a110f87d245fbe0b73ebdfa014b60d47"
+  },
+  "published_qa": {
+    "evidence": "docs/evidence/release-1.10.8/allies108-qa.json",
+    "package_sha256": "afa592f04855d03aa3a2b56eb7ae8c8a64b9dbcf966a52116d8e029ce442d40a",
+    "scope": "Read-only existing-data review; no mutation cases repeated remotely."
+  }
+}

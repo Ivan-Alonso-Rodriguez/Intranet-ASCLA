@@ -1,0 +1,33 @@
+meta {
+  name: 06. Ana confirma el único cupo
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/events/{{eventoCupoId}}/register
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAna}}
+  X-WP-Nonce: {{nonceAna}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "accepted"
+  }
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Cupo confirmado y aforo completo", function () { expect(res.getBody().registered).to.equal("accepted");expect(Number(res.getBody().attending)).to.equal(1);expect(res.getBody().full).to.equal(true); });
+}

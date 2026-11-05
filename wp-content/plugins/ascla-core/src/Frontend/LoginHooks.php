@@ -20,7 +20,7 @@ final class LoginHooks
 
     public static function enqueueNativeAssets(): void
     {
-        wp_enqueue_style('ascla-login',ASCLA_URL.'assets/login.css',['login'],ASCLA_VERSION);
+        wp_enqueue_style('ascla-login',ASCLA_URL.'assets/login.css',['login'],App::assetVersion('assets/login.css'));
     }
 
     public static function bodyClasses(array $classes): array

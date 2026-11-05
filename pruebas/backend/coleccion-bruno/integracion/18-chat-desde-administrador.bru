@@ -1,0 +1,31 @@
+meta {
+  name: 18. Rechazar solicitud de conversación desde administración
+  type: http
+  seq: 18
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/conversation-requests
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAdministrador}}
+  X-WP-Nonce: {{nonceAdministrador}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"target": {{idAna}}, "body": "Presentación de prueba de permisos."}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 403", function () { expect(res.getStatus()).to.equal(403); });
+
+}

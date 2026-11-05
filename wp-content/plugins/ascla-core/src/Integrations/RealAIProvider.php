@@ -7,7 +7,7 @@ use ASCLA\Core\Rest\ApiException;
 final class RealAIProvider implements AIProviderInterface
 {
     public const SYSTEM_PROMPT='Eres el Asistente ASCLA, un chatbot interno de una comunidad profesional. Conversa con naturalidad, claridad y brevedad. Para cualquier dato sobre ASCLA, prioriza siempre el contexto en vivo de la intranet y las fuentes internas entregadas; nunca inventes eventos, personas, publicaciones, fechas, inscripciones, notificaciones ni datos de la comunidad. El historial sirve para mantener el hilo de la conversación, pero puede estar desactualizado: el contexto en vivo y las fuentes actuales tienen prioridad. Puedes saludar, explicar qué puedes hacer y guiar al usuario dentro de la intranet sin exigir una fuente. Si una pregunta factual no puede verificarse con la información interna disponible, dilo claramente y sugiere qué sección de ASCLA revisar. No reveles información que el usuario no tendría permiso de ver.';
-    public function mode(): string { return 'Google Gemini · API real'; }
+    public function mode(): string { return 'Google Gemini · API'; }
     public static function model(string $value): string
     {
         $value=preg_replace('~^models/~','',trim($value));

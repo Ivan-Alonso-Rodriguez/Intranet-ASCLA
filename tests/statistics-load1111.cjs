@@ -1,0 +1,23 @@
+/* Statistics clarity and accessibility against an owned, disposable loopback dataset. */
+const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const out=path.resolve(process.env.ASCLA_STATISTICS_LOAD_OUT||'test-results/statistics-load-20261105');
+const env=Object.fromEntries(fs.readFileSync(path.join(out,'private/lab.env'),'utf8').split(/\r?\n/).filter(s=>s.includes('=')).map(s=>[s.slice(0,s.indexOf('=')),s.slice(s.indexOf('=')+1)]));
+const base=env.ASCLA_SITE_URL;if(process.env.ASCLA_E2E_EPHEMERAL!=='1'||!['localhost','127.0.0.1'].includes(new URL(base).hostname))throw Error('Disposable loopback environment required');
+const checks=[],errors=[],scans=[],images=[];let browser,context,page,video;
+async function capture(name){await page.locator('.stats-participation-summary').screenshot({path:path.join(out,name+'.png')});images.push(name+'.png');await page.addScriptTag({path:process.env.ASCLA_AXE_PATH||'test-results/visual-tools/axe.min.js'});const result=await page.evaluate(()=>axe.run(document.querySelector('#stats-view'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}}));scans.push({name,violations:result.violations.map(v=>({id:v.id,nodes:v.nodes.length}))});assert.deepEqual(scans.at(-1).violations,[]);}
+const pass=text=>{checks.push(text);console.log('PASS '+text);};
+(async()=>{try{
+ browser=await chromium.launch({headless:true,channel:'chrome'});context=await browser.newContext({viewport:{width:1440,height:1080},timezoneId:'America/Lima',recordVideo:{dir:path.join(out,'videos'),size:{width:1440,height:1080}}});page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(base+'/login/');await page.locator('#user_login').fill(env.ASCLA_ADMIN_USER);await page.locator('#user_pass').fill(env.ASCLA_ADMIN_PASSWORD);await Promise.all([page.waitForURL(u=>!u.pathname.endsWith('/login/')),page.locator('#wp-submit').click()]);
+ await page.goto(base+'/administracion/?section=estadisticas');await page.locator('.stats-participation-summary').waitFor();
+ const d=await page.evaluate(async()=>{const r=await fetch(ASCLA.api+'admin/statistics',{headers:{'X-WP-Nonce':ASCLA.nonce}});if(!r.ok)throw Error('Statistics API failed');return r.json();});
+ assert.deepEqual(await page.locator('.stats-summary-card h4').allTextContents(),['Actividad','Asistencias','Personas']);
+ for(const key of ['events','registrations','registrants','attendees','attendances','recurring','average'])assert.equal(await page.locator(`[data-stat="${key}"] > strong`).innerText(),String(d.summary[key]));
+ assert.ok(d.summary.registrations>d.summary.registrants);assert.ok(d.summary.attendances>d.summary.attendees);assert.match(await page.locator('[data-stat="registrants"]').innerText(),/inscripción confirmada/);assert.match(await page.locator('.stats-summary-card').nth(2).innerText(),/una sola vez/);
+ pass('Asistencias ocupa el centro; Personas muestra inscritos únicos y conserva la comparación con asistentes reales');
+ await capture('resumen-claro');await page.evaluate(()=>{document.documentElement.dataset.asclaTheme='dark';document.documentElement.style.colorScheme='dark';});await capture('resumen-oscuro');
+ await page.setViewportSize({width:390,height:844});await capture('resumen-movil-oscuro');await page.evaluate(()=>{document.documentElement.dataset.asclaTheme='light';document.documentElement.style.colorScheme='light';});await capture('resumen-movil-claro');assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);pass('Resumen legible en móvil y ambos temas, sin desbordamiento ni incidencias automáticas WCAG A/AA');
+ await page.setViewportSize({width:1440,height:1080});for(const section of ['users','topics','trends','overview']){await page.locator(`[data-stats-action="section"][data-section="${section}"]`).click();await page.locator('#stats-view .stats-section').first().waitFor();}pass('Participación, intereses, comparación de períodos y resumen conservan la navegación');
+ assert.deepEqual(errors,[]);
+}catch(error){errors.push(error.message);console.error(error.stack);if(page)await page.screenshot({path:path.join(out,'failure.png')}).catch(()=>{});process.exitCode=1;
+}finally{if(context){await context.close();video=await page.video()?.path();}if(browser)await browser.close();fs.writeFileSync(path.join(out,'browser.json'),JSON.stringify({status:errors.length?'FAIL':'PASS',checks,errors,accessibility:scans,screenshots:images,video:video?path.relative(out,video).split(path.sep).join('/'):null,scope:'Owned disposable loopback WordPress with synthetic registrations and attendance'},null,2));}})();

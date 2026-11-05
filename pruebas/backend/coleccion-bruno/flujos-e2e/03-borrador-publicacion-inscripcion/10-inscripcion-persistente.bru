@@ -1,0 +1,26 @@
+meta {
+  name: 10. Recargar y comprobar la inscripción
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/events/{{eventoPublicacionId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAna}}
+  X-WP-Nonce: {{nonceAna}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Validación: 10. Recargar y comprobar la inscripción", function () { expect(res.getBody().registered).to.equal("accepted"); });
+}

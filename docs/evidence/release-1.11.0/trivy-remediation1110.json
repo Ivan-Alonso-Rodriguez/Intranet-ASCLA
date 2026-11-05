@@ -1,0 +1,209 @@
+{
+  "date": "2026-10-26T08:36:17.716808+00:00",
+  "version": "1.11.0",
+  "status": "TRIVY_PASS",
+  "scope": "Corrección de 379 hallazgos bloqueantes en imágenes Docker; Jenkins local autorizado, sin despliegue remoto ni promoción de ramas.",
+  "before": {
+    "blocking": 379,
+    "by_image": {
+      "app": 357,
+      "cli": 0,
+      "db": 21,
+      "mailpit": 1
+    }
+  },
+  "after": {
+    "blocking": 0,
+    "all_severities": 0,
+    "images": [
+      {
+        "role": "app",
+        "reference": "ascla-ci-app:jenkins-ascla-local-2",
+        "id": "sha256:3299e1c3a5f9d35fa783e55e80476d9de516912260b5180b58ef47063f4a14cf",
+        "built": true,
+        "status": "PASS",
+        "config_id": "sha256:de452e09c1e9852cd135fc0d89822cd395001b78c2067e548a3ef3d6a0f8c4cf",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 0,
+        "report_sha256": "4a434bcf572532609589262667d783a2b961e33a40f13ad9957fb86635b4ce01"
+      },
+      {
+        "role": "cli",
+        "reference": "ascla-ci-cli:jenkins-ascla-local-2",
+        "id": "sha256:6e7d60e9a30154a2014c003976a231a918d6b9f4d9d7438fcaf1d8753648d80d",
+        "built": true,
+        "status": "PASS",
+        "config_id": "sha256:bc3042431b066cba2f1c68ab07173eb354d16925c42d93f4994920b6888cec64",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 0,
+        "report_sha256": "056a5d2e515d0750be712df0a52e4f8ce4b681965041babcc57ab744a808ae7a"
+      },
+      {
+        "role": "db",
+        "reference": "ascla-ci-db:jenkins-ascla-local-2",
+        "id": "sha256:906533c61ed83ccca954a806f23322b7dbf16302b9c847c1d7d0f8ad4861c4fb",
+        "built": true,
+        "status": "PASS",
+        "config_id": "sha256:2d8a6419c21df09e7df4bff588a32f8b616e6f6a3dca53d89cd620acd583cb90",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 0,
+        "report_sha256": "4c586182fdfd63147c6dd39cd762eb13c408f1331e50bf81ca76208ea52f2c00"
+      },
+      {
+        "role": "mailpit",
+        "reference": "ascla-ci-mailpit:jenkins-ascla-local-2",
+        "id": "sha256:f4964a77d804528f48b81d72ea3d473d63e148ddf8baac3a0b0183ea4cc73cbd",
+        "built": true,
+        "status": "PASS",
+        "config_id": "sha256:c11e378c70e90bcbf09f1ac228d971e00fe65e716c45955c003fbd127d8efb0c",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 0,
+        "report_sha256": "a3c38212abc7954989b7de9948974bf2ae8f90b21f737867c965d5dff99b56e3"
+      }
+    ],
+    "scanner": "aquasec/trivy:0.76.1@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c",
+    "source_sha256": "1d66dccce3b9b5919d6e6210801e7a5595f39f19e02b38e0a9eaeeb9055a17db"
+  },
+  "jenkins": {
+    "build": 2,
+    "result": "SUCCESS",
+    "snapshot_commit": "12137f48fc82892a9a61ebf9d52ad5b0353b20e7",
+    "branch": "main (snapshot privado sin despliegue)",
+    "deployment_skipped": true,
+    "html_and_json_archived": true,
+    "latest_only_retention": true
+  },
+  "policy": {
+    "tests": 17,
+    "status": "PASS",
+    "medium_high_critical_unknown_block": true,
+    "unfixed_findings_block": true,
+    "exceptions_or_vex": false
+  },
+  "quality": {
+    "status": "PASS",
+    "snapshot_commit": "17f12459b3fc2e7dc71f25a3a6cf697c21d64b89",
+    "php": {
+      "tests": 810,
+      "assertions": 8796,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "php_test_files": 87,
+    "javascript_assets": 15,
+    "browser_suite_completed": true,
+    "coverage_guard": {
+      "status": "PASS",
+      "complete_suite_accepted": true,
+      "missing_test_file_rejected": true,
+      "removed_test_cases": 10
+    }
+  },
+  "migration": {
+    "date": "2026-10-26T08:08:32.853132+00:00",
+    "status": "PASS",
+    "old_version": "11.4.13-MariaDB-ubu2404",
+    "new_version": "11.4.13-MariaDB",
+    "same_data_volume": true,
+    "utf8_json_blob_preserved": true,
+    "before_sha256": "537cb61069d744c0a526aee34623e79fb9229f455c02033ff01b3737612d9f07",
+    "after_sha256": "537cb61069d744c0a526aee34623e79fb9229f455c02033ff01b3737612d9f07"
+  },
+  "smtp_password_recovery": {
+    "status": "PASS",
+    "checks": [
+      "La recuperación conserva el formulario y no revela errores de cuenta",
+      "WordPress entrega el correo real por SMTP y el buzón permite consultarlo",
+      "El enlace permite restablecer la contraseña y acceder con la nueva credencial",
+      "El enlace consumido no se puede reutilizar y no hay errores JavaScript"
+    ],
+    "reset_links_or_passwords_saved": false
+  },
+  "web_security": {
+    "date": "2026-10-26T08:34:19.504789+00:00",
+    "status": "FAIL",
+    "scope_note": "ASCLA-owned HTML routes and 18 documented GET REST operations in disposable local QA. Excludes native WordPress admin, arbitrary CMS/theme/plugin routes, destructive writes and live external integrations. No universal absence-of-vulnerabilities claim.",
+    "phases": [
+      {
+        "phase": "frontend",
+        "status": "FAIL",
+        "risk_counts": {
+          "0": 9,
+          "1": 1,
+          "2": 0,
+          "3": 0
+        }
+      },
+      {
+        "phase": "backend",
+        "status": "PASS",
+        "risk_counts": {
+          "0": 1,
+          "1": 0,
+          "2": 0,
+          "3": 0
+        }
+      },
+      {
+        "phase": "CSP",
+        "status": "PASS"
+      },
+      {
+        "phase": "Browser",
+        "status": "PASS"
+      },
+      {
+        "phase": "Source consistency",
+        "status": "PASS"
+      }
+    ],
+    "review": {
+      "alert": "10096",
+      "source": "WordPress 7.1.3 core CSS",
+      "observation": "Los tres supuestos timestamps son partes decimales de componentes de color RGB. El control nativo conserva FAIL, sin excepciones ni alteración del CSS.",
+      "native_result_unchanged": "FAIL"
+    }
+  },
+  "sonarqube": {
+    "rerun_for_this_remediation": false,
+    "previous_evidence": "docs/evidence/release-1.11.0/full-qa1110.json",
+    "previous_qa_and_uat_quality_gate": "OK",
+    "previous_coverage_percent": 91.2
+  },
+  "plugin": {
+    "production_files_unchanged": 214,
+    "zip_bytes": 2098745,
+    "zip_sha256": "ab1a742f5729d3c3979fd90b8e76f11a7832ce7c37555998f46c074579604a69"
+  },
+  "notes": [
+    "WordPress/PHP/Apache y MariaDB conservan versiones funcionales; las bases del runtime cambian a Alpine con paquetes actualizados.",
+    "El capturador SMTP local usa MailDev con dependencias corregidas; el servicio conserva el nombre mailpit y el puerto SMTP 1025.",
+    "No se alteró el criterio de Trivy ni se filtraron vulnerabilidades sin versión corregida.",
+    "El resultado ZAP se conserva tal como lo produce su política; PASS de Trivy no implica aprobación de ZAP."
+  ]
+}

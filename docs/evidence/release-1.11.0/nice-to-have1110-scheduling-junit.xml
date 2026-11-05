@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="1" assertions="17" errors="0" failures="0" skipped="0" time="5.667710">
+    <testsuite name="NiceToHaveSchedulingTest" file="tests/php/NiceToHaveSchedulingTest.php" tests="1" assertions="17" errors="0" failures="0" skipped="0" time="5.667710">
+      <testcase name="testScheduledContentStaysHiddenUntilTheCronPublishesItForBothAuthorizedRoles" file="tests/php/NiceToHaveSchedulingTest.php" line="8" class="NiceToHaveSchedulingTest" classname="NiceToHaveSchedulingTest" assertions="17" time="5.667710"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

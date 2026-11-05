@@ -1,0 +1,249 @@
+{
+  "date": "2026-10-17T23:23:57.002103+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "scope": "UI usability and presentation with real local WordPress REST and synthetic data. No remote installation, coverage collection, new backend calculations or UAT certification.",
+  "run": "test-results/statistics-layout108-20261017T232221Z-12293",
+  "source_snapshot": "current-31",
+  "production_matches_tested_snapshot": true,
+  "regression_run": "test-results/statistics-layout108-20261017T231546Z-11266",
+  "regression_source_snapshot": "current-29",
+  "final_production_delta": [
+    "wp-content/plugins/ascla-core/assets/admin-statistics.js",
+    "wp-content/plugins/ascla-core/assets/app.css",
+    "wp-content/plugins/ascla-core/languages/ascla-core-en_US.mo",
+    "wp-content/plugins/ascla-core/languages/ascla-core-en_US.po",
+    "wp-content/plugins/ascla-core/languages/ascla-core-es_ES.mo",
+    "wp-content/plugins/ascla-core/languages/ascla-core-es_ES.po",
+    "wp-content/plugins/ascla-core/languages/en.json"
+  ],
+  "final_delta_explanation": "Final CSS improves contrast and row controls. JavaScript changes after the functional regression are confined to roster row presentation, visible units and their translations. Other JavaScript and all PHP remain unchanged. Final browser checks include saving and verifying a corrected row, CSS and usability.",
+  "production_changes": [
+    "wp-content/plugins/ascla-core/assets/admin-statistics.js",
+    "wp-content/plugins/ascla-core/assets/app.css",
+    "wp-content/plugins/ascla-core/assets/app.js",
+    "wp-content/plugins/ascla-core/languages/ascla-core-en_US.mo",
+    "wp-content/plugins/ascla-core/languages/ascla-core-en_US.po",
+    "wp-content/plugins/ascla-core/languages/ascla-core-es_ES.mo",
+    "wp-content/plugins/ascla-core/languages/ascla-core-es_ES.po",
+    "wp-content/plugins/ascla-core/languages/en.json"
+  ],
+  "php_sources_unchanged_from_previous_stage": true,
+  "full_php_suite_rerun": false,
+  "browser_regression": {
+    "results": [
+      {
+        "name": "administrator: estadísticas y asistencia requieren capacidad en REST",
+        "status": "passed"
+      },
+      {
+        "name": "administrator: acceso al menú y vistas",
+        "status": "passed"
+      },
+      {
+        "name": "IA: clasificación explícita sin inventar asistencias",
+        "status": "passed"
+      },
+      {
+        "name": "Vista previa CSV, corrección manual y cierre de asistencia",
+        "status": "passed"
+      },
+      {
+        "name": "Forms: previsualizar, revisar y confirmar sin modificar antes",
+        "status": "passed"
+      },
+      {
+        "name": "Reportes: revisar antes de eliminar y conservar la publicación",
+        "status": "passed"
+      },
+      {
+        "name": "Solicitudes: archivar conserva el contenido y el historial",
+        "status": "passed"
+      },
+      {
+        "name": "Estadísticas en wp-admin y adaptación móvil",
+        "status": "passed"
+      },
+      {
+        "name": "ascla_executive: estadísticas y asistencia requieren capacidad en REST",
+        "status": "passed"
+      },
+      {
+        "name": "ascla_executive: acceso al menú y vistas",
+        "status": "passed"
+      },
+      {
+        "name": "ascla_moderator: estadísticas y asistencia requieren capacidad en REST",
+        "status": "passed"
+      },
+      {
+        "name": "ascla_moderator: acceso al menú y vistas",
+        "status": "passed"
+      },
+      {
+        "name": "ascla_member: estadísticas y asistencia requieren capacidad en REST",
+        "status": "passed"
+      }
+    ],
+    "errors": []
+  },
+  "usability_browser": {
+    "checks": [
+      "Los indicadores y la cobertura coinciden con los registros reales del servidor",
+      "Resumen separa personas, asistencias, inscripciones y datos de la comunidad, con ayudas accesibles",
+      "Las cinco vistas explican su propósito, conservan los filtros y mantienen el foco de teclado",
+      "Intereses distingue selecciones actuales, participación y fuentes sin sumar duplicados",
+      "La comparación explica fechas, listas verificadas y variación porcentual",
+      "Buscar actualiza opciones; elegir evento filtra cifras y Quitar filtros conserva las fechas",
+      "Un filtro rechazado conserva el formulario y permite corregirlo sin perder la vista",
+      "Un período sin eventos muestra Sin datos y orienta para cambiar fechas, sin inventar tasas",
+      "Las filas muestran unidades claras, guardan la corrección y permiten verificar de nuevo la lista",
+      "El registro guía los tres pasos, explica los estados y se adapta a móvil y ambos temas"
+    ],
+    "errors": [],
+    "scans": [
+      {
+        "name": "statistics-overview-light",
+        "width": 1440,
+        "theme": "light",
+        "violations": []
+      },
+      {
+        "name": "statistics-overview-dark",
+        "width": 1440,
+        "theme": "dark",
+        "violations": []
+      },
+      {
+        "name": "statistics-overview-tablet",
+        "width": 900,
+        "theme": "dark",
+        "violations": []
+      },
+      {
+        "name": "statistics-users",
+        "width": 1440,
+        "theme": "light",
+        "violations": []
+      },
+      {
+        "name": "statistics-topics",
+        "width": 1440,
+        "theme": "light",
+        "violations": []
+      },
+      {
+        "name": "statistics-trends",
+        "width": 1440,
+        "theme": "light",
+        "violations": []
+      },
+      {
+        "name": "statistics-ai",
+        "width": 1440,
+        "theme": "light",
+        "violations": []
+      },
+      {
+        "name": "statistics-empty",
+        "width": 390,
+        "theme": "dark",
+        "violations": []
+      },
+      {
+        "name": "statistics-overview-mobile",
+        "width": 360,
+        "theme": "light",
+        "violations": []
+      },
+      {
+        "name": "statistics-roster-dark",
+        "width": 1440,
+        "theme": "dark",
+        "violations": []
+      },
+      {
+        "name": "statistics-roster-mobile",
+        "width": 360,
+        "theme": "light",
+        "violations": []
+      }
+    ],
+    "views": [
+      "statistics-overview-light.png",
+      "statistics-overview-dark.png",
+      "statistics-overview-tablet.png",
+      "statistics-users.png",
+      "statistics-topics.png",
+      "statistics-trends.png",
+      "statistics-ai.png",
+      "statistics-empty.png",
+      "statistics-overview-mobile.png",
+      "statistics-roster-dark.png",
+      "statistics-roster-mobile.png"
+    ]
+  },
+  "portable_checks": 49,
+  "data_provenance": {
+    "statistics": "Stored WordPress registration, attendance and profile records",
+    "comparison": "UI counts checked against the REST response",
+    "ai_provider_in_test": "Local mock keyword classification; no live external AI calls",
+    "permissions": "Administrator and executive allowed; moderator/member, invalid nonce and anonymous requests checked",
+    "csv": "Real preview, import and persistence; reconnections and manual corrections checked"
+  },
+  "coverage_collected": false,
+  "coverage_files_unchanged": {
+    "clover.xml": "2008bce81b5693cc82662820d8ff8aa19004cdacc082295365e906b6b9d90709",
+    "junit.xml": "bea4733ddbfab15f29230c5b08f1c7aac5a9586fc4ad87c7ea4ad503c47440ae",
+    "lcov.info": "c68411ab949218a79986a9548e775a364d0535dfe58cb248f65389e8523adb10",
+    "source-revision": "5e9488a9dd2e9101025ac5963ac77c71771b7b8bc6d0ac170896e53374b6fa39"
+  },
+  "temporary_environment_removed": true,
+  "translation_catalogs": {
+    "messages_per_language": 2001,
+    "locales": [
+      "es_ES",
+      "en_US"
+    ]
+  },
+  "requirement_statuses_changed": false,
+  "package": {
+    "version": "1.10.8",
+    "bytes": 1541495,
+    "files": 196,
+    "sha256": "bc9726468b3cb5accea8b82c9d7230fa4c794da769bc4836f965e6d16c4d43c5",
+    "source_bytes_match": true,
+    "crc_valid": true
+  },
+  "artifacts": {
+    "test-results/statistics-layout108-20261017T232221Z-12293/statistics-ui108.json": "64be3f1ec1c2f17f17bd0aa5cd7d74a7745bbecc76aa7d3e73bd97dc04694d11",
+    "test-results/statistics-layout108-20261017T232221Z-12293/sanity.log": "8755860c11c8d3f9a1de749e02b68760d94f38c5cd87cadef867e4a455591434",
+    "test-results/statistics-layout108-20261017T232221Z-12293/browser-ui.log": "09ea6049341ae62a61013548f2e6a0281f8129e102c56b97fd2a9e1e2dc13592",
+    "test-results/statistics-layout108-20261017T232221Z-12293/attendance-fixture.log": "d77b7a8dfcb0d7c6c8d21831104a8a467e45deb9c96e6da5434ce08eb0fcd91e",
+    "test-results/statistics-layout108-20261017T232221Z-12293/coverage-before.sha256": "1ffb945d05462735dd93a1e2ced23a30d856af26eaa4c7bb4b08cd57c311e329",
+    "test-results/statistics-layout108-20261017T232221Z-12293/coverage-after.sha256": "1ffb945d05462735dd93a1e2ced23a30d856af26eaa4c7bb4b08cd57c311e329",
+    "test-results/statistics-layout108-20261017T232221Z-12293/fixture-cleanup.log": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "test-results/statistics-layout108-20261017T232221Z-12293/cleanup.log": "9c9fdd32fe32b4885c12538dd05d3fae96db45b155c911b0696dd373ba9898d9",
+    "test-results/statistics-layout108-20261017T231546Z-11266/statistics.json": "9fed697719067c48ed58d39798e7a5143fcc5febf0fd15b186a3e951f662f690",
+    "test-results/statistics-layout108-20261017T231546Z-11266/browser-regression.log": "4e751e329aa386a2d03284b9f15eaaf94ae9f7a86a4b8bd958ab1d070f829c03",
+    "test-results/statistics-layout108-20261017T231546Z-11266/sanity.log": "8755860c11c8d3f9a1de749e02b68760d94f38c5cd87cadef867e4a455591434",
+    "test-results/statistics-layout108-20261017T231546Z-11266/cleanup.log": "0de4da96fc5557b21c600a1d77cac1701f0281e8257536a99d7209d8c54ea159",
+    "test-results/statistics-layout108-20261017T232221Z-12293/statistics-overview-light.png": "b7d7dff7643bd83eb15dd536d06ea6ff31300132390c3b6508334c2404952b0a",
+    "test-results/statistics-layout108-20261017T232221Z-12293/statistics-overview-dark.png": "344e89eeb622bd995465b3c0887a962b5afe76baddab45b45e6e73f69f899d11",
+    "test-results/statistics-layout108-20261017T232221Z-12293/statistics-overview-tablet.png": "eb961d4b08dda3644c2dc827a4b04e6219b50b24fe78031c0a51601db7848836",
+    "test-results/statistics-layout108-20261017T232221Z-12293/statistics-users.png": "45f38cbe1631e1958a3048646319ac203e41f36dc3e335d1d34c602902edbd99",
+    "test-results/statistics-layout108-20261017T232221Z-12293/statistics-topics.png": "8f371e93cf52e78ab2ed858a495d43d0eb3c0fa7c79536358589f846b4058ee0",
+    "test-results/statistics-layout108-20261017T232221Z-12293/statistics-trends.png": "962532c7885ca6a62b5a919b37bcc4c47b757d9014335fdc1703643c91ecf10f",
+    "test-results/statistics-layout108-20261017T232221Z-12293/statistics-ai.png": "bf7090219cc5bd329bf6f4bc93b6105a2a812f92ef2acf2a8cde1dd629a44497",
+    "test-results/statistics-layout108-20261017T232221Z-12293/statistics-empty.png": "89ab8d9df82352b4323ab835df3dbd6f9bff8f0962bfc96e857496faf00e5910",
+    "test-results/statistics-layout108-20261017T232221Z-12293/statistics-overview-mobile.png": "52d4eccaab7c775b8d9169189cf9dadc2bb63c3075b3fbf6073c0124f0320012",
+    "test-results/statistics-layout108-20261017T232221Z-12293/statistics-roster-dark.png": "ffe52ff5e30cbc895020ece0af2f5aea748ab2326e1f55e5130dbcfcdb1e5fce",
+    "test-results/statistics-layout108-20261017T232221Z-12293/statistics-roster-mobile.png": "14cbfd47df22424a2d1f2f9e3d94fa212a2d7ab26aca676a85bfae3f9068e071",
+    "test-results/statistics-layout108-run.sh": "39b7dac6653af10fdbb17800225b5ad572698a58b392fa6a09a2198753e907f5",
+    "test-results/statistics-layout108-final-run.sh": "fdbd883a420b873c8817b43e2782f13cd7b7281062f3a8a0dca180f0a1982555",
+    "test-results/statistics-ui108.cjs": "358d29ae8d9c825462c11749151dabb6a354c0951c21b7515a937bb69327af6a",
+    "test-results/statistics-ui108-fixture.php": "0a8e30b8d69f2617d8f257a9fe7cf77bd287dc023d79afbebf6f00624d333ef6",
+    "test-results/sonar/current-29-source-hashes.json": "7924b1f092b7e0e12e6ae064cf9b317e4b93e6f12455f8ffb3e22771d083e838",
+    "test-results/sonar/current-31-source-hashes.json": "cb55712b9c8656ca8c7f3015aad0d8bc3260a9278c495bbbc1debda3cf58757d"
+  }
+}

@@ -43,8 +43,10 @@ async function uploadPhoto(p){await p.goto(base+'/perfil/');await p.locator('[da
    await b.locator('.modal [data-decision="accept"]').click();await b.locator('.modal [data-state="connected"]').waitFor();
    await until(()=>a.locator('.modal [data-state="connected"]').count(),'Sender did not see acceptance');
    const left=(await ok(a,'profiles/'+ub.id)).connection,right=(await ok(b,'profiles/'+ua.id)).connection;
-   assert.equal(left.can_message,true);assert.equal(right.can_message,true);assert.equal((await ok(b,'connections')).incoming.length,0);
+   assert.equal(left.can_message,true);assert.equal(right.can_message,true);assert.ok(left.connected_at);assert.equal(left.connected_at,right.connected_at);assert.equal((await ok(b,'connections')).incoming.length,0);
    assert.equal(await b.locator('.modal [data-action="message-start"]').count(),1);
+   await b.goto(base+'/directorio/');const confirmed=b.locator('#connections-panel details').filter({hasText:'Conexiones confirmadas'});await confirmed.locator('summary').click();const confirmedRow=confirmed.locator('.connection-row').filter({has:b.locator(`[data-member-connection="${ua.id}"]`)});await confirmedRow.waitFor();
+   assert.equal((await confirmedRow.locator('.connection-position').innerText()).trim(),'Alba Cargo');assert.equal((await confirmedRow.locator('.connection-company').innerText()).trim(),'Organización Alba');assert.ok((await confirmedRow.locator('.connection-confirmed-date time').innerText()).trim());assert.ok(await confirmedRow.locator('.avatar').count());
   });
   await test('06 · Fotos reales subidas al módulo privado se guardan en ambos perfiles',async()=>{
    await uploadPhoto(a);await uploadPhoto(b);assert.ok((await ok(a,'profiles/'+ub.id)).photo_url);assert.ok((await ok(b,'profiles/'+ua.id)).photo_url);

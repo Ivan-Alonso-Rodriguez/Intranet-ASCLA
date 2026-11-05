@@ -1,0 +1,223 @@
+{
+  "date": "2026-10-17T19:24:26.258238+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "baseline_commit": "877568c3fe16695ca3ede931ef5f1de911539ffa",
+  "scope": "Disposable local WordPress with synthetic accounts. Real UI/REST workflows and PHP integration tests. AI HTTP transports are intercepted; no billed provider calls, new coverage, remote installation or UAT acceptance claim.",
+  "source_snapshot": "current-17",
+  "production_matches_tested_snapshot": true,
+  "usability": {
+    "moderation_queues": [
+      "Publicaciones",
+      "Comentarios",
+      "Reportes recibidos"
+    ],
+    "saved_drafts_separate": true,
+    "mobile_publication_rows_readable": true,
+    "reviewed_reports_separate": true,
+    "existing_authorizations_and_decision_reasons_preserved": true,
+    "profile_location_hints_removed": true,
+    "location_required_indicator": "País/región",
+    "existing_location_validation_preserved": true,
+    "phone_private_notice_matches_birthday_style": true,
+    "event_labels_and_examples_clarified": true,
+    "event_incomplete_draft_workflow_preserved": true,
+    "english_labels_checked": true,
+    "gettext_messages_per_locale": 1826
+  },
+  "rag": {
+    "method": "Lexical retrieval with title/body weighting, authorized excerpts, live intranet context and source-reference membership validation.",
+    "providers": [
+      "Gemini",
+      "OpenAI",
+      "DeepSeek"
+    ],
+    "provider_http_intercepted": true,
+    "integration_tests": 6,
+    "assertions": 117,
+    "checks": [
+      "Published authorized resources reach each provider context",
+      "Other authors drafts and unreviewed generated content are excluded",
+      "Reserved identities are removed before sending context",
+      "Unknown source identifiers are excluded from displayed references",
+      "Chained follow-up questions retrieve the original topic",
+      "A new thread without history does not reuse the previous topic or call the provider without evidence"
+    ],
+    "limitations": "Lexical retrieval, not a vector index. Source-ID validation does not semantically fact-check every generated sentence. Real provider response quality, availability and remote deployment still require their own validation."
+  },
+  "phpunit": {
+    "tests": 688,
+    "assertions": 7749,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "coverage_collected": false,
+    "source_snapshot": "current-16",
+    "run": "test-results/usability108-20261017T191515Z-1742",
+    "php_sources_and_tests_match_final_snapshot": true,
+    "final_delta": [
+      "wp-content/plugins/ascla-core/languages/ascla-core-en_US.mo",
+      "wp-content/plugins/ascla-core/languages/ascla-core-en_US.po",
+      "wp-content/plugins/ascla-core/languages/ascla-core-es_ES.mo",
+      "wp-content/plugins/ascla-core/languages/ascla-core-es_ES.po",
+      "wp-content/plugins/ascla-core/languages/en.json"
+    ],
+    "final_delta_validation": "49 portable checks and browser workflows repeated after adding the Status gettext label."
+  },
+  "portable_checks": 49,
+  "browser": {
+    "checks": [
+      "Publicaciones por aprobar y borradores están separados; los borradores siguen accesibles",
+      "Comentarios explica Aprobar y Mantener oculto; aprobar conserva la confirmación, publica el comentario y actualiza la bandeja",
+      "Los reportes tienen una explicación propia; revisar conserva el contenido y deja el registro en Reportes ya revisados",
+      "La navegación identifica tareas de IA, consultas de Contacto e historial con nombres claros",
+      "Perfil retira las dos ayudas, marca solo País/región en ubicación y muestra el aviso privado del teléfono sin afectar el guardado",
+      "Crear evento usa descripción, publicación, asistentes y avisos explicados; guardar un borrador incompleto sigue permitido",
+      "La nueva presentación mantiene la moderación del rol autorizado y rechaza el acceso de un asociado",
+      "Los nuevos nombres de moderación y el aviso del teléfono también se muestran en inglés"
+    ],
+    "errors": [],
+    "scans": [
+      {
+        "name": "moderation-desktop-dark",
+        "violations": []
+      },
+      {
+        "name": "moderation-mobile-light",
+        "violations": []
+      },
+      {
+        "name": "profile-simple-desktop-dark",
+        "violations": []
+      },
+      {
+        "name": "profile-simple-mobile-light",
+        "violations": []
+      }
+    ],
+    "views": [
+      "moderation-desktop-dark.png",
+      "moderation-mobile-light.png",
+      "profile-simple-desktop-dark.png",
+      "profile-simple-mobile-light.png",
+      "event-editor-clarified.png"
+    ],
+    "viewports": [
+      1440,
+      390
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "roles": [
+      "administrator",
+      "ascla_moderator",
+      "ascla_member"
+    ],
+    "automated_wcag_a_aa_violations": 0
+  },
+  "coverage": {
+    "collected": false,
+    "previous_reports_unchanged": true,
+    "sha256": {
+      "clover.xml": "2008bce81b5693cc82662820d8ff8aa19004cdacc082295365e906b6b9d90709",
+      "junit.xml": "bea4733ddbfab15f29230c5b08f1c7aac5a9586fc4ad87c7ea4ad503c47440ae",
+      "lcov.info": "c68411ab949218a79986a9548e775a364d0535dfe58cb248f65389e8523adb10",
+      "source-revision": "5e9488a9dd2e9101025ac5963ac77c71771b7b8bc6d0ac170896e53374b6fa39"
+    }
+  },
+  "package": {
+    "files": 196,
+    "bytes": 1505892,
+    "sha256": "26d41ba8927695d418fff5f2e457448b433ef6e9e283cc57b0e9b9960f565686",
+    "manifest": "docs/evidence/release-1.10.8/package.json"
+  },
+  "cleanup": {
+    "temporary_projects_removed": true,
+    "temporary_environment_files_removed": true,
+    "fixture_accounts_and_content_removed": true
+  },
+  "artifacts": [
+    {
+      "path": "test-results/usability108-20261017T192330Z-2696/usability108.json",
+      "sha256": "596fe6608270d0070c2ae85caa9d0540121bc7fb0ef90c2ca62eb20a7caa038b"
+    },
+    {
+      "path": "test-results/usability108-20261017T192330Z-2696/browser.log",
+      "sha256": "e7e2e78f7830657d6239c156621ffc0a9342517f141a799a554b61264d97e0d2"
+    },
+    {
+      "path": "test-results/usability108-20261017T192330Z-2696/sanity.log",
+      "sha256": "8755860c11c8d3f9a1de749e02b68760d94f38c5cd87cadef867e4a455591434"
+    },
+    {
+      "path": "test-results/usability108-20261017T192330Z-2696/fixture-cleanup.log",
+      "sha256": "3a5c22b205cecc13ed22c690720d457df5921e8ea57d2d24d9a29ffbbbbd03f0"
+    },
+    {
+      "path": "test-results/usability108-20261017T192330Z-2696/cleanup.log",
+      "sha256": "9b702c37308745b145dbacd3ca601b33c96e05536dcc40c8711b83ee660665b2"
+    },
+    {
+      "path": "test-results/usability108-20261017T192330Z-2696/moderation-desktop-dark.png",
+      "sha256": "84c9694a0771e3ea3a946522ee9183b4cefeb69234c23c2308dfac82568b43c7"
+    },
+    {
+      "path": "test-results/usability108-20261017T192330Z-2696/moderation-mobile-light.png",
+      "sha256": "94c25d773d12f7236e334727b820a3dd0da93173e77a8808cb6b9710a838def4"
+    },
+    {
+      "path": "test-results/usability108-20261017T192330Z-2696/profile-simple-desktop-dark.png",
+      "sha256": "90fc3dbb5e0ca1a56895c45c8e462c17761283f9fa2ebb5ffb701e9579bd9ef8"
+    },
+    {
+      "path": "test-results/usability108-20261017T192330Z-2696/profile-simple-mobile-light.png",
+      "sha256": "238c1fcc19f49cd38b7afe08d9205f8e7ae1e9087614de53ff6971074e26cfd3"
+    },
+    {
+      "path": "test-results/usability108-20261017T192330Z-2696/event-editor-clarified.png",
+      "sha256": "c198ace88f16b2c2f08b92da4c068b1c37f476b7b5bdd3cabce50a850d1b2522"
+    },
+    {
+      "path": "test-results/usability108-20261017T191515Z-1742/junit.xml",
+      "sha256": "f8e0489c19d912652b953642a91f48cc24648f3d6e4dd9d62b646a35830a3f40"
+    },
+    {
+      "path": "test-results/usability108-20261017T191515Z-1742/phpunit.log",
+      "sha256": "dbbc360306c9b0c0dec2fe315c5de8c98e77e472222c65f939007b376c20749f"
+    },
+    {
+      "path": "test-results/usability108-20261017T191515Z-1742/rag-preflight.log",
+      "sha256": "b6450226783e391926d131368401322a42e30b77398a7fd463953b6d2489b31c"
+    },
+    {
+      "path": "test-results/usability108-20261017T191515Z-1742/cleanup.log",
+      "sha256": "ef6ee198b1f710e6ee6dbbf9cbacfad015d379b61acdd36d9710611859fe856c"
+    },
+    {
+      "path": "test-results/sonar/current-16-source-hashes.json",
+      "sha256": "654088e1ffe1161eb649f1561a658d0ce495dff35551c2b66feb6e96b1c90f58"
+    },
+    {
+      "path": "test-results/sonar/current-17-source-hashes.json",
+      "sha256": "5ddd734185fb571af9ca3ec8dad0af88eff0114896a0dea0c3bb0b52d0e3f5be"
+    },
+    {
+      "path": "tests/php/RagIntegration108Test.php",
+      "sha256": "f9dbc64ed4a66ef58050207a45d9d5af5e96598e39cc0e842e600b7c988732f0"
+    },
+    {
+      "path": "test-results/usability108-ui.cjs",
+      "sha256": "cc998a417be0845dcdfe78f7262be5153116b1fd4429b64b1f31e437d2a9dfbc"
+    },
+    {
+      "path": "test-results/usability108-run.sh",
+      "sha256": "99812e1e3f56d90b35aa81e406a3529b662313400bf296bef2f0438e939a1564"
+    },
+    {
+      "path": "test-results/usability108-fixture.php",
+      "sha256": "7a6958eb442207efcc81619ba3db92e90c45191f703e2cebb5e7216d5738c34d"
+    }
+  ]
+}
