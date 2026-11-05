@@ -2,6 +2,16 @@
 
 Versión documentada: **1.11.1**, esquema **15**.
 
+## Repetición completa del 5 de noviembre · 1.11.1
+
+La [evidencia de validación completa](docs/evidence/release-1.11.1/full-validation1111.json) registra dos ejecuciones técnicas independientes: QA y UAT con 855 pruebas PHP y 9071 aserciones por entorno, cero fallos y una omisión histórica de traducciones. Incluye las suites de navegador del script de calidad, los nueve controles del escáner manual y 22 recorridos dirigidos del manual. Los JUnit completos están en [QA](docs/evidence/release-1.11.1/full-validation1111-qa-junit.xml) y [UAT](docs/evidence/release-1.11.1/full-validation1111-uat-junit.xml).
+
+Los Quality Gates del curso ASCLA-QA y ASCLA-UAT aprobaron con cero incidencias abiertas y 97,1 % de cobertura del código nuevo. La revisión analizada es `ee2db6ff4fcd8dd39e55b5205cb39e74c809d690`; los commits posteriores del lote ajustan ejecutores y documentación, y conservan los 219 archivos de producción del paquete. Bruno repitió 81 peticiones y 149 comprobaciones; Playwright aprobó los seis flujos con 12 videos y 12 capturas sobre WordPress local. El asistente usa un mock y no acredita una llamada a una cuenta externa.
+
+Trivy aprobó las cuatro imágenes sin hallazgos, conservando el bloqueo de Medium, High, Critical y Unknown, sin exclusiones. Se actualizaron glob y minimatch del buzón y se impidió reutilizar una capa APK antigua cuando Jenkins repite BUILD_TAG tras una restauración. ZAP activo y CSP aprobaron en HTTPS aislado; Jenkins ejecutó el build, archivó HTML/JSON y verificó retención de la última ejecución, incluida la secuencia éxito → fallo. Su snapshot local main no despliega.
+
+La carga actual aprobó 7102 lecturas medidas, ráfagas de hasta 32 sesiones, 60 segundos con 12 sesiones y cuatro sesiones administrativas alternando filtros, más escrituras concurrentes, cupos y permisos. Son mediciones locales acotadas; la aceptación humana UAT y los controles del hosting siguen pendientes. La revisión remota de octubre conservada en `pruebas/actualizacion/` mantiene su fecha original y no se presenta como una nueva ejecución.
+
 ## Estadísticas y carga · 1.11.1
 
 En Administración → Estadísticas → Resumen comprobar el orden Actividad, Asistencias y Personas. Personas cuenta usuarios distintos con inscripción confirmada en los eventos filtrados (por su fecha de finalización); excluye lista de espera, cancelaciones y usuarios sin acceso asignado. Una persona con tres reservas suma tres inscripciones y una persona. Una asistencia directa sin reserva aumenta asistentes/asistencias, pero no inscritos. Asistencias suma el estado Asistió por persona/evento; promedio y tasa mantienen las listas verificadas como base.

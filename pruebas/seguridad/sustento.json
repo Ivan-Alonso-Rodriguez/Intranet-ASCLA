@@ -1,11 +1,11 @@
 {
   "format": "ascla-security-defense-v1",
-  "prepared_at": "2026-10-22T09:57:08.460Z",
+  "prepared_at": "2026-11-05T19:16:05.111Z",
   "version": "1.10.9",
   "local": {
-    "date": "2026-10-22T09:11:27.133208+00:00",
+    "date": "2026-11-05T16:28:54.082062+00:00",
     "status": "PASS",
-    "source_sha256": "0b737f5511b599b06f300c3ba17e85d7dd7aa2822f0b1809d1e7246807e8e1a6",
+    "source_sha256": "8726ea30d4cb94a1f71b2328594955b18a54cba410b6d51a255863c1a7e9fbe3",
     "pages": 14,
     "api_get_operations": 18,
     "csp_passed": 20,
@@ -22,7 +22,7 @@
         "active_complete": true,
         "active_strength": "LOW",
         "completed_active_rules": 52,
-        "active_request_count": 30990,
+        "active_request_count": 12846,
         "risk_counts": {
           "0": 9,
           "1": 0,
@@ -39,7 +39,7 @@
         "active_complete": true,
         "active_strength": "LOW",
         "completed_active_rules": 52,
-        "active_request_count": 3686,
+        "active_request_count": 3684,
         "risk_counts": {
           "0": 1,
           "1": 0,
@@ -82,19 +82,19 @@
   "references": [
     {
       "file": "seguridad/resumen.json",
-      "sha256": "e32d192d219da070410b4da173ed4d3fb3c05fc420a06bd542b62ba2560fc62e"
+      "sha256": "7bbd0b2e1097e0b297113c67b7bb39ce292a55cb0693a03a41ed400153b15bc2"
     },
     {
       "file": "seguridad/frontend-zap.json",
-      "sha256": "bdea618b5ab51ab22f2226666b0589e1a1269fad0d0749114da2dc8bdd8e7e82"
+      "sha256": "a8cbdb69419c98a3b76826404c4e8ac27df78db8af54b0cca2dfc1d730c82444"
     },
     {
       "file": "seguridad/backend-zap.json",
-      "sha256": "ab96f5507ff3b1511f7e55ddfdf47422dfa1ae1c458bbd430c4f0346a4d746fc"
+      "sha256": "d9e8ac7db5ef0c129b50c22b241305e0a106876f315299ca039503ba196e6890"
     },
     {
       "file": "seguridad/csp-validation.json",
-      "sha256": "8e74b37c2700d9c218d4372e0c8580b7f2c796e75b7c357049bd4695ce368a5d"
+      "sha256": "8212451a85abcaecf766404b6d48fafed42b6ba91883479422d50ae7bb69ef34"
     },
     {
       "file": "seguridad/browser-security.json",

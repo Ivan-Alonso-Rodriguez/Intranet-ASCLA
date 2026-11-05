@@ -1,0 +1,820 @@
+[
+  {
+    "iterationIndex": 0,
+    "results": [
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\01-iniciar-sesion-administrador.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-login.php",
+          "responseTime": 59,
+          "duration": 59,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "Y10dbdHXxT8syTEUDSpHI"
+          },
+          {
+            "description": "Sesión y nonce propios de Administrador",
+            "status": "pass",
+            "uid": "R2Sg0ngkzERKnJXWodwg0"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.4380553,
+        "name": "01. Iniciar sesión como Administrador",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\01-iniciar-sesion-administrador",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\01-iniciar-sesion-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\02-iniciar-sesion-ana.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-login.php",
+          "responseTime": 57,
+          "duration": 57,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "otuU_5QgNbEwBP9D68d1O"
+          },
+          {
+            "description": "Sesión y nonce propios de Ana",
+            "status": "pass",
+            "uid": "9M2RwyyC-rvdcSrFXkMdD"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.3408311,
+        "name": "02. Iniciar sesión como Ana",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\02-iniciar-sesion-ana",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\02-iniciar-sesion-ana",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\03-iniciar-sesion-bruno.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-login.php",
+          "responseTime": 56,
+          "duration": 56,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "TVQkG5Z3WUJTo-jSdwLgW"
+          },
+          {
+            "description": "Sesión y nonce propios de Bruno",
+            "status": "pass",
+            "uid": "XA5p3pBILSzLMGxfrJ1Vb"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.3590994,
+        "name": "03. Iniciar sesión como Bruno",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\03-iniciar-sesion-bruno",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\03-iniciar-sesion-bruno",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\04-iniciar-sesion-carla.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-login.php",
+          "responseTime": 58,
+          "duration": 58,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "QRbfh1RE-S27QSztB0O2u"
+          },
+          {
+            "description": "Sesión y nonce propios de Carla",
+            "status": "pass",
+            "uid": "sU-kDXGmJZ3SApMy-10AI"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.3577321,
+        "name": "04. Iniciar sesión como Carla",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\04-iniciar-sesion-carla",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\04-iniciar-sesion-carla",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\05-crear-evento-con-un-solo-cupo.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/content/event",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/content/event",
+          "responseTime": 51,
+          "duration": 51,
+          "size": 742
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "zAWmYY2fJ4ShLVllIMS6e"
+          },
+          {
+            "description": "Evento publicado con capacidad uno",
+            "status": "pass",
+            "uid": "PH4-rdCEzJLvtQcn0jti2"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.282871,
+        "name": "05. Crear evento con un solo cupo",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\05-crear-evento-con-un-solo-cupo",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\05-crear-evento-con-un-solo-cupo",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\06-ana-confirma-el-unico-cupo.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/events/21/register",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/events/21/register",
+          "responseTime": 41,
+          "duration": 41,
+          "size": 1481
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "i8m9-c1pW3NArISVlc-tb"
+          },
+          {
+            "description": "Cupo confirmado y aforo completo",
+            "status": "pass",
+            "uid": "KaqGvi7RZQqoSAtt2fHwo"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.2011916,
+        "name": "06. Ana confirma el único cupo",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\06-ana-confirma-el-unico-cupo",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\06-ana-confirma-el-unico-cupo",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\07-bruno-no-puede-sobrepasar-el-aforo.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/events/21/register",
+          "headers": {}
+        },
+        "response": {
+          "status": 409,
+          "statusText": "Conflict",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/events/21/register",
+          "responseTime": 30,
+          "duration": 30,
+          "size": 121
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 409",
+            "status": "pass",
+            "uid": "ZJLOjq0skiq2TpltoHca0"
+          },
+          {
+            "description": "El rechazo se debe a falta de cupos",
+            "status": "pass",
+            "uid": "v6Mq2a3RzJhTnZuOm_SQ4"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.203541,
+        "name": "07. Bruno no puede sobrepasar el aforo",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\07-bruno-no-puede-sobrepasar-el-aforo",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\07-bruno-no-puede-sobrepasar-el-aforo",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\08-bruno-entra-en-lista-de-espera.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/events/21/register",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/events/21/register",
+          "responseTime": 48,
+          "duration": 48,
+          "size": 1323
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "QqlB5rLsXot0wE_7gES__"
+          },
+          {
+            "description": "Primer puesto de la lista de espera",
+            "status": "pass",
+            "uid": "kVwIc41zYEUKT1i3tgR0e"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.2488092,
+        "name": "08. Bruno entra en lista de espera",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\08-bruno-entra-en-lista-de-espera",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\08-bruno-entra-en-lista-de-espera",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\09-guardar-avisos-antes-de-liberar-el-cupo.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/notifications/summary",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/notifications/summary",
+          "responseTime": 20,
+          "duration": 20,
+          "size": 46
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "hX26oaK9cYjkd790ogtib"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.2647213,
+        "name": "09. Guardar avisos antes de liberar el cupo",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\09-guardar-avisos-antes-de-liberar-el-cupo",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\09-guardar-avisos-antes-de-liberar-el-cupo",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\10-ana-cancela-su-inscripcion.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/events/21/register",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/events/21/register",
+          "responseTime": 198,
+          "duration": 198,
+          "size": 1322
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "tgUsoRyO2a2pCgAKp_Nn_"
+          },
+          {
+            "description": "Inscripción cancelada",
+            "status": "pass",
+            "uid": "FcsWCVmpEzJ8dzLhd_Czf"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.3426611,
+        "name": "10. Ana cancela su inscripción",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\10-ana-cancela-su-inscripcion",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\10-ana-cancela-su-inscripcion",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\11-el-cupo-se-ofrece-a-bruno.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/events/21",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/events/21",
+          "responseTime": 28,
+          "duration": 28,
+          "size": 1343
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "GEPAYcgZfAESnDd88yh7Y"
+          },
+          {
+            "description": "Oferta vigente reservada para la lista de espera",
+            "status": "pass",
+            "uid": "OsZkDOId8si8pDaCuU2am"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1859784,
+        "name": "11. El cupo se ofrece a Bruno",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\11-el-cupo-se-ofrece-a-bruno",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\11-el-cupo-se-ofrece-a-bruno",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\12-la-oferta-genera-un-aviso-nuevo.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/notifications/summary",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/notifications/summary",
+          "responseTime": 18,
+          "duration": 18,
+          "size": 46
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "8hJ1uTBeHeTt7srO89e_m"
+          },
+          {
+            "description": "Aumenta el contador de avisos pendientes",
+            "status": "pass",
+            "uid": "cSoKL9KjxWXxjSAMnnX1Z"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1719433,
+        "name": "12. La oferta genera un aviso nuevo",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\12-la-oferta-genera-un-aviso-nuevo",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\12-la-oferta-genera-un-aviso-nuevo",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\13-el-aviso-corresponde-al-evento-probado.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/notifications",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/notifications",
+          "responseTime": 26,
+          "duration": 26,
+          "size": 845
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "GE2Nkm-ok9RBIAsgh5zxH"
+          },
+          {
+            "description": "Existe una notificación de cupo para este evento",
+            "status": "pass",
+            "uid": "KE7cgog2Ud8sk9eim47y2"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.2394258,
+        "name": "13. El aviso corresponde al evento probado",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\13-el-aviso-corresponde-al-evento-probado",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\13-el-aviso-corresponde-al-evento-probado",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\14-abrir-aviso.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/notifications/5/open",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/notifications/5/open",
+          "responseTime": 22,
+          "duration": 22,
+          "size": 85
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "DeVFUrtZazoxNb6hunkKs"
+          },
+          {
+            "description": "Validación: 14. Bruno abre la notificación del cupo",
+            "status": "pass",
+            "uid": "jaRdb2xYJnapjINg4sBBs"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1640223,
+        "name": "14. Bruno abre la notificación del cupo",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\14-abrir-aviso",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\14-abrir-aviso",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\15-aviso-leido.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/notifications",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/notifications",
+          "responseTime": 23,
+          "duration": 23,
+          "size": 862
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "Sf1pd4uylBi9IZpYzOMtB"
+          },
+          {
+            "description": "Validación: 15. La notificación queda leída",
+            "status": "pass",
+            "uid": "4h9fIXdKSX1hGUcN9Plxi"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1566416,
+        "name": "15. La notificación queda leída",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\15-aviso-leido",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\15-aviso-leido",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\16-confirmar-vacante.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/events/21/register",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/events/21/register",
+          "responseTime": 36,
+          "duration": 36,
+          "size": 1483
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "XZZSyHtw3qN0hiD4qBhRT"
+          },
+          {
+            "description": "Validación: 16. Bruno confirma la vacante ofrecida",
+            "status": "pass",
+            "uid": "c8sw8pGrQr-H5100sYLD6"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1882089,
+        "name": "16. Bruno confirma la vacante ofrecida",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\16-confirmar-vacante",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\16-confirmar-vacante",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\17-vacante-persistente.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/events/21",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/events/21",
+          "responseTime": 26,
+          "duration": 26,
+          "size": 1483
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "ggb1Igd_Gj9SLjyhBEy7z"
+          },
+          {
+            "description": "Validación: 17. Comprobar un único inscrito",
+            "status": "pass",
+            "uid": "Ddp7aPa0lQ9j-61OukdQZ"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.18746,
+        "name": "17. Comprobar un único inscrito",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\17-vacante-persistente",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\17-vacante-persistente",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\18-el-administrador-cancela-el-evento.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/events/21/cancel",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/events/21/cancel",
+          "responseTime": 197,
+          "duration": 197,
+          "size": 1320
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "YN4QBKqrunwUulpUn8fzN"
+          },
+          {
+            "description": "Evento identificado y cancelado",
+            "status": "pass",
+            "uid": "O1EAh7P2Jt8McButkytb4"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.3715546,
+        "name": "18. El administrador cancela el evento",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\18-el-administrador-cancela-el-evento",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\18-el-administrador-cancela-el-evento",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\04-aforo-espera-notificacion\\19-carla-no-puede-inscribirse-al-evento-cancelado.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/events/21/register",
+          "headers": {}
+        },
+        "response": {
+          "status": 409,
+          "statusText": "Conflict",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/events/21/register",
+          "responseTime": 24,
+          "duration": 24,
+          "size": 110
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 409",
+            "status": "pass",
+            "uid": "tzwKtXPaJ443sMX1-PQfd"
+          },
+          {
+            "description": "El rechazo identifica la cancelación",
+            "status": "pass",
+            "uid": "QEC8cr3cP8iwrf4yUKMMV"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1871503,
+        "name": "19. Carla no puede inscribirse al evento cancelado",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\04-aforo-espera-notificacion\\19-carla-no-puede-inscribirse-al-evento-cancelado",
+        "path": "flujos-e2e\\04-aforo-espera-notificacion\\19-carla-no-puede-inscribirse-al-evento-cancelado",
+        "iterationIndex": 0
+      }
+    ],
+    "summary": {
+      "totalRequests": 19,
+      "passedRequests": 19,
+      "failedRequests": 0,
+      "errorRequests": 0,
+      "skippedRequests": 0,
+      "skippedByBail": 0,
+      "totalAssertions": 0,
+      "passedAssertions": 0,
+      "failedAssertions": 0,
+      "totalTests": 37,
+      "passedTests": 37,
+      "failedTests": 0,
+      "totalPreRequestTests": 0,
+      "passedPreRequestTests": 0,
+      "failedPreRequestTests": 0,
+      "totalPostResponseTests": 0,
+      "passedPostResponseTests": 0,
+      "failedPostResponseTests": 0
+    }
+  }
+]

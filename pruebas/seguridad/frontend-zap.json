@@ -1,12 +1,12 @@
 {
   "format": "ascla-public-zap-summary-v1",
   "kind": "frontend",
-  "date": "2026-10-22T09:11:27.133208+00:00",
+  "date": "2026-11-05T16:28:54.082062+00:00",
   "status": "PASS",
   "tool": {
     "name": "ZAP",
     "version": "2.17.0",
-    "generated": "Thu, 22 Oct 2026 09:09:26"
+    "generated": "Thu, 5 Nov 2026 16:27:17"
   },
   "scope": [
     "/login/",
@@ -45,31 +45,31 @@
       "id": "40026",
       "name": "Cross Site Scripting (DOM Based)",
       "status": "Complete",
-      "requests": 4676
+      "requests": 353
     },
     {
       "id": "6",
       "name": "Path Traversal",
       "status": "Complete",
-      "requests": 1400
+      "requests": 644
     },
     {
       "id": "7",
       "name": "Remote File Inclusion",
       "status": "Complete",
-      "requests": 1000
+      "requests": 460
     },
     {
       "id": "10045",
       "name": "Source Code Disclosure - /WEB-INF Folder",
       "status": "Complete",
-      "requests": 174
+      "requests": 165
     },
     {
       "id": "10048",
       "name": "Remote Code Execution - Shell Shock",
       "status": "Complete",
-      "requests": 400
+      "requests": 184
     },
     {
       "id": "20015",
@@ -81,31 +81,31 @@
       "id": "20017",
       "name": "Source Code Disclosure - CVE-2012-1823",
       "status": "Complete",
-      "requests": 51
+      "requests": 28
     },
     {
       "id": "20018",
       "name": "Remote Code Execution - CVE-2012-1823",
       "status": "Complete",
-      "requests": 132
+      "requests": 84
     },
     {
       "id": "20019",
       "name": "External Redirect",
       "status": "Complete",
-      "requests": 600
+      "requests": 276
     },
     {
       "id": "40009",
       "name": "Server Side Include",
       "status": "Complete",
-      "requests": 800
+      "requests": 368
     },
     {
       "id": "40012",
       "name": "Cross Site Scripting (Reflected)",
       "status": "Complete",
-      "requests": 1096
+      "requests": 532
     },
     {
       "id": "40014",
@@ -117,43 +117,43 @@
       "id": "40018",
       "name": "SQL Injection",
       "status": "Complete",
-      "requests": 1604
+      "requests": 752
     },
     {
       "id": "40019",
       "name": "SQL Injection - MySQL (Time Based)",
       "status": "Complete",
-      "requests": 1200
+      "requests": 552
     },
     {
       "id": "40020",
       "name": "SQL Injection - Hypersonic SQL (Time Based)",
       "status": "Complete",
-      "requests": 1200
+      "requests": 552
     },
     {
       "id": "40021",
       "name": "SQL Injection - Oracle (Time Based)",
       "status": "Complete",
-      "requests": 600
+      "requests": 276
     },
     {
       "id": "40022",
       "name": "SQL Injection - PostgreSQL (Time Based)",
       "status": "Complete",
-      "requests": 600
+      "requests": 276
     },
     {
       "id": "40027",
       "name": "SQL Injection - MsSQL (Time Based)",
       "status": "Complete",
-      "requests": 1200
+      "requests": 552
     },
     {
       "id": "40045",
       "name": "Spring4Shell",
       "status": "Complete",
-      "requests": 184
+      "requests": 112
     },
     {
       "id": "40048",
@@ -165,19 +165,19 @@
       "id": "90019",
       "name": "Server Side Code Injection",
       "status": "Complete",
-      "requests": 1600
+      "requests": 736
     },
     {
       "id": "90020",
       "name": "Remote OS Command Injection",
       "status": "Complete",
-      "requests": 1800
+      "requests": 828
     },
     {
       "id": "90021",
       "name": "XPath Injection",
       "status": "Complete",
-      "requests": 600
+      "requests": 276
     },
     {
       "id": "90023",
@@ -201,25 +201,25 @@
       "id": "90035",
       "name": "Server Side Template Injection",
       "status": "Complete",
-      "requests": 768
+      "requests": 276
     },
     {
       "id": "90036",
       "name": "Server Side Template Injection (Blind)",
       "status": "Complete",
-      "requests": 2400
+      "requests": 1104
     },
     {
       "id": "90037",
       "name": "Remote OS Command Injection (Time Based)",
       "status": "Complete",
-      "requests": 1200
+      "requests": 552
     },
     {
       "id": "0",
       "name": "Directory Browsing",
       "status": "Complete",
-      "requests": 92
+      "requests": 56
     },
     {
       "id": "10106",
@@ -231,25 +231,25 @@
       "id": "30001",
       "name": "Buffer Overflow",
       "status": "Complete",
-      "requests": 200
+      "requests": 92
     },
     {
       "id": "30002",
       "name": "Format String Error",
       "status": "Complete",
-      "requests": 600
+      "requests": 276
     },
     {
       "id": "40003",
       "name": "CRLF Injection",
       "status": "Complete",
-      "requests": 1400
+      "requests": 644
     },
     {
       "id": "40008",
       "name": "Parameter Tampering",
       "status": "Complete",
-      "requests": 1400
+      "requests": 644
     },
     {
       "id": "40028",
@@ -261,7 +261,7 @@
       "id": "40029",
       "name": "Trace.axd Information Leak",
       "status": "Complete",
-      "requests": 16
+      "requests": 15
     },
     {
       "id": "40032",
@@ -297,37 +297,37 @@
       "id": "90017",
       "name": "XSLT Injection",
       "status": "Complete",
-      "requests": 384
+      "requests": 168
     },
     {
       "id": "10047",
       "name": "HTTPS Content Available via HTTP",
       "status": "Complete",
-      "requests": 26
+      "requests": 14
     },
     {
       "id": "10058",
       "name": "GET for POST",
       "status": "Complete",
-      "requests": 26
+      "requests": 14
     },
     {
       "id": "10104",
       "name": "User Agent Fuzzer",
       "status": "Complete",
-      "requests": 1104
+      "requests": 672
     },
     {
       "id": "40016",
       "name": "Cross Site Scripting (Persistent) - Prime",
       "status": "Complete",
-      "requests": 200
+      "requests": 92
     },
     {
       "id": "40017",
       "name": "Cross Site Scripting (Persistent) - Spider",
       "status": "Complete",
-      "requests": 92
+      "requests": 56
     },
     {
       "id": "50000",
@@ -354,7 +354,7 @@
       "requests": 10
     }
   ],
-  "active_request_count": 30990,
+  "active_request_count": 12846,
   "client_spider_limit_seconds": 60,
   "not_applicable_active_rules": [
     {
@@ -429,7 +429,7 @@
       "name": "Information Disclosure - Suspicious Comments",
       "risk": 0,
       "confidence": 2,
-      "count": 5,
+      "count": 6,
       "description": "The response appears to contain suspicious comments which may help an attacker.",
       "solution": "Remove all comments that return information that may help an attacker and fix any underlying problems they refer to.",
       "locations": [
@@ -461,7 +461,7 @@
       "solution": "This is an informational alert and so no changes are required.",
       "locations": [
         {
-          "path": "/directorio/",
+          "path": "/foros/",
           "method": "GET"
         },
         {
@@ -506,6 +506,10 @@
       "description": "Check for differences in response based on fuzzed User Agent (eg. mobile sites, access as a Search Engine Crawler). Compares the response statuscode and the hashcode of the response body with the original response.",
       "solution": "",
       "locations": [
+        {
+          "path": "/foros/",
+          "method": "GET"
+        },
         {
           "path": "/login/",
           "method": "GET"

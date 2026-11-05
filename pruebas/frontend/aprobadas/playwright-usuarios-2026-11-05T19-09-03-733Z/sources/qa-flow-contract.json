@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "integration": {
+    "id": "integracion",
+    "folder": "integracion",
+    "requests": 18,
+    "checks": 26
+  },
+  "flows": [
+    {
+      "id": "perfil",
+      "title": "Perfil del asociado",
+      "folder": "flujos-e2e/01-perfil",
+      "requests": 7,
+      "checks": 14,
+      "steps": [
+        "Iniciar sesión",
+        "Guardar biografía válida",
+        "Recargar y comprobar persistencia",
+        "Rechazar Empresa vacía",
+        "Conservar datos válidos",
+        "Restaurar biografía original"
+      ]
+    },
+    {
+      "id": "conexion-chat-bloqueo",
+      "title": "Conexión, chat y bloqueo",
+      "folder": "flujos-e2e/02-conexion-chat-bloqueo",
+      "requests": 12,
+      "checks": 24,
+      "steps": [
+        "Ana solicita conexión",
+        "Bruno acepta",
+        "Abrir chat",
+        "Enviar y leer el mensaje exacto",
+        "Bloquear e impedir escritura",
+        "Desbloquear sin restaurar la conexión"
+      ]
+    },
+    {
+      "id": "borrador-publicacion-inscripcion",
+      "title": "Borrador, publicación e inscripción",
+      "folder": "flujos-e2e/03-borrador-publicacion-inscripcion",
+      "requests": 12,
+      "checks": 22,
+      "steps": [
+        "Guardar borrador incompleto",
+        "Exigir campos para publicar",
+        "Publicar con fecha, hora y cupo",
+        "Reabrir y comprobar fechas",
+        "Inscribirse y comprobar persistencia",
+        "Cancelar evento propio"
+      ]
+    },
+    {
+      "id": "aforo-lista-espera-notificacion",
+      "title": "Aforo, lista de espera y notificación",
+      "folder": "flujos-e2e/04-aforo-espera-notificacion",
+      "requests": 19,
+      "checks": 37,
+      "steps": [
+        "Crear evento con un cupo",
+        "Ana confirma",
+        "Bruno entra en espera",
+        "Ana cancela y libera cupo",
+        "Comprobar oferta y abrir notificación",
+        "Comprobar aviso leído",
+        "Bruno confirma vacante sin sobrepasar aforo",
+        "Cancelar evento"
+      ]
+    },
+    {
+      "id": "suspension-reactivacion-acceso",
+      "title": "Suspensión y reactivación",
+      "folder": "flujos-e2e/05-suspension-reactivacion",
+      "requests": 9,
+      "checks": 18,
+      "steps": [
+        "Carla tiene acceso",
+        "Administrador suspende",
+        "Sesión revocada y acceso denegado",
+        "Administrador reactiva",
+        "Nuevo login permitido",
+        "Perfil conservado"
+      ]
+    },
+    {
+      "id": "asistente-ia",
+      "title": "Consulta al asistente IA",
+      "folder": "flujos-e2e/06-asistente-ia",
+      "requests": 4,
+      "checks": 8,
+      "steps": [
+        "Abrir conversación nueva",
+        "Enviar pregunta",
+        "Recibir trabajo pendiente con ID real",
+        "Esperar la respuesta del proveedor",
+        "Comprobar pregunta y respuesta",
+        "Recargar y conservar hilo"
+      ]
+    }
+  ]
+}

@@ -6,6 +6,8 @@ El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y prueba
 
 ## 1.11.1 — Importación revisada y perfiles
 
+La [repetición completa de QA/UAT del 5 de noviembre](docs/evidence/release-1.11.1/full-validation1111.json) añade correcciones verificadas por SonarQube, cobertura real del lector de importaciones y dependencias del buzón actualizadas. La construcción de CI renueva paquetes incluso si Jenkins reutiliza el identificador del build. Ambos Quality Gates quedaron aprobados sin incidencias abiertas; se conservan las evidencias de Bruno, Playwright, Trivy, ZAP, Jenkins y carga local. No incluye un despliegue ni aceptación humana del hosting.
+
 Entrega del 5 de noviembre de 2026. Una revisión posterior reorganiza el resumen como Actividad → Asistencias → Personas y cuenta personas con inscripción confirmada sin duplicar a quien reserva varios eventos. Conserva asistentes únicos, recurrencia, promedios y tasas con sus definiciones. Se añade un agregado SQL en la consulta existente, sin consultas por persona.
 
 La caché analítica conserva hasta ocho combinaciones de filtros/páginas por cuenta, en un único contenedor acotado, con 30 segundos de vigencia por entrada y las mismas invalidaciones tras confirmar cambios. La [evidencia de carga y estadísticas](docs/evidence/release-1.11.1/statistics-load1111.json) separa las mediciones comparables de la regresión y del hosting. El [manifiesto previo](docs/evidence/release-1.11.1/package-pre-statistics-load1111.json) conserva la identidad del ZIP de importación anterior a esta revisión.

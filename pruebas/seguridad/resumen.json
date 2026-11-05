@@ -1,9 +1,9 @@
 {
   "format": "ascla-public-security-summary-v1",
-  "date": "2026-10-22T09:11:27.133208+00:00",
+  "date": "2026-11-05T16:28:54.082062+00:00",
   "status": "PASS",
   "environment": "WordPress local HTTPS temporal",
-  "source_sha256": "0b737f5511b599b06f300c3ba17e85d7dd7aa2822f0b1809d1e7246807e8e1a6",
+  "source_sha256": "8726ea30d4cb94a1f71b2328594955b18a54cba410b6d51a255863c1a7e9fbe3",
   "phases": [
     {
       "phase": "frontend",

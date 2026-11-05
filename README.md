@@ -43,6 +43,8 @@ Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. 
 
 La promoción sigue `development → qa → uat → main`. El [pipeline de Jenkins](ci/README.md) construye y analiza las imágenes con Trivy antes del despliegue; en QA/UAT añade pruebas, SonarQube/Quality Gate y ZAP/CSP. `main` no despliega y debe estar protegida para recibir cambios mediante pull request. La aceptación humana de UAT corresponde a testers y PM.
 
+La [validación completa de 1.11.1 del 5 de noviembre](docs/evidence/release-1.11.1/full-validation1111.json) reúne QA/UAT técnicos, SonarQube del curso, los seis flujos de Bruno/Playwright, Trivy, ZAP, Jenkins y carga local. Los reportes publicados identifican el laboratorio local y conservan por separado la revisión remota histórica.
+
 Las pruebas también pueden ejecutarse [manualmente](MANUAL_QA_UAT.md). La [colección Bruno](pruebas/backend/coleccion-bruno) y [Playwright](tests/acceptance-ui.cjs) comparten seis flujos: perfil, conexión/chat/bloqueo, publicación/inscripción, aforo/espera, suspensión/reactivación y asistente IA. Bruno añade integración técnica: 81 peticiones y 149 comprobaciones en la entrega publicada. El [catálogo comparado](pruebas/flujos.json) identifica los recorridos y sus límites.
 
 Consulta los [dashboards de pruebas](pruebas/index.html) y [seguridad](pruebas/seguridad/dashboard.html). Cada reporte conserva fecha, entorno, fuentes y paquete: los resultados publicados del 22 de octubre no acreditan automáticamente el código posterior. La [validación técnica de QA/UAT](docs/evidence/release-1.11.0/full-qa1110.json) y la [corrección posterior de imágenes](docs/evidence/release-1.11.0/trivy-remediation1110.json) tienen revisiones distintas; Cumplimiento explica sus resultados y pendientes.

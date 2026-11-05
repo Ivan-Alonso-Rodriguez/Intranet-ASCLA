@@ -1,14 +1,14 @@
 # Pruebas de integración, E2E y seguridad de ASCLA
 
-El código actual prepara Core **1.11.0**. Esta entrega de reportes conserva su ejecución histórica de **1.10.9**; no se ha sustituido con resultados locales nuevos. La validación local de 1.11.0 se identifica en el manifiesto y la evidencia de `docs/evidence/release-1.11.0/`. Para renovar esta carpeta, ejecuta ambos clientes contra el mismo destino y paquete, con los seis flujos de `tests/qa-flow-contract.json`.
+La ejecución vigente del **5 de noviembre de 2026** corresponde a Core **1.11.1** en un WordPress local desechable: **81/81 peticiones y 149/149 comprobaciones de Bruno**, **6/6 flujos de Playwright**, **12 videos y 12 capturas**. El asistente usa un mock. La [validación completa](../docs/evidence/release-1.11.1/full-validation1111.json) añade QA/UAT técnicos, Quality Gates del curso, Trivy, ZAP, Jenkins y carga. No acredita un despliegue ni aceptación humana del hosting.
 
 Esta carpeta reúne la entrega de pruebas para GitHub: colección Bruno con variables, explicación de los flujos, evidencias de Playwright y resultados publicables de seguridad con OWASP ZAP y CSP. Los resultados identifican su fecha y entorno; la fecha de preparación de esta carpeta no equivale a otra ejecución.
 
-## Última versión desplegada: ejecución del 22 de octubre de 2026
+## Revisión remota histórica: 22 de octubre de 2026
 
 La revisión del **22 de octubre de 2026** se ejecutó contra **https://wordpress.ingsoftware.lat**, con el plugin **1.10.9**: **81/81 peticiones y 149/149 comprobaciones de Bruno**, más **6/6 recorridos de Playwright con 12 videos y 12 capturas**. El JavaScript y el CSS desplegados coinciden por SHA-256 con el paquete local probado; las pruebas API/UI contrastan el comportamiento del backend. Esta comparación no descarga ni certifica todos los archivos PHP privados del servidor.
 
-El asistente completó un trabajo real y conservó su hilo; el modo devuelto fue **Google Gemini · API real**. Las contraseñas de las tres cuentas dedicadas se renovaron con autorización del responsable y permanecen fuera de esta entrega. Los seis flujos terminan con Carla activa, la pareja desbloqueada y los eventos de prueba cancelados.
+El asistente completó un trabajo real y conservó su hilo; el modo devuelto fue **Google Gemini · API**. Las contraseñas de las tres cuentas dedicadas se renovaron con autorización del responsable y permanecen fuera de esta entrega. Los seis flujos terminan con Carla activa, la pareja desbloqueada y los eventos de prueba cancelados.
 
 La [regresión reciente](actualizacion/index.html) añade **14/14 controles de interfaz, 16 videos y 16 capturas** sobre ese mismo QA: borradores en seis secciones; paridad administrativa del Ejecutivo con las dos excepciones; filtros de Usuarios e intereses; tipo de asociado en la cabecera; Directorio de 4 columnas × 3 filas; lista única de Foros; portada y cabecera de Galería; Archivos integrado; y menú de tres puntos de Aliados. Se retiraron a la papelera exclusivamente los nueve contenidos ficticios creados por esa ejecución. Estos controles son adicionales y no se cuentan como otros 14 casos únicos del plan.
 
@@ -117,7 +117,7 @@ La selección sigue los módulos y los IDs de las matrices CU/CP y RF/CP del pla
 | Asistente IA | CP-070, CP-071, CP-072 | Trabajo asíncrono y contenido del hilo; falta contrastar autorización y cronología entre sesiones. |
 | Interfaz | CP-011, CP-013 y escenarios de conexión, eventos y suspensión anteriores | Seis flujos mediante controles reales: perfil; conexión/chat/bloqueo; publicación/inscripción; aforo/espera/notificación; suspensión/reactivación; asistente IA. |
 
-El diseño menciona **OpenAI**. La ejecución vigente utiliza **Google Gemini · API real**, según la respuesta del trabajo; no acredita la integración específica con OpenAI ni la corrección semántica de todas las respuestas. La suspensión devuelve **403** por nonce revocado; no acredita RNF-005 sobre cierre de sesión/inactividad y HTTP 401. Tampoco se acredita carga, disponibilidad, latencia bajo concurrencia, SMTP real ni los módulos 6 y 8. No equivale a aprobar todos los criterios de salida ni UAT.
+El diseño menciona **OpenAI**. La ejecución vigente utiliza **Google Gemini · API**, según la respuesta del trabajo; no acredita la integración específica con OpenAI ni la corrección semántica de todas las respuestas. La suspensión devuelve **403** por nonce revocado; no acredita RNF-005 sobre cierre de sesión/inactividad y HTTP 401. Tampoco se acredita carga, disponibilidad, latencia bajo concurrencia, SMTP real ni los módulos 6 y 8. No equivale a aprobar todos los criterios de salida ni UAT.
 
 ## Ejecutar y actualizar
 
