@@ -6,6 +6,13 @@ final class ProfileValidation
 {
     private const REQUIRED=['first_name'=>'Nombres','last_name'=>'Apellidos','position'=>'Cargo','company'=>'Empresa / organización'];
 
+    public static function validateRevision(array $input,array $profile): void
+    {
+        if (!array_key_exists('profile_revision',$input)) { return; }
+        $revision=FormRules::bounded($input['profile_revision'],0,PHP_INT_MAX);
+        Access::require($revision===(int)($profile['revision']??0),'El perfil cambió mientras lo editabas. Cierra y vuelve a abrir Editar usuario para cargar los datos actuales.',409);
+    }
+
     public static function validateSocialLink(string $field,string $value): void
     {
         $url=wp_parse_url($value);$host=strtolower($url['host']??'');

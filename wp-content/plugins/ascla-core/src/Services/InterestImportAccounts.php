@@ -14,8 +14,8 @@ final class InterestImportAccounts
     /** Email/code are authoritative. Names only fill missing identifiers, never override a conflict. */
     public function match(array $p): array
     {
-        $email=trim($p['email']??'');$code=trim($p['code']??'');$byEmail=$email!=='' && is_email($email)?get_user_by('email',$email):false;$byCode=[];
-        if($code!=='') {$byCode=$this->codes[$code]??=array_values(array_unique(array_map('intval',get_users(['fields'=>'ID','meta_query'=>['relation'=>'OR',['key'=>'_ascla_member_code','value'=>$code],['key'=>'ascla_member_code','value'=>$code]]])))); }
+        $email=trim($p['email']??'');$code=trim($p['code']??'');$byEmail=$email!=='' && is_email($email)?get_user_by('email',$email):false;
+        $byCode=$this->codeMatches($code);
         if(count($byCode)>1 || ($byCode && $byEmail && $byCode[0]!== (int)$byEmail->ID)) {return [0,'Código y correo ambiguos; revisión manual.']; }
         $id=0;
         if($byCode){$id=(int)$byCode[0];}
@@ -27,6 +27,12 @@ final class InterestImportAccounts
         if(!$id || !user_can($id,'ascla_access') || !Access::canManageAccount('edit_user',$id)) {return [0,$warning?:'Usuario no encontrado o sin permiso de edición.','']; }
         return [$id,$warning,$method];
     }
+    private function codeMatches(string $code): array
+    {
+        if ($code==='') { return []; }
+        return $this->codes[$code]??=array_values(array_unique(array_map('intval',get_users(['fields'=>'ID','meta_query'=>['relation'=>'OR',['key'=>'_ascla_member_code','value'=>$code],['key'=>'ascla_member_code','value'=>$code]]]))));
+    }
+
     private function namedCandidate(array $p,string $email): array
     {
         $name=implode(' ',array_filter([$p['person_name']??'',$p['name_extra']??'',$p['last_name']??'',$p['last_extra']??'']));
