@@ -1,5 +1,5 @@
 {
-  "prepared_at": "2026-11-05T19:16:04.971Z",
+  "prepared_at": "2026-11-05T19:21:12.436Z",
   "note": "Los originales se conservan en test-results. Las copias retiran rutas personales y valores de sesión/contraseña/respuesta completa del asistente cuando corresponda. Las vistas HTML organizan los resultados sin alterar sus estados, conteos ni errores.",
   "backend": {
     "run": "backend-publicable-2026-11-05T19-08-09-745Z",
@@ -1581,7 +1581,7 @@
     },
     {
       "published": "seguridad/procedencia.json",
-      "published_sha256": "85da012b1ae4e14707cd2596cf8421cb3987b21a78d99d794c90faf5591ad139",
+      "published_sha256": "69450232d1738fa6e290271aa0467f3bb0e42f22ace99f19334f455cd6d01a18",
       "transformed": true
     },
     {
@@ -1908,7 +1908,7 @@
     },
     {
       "published": "seguridad/sustento.json",
-      "published_sha256": "391b82e4b2c00d95cb2412af230d14d53482b2ae1d0a4a1b3ea5383784d93546",
+      "published_sha256": "99538f5bba96f2f43ba12803b52133013ee11a5e2b83bb61c54ba8e775f715e5",
       "transformed": true
     },
     {
@@ -1922,7 +1922,7 @@
     "status": "PASS",
     "source_sha256": "8726ea30d4cb94a1f71b2328594955b18a54cba410b6d51a255863c1a7e9fbe3",
     "report": "seguridad/dashboard.html",
-    "prepared_at": "2026-11-05T19:16:04.989Z",
+    "prepared_at": "2026-11-05T19:21:12.450Z",
     "environment": "local-ephemeral-https",
     "jenkins_evidence": false
   },

@@ -1,5 +1,5 @@
 {
-  "prepared_at": "2026-11-05T19:16:04.989Z",
+  "prepared_at": "2026-11-05T19:21:12.450Z",
   "date": "2026-11-05T16:28:54.082062+00:00",
   "status": "PASS",
   "source_sha256": "8726ea30d4cb94a1f71b2328594955b18a54cba410b6d51a255863c1a7e9fbe3",
@@ -169,7 +169,7 @@
     },
     {
       "published": "seguridad/sustento.json",
-      "published_sha256": "391b82e4b2c00d95cb2412af230d14d53482b2ae1d0a4a1b3ea5383784d93546",
+      "published_sha256": "99538f5bba96f2f43ba12803b52133013ee11a5e2b83bb61c54ba8e775f715e5",
       "transformed": true
     },
     {

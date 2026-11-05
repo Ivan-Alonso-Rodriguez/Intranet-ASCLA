@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-05T19:16:05.122Z",
+  "generated_at": "2026-11-05T19:21:12.565Z",
   "algorithm": "SHA-256",
   "files": {
     "acceso.example.json": "970aa0559f0d5fad7c16321e1165ec6fe45e743a863af850b20749ea8fc9d3f4",
@@ -314,8 +314,8 @@
     "frontend/dashboard.html": "8081e415b38c452dbef2f85c25eed1b3dfa5ac6e6b6a9bf1c79de4347e191541",
     "frontend/README.md": "30f874d35b0cd11710538c31b84821fb3ef90d2b0c1cd6ca3854c7cd8bbeedc1",
     "index.html": "5bdbabc92dde7e7f8d0268ca30b09d171af2d9f9ddd0bef8e6de2756a33d3561",
-    "procedencia.json": "cca39141c0bfe89a472837973bf408a314e9081a31f8f9e68abe52e3e8c4265e",
-    "README.md": "c81f263bc6cb96ce0267ed2681b824204cdbeb2d7cf233ee2a86a291bd1e7bee",
+    "procedencia.json": "42da252be56173958b3da55a647d0ec68cb4eb38306a4db9303ef5780641e372",
+    "README.md": "0e9d52b48c891e1a0da2a401d56c025f056abd95abfc8ce12ec2c27505ad9a28",
     "referencias.json": "be5d9318189f11d5009a1667d38a4b7bfdabf028938ba81c623f1c4780743852",
     "seguridad/backend-zap.html": "07a6d878ef6c5469ebb1f572a4cb81480700c510acd5011739522087a0f2e4fd",
     "seguridad/backend-zap.json": "d9e8ac7db5ef0c129b50c22b241305e0a106876f315299ca039503ba196e6890",
@@ -325,7 +325,7 @@
     "seguridad/frontend-zap.html": "e2e56d8879af874c0c886b41062ec20ae12b9415c52889c2dc2e4fa0b58a0b95",
     "seguridad/frontend-zap.json": "a8cbdb69419c98a3b76826404c4e8ac27df78db8af54b0cca2dfc1d730c82444",
     "seguridad/fuentes.html": "3e4fbb286754eac69dedc4dac7c2d43aeae1b30429aae55a52419cda26a5cb08",
-    "seguridad/procedencia.json": "85da012b1ae4e14707cd2596cf8421cb3987b21a78d99d794c90faf5591ad139",
+    "seguridad/procedencia.json": "69450232d1738fa6e290271aa0467f3bb0e42f22ace99f19334f455cd6d01a18",
     "seguridad/qa-publicado.json": "b537254d2870802da8d63be291184260e5c4933054c53d0bc6cef3ce60c27480",
     "seguridad/resumen.json": "7bbd0b2e1097e0b297113c67b7bb39ce292a55cb0693a03a41ed400153b15bc2",
     "seguridad/source-manifest.json": "a915e2d72ceebaf5cc25e2ce697995dc114f77997642ad5057036b469b1cdb38",
@@ -338,7 +338,7 @@
     "seguridad/sources/tests/security-openapi.py": "a9db108d15c1152ff34664d6df4fb1291e39a005c0003f7005568d3d0ad9eb36",
     "seguridad/sources/tests/zap-scan.py": "441db2be5d8bab1840fc907a81909e7253376a8dbbdfbe438dde7dc230d0238e",
     "seguridad/sustento.html": "9b31f5a5ab0d1640daccc08ea3a830a7a4de1333c04492e9f6a9cd25b18146ec",
-    "seguridad/sustento.json": "391b82e4b2c00d95cb2412af230d14d53482b2ae1d0a4a1b3ea5383784d93546",
+    "seguridad/sustento.json": "99538f5bba96f2f43ba12803b52133013ee11a5e2b83bb61c54ba8e775f715e5",
     "trazabilidad.json": "269da377f628bdc74cb0678c3274af3a7087edc07be9f376b646cd041340c6ee"
   }
 }
