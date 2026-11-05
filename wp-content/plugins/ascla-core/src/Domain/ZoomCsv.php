@@ -48,12 +48,7 @@ final class ZoomCsv
         $email=$header['email']===false?'':strtolower(trim((string)($cells[$header['email']]??'')));
         $name=mb_substr(sanitize_text_field((string)($header['name']===false?'':($cells[$header['name']]??''))),0,160);
         $duration=$header['minutes']===false?'':trim((string)($cells[$header['minutes']]??''));
-        $minutes=null;$seconds=null;
-        if ($duration!=='') {
-            $value=preg_match('/^\d+(?:[.,]\d+)?$/D',$duration)?(float)str_replace(',','.',$duration):-1;
-            if (!is_finite($value) || $value<0 || $value>10080) { $minutes=-1; }
-            else { $minutes=(int)ceil($value);$seconds=(int)round($value*60); }
-        }
+        [$minutes,$seconds]=self::duration($duration);
         $reason='';
         if (!is_email($email) && !Access::hasText($name)) { $reason='Correo y nombre ausentes o no válidos'; }
         elseif ($minutes!==null && ($minutes<0 || $minutes>10080)) { $reason='Duración no válida'; }
@@ -64,6 +59,13 @@ final class ZoomCsv
             'join'=>$header['join']===false?'':trim((string)($cells[$header['join']]??'')),
             'leave'=>$header['leave']===false?'':trim((string)($cells[$header['leave']]??'')),'error'=>$reason,
         ];
+    }
+    private static function duration(string $duration): array
+    {
+        if ($duration==='') { return [null,null]; }
+        $value=preg_match('/^\d+(?:[.,]\d+)?$/D',$duration)?(float)str_replace(',','.',$duration):-1;
+        if (!is_finite($value) || $value<0 || $value>10080) { return [-1,null]; }
+        return [(int)ceil($value),(int)round($value*60)];
     }
     private static function participantRows($stream,array $header,string $delimiter,int &$line): array
     {

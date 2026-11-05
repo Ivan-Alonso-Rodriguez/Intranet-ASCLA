@@ -254,10 +254,7 @@ final class Administration
         Access::require(Access::hasText($first.$last),'Indica al menos un nombre o apellido.',400);
         $membership=Membership::validate($input,$id);
         $previousProfile=(array)get_user_meta($id,'_ascla_profile',true)+['first_name'=>$user->first_name,'last_name'=>$user->last_name,'phone_visibility'=>'private'];
-        if (array_key_exists('profile_revision',$input)) {
-            $revision=FormRules::bounded($input['profile_revision'],0,PHP_INT_MAX);
-            Access::require($revision===(int)($previousProfile['revision']??0),'El perfil cambió mientras lo editabas. Cierra y vuelve a abrir Editar usuario para cargar los datos actuales.',409);
-        }
+        self::validateProfileRevision($input,$previousProfile);
         $phone=\ASCLA\Core\Domain\Phone::normalize($input['phone']??($previousProfile['phone']??''));
         $phoneVisibility=\ASCLA\Core\Domain\Phone::visibility($input['phone_visibility']??($previousProfile['phone_visibility']??'private'));
         $profile=Profiles::details($previousProfile,$input);
@@ -293,6 +290,13 @@ final class Administration
         \ASCLA\Core\Repositories\Transaction::afterCommit(static fn()=>Access::member($id)?Matching::refreshBatch($id):null);
         Birthdays::celebrate($id);
         return self::user($id);
+    }
+
+    private static function validateProfileRevision(array $input,array $profile): void
+    {
+        if (!array_key_exists('profile_revision',$input)) { return; }
+        $revision=FormRules::bounded($input['profile_revision'],0,PHP_INT_MAX);
+        Access::require($revision===(int)($profile['revision']??0),'El perfil cambió mientras lo editabas. Cierra y vuelve a abrir Editar usuario para cargar los datos actuales.',409);
     }
 
     private static function professionalFields(array $profile,array $previousProfile,array $input): array

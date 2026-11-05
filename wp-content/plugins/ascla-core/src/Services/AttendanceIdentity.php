@@ -4,7 +4,9 @@ namespace ASCLA\Core\Services;
 /** Request-local identity index: exact email first, then unique normalized names. */
 final class AttendanceIdentity
 {
-    private array $emails=[],$names=[],$resolved=[];
+    private array $emails=[];
+    private array $names=[];
+    private array $resolved=[];
     private bool $loaded=false;
 
     public function resolve(array $row): array
@@ -16,7 +18,11 @@ final class AttendanceIdentity
             $user=$this->emails[$email];
             if ($user) { return user_can($user,'ascla_access')?['user'=>$user,'method'=>'email']:['user'=>false,'reason'=>'El correo pertenece a una cuenta sin acceso ASCLA']; }
         }
-        $name=self::normalize($row['name']);
+        return $this->resolveName(self::normalize($row['name']));
+    }
+
+    private function resolveName(string $name): array
+    {
         if ($name==='') { return ['user'=>false,'reason'=>'Correo sin cuenta ASCLA y nombre no disponible']; }
         if (!isset($this->resolved[$name])) { $this->resolved[$name]=$this->byName($name); }
         return $this->resolved[$name];
@@ -59,6 +65,11 @@ final class AttendanceIdentity
         }
         if (count($exact)===1) { return ['user'=>$this->names[$exact[0]]['user'],'method'=>'name']; }
         if (count($exact)>1) { return ['user'=>false,'reason'=>'Hay varios asociados con ese nombre. Verifica su correo.']; }
+        return $this->closestName($scores);
+    }
+
+    private function closestName(array $scores): array
+    {
         arsort($scores,SORT_NUMERIC);$ids=array_keys($scores);$best=$scores[$ids[0]??0]??0;$second=$scores[$ids[1]??0]??0;
         if ($best>=0.90 && $best-$second>=0.08) { return ['user'=>$this->names[$ids[0]]['user'],'method'=>'similar_name']; }
         return ['user'=>false,'reason'=>$best>=0.80?'El nombre tiene coincidencias dudosas. Verifica su correo.':'No se encontró una cuenta ASCLA con ese correo o nombre'];

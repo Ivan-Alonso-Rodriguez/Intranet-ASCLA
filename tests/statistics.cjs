@@ -69,6 +69,9 @@ async function runStatistics(){let f,browser,page;const coverage=[];
      const saved=await api(page,'profiles/'+f.users[3].id);assert.ok(saved.data.interests.includes(f.formsTopic));const stats=await api(page,'admin/statistics?topic='+f.formsTopic);assert.equal(stats.data.topics[0].forms,1);assert.equal(stats.data.topics[0].declared,1);
      await page.screenshot({path:'test-results/forms-reviewed.png',fullPage:true});
     });
+    await test('Forms: conversión local PDF/HTML/ZIP, límites y rechazos seguros',async()=>{
+     await require('./interest-reader.cjs')(page);
+    });
     await test('Reportes: revisar antes de eliminar y conservar la publicación',async()=>{
      await page.locator('.admin-tabs [data-tab="moderacion"]').click();await page.locator('[data-moderation-view="reportes"]').click();await page.locator(`[data-action="report-reviewed"][data-id="${f.report}"]`).waitFor();assert.equal(await page.locator(`[data-action="admin-delete"][data-kind="report"][data-id="${f.report}"]`).count(),0);
      assert.equal((await api(page,'admin/reports/'+f.report,'DELETE',{})).status,409);
