@@ -46,7 +46,7 @@ async function neutral(locator){const colors=await locator.evaluate(n=>{const s=
   await go(member,'eventos/');await member.locator('.event-card').first().waitFor();assert.ok(await member.locator('.event-card-date strong').count());assert.ok(await member.locator('.event-card-location').count());await capture(member,'eventos-'+name);
   await go(member,'eventos/?item='+posts[0]);await member.locator('.alert.chatham').waitFor();const published=await neutral(member.locator('.modal .status.publish').first()),chatham=await neutral(member.locator('.alert.chatham'));assert.equal(published.actual,chatham.actual);await capture(member,'detalle-'+name);await member.keyboard.press('Escape');pass('Eventos: fecha destacada, horario y lugar; Publicado y Chatham House neutros: '+name);
  }
- await go(member,'eventos/');await member.locator('.event-card.is-cancelled').waitFor();assert.equal(await member.locator('.event-card.is-cancelled').filter({hasText:'Cancelado'}).count(),1);await capture(member,'evento-cancelado');pass('El evento cancelado conserva su estado visible y una tarjeta legible');
+ await go(member,'eventos/');const cancelled=member.locator('.event-card.is-cancelled').filter({has:member.locator(`[data-action="item"][data-id="${posts[2]}"]`)});await cancelled.waitFor();assert.equal(await cancelled.filter({hasText:'Cancelado'}).count(),1);await capture(member,'evento-cancelado');pass('El evento cancelado conserva su estado visible y una tarjeta legible');
  assert.deepEqual(errors,[]);
 }catch(error){errors.push(error.stack);console.error(error.stack);process.exitCode=1;if(member)await member.screenshot({path:path.join(out,'failure.png'),fullPage:true}).catch(()=>{});
 }finally{
