@@ -2397,7 +2397,7 @@ output.view-loading{display:block}
 #ascla-root .admin-user-person{display:flex;align-items:center;gap:14px;min-width:0}
 #ascla-root .admin-user-person>div{min-width:0}
 #ascla-root .admin-user h3{font-size:15px;margin:0 0 4px;overflow-wrap:anywhere}
-#ascla-root .admin-user-person span,#ascla-root .admin-user-person a{font-size:11px;display:block;overflow-wrap:anywhere}
+#ascla-root .admin-user-person > div > :is(span, a){font-size:11px;display:block;overflow-wrap:anywhere}
 #ascla-root .admin-user-person .avatar{display:flex;flex-shrink:0}
 #ascla-root .admin-user-access{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
 #ascla-root .admin-user-access small{width:100%;color:var(--muted);font-size:10px}
