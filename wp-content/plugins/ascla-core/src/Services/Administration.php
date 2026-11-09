@@ -1,5 +1,6 @@
 <?php
 namespace ASCLA\Core\Services;
+use ASCLA\Core\Integrations\Mailer;
 use ASCLA\Core\Repositories\Store;
 use ASCLA\Core\Repositories\WordPressWrites;
 
@@ -169,7 +170,7 @@ final class Administration
         Membership::apply($id,$account['membership']);
         Audit::changes('member_created',$id,[],['roles'=>[$account['role']]]);
         if($account['send_invite']) {
-            try { wp_new_user_notification($id,null,'user'); }
+            try { Mailer::sendInvitation($id); }
             catch (\Throwable $error) { /* La cuenta no depende del transporte de correo. */ }
         }
         Audit::record('member_created',$id,'role='.$account['role'].'; invite='.($account['send_invite']?'requested':'disabled'));
