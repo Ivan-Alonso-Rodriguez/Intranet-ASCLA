@@ -26,7 +26,7 @@ async function neutral(locator){const colors=await locator.evaluate(n=>{const s=
 (async()=>{try{
  browser=await chromium.launch({headless:true,channel:fixture.browser_channel||'msedge'});admin=await login('Administrador');member=await login('Ana');
  for(const [i,modality] of ['Virtual','Híbrido','Presencial'].entries()){
-  const event=await ok(admin,'content/event',{title:['Gobierno corporativo: perspectivas de la comunidad','Encuentro de secretarios corporativos','Taller de gestión de riesgos'][i],body:'Compartamos experiencias y herramientas para fortalecer el gobierno corporativo en nuestra comunidad.',status:'publish',meta:{start:new Date(Date.now()+(i+2)*86400000).toISOString(),end:new Date(Date.now()+(i+2)*86400000+3600000).toISOString(),capacity:30,modality,chatham:i===0,location:i===0?'En línea':'Lima · Centro de encuentros ASCLA'}});posts.push(event.id);
+  const event=await ok(admin,'content/event',{title:['Gobierno corporativo: perspectivas de la comunidad','Encuentro de secretarios corporativos','Taller de gestión de riesgos'][i],body:'Compartamos experiencias y herramientas para fortalecer el gobierno corporativo en nuestra comunidad.',status:'publish',meta:{start:new Date(Date.now()+(i+2)*86400000).toISOString(),end:new Date(Date.now()+(i+2)*86400000+3600000).toISOString(),capacity:30,modality,chatham:i===0,location:'Lima · Centro de encuentros ASCLA',url:'https://example.invalid/meeting'}});posts.push(event.id);
  }
  await ok(admin,'events/'+posts[2]+'/cancel',{reason:'Cancelación de prueba visual en laboratorio aislado.'});
  for(const theme of ['light','dark'])for(const [screen,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]){

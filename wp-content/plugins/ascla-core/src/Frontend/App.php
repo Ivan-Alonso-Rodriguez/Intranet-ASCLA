@@ -9,7 +9,11 @@ final class App
     private static function enqueuePageAssets(): void
     {
         $page=self::page();
-        if ($page) { self::assets($page); }
+        if ($page) {
+            // Keep Unicode emoji as text in the app. The WordPress fallback uses external images.
+            remove_action('wp_head','print_emoji_detection_script',7);
+            self::assets($page);
+        }
     }
 
     private static function shortcode(array $attrs): string
@@ -134,7 +138,9 @@ final class App
         self::$initialBootstrap=null;self::$bootstrapUser=get_current_user_id();
         try { self::$initialBootstrap=\ASCLA\Core\Services\Bootstrap::get(); }
         catch (\Throwable $error) { \ASCLA\Core\Services\TechnicalErrors::record('bootstrap','request_failed',$error); }
+        Theme::registerBrandStyle();
         wp_enqueue_style('ascla-app',ASCLA_URL.'assets/app.css',[],self::assetVersion('assets/app.css'));
+        wp_enqueue_style('ascla-executive',ASCLA_URL.'assets/executive.css',['ascla-app','ascla-brand'],self::assetVersion('assets/executive.css'));
         wp_enqueue_script('ascla-image-editor',ASCLA_URL.'assets/image-editor.js',[],self::assetVersion('assets/image-editor.js'),true);
         wp_enqueue_script('ascla-content',ASCLA_URL.'assets/content-ui.js',[],self::assetVersion('assets/content-ui.js'),true);
         wp_enqueue_script('ascla-pdf-preview',ASCLA_URL.'assets/pdf-preview.js',[],self::assetVersion('assets/pdf-preview.js'),true);

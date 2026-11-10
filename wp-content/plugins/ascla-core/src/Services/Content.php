@@ -12,6 +12,7 @@ final class Content
     {
         unset($metaId);
         if ($key!=='_ascla' || !is_array($value)) { return; }
+        if (get_post_type($postId)==='ascla_resource') { VideoEvidence::index($postId,$value); }
         if(get_post_type($postId)==='ascla_contact') { WordPressWrites::meta('post',$postId,'_ascla_request_status',$value['request_status']??'open'); }
         if(get_post_type($postId)==='ascla_ally') { WordPressWrites::meta('post',$postId,'_ascla_alliance_type',\ASCLA\Core\Repositories\AllySearch::value($value)); }
         foreach (['resource_type','start','end','source'] as $field) { WordPressWrites::meta('post',$postId,'_ascla_'.$field,$value[$field]??''); }
@@ -208,6 +209,7 @@ final class ContentPublishing
     private static function serializedMeta(\WP_Post $post): array
     {
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
+        unset($meta['ai_source_signature']);
         if ($post->post_type==='ascla_resource'&&Access::canPublish()) { $meta['video_preparation']=VideoPreparation::status($post->ID); }
         foreach (['summary','technical_note','infographic','moments','excerpts','frameworks','norms','concepts','tags','conclusions','suggested_hub','agenda_ai'] as $field) {
             if (isset($meta[$field])) { $meta[$field]=\ASCLA\Core\Domain\EntityRedactor::cleanTree($meta[$field]); }
@@ -379,15 +381,16 @@ final class ContentPublishing
         };
     }
 
-    public static function remove(int $id): array
+    public static function remove(int $id,bool $draftOnly=false): array
     {
         $post=Content::get($id);
-        if($post->post_type==='ascla_contact') { return Administration::deleteContact($id); }
+        if(!$draftOnly && $post->post_type==='ascla_contact') { return Administration::deleteContact($id); }
         Access::require(self::canDelete($post),'No tienes permisos para eliminar este contenido.',403);
-        return Store::atomic(($post->post_type==='ascla_event'?'event:':'content:').$id,static function()use($id){
+        return Store::atomic(($post->post_type==='ascla_event'?'event:':'content:').$id,static function()use($id,$draftOnly){
             clean_post_cache($id);
             $post=Content::get($id);
             Access::require(self::canDelete($post),'No tienes permisos para eliminar este contenido.',403);
+            Access::require(!$draftOnly || $post->post_status==='draft','El contenido ya no es un borrador.',409);
             $meta=(array)get_post_meta($id,'_ascla',true);
             Access::require((bool)wp_trash_post($id),'No se pudo eliminar el contenido.',500);
             if ($post->post_type==='ascla_gallery') { MediaRemoval::gallery($id); }
@@ -566,7 +569,7 @@ final class ContentSaveState
         Access::require(in_array($requested,['draft','pending','publish','scheduled'],true) || ($type==='ally' && $requested==='inactive')
             || (in_array($type,['gallery','resource'],true) && $requested==='ascla_hidden' && $context['publisher']),'Estado no válido.',400);
         if ($type==='event' && $requested!=='draft') {
-            Access::require(!empty($meta['start']) && !empty($meta['end']),'Complete la fecha y hora de inicio y fin.',400);
+            ContentMeta::requireEventDetails($meta);
         }
         $direct=$type==='resource' && $context['publisher'] && $requested==='publish' && !empty($meta['generated']);
         $status=$type==='ally'?Allies::publicationStatus($requested):self::status($type,$requested,$meta,$context['editor'],$context['publisher'],$direct);
@@ -792,6 +795,7 @@ final class ContentInteractions
         $meta=(array)get_post_meta($id,'_ascla',true);
         $before=['state'=>$post->post_status,'reason'=>$meta['moderation']['reason']??''];
         Access::require($decision!=='approve'||empty($meta['generated'])||$reviewed,'Debe confirmar revisión de fuentes, identidades y derechos.',400);
+        if ($decision==='approve' && $post->post_type==='ascla_event') { ContentMeta::requireEventDetails($meta); }
         $status=ContentSchedule::moderation($decision,$meta,$statuses[$decision]);
         if(!empty($meta['micro'])){ MicroLifecycle::review($id,$decision,$reason,$meta); }
         $meta['moderation']=['moderator'=>get_current_user_id(),'date'=>gmdate('c'),'decision'=>$decision,'reason'=>$reason];

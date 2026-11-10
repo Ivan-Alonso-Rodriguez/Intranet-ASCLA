@@ -31,7 +31,6 @@ $asclaAdminContext=false;
     <h1><a href="<?php echo esc_url(Login::url()); ?>" aria-label="ASCLA">ASCLA</a></h1>
 
     <div class="ascla-login-intro">
-        <p class="ascla-login-eyebrow">INTRANET ASCLA</p>
         <h2 id="ascla-login-title"><?php echo esc_html(Language::text('Te damos la bienvenida','Welcome to ASCLA')); ?></h2>
         <p><?php echo esc_html(Language::text('Ingresa con tu cuenta para acceder a la comunidad.','Sign in with your account to access the community.')); ?></p>
     </div>

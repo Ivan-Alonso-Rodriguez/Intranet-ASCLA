@@ -25,7 +25,7 @@ async function fault(action,user=0,mode='audit',email='',post=0){
   users.push({...user,page:await login(username,password)});await ok(users.at(-1).page,'profiles/me',complete);
  }
  const [a,b]=users;await ok(a.page,'relations',{target:b.id,kind:'connect',active:true,message:'Prueba transaccional'});const request=(await ok(b.page,'connections')).incoming.find(row=>row.id===a.id).connection.request_id;await ok(b.page,'connections/'+request+'/respond',{decision:'accept'});
- const event=await ok(admin,'content/event',{title:'Aforo transaccional '+suffix,body:'Evento para pruebas de reversión',status:'publish',meta:{start:new Date(Date.now()+86400000).toISOString(),end:new Date(Date.now()+90000000).toISOString(),capacity:1}});posts.push(event.id);
+ const event=await ok(admin,'content/event',{title:'Aforo transaccional '+suffix,body:'Evento para pruebas de reversión',status:'publish',meta:{start:new Date(Date.now()+86400000).toISOString(),end:new Date(Date.now()+90000000).toISOString(),capacity:1,url:'https://example.invalid/meeting'}});posts.push(event.id);
  await ok(a.page,'events/'+event.id+'/register',{status:'accepted'});await ok(b.page,'events/'+event.id+'/register',{status:'waitlisted'});
  await fault('enable',a.id);
  assert.equal((await api(a.page,'relations',{target:b.id,kind:'connect',active:false})).status,500);
@@ -73,7 +73,7 @@ async function fault(action,user=0,mode='audit',email='',post=0){
  assert.equal((await api(a.page,'items/'+topic.id,null,'DELETE')).status,500);assert.equal((await ok(b.page,'items/'+topic.id)).status,'publish');
  await fault('disable');await ok(a.page,'content/topic/'+topic.id,changedTopic);
  pass('Publicaciones: alta, edición, taxonomías y papelera revierten juntas cuando falla la auditoría');
- const eventInput={title:'Evento completo '+suffix,body:'Evento de aceptación de atomicidad',status:'publish',meta:{start:new Date(Date.now()+86400000*3).toISOString(),end:new Date(Date.now()+86400000*3+3600000).toISOString(),capacity:3}};
+ const eventInput={title:'Evento completo '+suffix,body:'Evento de aceptación de atomicidad',status:'publish',meta:{start:new Date(Date.now()+86400000*3).toISOString(),end:new Date(Date.now()+86400000*3+3600000).toISOString(),capacity:3,url:'https://example.invalid/meeting'}};
  const localEvent=await ok(a.page,'content/event',eventInput);posts.push(localEvent.id);
  await ok(b.page,'events/'+localEvent.id+'/register',{status:'accepted'});
  await fault('enable',a.id,'metadata');

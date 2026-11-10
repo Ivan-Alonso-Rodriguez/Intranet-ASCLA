@@ -83,7 +83,7 @@ globalThis.ASCLAContent = function ({ escape: E, icon: I, config: C, T = (text) 
           [{ id: 0, name: "Conversación general" }, ...forums],
           filter.parent,
         ) + controls;
-    return `<details class="advanced-filters" ${["category", "tag", "keyword", "author", "parent", "modality"].some((k) => filter[k] !== undefined && filter[k] !== "") ? "open" : ""}><summary>${E(T("Más filtros"))}</summary><div class="filter-grid">${controls}</div></details>`;
+    return controls;
   }
   const labels = {
     title: "Título",

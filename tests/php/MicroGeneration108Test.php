@@ -22,11 +22,12 @@ final class MicroGeneration108Test extends TestCase
         wp_set_current_user($this->users[0]);
         foreach ($this->posts as $id) { EventReminders::cancel($id);ContentSchedule::cancel($id);wp_clear_scheduled_hook('ascla_micro_tick',[$id]);Store::delete('registrations',['event_id'=>$id]);Store::delete('audit',['object_id'=>$id]);wp_delete_post($id,true); }
         foreach ($this->users as $id) { foreach (['relations','notifications','jobs'] as $table) { Store::delete($table,['user_id'=>$id]); }foreach (['audit','deliveries'] as $table) { Store::delete($table,['actor_id'=>$id]); }wp_clear_scheduled_hook('ascla_micro_candidate_changed',[$id]);wp_delete_user($id); }
-        delete_option($this->batch);update_option('ascla_settings',$this->settings,false);update_option('ascla_group_history',$this->history,false);wp_set_current_user(0);
+        delete_option($this->batch);delete_option(str_replace('ascla_micro_demo-','ascla_micro_manual_demo-',$this->batch));
+        update_option('ascla_settings',$this->settings,false);MicroPlanning::schedule();update_option('ascla_group_history',$this->history,false);wp_set_current_user(0);
     }
-    private function create(): array
+    private function create(int $manualJob=0): array
     {
-        $result=MicroEvents::create($this->users);$this->posts=array_values(array_unique(array_merge($this->posts,$result['events'])));return $result;
+        $result=MicroEvents::create($this->users,$manualJob);$this->posts=array_values(array_unique(array_merge($this->posts,$result['events'])));return $result;
     }
     private function api(string $path,array $data): WP_REST_Response
     {
@@ -38,6 +39,34 @@ final class MicroGeneration108Test extends TestCase
         self::assertNotContains($this->users[0],get_post_meta($result['events'][0],'_ascla',true)['invitees']);
         self::assertFalse($result['reused']);self::assertSame('ready',$result['diagnostics']['reason']);self::assertSame(4,$result['diagnostics']['max_shared_interest']);
         $again=$this->create();self::assertTrue($again['reused']);self::assertSame($result['events'],$again['events']);
+    }
+    public function testManualRequestsPrepareSeparateAlternativesAndRetriesKeepTheSameBatch(): void
+    {
+        $topics=array_slice(array_column(ASCLA\Core\Services\Profiles::catalogs()['interest'],'id'),0,2);
+        foreach (array_slice($this->users,1) as $id) {
+            $profile=get_user_meta($id,'_ascla_profile',true);$profile['interests']=$topics;update_user_meta($id,'_ascla_profile',$profile);
+        }
+        $scheduled=$this->create()['events'];
+        $job=static fn()=>Store::insert('jobs',['user_id'=>get_current_user_id(),'kind'=>'microevents','status'=>'processing','payload'=>'{}','created_at'=>current_time('mysql',true)]);
+        $firstJob=$job();$first=$this->create($firstJob)['events'];
+        self::assertCount(1,$first);self::assertNotSame($scheduled,$first);
+        self::assertNotSame(get_post($scheduled[0])->post_content,get_post($first[0])->post_content);
+        self::assertNotSame(get_post_meta($scheduled[0],'_ascla',true)['topic_id'],get_post_meta($first[0],'_ascla',true)['topic_id']);
+        self::assertSame($first,$this->create($firstJob)['events']);
+        Content::moderate($first[0],'reject','Se prefiere otro tema.');
+        $next=$this->create($job())['events'];
+        self::assertCount(1,$next);self::assertNotContains($next[0],array_merge($first,$scheduled));
+        self::assertSame('pending',get_post_status($next[0]));self::assertSame('ascla_rejected',get_post_status($first[0]));
+        self::assertSame($scheduled,$this->create()['events']);
+    }
+    public function testDailySchedulingAndWeeklyDefault(): void
+    {
+        $saved=get_option('ascla_settings');unset($saved['micro_interval_days']);update_option('ascla_settings',$saved,false);
+        self::assertSame(7,MicroPlanning::interval());
+        self::assertSame(200,$this->api('settings',['micro_interval_days'=>1])->get_status());
+        self::assertSame(1,MicroPlanning::interval());self::assertSame(DAY_IN_SECONDS,(int)wp_get_scheduled_event('ascla_microevents')->interval);
+        foreach ([0,91,1.5] as $invalid) { self::assertSame(400,$this->api('settings',['micro_interval_days'=>$invalid])->get_status()); }
+        self::assertSame(1,MicroPlanning::interval());
     }
     public function testZeroResultsFromAHigherMinimumCanBeRetriedAfterCorrectingTheSetting(): void
     {

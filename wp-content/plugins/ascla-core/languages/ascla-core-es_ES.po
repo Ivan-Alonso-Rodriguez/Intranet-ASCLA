@@ -1,7 +1,7 @@
 # ASCLA Core UI catalog. Source language: es_ES.
 
 msgid ""
-msgstr "Project-Id-Version: ASCLA Core 1.11.1\nLanguage: es_ES\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
+msgstr "Project-Id-Version: ASCLA Core 1.12\nLanguage: es_ES\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "1. Añadir o corregir una persona"
 msgstr "1. Añadir o corregir una persona"
@@ -17,12 +17,6 @@ msgstr "ACTIVIDAD E INTERESES"
 
 msgid "ACTIVIDAD REGISTRADA"
 msgstr "ACTIVIDAD REGISTRADA"
-
-msgid "ADMINISTRACIÓN ASCLA"
-msgstr "ADMINISTRACIÓN ASCLA"
-
-msgid "ADMINISTRACIÓN · SEGURIDAD · CONTROL"
-msgstr "ADMINISTRACIÓN · SEGURIDAD · CONTROL"
 
 msgid "ALIANZAS INSTITUCIONALES"
 msgstr "ALIANZAS INSTITUCIONALES"
@@ -249,6 +243,9 @@ msgstr "Actualización automática semanal"
 msgid "Actualización interna"
 msgstr "Actualización interna"
 
+msgid "Actualización semanal"
+msgstr "Actualización semanal"
+
 msgid "Actualizada"
 msgstr "Actualizada"
 
@@ -276,6 +273,9 @@ msgstr "Adjuntar imagen o PDF"
 msgid "Adjuntar logotipo"
 msgstr "Adjuntar logotipo"
 
+msgid "Administra la comunidad, los encuentros y los servicios de ASCLA."
+msgstr "Administra la comunidad, los encuentros y los servicios de ASCLA."
+
 msgid "Administra tu contraseña, tus archivos y las integraciones de tu cuenta."
 msgstr "Administra tu contraseña, tus archivos y las integraciones de tu cuenta."
 
@@ -284,6 +284,9 @@ msgstr "Administración"
 
 msgid "Administración ASCLA"
 msgstr "Administración ASCLA"
+
+msgid "Administración de la plataforma"
+msgstr "Administración de la plataforma"
 
 msgid "Administración del grupo"
 msgstr "Administración del grupo"
@@ -303,11 +306,17 @@ msgstr "Afinidad determinística"
 msgid "Afinidad mínima para recomendar (%)"
 msgstr "Afinidad mínima para recomendar (%)"
 
+msgid "Afinidad profesional"
+msgstr "Afinidad profesional"
+
 msgid "Afinidades que pueden convertirse en oportunidades"
 msgstr "Afinidades que pueden convertirse en oportunidades"
 
 msgid "Agenda de conversación"
 msgstr "Agenda de conversación"
+
+msgid "Agenda y conocimiento"
+msgstr "Agenda y conocimiento"
 
 msgid "Agregar"
 msgstr "Agregar"
@@ -681,6 +690,9 @@ msgstr "Añadir a Google Calendar ↗"
 msgid "Añadir conservando intereses actuales"
 msgstr "Añadir conservando intereses actuales"
 
+msgid "Añadir o corregir una persona"
+msgstr "Añadir o corregir una persona"
+
 msgid "Añadir tema"
 msgstr "Añadir tema"
 
@@ -722,6 +734,9 @@ msgstr "Aún no hay importaciones."
 
 msgid "Aún no hay intereses en este perfil."
 msgstr "Aún no hay intereses en este perfil."
+
+msgid "Aún no hay participantes en la lista. Añade una persona o importa el archivo de Zoom."
+msgstr "Aún no hay participantes en la lista. Añade una persona o importa el archivo de Zoom."
 
 msgid "Aún no hay registros para representar en este gráfico."
 msgstr "Aún no hay registros para representar en este gráfico."
@@ -858,9 +873,6 @@ msgstr "Buscar usuarios"
 msgid "COMUNIDAD DE ASOCIADOS"
 msgstr "COMUNIDAD DE ASOCIADOS"
 
-msgid "CONECTA · COMPARTE · CRECE"
-msgstr "CONECTA · COMPARTE · CRECE"
-
 msgid "CONOCIMIENTO"
 msgstr "CONOCIMIENTO"
 
@@ -926,6 +938,9 @@ msgstr "Cambio de datos del perfil"
 
 msgid "Cambio porcentual = (valor actual − valor anterior) / valor anterior × 100. Sin un valor anterior positivo, un aumento se muestra como Sin base previa. Si ambos son cero, se muestra Sin cambios."
 msgstr "Cambio porcentual = (valor actual − valor anterior) / valor anterior × 100. Sin un valor anterior positivo, un aumento se muestra como Sin base previa. Si ambos son cero, se muestra Sin cambios."
+
+msgid "Cambios guardados."
+msgstr "Cambios guardados."
 
 msgid "Cambios registrados"
 msgstr "Cambios registrados"
@@ -1170,6 +1185,9 @@ msgstr "Compartimos conocimiento con respeto, confidencialidad y bajo la Regla d
 msgid "Compatibilidad activa con claves cifradas anteriores. Configura las variables en el servidor antes de activar el modo externo."
 msgstr "Compatibilidad activa con claves cifradas anteriores. Configura las variables en el servidor antes de activar el modo externo."
 
+msgid "Completa el lugar o sala del evento."
+msgstr "Completa el lugar o sala del evento."
+
 msgid "Completa este campo con texto visible."
 msgstr "Completa este campo con texto visible."
 
@@ -1229,6 +1247,9 @@ msgstr "Comunidad"
 
 msgid "Comunidad ASCLA"
 msgstr "Comunidad ASCLA"
+
+msgid "Comunidad de asociados"
+msgstr "Comunidad de asociados"
 
 msgid "Comunidad profesional"
 msgstr "Comunidad profesional"
@@ -1319,6 +1340,9 @@ msgstr "Configura una OpenAI API Key."
 
 msgid "Configuración"
 msgstr "Configuración"
+
+msgid "Configuración guardada."
+msgstr "Configuración guardada."
 
 msgid "Configurar ASCLA"
 msgstr "Configurar ASCLA"
@@ -1454,6 +1478,9 @@ msgstr "Consulta los archivos privados de todos los asociados y elimina los que 
 
 msgid "Consulta privada"
 msgstr "Consulta privada"
+
+msgid "Consulta tu agenda y descubre quién comparte tus intereses profesionales."
+msgstr "Consulta tu agenda y descubre quién comparte tus intereses profesionales."
 
 msgid "Consulta tus aportes y abre la conversación original."
 msgstr "Consulta tus aportes y abre la conversación original."
@@ -1611,11 +1638,20 @@ msgstr "Correo sin cuenta ASCLA y nombre no disponible"
 msgid "Correo y nombre ausentes o no válidos"
 msgstr "Correo y nombre ausentes o no válidos"
 
+msgid "Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes."
+msgstr "Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes."
+
+msgid "Crea nuevas propuestas con los ajustes guardados, aunque ya haya propuestas esta semana."
+msgstr "Crea nuevas propuestas con los ajustes guardados, aunque ya haya propuestas esta semana."
+
 msgid "Creador"
 msgstr "Creador"
 
 msgid "Creador del grupo"
 msgstr "Creador del grupo"
+
+msgid "Crear / completar demo"
+msgstr "Crear / completar demo"
 
 msgid "Crear aliado"
 msgstr "Crear aliado"
@@ -1679,6 +1715,9 @@ msgstr "Cuentas con actividad"
 
 msgid "Cuentas creadas durante las fechas elegidas."
 msgstr "Cuentas creadas durante las fechas elegidas."
+
+msgid "Cumple los requisitos"
+msgstr "Cumple los requisitos"
 
 msgid "Cupo disponible"
 msgstr "Cupo disponible"
@@ -1770,6 +1809,9 @@ msgstr "DeepSeek API Key (guardada; vacío para conservar)"
 msgid "DeepSeek · API"
 msgstr "DeepSeek · API"
 
+msgid "Define el tamaño de cada grupo y el plazo de inscripción prioritaria."
+msgstr "Define el tamaño de cada grupo y el plazo de inscripción prioritaria."
+
 msgid "Dejará de estar visible para los asociados. Su información y su historial se conservarán."
 msgstr "Dejará de estar visible para los asociados. Su información y su historial se conservarán."
 
@@ -1811,6 +1853,9 @@ msgstr "Descartar cambios"
 
 msgid "Descartar comentario"
 msgstr "Descartar comentario"
+
+msgid "Descartar propuesta"
+msgstr "Descartar propuesta"
 
 msgid "Descartar y cerrar"
 msgstr "Descartar y cerrar"
@@ -2022,6 +2067,9 @@ msgstr "El asistente prioriza la información que tu cuenta puede consultar en A
 msgid "El asociado puede desactivar o reiniciar este aprendizaje desde Perfil → Intereses. Este resumen no cambia con los filtros del historial."
 msgstr "El asociado puede desactivar o reiniciar este aprendizaje desde Perfil → Intereses. Este resumen no cambia con los filtros del historial."
 
+msgid "El borrador se moverá a la papelera."
+msgstr "El borrador se moverá a la papelera."
+
 msgid "El botón analiza hasta 30 eventos pendientes. La propuesta no cambia los temas publicados."
 msgstr "El botón analiza hasta 30 eventos pendientes. La propuesta no cambia los temas publicados."
 
@@ -2054,6 +2102,9 @@ msgstr "El contenido del ZIP está incompleto."
 
 msgid "El contenido volverá a estar disponible en el catálogo de la comunidad."
 msgstr "El contenido volverá a estar disponible en el catálogo de la comunidad."
+
+msgid "El contenido ya no es un borrador."
+msgstr "El contenido ya no es un borrador."
 
 msgid "El correo no admite saltos de línea ni caracteres de control."
 msgstr "El correo no admite saltos de línea ni caracteres de control."
@@ -2094,6 +2145,9 @@ msgstr "El grupo contiene un bloqueo entre asociados. Revisa los candidatos de l
 msgid "El historial identifica al administrador, al usuario y los campos modificados. Las preferencias de privacidad y participación las conserva el asociado."
 msgstr "El historial identifica al administrador, al usuario y los campos modificados. Las preferencias de privacidad y participación las conserva el asociado."
 
+msgid "El intervalo predeterminado es de 7 días. Puedes elegir entre 1 y 90."
+msgstr "El intervalo predeterminado es de 7 días. Puedes elegir entre 1 y 90."
+
 msgid "El lector PDF debe cargarse desde ASCLA."
 msgstr "El lector PDF debe cargarse desde ASCLA."
 
@@ -2123,6 +2177,9 @@ msgstr "El plan de Supadata no permite esta solicitud. Revisa el plan y los cré
 
 msgid "El porcentaje mínimo de permanencia decide si una conexión de Zoom cuenta como asistencia completa o parcial. Las correcciones manuales se conservan."
 msgstr "El porcentaje mínimo de permanencia decide si una conexión de Zoom cuenta como asistencia completa o parcial. Las correcciones manuales se conservan."
+
+msgid "El promedio usa solo listas verificadas. Cada persona cuenta una vez aunque asista a varios eventos."
+msgstr "El promedio usa solo listas verificadas. Cada persona cuenta una vez aunque asista a varios eventos."
 
 msgid "El proveedor de IA respondió, pero no clasificó la muestra sintética de Forms."
 msgstr "El proveedor de IA respondió, pero no clasificó la muestra sintética de Forms."
@@ -2202,6 +2259,9 @@ msgstr "Elegir imagen"
 msgid "Elige a las personas antes de aprobar. Se comprueban la membresía, el consentimiento, el perfil y los bloqueos al guardar."
 msgstr "Elige a las personas antes de aprobar. Se comprueban la membresía, el consentimiento, el perfil y los bloqueos al guardar."
 
+msgid "Elige con qué frecuencia se preparan los círculos de conversación."
+msgstr "Elige con qué frecuencia se preparan los círculos de conversación."
+
 msgid "Elige cómo quieres ver la intranet. En Automático, ASCLA sigue la preferencia de tu dispositivo."
 msgstr "Elige cómo quieres ver la intranet. En Automático, ASCLA sigue la preferencia de tu dispositivo."
 
@@ -2240,6 +2300,9 @@ msgstr "Eliminar aliado"
 
 msgid "Eliminar archivo"
 msgstr "Eliminar archivo"
+
+msgid "Eliminar borrador"
+msgstr "Eliminar borrador"
 
 msgid "Eliminar comentario"
 msgstr "Eliminar comentario"
@@ -2355,6 +2418,9 @@ msgstr "Enviado"
 msgid "Enviando"
 msgstr "Enviando"
 
+msgid "Enviando enlace de recuperación…"
+msgstr "Enviando enlace de recuperación…"
+
 msgid "Enviar"
 msgstr "Enviar"
 
@@ -2366,6 +2432,9 @@ msgstr "Enviar enlace de recuperación"
 
 msgid "Enviar mensaje"
 msgstr "Enviar mensaje"
+
+msgid "Enviar otro enlace de recuperación"
+msgstr "Enviar otro enlace de recuperación"
 
 msgid "Enviar pregunta"
 msgstr "Enviar pregunta"
@@ -2414,6 +2483,9 @@ msgstr "Escribe una respuesta…"
 
 msgid "Esperando el siguiente turno de Supadata."
 msgstr "Esperando el siguiente turno de Supadata."
+
+msgid "Esta contraseña es muy común. Elige otra menos predecible."
+msgstr "Esta contraseña es muy común. Elige otra menos predecible."
 
 msgid "Esta convocatoria fue cancelada. No se enviarán nuevas invitaciones."
 msgstr "Esta convocatoria fue cancelada. No se enviarán nuevas invitaciones."
@@ -2631,6 +2703,9 @@ msgstr "Explorar"
 msgid "Explorar directorio"
 msgstr "Explorar directorio"
 
+msgid "Explorar eventos"
+msgstr "Explorar eventos"
+
 msgid "Explorar foros"
 msgstr "Explorar foros"
 
@@ -2796,8 +2871,14 @@ msgstr "Gemini respondió con el formato de Forms, confianza válida e IDs exist
 msgid "Gemini respondió, pero no clasificó la muestra sintética de Forms."
 msgstr "Gemini respondió, pero no clasificó la muestra sintética de Forms."
 
+msgid "Generación manual"
+msgstr "Generación manual"
+
 msgid "Generar la transcripción si no existen subtítulos (consume más créditos)"
 msgstr "Generar la transcripción si no existen subtítulos (consume más créditos)"
+
+msgid "Generar nuevas propuestas"
+msgstr "Generar nuevas propuestas"
 
 msgid "Generar propuestas cada (días)"
 msgstr "Generar propuestas cada (días)"
@@ -2820,6 +2901,9 @@ msgstr "Gestionar usuario"
 msgid "Gestión de esta alianza"
 msgstr "Gestión de esta alianza"
 
+msgid "Gestión diaria"
+msgstr "Gestión diaria"
+
 msgid "Grupo"
 msgstr "Grupo"
 
@@ -2834,6 +2918,9 @@ msgstr "Guarda el CSV con codificación UTF-8."
 
 msgid "Guarda el perfil para aplicar."
 msgstr "Guarda el perfil para aplicar."
+
+msgid "Guarda las correcciones de los participantes antes de verificar la lista."
+msgstr "Guarda las correcciones de los participantes antes de verificar la lista."
 
 msgid "Guardado en tu Google Calendar"
 msgstr "Guardado en tu Google Calendar"
@@ -2870,6 +2957,9 @@ msgstr "Guardar como"
 
 msgid "Guardar como borrador"
 msgstr "Guardar como borrador"
+
+msgid "Guardar configuración"
+msgstr "Guardar configuración"
 
 msgid "Guardar criterio de Zoom"
 msgstr "Guardar criterio de Zoom"
@@ -3099,6 +3189,9 @@ msgstr "Importar CSV de Zoom"
 msgid "Importar intereses"
 msgstr "Importar intereses"
 
+msgid "Importar participantes desde Zoom"
+msgstr "Importar participantes desde Zoom"
+
 msgid "Imágenes"
 msgstr "Imágenes"
 
@@ -3165,6 +3258,9 @@ msgstr "Información profesional"
 msgid "Ingresa con tu cuenta para acceder a la comunidad."
 msgstr "Ingresa con tu cuenta para acceder a la comunidad."
 
+msgid "Ingresa un enlace válido para asistir al evento."
+msgstr "Ingresa un enlace válido para asistir al evento."
+
 msgid "Iniciativas"
 msgstr "Iniciativas"
 
@@ -3216,6 +3312,9 @@ msgstr "Inscritos que asistieron"
 msgid "Inscríbete antes de guardar este evento en tu calendario."
 msgstr "Inscríbete antes de guardar este evento en tu calendario."
 
+msgid "Insertar emoji"
+msgstr "Insertar emoji"
+
 msgid "Integración Google Calendar no configurada para tu cuenta. Puedes conectarlo para guardar próximos eventos."
 msgstr "Integración Google Calendar no configurada para tu cuenta. Puedes conectarlo para guardar próximos eventos."
 
@@ -3258,6 +3357,9 @@ msgstr "Intereses propuestos · máximo 3"
 msgid "Intereses que más se comparten"
 msgstr "Intereses que más se comparten"
 
+msgid "Intereses y conocimientos"
+msgstr "Intereses y conocimientos"
+
 msgid "Intereses y objetivos"
 msgstr "Intereses y objetivos"
 
@@ -3279,6 +3381,18 @@ msgstr "Introduce un enlace de linkedin.com."
 msgid "Introduce un enlace de x.com o twitter.com."
 msgstr "Introduce un enlace de x.com o twitter.com."
 
+msgid "Introduce una fecha y hora de fin válidas."
+msgstr "Introduce una fecha y hora de fin válidas."
+
+msgid "Introduce una fecha y hora de inicio válidas."
+msgstr "Introduce una fecha y hora de inicio válidas."
+
+msgid "Introduce una fecha y hora de publicación válidas."
+msgstr "Introduce una fecha y hora de publicación válidas."
+
+msgid "Introduce una fecha y hora válidas para el cierre de inscripciones."
+msgstr "Introduce una fecha y hora válidas para el cierre de inscripciones."
+
 msgid "Invitaciones a eventos y círculos de conversación."
 msgstr "Invitaciones a eventos y círculos de conversación."
 
@@ -3293,6 +3407,9 @@ msgstr "Invitado"
 
 msgid "Invitar asociados"
 msgstr "Invitar asociados"
+
+msgid "Ir a sección"
+msgstr "Ir a sección"
 
 msgid "Ir al Hub"
 msgstr "Ir al Hub"
@@ -3360,6 +3477,9 @@ msgstr "La comunidad en cifras"
 msgid "La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta."
 msgstr "La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta."
 
+msgid "La contraseña no debe contener caracteres de control."
+msgstr "La contraseña no debe contener caracteres de control."
+
 msgid "La conversación en nuestra comunidad"
 msgstr "La conversación en nuestra comunidad"
 
@@ -3393,11 +3513,20 @@ msgstr "La experiencia de nuestra comunidad, siempre a tu alcance."
 msgid "La explicación de IA no está disponible ahora. Puedes seguir usando el perfil."
 msgstr "La explicación de IA no está disponible ahora. Puedes seguir usando el perfil."
 
+msgid "La fecha de fin debe tener un año de cuatro dígitos."
+msgstr "La fecha de fin debe tener un año de cuatro dígitos."
+
+msgid "La fecha de inicio debe tener un año de cuatro dígitos."
+msgstr "La fecha de inicio debe tener un año de cuatro dígitos."
+
 msgid "La fecha de inicio no puede superar la final. Elige hasta 366 días."
 msgstr "La fecha de inicio no puede superar la final. Elige hasta 366 días."
 
 msgid "La fecha inicial no puede ser posterior a la fecha final."
 msgstr "La fecha inicial no puede ser posterior a la fecha final."
+
+msgid "La fecha y hora de fin deben ser posteriores al inicio."
+msgstr "La fecha y hora de fin deben ser posteriores al inicio."
 
 msgid "La ficha se enviará a la papelera y dejará de aparecer en el catálogo y en el registro de aliados."
 msgstr "La ficha se enviará a la papelera y dejará de aparecer en el catálogo y en el registro de aliados."
@@ -3756,6 +3885,9 @@ msgstr "Marcar todas como leídas"
 msgid "Marcos de trabajo"
 msgstr "Marcos de trabajo"
 
+msgid "Materiales anteriores"
+msgstr "Materiales anteriores"
+
 msgid "Materiales de un video"
 msgstr "Materiales de un video"
 
@@ -3764,6 +3896,9 @@ msgstr "Materiales recomendados"
 
 msgid "Materiales seleccionados para ti"
 msgstr "Materiales seleccionados para ti"
+
+msgid "Materiales siguientes"
+msgstr "Materiales siguientes"
 
 msgid "Mayor grupo con un interés común"
 msgstr "Mayor grupo con un interés común"
@@ -3818,6 +3953,9 @@ msgstr "Mes siguiente"
 
 msgid "Mi calendario"
 msgstr "Mi calendario"
+
+msgid "Mi espacio"
+msgstr "Mi espacio"
 
 msgid "Mi información sigue vigente"
 msgstr "Mi información sigue vigente"
@@ -3957,6 +4095,9 @@ msgstr "Más opciones de cuenta"
 msgid "Máximo de asistentes"
 msgstr "Máximo de asistentes"
 
+msgid "Máximo de propuestas por generación"
+msgstr "Máximo de propuestas por generación"
+
 msgid "Máximo de propuestas por período"
 msgstr "Máximo de propuestas por período"
 
@@ -3965,6 +4106,9 @@ msgstr "Máximo de propuestas por semana"
 
 msgid "Método / confianza"
 msgstr "Método / confianza"
+
+msgid "Mínimo de caracteres:"
+msgstr "Mínimo de caracteres:"
 
 msgid "Mínimo de participantes"
 msgstr "Mínimo de participantes"
@@ -4010,6 +4154,12 @@ msgstr "No encontramos perfiles"
 
 msgid "No encontramos usuarios"
 msgstr "No encontramos usuarios"
+
+msgid "No encontré un video publicado al que tengas acceso con esos datos. Prueba con su título o con un tema del video."
+msgstr "No encontré un video publicado al que tengas acceso con esos datos. Prueba con su título o con un tema del video."
+
+msgid "No es obligatorio combinar mayúsculas, números y símbolos. Evita contraseñas muy comunes."
+msgstr "No es obligatorio combinar mayúsculas, números y símbolos. Evita contraseñas muy comunes."
 
 msgid "No es posible enviar la solicitud en este momento."
 msgstr "No es posible enviar la solicitud en este momento."
@@ -4395,6 +4545,9 @@ msgstr "Nuevas cuentas"
 msgid "Nuevas notificaciones"
 msgstr "Nuevas notificaciones"
 
+msgid "Nuevas propuestas listas para revisión."
+msgstr "Nuevas propuestas listas para revisión."
+
 msgid "Nuevo evento"
 msgstr "Nuevo evento"
 
@@ -4545,6 +4698,9 @@ msgstr "Para completar tu perfil y recibir recomendaciones, completa:"
 msgid "Para cuidar la calidad y privacidad de las coincidencias, necesitamos un perfil profesional mínimo y al menos 70% de completitud."
 msgstr "Para cuidar la calidad y privacidad de las coincidencias, necesitamos un perfil profesional mínimo y al menos 70% de completitud."
 
+msgid "Para iniciar la conversación"
+msgstr "Para iniciar la conversación"
+
 msgid "Parciales"
 msgstr "Parciales"
 
@@ -4571,6 +4727,9 @@ msgstr "Participantes (moderación)"
 
 msgid "Participantes confirmados"
 msgstr "Participantes confirmados"
+
+msgid "Participantes e inscripción"
+msgstr "Participantes e inscripción"
 
 msgid "Participantes e inscritos"
 msgstr "Participantes e inscritos"
@@ -4620,6 +4779,9 @@ msgstr "Perfil no disponible actualmente."
 msgid "Perfil y Forms cuentan personas por fuente; una misma persona puede estar en ambas. El total de intereses guardados elimina duplicados. El contenido publicado usa las fechas, pero no el filtro de evento o categoría."
 msgstr "Perfil y Forms cuentan personas por fuente; una misma persona puede estar en ambas. El total de intereses guardados elimina duplicados. El contenido publicado usa las fechas, pero no el filtro de evento o categoría."
 
+msgid "Perfiles anteriores"
+msgstr "Perfiles anteriores"
+
 msgid "Perfiles descartados"
 msgstr "Perfiles descartados"
 
@@ -4628,6 +4790,12 @@ msgstr "Perfiles por página"
 
 msgid "Perfiles recomendados"
 msgstr "Perfiles recomendados"
+
+msgid "Perfiles siguientes"
+msgstr "Perfiles siguientes"
+
+msgid "Perfiles sugeridos según tus intereses y experiencia."
+msgstr "Perfiles sugeridos según tus intereses y experiencia."
 
 msgid "Perfiles y directorio"
 msgstr "Perfiles y directorio"
@@ -4725,6 +4893,9 @@ msgstr "Período anterior"
 msgid "Período de actividad"
 msgstr "Período de actividad"
 
+msgid "Período de análisis"
+msgstr "Período de análisis"
+
 msgid "Período elegido"
 msgstr "Período elegido"
 
@@ -4806,6 +4977,9 @@ msgstr "Preparando respuesta…"
 msgid "Preparar categorías de Forms"
 msgstr "Preparar categorías de Forms"
 
+msgid "Preparar datos de demostración"
+msgstr "Preparar datos de demostración"
+
 msgid "Preparar los encuentros de la semana"
 msgstr "Preparar los encuentros de la semana"
 
@@ -4832,6 +5006,9 @@ msgstr "Previsualizar PDF"
 
 msgid "Primero se buscan subtítulos existentes. La generación opcional usa el modo auto de Supadata. Las transcripciones completas se guardan con caché de 7 días; los trabajos largos continúan en segundo plano. Solo se envía la URL pública del video, sin comentarios ni datos de asociados."
 msgstr "Primero se buscan subtítulos existentes. La generación opcional usa el modo auto de Supadata. Las transcripciones completas se guardan con caché de 7 días; los trabajos largos continúan en segundo plano. Solo se envía la URL pública del video, sin comentarios ni datos de asociados."
+
+msgid "Privacidad"
+msgstr "Privacidad"
 
 msgid "Privacidad del teléfono no válida."
 msgstr "Privacidad del teléfono no válida."
@@ -4862,6 +5039,9 @@ msgstr "Procesar solo cuentas ASCLA existentes; omitir personas sin identificar"
 
 msgid "Programa del evento"
 msgstr "Programa del evento"
+
+msgid "Programación de propuestas"
+msgstr "Programación de propuestas"
 
 msgid "Programación guardada. Falta aprobación administrativa."
 msgstr "Programación guardada. Falta aprobación administrativa."
@@ -4946,6 +5126,9 @@ msgstr "Prueba otro nombre o vuelve pronto para conocer nuevas alianzas."
 
 msgid "Prueba una búsqueda diferente."
 msgstr "Prueba una búsqueda diferente."
+
+msgid "Próximo encuentro"
+msgstr "Próximo encuentro"
 
 msgid "Próximos encuentros"
 msgstr "Próximos encuentros"
@@ -5054,6 +5237,9 @@ msgstr "Puedes presentarte antes de conectar. Máximo 1000 caracteres."
 
 msgid "Puedes recibir un enlace seguro de recuperación en"
 msgstr "Puedes recibir un enlace seguro de recuperación en"
+
+msgid "Puedes revisar o descartar cada propuesta antes de invitar a los asociados."
+msgstr "Puedes revisar o descartar cada propuesta antes de invitar a los asociados."
 
 msgid "Pulsa un dato para cambiar entre visible y oculto. La moderación puede consultarlo."
 msgstr "Pulsa un dato para cambiar entre visible y oculto. La moderación puede consultarlo."
@@ -5283,6 +5469,9 @@ msgstr "Registros completos: actual / anterior"
 msgid "Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones."
 msgstr "Regla de Chatham House: utiliza el conocimiento sin revelar identidades ni afiliaciones."
 
+msgid "Reglas de publicación y privacidad de la comunidad."
+msgstr "Reglas de publicación y privacidad de la comunidad."
+
 msgid "Regresa a los eventos"
 msgstr "Regresa a los eventos"
 
@@ -5406,6 +5595,9 @@ msgstr "Resume el motivo de tu consulta"
 msgid "Resumen"
 msgstr "Resumen"
 
+msgid "Resumen de actividad"
+msgstr "Resumen de actividad"
+
 msgid "Retirar"
 msgstr "Retirar"
 
@@ -5439,6 +5631,9 @@ msgstr "Revisa las inscripciones y las condiciones del encuentro."
 msgid "Revisa los mínimos en Configuración → Participación y revisión y los intereses autorizados de los perfiles."
 msgstr "Revisa los mínimos en Configuración → Participación y revisión y los intereses autorizados de los perfiles."
 
+msgid "Revisa los requisitos de la contraseña"
+msgstr "Revisa los requisitos de la contraseña"
+
 msgid "Revisa propuestas y prepara círculos de conversación."
 msgstr "Revisa propuestas y prepara círculos de conversación."
 
@@ -5448,11 +5643,17 @@ msgstr "Revisa que la fecha y los datos del encuentro sigan vigentes antes de co
 msgid "Revisa que la fecha y los datos del encuentro sigan vigentes. Si cambió el horario o la modalidad, se solicitará confirmar nuevamente la asistencia."
 msgstr "Revisa que la fecha y los datos del encuentro sigan vigentes. Si cambió el horario o la modalidad, se solicitará confirmar nuevamente la asistencia."
 
+msgid "Revisa tu correo"
+msgstr "Revisa tu correo"
+
 msgid "Revisa tu perfil"
 msgstr "Revisa tu perfil"
 
 msgid "Revisa tus consultas y tareas anteriores"
 msgstr "Revisa tus consultas y tareas anteriores"
+
+msgid "Revisa y confirma la importación de Zoom antes de salir."
+msgstr "Revisa y confirma la importación de Zoom antes de salir."
 
 msgid "Revisado"
 msgstr "Revisado"
@@ -5640,6 +5841,9 @@ msgstr "Secciones del perfil"
 msgid "Sección no válida."
 msgstr "Sección no válida."
 
+msgid "Secretaría corporativa en América Latina"
+msgstr "Secretaría corporativa en América Latina"
+
 msgid "Sector profesional"
 msgstr "Sector profesional"
 
@@ -5657,6 +5861,9 @@ msgstr "Segundo nombre (opcional)"
 
 msgid "Seguridad de la cuenta"
 msgstr "Seguridad de la cuenta"
+
+msgid "Seguridad y acceso"
+msgstr "Seguridad y acceso"
 
 msgid "Selecciona Google Gemini u OpenAI antes de probar la conexión."
 msgstr "Selecciona Google Gemini u OpenAI antes de probar la conexión."
@@ -5757,6 +5964,9 @@ msgstr "Seleccione una propuesta de microevento."
 msgid "Selecciones actuales de los perfiles y Forms revisados. No dependen de las fechas elegidas."
 msgstr "Selecciones actuales de los perfiles y Forms revisados. No dependen de las fechas elegidas."
 
+msgid "Servicios e integraciones"
+msgstr "Servicios e integraciones"
+
 msgid "Si YouTube no la expone públicamente, abre el reproductor para verificarla."
 msgstr "Si YouTube no la expone públicamente, abre el reproductor para verificarla."
 
@@ -5813,6 +6023,9 @@ msgstr "Sin evento"
 
 msgid "Sin eventos pendientes"
 msgstr "Sin eventos pendientes"
+
+msgid "Sin eventos programados"
+msgstr "Sin eventos programados"
 
 msgid "Sin fecha límite, la membresía permanece vigente hasta que se suspenda. El vencimiento conserva el perfil y el historial."
 msgstr "Sin fecha límite, la membresía permanece vigente hasta que se suspenda. El vencimiento conserva el perfil y el historial."
@@ -5876,6 +6089,9 @@ msgstr "Sitio personal"
 
 msgid "Sobre esta organización"
 msgstr "Sobre esta organización"
+
+msgid "Sobre mí"
+msgstr "Sobre mí"
 
 msgid "Socio estratégico"
 msgstr "Socio estratégico"
@@ -6213,6 +6429,9 @@ msgstr "Todo ASCLA te desea un gran día y un nuevo año lleno de buenas conexio
 msgid "Todo el historial"
 msgstr "Todo el historial"
 
+msgid "Todo guardado"
+msgstr "Todo guardado"
+
 msgid "Todos"
 msgstr "Todos"
 
@@ -6396,6 +6615,9 @@ msgstr "Unirme a la lista de espera"
 msgid "Usa CSV hasta 512 KB o PDF, HTML o ZIP hasta 5 MB."
 msgstr "Usa CSV hasta 512 KB o PDF, HTML o ZIP hasta 5 MB."
 
+msgid "Usa al menos %d caracteres. No es obligatorio combinar mayúsculas, números y símbolos. Evita contraseñas muy comunes."
+msgstr "Usa al menos %d caracteres. No es obligatorio combinar mayúsculas, números y símbolos. Evita contraseñas muy comunes."
+
 msgid "Usa el correo de su cuenta ASCLA. Si ya está en la lista, se actualizará su registro."
 msgstr "Usa el correo de su cuenta ASCLA. Si ya está en la lista, se actualizará su registro."
 
@@ -6564,6 +6786,9 @@ msgstr "Ver perfil"
 msgid "Ver perfil de"
 msgstr "Ver perfil de"
 
+msgid "Ver propuestas"
+msgstr "Ver propuestas"
+
 msgid "Ver publicación"
 msgstr "Ver publicación"
 
@@ -6584,6 +6809,9 @@ msgstr "Ver transcripción"
 
 msgid "Verifica la lista al terminar."
 msgstr "Verifica la lista al terminar."
+
+msgid "Verificar la lista"
+msgstr "Verificar la lista"
 
 msgid "Video de origen"
 msgstr "Video de origen"
@@ -6728,6 +6956,12 @@ msgstr "comparado con"
 
 msgid "con duración"
 msgstr "con duración"
+
+msgid "conexiones confirmadas"
+msgstr "conexiones confirmadas"
+
+msgid "conexión confirmada"
+msgstr "conexión confirmada"
 
 msgid "confirmadas"
 msgstr "confirmadas"
@@ -6876,6 +7110,9 @@ msgstr "participantes no se muestran por sus preferencias de privacidad."
 msgid "pendientes"
 msgstr "pendientes"
 
+msgid "perfil en la comunidad"
+msgstr "perfil en la comunidad"
+
 msgid "perfiles en la comunidad"
 msgstr "perfiles en la comunidad"
 
@@ -6945,6 +7182,9 @@ msgstr "sin leer"
 msgid "sin tema sugerido"
 msgstr "sin tema sugerido"
 
+msgid "solicitud recibida"
+msgstr "solicitud recibida"
+
 msgid "solicitudes recibidas"
 msgstr "solicitudes recibidas"
 
@@ -7008,6 +7248,9 @@ msgstr "¿Quiénes participan más?"
 msgid "¿Qué cambió entre períodos?"
 msgstr "¿Qué cambió entre períodos?"
 
+msgid "¿Qué es ASCLA y qué contiene su intranet?"
+msgstr "¿Qué es ASCLA y qué contiene su intranet?"
+
 msgid "¿Qué período quieres consultar?"
 msgstr "¿Qué período quieres consultar?"
 
@@ -7029,6 +7272,9 @@ msgstr "¿Qué tan completos están los registros?"
 msgid "¿Qué temas reúnen a la comunidad?"
 msgstr "¿Qué temas reúnen a la comunidad?"
 
+msgid "¿Qué videos puedo consultar?"
+msgstr "¿Qué videos puedo consultar?"
+
 msgid "¿Seguro que deseas cancelar este evento?"
 msgstr "¿Seguro que deseas cancelar este evento?"
 
@@ -7037,6 +7283,9 @@ msgstr "¿Seguro que deseas eliminar este grupo? Se eliminarán sus mensajes par
 
 msgid "Área de conocimiento"
 msgstr "Área de conocimiento"
+
+msgid "Áreas de configuración"
+msgstr "Áreas de configuración"
 
 msgid "Áreas de conocimiento"
 msgstr "Áreas de conocimiento"

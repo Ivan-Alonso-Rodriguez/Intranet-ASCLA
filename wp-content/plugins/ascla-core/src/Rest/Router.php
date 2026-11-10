@@ -1,6 +1,6 @@
 <?php
 namespace ASCLA\Core\Rest;
-use ASCLA\Core\Services\{Access,Profiles,Matching,Messaging,ConversationRequests,Content,Events,Notifications,Settings,Media,Knowledge,Audit,Account,Locations};
+use ASCLA\Core\Services\{Access,Profiles,Matching,Messaging,ConversationRequests,Content,Events,Notifications,Settings,Media,Knowledge,Audit,Account,Locations,FormRules};
 use ASCLA\Core\Repositories\Store;
 use ASCLA\Core\Jobs\Queue;
 use ASCLA\Core\Integrations\GoogleOAuth;
@@ -89,7 +89,7 @@ final class RouterRoutes
         Router::route('/content/(?P<type>[a-z]+)/(?P<id>\d+)','POST',static fn($r)=>Content::save($r['type'],$r->get_json_params()?:[],(int)$r['id']),'ascla_write');
         Router::route('/items/(?P<id>\d+)','GET',static fn($r)=>Content::serialize(Content::get((int)$r['id'])));
         Router::route('/items/(?P<id>\d+)/video-duration','POST',static fn($r)=>Knowledge::browserVideoDuration((int)$r['id'],(int)($r['duration_seconds']??0)),'ascla_admin_area');
-        Router::route('/items/(?P<id>\d+)','DELETE',static fn($r)=>Content::remove((int)$r['id']),'ascla_write');
+        Router::route('/items/(?P<id>\d+)','DELETE',static fn($r)=>Content::remove((int)$r['id'],FormRules::boolean($r['draft_only']??false)),'ascla_write');
         Router::route('/comments/(?P<id>\d+)','DELETE',static fn($r)=>Content::removeComment((int)$r['id']),'ascla_write');
         Router::route('/comments/mine','GET',static fn($r)=>\ASCLA\Core\Services\CommentHistory::listing($r->get_params()));
         Router::route('/items/(?P<id>\d+)/comments','GET',static fn($r)=>Content::comments((int)$r['id']));

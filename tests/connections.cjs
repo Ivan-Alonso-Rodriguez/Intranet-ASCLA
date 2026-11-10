@@ -55,9 +55,9 @@ async function uploadPhoto(p){await p.goto(base+'/perfil/');await p.locator('[da
    await profile(a,ub.id,'connected');await a.locator('.modal [data-action="message-start"]').click();await a.locator('.chat-compose').waitFor();
    conversation={id:Number(await a.locator('.chat-compose').getAttribute('data-id'))};const reverse=await ok(b,'conversations',{target:ua.id});assert.equal(Number(reverse.id),conversation.id);
    await b.goto(base+'/mensajeria/?conversation='+conversation.id);await b.locator('.chat-compose').waitFor();
-   await a.locator('.chat-compose textarea').fill('Mensaje A a B tras aceptación');await a.locator('.chat-compose button').click();
+   await a.locator('.chat-compose textarea').fill('Mensaje A a B tras aceptación');await a.locator('.chat-compose button[type="submit"]').click();
    await until(()=>b.locator('.bubble').filter({hasText:'Mensaje A a B tras aceptación'}).count(),'B did not receive A');
-   await b.locator('.chat-compose textarea').fill('Respuesta B a A con conexión confirmada');await b.locator('.chat-compose button').click();
+   await b.locator('.chat-compose textarea').fill('Respuesta B a A con conexión confirmada');await b.locator('.chat-compose button[type="submit"]').click();
    await until(()=>a.locator('.bubble').filter({hasText:'Respuesta B a A con conexión confirmada'}).count(),'A did not receive B');
    const chat=await ok(a,'conversations/'+conversation.id),p=await ok(a,'profiles/'+ub.id);assert.equal(chat.other.photo_url,p.photo_url);
   });

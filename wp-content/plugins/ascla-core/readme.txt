@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.11.1
+Stable tag: 1.12
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,15 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.12 =
+* Rediseño de la intranet, administración y acceso con Geist local, colores de la guía ASCLA, fondos planos y bordes más rectos. Navegación y formularios adaptados a móvil y a los temas claro y oscuro.
+* Directorio: vuelve Bloquear a la ficha de perfil, se corrigen las fotos en administración y Mis conexiones usa un icono de recarga.
+* Acceso: confirmación de solicitud de recuperación y resultado junto al botón en el perfil. Mínimo predeterminado de 8 caracteres, sin reglas de composición y con bloqueo de contraseñas muy comunes. Correo de alta con la plantilla HTML de ASCLA.
+* Mensajería: emojis nativos y selector en el campo de texto. Hub: los autores pueden enviar sus borradores a la papelera previa confirmación.
+* Eventos: pestaña activa visible en oscuro, fechas y horas obligatorias señaladas y errores junto al campo. Virtual exige enlace, Presencial exige lugar e Híbrido exige ambos; las fichas y tarjetas virtuales omiten la ubicación. Se pueden guardar borradores incompletos.
+* Administración: indicadores de asistencia por período, accesos a la lista de asistencia, ajustes por grupos y mejor gestión de propuestas de encuentros. El asistente aprovecha materiales de videos publicados respetando permisos.
+* Conserva el esquema de datos 15.
 
 = 1.11.1 =
 * Estadísticas: Asistencias en el centro; Personas muestra inscritos distintos con confirmación, separados de asistentes y reservas. Definiciones y cifras anteriores conservadas.

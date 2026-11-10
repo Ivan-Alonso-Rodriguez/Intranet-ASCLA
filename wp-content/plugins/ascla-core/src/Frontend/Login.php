@@ -90,8 +90,9 @@ final class Login
         if (!self::isFrontendPage()) { return; }
         // This template owns its layout. Reuse form primitives without loading
         // the native admin login layout and all of its administration palettes.
+        Theme::registerBrandStyle();
         wp_enqueue_style('ascla-login-layout',ASCLA_URL.'assets/login-layout.css',['dashicons','buttons','forms','l10n'],App::assetVersion('assets/login-layout.css'));
-        wp_enqueue_style('ascla-login', ASCLA_URL . 'assets/login.css', ['ascla-login-layout'], App::assetVersion('assets/login.css'));
+        wp_enqueue_style('ascla-login', ASCLA_URL . 'assets/login.css', ['ascla-login-layout','ascla-brand'], App::assetVersion('assets/login.css'));
         // Turnstile normally enqueues itself on wp-login.php. The dedicated ASCLA login
         // calls the same policy so adaptive protection is preserved instead of duplicated.
         Turnstile::enqueue();
@@ -262,7 +263,6 @@ final class Login
             $copy = Language::english()
                 ? ['Administrative access','Sign in with an administrator account to manage WordPress and the ASCLA platform.']
                 : ['Acceso administrativo','Ingresa con una cuenta administradora para gestionar WordPress y la plataforma ASCLA.'];
-            $eyebrow = Language::text('ADMINISTRACIÓN ASCLA','ASCLA ADMINISTRATION');
         } else {
             $copy = match ($GLOBALS['action'] ?? 'login') {
                 'login' => ['Te damos la bienvenida', 'Ingresa con tu cuenta para acceder a la comunidad.'],
@@ -279,9 +279,13 @@ final class Login
                 default=>['Your ASCLA account','Manage access to your community.'],
             };
             }
-            $eyebrow = 'INTRANET ASCLA';
         }
-        return '<div class="ascla-login-intro"><p class="ascla-login-eyebrow">' . esc_html($eyebrow) . '</p><h2>'
+        if (in_array($GLOBALS['action']??'',['lostpassword','retrievepassword'],true) && (($_GET['ascla_recovery']??'')==='sent'||($_GET['checkemail']??'')==='confirm')) {
+            $copy=Language::english()
+                ? ['Check your email','Look for the link to reset your password.']
+                : ['Revisa tu correo','Busca el enlace para restablecer tu contraseña.'];
+        }
+        return '<div class="ascla-login-intro"><h2>'
             . esc_html($copy[0]) . '</h2><p>' . esc_html($copy[1]) . '</p></div>' . $message;
     }
 

@@ -17,13 +17,15 @@ final class CredentialPolicyTest extends TestCase
         update_option('ascla_settings',$this->settings,false);$_POST=$this->post;$_SERVER=$this->server;
         ASCLA\Core\Repositories\Store::delete('audit',['actor_id'=>$this->user]);wp_delete_user($this->user);wp_set_current_user(0);
     }
-    public function testPasswordComplexityRejectsPersonalDataAndSequences(): void
+    public function testNormalPasswordsDoNotRequireEveryCharacterClass(): void
     {
         $u=get_userdata($this->user);
-        foreach(['short','lowercaselong!72','UPPERCASEONLY!72','NoNumbersHere!!','NoSymbolsHere72','Segura-Abcd!792','Mariana!57JxLm','Zb!AAAAf29xZw','Tg!4321Kn98a'] as $weak){
+        foreach(['short','12345678','password123','Contraseña','AAAAAAAA','        ','   sol  '] as $weak){
             self::assertNotSame('',CredentialPolicy::error($weak,$u));
         }
-        self::assertSame('',CredentialPolicy::error('J9!mQ7#vR2@tL8',$u));
+        foreach(['nubeazul','NUBEAZUL','Mariana1','29475186','mi nueva frase','Segura-Abcd!792','J9!mQ7#vR2@tL8'] as $normal) {
+            self::assertSame('',CredentialPolicy::error($normal,$u),$normal);
+        }
         Settings::save(['password_min_length'=>20]);self::assertStringContainsString('20',CredentialPolicy::error('J9!mQ7#vR2@tL8',$u));
     }
     public function testNativeResetAndRestCannotBypassPolicy(): void
@@ -34,8 +36,9 @@ final class CredentialPolicyTest extends TestCase
         self::assertSame('ascla_password_policy',$errors->get_error_code());
         $r=new WP_REST_Request('POST','/wp/v2/users/'.$this->user);$r->set_param('id',$this->user);$r->set_param('password','weak');
         $result=CredentialPolicy::restValidation((object)['user_pass'=>'weak'],$r);self::assertInstanceOf(WP_Error::class,$result);self::assertSame(400,$result->get_error_data()['status']);
-        $r->set_param('password','Mariana!57JxLm');self::assertInstanceOf(WP_Error::class,CredentialPolicy::restValidation((object)[],$r));
-        $r->set_param('password','J9!mQ7#vR2@tL8');self::assertNotInstanceOf(WP_Error::class,CredentialPolicy::restValidation((object)['user_pass'=>'J9!mQ7#vR2@tL8'],$r));
+        $r->set_param('password','nubeazul');self::assertNotInstanceOf(WP_Error::class,CredentialPolicy::restValidation((object)['user_pass'=>'nubeazul'],$r));
+        $_POST['pass1']='nubeazul';$errors=new WP_Error();do_action('validate_password_reset',$errors,$u);self::assertFalse($errors->has_errors());
+        $errors=new WP_Error();CredentialPolicy::profileValidation($errors,true,(object)['ID'=>$this->user,'user_pass'=>'nubeazul']);self::assertFalse($errors->has_errors());
     }
     public function testResetExpiryAndRememberDurationUseConfiguredLimits(): void
     {
@@ -61,7 +64,28 @@ final class CredentialPolicyTest extends TestCase
             self::assertEqualsWithDelta(time()+1800,TurnstileState::state('login',$login)['lock_until'],3);
         }finally{unset($_REQUEST['ascla_frontend_login']);TurnstileState::clearState('login',$login);}
         $before=Settings::get();
-        try{Settings::save(['password_min_length'=>8,'remember_days'=>90]);self::fail('Invalid configuration saved');}catch(ASCLA\Core\Rest\ApiException $e){self::assertSame(400,$e->getCode());}
+        try{Settings::save(['password_min_length'=>7,'remember_days'=>90]);self::fail('Invalid configuration saved');}catch(ASCLA\Core\Rest\ApiException $e){self::assertSame(400,$e->getCode());}
         self::assertSame($before,Settings::get());
+    }
+    public function testUpgradeReplacesLegacyDefaultOnlyOnce(): void
+    {
+        $version=get_option('ascla_password_policy_version',false);
+        try {
+            $settings=Settings::get();$settings['password_min_length']=12;update_option('ascla_settings',$settings,false);delete_option('ascla_password_policy_version');
+            CredentialPolicy::upgrade();self::assertSame(8,Settings::get()['password_min_length']);
+            Settings::save(['password_min_length'=>12]);CredentialPolicy::upgrade();self::assertSame(12,Settings::get()['password_min_length']);
+            delete_option('ascla_password_policy_version');Settings::save(['password_min_length'=>20]);CredentialPolicy::upgrade();self::assertSame(20,Settings::get()['password_min_length']);
+        } finally {
+            if ($version===false) { delete_option('ascla_password_policy_version'); } else { update_option('ascla_password_policy_version',$version,false); }
+        }
+    }
+    public function testProfilePasswordChangeAcceptsEightCharactersAndStillRequiresCurrentPassword(): void
+    {
+        wp_set_password('contraseña anterior',$this->user);
+        $result=Account::changePassword(['current_password'=>'contraseña anterior','new_password'=>'nubeazul','confirm_password'=>'nubeazul']);
+        self::assertTrue($result['ok']);self::assertTrue(wp_check_password('nubeazul',get_userdata($this->user)->user_pass,$this->user));
+        try {
+            Account::changePassword(['current_password'=>'incorrecta','new_password'=>'otranube','confirm_password'=>'otranube']);self::fail('Current password must be checked');
+        } catch (ASCLA\Core\Rest\ApiException $error) { self::assertSame(400,$error->getCode()); }
     }
 }

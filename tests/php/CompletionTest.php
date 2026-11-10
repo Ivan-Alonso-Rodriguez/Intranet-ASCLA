@@ -28,6 +28,7 @@ final class CompletionTest extends TestCase
     }
     private function create(string $type,array $data=[]): array
     {
+        if ($type==='event') { $data['meta']=($data['meta']??[])+['url'=>'https://example.invalid/meeting']; }
         $p=Content::save($type,array_replace_recursive(['title'=>'QZCierre '.$type,'body'=>'Gobierno corporativo y responsabilidades.','status'=>'publish'],$data));
         $this->posts[]=$p['id']; return $p;
     }

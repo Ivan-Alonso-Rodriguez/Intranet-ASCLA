@@ -1,0 +1,41 @@
+/* Palette sampled from the ASCLA guide. Geist matches the ITBCP reference.
+   The font is served locally under the SIL Open Font License. */
+@font-face {
+  font-family: "Geist";
+  src: url("fonts/geist/Geist-Variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+:root {
+  --ascla-font: "Geist", "Segoe UI", sans-serif;
+  --ascla-brand-blue: #74beff;
+  --ascla-brand-hover: #a2d4ff;
+  --ascla-brand-edge: #063159;
+  --ascla-brand-ink: #063159;
+  --ascla-accent-text: #063159;
+  --ascla-accent-tint: #eaf5ff;
+  --ascla-welcome-start: #063159;
+  --ascla-welcome-end: #063159;
+  --ascla-welcome-ink: #ffffff;
+  --ascla-welcome-rule: #74beff;
+  --ascla-paper: #f6f6f6;
+  --ascla-text: #2b2b2b;
+  --ascla-muted-text: #59636c;
+  --ascla-muted: var(--ascla-muted-text);
+  --ascla-rule: #dedede;
+  --ascla-control: #7c8792;
+  --ascla-surface: #ffffff;
+  --ascla-danger: #c6302c;
+}
+html[data-ascla-theme="dark"] {
+  --ascla-accent-text: #74beff;
+  --ascla-accent-tint: #153c60;
+  --ascla-paper: #071f35;
+  --ascla-text: #f6f6f6;
+  --ascla-muted-text: #bacbd9;
+  --ascla-muted: var(--ascla-muted-text);
+  --ascla-rule: #35516b;
+  --ascla-control: #829db5;
+  --ascla-surface: #0d2a44;
+}

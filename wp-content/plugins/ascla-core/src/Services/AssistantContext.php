@@ -13,14 +13,16 @@ final class AssistantContext
 {
     private const IDENTITIES_SEPARATOR='/[\n,;]+/u';
 
-    public static function build(string $question): array
+    public static function build(string $question,bool $videoQuestion=false): array
     {
         $plain=mb_strtolower(remove_accents($question));
         $intents=self::intents($plain);
+        if ($videoQuestion) { $intents=array_fill_keys(array_keys($intents),false); }
         $live=[
             'current_datetime'=>current_datetime()->format(DATE_ATOM),
             'timezone'=>wp_timezone_string()?:'UTC',
             'language'=>Language::english()?'English':'Español',
+            'organization'=>self::organization(),
             'unread_notifications'=>Notifications::summary()['unread_total'],
             'intents'=>$intents,
         ];
@@ -32,12 +34,20 @@ final class AssistantContext
 
     private static function intents(string $plain): array
     {
+        $resourceTopic=preg_match('/\b(?:recursos?|resources?)\b.*?\b(?:sobre|acerca de|about|on)\s+\S/u',$plain);
         return [
+            'organization'=>self::matchesAny($plain,[
+                '/\b(?:cuentame|explicame|dime) (?:un poco |mas )?(?:sobre|acerca de|de) ascla\b/u',
+                '/\b(?:que (?:es|significa|hace|ofrece|contiene|incluye)|que puedo (?:hacer|encontrar) en|para que sirve|a que se dedica|de que (?:trata|se trata)|hablame (?:de|sobre)) (?:la |esta )?(?:ascla|asociacion|intranet|plataforma|comunidad)\b/u',
+                '/\b(?:que (?:hay|encuentro) en|que (?:secciones|modulos|servicios|herramientas) (?:hay|tiene|ofrece)) (?:la |esta )?(?:ascla|intranet|comunidad|plataforma)\b/u',
+                '/\b(?:what is|what does|tell me about|what can i (?:do|find) (?:in|on)) (?:the )?(?:ascla|intranet|platform|association)\b/u',
+                '/^\W*ascla\W*$/u',
+            ]),
             'events'=>self::matchesAny($plain,[
                 '/\b(evento|eventos|reunion|reuniones|encuentro|encuentros|capacitacion|capacitaciones|agenda|calendario|proximo|proximos|pronto|semana|mes|inscrito|inscripcion)\b/u',
                 '/\b(event|events|meeting|meetings|training|calendar|upcoming|soon|week|month|registered)\b/u',
             ]),
-            'recent'=>self::matchesAny($plain,[
+            'recent'=>!$resourceTopic && self::matchesAny($plain,[
                 '/\b(reciente|recientes|nuevo|nuevos|nueva|nuevas|publicado|publicados|publicacion|publicaciones|novedad|novedades)\b/u',
                 '/\b(contenido|contenidos|recurso|recursos|articulo|articulos|hub|conocimiento|ultimo|ultimos)\b/u',
                 '/\b(recent|new|latest|published|posts|content|resources|knowledge)\b/u',
@@ -51,6 +61,32 @@ final class AssistantContext
                 '/\b(notification|notifications|unread|alerts?)\b/u',
             ]),
         ];
+    }
+
+    private static function organization(): array
+    {
+        $english=Language::english();
+        $pages=Catalog::PAGES;
+        if (Access::isAdministrator()) { unset($pages['intranet'],$pages['directorio'],$pages['mensajeria'],$pages['contacto']); }
+        if (current_user_can('ascla_admin_area')) { $pages['admin']='Administración'; }
+        return [
+            'name'=>'Asociación de Secretarios Corporativos de América Latina',
+            'overview'=>$english
+                ? 'ASCLA brings together corporate secretaries in Latin America to exchange professional experience and knowledge about corporate governance. Its private intranet helps members learn, meet and collaborate.'
+                : 'ASCLA reúne a profesionales de la secretaría corporativa de América Latina para intercambiar experiencias y conocimientos sobre gobierno corporativo. Su intranet es el espacio privado donde los asociados pueden formarse, encontrarse y colaborar.',
+            'knowledge'=>$english
+                ? 'The Knowledge Center contains member resources such as articles, documents and videos. Processed videos can include a summary, technical note and timestamped highlights.'
+                : 'El Centro de Conocimiento reúne artículos, documentos y videos. Los videos procesados pueden incluir un resumen, una nota técnica y cápsulas con marcas de tiempo.',
+            'sections'=>array_values(array_map([Language::class,'label'],$pages)),
+        ];
+    }
+
+    public static function describe(array $live): string
+    {
+        $org=$live['organization'];
+        $english=$live['language']==='English';
+        return 'ASCLA '.($english?'stands for the ':'es la ').$org['name'].".\n\n".$org['overview']
+            ."\n\n".($english?'Available sections':'Secciones disponibles').' · '.implode(', ',$org['sections']).".\n\n".$org['knowledge'];
     }
 
     private static function matchesAny(string $plain,array $patterns): bool
@@ -146,12 +182,12 @@ final class AssistantContext
             if(!Content::canRead($post)) {continue; }
             $meta=(array)get_post_meta($post->ID,'_ascla',true);
             if(!empty($meta['generated'])&&empty($meta['reviewed'])) {continue; }
-            [$title,$body]=self::safeText($post,$meta);
+            [$title,$body,$digest]=self::safeText($post,$meta);
             $url=Content::serialize($post)['url'];
             $date=$post->post_date_gmt?:get_gmt_from_date($post->post_date);
             $kind=substr($post->post_type,6);
             $items[]=['id'=>(int)$post->ID,'type'=>$kind,'title'=>$title,'date'=>$date,'url'=>$url];
-            $sources[]=['id'=>(int)$post->ID,'title'=>$title,'body'=>trim('Contenido ASCLA publicado el '.$date.'. '.mb_substr(wp_strip_all_tags($body),0,4500)),'score'=>80,'url'=>$url,'kind'=>$kind];
+            $sources[]=['id'=>(int)$post->ID,'title'=>$title,'body'=>trim('Contenido ASCLA publicado el '.$date.'. '.mb_substr(wp_strip_all_tags($body),0,4500)),'score'=>80,'url'=>$url,'kind'=>$kind,'video_digest'=>$digest];
             if(count($items)>=6) {break; }
         }
         return [$items,$sources];
@@ -174,13 +210,15 @@ final class AssistantContext
         return $items;
     }
 
-    private static function safeText(\WP_Post $post,array $meta): array
+    public static function safeText(\WP_Post $post,array $meta): array
     {
         $title=$post->post_title;$body=wp_strip_all_tags($post->post_content);
         if(!empty($meta['chatham'])){
             $identities=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];
             $title=EditorialPrivacy::title($title,$meta);$body=EntityRedactor::redact($body,$identities,[$title]);
         }
-        return [$title,$body];
+        $evidence=$post->post_type==='ascla_resource'?VideoEvidence::text($meta):'';
+        if ($evidence!=='') { $body=trim($body."\n".$evidence); }
+        return [$title,$body,$evidence===''?'':hash('sha256',$evidence)];
     }
 }

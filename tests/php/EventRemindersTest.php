@@ -17,7 +17,7 @@ final class EventRemindersTest extends TestCase
     }
     public function testOrdinaryEventSchedulesReplacesAndSendsOnlyConfirmedOnce(): void
     {
-        $p=Content::save('event',['title'=>'Recordatorio configurable','body'=>'Reunión','status'=>'publish','meta'=>['start'=>gmdate('c',time()+3*DAY_IN_SECONDS),'end'=>gmdate('c',time()+4*DAY_IN_SECONDS),'reminder_hours'=>[48,2]]]);$this->event=$p['id'];
+        $p=Content::save('event',['title'=>'Recordatorio configurable','body'=>'Reunión','status'=>'publish','meta'=>['start'=>gmdate('c',time()+3*DAY_IN_SECONDS),'end'=>gmdate('c',time()+4*DAY_IN_SECONDS),'reminder_hours'=>[48,2],'url'=>'https://example.invalid/meeting']]);$this->event=$p['id'];
         self::assertEqualsWithDelta(time()+DAY_IN_SECONDS,wp_next_scheduled('ascla_event_reminder',[$p['id'],48]),2);
         Content::save('event',['title'=>$p['title'],'body'=>$p['body'],'status'=>'publish','meta'=>['reminder_hours'=>[24,1]]],$p['id']);
         self::assertFalse(wp_next_scheduled('ascla_event_reminder',[$p['id'],48]));self::assertIsInt(wp_next_scheduled('ascla_event_reminder',[$p['id'],24]));

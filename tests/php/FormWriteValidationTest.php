@@ -58,7 +58,7 @@ final class FormWriteValidationTest extends TestCase
     #[DataProvider('invalidEventNumbers')]
     public function testEventNumbersAreRejectedWithoutChangingAPublishedEvent(string $field,mixed $value): void
     {
-        $event=Content::save('event',['title'=>'Valid original','body'=>'Valid body','status'=>'publish','meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>10,'offer_hours'=>24]]);$this->posts[]=$event['id'];
+        $event=Content::save('event',['title'=>'Valid original','body'=>'Valid body','status'=>'publish','meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>10,'offer_hours'=>24,'url'=>'https://example.invalid/meeting']]);$this->posts[]=$event['id'];
         $old=get_post($event['id']);$meta=get_post_meta($event['id'],'_ascla',true);
         $result=$this->request('/content/event/'.$event['id'],['title'=>'Must not save','body'=>'Changed text','status'=>'publish','meta'=>[$field=>$value]]);
         self::assertSame(400,$result->get_status());self::assertSame($old->post_title,get_post($event['id'])->post_title);self::assertSame($meta,get_post_meta($event['id'],'_ascla',true));
@@ -73,7 +73,7 @@ final class FormWriteValidationTest extends TestCase
         $r=new WP_REST_Request('GET','/ascla/v1/content/hub');$r->set_query_params(['category'=>'','after'=>'2026-01-01']);self::assertSame(200,rest_get_server()->dispatch($r)->get_status());
         $r=new WP_REST_Request('GET','/ascla/v1/content/topic');$r->set_query_params(['parent'=>'','after'=>'2026-01-01']);self::assertSame(200,rest_get_server()->dispatch($r)->get_status());
         $r->set_query_params(['parent'=>'-1']);self::assertSame(400,rest_get_server()->dispatch($r)->get_status());
-        $event=$this->request('/content/event',['title'=>'Numbers','body'=>'Valid text','meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>'100000','offer_hours'=>'168']]);self::assertSame(200,$event->get_status());$this->posts[]=$event->get_data()['id'];
+        $event=$this->request('/content/event',['title'=>'Numbers','body'=>'Valid text','meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>'100000','offer_hours'=>'168','url'=>'https://example.invalid/meeting']]);self::assertSame(200,$event->get_status());$this->posts[]=$event->get_data()['id'];
     }
     public function testErrorsUseTheAccountLocaleAndDoNotRewriteContent(): void
     {

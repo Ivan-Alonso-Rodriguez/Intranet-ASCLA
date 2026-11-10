@@ -51,6 +51,8 @@ $fixture['batch']='ascla_micro_demo-'.substr(hash('sha256',wp_json_encode($group
 $result=MicroEvents::create($group);$publish=$result['events'][0]??0;
 if (!$publish) { throw new RuntimeException('Expected a real generated proposal.'); }
 $fixture['posts'][]=$publish;update_option($key,$fixture,false);$posts=['publish'=>$publish];$baseMeta=get_post_meta($publish,'_ascla',true);
+$baseMeta['url']='https://example.invalid/meeting';
+update_post_meta($publish,'_ascla',$baseMeta);
 foreach (['pending','scheduled','changed','insufficient'] as $name) {
     $meta=$baseMeta;
     if (in_array($name,['changed','insufficient'],true)) { $meta['invitees']=array_map(static fn($n)=>$fixture['users'][$n],['changed1','changed2','changed3','changed4']); }
@@ -65,7 +67,7 @@ foreach (['pending','scheduled','changed','insufficient'] as $name) {
 }
 $profile=get_user_meta($fixture['users']['changed1'],'_ascla_profile',true);$profile['bio']='';update_user_meta($fixture['users']['changed1'],'_ascla_profile',$profile);
 $profile=get_user_meta($fixture['users']['changed2'],'_ascla_profile',true);$profile['microevents']=false;update_user_meta($fixture['users']['changed2'],'_ascla_profile',$profile);
-$regular=Content::save('event',['title'=>$prefix.' · institucional','body'=>'Evento local para comprobar el formulario de cancelación.','status'=>'publish','meta'=>['chatham'=>false,'start'=>gmdate('c',time()+DAY_IN_SECONDS),'end'=>gmdate('c',time()+DAY_IN_SECONDS+3600),'capacity'=>20,'modality'=>'Virtual']]);
+$regular=Content::save('event',['title'=>$prefix.' · institucional','body'=>'Evento local para comprobar el formulario de cancelación.','status'=>'publish','meta'=>['chatham'=>false,'start'=>gmdate('c',time()+DAY_IN_SECONDS),'end'=>gmdate('c',time()+DAY_IN_SECONDS+3600),'capacity'=>20,'modality'=>'Virtual','url'=>'https://example.invalid/meeting']]);
 $fixture['posts'][]=$regular['id'];update_option($key,$fixture,false);$posts['regular']=$regular['id'];
 echo wp_json_encode(['actors'=>$actors,'password'=>$password,'posts'=>$posts,'group_size'=>count($baseMeta['invitees']),
     'invited_member'=>array_search($baseMeta['invitees'][0],$fixture['users'],true)]);

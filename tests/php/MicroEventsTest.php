@@ -31,7 +31,11 @@ final class MicroEventsTest extends TestCase
     private function proposal(): int
     {
         $result=MicroEvents::create($this->users);$this->events=array_unique(array_merge($this->events,$result['events']));
-        self::assertNotEmpty($result['events']);return $result['events'][0];
+        self::assertNotEmpty($result['events']);$id=$result['events'][0];
+        $meta=get_post_meta($id,'_ascla',true);
+        $meta['url']='https://example.invalid/meeting';
+        update_post_meta($id,'_ascla',$meta);
+        return $id;
     }
     private function reject(callable $fn,int $code): void
     {
@@ -125,7 +129,7 @@ final class MicroEventsTest extends TestCase
         update_user_meta($outsider,'_ascla_profile',ascla_test_profile(['microevents'=>false,'directory'=>false]));
         wp_set_current_user($outsider);$this->reject(fn()=>Events::register($id,'accepted'),user_can($outsider,'ascla_manage')?403:404);
         $meta['public_at']=time()-1;update_post_meta($id,'_ascla',$meta);
-        self::assertTrue(Content::canRead(get_post($id)));self::assertContains($id,array_column(Content::listing('event')['items'],'id'));
+        self::assertTrue(Content::canRead(get_post($id)));self::assertContains($id,array_column(Content::listing('event',['author'=>(int)get_post($id)->post_author])['items'],'id'));
         self::assertSame('accepted',Events::register($id,'accepted')['registered']);
         self::assertSame('cancelled',Events::register($id,'cancelled')['registered']);
     }

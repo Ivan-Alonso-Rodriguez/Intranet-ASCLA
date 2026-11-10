@@ -304,6 +304,7 @@ async function goto(page, route) {
           await card.waitFor();
           await card.locator('[data-action="member"]').click();
           const profile = p.locator('.modal');
+          assert.equal(await profile.getByRole('button', { name: 'Bloquear', exact: true }).isVisible(), true);
           await profile.getByRole('button', { name: 'Bloquear', exact: true }).click();
           await p.getByRole('button', {name:'Confirmar bloqueo',exact:true}).click();
           await card.getByRole('button', { name: 'Desbloquear', exact: true }).waitFor();
@@ -406,7 +407,7 @@ async function goto(page, route) {
           start: new Date(Date.now() + 86400000).toISOString(),
           end: new Date(Date.now() + 90000000).toISOString(),
           capacity: 2,
-          location: "Virtual",
+          url: "https://example.invalid/meeting",
         },
       });
       assert.equal(r.status, 200, JSON.stringify(r.body));
@@ -417,7 +418,7 @@ async function goto(page, route) {
       await p.getByRole("button", { name: "Cancelar inscripción", exact: true }).waitFor();
       assert.equal(await p.getByRole("button", { name: "ICS", exact: true }).count(), 0);
       assert.equal(await p.getByRole("link", { name: /Añadir a Google Calendar/ }).count(), 1);
-      const changed = await request(a, "content/event/" + event.id, {title:event.title, body:event.body, status:"publish", meta:{modality:"Presencial",change_reason:"Cambio de modalidad para el encuentro de prueba."}});
+      const changed = await request(a, "content/event/" + event.id, {title:event.title, body:event.body, status:"publish", meta:{modality:"Presencial",location:"Sala QA",change_reason:"Cambio de modalidad para el encuentro de prueba."}});
       assert.equal(changed.status, 200);
       await p.reload();
       await p.getByRole("button", {name:"Reconfirmar asistencia", exact:true}).click();

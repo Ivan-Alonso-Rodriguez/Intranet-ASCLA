@@ -79,7 +79,7 @@ final class NetworkingAI
     {
         return ['score'=>$affinity['score'],'shared'=>$affinity['shared'],'signals'=>$affinity['signals']??[],'left'=>Profiles::networkingContext($a),'right'=>Profiles::networkingContext($b)];
     }
-    public static function agenda(array $group,bool $demo=false): array
+    public static function agenda(array $group,bool $demo=false,int $topic=0,int $edition=0): array
     {
         $context=['group_size'=>count($group),'interests'=>[],'positions'=>[],'industries'=>[],'goals'=>[],'areas'=>[]];
         foreach($group as $uid){
@@ -89,6 +89,14 @@ final class NetworkingAI
         }
         $counts=array_count_values($context['interests']);
         $context['common_interests']=array_keys(array_filter($counts,static fn($count)=>$count>=2));
+        $selected=$topic?get_term($topic,'ascla_interest'):null;
+        if ($selected instanceof \WP_Term && in_array($selected->name,$context['common_interests'],true)) {
+            $context['selected_topic']=$selected->name;
+        }
+        if ($edition>0) {
+            $formats=['caso práctico','clínica de preguntas','taller de decisiones'];
+            $context['meeting_format']=$formats[($edition-1)%count($formats)];
+        }
         foreach(['interests','positions','industries','goals','areas'] as $field){ $context[$field]=array_values(array_unique($context[$field])); }
         $result=$demo?(new MockAIProvider())->generate('microagenda',$context):self::generate('microagenda',$context);
         $mode=$demo?self::DEMO_MODE:($result['mode']??self::DEMO_MODE);

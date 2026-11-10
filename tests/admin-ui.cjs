@@ -22,6 +22,7 @@ const pass=name=>{checks.push(name);console.log('PASS '+name);};
   pass('Administrador sin Directorio, Mensajería, Contacto ni tareas de IA; enlace antiguo vuelve al resumen');
   await admin.locator('.admin-tabs [data-tab="usuarios"]').click();
   let form=admin.locator('[data-form="admin-filter"][data-area="users"]');await form.waitFor();
+  await form.locator('.search-options > summary').click();
   await form.locator('[name=q]').fill(fixture.prefix);await form.locator('[name=country]').fill('peru');
   for(const [key,ids] of [['industries',fixture.terms.industry],['interests',fixture.terms.interest],['areas',[fixture.terms.area[0]]]]){
    const facet=form.locator('.directory-facet').filter({has:admin.locator('input[name="'+key+'"]')});
@@ -57,6 +58,7 @@ const pass=name=>{checks.push(name);console.log('PASS '+name);};
   const community=await login('member');
   for(const route of ['directorio','mensajeria','contacto'])assert.equal(await community.locator('.ascla-sidebar .nav-link[href*="/'+route+'/" ]').count(),1);
   await community.goto(fixture.base+'/directorio/');const directory=community.locator('.directory-search');await directory.waitFor();
+  await directory.locator('.search-options > summary').click();
   await directory.locator('[name=q]').fill(fixture.prefix);await directory.locator('[name=country]').fill('');
   for(const [key,ids] of [['industries',fixture.terms.industry],['interests',fixture.terms.interest]]){
    const facet=directory.locator('.directory-facet').filter({has:community.locator('input[name="'+key+'"]')});await facet.locator('summary').click();

@@ -1,6 +1,6 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 5 de noviembre de 2026. Plugin **1.11.1**, esquema **15**. Este documento describe el estado del código y la evidencia por etapa. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado.
+Revisión documental: 10 de noviembre de 2026. Plugin **1.12**, esquema **15**. El [historial](VERSION_HISTORY.md#release-112) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
 
 ## Perfil, recuperación e importación del 5 de noviembre de 2026
 

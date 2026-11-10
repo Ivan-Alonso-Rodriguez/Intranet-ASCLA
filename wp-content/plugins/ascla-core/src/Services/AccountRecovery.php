@@ -84,12 +84,16 @@ final class AccountRecovery
         nocache_headers();
         if ($posted&&$result===true) { wp_safe_redirect(self::confirmationUrl(),303);exit; }
         if ($result===true) {
-            login_header(Language::text('Recuperar contraseña','Reset password'),'<p class="message" role="status">'.esc_html(self::confirmationMessage()).'</p>');
+            login_header(Language::text('Revisa tu correo','Check your email'),'<div class="message ascla-recovery-confirmation" role="status"><strong>'.esc_html(Language::text('Solicitud enviada','Request sent')).'</strong><p>'.esc_html(self::confirmationMessage()).'</p></div>');
         } else {
             login_header(Language::text('Recuperar contraseña','Reset password'),'',$result);
+            self::form($identifier);
         }
-        self::form($identifier);
         echo '<p id="nav"><a href="'.esc_url(self::communityContext()?Login::url():site_url('wp-login.php','login')).'">'.esc_html(Language::text('Volver al inicio de sesión','Back to sign in')).'</a></p>';
+        if ($result===true) {
+            $retry=remove_query_arg('ascla_recovery',self::confirmationUrl());
+            echo '<p class="ascla-recovery-retry"><a href="'.esc_url($retry).'">'.esc_html(Language::text('Enviar otro enlace de recuperación','Send another recovery link')).'</a></p>';
+        }
         login_footer();exit;
     }
     private static function form(string $identifier): void

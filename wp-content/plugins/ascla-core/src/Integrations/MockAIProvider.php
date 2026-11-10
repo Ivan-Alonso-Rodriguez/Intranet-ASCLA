@@ -70,6 +70,16 @@ final class MockAIProvider implements AIProviderInterface
         $live=(array)($context['live_context']??[]);
         $question=mb_strtolower(remove_accents((string)($context['question']??'')));
         $english=(($live['language']??'')==='English');
+        if (!empty($live['intents']['organization'])) {
+            return ['answer'=>\ASCLA\Core\Services\AssistantContext::describe($live),'source_ids'=>[],'mode'=>$this->mode()];
+        }
+        if (($live['video_request']??'')==='choose') {
+            $options=array_slice($sources,0,3);
+            return ['answer'=>($english?'Which video do you mean?':'¿Sobre cuál de estos videos quieres preguntar?')."\n".implode("\n",array_map(static fn($s)=>'• '.$s['title'],$options)),'source_ids'=>array_column($options,'id'),'mode'=>$this->mode()];
+        }
+        if (($live['video_request']??'')==='answer' && $sources) {
+            return $this->sourceAnswer([$sources[0]],$english);
+        }
         $liveAnswer=$this->liveAnswer($live,$english);
         if ($liveAnswer!==null) { return $liveAnswer; }
         $isGreeting=(bool)preg_match('/^(?:hola|hello|hi|buenas)/u',$question);
@@ -171,7 +181,19 @@ final class MockAIProvider implements AIProviderInterface
 
     private function microagenda(array $context): array
     {
-        $theme=implode(' y ',array_slice($context['interests']??[],0,2))?:'gobierno corporativo';
+        $theme=$context['selected_topic']??(implode(' y ',array_slice($context['interests']??[],0,2))?:'gobierno corporativo');
+        $format=$context['meeting_format']??'';
+        $activities=[
+            'caso práctico'=>['Contrastar un caso anonimizado de '.$theme.'.','Presentar el caso','Comparar alternativas de actuación','¿Qué dato necesitarías para decidir?'],
+            'clínica de preguntas'=>['Resolver preguntas de la práctica profesional sobre '.$theme.'.','Recoger las preguntas del grupo','Trabajar en parejas sobre las preguntas elegidas','¿Qué pregunta te llevas de tu práctica reciente?'],
+            'taller de decisiones'=>['Acordar criterios aplicables a una decisión sobre '.$theme.'.','Definir la decisión y sus límites','Contrastar criterios y acordar un plan','¿Qué criterio debería pesar más en esta decisión?'],
+        ];
+        if (isset($activities[$format])) {
+            [$goal,$opening,$discussion,$question]=$activities[$format];
+            return ['title'=>ucfirst($format).' · '.$theme,'theme'=>$theme,'objective'=>$goal,'duration_minutes'=>40,
+                'agenda'=>[['minutes'=>10,'topic'=>$opening],['minutes'=>20,'topic'=>$discussion],['minutes'=>10,'topic'=>'Acordar un siguiente paso sobre '.$theme]],
+                'icebreaker'=>$question,'closing_question'=>'¿Cómo aplicarías lo conversado en tu próxima reunión?','mode'=>$this->mode()];
+        }
         return ['title'=>'Círculo ASCLA · '.$theme,'theme'=>$theme,'objective'=>'Intercambiar experiencias y preguntas sobre '.$theme.'.','duration_minutes'=>30,'agenda'=>[['minutes'=>5,'topic'=>'Presentaciones y objetivos'],['minutes'=>10,'topic'=>'Experiencias sobre '.$theme],['minutes'=>10,'topic'=>'Preguntas y aprendizajes compartidos'],['minutes'=>5,'topic'=>'Próximos pasos']],'icebreaker'=>'¿Qué pregunta sobre '.$theme.' te gustaría explorar?','closing_question'=>'¿Qué aprendizaje te gustaría llevar a tu próxima reunión?','mode'=>$this->mode()];
     }
 

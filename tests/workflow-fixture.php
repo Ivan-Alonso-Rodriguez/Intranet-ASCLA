@@ -18,7 +18,7 @@ if (($input['action']??'')==='setup') {
     wp_set_current_user($users[1]['id']);$events=[];
     for ($index=0;$index<2;$index++) {
         $event=Content::save('event',['title'=>'Microevento QA '.$token.' '.$index,'body'=>'Propuesta de aceptación local.','status'=>'draft',
-            'meta'=>['start'=>gmdate('c',time()+3*DAY_IN_SECONDS),'end'=>gmdate('c',time()+3*DAY_IN_SECONDS+3600),'capacity'=>4]]);
+            'meta'=>['start'=>gmdate('c',time()+3*DAY_IN_SECONDS),'end'=>gmdate('c',time()+3*DAY_IN_SECONDS+3600),'capacity'=>4,'url'=>'https://example.invalid/meeting']]);
         $id=$event['id'];$meta=$event['meta']+['micro'=>true,'micro_min'=>2,'priority_hours'=>48,'invitees'=>[$users[2]['id'],$users[3]['id']],'invited'=>false];
         update_post_meta($id,'_ascla',MicroLifecycle::defaults($meta));MicroLifecycle::history($id,'pending');wp_update_post(['ID'=>$id,'post_status'=>'pending']);$events[]=$id;
     }

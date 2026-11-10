@@ -9,4 +9,12 @@ if (!$user || !str_starts_with($user->user_login,$fixture['prefix'])) { throw ne
 $id=wp_insert_post(['post_type'=>'ascla_event','post_status'=>'draft','post_author'=>$author,'post_title'=>$fixture['prefix'].' Microevento en preparación','post_content'=>''],true);
 if (is_wp_error($id)) { throw new RuntimeException('Could not create proposal fixture.'); }
 update_post_meta($id,'_ascla',['micro'=>true,'capacity'=>0,'chatham'=>false]);
-echo wp_json_encode(['id'=>$id]).PHP_EOL;
+$events=[];
+foreach (['Virtual'=>'Por confirmar','Presencial'=>'Sala QA','Híbrido'=>'Auditorio QA'] as $modality=>$location) {
+    $title=$fixture['prefix'].' Ubicación '.$modality;
+    $event=wp_insert_post(['post_type'=>'ascla_event','post_status'=>'publish','post_author'=>$author,'post_title'=>$title,'post_content'=>'Evento de prueba de ubicación.'],true);
+    if (is_wp_error($event)) { throw new RuntimeException('Could not create event location fixture.'); }
+    update_post_meta($event,'_ascla',['start'=>gmdate('c',time()+DAY_IN_SECONDS),'end'=>gmdate('c',time()+DAY_IN_SECONDS+HOUR_IN_SECONDS),'modality'=>$modality,'location'=>$location,'chatham'=>false]);
+    $events[]=['title'=>$title,'id'=>$event,'location'=>$modality==='Virtual'?'':$location];
+}
+echo wp_json_encode(['id'=>$id,'events'=>$events]).PHP_EOL;

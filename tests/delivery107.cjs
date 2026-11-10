@@ -12,7 +12,7 @@ const pass=name=>{checks.push(name);console.log('PASS '+name);};
  page.on('pageerror',e=>errors.push(e.message));
  await page.goto(base+'/wp-login.php');await page.locator('#user_login').fill('ascla.admin');await page.locator('#user_pass').fill(env.ASCLA_ADMIN_PASSWORD);
  await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),page.locator('#wp-submit').click()]);
- await page.goto(base+'/administracion/?section=configuracion');await page.locator('[data-form="settings"]').waitFor();
+ await page.goto(base+'/administracion/?section=configuracion');await page.locator('[data-form="settings"]').waitFor();await page.locator('[data-settings-group=servicios]').click();await page.locator('.settings-group').filter({has:page.locator('[name=smtp_host]')}).locator('summary').first().click();
  const status=await page.evaluate(async()=>{const r=await fetch(ASCLA.api+'admin/deliveries',{headers:{'X-WP-Nonce':ASCLA.nonce}});return {status:r.status,body:await r.json()};});
  assert.equal(status.status,200);assert.deepEqual(Object.keys(status.body.counts).sort(),['failed','pending','processing']);
  for(const item of status.body.items)assert.deepEqual(Object.keys(item).sort(),['attempts','available_at','created_at','id','kind','status']);

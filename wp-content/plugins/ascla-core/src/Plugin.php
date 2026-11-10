@@ -50,6 +50,7 @@ final class Plugin
         add_action('added_post_meta',[Services\Content::class,'indexMeta'],10,4);
         add_action('updated_post_meta',[Services\Content::class,'indexMeta'],10,4);
         add_action('deleted_post_meta',[Repositories\AllySearch::class,'deleted'],10,4);
+        add_action('deleted_post_meta',[Services\VideoEvidence::class,'deleted'],10,3);
         Integrations\GoogleOAuth::boot();
         Integrations\Mailer::boot();
         add_action('transition_comment_status',[Services\Content::class,'commentTransition'],10,3);

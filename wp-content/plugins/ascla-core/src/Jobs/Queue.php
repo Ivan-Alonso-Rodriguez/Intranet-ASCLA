@@ -57,7 +57,11 @@ final class Queue
             if(self::threadKey((string)($payload['thread']??'legacy'))!==$thread) {continue; }
             $result=json_decode($row['result']??'null',true);
             if(!is_array($result)||trim((string)($result['answer']??''))==='') {continue; }
-            $turns[]=['question'=>Access::text($payload['question']??'',2000),'answer'=>Access::text($result['answer'],20000)];
+            $verified=Knowledge::storedAnswer($result);
+            if (!empty($result['grounding']['context_source_ids']) && empty($verified['grounding'])) { continue; }
+            $turn=['question'=>Access::text($payload['question']??'',2000),'answer'=>Access::text($verified['answer'],20000)];
+            if ($verified['sources']) { $turn['source_ids']=array_map('intval',array_column($verified['sources'],'id')); }
+            $turns[]=$turn;
             if(count($turns)>=6) {break; }
         }
         return array_reverse($turns);
@@ -94,7 +98,7 @@ final class Queue
             'transcript'=>\ASCLA\Core\Services\VideoTranscripts::obtain((int)($payload['resource_id']??0)),
             'answer'=>Knowledge::answer($payload['question']??'',self::history((int)$row['user_id'],(string)($payload['thread']??'legacy'),(int)$row['id'])),
             'multimedia'=>!empty($payload['automatic'])?\ASCLA\Core\Services\VideoPreparation::run((int)($payload['resource_id']??0),(int)$row['id'],(string)($payload['source_signature']??'')):Knowledge::multimedia((int)($payload['resource_id']??0)),
-            'microevents'=>MicroEvents::create(),
+            'microevents'=>MicroEvents::create([],((int)$row['user_id']>0)?(int)$row['id']:0),
             'social'=>self::social(),
             'resource_notifications'=>Discovery::resource((int)($payload['resource_id']??0)),
             'discovery'=>Discovery::networking(),

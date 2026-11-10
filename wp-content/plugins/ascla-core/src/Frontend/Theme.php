@@ -1,10 +1,15 @@
 <?php
 namespace ASCLA\Core\Frontend;
 
-/** Applies the preferred color scheme before paint to avoid a light/dark flash. */
+/** Shares the ASCLA palette and applies the preferred appearance before paint. */
 final class Theme
 {
     public const STORAGE_KEY='ascla-theme';
+
+    public static function registerBrandStyle(): void
+    {
+        wp_register_style('ascla-brand', ASCLA_URL . 'assets/brand.css', [], App::assetVersion('assets/brand.css'));
+    }
 
     public static function script(): string
     {

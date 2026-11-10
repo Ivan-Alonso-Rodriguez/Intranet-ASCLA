@@ -114,7 +114,7 @@ final class ProvidersTest extends TestCase
         $guestEmail='calendar_guest_'.bin2hex(random_bytes(4)).'@example.com';
         $guest=wp_insert_user(['user_login'=>'calendar_guest_'.bin2hex(random_bytes(4)),'user_email'=>$guestEmail,'user_pass'=>wp_generate_password(30),'role'=>'ascla_member']);
         self::assertIsInt($guest);$this->users[]=$guest;
-        $p=Content::save('event',['title'=>'Organizer calendar invite','body'=>'Private discussion','status'=>'publish','meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'location'=>'Sala virtual']]);$this->posts[]=$p['id'];
+        $p=Content::save('event',['title'=>'Organizer calendar invite','body'=>'Private discussion','status'=>'publish','meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'url'=>'https://example.invalid/meeting']]);$this->posts[]=$p['id'];
         $calls=[];
         $this->mock(static function($args,$url)use(&$calls,$guestEmail){
             $calls[]=['method'=>$args['method'],'url'=>$url,'body'=>isset($args['body'])?json_decode($args['body'],true):null];
@@ -143,7 +143,7 @@ final class ProvidersTest extends TestCase
 
     public function testCalendarCreateUpdateAndCancelRequireExplicitOperations(): void
     {
-        Secrets::set('google_calendar_'.$this->user,wp_json_encode(['access_token'=>'fake','expires_at'=>time()+3600]));$p=Content::save('event',['title'=>'Calendar transport test','body'=>'Private discussion','status'=>'publish','meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200)]]);$this->posts[]=$p['id'];$methods=[];
+        Secrets::set('google_calendar_'.$this->user,wp_json_encode(['access_token'=>'fake','expires_at'=>time()+3600]));$p=Content::save('event',['title'=>'Calendar transport test','body'=>'Private discussion','status'=>'publish','meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'url'=>'https://example.invalid/meeting']]);$this->posts[]=$p['id'];$methods=[];
         $this->mock(static function($args,$url)use(&$methods){self::assertStringStartsWith('https://www.googleapis.com/calendar/v3/calendars/primary/events',$url);$methods[]=$args['method'];if($args['method']!=='DELETE'){self::assertSame('private',json_decode($args['body'],true)['visibility']);}return self::response(['id'=>'remote-test-event']);});
         self::assertTrue(GoogleOAuth::calendar($p['id'],'save')['ok']);self::assertTrue(GoogleOAuth::calendar($p['id'],'save')['ok']);self::assertTrue(GoogleOAuth::calendar($p['id'],'cancel')['ok']);self::assertSame(['POST','PATCH','DELETE'],$methods);self::assertSame('',get_user_meta($this->user,'_ascla_google_event_'.$p['id'],true));
     }

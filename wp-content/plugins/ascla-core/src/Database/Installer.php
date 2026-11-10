@@ -23,6 +23,7 @@ final class Installer
         self::migrateDeliveries();
         EventFiltersMigration::run();
         AllySearchMigration::run();
+        VideoEvidenceMigration::run();
         self::loginPage();
         self::pages();
         self::adminPage();
@@ -36,7 +37,9 @@ final class Installer
     }
     public static function upgrade(): void
     {
+        \ASCLA\Core\Services\CredentialPolicy::upgrade();
         if (get_option('ascla_version') !== ASCLA_VERSION || (int)get_option('ascla_schema',0)<self::SCHEMA_VERSION || !EventFiltersMigration::ready() || !AllySearchMigration::ready()) { self::activate(false); }
+        elseif (!VideoEvidenceMigration::ready()) { VideoEvidenceMigration::run(); }
         \ASCLA\Core\Domain\Roles::upgrade();
     }
     private static function migrateIndexes(): void

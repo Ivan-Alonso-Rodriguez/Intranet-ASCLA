@@ -29,7 +29,7 @@ final class ContentLifecycleTest extends TestCase
     public function testEveryEditorialTypeCanBeTrashedByAnAdministrator():void
     {
         foreach(array_keys(ASCLA\Core\Domain\Catalog::TYPES) as $type){
-            $meta=$type==='event'?['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000)]:[];
+            $meta=$type==='event'?['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000),'url'=>'https://example.invalid/meeting']:[];
             $p=$this->post($type,['meta'=>$meta]);
             if($type==='contact') { ascla_test_support_state($p['id'],$this->users[0],'closed');self::assertSame(200,$this->api('DELETE','items/'.$p['id'])->get_status());self::assertSame('private',get_post_status($p['id']));continue; }
             self::assertTrue($p['can_delete']);
@@ -138,7 +138,7 @@ final class ContentLifecycleTest extends TestCase
 
     public function testOnlyAdminCreatesEventsAndNonDraftPublishesImmediately():void
     {
-        $payload=['title'=>'Evento directo','body'=>'Descripción','meta'=>['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000)]];
+        $payload=['title'=>'Evento directo','body'=>'Descripción','meta'=>['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000),'url'=>'https://example.invalid/meeting']];
         $p=$this->post('event',$payload+['status'=>'pending']);self::assertSame('publish',$p['status']);
         $draft=$this->post('event',$payload+['status'=>'draft']);self::assertSame('draft',$draft['status']);
         foreach(array_slice($this->users,1) as $id){wp_set_current_user($id);self::assertSame(403,$this->api('POST','content/event',$payload)->get_status());self::assertSame(403,$this->api('POST','content/event/'.$p['id'],$payload)->get_status());self::assertSame($id===$this->users[1]?404:403,$this->api('POST','items/'.$draft['id'].'/moderate',['decision'=>'approve','reason'=>'Publicar'])->get_status());}
@@ -155,8 +155,42 @@ final class ContentLifecycleTest extends TestCase
         self::assertSame(200,$partial->get_status());self::assertSame('draft',$partial->get_data()['status']);
         self::assertSame(400,$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento todavía incompleto','body'=>'','status'=>'publish','meta'=>[]])->get_status());
         self::assertSame(400,$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento listo','body'=>'Descripción completa','status'=>'publish','meta'=>[]])->get_status());
-        $complete=$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento listo','body'=>'Descripción completa','status'=>'publish','meta'=>['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000)]]);
+        $complete=$this->api('POST','content/event/'.$draft['id'],['title'=>'Evento listo','body'=>'Descripción completa','status'=>'publish','meta'=>['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000),'url'=>'https://example.invalid/meeting']]);
         self::assertSame(200,$complete->get_status());self::assertSame('publish',$complete->get_data()['status']);
+    }
+    public function testEventAttendanceFieldsAreRequiredByModalityOutsideDrafts():void
+    {
+        $payload=['title'=>'Evento por modalidad','body'=>'Descripción'];
+        $dates=['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000)];
+        $link='https://example.invalid/meeting';
+        $saved=$this->post('event',$payload+['status'=>'draft','meta'=>$dates+['modality'=>'Híbrido']]);
+        $id=$saved['id'];
+        $edit='content/event/'.$id;
+        $before=get_post_meta($id,'_ascla',true);
+        foreach ([
+            ['publish',['modality'=>'Virtual','location'=>'Auditorio']],
+            ['publish',['modality'=>'Presencial','location'=>"\u{200B}",'url'=>$link]],
+            ['scheduled',['modality'=>'Híbrido','location'=>'Auditorio']],
+            ['pending',['modality'=>'Híbrido','url'=>$link]],
+        ] as [$status,$meta]) {
+            $rejected=$this->api('POST',$edit,$payload+['status'=>$status,'publish_at'=>gmdate('c',time()+3600),'meta'=>$meta]);
+            self::assertSame(400,$rejected->get_status());
+            self::assertSame('draft',get_post_status($id));
+            self::assertSame($before,get_post_meta($id,'_ascla',true));
+        }
+        self::assertSame(400,$this->api('POST','items/'.$id.'/moderate',['decision'=>'approve','reason'=>'Publicar'])->get_status());
+        $published=$this->api('POST',$edit,$payload+['status'=>'publish','meta'=>['modality'=>'Híbrido','location'=>'Auditorio','url'=>$link]]);
+        self::assertSame(200,$published->get_status());
+        self::assertSame('Auditorio',$published->get_data()['meta']['location']);
+        self::assertSame($link,$published->get_data()['meta']['url']);
+        $onsite=$this->api('POST',$edit,$payload+['status'=>'publish','meta'=>['modality'=>'Presencial']]);
+        self::assertSame(200,$onsite->get_status());
+        self::assertSame('Auditorio',$onsite->get_data()['meta']['location']);
+        self::assertArrayNotHasKey('url',$onsite->get_data()['meta']);
+        $online=$this->api('POST',$edit,$payload+['status'=>'publish','meta'=>['modality'=>'Virtual','url'=>$link]]);
+        self::assertSame(200,$online->get_status());
+        self::assertSame($link,$online->get_data()['meta']['url']);
+        self::assertArrayNotHasKey('location',$online->get_data()['meta']);
     }
     public function testIncompleteDraftStillRejectsInvalidDatesNumbersAndPublication():void
     {
@@ -166,6 +200,12 @@ final class ContentLifecycleTest extends TestCase
         $before=get_post_meta($id,'_ascla',true);
         foreach ([['capacity'=>1.5],['capacity'=>true],['offer_hours'=>0],['modality'=>'unknown'],['start'=>'2027-02-30T10:00:00Z'],['start'=>'2027-01-15T10:00'],['start'=>'2027-01-15T11:00:00Z','end'=>'2027-01-15T10:00:00Z']] as $meta) {
             self::assertSame(400,$this->api('POST','content/event/'.$id,$base+['meta'=>$meta])->get_status());
+            self::assertSame($before,get_post_meta($id,'_ascla',true));
+        }
+        foreach (['start'=>'La fecha de inicio debe tener un año de cuatro dígitos.','end'=>'La fecha de fin debe tener un año de cuatro dígitos.'] as $key=>$message) {
+            $invalid=$this->api('POST','content/event/'.$id,$base+['meta'=>[$key=>'33333-11-05T03:33:00Z']]);
+            self::assertSame(400,$invalid->get_status());
+            self::assertSame(Language::label($message),$invalid->get_data()['message']);
             self::assertSame($before,get_post_meta($id,'_ascla',true));
         }
         foreach (['publish','scheduled','pending'] as $status) {
@@ -207,7 +247,7 @@ final class ContentLifecycleTest extends TestCase
         $imageA=$makeMedia('event-cover-a.webp','image/webp');
         $imageB=$makeMedia('event-cover-b.png','image/png');
         $pdf=$makeMedia('event-cover.pdf','application/pdf');
-        $dates=['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000),'capacity'=>20,'modality'=>'Virtual'];
+        $dates=['start'=>gmdate('c',time()+86400),'end'=>gmdate('c',time()+90000),'capacity'=>20,'modality'=>'Virtual','url'=>'https://example.invalid/meeting'];
         $event=$this->post('event',['meta'=>$dates+['media_ids'=>[$imageA]]]);
         self::assertSame([$imageA],get_post_meta($event['id'],'_ascla',true)['media_ids']);
         self::assertSame($event['id'],(int)Store::one('media',$imageA)['post_id']);

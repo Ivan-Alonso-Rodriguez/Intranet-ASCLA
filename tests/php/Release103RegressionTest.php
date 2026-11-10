@@ -217,8 +217,7 @@ final class Release103RegressionTest extends TestCase
         update_user_meta($this->member,'_ascla_profile',$hidden);
         $empty=Profiles::raw($this->users[5]);$empty['position']='';update_user_meta($this->users[5],'_ascla_profile',$empty);
         wp_set_current_user($this->viewer);
-        $results=Profiles::directory(['q'=>'MIEMBRO ASCLA']);
-        $ids=array_column($results['items'],'id');
+        $ids=$this->directoryIds('MIEMBRO ASCLA');
         self::assertContains($this->member,$ids);
         self::assertContains($this->users[5],$ids,'Both an empty and a hidden position use the visible fallback; completeness does not exclude active members.');
         self::assertNotContains($this->moderator,$ids);
@@ -227,11 +226,21 @@ final class Release103RegressionTest extends TestCase
         self::assertSame('Miembro ASCLA',Profiles::visible($this->member)['position_label']);
         update_user_meta($this->viewer,'locale','en_US');
         self::assertSame('ASCLA member',Profiles::visible($this->member)['position_label']);
-        self::assertContains($this->member,array_column(Profiles::directory(['q'=>'ASCLA member'])['items'],'id'));
+        self::assertContains($this->member,$this->directoryIds('ASCLA member'));
         wp_set_current_user($this->admin);
         self::assertSame('SecretPosition103',Profiles::visible($this->member)['position_label']);
-        self::assertContains($this->member,array_column(Profiles::directory(['q'=>'Miembro ASCLA'])['items'],'id'));
+        self::assertContains($this->member,$this->directoryIds('Miembro ASCLA'));
         self::assertSame(0,Profiles::directory(['q'=>'SecretPosition103'])['total'],'Directory searches respect visibility even for administrators.');
+    }
+
+    private function directoryIds(string $query): array
+    {
+        $result=Profiles::directory(['q'=>$query]);
+        $ids=array_column($result['items'],'id');
+        for ($page=2;$page<=$result['pages'];$page++) {
+            $ids=array_merge($ids,array_column(Profiles::directory(['q'=>$query,'page'=>$page])['items'],'id'));
+        }
+        return $ids;
     }
 
     public function testExecutiveCreatesMicroeventsThroughRouteAndWorkerWithoutPublishing(): void
@@ -258,6 +267,7 @@ final class Release103RegressionTest extends TestCase
                 self::assertSame(0,Store::count('registrations','event_id=%d',[$id]));
                 self::assertTrue(Content::serialize(Content::get($id))['can_moderate']);
                 $meta=get_post_meta($id,'_ascla',true);
+                $meta['url']='https://example.invalid/meeting';
                 $saved=Content::save('event',['title'=>'Propuesta revisada','body'=>'Agenda para revisar','status'=>'publish','meta'=>$meta],$id);
                 self::assertSame('pending',$saved['status']);
             }

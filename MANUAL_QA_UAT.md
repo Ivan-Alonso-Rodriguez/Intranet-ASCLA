@@ -1,6 +1,6 @@
 # Guía práctica de QA, SonarQube y UAT
 
-Versión documentada: **1.11.1**, esquema **15**.
+Versión documentada: **1.12**, esquema **15**. El [historial de 1.12](VERSION_HISTORY.md#release-112) detalla el alcance de la entrega; los resultados históricos se indican por versión.
 
 ## Repetición completa del 5 de noviembre · 1.11.1
 

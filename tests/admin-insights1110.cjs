@@ -34,6 +34,16 @@ const micro=id=>page.locator(`[data-micro-id="${id}"]`);
  await go('estadisticas');await theme('dark');await capture('estadisticas-resumen-oscuro','#stats-view');await page.setViewportSize({width:390,height:844});await capture('estadisticas-movil-oscuro','#stats-view');
  await page.setViewportSize({width:1440,height:1100});await theme('light');await go('microeventos');const diagnosis=await ok('microevents/diagnostics');assert.equal(diagnosis.reason,'ready');assert.equal(await page.locator('.micro-planning-steps li').count(),3);for(const [key,value] of [['eligible',diagnosis.eligible],['minimum',diagnosis.minimum],['shared',diagnosis.max_shared_interest]])assert.equal(await page.locator(`[data-micro-stat=${key}] > strong`).innerText(),String(value));
  assert.equal(await page.locator('.micro-history-card').count(),4);for(const id of Object.values(f.micro)){assert.ok(await micro(id).locator('.micro-state').isVisible());assert.ok(await micro(id).locator('.micro-next-step').innerText());}await capture('encuentros-claro','#admin-panel');pass('Encuentros explica tres pasos y separa condiciones, métricas reales, estados y el siguiente paso de cada propuesta');
+ for (const url of ['/wp-admin/admin.php?page=ascla-microeventos','/administracion/?section=microeventos']) {
+   await page.goto(fixture.base+url);
+   await page.locator('.micro-history-card').first().waitFor();
+   const axis=await page.locator('.micro-counts').boundingBox();
+   const cards=page.locator('.micro-planning,.micro-history-card');
+   for (const card of await cards.all()) {
+     const bounds=await card.boundingBox();
+     assert.ok(Math.abs(bounds.x-axis.x)<=1 && Math.abs(bounds.width-axis.width)<=1,'Tarjetas alineadas con los contadores en '+url);
+   }
+ }
  await micro(f.micro.pending).locator('[data-action=item]').click();await page.locator('.modal .detail-meta').first().waitFor();await page.locator('.modal-top [data-action=close]').click();
  const archived=page.waitForResponse(r=>r.url().includes('/events/'+f.micro.cancelled+'/archive'));await micro(f.micro.cancelled).locator('[data-action=micro-archive]').click();assert.equal((await archived).status(),200);await micro(f.micro.cancelled).waitFor({state:'detached'});await page.locator('[data-action=micro-archive-tab][data-archived=true]').click();await micro(f.micro.cancelled).waitFor();await micro(f.micro.cancelled).locator('[data-action=micro-archive]').click();await micro(f.micro.cancelled).waitFor({state:'detached'});await page.locator('[data-action=micro-archive-tab][data-archived=false]').click();await micro(f.micro.cancelled).waitFor();pass('Revisar, archivar y restaurar siguen operativos; restaurar conserva el estado cancelado');
  await ok('settings',{micro_min:50,micro_capacity:100});await go('microeventos');await page.locator('.micro-readiness').getByText('No hay suficientes asociados elegibles para alcanzar el mínimo.',{exact:true}).waitFor();await page.locator('.micro-diagnostics details').evaluate(n=>n.open=true);await capture('encuentros-condiciones','#admin-panel');

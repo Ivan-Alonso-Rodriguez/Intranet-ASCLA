@@ -2,36 +2,57 @@
 namespace ASCLA\Core\Services;
 use ASCLA\Core\Domain\GroupPlanner;
 use ASCLA\Core\Domain\Catalog;
-use ASCLA\Core\Repositories\Store;
+use ASCLA\Core\Repositories\{Store,WordPressWrites};
 final class MicroEvents
 {
-    public static function create(array $onlyIds=[]): array
+    public static function create(array $onlyIds=[],int $manualJob=0): array
     {
         sort($onlyIds);
         $month=($onlyIds?'demo-'.substr(hash('sha256',wp_json_encode($onlyIds)),0,12).'-':'').MicroPlanning::period();
-        return Store::lock('micro:'.$month,static function () use($month,$onlyIds) {
-            $existing=get_option('ascla_micro_'.$month);
-            if (is_array($existing)) {
+        return Store::atomic('micro:'.$month,static function () use($month,$onlyIds,$manualJob) {
+            $periodKey='ascla_micro_'.$month;
+            $manualKey='ascla_micro_manual_'.$month;
+            $existing=get_option($periodKey);
+            $recentTopics=[];
+            if ($manualJob) {
+                // A retried job gets its own batch back. A new button press has a different job ID.
+                $checkpoint=json_decode(Store::one('jobs',$manualJob)['result']??'null',true);
+                if (is_array($checkpoint) && isset($checkpoint['events'])) { return self::sanitizeResult($checkpoint); }
+                $recentTopics=(array)get_option($manualKey,[]);
+                if (!$recentTopics) {
+                    foreach ((array)($existing['events']??[]) as $id) {
+                        $meta=get_post_meta($id,'_ascla',true);
+                        if (!empty($meta['topic_id'])) { $recentTopics[$meta['topic_id']]=1; }
+                    }
+                }
+            } elseif (is_array($existing)) {
                 $current=self::sanitizeResult($existing);
                 if (!empty($current['events'])) {
-                    if ($current!==$existing) { update_option('ascla_micro_'.$month,$current,false); }
+                    if ($current!==$existing) { WordPressWrites::option($periodKey,$current); }
                     return array_replace($current,['reused'=>true,'diagnostics'=>self::diagnostics($onlyIds)]);
                 }
                 // A deleted proposal must not keep the month locked to stale post IDs.
-                delete_option('ascla_micro_'.$month);
+                delete_option($periodKey);
             }
             $profiles=self::eligible($onlyIds,$excluded);
             $history=get_option('ascla_group_history',[]);
             $blocked=self::blockedPairs($profiles);
-            $plan=MicroPlanning::plan($profiles,$history,$blocked);
+            $plan=MicroPlanning::plan($profiles,$history,$blocked,$recentTopics);
             $ids=[];
             foreach ($plan['groups'] as $group) {
-                $ids[]=self::proposal($group['members'],(bool)$onlyIds,$group['topic']);
+                $topic=$group['topic'];
+                $ids[]=self::proposal($group['members'],(bool)$onlyIds,$topic,$manualJob?($recentTopics[$topic]??0)+1:0);
                 $history=self::recordPairs($group['members'],$history);
+                $recentTopics[$topic]=($recentTopics[$topic]??0)+1;
             }
             $result=['events'=>$ids,'waiting'=>$plan['waiting'],'month'=>$month,'reused'=>false,
                 'diagnostics'=>MicroPlanning::diagnostics($profiles,$blocked,$plan)+['excluded'=>$excluded]];
-            if ($ids) { update_option('ascla_micro_'.$month,$result,false); update_option('ascla_group_history',$history,false); }
+            if ($ids) {
+                if ($manualJob) { WordPressWrites::option($manualKey,$recentTopics); }
+                else { WordPressWrites::option($periodKey,$result); }
+                WordPressWrites::option('ascla_group_history',$history);
+            }
+            if ($manualJob) { Store::update('jobs',['result'=>wp_json_encode($result)],['id'=>$manualJob]); }
             Audit::record('microevents_created',0,'groups_'.count($ids)); return $result;
         });
     }
@@ -107,17 +128,17 @@ final class MicroEvents
         }
         return $history;
     }
-    private static function proposal(array $group,bool $demo,int $topic): int
+    private static function proposal(array $group,bool $demo,int $topic,int $edition): int
     {
-                $proposal=NetworkingAI::agenda($group,$demo);
+                $proposal=NetworkingAI::agenda($group,$demo,$topic,$edition);
                 $start=(new \DateTimeImmutable('+14 days 16:00',wp_timezone()))->setTimezone(new \DateTimeZone('UTC'));
-                $meta=['micro'=>true,'invitees'=>$group,'start'=>$start->format('c'),'end'=>$start->modify('+'.$proposal['duration_minutes'].' minutes')->format('c'),'capacity'=>Settings::get()['micro_capacity'],'chatham'=>true,'modality'=>'Virtual','location'=>'Por confirmar','agenda'=>implode("\n",array_map(static fn($item)=>$item['minutes'].' min · '.$item['topic'],$proposal['agenda'])),'agenda_ai'=>$proposal,'invited'=>false];
+                $meta=['micro'=>true,'invitees'=>$group,'start'=>$start->format('c'),'end'=>$start->modify('+'.$proposal['duration_minutes'].' minutes')->format('c'),'capacity'=>Settings::get()['micro_capacity'],'chatham'=>true,'modality'=>'Virtual','agenda'=>implode("\n",array_map(static fn($item)=>$item['minutes'].' min · '.$item['topic'],$proposal['agenda'])),'agenda_ai'=>$proposal,'invited'=>false];
                 $id=wp_insert_post(wp_slash(['post_type'=>'ascla_event','post_title'=>$proposal['title'],'post_content'=>$proposal['objective'],'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
                 if (is_wp_error($id)) { throw new ServiceException('No se pudo crear el microevento.'); }
-                update_post_meta($id,'_ascla',MicroLifecycle::defaults($meta+['topic_id'=>$topic]));
-                wp_set_object_terms($id,[$topic],'ascla_interest');
+                WordPressWrites::meta('post',$id,'_ascla',MicroLifecycle::defaults($meta+['topic_id'=>$topic]),true);
+                WordPressWrites::terms($id,[$topic],'ascla_interest');
                 MicroLifecycle::history($id,'pending');
-                wp_update_post(['ID'=>$id,'post_status'=>'pending']);
+                if (is_wp_error(wp_update_post(['ID'=>$id,'post_status'=>'pending'],true))) { throw new ServiceException('No se pudo preparar la propuesta para revisión.'); }
 
         return $id;
     }

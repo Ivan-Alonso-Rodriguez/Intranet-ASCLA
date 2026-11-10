@@ -41,6 +41,21 @@ async function runStatistics(){let f,browser,page;const coverage=[];
      const r=await api(page,'admin/statistics/topics?topic='+f.topic);assert.equal(r.status,200);assert.equal(r.data.pending,0);assert.equal(r.data.classified,2);assert.equal(r.data.groups[0].attendances,1);
      await page.locator('[data-stats-action="section"][data-section="overview"]').click();
     });
+    await test('Aviso de asistencia, validación y descarte de varias ediciones',async()=>{
+      await page.locator(`[data-stats-action="roster"][data-id="${f.events[0]}"]`).click();
+      const roster=page.locator('.attendance-dialog'),email=roster.locator('[name=email]');
+      const minutes=roster.locator(`[data-stats-form=row][data-user="${f.users[3].id}"] [name=minutes]`);
+      const previous=await minutes.inputValue();
+      await email.fill('incompleto');await minutes.fill('37');await page.keyboard.press('Escape');
+      const decision=page.getByRole('alertdialog');await decision.locator('[data-choice=save]').click();
+      assert.equal(await email.evaluate(field=>field.validity.typeMismatch),true);
+      await roster.locator('[data-action=close]').click();await decision.locator('[data-action=modal-unsaved-stay]').last().click();
+      assert.equal(await minutes.inputValue(),'37');
+      await page.keyboard.press('Escape');await decision.locator('[data-choice=discard]').click();
+      await page.locator(`[data-stats-action="roster"][data-id="${f.events[0]}"]`).click();
+      assert.equal(await minutes.inputValue(),previous);assert.equal(await email.inputValue(),'');
+      await roster.locator('[data-action=close]').click();
+    });
     await test('Vista previa CSV, corrección manual y cierre de asistencia',async()=>{
      await page.locator(`[data-stats-action="roster"][data-id="${f.events[0]}"]`).click();await page.locator('.stats-roster').waitFor();
      await page.locator('[data-stats-workflow="csv"] > summary').click();
