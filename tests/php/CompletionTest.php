@@ -15,8 +15,8 @@ final class CompletionTest extends TestCase
             self::assertIsInt($id); $this->users[]=$id;
         }
         wp_set_current_user($this->users[0]); Settings::save(['ai_mode'=>'mock','youtube_mode'=>'mock']);
-        foreach (['interest','category','area'] as $tax) { $term=wp_insert_term('Cierre '.bin2hex(random_bytes(4)),'ascla_'.$tax); $this->terms[$tax]=(int)$term['term_id']; }
-        foreach (array_slice($this->users,1) as $id) { wp_set_current_user($id); Profiles::save(['networking'=>true,'interests'=>[$this->terms['interest']],'areas'=>[$this->terms['area']]]); }
+        foreach (['interest','category','area','industry','goal'] as $tax) { $term=wp_insert_term('Cierre '.bin2hex(random_bytes(4)),'ascla_'.$tax); $this->terms[$tax]=(int)$term['term_id']; }
+        foreach (array_slice($this->users,1) as $id) { wp_set_current_user($id); Profiles::save(['first_name'=>'Persona','last_name'=>'Completa','position'=>'Analista','company'=>'Pruebas','city'=>'Lima','bio'=>'Perfil completo de prueba','industries'=>[$this->terms['industry']],'goals'=>[$this->terms['goal']],'networking'=>true,'interests'=>[$this->terms['interest']],'areas'=>[$this->terms['area']]]); }
         wp_set_current_user($this->users[0]);
     }
     protected function tearDown(): void
@@ -28,6 +28,7 @@ final class CompletionTest extends TestCase
     }
     private function create(string $type,array $data=[]): array
     {
+        if ($type==='event') { $data['meta']=($data['meta']??[])+['url'=>'https://example.invalid/meeting']; }
         $p=Content::save($type,array_replace_recursive(['title'=>'QZCierre '.$type,'body'=>'Gobierno corporativo y responsabilidades.','status'=>'publish'],$data));
         $this->posts[]=$p['id']; return $p;
     }
@@ -88,7 +89,7 @@ final class CompletionTest extends TestCase
     }
     public function testInvitationsAreAuthorizedDeduplicatedAndDoNotReserveCapacity(): void
     {
-        $p=$this->create('event',['meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>1]]);
+        $p=$this->create('event',['meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>2]]);
         self::assertSame(2,Events::invite($p['id'],[$this->users[1],$this->users[2]])['sent']);
         self::assertSame(0,Events::invite($p['id'],[$this->users[1]])['sent']);
         self::assertSame(0,Events::detail($p['id'])['attending']);
@@ -116,7 +117,7 @@ final class CompletionTest extends TestCase
         // even when the activity topic is not part of the explicit profile.
         $activityTag='Actividad '.bin2hex(random_bytes(4));
         wp_set_current_user($this->users[0]);
-        $activitySource=$this->create('resource',['title'=>'QZ Fuente de actividad','tag_names'=>[$activityTag]]);
+        $activitySource=$this->create('resource',['title'=>'QZ Fuente de actividad','tag_names'=>[$activityTag],'meta'=>['chatham'=>false]]);
         $activityTarget=$this->create('resource',['title'=>'QZ Recomendación por actividad','tag_names'=>[$activityTag]]);
         wp_set_current_user($this->users[1]);
         Content::react($activitySource['id'],'like',true);

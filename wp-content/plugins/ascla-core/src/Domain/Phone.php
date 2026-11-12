@@ -16,6 +16,7 @@ final class Phone
     public static function visibility(mixed $value): string
     {
         Access::require(is_string($value) && in_array($value,['private','members'],true),'Privacidad del teléfono no válida.',400);
-        return $value;
+        // Legacy clients may send members; personal contact data stays private (RF-006).
+        return 'private';
     }
 }

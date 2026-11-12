@@ -1,0 +1,212 @@
+{
+  "date": "2026-10-17T13:45:51.381582+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "baseline_commit": "877568c3fe16695ca3ede931ef5f1de911539ffa",
+  "scope": "Disposable local WordPress and synthetic accounts. Focused existing PHP regressions plus real browser/REST checks. No remote installation, new coverage, repeated full-suite or UAT acceptance claim.",
+  "source_snapshot": "current-13",
+  "production_matches_tested_snapshot": true,
+  "directory": {
+    "shared_card_rows": true,
+    "sent_request_cancel_visible": true,
+    "ellipsis_for_sent_request": false,
+    "cooldown_date_visible": true,
+    "connect_not_offered_during_visible_cooldown": true,
+    "existing_cancel_confirmation_preserved": true
+  },
+  "phone": {
+    "native_country_select": true,
+    "local_flags": 244,
+    "country_calling_code_entries": 244,
+    "module_loaded_only_when_form_opens": true,
+    "readonly_authorization_preserved": true,
+    "own_save_and_reload_checked": true,
+    "private_from_other_members": true,
+    "administrator_change_requires_contact_authorization": true,
+    "optional_empty_preserved": true,
+    "unknown_prefix_number_preserved": true,
+    "international_plain_input_fallback_checked": true,
+    "country_of_residence_unchanged": true,
+    "vendor": {
+      "name": "intl-tel-input",
+      "version": "29.5.3",
+      "used": "Calling-code data and flag sprite only; input controller is local code.",
+      "source": "https://github.com/jackocnr/intl-tel-input/releases/tag/v29.5.3",
+      "license": "MIT",
+      "license_file": "wp-content/plugins/ascla-core/assets/phone/LICENSE.txt",
+      "npm_archive_sha256": "6ceca7fbdb62df3f180c285baee35c96e430df40b71fcf14fb1f279071f67e9d"
+    }
+  },
+  "phpunit": {
+    "tests": 59,
+    "assertions": 432,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "selection": [
+      "ReleaseCompletionTest",
+      "SprintNetworkingTest",
+      "FormIntegrity108Test",
+      "ProfileLoadingTest"
+    ],
+    "coverage_collected": false
+  },
+  "portable_checks": 49,
+  "browser": {
+    "checks": [
+      "El selector y las banderas solo se descargan al abrir un formulario de teléfono",
+      "Banderas y prefijos reconocen Perú, Colombia, Reino Unido y países con +1; cambiar país conserva el número nacional y pegar 00 se convierte en +",
+      "El teléfono se guarda y reaparece con su bandera; otro asociado no lo recibe y administración conserva su acceso",
+      "Borrar el teléfono guarda el campo opcional vacío y no inserta un prefijo por sí solo",
+      "El selector administrativo permanece bloqueado hasta elegir una solicitud autorizada y guarda el teléfono con el permiso existente",
+      "Las tarjetas de una fila alinean Ver perfil, la solicitud enviada y la fecha de espera; no ofrecen Conectar durante el bloqueo temporal",
+      "Cancelar está visible y retira la solicitud mediante la confirmación existente sin recargar la página",
+      "Si el selector no puede descargarse, el campo internacional original sigue visible y editable"
+    ],
+    "errors": [],
+    "scans": [
+      {
+        "name": "phone-desktop-light",
+        "violations": []
+      },
+      {
+        "name": "phone-desktop-dark",
+        "violations": []
+      },
+      {
+        "name": "phone-mobile-light",
+        "violations": []
+      },
+      {
+        "name": "phone-mobile-dark",
+        "violations": []
+      },
+      {
+        "name": "directory-states-desktop-dark",
+        "violations": []
+      },
+      {
+        "name": "directory-states-desktop-light",
+        "violations": []
+      },
+      {
+        "name": "directory-states-mobile-dark",
+        "violations": []
+      },
+      {
+        "name": "directory-states-mobile-light",
+        "violations": []
+      }
+    ],
+    "views": [
+      "phone-desktop-light.png",
+      "phone-desktop-dark.png",
+      "phone-mobile-light.png",
+      "phone-mobile-dark.png",
+      "directory-states-desktop-dark.png",
+      "directory-states-desktop-light.png",
+      "directory-states-mobile-dark.png",
+      "directory-states-mobile-light.png"
+    ],
+    "viewports": [
+      1440,
+      390
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "automated_wcag_a_aa_violations": 0
+  },
+  "coverage": {
+    "collected": false,
+    "previous_reports_unchanged": true,
+    "sha256": {
+      "clover.xml": "2008bce81b5693cc82662820d8ff8aa19004cdacc082295365e906b6b9d90709",
+      "junit.xml": "bea4733ddbfab15f29230c5b08f1c7aac5a9586fc4ad87c7ea4ad503c47440ae",
+      "lcov.info": "c68411ab949218a79986a9548e775a364d0535dfe58cb248f65389e8523adb10",
+      "source-revision": "5e9488a9dd2e9101025ac5963ac77c71771b7b8bc6d0ac170896e53374b6fa39"
+    }
+  },
+  "package": {
+    "files": 196,
+    "bytes": 1498399,
+    "sha256": "72e560e82eaf4020757d7f59b693cdd31dce55f8dee941aa047a97128b91fa13",
+    "manifest": "docs/evidence/release-1.10.8/package.json"
+  },
+  "cleanup": {
+    "temporary_projects_removed": true,
+    "temporary_environment_files_removed": true,
+    "fixture_accounts_removed": true
+  },
+  "artifacts": [
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/directory-phone108.json",
+      "sha256": "ce39bb808df5322ba11685103c27c787102fe23b8afca3a5571dbc45d800dc00"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/browser.log",
+      "sha256": "bb1c6ad64491b30779b6521070c3695bf9b34c59e67bdbc6dd8f4705e43e6db3"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/junit.xml",
+      "sha256": "9b3f85e4ae78db0cc68dedf5296834f5eaef70fd4e6bfca9b273d729d30b179d"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/phpunit.log",
+      "sha256": "c35342b305d50136445c51cbdcd410da4cb54197d35a8fd3eb05a39d42842b9f"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/sanity.log",
+      "sha256": "8755860c11c8d3f9a1de749e02b68760d94f38c5cd87cadef867e4a455591434"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/fixture-cleanup.log",
+      "sha256": "ae10dc1a0e784b43e73dbf9dc7cf25d314f518b09788c900cb19c293d9ace29a"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/cleanup.log",
+      "sha256": "54620c1be52e9a857f03d0cbb8c74d9435829a71b7194d72261f6cb65eb8983e"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/phone-desktop-light.png",
+      "sha256": "7e55fa86d2770d4dca63c3e83c8a9c0e627fa9a10460f4ecd2393d90faef07b8"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/phone-desktop-dark.png",
+      "sha256": "b1290f1d5dc71858f6ca5b47393c6ea9c5f99076c66378af64da1f12dea37af8"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/phone-mobile-light.png",
+      "sha256": "4756694e94f387239e3a936478246029e82a403f60754456d4894d7de7215906"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/phone-mobile-dark.png",
+      "sha256": "a770929ebdbf4fe1a358d3449ad78580ef8edfe6269e0a37a344cf34f21feee9"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/directory-states-desktop-dark.png",
+      "sha256": "e1e7acd307d6693d441e1466920e1fb3e8ef0cea088188bf91b0f40c213efc4b"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/directory-states-desktop-light.png",
+      "sha256": "f90310a565e629ef552d2feb10d117ad01f335c790a78a78d291936e17310708"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/directory-states-mobile-dark.png",
+      "sha256": "02adcb974b693e7350adee8c6d74e5263da8c3ebfe0f14a264c2a3572fd3fb98"
+    },
+    {
+      "path": "test-results/directory-phone108-20261017T134408Z-708/directory-states-mobile-light.png",
+      "sha256": "b03f8f3eb19bfcef8857c7d3647c4f24bafaa03f132ca8b3c96875032cc242ac"
+    },
+    {
+      "path": "test-results/directory-phone108-ui.cjs",
+      "sha256": "84b5ed23ec34b37ff4cbb07ceb65dd07b4d576d491347281b356097ffb88a5e5"
+    },
+    {
+      "path": "test-results/directory-phone108-run.sh",
+      "sha256": "83d42f29f4f8442a8905bea833ba2bf96d151b4de4b3be8898624d130188d936"
+    }
+  ]
+}

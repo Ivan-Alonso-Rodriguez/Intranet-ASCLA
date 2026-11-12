@@ -1,0 +1,28 @@
+meta {
+  name: 02. Obtener protección de la sesión
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base}}/intranet/
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAsociado}}
+  X-WP-Nonce: {{nonceAsociado}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+script:post-response {
+  const match = String(res.getBody()).match(/var ASCLA\s*=\s*(\{[\s\S]*?\});/);
+  if (match) bru.setVar("nonceAsociado", JSON.parse(match[1]).nonce);
+}
+tests {
+  test("Sesi\u00f3n autenticada a", function () { expect(res.getStatus()).to.equal(200); });
+  test("Nonce REST disponible", function () { expect(bru.getVar("nonceAsociado")).to.be.a("string").and.not.empty; });
+}

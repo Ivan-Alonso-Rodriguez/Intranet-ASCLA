@@ -1,0 +1,1074 @@
+{
+  "date": "2026-11-05T19:17:18.587402+00:00",
+  "version": "1.11.1",
+  "schema": 15,
+  "status": "PASS",
+  "scope": "QA/UAT técnicos independientes en WordPress local desechable, SonarQube del curso, Trivy, ZAP/CSP HTTPS y Jenkins local. No certifica despliegue ni aceptación humana UAT.",
+  "source_commit": "ee2db6ff4fcd8dd39e55b5205cb39e74c809d690",
+  "delivery_executor_commit": "174f74519b62d51f5826e936922f4d4575288db8",
+  "production_files_identical_to_current_package": 219,
+  "package": {
+    "sha256": "0bcea05b2c823ad811c542de90cf24e73339943f4b01692b8e7576dabd33d3d9",
+    "bytes": 2134919,
+    "files": 219
+  },
+  "php": {
+    "qa": {
+      "tests": 855,
+      "assertions": 9071,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 1
+    },
+    "uat": {
+      "tests": 855,
+      "assertions": 9071,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 1
+    }
+  },
+  "quality": {
+    "browser_commands": [
+      "native-login-security",
+      "e2e (incluye statistics y lector PDF/HTML/ZIP)",
+      "editorial107",
+      "analysis-filters107",
+      "governance107",
+      "delivery107",
+      "comment-history107",
+      "accessibility107",
+      "forms107",
+      "forms108",
+      "events108",
+      "privacy108",
+      "dashboard-loading108"
+    ],
+    "manual_scanner_guard_cases": 9,
+    "qa_log_sha256": "805b949d5c16018f2e029a4216895149a10675dbb50ddb252ceb4c63e4cabe4a",
+    "uat_log_sha256": "ec9417adf59e0eb095599d02a25e39357dcef790c3b14b99935766fb69775a53",
+    "javascript_line_coverage_pct": 94.65
+  },
+  "sonar": {
+    "qa": {
+      "project": "ASCLA-QA",
+      "commit": "ee2db6ff4fcd8dd39e55b5205cb39e74c809d690",
+      "status": "OK",
+      "open_issues": 0,
+      "analysis": "9f6261b1-79b9-4ca4-8149-ed958e9cee28",
+      "conditions": [
+        {
+          "status": "OK",
+          "metricKey": "new_coverage",
+          "comparator": "LT",
+          "errorThreshold": "80",
+          "actualValue": "97.1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "coverage",
+          "comparator": "LT",
+          "errorThreshold": "80",
+          "actualValue": "91.8"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_duplicated_lines_density",
+          "comparator": "GT",
+          "errorThreshold": "2",
+          "actualValue": "0.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "duplicated_lines_density",
+          "comparator": "GT",
+          "errorThreshold": "2",
+          "actualValue": "0.1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_software_quality_maintainability_rating",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "actualValue": "1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_violations",
+          "comparator": "GT",
+          "errorThreshold": "0",
+          "actualValue": "0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "software_quality_maintainability_rating",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "actualValue": "1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "test_success_density",
+          "comparator": "LT",
+          "errorThreshold": "100",
+          "actualValue": "100.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "violations",
+          "comparator": "GT",
+          "errorThreshold": "0",
+          "actualValue": "0"
+        }
+      ],
+      "measures": [
+        {
+          "metric": "coverage",
+          "value": "91.8",
+          "bestValue": false
+        },
+        {
+          "metric": "bugs",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "duplicated_lines_density",
+          "value": "0.1",
+          "bestValue": false
+        },
+        {
+          "metric": "code_smells",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "new_coverage",
+          "period": {
+            "index": 1,
+            "value": "97.1",
+            "bestValue": false
+          }
+        },
+        {
+          "metric": "violations",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "vulnerabilities",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "security_hotspots",
+          "value": "0",
+          "bestValue": true
+        }
+      ]
+    },
+    "uat": {
+      "project": "ASCLA-UAT",
+      "commit": "ee2db6ff4fcd8dd39e55b5205cb39e74c809d690",
+      "status": "OK",
+      "open_issues": 0,
+      "analysis": "4986199b-0136-4278-90ed-8f0cddcf8950",
+      "conditions": [
+        {
+          "status": "OK",
+          "metricKey": "new_coverage",
+          "comparator": "LT",
+          "errorThreshold": "80",
+          "actualValue": "97.1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "coverage",
+          "comparator": "LT",
+          "errorThreshold": "80",
+          "actualValue": "91.8"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_duplicated_lines_density",
+          "comparator": "GT",
+          "errorThreshold": "2",
+          "actualValue": "0.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "duplicated_lines_density",
+          "comparator": "GT",
+          "errorThreshold": "2",
+          "actualValue": "0.1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_software_quality_maintainability_rating",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "actualValue": "1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_violations",
+          "comparator": "GT",
+          "errorThreshold": "0",
+          "actualValue": "0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "software_quality_maintainability_rating",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "actualValue": "1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "test_success_density",
+          "comparator": "LT",
+          "errorThreshold": "100",
+          "actualValue": "100.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "violations",
+          "comparator": "GT",
+          "errorThreshold": "0",
+          "actualValue": "0"
+        }
+      ],
+      "measures": [
+        {
+          "metric": "coverage",
+          "value": "91.8",
+          "bestValue": false
+        },
+        {
+          "metric": "bugs",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "duplicated_lines_density",
+          "value": "0.1",
+          "bestValue": false
+        },
+        {
+          "metric": "code_smells",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "new_coverage",
+          "period": {
+            "index": 1,
+            "value": "97.1",
+            "bestValue": false
+          }
+        },
+        {
+          "metric": "violations",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "vulnerabilities",
+          "value": "0",
+          "bestValue": true
+        },
+        {
+          "metric": "security_hotspots",
+          "value": "0",
+          "bestValue": true
+        }
+      ]
+    }
+  },
+  "bruno": {
+    "date": "2026-11-05T19:09:03.374Z",
+    "commit": "174f74519b62d51f5826e936922f4d4575288db8",
+    "groups": 7,
+    "passed_groups": 7,
+    "requests": 81,
+    "checks": 149,
+    "failures": 0,
+    "assistant_provider": "mock"
+  },
+  "playwright": {
+    "date": "2026-11-05T19:09:36.949Z",
+    "commit": "174f74519b62d51f5826e936922f4d4575288db8",
+    "flows": 6,
+    "passed": 6,
+    "videos": 12,
+    "screenshots": 12
+  },
+  "manual_browser_suites": [
+    {
+      "suite": "admin-insights1110",
+      "status": "PASS",
+      "checks": 15,
+      "axe_views": 10,
+      "source": "test-results/full-validation-20261105/manual/admin-insights1110/summary.json",
+      "source_sha256": "eb9060727ac9a55b9bdc3d2c43f11b519d9028401105a0ce98ac49357d76fd09",
+      "reported_package_sha256": null,
+      "report": "manual/admin-insights1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "code-optimization1110",
+      "status": "PASS",
+      "checks": 14,
+      "axe_views": 13,
+      "source": "test-results/full-validation-20261105/manual/code-optimization1110/summary.json",
+      "source_sha256": "0d3ba374afcedb58cbf50305876deb08a724657bea45a75420d3ea042faaa35c",
+      "reported_package_sha256": "d83302bfc36d3d7e8bbbdd543ffb183adc10ce49e0dc9d6b8056049c4b715aa6",
+      "report": "manual/code-optimization1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "comment-threads1110",
+      "status": "PASS",
+      "checks": 16,
+      "axe_views": 6,
+      "source": "test-results/full-validation-20261105/manual/comment-threads1110/summary.json",
+      "source_sha256": "5015cab56fe65605d55281b39116be3cf15aebd721298c5a75b0cf900d4d353c",
+      "reported_package_sha256": null,
+      "report": "manual/comment-threads1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "event-reactivation1110",
+      "status": "PASS",
+      "checks": 12,
+      "axe_views": 14,
+      "source": "test-results/full-validation-20261105/manual/event-reactivation1110/summary.json",
+      "source_sha256": "4e25a313ad78418bd290ec5a9bb1fa3f9f8b0b16375690d540d3f79824eaa57d",
+      "reported_package_sha256": "d83302bfc36d3d7e8bbbdd543ffb183adc10ce49e0dc9d6b8056049c4b715aa6",
+      "report": "manual/event-reactivation1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "gallery-calendar1110",
+      "status": "PASS",
+      "checks": 14,
+      "axe_views": 24,
+      "source": "test-results/full-validation-20261105/manual/gallery-calendar1110/summary.json",
+      "source_sha256": "e0038cde7112fdfa864bf8c14aebcdb34c12339ad9944544162e2826616100d7",
+      "reported_package_sha256": "d83302bfc36d3d7e8bbbdd543ffb183adc10ce49e0dc9d6b8056049c4b715aa6",
+      "report": "manual/gallery-calendar1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "gallery-profile1110",
+      "status": "PASS",
+      "checks": 22,
+      "axe_views": 28,
+      "source": "test-results/full-validation-20261105/manual/gallery-profile1110/summary.json",
+      "source_sha256": "302bfbee6665cdb633a627bd63431e85cfd1936d7d08efd91c6c9b17a3151a5f",
+      "reported_package_sha256": "d83302bfc36d3d7e8bbbdd543ffb183adc10ce49e0dc9d6b8056049c4b715aa6",
+      "report": "manual/gallery-profile1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "interest-import1111",
+      "status": "PASS",
+      "checks": 6,
+      "axe_views": 4,
+      "source": "test-results/full-validation-20261105/manual/interest-import1111/browser.json",
+      "source_sha256": "244a9d04c94d05f7690ff9adb95c2498469534af002df7e325382d55a27598ab",
+      "reported_package_sha256": null,
+      "report": "manual/interest-import1111/index.html",
+      "videos": 5
+    },
+    {
+      "suite": "login-assets1110",
+      "status": "PASS",
+      "checks": 4,
+      "axe_views": 0,
+      "source": "test-results/full-validation-20261105/manual/login-assets1110/summary.json",
+      "source_sha256": "6a4b04b8de789c4313019021363367f746dc1f28405bebc0c803b7f5f9e85a35",
+      "reported_package_sha256": null,
+      "report": "manual/login-assets1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "media-knowledge1110",
+      "status": "PASS",
+      "checks": 25,
+      "axe_views": 17,
+      "source": "test-results/full-validation-20261105/manual/media-knowledge1110/summary.json",
+      "source_sha256": "b0fd86f314115a1f1bc7b87f2271eab12cdc75c6ade00cc146bc6ca30ff9b818",
+      "reported_package_sha256": "d83302bfc36d3d7e8bbbdd543ffb183adc10ce49e0dc9d6b8056049c4b715aa6",
+      "report": "manual/media-knowledge1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "moderation-layout1110",
+      "status": "PASS",
+      "checks": 18,
+      "axe_views": 19,
+      "source": "test-results/full-validation-20261105/manual/moderation-layout1110/summary.json",
+      "source_sha256": "cd624c6b16c828ed0db4c9b3655a3bcf7c626b28dd4304e0a93d0203c53f91fa",
+      "reported_package_sha256": null,
+      "report": "manual/moderation-layout1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "nice-to-have1110",
+      "status": "PASS",
+      "checks": 9,
+      "axe_views": 4,
+      "source": "test-results/full-validation-20261105/manual/nice-to-have1110/browser.json",
+      "source_sha256": "fb53d5c03d58707f80da14b62bff186d6d976f53e5def3697a5f64b706f7ce85",
+      "reported_package_sha256": null,
+      "report": "manual/nice-to-have1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "optimization1110",
+      "status": "PASS",
+      "checks": 5,
+      "axe_views": 0,
+      "source": "test-results/full-validation-20261105/manual/optimization1110/browser.json",
+      "source_sha256": "29af114a41ded17e82f07b260169a623f59e7af334cec6ca0d69c2110d77f535",
+      "reported_package_sha256": null,
+      "report": "manual/optimization1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "profile-attendance1110",
+      "status": "PASS",
+      "checks": 7,
+      "axe_views": 0,
+      "source": "test-results/full-validation-20261105/manual/profile-attendance1110/browser.json",
+      "source_sha256": "0d7f01e99d618687a12ac98f17d347af4f41ffdac73fc5e97696774157d5a573",
+      "reported_package_sha256": null,
+      "report": "manual/profile-attendance1110/index.html",
+      "videos": 8
+    },
+    {
+      "suite": "readers-auto1110",
+      "status": "PASS",
+      "checks": 23,
+      "axe_views": 14,
+      "source": "test-results/full-validation-20261105/manual/readers-auto1110/summary.json",
+      "source_sha256": "5ce22d27decfdaca832c7bafd02133e2be27fd01126bb22062a523a7988d11fc",
+      "reported_package_sha256": "d83302bfc36d3d7e8bbbdd543ffb183adc10ce49e0dc9d6b8056049c4b715aa6",
+      "report": "manual/readers-auto1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "recovery-role-pdf1110",
+      "status": "PASS",
+      "checks": 16,
+      "axe_views": 4,
+      "source": "test-results/full-validation-20261105/manual/recovery-role-pdf1110/summary.json",
+      "source_sha256": "d0d037f93cda3851c74fdb953c45075a0a7cc7693c26edc1a760dd7a6c25bcc8",
+      "reported_package_sha256": null,
+      "report": "manual/recovery-role-pdf1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "statistics-load1111",
+      "status": "PASS",
+      "checks": 3,
+      "axe_views": 4,
+      "source": "test-results/full-validation-20261105/manual/statistics-load1111/browser.json",
+      "source_sha256": "1c1cd6c7e182f6b389e13bc33aaa2a655d455aade51f0e3f1811798e0d46376e",
+      "reported_package_sha256": null,
+      "report": "manual/statistics-load1111/index.html",
+      "videos": 2
+    },
+    {
+      "suite": "summary-refresh1110",
+      "status": "PASS",
+      "checks": 11,
+      "axe_views": 11,
+      "source": "test-results/full-validation-20261105/manual/summary-refresh1110/summary.json",
+      "source_sha256": "05c0fd83132add4ad3d169ac71c44499b168e6ff891f65112cff5f44da0df17f",
+      "reported_package_sha256": "d83302bfc36d3d7e8bbbdd543ffb183adc10ce49e0dc9d6b8056049c4b715aa6",
+      "report": "manual/summary-refresh1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "summary-review1110",
+      "status": "PASS",
+      "checks": 16,
+      "axe_views": 11,
+      "source": "test-results/full-validation-20261105/manual/summary-review1110/summary.json",
+      "source_sha256": "22b6117c9c888d3c8e785483a2547e0606fd13f64761c58118ca4b9d8eb2e79c",
+      "reported_package_sha256": null,
+      "report": "manual/summary-review1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "usability1110",
+      "status": "PASS",
+      "checks": 13,
+      "axe_views": 0,
+      "source": "test-results/full-validation-20261105/manual/usability1110/summary.json",
+      "source_sha256": "d23a4c713b7aaeb7c09a24c040fa58b78a8876b12aed76442846866260f37913",
+      "reported_package_sha256": null,
+      "report": "manual/usability1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "video-auto1110",
+      "status": "PASS",
+      "checks": 6,
+      "axe_views": 7,
+      "source": "test-results/full-validation-20261105/manual/video-auto1110/summary.json",
+      "source_sha256": "98b3598d703e5874f884204b4f4ed5c37ba3895a3e52b76c59a2939bee1448f2",
+      "reported_package_sha256": "d83302bfc36d3d7e8bbbdd543ffb183adc10ce49e0dc9d6b8056049c4b715aa6",
+      "report": "manual/video-auto1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "visual1110",
+      "status": "PASS",
+      "checks": 13,
+      "axe_views": 17,
+      "source": "test-results/full-validation-20261105/manual/visual1110/summary.json",
+      "source_sha256": "cc46fc3d150f0002a7943e3a982f78e3dfc7f3e76455bb7a0b5f43d6399f15eb",
+      "reported_package_sha256": "d83302bfc36d3d7e8bbbdd543ffb183adc10ce49e0dc9d6b8056049c4b715aa6",
+      "report": "manual/visual1110/index.html",
+      "videos": 0
+    },
+    {
+      "suite": "workflow1110",
+      "status": "PASS",
+      "checks": 13,
+      "axe_views": 6,
+      "source": "test-results/full-validation-20261105/workflow/browser.json",
+      "source_sha256": "7c6c2e638ef53792913d0ca9f057e157bced039cfbf57f5459535f7ec03f2ae1",
+      "reported_package_sha256": null,
+      "report": "workflow/index.html",
+      "videos": 0
+    }
+  ],
+  "trivy": {
+    "date": "2026-11-05T19:04:15.107486+00:00",
+    "status": "PASS",
+    "images": [
+      {
+        "role": "app",
+        "reference": "ascla-ci-app:full-validation-runtime-20261105-174f74519b62",
+        "id": "sha256:2db9b6eaca1b90f78e3800d7895c5ccf2c27dcb9c742b3255c360c6aea3c56c8",
+        "built": true,
+        "status": "PASS",
+        "config_id": "sha256:ff9c6bedf1f577c00a9010c890af7ea5d734393e6a3e05c052326e4921529071",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 0,
+        "report_sha256": "6adb3941b280cdd7bb2a425fbb165ae70641ed593d371f35467b15084ae56e68"
+      },
+      {
+        "role": "cli",
+        "reference": "ascla-ci-cli:full-validation-runtime-20261105-174f74519b62",
+        "id": "sha256:813d5a1ff358bd64c394cfdf9e0b70b8ff8b2eb17eadef4db157df1c9bb6f034",
+        "built": true,
+        "status": "PASS",
+        "config_id": "sha256:b7a30c5ca39b82b26eb27e121874c6fe1f871d3618d8d73caa30ea86f7f093b8",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 0,
+        "report_sha256": "e0d62278fdf78c04f538d1c77cc7172e7be138eaeed17cbdb09e7426d477afd3"
+      },
+      {
+        "role": "db",
+        "reference": "ascla-ci-db:full-validation-runtime-20261105-174f74519b62",
+        "id": "sha256:caa722ef6d463428ec70f54c70cad3e66901a8323d34f87ac9b7f89b8e5457e5",
+        "built": true,
+        "status": "PASS",
+        "config_id": "sha256:f3540449f9cc759e0e488aa31431d4b22e193d19ab432784a69c76e4592b9220",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 0,
+        "report_sha256": "45738a9c84df50fbedf2eb0b748f0966e6ec633fa6fb228a51a2272f947e4710"
+      },
+      {
+        "role": "mailpit",
+        "reference": "ascla-ci-mailpit:full-validation-runtime-20261105-174f74519b62",
+        "id": "sha256:dfcd8867234df03905d4c420c0085738f2eae27af444459e82df9d7f1b80def8",
+        "built": true,
+        "status": "PASS",
+        "config_id": "sha256:ec055d79c340ece27e68f87e5fbae717a5672f222e91805e2ead80105f6942d1",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 0,
+        "report_sha256": "898ba5e01f643cf3c95fca197fc319d5421e72eacdbe4e0660920bcf92069a5b"
+      }
+    ],
+    "commit": "174f74519b62d51f5826e936922f4d4575288db8",
+    "source_sha256": "bcbb07e99ea3a890bac0f0f5cf21e0f8d9aae75b27ba5224ff344ffa404e4ff4",
+    "scanner": "aquasec/trivy:0.76.1@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c",
+    "run": "full-validation-runtime-20261105-174f74519b62"
+  },
+  "zap": {
+    "date": "2026-11-05T16:28:54.082062+00:00",
+    "status": "PASS",
+    "scope_note": "ASCLA-owned HTML routes and 18 documented GET REST operations in disposable local QA. Excludes native WordPress admin, arbitrary CMS/theme/plugin routes, destructive writes and live external integrations. No universal absence-of-vulnerabilities claim.",
+    "phases": [
+      {
+        "phase": "frontend",
+        "status": "PASS",
+        "risk_counts": {
+          "0": 9,
+          "1": 0,
+          "2": 0,
+          "3": 0
+        }
+      },
+      {
+        "phase": "backend",
+        "status": "PASS",
+        "risk_counts": {
+          "0": 1,
+          "1": 0,
+          "2": 0,
+          "3": 0
+        }
+      },
+      {
+        "phase": "CSP",
+        "status": "PASS"
+      },
+      {
+        "phase": "Browser",
+        "status": "PASS"
+      },
+      {
+        "phase": "Source consistency",
+        "status": "PASS"
+      }
+    ]
+  },
+  "jenkins": {
+    "build": 3,
+    "result": "SUCCESS",
+    "four_images_analyzed": true,
+    "deployment_skipped": true,
+    "html_json_archived": true,
+    "latest_only_retention_verified": true,
+    "production_match": {
+      "commit": "df24bf82cf87677a85ee7e0dbde61aec02868b74",
+      "package_sha256": "0bcea05b2c823ad811c542de90cf24e73339943f4b01692b8e7576dabd33d3d9",
+      "exact_files": 219,
+      "git_line_ending_normalization_only": [],
+      "all_production_sources_equivalent": true
+    }
+  },
+  "load": {
+    "phase": "optimized",
+    "scope": "Loopback HTTP, native plugin volume, 32 independent sessions, same fixture; 7 routes per worker, 14 measured requests per worker after equal warm-up; 60-second soak at twelve sessions and optional four independent admin sessions alternating three contexts. Concurrency is closed-loop, not a production capacity guarantee.",
+    "profiles": [
+      {
+        "name": "load-1",
+        "concurrency": 1,
+        "requests": 14,
+        "seconds": 0.757,
+        "requests_per_second": 18.499,
+        "errors": 0,
+        "p50_ms": 39.624,
+        "p95_ms": 125.243,
+        "max_ms": 125.853,
+        "routes": {
+          "profiles": {
+            "p50_ms": 125.384,
+            "p95_ms": 125.806,
+            "max_ms": 125.853
+          },
+          "content/resource": {
+            "p50_ms": 26.316,
+            "p95_ms": 26.727,
+            "max_ms": 26.773
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 60.029,
+            "p95_ms": 61.338,
+            "max_ms": 61.483
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 27.599,
+            "p95_ms": 35.077,
+            "max_ms": 35.908
+          },
+          "matching": {
+            "p50_ms": 38.745,
+            "p95_ms": 39.382,
+            "max_ms": 39.453
+          },
+          "bootstrap": {
+            "p50_ms": 32.562,
+            "p95_ms": 39.073,
+            "max_ms": 39.796
+          },
+          "@page": {
+            "p50_ms": 49.992,
+            "p95_ms": 51.185,
+            "max_ms": 51.318
+          }
+        }
+      },
+      {
+        "name": "load-4",
+        "concurrency": 4,
+        "requests": 56,
+        "seconds": 0.986,
+        "requests_per_second": 56.783,
+        "errors": 0,
+        "p50_ms": 46.184,
+        "p95_ms": 165.955,
+        "max_ms": 310.711,
+        "routes": {
+          "profiles": {
+            "p50_ms": 155.043,
+            "p95_ms": 263.638,
+            "max_ms": 310.711
+          },
+          "content/resource": {
+            "p50_ms": 28.748,
+            "p95_ms": 45.845,
+            "max_ms": 50.333
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 84.069,
+            "p95_ms": 114.018,
+            "max_ms": 118.927
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 18.856,
+            "p95_ms": 34.607,
+            "max_ms": 40.9
+          },
+          "matching": {
+            "p50_ms": 42.962,
+            "p95_ms": 54.105,
+            "max_ms": 56.907
+          },
+          "bootstrap": {
+            "p50_ms": 30.762,
+            "p95_ms": 42.112,
+            "max_ms": 47.081
+          },
+          "@page": {
+            "p50_ms": 54.863,
+            "p95_ms": 64.55,
+            "max_ms": 66.39
+          }
+        }
+      },
+      {
+        "name": "load-12",
+        "concurrency": 12,
+        "requests": 168,
+        "seconds": 1.859,
+        "requests_per_second": 90.383,
+        "errors": 0,
+        "p50_ms": 95.96,
+        "p95_ms": 304.643,
+        "max_ms": 442.986,
+        "routes": {
+          "profiles": {
+            "p50_ms": 292.192,
+            "p95_ms": 434.233,
+            "max_ms": 442.986
+          },
+          "content/resource": {
+            "p50_ms": 140.089,
+            "p95_ms": 278.463,
+            "max_ms": 285.975
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 162.411,
+            "p95_ms": 198.756,
+            "max_ms": 226.233
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 50.066,
+            "p95_ms": 128.401,
+            "max_ms": 133.544
+          },
+          "matching": {
+            "p50_ms": 77.317,
+            "p95_ms": 93.275,
+            "max_ms": 102.754
+          },
+          "bootstrap": {
+            "p50_ms": 59.573,
+            "p95_ms": 74.941,
+            "max_ms": 78.397
+          },
+          "@page": {
+            "p50_ms": 101.624,
+            "p95_ms": 122.654,
+            "max_ms": 135.762
+          }
+        }
+      },
+      {
+        "name": "load-24",
+        "concurrency": 24,
+        "requests": 336,
+        "seconds": 2.569,
+        "requests_per_second": 130.792,
+        "errors": 0,
+        "p50_ms": 131.16,
+        "p95_ms": 397.492,
+        "max_ms": 566.381,
+        "routes": {
+          "profiles": {
+            "p50_ms": 377.073,
+            "p95_ms": 558.626,
+            "max_ms": 566.381
+          },
+          "content/resource": {
+            "p50_ms": 218.758,
+            "p95_ms": 398.02,
+            "max_ms": 403.106
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 227.69,
+            "p95_ms": 318.97,
+            "max_ms": 324.273
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 88.489,
+            "p95_ms": 188.054,
+            "max_ms": 222.384
+          },
+          "matching": {
+            "p50_ms": 110.29,
+            "p95_ms": 133.868,
+            "max_ms": 141.416
+          },
+          "bootstrap": {
+            "p50_ms": 93.88,
+            "p95_ms": 118.625,
+            "max_ms": 133.284
+          },
+          "@page": {
+            "p50_ms": 128.967,
+            "p95_ms": 166.781,
+            "max_ms": 282.341
+          }
+        }
+      },
+      {
+        "name": "load-32",
+        "concurrency": 32,
+        "requests": 448,
+        "seconds": 3.197,
+        "requests_per_second": 140.127,
+        "errors": 0,
+        "p50_ms": 178.975,
+        "p95_ms": 457.623,
+        "max_ms": 684.588,
+        "routes": {
+          "profiles": {
+            "p50_ms": 372.239,
+            "p95_ms": 555.32,
+            "max_ms": 684.588
+          },
+          "content/resource": {
+            "p50_ms": 243.569,
+            "p95_ms": 376.41,
+            "max_ms": 388.174
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 296.005,
+            "p95_ms": 400.406,
+            "max_ms": 402.992
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 154.046,
+            "p95_ms": 262.332,
+            "max_ms": 271.596
+          },
+          "matching": {
+            "p50_ms": 147.047,
+            "p95_ms": 193.572,
+            "max_ms": 199.849
+          },
+          "bootstrap": {
+            "p50_ms": 134.272,
+            "p95_ms": 168.009,
+            "max_ms": 181.346
+          },
+          "@page": {
+            "p50_ms": 164.278,
+            "p95_ms": 205.171,
+            "max_ms": 460.296
+          }
+        }
+      },
+      {
+        "name": "duration",
+        "concurrency": 12,
+        "requests": 6018,
+        "seconds": 60.079,
+        "think_seconds": 0.05,
+        "errors": 0,
+        "requests_per_second": 100.167,
+        "p50_ms": 51.677,
+        "p95_ms": 186.928,
+        "max_ms": 320.892
+      },
+      {
+        "name": "recovery",
+        "concurrency": 1,
+        "requests": 14,
+        "seconds": 0.859,
+        "requests_per_second": 16.305,
+        "errors": 0,
+        "p50_ms": 54.25,
+        "p95_ms": 141.271,
+        "max_ms": 142.615,
+        "routes": {
+          "profiles": {
+            "p50_ms": 141.582,
+            "p95_ms": 142.512,
+            "max_ms": 142.615
+          },
+          "content/resource": {
+            "p50_ms": 30.706,
+            "p95_ms": 31.608,
+            "max_ms": 31.708
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 72.775,
+            "p95_ms": 81.619,
+            "max_ms": 82.602
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 29.053,
+            "p95_ms": 34.647,
+            "max_ms": 35.268
+          },
+          "matching": {
+            "p50_ms": 60.708,
+            "p95_ms": 72.208,
+            "max_ms": 73.486
+          },
+          "bootstrap": {
+            "p50_ms": 31.435,
+            "p95_ms": 31.711,
+            "max_ms": 31.742
+          },
+          "@page": {
+            "p50_ms": 61.742,
+            "p95_ms": 62.797,
+            "max_ms": 62.914
+          }
+        }
+      },
+      {
+        "name": "admin-filter-churn",
+        "concurrency": 4,
+        "requests": 48,
+        "seconds": 0.302,
+        "errors": 0,
+        "requests_per_second": 159.065,
+        "p50_ms": 24.559,
+        "p95_ms": 26.991,
+        "max_ms": 28.33
+      }
+    ],
+    "write_and_security_checks": [
+      {
+        "name": "Eight concurrent profile writes, correct owner and restored data",
+        "status": "PASS",
+        "p50_ms": 467.898,
+        "p95_ms": 695.632,
+        "max_ms": 808.11
+      },
+      {
+        "name": "Sixteen simultaneous RSVPs: exactly two accepted, fourteen capacity conflicts, fourteen waitlisted",
+        "status": "PASS",
+        "accepted": 2,
+        "expected_conflicts": 14,
+        "waitlisted": 14
+      },
+      {
+        "name": "Anonymous access, staff-only statistics and missing nonce rejected; private responses stay no-store",
+        "status": "PASS"
+      }
+    ],
+    "total_measured_reads": 7102,
+    "warmup_requests": 224,
+    "status": "PASS"
+  },
+  "runtime_source_match": {
+    "shared": {
+      "production_files": 219,
+      "exact_match": true,
+      "package_sha256": "0bcea05b2c823ad811c542de90cf24e73339943f4b01692b8e7576dabd33d3d9"
+    },
+    "load": {
+      "production_files": 219,
+      "exact_match": true,
+      "package_sha256": "0bcea05b2c823ad811c542de90cf24e73339943f4b01692b8e7576dabd33d3d9"
+    }
+  },
+  "limits": [
+    "Una prueba PHP histórica omitida por no conservar la instantánea original de traducciones.",
+    "Supadata, Google Calendar y la IA se simulan donde corresponde. No se consumió una cuenta del usuario.",
+    "El escaneo ZAP cubre rutas ASCLA y 18 operaciones GET documentadas; no certifica otros plugins, temas ni todo WordPress.",
+    "La carga local acotada no garantiza la capacidad del hosting.",
+    "La aceptación humana UAT y las credenciales externas del hosting siguen pendientes."
+  ],
+  "corrections": [
+    "Actualizadas dependencias glob y minimatch del buzón tras dos hallazgos Medium.",
+    "Las capas de actualización APK no se reutilizan aunque se repita BUILD_TAG en Jenkins; libexpat se actualiza antes de Trivy.",
+    "Resueltas las 17 observaciones iniciales de Sonar y las dos posteriores sin exclusiones ni cambios del Quality Gate.",
+    "Ampliada la cobertura real del lector de importaciones, conservando revisión obligatoria y límites.",
+    "Ajustados selectores y expectativas de pruebas antiguas al diseño vigente, sin debilitar permisos."
+  ],
+  "delivery_verification": {
+    "report": {
+      "status": "PASS",
+      "results": [
+        {
+          "viewport": 1440,
+          "status": "PASS"
+        },
+        {
+          "viewport": 390,
+          "status": "PASS"
+        }
+      ],
+      "local_links": 342,
+      "pages": 23,
+      "js_errors": []
+    },
+    "credentials": {
+      "status": "PASS",
+      "git_visible_files_scanned": 1119,
+      "private_credential_values_checked": 104,
+      "leaks": 0
+    },
+    "published_reports": "QA delivery OK: 339 files, 81 requests, 149 checks, 6 shared flows and 216 HTML links verified",
+    "documentation": "9 Markdown files, 302 requirements and 1790 local links verified"
+  }
+}

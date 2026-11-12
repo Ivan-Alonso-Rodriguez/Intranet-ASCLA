@@ -1,0 +1,31 @@
+meta {
+  name: disconnect
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/relations
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+  Content-Type: application/json
+}
+body:json {
+  {}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+script:pre-request {
+  req.setBody({target:Number(bru.getEnvVar("bId")),kind:"connect",active:false});
+}
+tests {
+  test("A disuelve la conexi\u00f3n", function () { expect(res.getStatus()).to.equal(200); });
+  test("La conexión desaparece", function () { expect(res.getBody().state).to.equal("none"); });
+}

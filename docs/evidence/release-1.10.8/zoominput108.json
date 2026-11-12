@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-15",
+  "recorded_at_utc": "2026-10-15T07:41:59.235922+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "requirements": [
+    "RNF-013",
+    "RNF-017"
+  ],
+  "scope": "Local WordPress/MariaDB regression tests including REST dispatch. No new coverage, complete quality-ci, browser rerun or remote deployment.",
+  "php": {
+    "tests": 156,
+    "assertions": 729,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "junit": "docs/evidence/release-1.10.8/zoominput108-junit.xml",
+    "sha256": "a383c5264c5a83a94102d055b1fcb4f4e16408f548d947fcde05f1e3337ac1b2"
+  },
+  "new_cases": 33,
+  "new_cases_included_in_php_total": true,
+  "portable_checks": 49,
+  "behaviors_verified": [
+    "Ambiguous headers and differing row widths return HTTP 400 before changing attendance, completion status or import history",
+    "Impossible ISO dates/times and offsets stay in manual review with no invented seconds or attendance percentage",
+    "Invalid durations, including numeric overflow, cannot become valid zero attendance",
+    "Invalid evidence does not hide a later valid row for the same email",
+    "UTF-8 BOM, uppercase accented headers, empty preamble lines, quoted names, decimal minutes, comma/semicolon/tab delimiters and valid time offsets remain supported",
+    "English validation reports the offending CSV row",
+    "Manual corrections, stale preview tokens, reconnection union and transactional import rollback remain covered by regression tests"
+  ],
+  "cleanup": {
+    "remaining_fixture_users": 0,
+    "remaining_fixture_events": 0,
+    "verified_with": "Local read-only CLI counts for the owned fixture prefix and event title"
+  },
+  "package": {
+    "bytes": 1334266,
+    "sha256": "e1e5c7307be3c775c5a9b2406d9a623721588bc69c8bd33609ed31986232ca70",
+    "files": 183,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true
+  },
+  "source_sha256": {
+    "wp-content/plugins/ascla-core/src/Domain/ZoomCsv.php": "61df23a113bc8f2733558863e36d95f75ce8bdd0839284db7daecdd1178e7d7b",
+    "wp-content/plugins/ascla-core/src/Domain/AttendanceSessions.php": "c5454ea2c9c0cd3b45eea754a09032a443ace1bc2aa8508e91cbe5a48dcab5b0",
+    "wp-content/plugins/ascla-core/src/Services/Attendance.php": "2cde0b12503c2620086f23e5211c500683ca3f86f1f26bd97f006a040de65d4b",
+    "wp-content/plugins/ascla-core/languages/en.json": "902c95034c9265c4f4cf5c7781d450466329962d68eb08af6ada0a89fcc346b3",
+    "tests/php/ZoomInput108Test.php": "0b0086909db99b85feb8f1685e5f515bf52c28eaf0225d88395d9c8127335a9c",
+    "tests/php/AttendanceCsvInput108Test.php": "e20a250efef4aa8d4c086bee62e3eaca4b5e16e743412c7667c29720678965f7"
+  },
+  "deployment": {
+    "automatic": false,
+    "reason": "Plugin installation is performed by the environment administrator at the user request",
+    "remote_validation_pending": true
+  }
+}

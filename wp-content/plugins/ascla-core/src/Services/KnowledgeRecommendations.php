@@ -1,8 +1,6 @@
 <?php
 namespace ASCLA\Core\Services;
 
-use ASCLA\Core\Repositories\Store;
-
 /**
  * RF-041: rank knowledge resources using three complementary layers:
  * explicit profile preferences, professional context and recent relevant
@@ -10,12 +8,9 @@ use ASCLA\Core\Repositories\Store;
  */
 final class KnowledgeRecommendations
 {
-    /** @var array<int,array<int,string>> */
-    private static array $activityCache=[];
-
     public static function invalidateActivity(int $userId): void
     {
-        unset(self::$activityCache[$userId]);
+        LearnedInterests::invalidate($userId);
     }
 
     public static function score(\WP_Post $post, int $userId=0): array
@@ -89,15 +84,19 @@ final class KnowledgeRecommendations
 
     private static function activityScore(\WP_Post $post,int $userId,array $tags): array
     {
-        $activity=self::activityLabels($userId);
-        if (!$activity) { return [0,'']; }
+        $topics=LearnedInterests::estimate($userId)['topics'];
+        if (!$topics) { return [0,'']; }
         $resourceLabels=array_values(array_unique(array_merge(
-            self::termNames($post->ID,['ascla_interest','ascla_category','ascla_tag']),
-            $tags
+            self::termNames($post->ID,['ascla_interest','ascla_category','ascla_tag']), $tags
         )));
         $score=0;
         foreach ($resourceLabels as $label) {
-            $score+=match(self::match((string)$label,$activity)) {'exact'=>8,'fuzzy'=>4,default=>0};
+            $best=0;
+            foreach ($topics as $topic) {
+                $weight=min(8,max(2,(int)$topic['score']*2));
+                $best=max($best,match(self::match((string)$label,[$topic['name']])) {'exact'=>$weight,'fuzzy'=>(int)ceil($weight/2),default=>0});
+            }
+            $score+=$best;
         }
         return [$score,$score>0?'activity_match':''];
     }
@@ -107,34 +106,6 @@ final class KnowledgeRecommendations
         $timestamp=strtotime($post->post_date_gmt.' UTC')?:strtotime($post->post_date)?:0;
         $days=$timestamp?max(0,(int)floor((time()-$timestamp)/DAY_IN_SECONDS)):9999;
         return match(true) {$days<=14=>10,$days<=30=>6,$days<=90=>3,default=>0};
-    }
-
-    /** @return string[] */
-    private static function activityLabels(int $userId): array
-    {
-        if (isset(self::$activityCache[$userId])) { return self::$activityCache[$userId]; }
-        $ids=[];
-        foreach (Store::rows('relations','user_id=%d AND kind IN (%s,%s)',[$userId,'like','follow'],'ORDER BY id DESC LIMIT 80') as $row) {
-            $ids[]=(int)$row['target_id'];
-        }
-        foreach (get_comments(['user_id'=>$userId,'status'=>'approve','number'=>60,'fields'=>'ids']) as $commentId) {
-            $comment=get_comment((int)$commentId); if ($comment) { $ids[]=(int)$comment->comment_post_ID; }
-        }
-        $authored=get_posts([
-            'author'=>$userId,
-            'post_type'=>['ascla_hub','ascla_topic','ascla_resource','ascla_gallery'],
-            'post_status'=>'publish','posts_per_page'=>30,'fields'=>'ids','orderby'=>'date','order'=>'DESC',
-        ]);
-        $ids=array_values(array_unique(array_merge($ids,array_map('intval',$authored))));
-
-        $labels=[];
-        foreach (array_slice($ids,0,100) as $postId) {
-            $item=get_post($postId);
-            if (!$item || $item->post_status!=='publish' || !str_starts_with($item->post_type,'ascla_') || !Content::canRead($item)) { continue; }
-            $labels=array_merge($labels,self::termNames($postId,['ascla_interest','ascla_category','ascla_tag']));
-        }
-        $labels=array_values(array_unique(array_filter(array_map('strval',$labels))));
-        return self::$activityCache[$userId]=array_slice($labels,0,80);
     }
 
     /** @return string[] */

@@ -1,0 +1,25 @@
+meta {
+  name: 04. El asociado no puede abrir el borrador
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/items/{{eventoPublicacionId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAna}}
+  X-WP-Nonce: {{nonceAna}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 404", function () { expect(res.getStatus()).to.equal(404); });
+}

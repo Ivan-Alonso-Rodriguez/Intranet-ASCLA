@@ -1,0 +1,24 @@
+meta {
+  name: receiver-history
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/conversations/{{conversationId}}/messages
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{bCookie}}
+  X-WP-Nonce: {{bNonce}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("B lee el mensaje guardado", function () { expect(res.getStatus()).to.equal(200); });
+  test("El mensaje está en el historial del destinatario", function () { expect(res.getBody().items.some(m=>Number(m.id)===Number(bru.getVar("messageId"))&&m.body==="QA: mensaje que debe conservarse.")).to.equal(true); });
+}

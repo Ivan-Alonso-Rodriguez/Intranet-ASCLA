@@ -35,9 +35,12 @@ final class ReleaseCompletionTest extends TestCase
     private function topicName(int $n=0):string{return get_term($this->terms[$n],'ascla_interest')->name;}
     public function testPhonePrivacyEditClearAndNoAiExposure():void
     {
-        $uid=$this->users[1];wp_set_current_user($uid);Profiles::save(['phone'=>'+51 999 123 456']);self::assertSame('+51999123456',Profiles::visible($uid)['phone']);self::assertArrayNotHasKey('phone',Profiles::matchingProfile($uid));self::assertStringNotContainsString('999',wp_json_encode(Profiles::networkingContext($uid)));
-        foreach([2,3] as $i){wp_set_current_user($this->users[$i]);self::assertArrayNotHasKey('phone',Profiles::visible($uid));$this->rejected(403,fn()=>Profiles::save(['phone'=>'+51 900 000 000'],$uid));}
-        wp_set_current_user($uid);Profiles::save(['phone_visibility'=>'members']);wp_set_current_user($this->users[2]);self::assertSame('+51999123456',Profiles::visible($uid)['phone']);
+        $uid=$this->users[1];wp_set_current_user($uid);Profiles::save(ascla_test_profile(['phone'=>'+51 999 123 456']));self::assertSame('+51999123456',Profiles::visible($uid)['phone']);self::assertArrayNotHasKey('phone',Profiles::matchingProfile($uid));self::assertStringNotContainsString('999',wp_json_encode(Profiles::networkingContext($uid)));
+        foreach([3] as $i){wp_set_current_user($this->users[$i]);self::assertArrayNotHasKey('phone',Profiles::visible($uid));$this->rejected(403,fn()=>Profiles::save(['phone'=>'+51 900 000 000'],$uid));}
+        wp_set_current_user($uid);Profiles::save(['phone_visibility'=>'members']);self::assertSame('private',Profiles::raw($uid)['phone_visibility']);
+        $legacy=Profiles::raw($uid);$legacy['phone_visibility']='members';$legacy['hidden']=['company','position'];update_user_meta($uid,'_ascla_profile',$legacy);
+        foreach([3] as $i){wp_set_current_user($this->users[$i]);$visible=Profiles::visible($uid);foreach(['phone','company','position'] as $field)self::assertArrayNotHasKey($field,$visible);self::assertFalse(ASCLA\Core\Services\Content::canCreate('ally'));}
+        wp_set_current_user($uid);Profiles::save(['directory'=>false]);foreach([3] as $i){wp_set_current_user($this->users[$i]);$this->rejected(404,fn()=>Profiles::visible($uid));}
         wp_set_current_user($this->users[0]);Profiles::save(['phone'=>'','phone_visibility'=>'private'],$uid);self::assertSame('',Profiles::visible($uid)['phone']);
         foreach([51999123456,'999123456','0051999123456','+0123456789','+1234567','+1234567890123456','<script>1234567</script>',[]] as $value)$this->rejected(400,fn()=>Profiles::save(['phone'=>$value],$uid));
     }
@@ -76,7 +79,7 @@ final class ReleaseCompletionTest extends TestCase
     public function testEmptyReplacementKeepsInterestsAndConcurrentEditsRequireReview():void
     {
         update_user_meta($this->users[1],'_ascla_profile',['interests'=>[$this->terms[0]],'bio'=>'Before']);$i=$this->start([[$this->email(),'','','']],'replace');$i=InterestImports::process((int)$i['id']);InterestImports::review((int)$i['id'],$i['rows'][0]['id'],['decision'=>'accept','topics'=>[]]);InterestImports::confirm((int)$i['id']);$i=InterestImports::apply((int)$i['id']);self::assertSame(1,$i['counts']['unchanged']);self::assertSame([$this->terms[0]],get_user_meta($this->users[1],'_ascla_profile',true)['interests']);
-        $i=$this->start([[$this->email(),'',$this->topicName(),'']]);$i=InterestImports::process((int)$i['id']);InterestImports::review((int)$i['id'],$i['rows'][0]['id'],['decision'=>'accept','topics'=>[$this->terms[0]]]);InterestImports::confirm((int)$i['id']);Profiles::save(['interests'=>[]],$this->users[1]);$i=InterestImports::apply((int)$i['id']);self::assertSame('review',$i['status']);self::assertSame(1,$i['counts']['conflict']);self::assertSame([],get_user_meta($this->users[1],'_ascla_profile',true)['interests']);
+        $i=$this->start([[$this->email(),'',$this->topicName(),'']]);$i=InterestImports::process((int)$i['id']);InterestImports::review((int)$i['id'],$i['rows'][0]['id'],['decision'=>'accept','topics'=>[$this->terms[0]]]);InterestImports::confirm((int)$i['id']);$term=wp_insert_term('Cambio concurrente '.bin2hex(random_bytes(4)),'ascla_interest');$this->terms[]=(int)$term['term_id'];Profiles::save(ascla_test_profile(['interests'=>[$this->terms[1]]]),$this->users[1]);$i=InterestImports::apply((int)$i['id']);self::assertSame('review',$i['status']);self::assertSame(1,$i['counts']['conflict']);self::assertSame([$this->terms[1]],get_user_meta($this->users[1],'_ascla_profile',true)['interests']);
     }
     public function testUniqueCodePrecedenceAndAmbiguousIdentitiesNeverUseNames():void
     {
@@ -85,6 +88,36 @@ final class ReleaseCompletionTest extends TestCase
     public function testCatalogAliasesAreDeterministicAndDoNotGenerateUnknownTerms():void
     {
         $term=InterestCatalog::create('Ciberseguridad');if(!$term['existing'])$this->terms[]=$term['id'];$p=InterestCatalog::propose('CyberSecurity; Seguridad informática');self::assertSame([$term['id']],$p['ids']);self::assertSame(2,$p['selected_count']);$before=count(InterestCatalog::terms());$p=InterestCatalog::propose('Tema inexistente QZX');self::assertSame([],$p['ids']);self::assertNotEmpty($p['unknown']);self::assertCount($before,InterestCatalog::terms());$this->rejected(400,fn()=>InterestCatalog::validate([999999999]));
+    }
+    public function testDeletingATopicUpdatesProfilesAndEventsAndReturnsApprovedImportsToReview():void
+    {
+        $topic=InterestCatalog::create('Catálogo compartido '.bin2hex(random_bytes(4)));
+        $id=$topic['id'];$keep=$this->terms[0];$this->terms[]=$id;
+        $event=\ASCLA\Core\Services\Content::save('event',[
+            'title'=>'Temas compartidos','body'=>'Evento de prueba','status'=>'publish','interest'=>[$id,$keep],
+            'meta'=>['start'=>gmdate('c',time()+DAY_IN_SECONDS),'end'=>gmdate('c',time()+DAY_IN_SECONDS+3600),'url'=>'https://example.invalid/meeting'],
+        ]);
+        $this->posts[]=$event['id'];
+        wp_set_current_user($this->users[1]);
+        Profiles::save(ascla_test_profile(['interests'=>[$keep,$id],'connect_topics'=>[$id]]));
+        self::assertSame([$keep,$id],Profiles::raw($this->users[1])['interests']);
+        $this->rejected(403,fn()=>InterestCatalog::delete($id));
+        wp_set_current_user($this->users[0]);
+        $import=$this->start([[$this->email(),'',$topic['name'],'']]);
+        $import=InterestImports::process($import['id']);
+        InterestImports::review($import['id'],$import['rows'][0]['id'],['decision'=>'accept','topics'=>[$id]]);
+        InterestImports::confirm($import['id']);
+        self::assertNotContains($id,array_column(InterestCatalog::delete($id),'id'));
+        self::assertSame([$keep],wp_get_post_terms($event['id'],'ascla_interest',['fields'=>'ids']));
+        self::assertSame([$keep],Profiles::raw($this->users[1])['interests']);
+        self::assertSame([],Profiles::raw($this->users[1])['connect_topics']);
+        self::assertSame(0,Store::count('user_interests','term_id=%d',[$id]));
+        $result=InterestImports::apply($import['id']);
+        self::assertSame('review',$result['status']);
+        self::assertSame(1,$result['counts']['conflict']);
+        wp_set_current_user($this->users[1]);
+        Profiles::save(['interests'=>[$keep]]);
+        self::assertSame([$keep],get_user_meta($this->users[1],'_ascla_profile',true)['interests']);
     }
     public function testFreeTextAiCannotInventIdsOrApplyWithoutHumanReview():void
     {
@@ -95,7 +128,7 @@ final class ReleaseCompletionTest extends TestCase
     public function testBatchProgressPaginationAndAccessChecks():void
     {
         $i=$this->start(array_fill(0,55,[$this->email(),'','','']));$id=(int)$i['id'];$i=InterestImports::process($id);self::assertSame('processing',$i['status']);self::assertSame(5,$i['counts']['pending']);self::assertCount(20,$i['rows']);$i=InterestImports::process($id);self::assertSame('review',$i['status']);self::assertCount(15,InterestImports::detail($id,3)['rows']);
-        foreach([1,2,3] as $n){wp_set_current_user($this->users[$n]);$this->rejected(403,fn()=>InterestImports::detail($id));$r=new WP_REST_Request('POST','/ascla/v1/admin/interest-imports/'.$id.'/confirm');self::assertSame(403,rest_do_request($r)->get_status());}
+        foreach([1,3] as $n){wp_set_current_user($this->users[$n]);$this->rejected(403,fn()=>InterestImports::detail($id));$r=new WP_REST_Request('POST','/ascla/v1/admin/interest-imports/'.$id.'/confirm');self::assertSame(403,rest_do_request($r)->get_status());}
     }
     public function testSessionUnionThresholdAndExplicitDateFormats():void
     {
@@ -114,13 +147,13 @@ final class ReleaseCompletionTest extends TestCase
         $sonar=file_get_contents($root.'/sonar-project.properties');
         $docs=file_get_contents($root.'/README.md');
         $history=file_get_contents($root.'/VERSION_HISTORY.md');
-        self::assertMatchesRegularExpression('/Version:\s*1\.10\.4/', $plugin);
-        self::assertStringContainsString("define('ASCLA_VERSION', '1.10.4');", $plugin);
-        self::assertMatchesRegularExpression('/Stable tag:\s*1\.10\.4/', $readme);
-        self::assertStringContainsString('sonar.projectVersion=1.10.4', $sonar);
-        self::assertStringContainsString('Versión actual: 1.10.4 · esquema 13', $docs);
-        self::assertStringContainsString('**Versión actual:** `1.10.4`', $history);
-        self::assertSame(13, \ASCLA\Core\Database\Installer::SCHEMA_VERSION);
+        self::assertMatchesRegularExpression('/Version:\s*1\.12\h*$/m', $plugin);
+        self::assertStringContainsString("define('ASCLA_VERSION', '1.12');", $plugin);
+        self::assertMatchesRegularExpression('/Stable tag:\s*1\.12\h*$/m', $readme);
+        self::assertMatchesRegularExpression('/^sonar\.projectVersion=1\.12\h*$/m', $sonar);
+        self::assertStringContainsString('Versión actual: 1.12 · esquema 15', $docs);
+        self::assertStringContainsString('**Versión actual:** `1.12`', $history);
+        self::assertSame(15, \ASCLA\Core\Database\Installer::SCHEMA_VERSION);
     }
     public function testSqlRankingAndRosterReturnPagesWithoutLosingTotals():void
     {

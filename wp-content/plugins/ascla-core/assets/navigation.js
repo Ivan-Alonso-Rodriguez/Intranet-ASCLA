@@ -64,5 +64,10 @@ globalThis.ASCLANavigation = ({ root, pages, prepare, load, error, beforeNavigat
   history.scrollRestoration = 'manual';
   history.replaceState({ ...history.state, ascla: true, scroll: scrollY }, '', location.href);
   const initial = matches(location.href); if (initial) activate(initial);
-  return { matches, navigate };
+  function replaceUrl(value) {
+    const url=new URL(value,location.href);
+    if (!matches(url.href)) return;
+    activeUrl=url.href;history.replaceState({...history.state,ascla:true},'',url.href);
+  }
+  return { matches, navigate, replaceUrl };
 };

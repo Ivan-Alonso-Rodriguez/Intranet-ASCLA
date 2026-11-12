@@ -1,0 +1,35 @@
+/* Layout for the standalone community form. Native wp-login.php keeps core CSS. */
+body.ascla-frontend-login {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.ascla-frontend-login h1,
+.ascla-frontend-login p { margin: 0; padding: 0; }
+.ascla-frontend-login #login h1 { text-align: center; }
+.ascla-frontend-login #login h1 a {
+  display: block;
+  overflow: hidden;
+  text-indent: -9999px;
+  text-decoration: none;
+}
+.ascla-frontend-login #login label { display: inline-block; }
+.ascla-frontend-login #login form .input {
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: 400;
+  line-height: 1.33333333;
+}
+.ascla-frontend-login .wp-pwd { position: relative; }
+.ascla-frontend-login .wp-pwd .wp-hide-pw {
+  display: block;
+  position: absolute;
+  right: 0;
+  cursor: pointer;
+  box-shadow: none;
+}
+.ascla-frontend-login .wp-hide-pw .dashicons { vertical-align: middle; }
+.ascla-frontend-login .wp-pwd .wp-hide-pw.hide-if-no-js { display: none; }
+.ascla-frontend-login #login .message,
+.ascla-frontend-login #login .notice { border-left: 4px solid #72aee6; }
+.ascla-frontend-login #login #login_error { border-left: 4px solid #d63638; }

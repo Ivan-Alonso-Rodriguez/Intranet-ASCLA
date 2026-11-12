@@ -86,7 +86,7 @@ final class Schema12To13MigrationTest extends TestCase
             update_option('ascla_schema',12,false);update_option('ascla_version',ASCLA_VERSION,false);
             Installer::upgrade();
 
-            self::assertSame(13,(int)get_option('ascla_schema'));
+            self::assertSame(Installer::SCHEMA_VERSION,(int)get_option('ascla_schema'));
             foreach($newTables as $name){
                 $table=Store::table($name);
                 self::assertSame($table,$wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s',$wpdb->esc_like($table))),"Missing migrated table $name");
@@ -113,7 +113,7 @@ final class Schema12To13MigrationTest extends TestCase
 
             // Re-running the migration must be safe and keep the same data.
             Installer::upgrade();
-            self::assertSame(13,(int)get_option('ascla_schema'));
+            self::assertSame(Installer::SCHEMA_VERSION,(int)get_option('ascla_schema'));
             self::assertSame($profileBefore,get_user_meta($createdUser,'_ascla_profile',true));
             self::assertSame($registrationBefore,Store::one('registrations',$registration));
         } finally {

@@ -1,0 +1,303 @@
+{
+  "date": "2026-10-25T21:37:55.469877+00:00",
+  "version": "1.11.0",
+  "scope": "Integración CI: ejecución real de Jenkins local autenticado y limitado a loopback. Snapshot de fuentes pendientes; ningún despliegue externo.",
+  "original_repository_commit": "d3304cfeef7668735690dc9f8cfc562fc3d5eadc",
+  "jenkins_version": "2.580.1",
+  "trivy_version": "0.76.1",
+  "jenkins_build": 3,
+  "pipeline_result": "FAILURE",
+  "policy_result": "BLOCKED",
+  "deployment_skipped": true,
+  "all_four_images_analyzed": true,
+  "policy_unit_tests": {
+    "tests": 15,
+    "failures": 0,
+    "errors": 0
+  },
+  "html_and_json_archived_even_on_failure": true,
+  "native_trivy_summary": {
+    "date": "2026-10-25T21:29:20.169320+00:00",
+    "status": "BLOCKED",
+    "images": [
+      {
+        "role": "app",
+        "reference": "ascla-ci-app:jenkins-ascla-local-3",
+        "id": "sha256:3efb7a5cb93fc3c567af8e213af36cee6087ad3b225cbf3e09f0968cd8e98711",
+        "built": true,
+        "status": "BLOCKED",
+        "config_id": "sha256:348bcd581db16190b1c012029f4db6b4cdcec71763b8c2f6ee5577a409a9e064",
+        "counts": {
+          "UNKNOWN": 253,
+          "LOW": 2120,
+          "MEDIUM": 5759,
+          "HIGH": 1241,
+          "CRITICAL": 66
+        },
+        "blocking": 7319,
+        "report_sha256": "e3a19fc94464eafbd3b442e3440d760c1b69580f925b484b6df29fce5b6a7561"
+      },
+      {
+        "role": "cli",
+        "reference": "ascla-ci-cli:jenkins-ascla-local-3",
+        "id": "sha256:9e5195cbe3841eda371545a4403d9f3d6c8b50869dba50407869c605ce86bf3f",
+        "built": true,
+        "status": "BLOCKED",
+        "config_id": "sha256:4bb08e4f17f2ba5a373b9b9abe5dcdd3cd0feeb271a9388c1e40fe8204def2dd",
+        "counts": {
+          "UNKNOWN": 4,
+          "LOW": 36,
+          "MEDIUM": 40,
+          "HIGH": 29,
+          "CRITICAL": 0
+        },
+        "blocking": 73,
+        "report_sha256": "991ff6ae385d20d526b4c2eca38a3bf625f13c587336d83d40e4f4a7ab1fd981"
+      },
+      {
+        "role": "db",
+        "reference": "mariadb:11.4@sha256:611a2fcc5fa7c6ceb8644c6f74b25ede004ff6c3a6b38c8f8c23d3bbf6c26430",
+        "id": "sha256:611a2fcc5fa7c6ceb8644c6f74b25ede004ff6c3a6b38c8f8c23d3bbf6c26430",
+        "built": false,
+        "status": "BLOCKED",
+        "config_id": "sha256:c18ae419b0b1beea9407224aa1173792e6f5992be3ff8dcfc3d4d9006a5e6205",
+        "counts": {
+          "UNKNOWN": 1,
+          "LOW": 38,
+          "MEDIUM": 164,
+          "HIGH": 27,
+          "CRITICAL": 1
+        },
+        "blocking": 193,
+        "report_sha256": "7b5848e7ddbe0db6e257e02012425a6a56c7cdaa89efdd2d4e75e2b7f409e4d9"
+      },
+      {
+        "role": "mailpit",
+        "reference": "axllent/mailpit:v1.27.10@sha256:b1f1be18af530d939a11ee8820b379e0c88eeec204d904bfad68862adced3a5a",
+        "id": "sha256:b1f1be18af530d939a11ee8820b379e0c88eeec204d904bfad68862adced3a5a",
+        "built": false,
+        "status": "BLOCKED",
+        "config_id": "sha256:28ccd879e7d68e36c5c45680c3c691849fd2b2684e3b802163a3349a65887265",
+        "counts": {
+          "UNKNOWN": 4,
+          "LOW": 53,
+          "MEDIUM": 82,
+          "HIGH": 72,
+          "CRITICAL": 3
+        },
+        "blocking": 161,
+        "report_sha256": "c5f75ab8641013cb439f146d72cde389470c6ca437fa2de13e71d402b8285cfc"
+      }
+    ],
+    "commit": "fcb0698f70a52f492092df025d5c95caf13c42e4",
+    "source_sha256": "474213bbb1efa55efa34d1a185ef3de17cbccb2bb2dff2e249873a9c8c914c65",
+    "scanner": "aquasec/trivy:0.76.1@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c",
+    "run": "jenkins-ascla-local-3"
+  },
+  "retention": {
+    "success_followed_by_failure": true,
+    "older_success_and_its_artifacts_removed": true,
+    "latest_failure_artifact_preserved": true,
+    "results": [
+      {
+        "_class": "org.jenkinsci.plugins.workflow.job.WorkflowRun",
+        "artifacts": [
+          {
+            "fileName": "fixture.html"
+          }
+        ],
+        "building": false,
+        "number": 1,
+        "result": "SUCCESS"
+      },
+      {
+        "_class": "org.jenkinsci.plugins.workflow.job.WorkflowRun",
+        "artifacts": [
+          {
+            "fileName": "fixture.html"
+          }
+        ],
+        "building": false,
+        "number": 2,
+        "result": "FAILURE"
+      }
+    ],
+    "job_after_retention": {
+      "_class": "org.jenkinsci.plugins.workflow.job.WorkflowJob",
+      "builds": [
+        {
+          "_class": "org.jenkinsci.plugins.workflow.job.WorkflowRun",
+          "number": 2
+        }
+      ],
+      "lastStableBuild": null,
+      "lastSuccessfulBuild": null
+    }
+  },
+  "source_verification": {
+    "checkout_source_sha256": "474213bbb1efa55efa34d1a185ef3de17cbccb2bb2dff2e249873a9c8c914c65",
+    "report_source_sha256": "474213bbb1efa55efa34d1a185ef3de17cbccb2bb2dff2e249873a9c8c914c65",
+    "matches_tested_git_sources": true,
+    "working_tree_differences": [
+      {
+        "path": "wp-content/plugins/ascla-core/languages/ascla-core-en_US.po",
+        "only_crlf_to_lf": true
+      },
+      {
+        "path": "wp-content/plugins/ascla-core/languages/ascla-core-es_ES.po",
+        "only_crlf_to_lf": true
+      }
+    ]
+  },
+  "ci_source_hashes": {
+    "Jenkinsfile": "42eed3760cbd49c22adfb9a1c24e9df601084e8bb42d8aa7006f7c1eed78b730",
+    ".dockerignore": "c1ec977f04d097ae3e4ef920f1c830580e235672f8c6e0521b01d1689b5755e6",
+    "ci/images.json": "d3aa9efe72292d6e753d4ef9f4b1eec5f89e702eced863f91e76e486f2b3b3bb",
+    "ci/Dockerfile.app": "e7de511ec3796937f5ecd405ffab207a95d4c32cc2d6dfa536cff6b733745973",
+    "ci/Dockerfile.cli": "06759617dadc4e563b05ed757ab94176b034edd976694574f6e2d289d9ddab10",
+    "ci/compose.runtime.yaml": "9932ab483ab18e518282a45f16339c4760caebbe6587af653b5af60b6ab74e47",
+    "ci/compose.security.yaml": "5a0121b25452dd21e483a95a87d6bb5cb645bfd76cce5021583e9ebcb4482c4d",
+    "scripts/ci-security.py": "ae86ae629b12207d13a6208a8d4141591b6a9aeda4c578969a0ab6953ef5e4d4",
+    "scripts/ci-publish-security.py": "ac559429df095bb28d5ec158fef057fd0f71d049a5b1d418bacda795c55dcfa0",
+    "scripts/security-tests.sh": "dc01852764340d1321510faf79455a694537816de4de4795dcc993e4d4e146c4",
+    "scripts/jenkins-local.py": "caffd45a525a3693dba520d65573ad3acb8f6e28ee18472a3a2017bf37a1817a",
+    "tests/test_ci_security.py": "0a29f241b61fa694c26c0e7be8a43ad474e32b40e5ab7278b8316b9b3a2f0b60",
+    "tests/jenkins-security.py": "9d9d7d00b945f4a6f5941f4820d160f494989a6c7ea331a1a9346d5dd8c3763f",
+    "ci/jenkins/Dockerfile": "1c7740c5b04c615d063de3c69c9e7a677174ea112f29c10b7e79ca7d0b961ca4",
+    "ci/jenkins/compose.yaml": "9f8418b48043c18cd876a1378601fdfa438babfe111f0dfa0e133f0851ebdc3c",
+    "ci/jenkins/init.groovy": "b028e80a766849ca3e50fbe80213371bc903fff24c02f0bb58b9f41b0fc90fd7",
+    "ci/jenkins/plugins.txt": "0d5b58ab1df81dbd5eb2768e105510b1eddcd1224adb38893768ff8c2c4434a6"
+  },
+  "exported_artifacts": [
+    {
+      "path": "trivy/app.html",
+      "bytes": 32821670,
+      "sha256": "4bae5c296184e2530b0996f7ad790010936886c0ef70fdef6022795efd32675d"
+    },
+    {
+      "path": "trivy/app.json",
+      "bytes": 42400663,
+      "sha256": "e3a19fc94464eafbd3b442e3440d760c1b69580f925b484b6df29fce5b6a7561"
+    },
+    {
+      "path": "trivy/app.log",
+      "bytes": 476,
+      "sha256": "5ea339d658c4fed0def00ac170ef3bbe8433cdc55a44e6620c2a16b6fb2ce6b4"
+    },
+    {
+      "path": "trivy/cli.html",
+      "bytes": 504913,
+      "sha256": "56e59ff5c133c70baf8878662bbcf32046f8698684d783ad43822eb310ea3e53"
+    },
+    {
+      "path": "trivy/cli.json",
+      "bytes": 671149,
+      "sha256": "991ff6ae385d20d526b4c2eca38a3bf625f13c587336d83d40e4f4a7ab1fd981"
+    },
+    {
+      "path": "trivy/cli.log",
+      "bytes": 5222,
+      "sha256": "94143a959986b07f1d9cda286dc600fd5ea51ae200356b17bcc58d208c4e9b9e"
+    },
+    {
+      "path": "trivy/db.html",
+      "bytes": 820082,
+      "sha256": "50c917cdfd5c3d6628ab2c5d91390dae5a73eb49f921ec3dba0d1e4a1c02afbd"
+    },
+    {
+      "path": "trivy/db.json",
+      "bytes": 1550510,
+      "sha256": "7b5848e7ddbe0db6e257e02012425a6a56c7cdaa89efdd2d4e75e2b7f409e4d9"
+    },
+    {
+      "path": "trivy/db.log",
+      "bytes": 546,
+      "sha256": "44a17d0f683f4d46582ce70069034abbbeaa96e94761249b8361701886ce241c"
+    },
+    {
+      "path": "trivy/index.html",
+      "bytes": 3435,
+      "sha256": "503e25cb685a852066af380530751520127aa51740e8cc110d4483ded91bc0ac"
+    },
+    {
+      "path": "trivy/mailpit.html",
+      "bytes": 1209802,
+      "sha256": "35ed3e8aba0bc627a4dc3c8a3d66b68be40ac20ff399939fd72b4591fccc8103"
+    },
+    {
+      "path": "trivy/mailpit.json",
+      "bytes": 1270676,
+      "sha256": "c5f75ab8641013cb439f146d72cde389470c6ca437fa2de13e71d402b8285cfc"
+    },
+    {
+      "path": "trivy/mailpit.log",
+      "bytes": 5288,
+      "sha256": "f17e491e61a0cb64683787a46b96bbeb71b5e6b36ea0ed5916b26af12c259247"
+    },
+    {
+      "path": "trivy/summary.json",
+      "bytes": 2763,
+      "sha256": "afb518366ecc5ebfd962e11ae49ff0bddc6b4d2c096b7c05a3f5dc2384cd6627"
+    }
+  ],
+  "zap": {
+    "status": "PASS",
+    "date": "2026-10-25T21:32:31.689748+00:00",
+    "phases": [
+      {
+        "phase": "frontend",
+        "status": "PASS",
+        "risk_counts": {
+          "0": 9,
+          "1": 0,
+          "2": 0,
+          "3": 0
+        }
+      },
+      {
+        "phase": "backend",
+        "status": "PASS",
+        "risk_counts": {
+          "0": 1,
+          "1": 0,
+          "2": 0,
+          "3": 0
+        }
+      },
+      {
+        "phase": "CSP",
+        "status": "PASS"
+      },
+      {
+        "phase": "Browser",
+        "status": "PASS"
+      },
+      {
+        "phase": "Source consistency",
+        "status": "PASS"
+      }
+    ],
+    "execution": "Separada del build development: HTTPS local desechable con ASCLA_CI_SECURITY=1 e imágenes construidas, sin escanear el hosting compartido.",
+    "source_manifest_sha256": "59f25a2d7e9bfef57e92adabac70be10b6b8ab702656a397bf6017fac3734764"
+  },
+  "sonarqube": {
+    "qa_uat_stages_preserved": true,
+    "abort_on_quality_gate_failure": true,
+    "new_analysis_executed": false,
+    "reason": "La demostración Jenkins se ejecutó en development, que conserva el alcance previo de calidad. QA/UAT requieren las configuraciones SonarQube-Server, SonarScanner y credenciales del curso."
+  },
+  "limits": [
+    "Los hallazgos de Trivy son por paquete, no CVEs únicas ni defectos atribuibles exclusivamente al plugin.",
+    "Las cuatro imágenes actuales incumplen la política: no se autorizó su despliegue y no se omitieron hallazgos.",
+    "No se acredita ejecución en el Jenkins externo del curso, nueva aprobación SonarQube ni despliegue del hosting.",
+    "La única diferencia entre el checkout probado y las fuentes actuales son finales CRLF/LF en los PO; las fuentes Git y el reporte coinciden."
+  ],
+  "report": "test-results/ci-jenkins-latest/index.html",
+  "guide": "ci/README.md",
+  "laboratory_cleanup": {
+    "jenkins_container_and_volume_removed": true,
+    "snapshot_and_workspaces_removed": true,
+    "temporary_credentials_and_sessions_removed": true,
+    "downloaded_latest_artifacts_preserved": true
+  }
+}

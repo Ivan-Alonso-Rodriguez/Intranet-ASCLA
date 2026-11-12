@@ -1,0 +1,31 @@
+meta {
+  name: 14. Bruno abre la notificación del cupo
+  type: http
+  seq: 14
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/notifications/{{avisoCupoId}}/open
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionBruno}}
+  X-WP-Nonce: {{nonceBruno}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Validación: 14. Bruno abre la notificación del cupo", function () { expect(res.getBody().available).to.equal(true);expect(Number((String(res.getBody().url).match(/[?&]item=(\d+)/)||[])[1])).to.equal(Number(bru.getCollectionVar("eventoCupoId"))); });
+}

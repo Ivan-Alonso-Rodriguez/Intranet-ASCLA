@@ -28,10 +28,11 @@ final class LoginTest extends TestCase
         self::assertSame($queryUrl, Login::redirect(admin_url(), $queryUrl, $member));
     }
 
-    public function testAdministratorAndAuthenticationErrorsKeepNativeRedirect(): void
+    public function testAdministratorStartsInAsclaAndExplicitTechnicalAccessRemainsAvailable(): void
     {
         $admin = get_users(['role' => 'administrator', 'number' => 1])[0];
-        self::assertSame(admin_url(), Login::redirect(admin_url(), '', $admin));
+        self::assertSame(App::adminUrl(), Login::redirect(admin_url(), '', $admin));
+        self::assertSame(admin_url(), Login::redirect(admin_url(), admin_url(), $admin));
         self::assertSame(admin_url(), Login::redirect(admin_url(), '', new WP_Error('incorrect_password')));
     }
 }

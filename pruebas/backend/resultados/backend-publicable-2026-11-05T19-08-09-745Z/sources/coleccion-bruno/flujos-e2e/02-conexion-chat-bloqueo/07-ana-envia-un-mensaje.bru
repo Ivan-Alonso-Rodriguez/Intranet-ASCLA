@@ -1,0 +1,40 @@
+meta {
+  name: 07. Ana envía un mensaje
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/conversations/{{conversacionBloqueoId}}/messages
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAna}}
+  X-WP-Nonce: {{nonceAna}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:pre-request {
+  bru.setCollectionVar("textoMensajeBloqueo", "Mensaje de la prueba de bloqueo " + new Date().toISOString());
+  req.setBody({body:bru.getCollectionVar("textoMensajeBloqueo")});
+}
+
+script:post-response {
+  if(res.getStatus()===200) bru.setCollectionVar("mensajeBloqueoId", Number(res.getBody().id));
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("El servidor conserva el texto enviado", function () { expect(res.getBody().body).to.equal(bru.getCollectionVar("textoMensajeBloqueo")); });
+}

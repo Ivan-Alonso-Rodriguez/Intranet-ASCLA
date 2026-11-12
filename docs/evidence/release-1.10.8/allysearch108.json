@@ -1,0 +1,83 @@
+{
+  "date": "2026-10-15",
+  "recorded_at_utc": "2026-10-15T07:29:58.623798+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "requirement": "RF-077",
+  "pdf_page": 53,
+  "scope": "Focused local regressions and real local browser data, followed by read-only checks of the existing deployed QA allies. No complete quality-ci, new coverage or load certification.",
+  "php": {
+    "tests": 127,
+    "assertions": 960,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "junit": "docs/evidence/release-1.10.8/allysearch108-junit.xml",
+    "sha256": "c678cffc812f6b2914a6a7e51f47f129ebf878596f19455a162cfad8844540b5"
+  },
+  "final_focused_php": {
+    "tests": 12,
+    "assertions": 58,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "junit": "docs/evidence/release-1.10.8/allysearch108-final-junit.xml",
+    "sha256": "711479b5fc2b8474ad83f8a1123d786f8841e56d6898567685f3f7ec6b5a519c",
+    "overlaps_previous_suite": true
+  },
+  "browser": {
+    "environment": "disposable-local",
+    "checks": [
+      "Buscar el tipo de convenio encuentra 21 fichas aunque no figure en nombre ni descripción",
+      "Paginación conserva la búsqueda y no cuenta ni muestra inactivos o borradores",
+      "Nombre, descripción, estado vacío y limpieza de búsqueda siguen funcionando",
+      "El registro administrativo combina tipo de convenio con Inactivo y Borrador",
+      "La API conserva permisos y rechaza búsquedas con estructura inválida",
+      "El buscador funciona en móvil sin desbordamiento y pasa axe A/AA en su alcance",
+      "Buscar por el tipo mostrado en inglés incluye tipos institucionales y etiquetas por defecto"
+    ],
+    "errors": []
+  },
+  "portable_checks": 49,
+  "migration": {
+    "batch_size": 200,
+    "legacy_records_in_batch_test": 203,
+    "preserves_original_data": true,
+    "rollback_and_retry_tested": true,
+    "schema_changed": false
+  },
+  "cleanup": {
+    "fixture_option_absent": true,
+    "remaining_fixture_posts": 0,
+    "remaining_fixture_users": 0,
+    "private_fixture_file_absent": true,
+    "scope": "Owned disposable local fixture only; verified via local CLI"
+  },
+  "package": {
+    "bytes": 1333301,
+    "sha256": "3715b8e9b20c7795694abbf2047dd472d0dac0198ebfd83f36f85c6d6eab1066",
+    "files": 183,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true
+  },
+  "source_sha256": {
+    "wp-content/plugins/ascla-core/src/Repositories/AllySearch.php": "de361d49e783e0f7e86151003facd8598dfd31d462681c01032862bb8398d2b5",
+    "wp-content/plugins/ascla-core/src/Repositories/ContentQuery.php": "ede3d8d1e53f40c2742401bf92c4627863874e04bbc3c9deff52aeaec14984c9",
+    "wp-content/plugins/ascla-core/src/Database/AllySearchMigration.php": "abad8157c1c10cbcfacbe3cd42ca1ff668146f70a45be22f54613f24eb5ee409",
+    "wp-content/plugins/ascla-core/src/Database/Installer.php": "ad8aae15f2e159fdc4a7feed6824b247eae0cbc0910ba5faef7f05e908398beb",
+    "wp-content/plugins/ascla-core/src/Services/Content.php": "479866bd5015eabd091f92fdf02375d6c6e288697bad2f4d932b5f6c9ecdae55",
+    "wp-content/plugins/ascla-core/src/Services/Allies.php": "1f97b3ef2534dd68f3d756e096a495c4bda64bede622ee15280796ca84b9e9cd",
+    "wp-content/plugins/ascla-core/src/Plugin.php": "515ecd1f3d892ed8ea3f8cb49e7e696301b618a611df8e3dd3d7e2dff305f02b",
+    "wp-content/plugins/ascla-core/assets/allies-ui.js": "9bfb52af98df385bb26abb3e934386dfcf847941ee00280a65b4ea2cf0d0d82c",
+    "wp-content/plugins/ascla-core/languages/en.json": "db91edb8029f052163c2245d4b356712945ff05acb828a4f71d109ff4aa29e2c",
+    "tests/php/AllySearchTest.php": "f167cb56d0caeb533baa080ec159ffadb7662c33f959510ea51d7e38a07b72d7",
+    "tests/ally-search108.cjs": "41ce1d945a5af2e7ee8a88f6b20cbe7f3ba8d20ec1d5b7b8844099afd6f12b15",
+    "tests/ally-search108-fixture.php": "6e28754110c07bc0d62f2c491ab13c69fec10f3c14a0936bc892fb89058f571d"
+  },
+  "screenshots": [
+    "test-results/allysearch108-catalog-light.png",
+    "test-results/allysearch108-catalog-dark-mobile.png"
+  ],
+  "published_qa": "docs/evidence/release-1.10.8/allysearch108-qa.json"
+}

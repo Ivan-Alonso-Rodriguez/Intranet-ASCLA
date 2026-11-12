@@ -7,37 +7,51 @@ final class AttendanceSessions
 {
     public static function options(array $input): array
     {
-        $zone=(string)($input['timezone']??wp_timezone_string());$format=(string)($input['date_format']??'ymd');
+        $zone=$input['timezone']??wp_timezone_string();$format=$input['date_format']??'ymd';
+        Access::require(is_string($zone),'Zona horaria no válida.',400);
+        Access::require(is_string($format),'Formato de fecha no válido.',400);
         try{new \DateTimeZone($zone);}catch(\Exception $e){Access::require(false,'Zona horaria no válida.',400);}
-        Access::require(in_array($format,['ymd','dmy','mdy'],true),'Formato de fecha no válido.',400);
+        Access::require(in_array($format,['auto','ymd','dmy','mdy'],true),'Formato de fecha no válido.',400);
         return ['timezone'=>$zone,'date_format'=>$format];
     }
     private static function timestamp(string $value,array $options): ?int
     {
         $timestamp=null;
-        if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:Z|[+-]\d{2}:?\d{2})$/D',$value)) {
-            try { $timestamp=(new \DateTimeImmutable($value))->getTimestamp(); } catch (\Exception) { $timestamp=null; }
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?(?:Z|[+-](\d{2}):?(\d{2}))$/D',$value,$parts)) {
+            if (!self::validIsoComponents($parts)) { return null; }
+            try {
+                $parsed=new \DateTimeImmutable($value);$errors=\DateTimeImmutable::getLastErrors();
+                if (!$errors || (!$errors['warning_count'] && !$errors['error_count'])) { $timestamp=$parsed->getTimestamp(); }
+            } catch (\Exception) { $timestamp=null; }
         } else {
             $timestamp=self::formattedTimestamp($value,$options);
         }
         return $timestamp;
     }
 
+    private static function validIsoComponents(array $parts): bool
+    {
+        // DateTime normalizes impossible ISO fields; they must remain reviewable evidence.
+        return checkdate((int)$parts[2],(int)$parts[3],(int)$parts[1])
+            && (int)$parts[4]<=23 && (int)$parts[5]<=59 && (int)($parts[6]??0)<=59
+            && (int)($parts[7]??0)<=23 && (int)($parts[8]??0)<=59;
+    }
+
     private static function formattedTimestamp(string $value,array $options): ?int
     {
-        $dates=match($options['date_format']){'dmy'=>['d/m/Y','d-m-Y'],'mdy'=>['m/d/Y','m-d-Y'],default=>['Y-m-d','Y/m/d']};
-        $timestamp=null;
+        $dates=match($options['date_format']){'auto'=>['Y-m-d','Y/m/d','d/m/Y','d-m-Y','m/d/Y','m-d-Y'],'dmy'=>['d/m/Y','d-m-Y'],'mdy'=>['m/d/Y','m-d-Y'],default=>['Y-m-d','Y/m/d']};
+        $timestamps=[];
         foreach ($dates as $date) {
             foreach (['H:i:s','H:i','h:i:s A','h:i A'] as $time) {
                 $parsed=\DateTimeImmutable::createFromFormat('!'.$date.' '.$time,$value,new \DateTimeZone($options['timezone']));
                 $errors=\DateTimeImmutable::getLastErrors();
                 if ($parsed && (!$errors || (!$errors['warning_count'] && !$errors['error_count']))) {
-                    $timestamp=$parsed->getTimestamp();
-                    break 2;
+                    $timestamps[]=$parsed->getTimestamp();
                 }
             }
         }
-        return $timestamp;
+        $timestamps=array_values(array_unique($timestamps));
+        return count($timestamps)===1?$timestamps[0]:null;
     }
     public static function calculate(array $rows,int $start,int $end,int $threshold,array $options): array
     {

@@ -6,7 +6,7 @@ use ASCLA\Core\Rest\ApiException;
 /** DeepSeek REST transport using the OpenAI-compatible Chat Completions API. */
 final class DeepSeekProvider implements AIProviderInterface
 {
-    public function mode(): string { return 'DeepSeek · API real'; }
+    public function mode(): string { return 'DeepSeek · API'; }
 
     public static function model(string $value): string
     {
@@ -18,11 +18,20 @@ final class DeepSeekProvider implements AIProviderInterface
         $key=Secrets::get('deepseek_key');
         Access::require($key!=='','Configura una DeepSeek API Key.',400);
         $model=self::model(Settings::get()['deepseek_model']??'deepseek-flash');
+        $images=AIProviderSupport::images($context);
+        $content=wp_json_encode(['task'=>$task,'context'=>$context],JSON_UNESCAPED_UNICODE);
+        if ($images) {
+            $content=[['type'=>'text','text'=>$content]];
+            foreach ($images as $image) {
+                $content[]=['type'=>'text','text'=>AIProviderSupport::imageLabel($image)];
+                $content[]=['type'=>'image_url','image_url'=>['url'=>'data:'.$image['mime'].';base64,'.$image['data']]];
+            }
+        }
         $body=[
             'model'=>$model,
             'messages'=>[
                 ['role'=>'system','content'=>AIProviderSupport::instructions($task,$context)],
-                ['role'=>'user','content'=>wp_json_encode(['task'=>$task,'context'=>$context],JSON_UNESCAPED_UNICODE)],
+                ['role'=>'user','content'=>$content],
             ],
             'response_format'=>['type'=>'json_object'],
             'thinking'=>['type'=>'disabled'],

@@ -43,11 +43,12 @@ final class ConversationRequests
     private static function applyRequestPermissions(array &$states,int $me,array $mine): void
     {
         foreach ($states as $id=>&$state) {
-            $valid=$id!==$me && Access::member($me) && Access::member($id);
+            $valid=$id!==$me && Access::networkingMember($me) && Access::networkingMember($id);
             $blockRows=$valid?Store::rows('relations',"kind='block' AND ((user_id=%d AND target_id=%d) OR (user_id=%d AND target_id=%d))",[$me,$id,$id,$me],''):[];
             $state['blocked']=(bool)$blockRows;
-            foreach ($blockRows as $block) { if ((int)$block['user_id']===$me) { $state['blocked_by_me']=true; } }
+            if (array_filter($blockRows,static fn($block)=>(int)$block['user_id']===$me)) { $state['blocked_by_me']=true; }
             $connected=$valid && Connections::areConnected($me,$id);
+            if ($connected) { $state['state']='connected';$state['request_id']=0; }
             $state['can_message']=$valid && !$state['blocked'] && ($connected || $state['state']==='allowed');
             if (self::requestAvailable($valid,$connected,$state)) {
                 $other=Profiles::raw($id);$state['can_request']=!empty($mine['networking']) && !empty($other['networking']) && !empty($other['directory']);
@@ -80,6 +81,7 @@ final class ConversationRequests
 
     public static function isAuthorized(int $a,int $b): bool
     {
+        if (!Access::networkingMember($a) || !Access::networkingMember($b)) { return false; }
         if (Connections::areConnected($a,$b)) { return true; }
         $state=self::between($a,$b);
         return $state['state']==='allowed';
@@ -92,7 +94,7 @@ final class ConversationRequests
 
     private static function writer(): int
     {
-        Access::require(Access::member() && current_user_can('ascla_write'));
+        Access::require(Access::networkingMember() && current_user_can('ascla_write'));
         return get_current_user_id();
     }
 
@@ -100,8 +102,8 @@ final class ConversationRequests
     {
         $me=self::writer();
         $body=trim(Access::text($body,5000));
-        Access::require($body!=='','Escribe el mensaje que quieres enviar con la solicitud.',400);
-        Access::require($target>0 && $target!==$me && Access::member($target),'Asociado no válido.',400);
+        Access::require(Access::hasText($body),'Escribe el mensaje que quieres enviar con la solicitud.',400);
+        Access::require($target>0 && $target!==$me && Access::networkingMember($target),'Asociado no válido.',400);
         return Connections::lockPair($me,$target,static function () use($me,$target,$body) {
             Access::require(!Connections::areConnected($me,$target),'Ya existe una conexión confirmada; puedes iniciar la conversación directamente.',409);
             $state=self::between($me,$target);
@@ -142,12 +144,11 @@ final class ConversationRequests
             $row=Store::one('relations',$id);
             Access::require($row && $row['kind']==='conversation_request' && (int)$row['target_id']===$me,'Esta solicitud ya fue resuelta.',409);
             if ($decision==='accept') {
-                Access::require($sender!==$me && Access::member($sender) && !Messaging::blocked($me,$sender),'No se puede autorizar esta conversación.',403);
+                Access::require($sender!==$me && Access::networkingMember($sender) && !Messaging::blocked($me,$sender),'No se puede autorizar esta conversación.',403);
                 Store::update('relations',['kind'=>'conversation_allowed'],['id'=>$id]);
             } else {
                 Notifications::removeConversationRequestNotices($me,$sender);
                 Store::delete('relations',['id'=>$id]);
-                Messaging::discardPendingRequest($sender,$me,(string)$row['created_at']);
             }
             if ($decision==='accept') { self::readRequests($me,$sender); }
             Audit::record($decision==='accept'?'conversation_request_accepted':'conversation_request_rejected',$id);
@@ -174,9 +175,7 @@ final class ConversationRequests
             $state=self::between($me,$target);
             Access::require($state['state']==='outgoing_pending','No hay una solicitud de conversación enviada que puedas cancelar.',409);
             $id=(int)$state['request_id'];
-            $row=Store::one('relations',$id);
             Store::delete('relations',['id'=>$id,'user_id'=>$me,'target_id'=>$target,'kind'=>'conversation_request']);
-            if ($row) { Messaging::discardPendingRequest($me,$target,(string)$row['created_at']); }
             Notifications::removeProfileNotices($target,['conversation_request'],$me);
             Notifications::removeConversationRequestNotices($target,$me);
             Audit::record('conversation_request_cancelled',$id,'profile-'.$target);
@@ -193,7 +192,7 @@ final class ConversationRequests
         $states=self::statesFor($me,$ids,$rows);
         $connections=Connections::statesFor($me,$ids);
         foreach ($states as $id=>$state) {
-            if (!Access::member($id) || $state['state']==='none') { continue; }
+            if (!Access::networkingMember($me) || !Access::networkingMember($id) || $state['state']==='none') { continue; }
             $key=['incoming_pending'=>'incoming','outgoing_pending'=>'outgoing','allowed'=>'allowed'][$state['state']]??null;
             if (!$key) { continue; }
             $state+=Messaging::requestSummary($me,$id);

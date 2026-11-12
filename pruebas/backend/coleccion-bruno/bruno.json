@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "ASCLA - Integración y E2E",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

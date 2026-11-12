@@ -1,0 +1,119 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-23T05:29:33.650Z",
+  "scope": "isolated local WordPress; desktop 1440x1000 and mobile 390x844; light and dark; no remote deployment or security scan",
+  "package_sha256": "ee6e15a28045b9525888c0aaa4b77d964a6119021d63d6da272f32aab770519c",
+  "checks": [
+    "Indicadores navegables con teclado y bandeja de notificaciones: desktop-light",
+    "Directorio: tipografía uniforme, dos espacios de 9 px y columnas adaptables: desktop-light",
+    "Eventos: fecha destacada, horario y lugar; Publicado y Chatham House neutros: desktop-light",
+    "Indicadores navegables con teclado y bandeja de notificaciones: mobile-light",
+    "Directorio: tipografía uniforme, dos espacios de 9 px y columnas adaptables: mobile-light",
+    "Eventos: fecha destacada, horario y lugar; Publicado y Chatham House neutros: mobile-light",
+    "Indicadores navegables con teclado y bandeja de notificaciones: desktop-dark",
+    "Directorio: tipografía uniforme, dos espacios de 9 px y columnas adaptables: desktop-dark",
+    "Eventos: fecha destacada, horario y lugar; Publicado y Chatham House neutros: desktop-dark",
+    "Indicadores navegables con teclado y bandeja de notificaciones: mobile-dark",
+    "Directorio: tipografía uniforme, dos espacios de 9 px y columnas adaptables: mobile-dark",
+    "Eventos: fecha destacada, horario y lugar; Publicado y Chatham House neutros: mobile-dark",
+    "El evento cancelado conserva su estado visible y una tarjeta legible"
+  ],
+  "scans": [
+    {
+      "name": "inicio-desktop-light",
+      "violations": [],
+      "incomplete": 2
+    },
+    {
+      "name": "directorio-desktop-light",
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "eventos-desktop-light",
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "detalle-desktop-light",
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "inicio-mobile-light",
+      "violations": [],
+      "incomplete": 2
+    },
+    {
+      "name": "directorio-mobile-light",
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "eventos-mobile-light",
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "detalle-mobile-light",
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "inicio-desktop-dark",
+      "violations": [],
+      "incomplete": 2
+    },
+    {
+      "name": "directorio-desktop-dark",
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "eventos-desktop-dark",
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "detalle-desktop-dark",
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "inicio-mobile-dark",
+      "violations": [],
+      "incomplete": 2
+    },
+    {
+      "name": "directorio-mobile-dark",
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "eventos-mobile-dark",
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "detalle-mobile-dark",
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "evento-cancelado",
+      "violations": [],
+      "incomplete": 0
+    }
+  ],
+  "errors": [],
+  "status": "passed_local_visual_validation",
+  "report": "test-results/visual1110/index.html",
+  "test_source": "tests/visual1110.cjs",
+  "test_source_sha256": "c3ffd24de4e9ea3bd36aa5b5b74ec29e57ec1a8b3520a456ae3ecf2a1de0f23b",
+  "package_manifest": "docs/evidence/release-1.11.0/package-visual.json",
+  "base_commit": "2daf0d9e5b0da8eee8b21076f2dc3915c77a4e3f",
+  "working_tree": "uncommitted; current production sources match the ZIP manifest",
+  "visual_review": "Representative desktop and mobile captures reviewed in light and dark themes; event layout, directory buttons, home cards and neutral states checked. Automatic axe checks do not replace human accessibility review.",
+  "prior_validation": "docs/evidence/release-1.11.0/usability1110.json; preserved with original ZIP SHA; PHP/Bruno/full browser/security/Sonar suites were not rerun for this additional visual change.",
+  "temporary_environment_cleanup": "completed; isolated containers, volumes and private access files removed"
+}

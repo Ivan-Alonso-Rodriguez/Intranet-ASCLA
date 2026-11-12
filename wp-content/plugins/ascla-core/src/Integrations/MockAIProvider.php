@@ -11,6 +11,12 @@ final class MockAIProvider implements AIProviderInterface
             'answer'=>$this->answer($context),
             'matching','intro'=>$this->matching($context),
             'microagenda'=>$this->microagenda($context),
+            'microevent_copy'=>[
+                'objective'=>(string)($context['event']['description']??$context['event']['title']??'Conversar sobre intereses compartidos.'),
+                'icebreaker'=>'¿Qué experiencia te gustaría aportar a “'.($context['event']['title']??'este encuentro').'”?',
+                'closing_question'=>'¿Qué acción aplicarías después de “'.($context['event']['title']??'este encuentro').'”?',
+                'mode'=>$this->mode(),
+            ],
             'social'=>$this->social($context),
             default=>$this->multimedia($context),
         };
@@ -64,6 +70,16 @@ final class MockAIProvider implements AIProviderInterface
         return $topic;
     }
 
+    private function galleryAnswer(array $sources,array $live,bool $english): array
+    {
+            if (!$sources) { return ['answer'=>$english?'I could not find a published gallery you can access. Try its title.':'No encontré una galería publicada a la que tengas acceso. Prueba con su título.','source_ids'=>[],'mode'=>$this->mode()]; }
+            if (($live['gallery_request']??'')==='choose') {
+                return ['answer'=>($english?'Which gallery would you like to explore?':'¿Qué galería quieres consultar?')."\n".implode("\n",array_map(static fn($s)=>'• '.$s['title'],$sources)),'source_ids'=>array_column($sources,'id'),'mode'=>$this->mode()];
+            }
+            $source=$sources[0];
+            return ['answer'=>$source['title']."\n\n".$source['body']."\n\n".($english?'This gallery contains '.count($source['files']??[]).' files. Demo mode can read the description, but cannot visually analyze photos. Enable an image-capable AI provider to analyze them.':'Esta galería contiene '.count($source['files']??[]).' archivos. En modo demo puedo consultar su descripción, pero no analizar visualmente las fotos. Activa un proveedor de IA con visión para analizarlas.'),'source_ids'=>[$source['id']],'mode'=>$this->mode()];
+    }
+
     private function answer(array $context): array
     {
         $sources=$context['sources']??[];
@@ -71,13 +87,23 @@ final class MockAIProvider implements AIProviderInterface
         $question=mb_strtolower(remove_accents((string)($context['question']??'')));
         $english=(($live['language']??'')==='English');
         $liveAnswer=$this->liveAnswer($live,$english);
-        if ($liveAnswer!==null) { return $liveAnswer; }
         $isGreeting=(bool)preg_match('/^(?:hola|hello|hi|buenas)/u',$question);
         $asksCapabilities=(bool)preg_match('/\b(?:que puedes hacer|como me ayudas|help|what can you do)\b/u',$question);
-        if ($isGreeting || $asksCapabilities) {
-            return ['answer'=>$english?'Hello! I can help you check upcoming ASCLA events, recent posts, community resources, notifications, and member recommendations. Ask me naturally.':'¡Hola! Puedo ayudarte a consultar eventos próximos, publicaciones recientes, recursos de la comunidad, notificaciones y recomendaciones de asociados. Pregúntame con naturalidad.','source_ids'=>[],'mode'=>$this->mode()];
-        }
-        return $this->sourceAnswer($sources,$english);
+        return match(true) {
+            !empty($live['intents']['gallery'])=>$this->galleryAnswer($sources,$live,$english),
+            !empty($live['intents']['organization'])=>['answer'=>\ASCLA\Core\Services\AssistantContext::describe($live),'source_ids'=>[],'mode'=>$this->mode()],
+            ($live['video_request']??'')==='choose'=>$this->videoOptions($sources,$english),
+            ($live['video_request']??'')==='answer' && (bool)$sources=>$this->sourceAnswer([$sources[0]],$english),
+            $liveAnswer!==null=>$liveAnswer,
+            $isGreeting || $asksCapabilities=>['answer'=>$english?'Hello! I can help you check upcoming ASCLA events, recent posts, community resources, galleries, notifications, and member recommendations. Ask me naturally.':'¡Hola! Puedo ayudarte a consultar eventos próximos, publicaciones recientes, recursos de la comunidad, galerías, notificaciones y recomendaciones de asociados. Pregúntame con naturalidad.','source_ids'=>[],'mode'=>$this->mode()],
+            default=>$this->sourceAnswer($sources,$english),
+        };
+    }
+
+    private function videoOptions(array $sources,bool $english): array
+    {
+        $options=array_slice($sources,0,3);
+        return ['answer'=>($english?'Which video do you mean?':'¿Sobre cuál de estos videos quieres preguntar?')."\n".implode("\n",array_map(static fn($s)=>'• '.$s['title'],$options)),'source_ids'=>array_column($options,'id'),'mode'=>$this->mode()];
     }
 
     private function liveAnswer(array $live,bool $english): ?array
@@ -98,14 +124,30 @@ final class MockAIProvider implements AIProviderInterface
         };
     }
 
+    private function eventLine(array $event,bool $english): string
+    {
+        $availability=($english?'Available seats: ':'Cupos disponibles: ').(int)($event['remaining']??0);
+        if (!empty($event['unlimited'])) { $availability=$english?'Unlimited capacity':'Sin límite de cupos'; }
+        $status=match(true) {
+            !empty($event['cancelled'])=>$english?'Cancelled':'Cancelado',
+            !empty($event['is_past'])=>$english?'Finished':'Finalizado',
+            !empty($event['registration_closed'])=>$english?'Registration closed':'Inscripciones cerradas',
+            default=>'',
+        };
+            return '• '.($event['title']??'Evento')."\n".($event['start']??'').' · '.($event['modality']??'')."\n".$availability.($status!==''?' · '.$status:'')
+                ."\n".($event['description']??'').(!empty($event['agenda'])?"\n".$event['agenda']:'');
+    }
+
     private function eventsAnswer(array $events,bool $english): array
     {
         if (!$events) {
             return ['answer'=>$english?'I do not see any upcoming ASCLA events available to you right now.':'No veo eventos próximos de ASCLA disponibles para ti en este momento.','source_ids'=>[],'mode'=>$this->mode()];
         }
         $lines=[];
-        foreach (array_slice($events,0,3) as $event) { $lines[]='• '.($event['title']??'Evento').' — '.($event['start']??'').' · '.($event['modality']??''); }
-        return ['answer'=>($english?'Yes. The next events I can see in ASCLA are:':'Sí. Los próximos eventos que veo en ASCLA son:')."\n".implode("\n",$lines),'source_ids'=>array_map('intval',array_column(array_slice($events,0,3),'id')),'mode'=>$this->mode()];
+        foreach (array_slice($events,0,3) as $event) {
+            $lines[]=$this->eventLine($event,$english);
+        }
+        return ['answer'=>($english?'These are the ASCLA events I can see:':'Estos son los eventos de ASCLA que puedo consultar:')."\n".implode("\n\n",$lines),'source_ids'=>array_map('intval',array_column(array_slice($events,0,3),'id')),'mode'=>$this->mode()];
     }
 
     private function recentAnswer(array $recent,bool $english): array
@@ -171,7 +213,19 @@ final class MockAIProvider implements AIProviderInterface
 
     private function microagenda(array $context): array
     {
-        $theme=implode(' y ',array_slice($context['interests']??[],0,2))?:'gobierno corporativo';
+        $theme=$context['selected_topic']??(implode(' y ',array_slice($context['interests']??[],0,2))?:'gobierno corporativo');
+        $format=$context['meeting_format']??'';
+        $activities=[
+            'caso práctico'=>['Contrastar un caso anonimizado de '.$theme.'.','Presentar el caso','Comparar alternativas de actuación','¿Qué dato necesitarías para decidir?'],
+            'clínica de preguntas'=>['Resolver preguntas de la práctica profesional sobre '.$theme.'.','Recoger las preguntas del grupo','Trabajar en parejas sobre las preguntas elegidas','¿Qué pregunta te llevas de tu práctica reciente?'],
+            'taller de decisiones'=>['Acordar criterios aplicables a una decisión sobre '.$theme.'.','Definir la decisión y sus límites','Contrastar criterios y acordar un plan','¿Qué criterio debería pesar más en esta decisión?'],
+        ];
+        if (isset($activities[$format])) {
+            [$goal,$opening,$discussion,$question]=$activities[$format];
+            return ['title'=>ucfirst($format).' · '.$theme,'theme'=>$theme,'objective'=>$goal,'duration_minutes'=>40,
+                'agenda'=>[['minutes'=>10,'topic'=>$opening],['minutes'=>20,'topic'=>$discussion],['minutes'=>10,'topic'=>'Acordar un siguiente paso sobre '.$theme]],
+                'icebreaker'=>$question,'closing_question'=>'¿Cómo aplicarías lo conversado en tu próxima reunión?','mode'=>$this->mode()];
+        }
         return ['title'=>'Círculo ASCLA · '.$theme,'theme'=>$theme,'objective'=>'Intercambiar experiencias y preguntas sobre '.$theme.'.','duration_minutes'=>30,'agenda'=>[['minutes'=>5,'topic'=>'Presentaciones y objetivos'],['minutes'=>10,'topic'=>'Experiencias sobre '.$theme],['minutes'=>10,'topic'=>'Preguntas y aprendizajes compartidos'],['minutes'=>5,'topic'=>'Próximos pasos']],'icebreaker'=>'¿Qué pregunta sobre '.$theme.' te gustaría explorar?','closing_question'=>'¿Qué aprendizaje te gustaría llevar a tu próxima reunión?','mode'=>$this->mode()];
     }
 
@@ -188,7 +242,7 @@ final class MockAIProvider implements AIProviderInterface
         $text=trim($context['transcript']??'');
         $sentences=\ASCLA\Core\Domain\Grounding::sentences($text);
         $points=array_slice(array_map(static fn($s)=>mb_substr($s,0,400),$sentences),0,5);
-        $summary=implode(' ',array_slice($points,0,3));
+        $summary=implode("\n\n",array_map(static fn($part)=>implode(' ',$part),array_chunk(array_slice($sentences,0,8),2)));
         preg_match_all('/gobernanza|inteligencia artificial|supervisión|directorio|riesgos|responsabilidades|secretaría corporativa|cumplimiento|sostenibilidad|transformación digital|acuerdos/iu',$text,$keywords);
         $tags=array_slice(array_values(array_unique(array_map('mb_strtolower',$keywords[0]))),0,12);
         preg_match_all('/\b(?:ISO\s+\d+(?::\d+)?|COSO(?:\s+ERM)?|OCDE)\b/u',$text,$standards);

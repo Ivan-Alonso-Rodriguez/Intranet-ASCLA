@@ -1,0 +1,205 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-23T06:44:14.653Z",
+  "scope": "isolated local WordPress; desktop/mobile and light/dark; video thumbnail/duration and missing thumbnail are simulated display metadata; no external YouTube playback, deployment or security scan",
+  "package_sha256": "c19aea63043d0e61bc9a0dd7a080c7760f1d91ea105cde1f3ac296cf3ca773db",
+  "checks": [
+    "Foto única amplia, sin recortes ni controles innecesarios: desktop-light",
+    "Álbum por miniaturas, botones y teclado; conserva el comentario: desktop-light",
+    "Original y PDF mantienen acceso autenticado desde el álbum: desktop-light",
+    "Centro de Conocimiento: tarjetas adaptables, títulos legibles, tipos y duraciones (metadatos visuales simulados): desktop-light",
+    "El filtro por tipo y su limpieza conservan resultados y presentación: desktop-light",
+    "Portada, título y botón abren el mismo recurso por teclado: desktop-light",
+    "Foto única amplia, sin recortes ni controles innecesarios: mobile-light",
+    "Álbum por miniaturas, botones y teclado; conserva el comentario: mobile-light",
+    "Original y PDF mantienen acceso autenticado desde el álbum: mobile-light",
+    "Centro de Conocimiento: tarjetas adaptables, títulos legibles, tipos y duraciones (metadatos visuales simulados): mobile-light",
+    "El filtro por tipo y su limpieza conservan resultados y presentación: mobile-light",
+    "Portada, título y botón abren el mismo recurso por teclado: mobile-light",
+    "Foto única amplia, sin recortes ni controles innecesarios: desktop-dark",
+    "Álbum por miniaturas, botones y teclado; conserva el comentario: desktop-dark",
+    "Original y PDF mantienen acceso autenticado desde el álbum: desktop-dark",
+    "Centro de Conocimiento: tarjetas adaptables, títulos legibles, tipos y duraciones (metadatos visuales simulados): desktop-dark",
+    "El filtro por tipo y su limpieza conservan resultados y presentación: desktop-dark",
+    "Portada, título y botón abren el mismo recurso por teclado: desktop-dark",
+    "Foto única amplia, sin recortes ni controles innecesarios: mobile-dark",
+    "Álbum por miniaturas, botones y teclado; conserva el comentario: mobile-dark",
+    "Original y PDF mantienen acceso autenticado desde el álbum: mobile-dark",
+    "Centro de Conocimiento: tarjetas adaptables, títulos legibles, tipos y duraciones (metadatos visuales simulados): mobile-dark",
+    "El filtro por tipo y su limpieza conservan resultados y presentación: mobile-dark",
+    "Portada, título y botón abren el mismo recurso por teclado: mobile-dark",
+    "La miniatura no disponible conserva una portada legible, tipo y duración (error simulado)"
+  ],
+  "scans": [
+    {
+      "name": "foto-amplia-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "album-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "conocimiento-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "filtro-documento-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "foto-amplia-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "album-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "conocimiento-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "filtro-documento-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "foto-amplia-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "album-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "conocimiento-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "filtro-documento-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "foto-amplia-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "album-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "conocimiento-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "filtro-documento-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "miniatura-no-disponible",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    }
+  ],
+  "errors": [],
+  "status": "passed_local_ui_validation",
+  "change_scope": "Restores the previous illustrated default resource cover when a thumbnail is missing or fails, preserving valid photographs and the updated knowledge-card layout.",
+  "package_manifest": "docs/evidence/release-1.11.0/package-knowledge-cover.json",
+  "report": "test-results/knowledge-cover1110/index.html",
+  "test_source": "tests/media-knowledge1110.cjs",
+  "test_source_sha256": "36a792cb19384c86280b0530fb6208ea475d50ca4aa1562bff904fb7072ab0a6",
+  "php_sources_unchanged": true,
+  "visual_review": "Restored background, title and ASCLA cover identity checked in representative desktop and mobile, light/dark captures. Valid photograph checked without fallback text overlaid.",
+  "base_commit": "2daf0d9e5b0da8eee8b21076f2dc3915c77a4e3f",
+  "working_tree": "uncommitted; ZIP bytes match production sources",
+  "prior_stage": "docs/evidence/release-1.11.0/media-knowledge1110.json; original package and test source archived separately",
+  "limitations": [
+    "Existing local UI suite reused; video thumbnail/duration and missing-image metadata are simulated.",
+    "No remote deployment, external YouTube playback, new PHP/Bruno/security run or SonarQube analysis was performed for this visual correction."
+  ],
+  "temporary_environment_cleanup": "completed; isolated containers, volumes, image/PDF fixtures and private access files removed"
+}

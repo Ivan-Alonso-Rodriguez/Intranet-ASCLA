@@ -5,12 +5,12 @@ final class ImportRecords
 {
     public static function create(string $kind,string $filename,array $config,array $rows,int $event=0): int
     {
-        global $wpdb;$wpdb->query('START TRANSACTION');
-        try {
+        return Transaction::run(static function()use($kind,$filename,$config,$rows,$event) {
+            global $wpdb;
             $id=Store::insert('imports',['kind'=>$kind,'actor_id'=>get_current_user_id(),'event_id'=>$event,'filename'=>sanitize_file_name($filename)?:'importacion.csv','status'=>'processing','total'=>count($rows),'config'=>wp_json_encode($config),'created_at'=>current_time('mysql',true)]);
             foreach(array_chunk($rows,100,true) as $chunk){$values=[];$args=[];foreach($chunk as $position=>$payload){$values[]='(%d,%d,%s,%s)';array_push($args,$id,$position+1,'pending',wp_json_encode($payload));}$sql='INSERT INTO '.Store::table('import_rows').' (import_id,position,state,payload) VALUES '.implode(',',$values);if($wpdb->query($wpdb->prepare($sql,...$args))===false) {throw new RepositoryException('No se pudo guardar la importación.'); }}
-            $wpdb->query('COMMIT');return $id;
-        }catch(\Throwable $e){$wpdb->query('ROLLBACK');throw $e;}
+            return $id;
+        });
     }
     public static function get(int $id,string $kind): array
     {

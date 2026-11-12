@@ -6,7 +6,7 @@ use ASCLA\Core\Rest\ApiException;
 /** OpenAI Responses API transport. ASCLA builds and authorizes the context before it reaches this provider. */
 final class OpenAIProvider implements AIProviderInterface
 {
-    public function mode(): string { return 'OpenAI · API real'; }
+    public function mode(): string { return 'OpenAI · API'; }
 
     public static function model(string $value): string
     {
@@ -32,10 +32,21 @@ final class OpenAIProvider implements AIProviderInterface
         $key=Secrets::get('openai_key');
         Access::require($key!=='','Configura una OpenAI API Key.',400);
         $model=self::model(Settings::get()['openai_model']??'gpt-5.6-luna');
+        $images=AIProviderSupport::images($context);
+        $input=wp_json_encode(['task'=>$task,'context'=>$context],JSON_UNESCAPED_UNICODE);
+        if ($images) {
+            $parts=[['type'=>'input_text','text'=>$input]];
+            foreach ($images as $image) {
+                $parts[]=['type'=>'input_text','text'=>AIProviderSupport::imageLabel($image)];
+                $parts[]=['type'=>'input_image','image_url'=>'data:'.$image['mime'].';base64,'.$image['data'],'detail'=>'auto'];
+            }
+            $input=[['role'=>'user','content'=>$parts]];
+        }
         $body=[
             'model'=>$model,
             'instructions'=>AIProviderSupport::instructions($task,$context),
-            'input'=>wp_json_encode(['task'=>$task,'context'=>$context],JSON_UNESCAPED_UNICODE),
+            'input'=>$input,
+            'store'=>false,
             'max_output_tokens'=>$task==='probe'?512:8192,
         ];
         $response=wp_remote_post('https://api.openai.com/v1/responses',AIProviderSupport::bearerPostArgs($key,$task==='probe'?25:55,$body));

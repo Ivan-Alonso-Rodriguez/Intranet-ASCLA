@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-22T06:56:13.216863+00:00",
+  "environment": "Disposable local WordPress",
+  "version": "1.10.9",
+  "php": {
+    "tests": 74,
+    "assertions": 631,
+    "errors": 0,
+    "failures": 0
+  },
+  "suite_filter": "UnifiedForumListingTest|DraftWorkflowTest|ContentLifecycleTest|MediaTemporaryTest|MediaMigrationTest|FormWriteValidationTest",
+  "browser": {
+    "checks": 6,
+    "passed": [
+      "Foros y publicaciones comparten lista, sin Explorar foros, y se abre la conversación",
+      "Biblioteca administrativa visible directamente: búsqueda, propietario, paginación y apertura de archivos",
+      "Cancelar conserva el archivo; eliminar el último de una página conserva filtros y vuelve a una página válida",
+      "Biblioteca integrada también para Ejecutivo y sin desbordamiento en móvil",
+      "Mis archivos del perfil mantiene su ventana y solo muestra archivos propios",
+      "Ver perfil, Conectar y Enviar mensaje mantienen 12 px de separación en escritorio y móvil"
+    ],
+    "errors": []
+  },
+  "portable_checks": 49,
+  "package_sha256": "08448a5c280837e065f480217b156f7e1fde5c7496f7410b9df0d4d7b143a86b",
+  "package_files": 201,
+  "reports": {
+    "php-junit.xml": "1f6accd76d3cab394cd36fb5d8ebf66f52ad6589306876c09495310be21bedcd",
+    "browser-result.json": "5fc748427e5ce8eefeab2939cbc680fee36dca0a5eead10fcaa13995e3c42520"
+  },
+  "test_sources": [
+    "tests/php/UnifiedForumListingTest.php",
+    "tests/layout-ui.cjs",
+    "tests/layout-ui-fixture.php"
+  ],
+  "scope": [
+    "Foros y publicaciones en una lista compartida, con búsqueda, fechas, alcance propio, totales y paginación comunes.",
+    "Biblioteca de archivos integrada directamente en Administración, con búsqueda, propietario, apertura y eliminación confirmada.",
+    "Cancelar conserva el archivo y eliminar la última fila de una página conserva filtros y vuelve a una página válida.",
+    "Biblioteca integrada para Administrador y Ejecutivo; biblioteca propia del perfil en su ventana privada.",
+    "Ver perfil, Conectar y Enviar mensaje separados por 12 px en escritorio y móvil."
+  ],
+  "temporary_environment_removed": true,
+  "temporary_credentials_removed": true,
+  "full_php_suite": false,
+  "coverage_collected": false,
+  "new_zap_scan": false,
+  "remote_deployment": false,
+  "limitations": [
+    "Regresión dirigida local; no renueva la suite completa anterior, cobertura, Quality Gate ni aceptación UAT.",
+    "Las evidencias previas mantienen su fecha, paquete y alcance."
+  ]
+}

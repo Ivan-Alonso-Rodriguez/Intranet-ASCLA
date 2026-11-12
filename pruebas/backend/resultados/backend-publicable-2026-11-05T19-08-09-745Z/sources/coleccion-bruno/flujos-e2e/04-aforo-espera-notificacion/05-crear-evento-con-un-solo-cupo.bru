@@ -1,0 +1,39 @@
+meta {
+  name: 05. Crear evento con un solo cupo
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/content/event
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAdministrador}}
+  X-WP-Nonce: {{nonceAdministrador}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:pre-request {
+  req.setBody({title:"Encuentro ASCLA con cupo limitado",body:"Demostración de aforo, lista de espera y cancelación.",status:"publish",meta:{start:new Date(Date.now()+5*86400000).toISOString(),end:new Date(Date.now()+5*86400000+3600000).toISOString(),capacity:1,modality:"Virtual",location:"Sala de pruebas ASCLA",chatham:false}});
+}
+
+script:post-response {
+  if(res.getStatus()===200) bru.setCollectionVar("eventoCupoId", Number(res.getBody().id));
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Evento publicado con capacidad uno", function () { expect(res.getBody().status).to.equal("publish");expect(Number(res.getBody().id)).to.be.above(0);expect(Number(res.getBody().meta.capacity)).to.equal(1); });
+}

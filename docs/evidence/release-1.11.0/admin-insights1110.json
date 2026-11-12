@@ -1,0 +1,107 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-24T20:47:59.796Z",
+  "scope": "Chrome real en Windows; WordPress loopback desechable con eventos y asistencias sintéticos. Gráficos con respuestas REST reales, sin series inventadas ni servicios externos.",
+  "package_sha256": "727cc8e42828f6b34dd9c1d661654268c43e4f6f574598fc15cc0ac25b00f852",
+  "package_manifest": "docs/evidence/release-1.11.0/package-admin-insights.json",
+  "previous_package_manifest": "docs/evidence/release-1.11.0/package-comment-threads.json",
+  "phpunit": {
+    "name": "CLI Arguments",
+    "tests": "67",
+    "assertions": "589",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "35.080315"
+  },
+  "checks": [
+    "Resumen y gráfico circular coinciden con registros reales: 50% usa seis inscripciones verificadas y distingue personas, asistencias y reservas",
+    "El resumen conduce al registro de asistencia y conserva la apertura de las listas",
+    "Intereses distingue los perfiles actuales de la asistencia del período, con valores visibles en los gráficos y tablas de detalle",
+    "Comparar períodos representa los cinco indicadores reales, con escala por indicador, cifras y períodos identificados",
+    "Participación, clasificación de temas y las cinco vistas conservan sus controles",
+    "Los filtros actualizan los gráficos y los indicadores con la misma respuesta del servidor",
+    "Sin eventos o base verificada se muestra Sin datos y un estado vacío, sin inventar porcentajes",
+    "Una lista pendiente puede mostrar asistencias registradas sin presentar una tasa como si estuviera verificada",
+    "Un cero con listas verificadas se diferencia de la ausencia de datos",
+    "Encuentros explica tres pasos y separa condiciones, métricas reales, estados y el siguiente paso de cada propuesta",
+    "Revisar, archivar y restaurar siguen operativos; restaurar conserva el estado cancelado",
+    "El trabajo de preparación real conserva el diagnóstico y explica un resultado sin propuestas",
+    "Encuentros y Estadísticas se adaptan a móvil y ambos temas con revisión automática de accesibilidad",
+    "Los nuevos textos y gráficos se traducen al inglés",
+    "Los datos administrativos mantienen los permisos de acceso y la página no presenta errores JavaScript"
+  ],
+  "accessibility_scans": [
+    {
+      "name": "estadisticas-resumen-claro",
+      "violations": []
+    },
+    {
+      "name": "estadisticas-intereses-claro",
+      "violations": []
+    },
+    {
+      "name": "estadisticas-comparacion-claro",
+      "violations": []
+    },
+    {
+      "name": "estadisticas-sin-datos",
+      "violations": []
+    },
+    {
+      "name": "estadisticas-resumen-oscuro",
+      "violations": []
+    },
+    {
+      "name": "estadisticas-movil-oscuro",
+      "violations": []
+    },
+    {
+      "name": "encuentros-claro",
+      "violations": []
+    },
+    {
+      "name": "encuentros-condiciones",
+      "violations": []
+    },
+    {
+      "name": "encuentros-oscuro",
+      "violations": []
+    },
+    {
+      "name": "encuentros-movil-oscuro",
+      "violations": []
+    }
+  ],
+  "page_errors": [],
+  "data_checks": {
+    "registered": 9,
+    "unique_attendees": 3,
+    "recorded_attendances": 5,
+    "eligible_registrations_for_rate": 6,
+    "attended_eligible_registrations": 3,
+    "rate_percent": 50,
+    "filtered_rate_percent": 66.7,
+    "verified_zero_rate": true,
+    "unverified_rate_is_no_data": true
+  },
+  "behavior": {
+    "planning": "eligibility diagnostics, three preparation steps, states and next action; archive and restore retained",
+    "overview": "people, attendances and registrations kept distinct; verified-rate denominator visible",
+    "charts": [
+      "attendance donut",
+      "saved interests",
+      "attendances by topic",
+      "paired comparisons for five period metrics"
+    ],
+    "chart_implementation": "local SVG and native progress elements; visible numbers, captions and detail tables; no extra libraries or external chart services",
+    "server_formulas_and_permissions": "unchanged",
+    "schema": 15
+  },
+  "limits": [
+    "PHP and browser checks run only on the disposable local WordPress. No remote deployment or new coverage run is claimed.",
+    "Bar charts show at most six positive entries. Topic rows can overlap and must not be summed as unique people.",
+    "Paired period bars use a separate scale for each metric, explicitly stated in the caption. No daily time series is inferred."
+  ],
+  "local_report": "test-results/admin-insights1110/index.html"
+}

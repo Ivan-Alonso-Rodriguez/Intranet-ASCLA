@@ -1,0 +1,23 @@
+meta {
+  name: admin-denied
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/admin/users
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("Asociado no accede a administraci\u00f3n", function () { expect(res.getStatus()).to.equal(403); });
+}

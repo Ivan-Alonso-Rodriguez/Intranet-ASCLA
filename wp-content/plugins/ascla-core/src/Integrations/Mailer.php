@@ -19,6 +19,52 @@ final class Mailer
     {
         return wp_get_environment_type()==='local' && defined('ASCLA_LOCAL_MAIL_CAPTURE') && ASCLA_LOCAL_MAIL_CAPTURE===true;
     }
+
+    public static function sendInvitation(int $id): void
+    {
+        $format = static function (array $mail, \WP_User $user) use ($id): array {
+            return (int)$user->ID === $id ? self::formatInvitation($mail, $user) : $mail;
+        };
+        add_filter('wp_new_user_notification_email', $format, 20, 2);
+        try {
+            wp_new_user_notification($id, null, 'user');
+        } finally {
+            remove_filter('wp_new_user_notification_email', $format, 20);
+        }
+    }
+
+    private static function formatInvitation(array $mail, \WP_User $user): array
+    {
+        // Reuse the original link and key that WordPress generated for this recipient.
+        $loginPage = network_site_url('wp-login.php', 'login') . '?';
+        preg_match_all('~https?://[^\s<>"]+~i', $mail['message'], $links);
+        foreach ($links[0] as $link) {
+            if (!str_starts_with($link, $loginPage)) {
+                continue;
+            }
+            parse_str(substr($link, strlen($loginPage)), $query);
+            if (($query['action'] ?? '') !== 'rp' || ($query['login'] ?? '') !== $user->user_login || !is_string($query['key'] ?? null) || $query['key'] === '') {
+                continue;
+            }
+
+            $mail['subject'] = 'ASCLA · Configura tu acceso';
+            $mail['message'] = EmailTemplate::render(
+                'Te damos la bienvenida a ASCLA',
+                $user->display_name ?: $user->user_login,
+                'Tu cuenta de la comunidad ASCLA está lista. Establece tu contraseña para ingresar y acceder a los recursos de la intranet.',
+                'Establecer mi contraseña',
+                $link,
+                "Tu usuario es {$user->user_login}. Si no esperabas este correo, puedes ignorarlo."
+            );
+            $headers = is_array($mail['headers']) ? $mail['headers'] : preg_split('/\R/', $mail['headers']);
+            $mail['headers'] = array_values(array_filter($headers, static fn($header) => stripos(ltrim($header), 'Content-Type:') !== 0));
+            $mail['headers'][] = self::HTML_CONTENT_TYPE;
+            return $mail;
+        }
+
+        return $mail;
+    }
+
     public static function from(string $original): string
     {
         if (self::local()) { return 'ascla@example.test'; }
@@ -57,22 +103,33 @@ final class Mailer
         foreach (['mail_mode'=>['wordpress','smtp'],'smtp_security'=>['tls','ssl']] as $key=>$allowed) {
             if (isset($input[$key])) { Access::require(in_array($input[$key],$allowed,true),'Configuración de correo no válida.',400); $data[$key]=$input[$key]; }
         }
-        foreach (['smtp_host','smtp_user','smtp_from','smtp_name'] as $key) {
-            if (isset($input[$key])) {
-                $value=trim(Access::text($input[$key],254));
-                Access::require(!preg_match('/[\r\n]/',$value),'El correo no admite saltos de línea.',400);
-                $data[$key]=$value;
-            }
-        }
+        $data=self::textFields($input,$data);
         Access::require($data['smtp_host']==='' || (bool)preg_match('/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i',$data['smtp_host']),'Introduzca únicamente el nombre del servidor SMTP.',400);
         Access::require($data['smtp_from']==='' || (bool)is_email($data['smtp_from']),'El correo remitente no es válido.',400);
-        if (isset($input['smtp_port'])) { Access::require(in_array(filter_var($input['smtp_port'],FILTER_VALIDATE_INT),[465,587,2525],true),'Use el puerto SMTP 465, 587 o 2525.',400); $data['smtp_port']=(int)$input['smtp_port']; }
-        if (isset($input['smtp_password'])) { Access::require(is_string($input['smtp_password']) && strlen($input['smtp_password'])<=2000 && !preg_match('/[\r\n\x00]/',$input['smtp_password']),'Contraseña SMTP no válida.',400); }
-        $password=!empty($input['smtp_password'])?$input['smtp_password']:Secrets::get('smtp_password');
-        if (!empty($input['clear_smtp_password'])) { $password=''; }
+        if (array_key_exists('smtp_port',$input)) { $data['smtp_port']=self::smtpPort($input['smtp_port']); }
+        if (array_key_exists('smtp_password',$input)) { Access::require(is_string($input['smtp_password']) && strlen($input['smtp_password'])<=\ASCLA\Core\Services\FormRules::MAIL_TEXT['smtp_password'] && !preg_match('/[\r\n\x00]/',$input['smtp_password']),'Contraseña SMTP no válida.',400); }
+        $password=isset($input['smtp_password']) && $input['smtp_password']!==''?$input['smtp_password']:Secrets::get('smtp_password');
+        if (array_key_exists('clear_smtp_password',$input) && \ASCLA\Core\Services\FormRules::boolean($input['clear_smtp_password'])) { $password=''; }
         if ($data['mail_mode']==='smtp') {
             Access::require($data['smtp_host']!=='' && $data['smtp_user']!=='' && is_email($data['smtp_from']) && $password!=='','Complete servidor, usuario, contraseña y remitente antes de activar SMTP.',400);
             Access::require(($data['smtp_port']===465)===($data['smtp_security']==='ssl'),'El puerto 465 usa SSL/TLS; 587 y 2525 usan STARTTLS.',400);
+        }
+        return $data;
+    }
+    private static function smtpPort(mixed $value): int
+    {
+        Access::require((is_int($value)||is_string($value)) && in_array(filter_var($value,FILTER_VALIDATE_INT),[465,587,2525],true),'Use el puerto SMTP 465, 587 o 2525.',400);
+        return (int)$value;
+    }
+    private static function textFields(array $input,array $data): array
+    {
+        foreach (['smtp_host','smtp_user','smtp_from','smtp_name'] as $key) {
+            if (!array_key_exists($key,$input)) { continue; }
+            $value=$input[$key];Access::require(is_string($value),'Texto no válido.',400);
+            $max=\ASCLA\Core\Services\FormRules::MAIL_TEXT[$key];
+            Access::require(mb_strlen($value)<=$max,'El texto supera el límite de '.$max.' caracteres.',400);
+            Access::require(!preg_match('/[\x00-\x1F\x7F]/',$value),'El correo no admite saltos de línea ni caracteres de control.',400);
+            $data[$key]=trim(Access::text($value,$max));
         }
         return $data;
     }
@@ -122,7 +179,7 @@ final class Mailer
         $body=EmailTemplate::render($subjects[$category],$name,$message,'Ver en ASCLA',$safeUrl,'Puedes gestionar estos correos desde Mi perfil > Notificaciones por correo: '.$profileUrl);
         $sent=false;
         try { $sent=(bool)wp_mail($account->user_email,$subjects[$category],$body,[self::HTML_CONTENT_TYPE]); }
-        catch (\Throwable) { self::record('failed'); }
+        catch (\Throwable $error) { \ASCLA\Core\Services\TechnicalErrors::record('smtp','mail_failed',$error);self::record('failed'); }
         return $sent;
     }
 
@@ -136,7 +193,7 @@ final class Mailer
         $subject='ASCLA · ¡Feliz cumpleaños! 🎉';
         $body=EmailTemplate::render($subject,$name,"¡Feliz cumpleaños! 🎉\n\nEn ASCLA queremos acompañarte en este día y desearte un nuevo año lleno de buenas conexiones, aprendizajes, proyectos y motivos para celebrar.\n\nGracias por ser parte de nuestra comunidad.",'Visitar mi comunidad',\ASCLA\Core\Domain\Catalog::url('intranet'));
         try { return (bool)wp_mail($account->user_email,$subject,$body,[self::HTML_CONTENT_TYPE]); }
-        catch (\Throwable $error) { self::record('failed'); return false; }
+        catch (\Throwable $error) { \ASCLA\Core\Services\TechnicalErrors::record('smtp','mail_failed',$error);self::record('failed'); return false; }
     }
 
     public static function localNotice(string $message): string

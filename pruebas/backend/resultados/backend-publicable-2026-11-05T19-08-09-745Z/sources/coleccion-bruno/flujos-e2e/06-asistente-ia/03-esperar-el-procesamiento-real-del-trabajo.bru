@@ -1,0 +1,53 @@
+meta {
+  name: 03. Esperar el procesamiento real del trabajo
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/jobs/{{trabajoAsistenteId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAna}}
+  X-WP-Nonce: {{nonceAna}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 150000
+}
+
+script:pre-request {
+  const until=Date.now()+120000;
+  let polls=0;
+  while(Date.now()<until){
+    const response=await bru.sendRequest({method:"GET",url:bru.getCollectionVar("base")+"/wp-json/ascla/v1/jobs/"+bru.getCollectionVar("trabajoAsistenteId"),headers:{Cookie:bru.getVar("sesionAna"),"X-WP-Nonce":bru.getVar("nonceAna")}});
+    if(response.status!==200) throw Error("La consulta del trabajo devolvió HTTP "+response.status);
+    polls++;
+    bru.setCollectionVar("estadoTrabajoAsistente", response.data.status);
+    if(response.data.status==="error") throw Error("El trabajo del asistente falló: "+(response.data.error||"sin diagnóstico"));
+    if(response.data.status==="completed") break;
+    await bru.sleep(2000);
+  }
+  bru.setCollectionVar("consultasTrabajoAsistente", polls);
+  if(bru.getCollectionVar("estadoTrabajoAsistente")!=="completed") throw Error("El trabajo no terminó en 120 segundos. Revisar cron y proveedor de IA.");
+}
+
+script:post-response {
+  if(res.getStatus()===200&&res.getBody().status==="completed"){
+    bru.setCollectionVar("respuestaAsistente", res.getBody().result.answer);
+    bru.setCollectionVar("modoAsistente", res.getBody().result.mode||"no indicado");
+  }
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Trabajo completado con respuesta y contexto correctos", function () { const job=res.getBody();expect(job.status).to.equal("completed");expect(Number(job.id)).to.equal(Number(bru.getCollectionVar("trabajoAsistenteId")));expect(job.question).to.equal(bru.getCollectionVar("preguntaAsistente"));expect(job.thread).to.equal(bru.getCollectionVar("hiloAsistente"));expect(job.result.answer).to.be.a("string").and.not.empty; });
+}
+
+docs {
+  El polling real dura como máximo 120 segundos y falla si el trabajo no termina o el proveedor devuelve error. Se conserva el modo real de IA; la prueba no cambia proveedores ni marca trabajos como completados.
+}

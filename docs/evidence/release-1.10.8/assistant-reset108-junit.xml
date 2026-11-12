@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="6" assertions="55" errors="0" failures="0" skipped="0" time="1.492858">
+    <testsuite name="AssistantReset108Test" file="/opt/ascla-tests/php/AssistantReset108Test.php" tests="3" assertions="32" errors="0" failures="0" skipped="0" time="0.540496">
+      <testcase name="testFreshThreadSendsNoPreviousConversationToGeminiAndKeepsHistory" file="/opt/ascla-tests/php/AssistantReset108Test.php" line="59" class="AssistantReset108Test" classname="AssistantReset108Test" assertions="11" time="0.220140"/>
+      <testcase name="testContinuingAnExplicitThreadUsesOnlyItsOwnCompletedTurns" file="/opt/ascla-tests/php/AssistantReset108Test.php" line="66" class="AssistantReset108Test" classname="AssistantReset108Test" assertions="7" time="0.164289"/>
+      <testcase name="testAnOldJobCompletedAfterResetDoesNotBecomeTheNewThreadsContext" file="/opt/ascla-tests/php/AssistantReset108Test.php" line="76" class="AssistantReset108Test" classname="AssistantReset108Test" assertions="14" time="0.156068"/>
+    </testsuite>
+    <testsuite name="IntegrationTest" file="/opt/ascla-tests/php/IntegrationTest.php" tests="3" assertions="23" errors="0" failures="0" skipped="0" time="0.952361">
+      <testcase name="testAssistantUsesOnlyPublishedSourcesAndAbstains" file="/opt/ascla-tests/php/IntegrationTest.php" line="310" class="IntegrationTest" classname="IntegrationTest" assertions="8" time="0.375095"/>
+      <testcase name="testAssistantKnowsUpcomingEventsFromTheIntranet" file="/opt/ascla-tests/php/IntegrationTest.php" line="324" class="IntegrationTest" classname="IntegrationTest" assertions="6" time="0.294052"/>
+      <testcase name="testAssistantThreadsKeepConversationHistoryScopedToTheMember" file="/opt/ascla-tests/php/IntegrationTest.php" line="335" class="IntegrationTest" classname="IntegrationTest" assertions="9" time="0.283214"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

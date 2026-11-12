@@ -1,0 +1,33 @@
+meta {
+  name: 04. Bruno acepta la solicitud obtenida
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/connections/{{solicitudBloqueoId}}/respond
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionBruno}}
+  X-WP-Nonce: {{nonceBruno}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "decision": "accept"
+  }
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Conexión confirmada", function () { expect(res.getBody().state).to.equal("connected"); });
+}

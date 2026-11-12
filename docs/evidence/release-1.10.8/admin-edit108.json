@@ -1,0 +1,103 @@
+{
+  "date": "2026-10-17T21:46:30.920850+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "scope": "Disposable local WordPress, real REST and Chromium. No remote installation, new coverage or UAT certification.",
+  "decision": {
+    "direct_administrative_profile_edit": true,
+    "contact_request": "optional, assigned, active, single use when linked",
+    "analysis_exceptions": [
+      "RN-001",
+      "RN-032"
+    ],
+    "original_requirement_texts_preserved": true,
+    "personal_consent_preserved": true,
+    "technical_accounts_separate": true
+  },
+  "full_php_regression": {
+    "tests": 693,
+    "assertions": 7890,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "source_snapshot": "current-24",
+    "run": "test-results/admin-edit108-20261017T213731Z-7310",
+    "coverage_collected": false
+  },
+  "final_php_regression": {
+    "tests": 79,
+    "assertions": 472,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "source_snapshot": "current-25",
+    "run": "test-results/admin-edit108-20261017T214016Z-7700",
+    "all_php_sources_and_tests_match_final": true,
+    "overlaps_full_suite": true,
+    "coverage_collected": false
+  },
+  "final_browser": {
+    "checks": [
+      "Datos personales y profesionales editables sin solicitudes de Contacto",
+      "Editar otro dato conserva ubicaciones heredadas que no figuran en el catálogo",
+      "Guardar persiste datos, teléfono internacional, ubicación, biografía, experiencia, enlaces y selección de intereses",
+      "Reabrir conserva los datos y los controles de acceso continúan funcionando",
+      "Una edición desactualizada devuelve conflicto, conserva el formulario y no sobrescribe el cambio reciente"
+    ],
+    "errors": [],
+    "views": [
+      "admin-editor-desktop-dark.png",
+      "admin-editor-mobile-light.png"
+    ],
+    "scans": [
+      {
+        "name": "admin-editor-desktop-dark",
+        "width": 1440,
+        "theme": "dark",
+        "violations": []
+      },
+      {
+        "name": "admin-editor-mobile-light",
+        "width": 390,
+        "theme": "light",
+        "violations": []
+      }
+    ],
+    "source_snapshot": "current-26",
+    "run": "test-results/admin-edit108-20261017T214542Z-9926"
+  },
+  "portable_checks": 49,
+  "production_matches_final_snapshot": true,
+  "full_to_final_production_delta": [
+    "wp-content/plugins/ascla-core/assets/app.js",
+    "wp-content/plugins/ascla-core/src/Services/Administration.php"
+  ],
+  "delta_explanation": "Final PHP guards matching refresh for inactive members; final UI preserves legacy countries and clears the old city on country change. Final PHP and browser evidence cover these changes. Full-suite counts refer to current-24.",
+  "coverage_files_unchanged": true,
+  "temporary_environment_removed": true,
+  "package": {
+    "version": "1.10.8",
+    "bytes": 1513585,
+    "files": 196,
+    "sha256": "6aa6ed6088cfb2df6f718d1b2df8792e37c8708d4987492ae3bb87cd3bb0e31c",
+    "source_bytes_match": true,
+    "crc_valid": true
+  },
+  "artifacts": {
+    "test-results/admin-edit108-20261017T213731Z-7310/junit.xml": "d245ee54f73d769852bb1f6251f60de573f13cb1faae645bc4aabdbd9601d7b8",
+    "test-results/admin-edit108-20261017T214016Z-7700/preflight.xml": "19375542bd5b73a4ed2da6fead29dbf42fb9a57170e1d15c46656f02154a4a9a",
+    "test-results/admin-edit108-20261017T214542Z-9926/admin-edit108.json": "d7b4f0f28360e9389abc76129823d89bef043fb39e1a5ceb191c5b692a9a0d14",
+    "test-results/admin-edit108-20261017T214542Z-9926/sanity.log": "8755860c11c8d3f9a1de749e02b68760d94f38c5cd87cadef867e4a455591434",
+    "test-results/admin-edit108-20261017T214542Z-9926/coverage-before.sha256": "1ffb945d05462735dd93a1e2ced23a30d856af26eaa4c7bb4b08cd57c311e329",
+    "test-results/admin-edit108-20261017T214542Z-9926/coverage-after.sha256": "1ffb945d05462735dd93a1e2ced23a30d856af26eaa4c7bb4b08cd57c311e329",
+    "test-results/admin-edit108-20261017T214542Z-9926/cleanup.log": "3792caa061ebcc491ddc78cdc7929b85ed138ce43c83727fa9a3184fa10ce89d",
+    "test-results/admin-edit108-ui.cjs": "6ffc65aa5b690aa576a798d632d13f98c9bfbb0e0e9e73e505d9d0afe09c415e",
+    "test-results/admin-edit108-fixture.php": "9b9302e8d1dbef70df9329396a25288d5dfbbd16382a5e015a3f7f00db7013cc",
+    "test-results/admin-edit108-run.sh": "c8be4e88f76e0c6cd7386dc4bcc11152966a33e3fc469b6f46dd2b3d4ce64806",
+    "test-results/admin-edit108-final-run.sh": "bc07de7d5c77b440480a89d6f90e0e48bcfea5e250b4e2c6c80e23be1b1f9a60",
+    "test-results/admin-edit108-browser-run.sh": "e061abac0cdb29051361797485aca910fd728bd9d3dc068993c0eadfe3f3e52c",
+    "test-results/sonar/current-24-source-hashes.json": "d29fcedb9fe8cba046644631ee1bf94cdebe8057acd1714084bc7495a352c05f",
+    "test-results/sonar/current-25-source-hashes.json": "05ff495113ef51d657295936ed0321e7f7c0ae9578d46dd9fe89a071fe3dc948",
+    "test-results/sonar/current-26-source-hashes.json": "55a0311fc11b2d10574092cb1f7e02bd9484ffc6489dedc54a44752ec41fe8a9"
+  }
+}

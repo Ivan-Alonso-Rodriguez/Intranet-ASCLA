@@ -1,0 +1,33 @@
+meta {
+  name: 08. Bruno entra en lista de espera
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/events/{{eventoCupoId}}/register
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionBruno}}
+  X-WP-Nonce: {{nonceBruno}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "waitlisted"
+  }
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Primer puesto de la lista de espera", function () { expect(res.getBody().registered).to.equal("waitlisted");expect(Number(res.getBody().waitlist_position)).to.equal(1); });
+}

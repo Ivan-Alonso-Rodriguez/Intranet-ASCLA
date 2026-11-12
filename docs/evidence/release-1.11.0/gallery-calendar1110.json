@@ -1,0 +1,269 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-23T05:59:15.930Z",
+  "scope": "isolated local WordPress; desktop/mobile and light/dark; Google pending/invited/failed and connected display simulated; no real Google delivery or remote deployment",
+  "package_sha256": "7155af631f9f74e71ccfff97661830cb34c2ebdad3bfba63bde3ee14d23e3856",
+  "checks": [
+    "Borradores neutros y etiquetas Publicación/Galería con mayúscula: desktop-light",
+    "Galería adaptable: imágenes reales, contador, portada vacía y tres accesos por teclado: desktop-light",
+    "Calendario manual solo para inscritos, incluye Zoom y se retira al cancelar; estado adaptado al tema: desktop-light",
+    "Borradores neutros y etiquetas Publicación/Galería con mayúscula: mobile-light",
+    "Galería adaptable: imágenes reales, contador, portada vacía y tres accesos por teclado: mobile-light",
+    "Calendario manual solo para inscritos, incluye Zoom y se retira al cancelar; estado adaptado al tema: mobile-light",
+    "Borradores neutros y etiquetas Publicación/Galería con mayúscula: desktop-dark",
+    "Galería adaptable: imágenes reales, contador, portada vacía y tres accesos por teclado: desktop-dark",
+    "Calendario manual solo para inscritos, incluye Zoom y se retira al cancelar; estado adaptado al tema: desktop-dark",
+    "Borradores neutros y etiquetas Publicación/Galería con mayúscula: mobile-dark",
+    "Galería adaptable: imágenes reales, contador, portada vacía y tres accesos por teclado: mobile-dark",
+    "Calendario manual solo para inscritos, incluye Zoom y se retira al cancelar; estado adaptado al tema: mobile-dark",
+    "La alternativa manual permanece con entrega pendiente, invitación enviada o error (estados Google simulados)",
+    "La cuenta vinculada conserva el flujo automático sin repetir el botón manual (estado OAuth simulado)"
+  ],
+  "scans": [
+    {
+      "name": "borrador-publicacion-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "borrador-galeria-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "galeria-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "galeria-detalle-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "calendario-inscrito-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "inscripcion-cancelada-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "borrador-publicacion-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "borrador-galeria-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "galeria-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "galeria-detalle-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "calendario-inscrito-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "inscripcion-cancelada-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "borrador-publicacion-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "borrador-galeria-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "galeria-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "galeria-detalle-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "calendario-inscrito-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "inscripcion-cancelada-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "borrador-publicacion-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "borrador-galeria-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "galeria-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "galeria-detalle-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "calendario-inscrito-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "inscripcion-cancelada-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    }
+  ],
+  "errors": [],
+  "status": "passed_local_validation",
+  "report": "test-results/gallery-calendar1110/index.html",
+  "package_manifest": "docs/evidence/release-1.11.0/package-gallery-calendar.json",
+  "test_source": "tests/gallery-calendar1110.cjs",
+  "test_source_sha256": "c3bfdfbf5c7345ecf8ca99c7b7e13789315741dcc76b77aa504ac7ef928c5916",
+  "php": {
+    "suite": "UserExperience1110Test",
+    "tests": 9,
+    "assertions": 38,
+    "failures": 0,
+    "errors": 0,
+    "report": "test-results/gallery-calendar1110/phpunit.xml",
+    "note": "PHP production sources were unchanged during the browser accessibility repairs."
+  },
+  "visual_review": "Representative desktop/mobile, light/dark captures reviewed for gallery cards, draft labels and registration badges; automatic axe checks do not replace human accessibility review.",
+  "fixtures": "Disposable shared users; local Windows wallpaper images uploaded only to the isolated lab as image fixtures. They are not included in the plugin ZIP.",
+  "base_commit": "2daf0d9e5b0da8eee8b21076f2dc3915c77a4e3f",
+  "working_tree": "uncommitted; production source bytes match package manifest",
+  "prior_stages": [
+    "docs/evidence/release-1.11.0/usability1110.json",
+    "docs/evidence/release-1.11.0/visual1110.json"
+  ],
+  "limitations": [
+    "Google delivery states and OAuth-connected display were simulated for button availability; no real invitation delivery or Google account acceptance was tested.",
+    "No remote deployment, live ZAP scan, new SonarQube analysis or full PHP/Bruno/shared-flow regression was performed for this additional revision. Earlier evidence keeps its original package SHA."
+  ],
+  "temporary_environment_cleanup": "completed; isolated containers, volumes, uploaded image fixtures and private access files removed",
+  "test_source_archive": "test-results/gallery-calendar1110/test-source.cjs"
+}

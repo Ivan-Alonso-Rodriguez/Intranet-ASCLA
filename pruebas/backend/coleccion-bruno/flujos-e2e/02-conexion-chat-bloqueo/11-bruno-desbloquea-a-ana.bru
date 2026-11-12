@@ -1,0 +1,35 @@
+meta {
+  name: 11. Bruno desbloquea a Ana
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/relations
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionBruno}}
+  X-WP-Nonce: {{nonceBruno}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:pre-request {
+  req.setBody({target:Number(bru.getCollectionVar("idAna")),kind:"block",active:false});
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Bloqueo retirado", function () { expect(res.getBody().active).to.equal(false); });
+}

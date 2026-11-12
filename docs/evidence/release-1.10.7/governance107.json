@@ -1,0 +1,28 @@
+{
+  "stage": "Gobierno, importaciones y credenciales del 13 de octubre",
+  "date": "2026-10-13",
+  "base_revision": "d01e3d12b6c404ba5aaa9fc4648f5989565bf590",
+  "base_branch": "development",
+  "working_tree_modified": true,
+  "plugin_version": "1.10.7",
+  "schema_version": 14,
+  "php_tests": 372,
+  "php_assertions": 5749,
+  "php_line_coverage_percent": 83.89,
+  "browser_checks": 26,
+  "new_javascript_coverage": false,
+  "full_quality_ci_rerun": false,
+  "requirements_closed": [
+    "RN-036",
+    "RF-133",
+    "RF-135",
+    "RNF-001"
+  ],
+  "requirements_advanced": [
+    "RNF-007",
+    "RNF-011",
+    "RNF-015"
+  ],
+  "browser_note": "10 comprobaciones de gobierno, 9 editoriales y 7 de filtros/completitud. La interfaz externa usa metadatos simulados; el entorno y el modo externo se prueban en PHP con variables temporales.",
+  "evidence": "docs/evidence/release-1.10.7/governance107.json"
+}

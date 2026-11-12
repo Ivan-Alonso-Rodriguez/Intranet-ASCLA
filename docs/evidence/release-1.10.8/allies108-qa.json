@@ -1,0 +1,106 @@
+{
+  "date": "2026-10-15",
+  "completed_at_utc": "2026-10-15T05:46:58.334848+00:00",
+  "target": "https://wordpress.ingsoftware.lat",
+  "version": "1.10.8",
+  "schema": 15,
+  "status": "passed",
+  "scope": "Authenticated read-only review with existing QA allies. Retirement dialog cancelled; no ally state/content changed and no remote fixture created. Mutation, multi-admin and pagination behavior were tested locally.",
+  "package": {
+    "sha256": "afa592f04855d03aa3a2b56eb7ae8c8a64b9dbcf966a52116d8e029ce442d40a",
+    "bytes": 1318414,
+    "files": 177,
+    "crc_valid": true,
+    "source_bytes_match": true
+  },
+  "browser_review": {
+    "target": "https://wordpress.ingsoftware.lat",
+    "version": "1.10.8",
+    "package_sha256": "afa592f04855d03aa3a2b56eb7ae8c8a64b9dbcf966a52116d8e029ce442d40a",
+    "existing_catalog_preserved": true,
+    "catalog_count": 4,
+    "checks": [
+      "WordPress confirmed successful update",
+      "Institutional catalogue renders with the same four existing allies",
+      "Existing WCD detail uses institutional layout with website and management actions",
+      "Retirement confirmation explains preservation; cancelled without applying changes",
+      "No publication metadata, Chatham banner, reactions or comment form in the ally detail",
+      "Registry lists all four existing allies and supports an empty inactive filter",
+      "Editor exposes Active, Inactive, Draft and Scheduled plus contact fields; cancelled without saving",
+      "No page/dialog overflow across the inspected desktop and mobile sizes"
+    ],
+    "views": [
+      {
+        "dialog_overflow": false,
+        "page_overflow": false,
+        "section": "detail",
+        "width": 1440
+      },
+      {
+        "dialog_overflow": false,
+        "page_overflow": false,
+        "section": "detail",
+        "width": 1024
+      },
+      {
+        "dialog_overflow": false,
+        "page_overflow": false,
+        "section": "detail",
+        "width": 768
+      },
+      {
+        "dialog_overflow": false,
+        "page_overflow": false,
+        "section": "detail",
+        "width": 390
+      },
+      {
+        "page_overflow": false,
+        "section": "registry",
+        "width": 390
+      }
+    ],
+    "completed_at_utc": "2026-10-15T05:46:08.154Z",
+    "scope": "Authenticated read-only review with existing QA allies. Retirement dialog cancelled; no ally state/content changed and no remote fixture created. Mutation, multi-admin and pagination behavior were tested locally."
+  },
+  "public_assets": {
+    "target": "https://wordpress.ingsoftware.lat",
+    "scope": "Anonymous public asset byte comparison only",
+    "assets": [
+      {
+        "asset": "app.js",
+        "sha256": "a52dfab6122392e68cbcfb2fb73f3e6e746518fba779c4fe3b56dd8c688662f7",
+        "bytes_match": true
+      },
+      {
+        "asset": "app.css",
+        "sha256": "30cb900429fad41b529867be5f35a08e19ee5b04779a8206983df09d089ac82b",
+        "bytes_match": true
+      },
+      {
+        "asset": "allies-ui.js",
+        "sha256": "f4df554ef0ffeb5aa19ce0acdf4b6482f5c8ea7bdf5c4dd57cf8652a420b9860",
+        "bytes_match": true
+      },
+      {
+        "asset": "admin-members.js",
+        "sha256": "73f3f06e2d4c14bdd35c20ffdc174e5dbe0f1a206b327f5714f93f07f4f159fb",
+        "bytes_match": true
+      },
+      {
+        "asset": "login.css",
+        "sha256": "e23f9205458515024d16d8ff1900b48fdbef92152028f3074e546e6346a0ce79",
+        "bytes_match": true
+      }
+    ]
+  },
+  "remote_allies_changed": false,
+  "remote_fixture_created": false,
+  "full_acceptance_rerun": false,
+  "screenshots": [
+    "test-results/allies108-qa-catalog.jpg",
+    "test-results/allies108-qa-detail.jpg",
+    "test-results/allies108-qa-detail-mobile.jpg",
+    "test-results/allies108-qa-registry.jpg"
+  ]
+}

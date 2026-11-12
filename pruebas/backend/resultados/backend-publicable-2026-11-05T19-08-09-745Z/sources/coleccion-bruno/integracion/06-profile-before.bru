@@ -1,0 +1,26 @@
+meta {
+  name: 06. Consultar empresa actual
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/profiles/{{idAsociado}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAsociado}}
+  X-WP-Nonce: {{nonceAsociado}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+script:post-response {
+  bru.setCollectionVar("empresaAnterior", res.getBody().company);
+}
+tests {
+  test("Perfil disponible", function () { expect(res.getStatus()).to.equal(200); });
+}

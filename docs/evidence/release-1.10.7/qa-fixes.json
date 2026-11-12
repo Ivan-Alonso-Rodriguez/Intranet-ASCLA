@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-08",
+  "version": "1.10.7",
+  "branch": "development",
+  "base_revision": "626197a",
+  "command": "BRANCH_NAME=qa bash scripts/quality-ci.sh",
+  "environment": "Local disposable WordPress; no deployment or Sonar scan",
+  "php_tests": 325,
+  "php_assertions": 5284,
+  "php_failures": 0,
+  "php_errors": 0,
+  "browser_checks": 40,
+  "scanner_guard_checks": 8,
+  "php_line_coverage_percent": 82.92,
+  "javascript_line_coverage_percent": 94.76,
+  "coverage_reports_validated": true,
+  "directory_viewports": [
+    1920,
+    1440,
+    768,
+    390
+  ]
+}

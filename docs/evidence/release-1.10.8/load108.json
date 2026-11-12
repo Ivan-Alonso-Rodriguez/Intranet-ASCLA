@@ -1,0 +1,314 @@
+{
+  "date": "2026-10-17T05:56:11.808386+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "baseline_commit": "877568c3fe16695ca3ede931ef5f1de911539ffa",
+  "scope": "Disposable local WordPress; same database and synthetic accounts before/after. No remote installation, provider latency, 50-user capacity, new coverage or UAT acceptance claim.",
+  "method": {
+    "navigations_per_module_per_phase": 3,
+    "total_navigations": 78,
+    "before_snapshot": "current-9",
+    "after_snapshot": "current-10",
+    "browser": "Playwright Chromium headless, 1366x900, foreground page",
+    "ready": "Browser MutationObserver timestamp from navigation start when #page-content has h1 and no aria-busy; driver polling time is excluded.",
+    "not_included_in_ready": "Images, external providers and optional background recommendations/notifications may finish later.",
+    "ordering": "Three rounds of 13 modules before, then three rounds after; no concurrent test suite. Small local sequential sample, not a statistical performance SLA.",
+    "identity": "Community modules use a synthetic member; Administration uses a synthetic administrator.",
+    "ttfb_tradeoff": "Startup work moves from REST to private HTML: HTML TTFB can increase even when the main view is ready earlier.",
+    "rest_accounting": "Only bootstrap has an exact per-navigation count asserted; background requests can overlap sample boundaries. SQL counts are diagnostic medians, with response sample sizes."
+  },
+  "timings": [
+    {
+      "module": "intranet",
+      "before_ready_ms": 520,
+      "after_ready_ms": 412,
+      "reduction_percent": 20.8,
+      "before_ttfb_ms": 200.7,
+      "after_ttfb_ms": 222.4
+    },
+    {
+      "module": "perfil",
+      "before_ready_ms": 519,
+      "after_ready_ms": 421,
+      "reduction_percent": 18.9,
+      "before_ttfb_ms": 222.9,
+      "after_ttfb_ms": 235.5
+    },
+    {
+      "module": "eventos",
+      "before_ready_ms": 413,
+      "after_ready_ms": 315,
+      "reduction_percent": 23.7,
+      "before_ttfb_ms": 187.3,
+      "after_ttfb_ms": 206.7
+    },
+    {
+      "module": "hub",
+      "before_ready_ms": 419,
+      "after_ready_ms": 343,
+      "reduction_percent": 18.1,
+      "before_ttfb_ms": 201.1,
+      "after_ttfb_ms": 223.8
+    },
+    {
+      "module": "galeria",
+      "before_ready_ms": 370,
+      "after_ready_ms": 332,
+      "reduction_percent": 10.3,
+      "before_ttfb_ms": 179.5,
+      "after_ttfb_ms": 229.6
+    },
+    {
+      "module": "foros",
+      "before_ready_ms": 495,
+      "after_ready_ms": 295,
+      "reduction_percent": 40.4,
+      "before_ttfb_ms": 178.2,
+      "after_ttfb_ms": 199.8
+    },
+    {
+      "module": "directorio",
+      "before_ready_ms": 541,
+      "after_ready_ms": 461,
+      "reduction_percent": 14.8,
+      "before_ttfb_ms": 201,
+      "after_ttfb_ms": 202.3
+    },
+    {
+      "module": "centro-conocimiento",
+      "before_ready_ms": 510,
+      "after_ready_ms": 325,
+      "reduction_percent": 36.3,
+      "before_ttfb_ms": 196.4,
+      "after_ttfb_ms": 211.7
+    },
+    {
+      "module": "asistente",
+      "before_ready_ms": 439,
+      "after_ready_ms": 304,
+      "reduction_percent": 30.8,
+      "before_ttfb_ms": 265.7,
+      "after_ttfb_ms": 220.5
+    },
+    {
+      "module": "aliados",
+      "before_ready_ms": 410,
+      "after_ready_ms": 322,
+      "reduction_percent": 21.5,
+      "before_ttfb_ms": 186.3,
+      "after_ttfb_ms": 215.5
+    },
+    {
+      "module": "mensajeria",
+      "before_ready_ms": 464,
+      "after_ready_ms": 406,
+      "reduction_percent": 12.5,
+      "before_ttfb_ms": 199.7,
+      "after_ttfb_ms": 220.5
+    },
+    {
+      "module": "contacto",
+      "before_ready_ms": 364,
+      "after_ready_ms": 299,
+      "reduction_percent": 17.9,
+      "before_ttfb_ms": 179.9,
+      "after_ttfb_ms": 216.7
+    },
+    {
+      "module": "administracion",
+      "before_ready_ms": 414,
+      "after_ready_ms": 337,
+      "reduction_percent": 18.6,
+      "before_ttfb_ms": 208.3,
+      "after_ttfb_ms": 235.1
+    }
+  ],
+  "aggregate": {
+    "metric": "Arithmetic mean of the 13 per-module median ready times",
+    "before_ms": 452.2,
+    "after_ms": 351.7,
+    "reduction_percent": 22.2
+  },
+  "bootstrap_rest": {
+    "before": 39,
+    "after": 0
+  },
+  "sql_samples": [
+    {
+      "route": "content/hub",
+      "before_median_queries": 58.0,
+      "after_median_queries": 46.0,
+      "before_responses": 6,
+      "after_responses": 6
+    },
+    {
+      "route": "content/resource",
+      "before_median_queries": 61,
+      "after_median_queries": 47,
+      "before_responses": 9,
+      "after_responses": 9
+    },
+    {
+      "route": "content/forum",
+      "before_median_queries": 28,
+      "after_median_queries": 26,
+      "before_responses": 3,
+      "after_responses": 3
+    },
+    {
+      "route": "content/ally",
+      "before_median_queries": 36,
+      "after_median_queries": 30,
+      "before_responses": 3,
+      "after_responses": 3
+    }
+  ],
+  "phpunit": {
+    "tests": 682,
+    "assertions": 7625,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "coverage_collected": false
+  },
+  "portable_checks": 49,
+  "browser": {
+    "load_checks": [
+      "HTML privado contiene solo el arranque autorizado del usuario y evita GET bootstrap; REST mantiene sus permisos",
+      "Si falta el arranque incluido en HTML, usa bootstrap REST y carga el perfil",
+      "Inicio y cabecera comparten una sola consulta simultánea de notificaciones",
+      "Navega a Perfil mientras Hub sigue pendiente, conserva el documento y descarta la respuesta anterior",
+      "Recursos y filtros de autores comienzan en paralelo",
+      "Un GET fallido no queda en caché: Reintentar vuelve al servidor y recupera Hub",
+      "Usuarios carga directamente su bandeja; Resumen solicita sus datos sin auditoría, y la API completa sigue compatible"
+    ],
+    "profile_directory_checks": [
+      "Se conserva el inicio administrativo, un logo y la navegación superior del último pull",
+      "El administrador guarda su perfil sin casillas sociales ni error checked y el cambio persiste",
+      "Nombre, cargo, empresa, biografía y los tres grupos mínimos muestran el indicador obligatorio",
+      "Desde Directorio abre Actividad e intereses y vuelve sin perder la vista ni habilitar networking administrativo",
+      "Administración asigna Empresa asociada desde el Directorio con solo dos tipos y regresa al listado",
+      "La API rechaza tipos arbitrarios y conserva el tipo administrativo anterior",
+      "Gestión conserva suspensión y reactivación reales, y la confirmación de eliminación existente",
+      "El asociado ve el tipo asignado pero no puede alterarlo ni forzándolo por REST",
+      "El Directorio del asociado usa Conectar y Pendiente; cancelar sigue disponible en su menú y funciona"
+    ],
+    "errors": [],
+    "accessibility_views": 6,
+    "automated_wcag_a_aa_violations": 0
+  },
+  "coverage": {
+    "collected": false,
+    "previous_reports_unchanged": true,
+    "sha256": {
+      "clover.xml": "2008bce81b5693cc82662820d8ff8aa19004cdacc082295365e906b6b9d90709",
+      "junit.xml": "bea4733ddbfab15f29230c5b08f1c7aac5a9586fc4ad87c7ea4ad503c47440ae",
+      "lcov.info": "c68411ab949218a79986a9548e775a364d0535dfe58cb248f65389e8523adb10",
+      "source-revision": "5e9488a9dd2e9101025ac5963ac77c71771b7b8bc6d0ac170896e53374b6fa39"
+    }
+  },
+  "package": {
+    "files": 190,
+    "sha256": "6a445bf30213f838ced1ab25d973104abdfe4ba42c7024930793a57c92983df3",
+    "production_matches_tested_snapshot": true,
+    "manifest": "docs/evidence/release-1.10.8/package.json"
+  },
+  "cleanup": {
+    "temporary_wordpress_projects_removed": true,
+    "temporary_environment_files_removed": true
+  },
+  "artifacts": [
+    {
+      "path": "test-results/load108-20261017T055408Z-5670/load108-before.json",
+      "sha256": "91d2c0cfec9c0b2d0acc3142ee577028c264c671f09b545e0d04910e360cb520"
+    },
+    {
+      "path": "test-results/load108-20261017T055408Z-5670/load108-after.json",
+      "sha256": "dca698672fc5f6cf9ac49297f0b21cc6f5f14501e3e5779de52b5d3dc1db6d65"
+    },
+    {
+      "path": "test-results/load108-20261017T055408Z-5670/cleanup.log",
+      "sha256": "f9c1f78fa9e360e38addd21d6955ccb13465fb14f29202eb94090a6e515b3b82"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/junit.xml",
+      "sha256": "a5b9c2a18b210a623e4d66a4ea4dd2d4505b5f8bd30bf560454b4f0a583d44a5"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/phpunit.log",
+      "sha256": "5cab26d998bc7fe006bdb1cc3f083ba10d98dab2ef7e8eeba4765cd3bb64cb8e"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/sanity.log",
+      "sha256": "8755860c11c8d3f9a1de749e02b68760d94f38c5cd87cadef867e4a455591434"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/load108-flows.json",
+      "sha256": "a0c7f543d65c54b7cc1190079ead36a0b692699afafe15ba932e2f57e48b96d9"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/profile-directory108.json",
+      "sha256": "46546c4ac68ef007f8d981890843ca23285deb8f87a0a97c1bda85badbe2c55e"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/fixture-cleanup.log",
+      "sha256": "ae10dc1a0e784b43e73dbf9dc7cf25d314f518b09788c900cb19c293d9ace29a"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/cleanup.log",
+      "sha256": "0fabd4fe48b7252efd141c5554661ca7ca8a8e16d380cf1d4faa783d7b2a0659"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/load108-hub-recovered.png",
+      "sha256": "07d91598a3d35ff9455476e3ab005ae035e90af2da8dde74a894a1fac6361913"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/load108-admin-overview.png",
+      "sha256": "0b9a93441ef6b4e054f4f53dcfe073cd0fb0d09c9ed0fcaa55b60854a26af377"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/profile-admin-required-desktop.png",
+      "sha256": "136258e5c9238725eb63aa71f317d3b1b03e388bd025bbfa0a79b87b426348dc"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/profile-admin-required-mobile.png",
+      "sha256": "7bc9d679404bdb9a271b879c537072af19931818d452c655e472790581571ba4"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/directory-admin-desktop.png",
+      "sha256": "7a7c3f05c762dcd38017a70c28ad56cd149bcd98f045364dd37b69fd0d77d817"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/directory-admin-mobile.png",
+      "sha256": "a6da7f383378d6f83846e46bc2b94ff4d86c48b81716e9523e5be61b59cca891"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/directory-member-desktop.png",
+      "sha256": "58da60f8eaa29cb2ae859a2fad542b28a923618e197ec55be220eda8a8853f45"
+    },
+    {
+      "path": "test-results/load108-regression-20261017T054803Z-5076/directory-member-mobile.png",
+      "sha256": "2c01ec661db9a3a9d6d6266bd9ac2e0b725a0b6ded5ea993c60456f9d9a7a7e5"
+    },
+    {
+      "path": "test-results/load108-run.sh",
+      "sha256": "ec4e8e930b048fab0be98555c0ea2686e7fa00ba8c67a96fbef7471f47704c9d"
+    },
+    {
+      "path": "test-results/load108-benchmark.cjs",
+      "sha256": "3174adaf38257223f6026007a95a04d0b800ad92273543bba4ed85b16bbaaf4d"
+    },
+    {
+      "path": "test-results/load108-regression.sh",
+      "sha256": "e47bce38d76e4c4316e613c466d3f5b96119e03da53b38b45d734c50958a18b8"
+    },
+    {
+      "path": "test-results/load108-flows.cjs",
+      "sha256": "fac62bc9db5600405f49ac6e83b8e7e9916c0f166fdf7bf83cfb754199306a50"
+    },
+    {
+      "path": "test-results/load108-probe.php",
+      "sha256": "4a447b8c0bd04f2f190a7355c5968be53d1ba98936ac3d43716e49660723c207"
+    }
+  ]
+}

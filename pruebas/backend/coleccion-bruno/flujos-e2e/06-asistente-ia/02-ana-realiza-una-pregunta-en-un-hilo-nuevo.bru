@@ -1,0 +1,41 @@
+meta {
+  name: 02. Ana realiza una pregunta en un hilo nuevo
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/ask
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAna}}
+  X-WP-Nonce: {{nonceAna}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:pre-request {
+  bru.setCollectionVar("hiloAsistente", "ascla_prueba_"+Date.now());
+  bru.setCollectionVar("preguntaAsistente", "¿Qué eventos próximos hay en ASCLA?");
+  req.setBody({question:bru.getCollectionVar("preguntaAsistente"),thread:bru.getCollectionVar("hiloAsistente")});
+}
+
+script:post-response {
+  if(res.getStatus()===200) bru.setCollectionVar("trabajoAsistenteId", Number(res.getBody().id));
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Se crea un trabajo pendiente con ID real", function () { expect(Number(res.getBody().id)).to.be.above(0);expect(res.getBody().status).to.equal("pending"); });
+}

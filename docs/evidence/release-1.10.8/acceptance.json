@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-14",
+  "scope": "Instructions (1).md: puntos 1 y 2; excepción a Jenkins confirmada por el usuario",
+  "version": "1.10.8",
+  "commit": "d01e3d12b6c404ba5aaa9fc4648f5989565bf590",
+  "working_tree": "uncommitted",
+  "integration_requests": 10,
+  "integration_checks": 15,
+  "backend_e2e_requests": 23,
+  "backend_e2e_checks": 38,
+  "frontend_journeys": 3,
+  "videos_per_run": 5,
+  "successful_reports": [
+    "test-results/acceptance-20261015T015036Z-2480",
+    "test-results/acceptance-20261015T015243Z-2906"
+  ],
+  "local_modes_validated": [
+    "ephemeral",
+    "deployed_on_temporary_local_qa"
+  ],
+  "real_remote_qa_validated": false,
+  "php_rerun": false,
+  "new_coverage": false,
+  "guide": "docs/QA_HTTP_E2E.md",
+  "limitations": "Flujos enumerados; no todos los endpoints, navegadores ni proveedores. Sin despliegue o Quality Gate remoto. No modifica versión ni esquema. Las 529 pruebas PHP/84,36 % conservan su evidencia anterior."
+}
