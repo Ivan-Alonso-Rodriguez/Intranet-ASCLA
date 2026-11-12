@@ -297,7 +297,6 @@ html[data-ascla-theme="dark"] {
 }
 html[data-ascla-theme="dark"] #ascla-root .ascla-sidebar { background: var(--sidebar-surface); border-color: var(--line); }
 html[data-ascla-theme="dark"] #ascla-root .ascla-header { background: var(--surface); }
-html[data-ascla-theme="dark"] #ascla-root .btn.danger { color: #fff; background: var(--ascla-danger); border-color: var(--ascla-danger); }
 html[data-ascla-theme="dark"] #ascla-root .btn.ghost { background: transparent; color: var(--blue); }
 html[data-ascla-theme="dark"] #ascla-root :is(.field input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]), .field select, .field textarea, .filters input:not([type="checkbox"], [type="radio"]), .filters select, .assistant-compose textarea) { background-color: var(--bg); color: var(--ink); border-color: var(--control-border); }
 html[data-ascla-theme="dark"] #ascla-root .directory-search { border-top-color: var(--ascla-brand-blue); }
@@ -639,3 +638,4 @@ html[data-ascla-theme] #ascla-root .btn.danger { color: var(--ascla-danger); bac
 html[data-ascla-theme] #ascla-root .btn.primary.danger { color: #fff; background: var(--ascla-danger); border-color: var(--ascla-danger); }
 #ascla-root .account-recovery-status { margin-top: 14px; padding: 12px 14px; border-inline-start: 3px solid var(--blue); background: var(--blue-soft); color: var(--ink); border-radius: 3px; }
 #ascla-root .account-recovery-status[hidden] { display: none; }
+html[data-ascla-theme="dark"] #ascla-root .btn.danger { color: #fff; background: var(--ascla-danger); border-color: var(--ascla-danger); }
