@@ -153,9 +153,9 @@ final class Knowledge
 
         $structured=[];
         foreach (['frameworks','norms','conclusions','concepts','tags'] as $field) {
-            $structured[$field]=self::cleanStructuredList((array)($result[$field]??[]));
+            $structured[$field]=KnowledgeMaterial::cleanList((array)($result[$field]??[]));
         }
-        $info=self::cleanInfographic($result);
+        $info=KnowledgeMaterial::infographic($result);
 
         // Keep only timed excerpts grounded in timestamps actually present in the source and inside the detected duration.
         $grounded=$durationSeconds>0
@@ -221,16 +221,6 @@ final class Knowledge
         Audit::record('ai_enriched',$id,$ai->mode());
         return ['resource_id'=>$id,'capsule_ids'=>[],'hub_id'=>0,'mode'=>$ai->mode(),'video_mode'=>$videoMode,'duration_seconds'=>$durationSeconds,'topics'=>$autoTopics,'message'=>'Resumen y nota técnica integrados en la publicación original.'.($autoTopics?' Temas activados: '.implode(', ',$autoTopics).'.':'')];
     }
-    private static function cleanInfographic(array $result): array
-    {
-        $info=is_array($result['infographic']??null)?$result['infographic']:[];
-        foreach (['sections','key_points'] as $field) {
-            if (isset($info[$field])) { $info[$field]=self::cleanStructuredList((array)$info[$field]); }
-        }
-
-        return $info;
-    }
-
     private static function naturalizeVideoLanguage(string $text): string
     {
         if ($text==='') { return ''; }
@@ -238,19 +228,6 @@ final class Knowledge
         $text=preg_replace('/\b(?:la|esta) transcripci[oó]n\b/iu','el video',$text)??$text;
         $text=preg_replace('/\btranscripci[oó]n\b/iu','contenido del video',$text)??$text;
         return trim($text);
-    }
-    private static function cleanStructuredList(array $values): array
-    {
-        $clean=[];
-        foreach (array_slice($values,0,40) as $value) {
-            if (!is_string($value)) { continue; }
-            $value=trim(preg_replace('/\s+/u',' ',sanitize_text_field($value)));
-            if ($value==='') { continue; }
-            $plain=mb_strtolower(remove_accents(trim($value," \t\n\r\0\x0B.,;:–—-")));
-            if (in_array($plain,['participante','participantes','una persona','persona','dato reservado','informacion reservada','identidad reservada','organizacion reservada'],true)) { continue; }
-            $clean[]=$value;
-        }
-        return array_values(array_unique($clean));
     }
     private static function editorialContext(int $id): array
     {
@@ -453,6 +430,11 @@ final class KnowledgeAnswer
         return $videos && !$isVideo?null:[$title,$body,$digest,$meta];
     }
 
+    private static function rankScore(int $reference,bool $videos,array $query,string $title,string $body): int
+    {
+        return $reference || ($videos && !$query)?1:KnowledgeSearch::score($title,$body,$query);
+    }
+
     private static function ranked(array $query,array $tokens,bool $videos=false,int $author=0,int $reference=0,bool $latest=false): array
     {
         $ranked=[];$protected=false;$allIdentities=[];
@@ -463,7 +445,7 @@ final class KnowledgeAnswer
             [$title,$body,$digest,$meta]=$candidate;
             $identities=[];
             if (!empty($meta['chatham'])) { $identities=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[]; }
-            $score=$reference || ($videos && !$query)?1:KnowledgeSearch::score($title,$body,$query);
+            $score=self::rankScore($reference,$videos,$query,$title,$body);
             if ($score>0) {
                 $protected=$protected || !empty($meta['chatham']);
                 $allIdentities=array_merge($allIdentities,$identities);
@@ -518,26 +500,31 @@ final class KnowledgeAnswer
         return $images;
     }
 
+    private static function sourceDigests(array &$sources): array
+    {
+        $digests=[];
+        foreach ($sources as &$source) {
+            foreach (['video_digest'=>'video_digests','event_digest'=>'event_digests','gallery_digest'=>'gallery_digests'] as $field=>$key) {
+                if (!empty($source[$field])) { $digests[$key][$source['id']]=$source[$field]; }
+                unset($source[$field]);
+            }
+        }
+        unset($source);
+        return $digests;
+    }
+
     private static function generate(string $question,array $history,array $context,array $sources,bool $conversation,bool $protected,array $identities): array
     {
         $references=array_column($sources,'title');
         $inputQuestion=$protected?EntityRedactor::redact($question,$identities,$references):$question;
         $images=self::galleryImages($context,$sources);
-        $digests=[];$eventDigests=[];$galleryDigests=[];
-        foreach ($sources as $index=>$source) {
-            if (!empty($source['video_digest'])) { $digests[$source['id']]=$source['video_digest']; }
-            if (!empty($source['event_digest'])) { $eventDigests[$source['id']]=$source['event_digest']; }
-            if (!empty($source['gallery_digest'])) { $galleryDigests[$source['id']]=$source['gallery_digest']; }
-            unset($sources[$index]['video_digest'],$sources[$index]['event_digest'],$sources[$index]['gallery_digest']);
-        }
+        $digests=self::sourceDigests($sources);
         $history=EntityRedactor::cleanTree(array_map(static fn($turn)=>['question'=>$turn['question'],'answer'=>$turn['answer']],$history));
         if ($protected) { $history=EntityRedactor::tree($history,$identities,$references); }
         $result=EntityRedactor::cleanTree(Knowledge::provider()->generate('answer',['question'=>$inputQuestion,'sources'=>$sources,'live_context'=>$context['live'],'history'=>$history,'gallery_images'=>$images]));
         if ($protected) { $result=EntityRedactor::tree($result,$identities,$references); }
         $verified=Grounding::answer($result,$sources);
-        if ($digests) { $verified['grounding']['video_digests']=$digests; }
-        if ($eventDigests) { $verified['grounding']['event_digests']=$eventDigests; }
-        if ($galleryDigests) { $verified['grounding']['gallery_digests']=$galleryDigests; }
+        $verified['grounding']=array_merge($verified['grounding'],$digests);
         $verified['grounding']['live_context_used']=!empty($context['answerable']);
         $verified['grounding']['conversation_only']=$conversation&&!$sources&&!$context['answerable'];
         $verified['grounding']['snapshot_at']=current_datetime()->format(DATE_ATOM);

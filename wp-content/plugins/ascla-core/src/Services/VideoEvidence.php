@@ -15,11 +15,7 @@ final class VideoEvidence
 
         $lines=[];
         $append=static function(string $label,mixed $values) use (&$lines): void {
-            foreach ((array)$values as $value) {
-                if (!is_string($value)) { continue; }
-                $value=trim(wp_strip_all_tags($value));
-                if ($value!=='') { $lines[$label.' · '.$value]=true; }
-            }
+            self::appendValues($lines,$label,$values);
         };
         foreach (['summary'=>'Resumen','technical_note'=>'Nota técnica','conclusions'=>'Conclusión','frameworks'=>'Marco','norms'=>'Norma','concepts'=>'Concepto','tags'=>'Etiqueta','ai_topics'=>'Tema','suggested_hub'=>'Texto sugerido para el Hub'] as $key=>$label) {
             $append($label,$meta[$key]??[]);
@@ -35,6 +31,15 @@ final class VideoEvidence
             $text=EntityRedactor::redact($text,preg_split('/[\r\n,;]+/u',(string)($meta['identities']??''))?:[]);
         }
         return $text;
+    }
+
+    private static function appendValues(array &$lines,string $label,mixed $values): void
+    {
+        foreach ((array)$values as $value) {
+            if (!is_string($value)) { continue; }
+            $value=trim(wp_strip_all_tags($value));
+            if ($value!=='') { $lines[$label.' · '.$value]=true; }
+        }
     }
 
     private static function appendTimeline(array $info,callable $append): void

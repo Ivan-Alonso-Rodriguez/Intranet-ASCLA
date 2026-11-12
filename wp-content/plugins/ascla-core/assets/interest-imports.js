@@ -1,6 +1,12 @@
 /* Reviewed imports are processed in resumable server batches; no user data changes on upload. */
 (() => {
   'use strict';
+  function orderedHeader(header,first,last) {
+    return header.toLowerCase().split(/[\r\n]/).some(line=>{
+      const start=line.indexOf(first);
+      return start>=0 && line.indexOf(last,start+first.length)>=0;
+    });
+  }
   globalThis.ASCLAInterestImports=({root,api,E,T,I,modal,closeModal,toast,date,onCatalogChange})=>{
     let panel, csv='',filename='',mime='',source={},inspected,record,running=false,historyPage=1,generation=0;
     const L=t=>E(T(t));const B=(text,key,attrs='',style='')=>`<button type="button" class="btn ${style}" data-import-action="${key}" ${attrs}>${L(text)}</button>`;
@@ -161,9 +167,9 @@
             <legend>${L('Relacionar las respuestas')}</legend>
             <p class="import-hint">${L('Selecciona las columnas que contienen intereses. Si el archivo trata de un evento, puedes proponer sus temas para revisarlos.')}</p>
             <div class="form-grid">
-              ${choices('structured','Temas seleccionados en el formulario',/3.*tema|temas.*valor|tem[aá]tica|intereses/i)}
+              ${choices('structured','Temas seleccionados en el formulario',{test:header=>orderedHeader(header,'3','tema') || orderedHeader(header,'temas','valor') || /tem[aá]tica|intereses/i.test(header)})}
               ${choices('free','Respuesta abierta / Otros',/otros|respuesta abierta|texto libre/i)}
-              ${choices('event_text','Eventos elegidos / tema contextual',/escoge.*event|evento.*particip|eventos elegidos/i)}
+              ${choices('event_text','Eventos elegidos / tema contextual',{test:header=>orderedHeader(header,'escoge','event') || orderedHeader(header,'evento','particip') || /eventos elegidos/i.test(header)})}
               <label class="field"><span>${L('Tema del formulario o evento (opcional)')}</span>
                 <input name="context" maxlength="1000" value="${E(source.context||'')}">
               </label>
@@ -283,7 +289,7 @@
       try{await processBatches(ticket);}
       finally{if(ticket===generation){running=false;render();}}
     }
-    async function work(control,fn){if(control.disabled)return;const label=control.textContent;control.disabled=true;try{await fn();}catch(e){toast(T(e.message));}finally{control.disabled=false;if(control.isConnected)control.textContent=label;}}
+    async function work(control,fn){if(control.disabled){return;}const label=control.textContent;control.disabled=true;try{await fn();}catch(e){toast(T(e.message));}finally{control.disabled=false;if(control.isConnected){control.textContent=label;}}}
     async function aiAction(a,b) {
       if(a==='ai-test'){const result=await api('admin/interest-imports/ai-test',{});modal(T('Diagnóstico IA · Google Forms'),`<p>${L('Conexión y contrato de clasificación correctos.')}</p><dl><dt>${L('Proveedor')}</dt><dd>${E(result.provider)}</dd><dt>${L('Modelo')}</dt><dd>${E(result.model||'—')}</dd><dt>${L('Confianza devuelta')}</dt><dd>${L(result.confidence)}</dd><dt>${L('IDs válidos')}</dt><dd>${result.topics.map(t=>("" + (E(t.name)) + " (#" + (t.id) + ")")).join(', ')}</dd></dl><p class="private-note">${L('La prueba usa texto sintético y el catálogo actual; no envía respuestas, correos ni perfiles de asociados.')}</p>`);}
       else if(a==='ai'){await api(endpoint()+`/rows/${Number(b.dataset.row)}/ai`,{});record=await api(endpoint()+'?page='+record.page);render();}

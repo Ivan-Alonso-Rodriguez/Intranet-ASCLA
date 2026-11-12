@@ -32,15 +32,20 @@ final class GalleryEvidence
             }
             $ranked[]=$source;
         }
-        if (!$latest && !$reference) { usort($ranked,static fn($a,$b)=>$b['score']<=>$a['score']); }
-        $specific=$reference || $latest || ($tokens && (!isset($ranked[1]) || $ranked[0]['score']>$ranked[1]['score']));
-        $sources=array_slice($ranked,0,$specific?1:8);
+        $sources=self::selectSources($ranked,$latest,$reference,$tokens);
         foreach ($sources as &$source) {
             $source['gallery_digest']=self::digest(get_post($source['id']));
             if ($protected) { $source['files']=\ASCLA\Core\Domain\EntityRedactor::tree($source['files'],$identities,array_column($sources,'title')); }
         }
         unset($source);
         return ['sources'=>$sources,'protected'=>$protected,'identities'=>$identities,'request'=>count($sources)>1?'choose':'answer'];
+    }
+
+    private static function selectSources(array $ranked,bool $latest,int $reference,array $tokens): array
+    {
+        if (!$latest && !$reference) { usort($ranked,static fn($a,$b)=>$b['score']<=>$a['score']); }
+        $specific=$reference || $latest || ($tokens && (!isset($ranked[1]) || $ranked[0]['score']>$ranked[1]['score']));
+        return array_slice($ranked,0,$specific?1:8);
     }
 
     private static function reference(string $plain,array $history): int

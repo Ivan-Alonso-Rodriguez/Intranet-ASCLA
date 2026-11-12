@@ -279,7 +279,7 @@
     return [...(scope?.querySelectorAll('form[data-form="comment"],form[data-form="comment-reply"]') || [])]
       .filter(form => form.elements.body?.value.trim());
   }
-  function confirmCommentExit(forms) {
+  async function confirmCommentExit(forms) {
     if (!forms.length) return true;
     if (commentExitResolver) return false;
     return new Promise(resolve => {
@@ -774,13 +774,14 @@
   async function confirmUnsavedExit() {
     if (!(await confirmGuardedDialog())) return false;
     const comments = [...dirtyComments(), ...modalHistory.flatMap(entry=>dirtyComments(entry.node))];
-    if (comments.length) return confirmCommentExit(comments).then(leave=>{
+    if (comments.length) {
+      const leave=await confirmCommentExit(comments);
       if (!leave) return false;
       for (const form of comments) form.reset();
       return confirmUnsavedExit();
-    });
-    if (!hasUnsavedChanges()) return Promise.resolve(true);
-    if (S.pendingUnsavedResolver) return Promise.resolve(false);
+    }
+    if (!hasUnsavedChanges()) return true;
+    if (S.pendingUnsavedResolver) return false;
     return new Promise(resolve => {
       modal(T("Cambios sin guardar"), `<p class="detail-body">${E(T("Has realizado cambios que todavía no se han guardado."))}</p><p class="private-note">${E(T("¿Quieres guardar los cambios antes de salir?"))}</p><div class="form-actions">${btn(T("Seguir editando"), "unsaved-stay")}${btn(T("Descartar cambios"), "unsaved-discard", "", "danger")}${btn(I("check")+" "+T("Guardar cambios y salir"), "unsaved-save", "", "primary")}</div>`);
       S.pendingUnsavedResolver = resolve;
@@ -2357,8 +2358,9 @@
           return;
         }
       } catch (error) {
-        // A transient polling failure is retried while this proposal remains open.
         if (!target.isConnected) return;
+        // Display the current failure while retrying this transient read.
+        target.innerHTML='<p class="private-note" role="status">'+E(error.message)+'</p>';
       }
       setTimeout(poll,2500);
     };
