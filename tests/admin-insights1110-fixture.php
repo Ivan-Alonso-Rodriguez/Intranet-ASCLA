@@ -12,9 +12,10 @@ if (getenv('ASCLA_FIXTURE_ACTION')==='repair_finished') {
     foreach (get_posts(['post_type'=>'ascla_event','post_status'=>'publish','author'=>$admin->ID,'title'=>'Experiencias compartidas en la gestión de riesgos']) as $post) MicroLifecycle::history($post->ID,'finished','Encuentro sintético finalizado.');
     echo '{}';return;
 }
-$topic=(int)wp_insert_term('Gobierno corporativo y gestión de riesgos · panel de prueba','ascla_interest')['term_id'];
-$other=(int)wp_insert_term('Sostenibilidad y colaboración · panel de prueba','ascla_interest')['term_id'];
-$empty=(int)wp_insert_term('Sin eventos · panel de prueba','ascla_interest')['term_id'];
+$suffix=' · '.bin2hex(random_bytes(4));
+$topic=(int)wp_insert_term('Gobierno corporativo y gestión de riesgos · panel de prueba'.$suffix,'ascla_interest')['term_id'];
+$other=(int)wp_insert_term('Sostenibilidad y colaboración · panel de prueba'.$suffix,'ascla_interest')['term_id'];
+$empty=(int)wp_insert_term('Sin eventos · panel de prueba'.$suffix,'ascla_interest')['term_id'];
 $events=[];
 foreach ([-3,-8,-15,-100,-115] as $i=>$offset) {
     $start=time()+$offset*DAY_IN_SECONDS;

@@ -885,6 +885,9 @@ msgstr "Buscar en tu comunidad…"
 msgid "Buscar evento"
 msgstr "Buscar evento"
 
+msgid "Buscar invitados"
+msgstr "Buscar invitados"
+
 msgid "Buscar perfiles"
 msgstr "Buscar perfiles"
 
@@ -2537,6 +2540,9 @@ msgstr "Enviar a revisión"
 
 msgid "Enviar enlace de recuperación"
 msgstr "Enviar enlace de recuperación"
+
+msgid "Enviar invitaciones"
+msgstr "Enviar invitaciones"
 
 msgid "Enviar mensaje"
 msgstr "Enviar mensaje"
@@ -4680,6 +4686,9 @@ msgstr "Nombre similar: revisa la identidad"
 msgid "Nombre, cargo, empresa o experiencia…"
 msgstr "Nombre, cargo, empresa o experiencia…"
 
+msgid "Nombre, empresa o interés"
+msgstr "Nombre, empresa o interés"
+
 msgid "Nombre, tipo de convenio o descripción…"
 msgstr "Nombre, tipo de convenio o descripción…"
 
@@ -6302,6 +6311,9 @@ msgstr "Sin invitación registrada"
 
 msgid "Sin leer"
 msgstr "Sin leer"
+
+msgid "Sin límite"
+msgstr "Sin límite"
 
 msgid "Sin límite de cupos"
 msgstr "Sin límite de cupos"

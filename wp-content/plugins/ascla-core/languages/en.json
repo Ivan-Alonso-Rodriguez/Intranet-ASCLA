@@ -2443,5 +2443,9 @@
   "Si el organizador tiene Google Calendar conectado, se enviará también la invitación oficial por correo.": "If the organizer has Google Calendar connected, the official invitation will also be emailed.",
   "Tu seguridad": "Your security",
   "Conversa con el asistente sobre eventos, publicaciones, recursos, galerías y conexiones. Primero consulta la información disponible en la propia intranet.": "Chat with the assistant about events, posts, resources, galleries, and connections. It first checks information available within the intranet.",
-  "Hola. Puedo revisar lo que hay en ASCLA y ayudarte a encontrar eventos próximos, publicaciones recientes, recursos, galerías y conexiones recomendadas. ¿Qué quieres saber?": "Hello. I can check ASCLA and help you find upcoming events, recent posts, resources, galleries, and recommended connections. What would you like to know?"
+  "Hola. Puedo revisar lo que hay en ASCLA y ayudarte a encontrar eventos próximos, publicaciones recientes, recursos, galerías y conexiones recomendadas. ¿Qué quieres saber?": "Hello. I can check ASCLA and help you find upcoming events, recent posts, resources, galleries, and recommended connections. What would you like to know?",
+  "Buscar invitados": "Search invitees",
+  "Enviar invitaciones": "Send invitations",
+  "Nombre, empresa o interés": "Name, company or interest",
+  "Sin límite": "Unlimited"
 }

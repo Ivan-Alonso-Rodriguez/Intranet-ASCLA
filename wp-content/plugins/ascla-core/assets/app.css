@@ -3197,7 +3197,7 @@ html[data-ascla-theme="dark"] #ascla-root .image-editor-close:hover { background
 }
 
 /* v1.9.11 moderation state */
-.admin-report.is-reviewed{opacity:.78}
+.admin-report.is-reviewed{background:var(--bg)}
 .admin-report-heading{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .tag.success{border-color:var(--state-border);background:var(--state-bg);color:var(--state-ink)}
 

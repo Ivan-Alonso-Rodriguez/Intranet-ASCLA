@@ -108,6 +108,8 @@ dc run --rm cli wp eval '
 '
 dc run --rm cli wp ascla seed
 
+dc exec -T wordpress env ASCLA_PLUGIN_ROOT=/var/www/html/wp-content/plugins/ascla-core php /opt/ascla-tests/release-sanity.php
+
 echo 'Preparando PHPUnit y PCOV...'
 dc exec -T -u 0 wordpress sh -c '
   set -e
@@ -149,7 +151,6 @@ dc exec -T wordpress php \
   /tmp/ascla-tests/php
 
 collect_php_reports
-dc exec -T wordpress env ASCLA_PLUGIN_ROOT=/var/www/html/wp-content/plugins/ascla-core php /opt/ascla-tests/release-sanity.php
 
 printf '%s' '{"action":"setup"}' | dc exec -T wordpress php /opt/ascla-tests/statistics-fixture.php > test-results/statistics-fixture.json
 dc exec -T -e ASCLA_E2E_EPHEMERAL=1 wordpress php /opt/ascla-tests/events108-fixture.php > test-results/events108-fixture.json

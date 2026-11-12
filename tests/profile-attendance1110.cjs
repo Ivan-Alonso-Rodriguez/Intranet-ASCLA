@@ -17,7 +17,7 @@ async function editUser(p,actor){await go(p,'administracion/?section=usuarios');
  const anon=await context('recuperacion');await anon.goto(fixture.base+'/login/');await anon.locator('#nav a').click();await anon.locator('#lostpasswordform').waitFor();
  assert.equal(await anon.locator('#nav a').first().getAttribute('href'),fixture.base+'/login/');await anon.locator('#nav a').first().click();await anon.waitForURL(/\/login\/$/);
  await anon.locator('#nav a').click();await anon.locator('#user_login').fill('unknown-synthetic@example.invalid');await anon.locator('#wp-submit').click();await anon.getByText(/Si existe una cuenta asociada/).waitFor();assert.equal(await anon.locator('#nav a').first().getAttribute('href'),fixture.base+'/login/');await shot(anon,'recuperacion-comunidad');
- await anon.goto(fixture.base+'/wp-login.php?action=lostpassword');assert.match(await anon.locator('#nav a').first().getAttribute('href'),/wp-login\.php$/);
+ await anon.goto(fixture.base+'/wp-login.php?action=lostpassword&ascla_login_context=admin');assert.match(await anon.locator('#nav a').first().getAttribute('href'),/wp-login\.php$/);
  pass('Recuperación y confirmación vuelven al login de comunidad; la recuperación administrativa conserva su acceso');
  const member=await login(fixture.actors.member,'perfil');await go(member,'perfil/');const profile=member.locator('[data-form="profile"]');await profile.waitFor();assert.equal(await profile.locator('.profile-summary .avatar img').count(),1);
  await profile.locator('[data-action="profile-photo-reset"]').click();assert.equal(await profile.locator('[name="photo_id"]').inputValue(),'0');assert.equal(await profile.locator('.profile-summary .avatar img').count(),0);

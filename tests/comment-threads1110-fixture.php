@@ -15,7 +15,7 @@ $make=static function(int $post,int $user,string $body,int $parent=0,string $sta
 };
 foreach (['hub','topic','forum','gallery','resource','event'] as $type) {
     foreach (get_posts(['post_type'=>'ascla_'.$type,'post_status'=>'any','author'=>$admin->ID,'title'=>'Conversaciones de nuestra comunidad · '.$type,'numberposts'=>-1]) as $old) wp_delete_post($old->ID,true);
-    $meta=$type==='event'?['start'=>'2026-11-15T09:00:00-05:00','end'=>'2026-11-15T10:00:00-05:00','capacity'=>100,'location'=>'Comunidad ASCLA','modality'=>'Virtual']:[];
+    $meta=$type==='event'?['start'=>gmdate('c',time()+7*DAY_IN_SECONDS),'end'=>gmdate('c',time()+7*DAY_IN_SECONDS+3600),'capacity'=>100,'url'=>'https://example.invalid/ascla-meeting','modality'=>'Virtual']:[];
     $post=Content::save($type,['title'=>'Conversaciones de nuestra comunidad · '.$type,'body'=>'Un espacio para compartir experiencias, aprender y conectar.','status'=>'publish','meta'=>$meta]);
     $id=(int)$post['id'];$root=$make($id,$bruno->ID,'¿Qué experiencia les gustaría compartir con la comunidad?');$replies=[];$parent=$root;
     foreach (range(1,13) as $n) {

@@ -26,7 +26,7 @@ module.exports=async function({fixture,out}) {
         assert.equal(await page.locator('.ascla-sidebar').count(),1);
         if(actor==='admin'){
           await page.getByRole('heading',{name:'Administración ASCLA',exact:true}).waitFor();
-          await page.locator('#admin-panel h2').waitFor();
+          await page.getByRole('heading',{name:'Resumen de actividad',exact:true}).waitFor();
           const nav=await page.locator('.admin-tabs').boundingBox(),panel=await page.locator('#admin-panel').boundingBox();
           assert.ok(nav.y+nav.height<=panel.y+1,'Las secciones van encima del panel.');
           assert.equal(await page.locator('.ascla-sidebar .nav-link[href*="administracion"]').count(),1);

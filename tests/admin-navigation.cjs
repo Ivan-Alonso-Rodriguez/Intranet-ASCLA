@@ -22,14 +22,14 @@ async function test(name,action){try{await action();results.push({name,status:'p
    await admin.goto(fixture.base+'/intranet/');assert.equal(new URL(admin.url()).pathname,'/administracion/');await admin.locator('.admin-tabs').waitFor();
   });
   await test('Escritorio: un logo visible y las secciones de administración encima del contenido',async()=>{
-   await admin.locator('#admin-panel h2').waitFor();assert.equal(await admin.locator('#ascla-root .brand img:visible').count(),1);
+   await admin.getByRole('heading',{name:'Resumen de actividad',exact:true}).waitFor();assert.equal(await admin.locator('#ascla-root .brand img:visible,#ascla-root .header-brand img:visible').count(),1);
    assert.equal(await admin.locator('.ascla-sidebar').count(),1);
    const nav=await admin.locator('.admin-tabs').boundingBox(),panel=await admin.locator('#admin-panel').boundingBox();
    assert.ok(nav.y+nav.height<=panel.y+1);assert.ok(Math.abs(nav.x-panel.x)<2);assert.ok(nav.width>=panel.width-2);
    assert.equal(await admin.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
    await admin.screenshot({path:path.join(out,'administracion-claro.png'),fullPage:true});
-   await admin.evaluate(()=>localStorage.setItem('ascla-theme','dark'));await admin.reload();await admin.locator('#admin-panel h2').waitFor();
-   assert.equal(await admin.locator('#ascla-root .brand img:visible').count(),1);await admin.screenshot({path:path.join(out,'administracion-oscuro.png'),fullPage:true});
+   await admin.evaluate(()=>localStorage.setItem('ascla-theme','dark'));await admin.reload();await admin.getByRole('heading',{name:'Resumen de actividad',exact:true}).waitFor();
+   assert.equal(await admin.locator('#ascla-root .brand img:visible,#ascla-root .header-brand img:visible').count(),1);await admin.screenshot({path:path.join(out,'administracion-oscuro.png'),fullPage:true});
   });
   await test('Las secciones administrativas mantienen su navegación',async()=>{
    for(const [tab,target] of [['usuarios','[data-form="admin-filter"][data-area="users"]'],['moderacion','.admin-review-grid'],['configuracion','[data-form="settings"]']]){
@@ -39,7 +39,7 @@ async function test(name,action){try{await action();results.push({name,status:'p
   });
   await test('Móvil: menú disponible, sin dos logos ni desbordamiento horizontal',async()=>{
    await admin.setViewportSize({width:390,height:844});assert.equal(await admin.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-   await admin.locator('[data-action="menu"]').click();await admin.locator('.ascla-sidebar.open').waitFor();assert.equal(await admin.locator('#ascla-root .brand img:visible').count(),1);
+   await admin.locator('[data-action="menu"]').click();await admin.locator('.ascla-sidebar.open').waitFor();assert.equal(await admin.locator('#ascla-root .brand img:visible,#ascla-root .header-brand img:visible').count(),1);
    await admin.screenshot({path:path.join(out,'administracion-movil.png'),fullPage:true});await admin.keyboard.press('Escape');await admin.setViewportSize({width:1440,height:1000});
   });
   member=await login('Asociado');

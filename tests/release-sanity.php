@@ -110,7 +110,7 @@ namespace {
     $assert(str_contains($deepseek,'https://api.deepseek.com/chat/completions') && str_contains($deepseek,"'response_format'=>['type'=>'json_object']"),'DeepSeek official API JSON transport');
     $assert(str_contains($settings,"'deepseek_model'=>'deepseek-flash'") && str_contains($settings,"'deepseek_key'"),'DeepSeek independent model and secret');
     $assert(str_contains($router,"'deepseek'=>\\ASCLA\\Core\\Integrations\\DeepSeekProvider::test()"),'DeepSeek connection probe route');
-    $assert(str_contains($importsJs,"Probar IA para Forms"),'Forms AI diagnostic admin control');
+    $assert(str_contains($importsJs,"B('Probar conexión de IA','ai-test')"),'Forms AI diagnostic admin control');
 
     // New administrative/profile UI must not fall back to Spanish in English mode.
     $translations=json_decode($read('wp-content/plugins/ascla-core/languages/en.json'),true);

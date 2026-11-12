@@ -885,6 +885,9 @@ msgstr "Search your community…"
 msgid "Buscar evento"
 msgstr "Search event"
 
+msgid "Buscar invitados"
+msgstr "Search invitees"
+
 msgid "Buscar perfiles"
 msgstr "Search profiles"
 
@@ -2537,6 +2540,9 @@ msgstr "Submit for review"
 
 msgid "Enviar enlace de recuperación"
 msgstr "Send recovery link"
+
+msgid "Enviar invitaciones"
+msgstr "Send invitations"
 
 msgid "Enviar mensaje"
 msgstr "Send message"
@@ -4680,6 +4686,9 @@ msgstr "Similar name: review the identity"
 msgid "Nombre, cargo, empresa o experiencia…"
 msgstr "Name, position, company, or experience…"
 
+msgid "Nombre, empresa o interés"
+msgstr "Name, company or interest"
+
 msgid "Nombre, tipo de convenio o descripción…"
 msgstr "Name, agreement type or description…"
 
@@ -6302,6 +6311,9 @@ msgstr "No invitation recorded"
 
 msgid "Sin leer"
 msgstr "Unread"
+
+msgid "Sin límite"
+msgstr "Unlimited"
 
 msgid "Sin límite de cupos"
 msgstr "No capacity limit"
