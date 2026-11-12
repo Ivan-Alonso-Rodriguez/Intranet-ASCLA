@@ -4,7 +4,7 @@
   function orderedHeader(header,first,last) {
     return header.toLowerCase().split(/[\r\n]/).some(line=>{
       const start=line.indexOf(first);
-      return start>=0 && line.indexOf(last,start+first.length)>=0;
+      return start>=0 && line.includes(last,start+first.length);
     });
   }
   globalThis.ASCLAInterestImports=({root,api,E,T,I,modal,closeModal,toast,date,onCatalogChange})=>{
