@@ -9,52 +9,69 @@ final class MicroEvents
     {
         sort($onlyIds);
         $month=($onlyIds?'demo-'.substr(hash('sha256',wp_json_encode($onlyIds)),0,12).'-':'').MicroPlanning::period();
-        return Store::atomic('micro:'.$month,static function () use($month,$onlyIds,$manualJob) {
-            $periodKey='ascla_micro_'.$month;
-            $manualKey='ascla_micro_manual_'.$month;
-            $existing=get_option($periodKey);
-            $recentTopics=[];
-            if ($manualJob) {
-                // A retried job gets its own batch back. A new button press has a different job ID.
-                $checkpoint=json_decode(Store::one('jobs',$manualJob)['result']??'null',true);
-                if (is_array($checkpoint) && isset($checkpoint['events'])) { return self::sanitizeResult($checkpoint); }
-                $recentTopics=(array)get_option($manualKey,[]);
-                if (!$recentTopics) {
-                    foreach ((array)($existing['events']??[]) as $id) {
-                        $meta=get_post_meta($id,'_ascla',true);
-                        if (!empty($meta['topic_id'])) { $recentTopics[$meta['topic_id']]=1; }
-                    }
-                }
-            } elseif (is_array($existing)) {
-                $current=self::sanitizeResult($existing);
-                if (!empty($current['events'])) {
-                    if ($current!==$existing) { WordPressWrites::option($periodKey,$current); }
-                    return array_replace($current,['reused'=>true,'diagnostics'=>self::diagnostics($onlyIds)]);
-                }
-                // A deleted proposal must not keep the month locked to stale post IDs.
-                delete_option($periodKey);
+        return Store::atomic('micro:'.$month,static fn()=>self::createLocked($month,$onlyIds,$manualJob));
+    }
+
+    private static function createLocked(string $month,array $onlyIds,int $manualJob): array
+    {
+        $periodKey='ascla_micro_'.$month;
+        $manualKey='ascla_micro_manual_'.$month;
+        $existing=get_option($periodKey);
+        $recentTopics=[];
+        $previous=self::previousBatch($existing,$periodKey,$onlyIds,$manualJob);
+        if ($previous!==null) { return $previous; }
+        if ($manualJob) { $recentTopics=self::recentTopics($manualKey,$existing); }
+        $profiles=self::eligible($onlyIds,$excluded);
+        $history=get_option('ascla_group_history',[]);
+        $blocked=self::blockedPairs($profiles);
+        $plan=MicroPlanning::plan($profiles,$history,$blocked,$recentTopics);
+        $ids=[];
+        foreach ($plan['groups'] as $group) {
+            $topic=$group['topic'];
+            $ids[]=self::proposal($group['members'],(bool)$onlyIds,$topic,$manualJob?($recentTopics[$topic]??0)+1:0);
+            $history=self::recordPairs($group['members'],$history);
+            $recentTopics[$topic]=($recentTopics[$topic]??0)+1;
+        }
+        $result=['events'=>$ids,'waiting'=>$plan['waiting'],'month'=>$month,'reused'=>false,
+            'diagnostics'=>MicroPlanning::diagnostics($profiles,$blocked,$plan)+['excluded'=>$excluded]];
+        if ($ids) {
+            if ($manualJob) { WordPressWrites::option($manualKey,$recentTopics); }
+            else { WordPressWrites::option($periodKey,$result); }
+            WordPressWrites::option('ascla_group_history',$history);
+        }
+        if ($manualJob) { Store::update('jobs',['result'=>wp_json_encode($result)],['id'=>$manualJob]); }
+        Audit::record('microevents_created',0,'groups_'.count($ids)); return $result;
+    }
+
+    private static function previousBatch(mixed $existing,string $periodKey,array $onlyIds,int $manualJob): ?array
+    {
+        if ($manualJob) {
+            // A retried job gets its own batch back; another button press has a different job ID.
+            $checkpoint=json_decode(Store::one('jobs',$manualJob)['result']??'null',true);
+            return is_array($checkpoint) && isset($checkpoint['events'])?self::sanitizeResult($checkpoint):null;
+        }
+        if (is_array($existing)) {
+            $current=self::sanitizeResult($existing);
+            if (!empty($current['events'])) {
+                if ($current!==$existing) { WordPressWrites::option($periodKey,$current); }
+                return array_replace($current,['reused'=>true,'diagnostics'=>self::diagnostics($onlyIds)]);
             }
-            $profiles=self::eligible($onlyIds,$excluded);
-            $history=get_option('ascla_group_history',[]);
-            $blocked=self::blockedPairs($profiles);
-            $plan=MicroPlanning::plan($profiles,$history,$blocked,$recentTopics);
-            $ids=[];
-            foreach ($plan['groups'] as $group) {
-                $topic=$group['topic'];
-                $ids[]=self::proposal($group['members'],(bool)$onlyIds,$topic,$manualJob?($recentTopics[$topic]??0)+1:0);
-                $history=self::recordPairs($group['members'],$history);
-                $recentTopics[$topic]=($recentTopics[$topic]??0)+1;
+            // Deleted proposals must not keep the month locked to stale IDs.
+            delete_option($periodKey);
+        }
+        return null;
+    }
+
+    private static function recentTopics(string $manualKey,mixed $existing): array
+    {
+        $topics=(array)get_option($manualKey,[]);
+        if (!$topics) {
+            foreach ((array)($existing['events']??[]) as $id) {
+                $meta=get_post_meta($id,'_ascla',true);
+                if (!empty($meta['topic_id'])) { $topics[$meta['topic_id']]=1; }
             }
-            $result=['events'=>$ids,'waiting'=>$plan['waiting'],'month'=>$month,'reused'=>false,
-                'diagnostics'=>MicroPlanning::diagnostics($profiles,$blocked,$plan)+['excluded'=>$excluded]];
-            if ($ids) {
-                if ($manualJob) { WordPressWrites::option($manualKey,$recentTopics); }
-                else { WordPressWrites::option($periodKey,$result); }
-                WordPressWrites::option('ascla_group_history',$history);
-            }
-            if ($manualJob) { Store::update('jobs',['result'=>wp_json_encode($result)],['id'=>$manualJob]); }
-            Audit::record('microevents_created',0,'groups_'.count($ids)); return $result;
-        });
+        }
+        return $topics;
     }
 
     /** Remove deleted/trashed microevents from a stored or queued result. */

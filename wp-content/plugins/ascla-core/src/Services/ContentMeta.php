@@ -150,7 +150,7 @@ final class ContentMeta
             'end'=>'Introduce una fecha y hora de fin válidas.',
             default=>'Fecha inválida.',
         };
-        if (is_string($value) && preg_match('/^(?:0000|\d{5,})-/',$value)) {
+        if (is_string($value) && (str_starts_with($value,'0000-') || preg_match('/^\d{5,}-/',$value))) {
             $year=match($field) {
                 'start'=>'La fecha de inicio debe tener un año de cuatro dígitos.',
                 'end'=>'La fecha de fin debe tener un año de cuatro dígitos.',

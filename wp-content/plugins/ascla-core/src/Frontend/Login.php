@@ -222,7 +222,7 @@ final class Login
         }
         if ($domain !== 'default' || Language::english()) { return $translation; }
         $adminLabels=['Log In'=>'Entrar a administración','Log in'=>'Volver al acceso administrativo'];
-        if (self::nativeAdminContext() && isset($adminLabels[$text])) { return $adminLabels[$text]; }
+
         static $labels = [
             'Log In' => 'Entrar a la comunidad',
             'Log in' => 'Volver al inicio de sesión',
@@ -255,7 +255,9 @@ final class Login
             '<strong>Error:</strong> The username <strong>%s</strong> is not registered on this site. If you are unsure of your username, try your email address instead.' => '<strong>Error:</strong> El usuario <strong>%s</strong> no está registrado. Prueba con tu correo electrónico.',
             'Unknown email address. Check again or try your username.' => 'No se reconoce ese correo electrónico. Revísalo o prueba con tu usuario.',
         ];
-        return $labels[$text] ?? $translation;
+        $selected=$labels[$text]??$translation;
+        if (self::nativeAdminContext() && isset($adminLabels[$text])) { $selected=$adminLabels[$text]; }
+        return $selected;
     }
 
     public static function welcome(string $message): string

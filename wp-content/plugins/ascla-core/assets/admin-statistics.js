@@ -6,6 +6,11 @@
     if(source==='zoom')return 'Zoom';
     return 'Sin verificar';
   }
+    function revealForm(form) {
+      for (let node=form.parentElement;node;node=node.parentElement) {
+        if (node.tagName==='DETAILS') node.open=true;
+      }
+    }
   globalThis.ASCLAStatistics = ({root, api, E, T, I, modal, toast, date, formSnapshot, registerGuard, confirmGuardedDialog}) => {
     let panel, data, filters = {}, section = "overview", insights, roster, preview, csv = "", page = 1;
     let generation = 0, zoomOptions={}, eventPage=1;
@@ -252,11 +257,6 @@
     function dirtyRosterForms(node) {
       return [...(node?.querySelectorAll('form[data-stats-form]') || [])].filter(form=>rosterBaselines.has(form) && rosterBaselines.get(form)!==rosterSnapshot(form));
     }
-    function revealForm(form) {
-      for (let node=form.parentElement;node;node=node.parentElement) {
-        if (node.tagName==='DETAILS') node.open=true;
-      }
-    }
     async function writeAttendance(form) {
       const values=Object.fromEntries(new FormData(form)),key=form.dataset.statsForm;
       const path='admin/attendance/'+roster.id;
@@ -415,6 +415,16 @@
       preview=null;csv='';
       form.querySelector('#stats-csv-preview').replaceChildren();
     });
+    async function previewCsvFile(form,values) {
+          preview=null;root.querySelector('#stats-csv-preview').innerHTML='';
+          const file=form.elements.file.files[0];if(!file || file.size>524288)throw new Error(T('El CSV debe ocupar como máximo 512 KB.'));
+          const signature=rosterSnapshot(form),text=await file.text();
+          const options={timezone:values.timezone,date_format:values.date_format,filename:file.name};
+          const result=await api(`admin/attendance/${roster.id}/preview`,{csv:text,...options});
+          if (form.isConnected && rosterSnapshot(form)===signature) {
+            csv=text;zoomOptions=options;showPreview(result);
+          }
+    }
     root.addEventListener('submit',event=>{
       const form=event.target.closest('form[data-stats-form]');
       if(!form)return;
@@ -428,14 +438,7 @@
           filters=values;page=1;eventPage=1;await load();
         }
         else if(key==='csv'){
-          preview=null;root.querySelector('#stats-csv-preview').innerHTML='';
-          const file=form.elements.file.files[0];if(!file || file.size>524288)throw new Error(T('El CSV debe ocupar como máximo 512 KB.'));
-          const signature=rosterSnapshot(form),text=await file.text();
-          const options={timezone:values.timezone,date_format:values.date_format,filename:file.name};
-          const result=await api(`admin/attendance/${roster.id}/preview`,{csv:text,...options});
-          if (form.isConnected && rosterSnapshot(form)===signature) {
-            csv=text;zoomOptions=options;showPreview(result);
-          }
+          await previewCsvFile(form,values);
         } else {
           if (savingRoster) return;
           if (key==='complete' && dirtyRosterForms(form.closest('.stats-roster')).some(other=>other!==form)) {
@@ -444,7 +447,7 @@
           savingRoster=true;
           try {
             const result=await writeAttendance(form);
-            await refresh();showRoster(result,form);toast(T(key==='complete'?'Registro completo.':key==='threshold'?'Cambios guardados.':'Asistencia guardada.'));
+            await refresh();showRoster(result,form);toast(T(({complete:'Registro completo.',threshold:'Cambios guardados.'})[key]||'Asistencia guardada.'));
           } finally { savingRoster=false; }
         }
       });

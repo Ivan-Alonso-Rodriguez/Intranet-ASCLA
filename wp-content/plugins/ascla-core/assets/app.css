@@ -1730,7 +1730,7 @@ html[data-ascla-theme="dark"] #ascla-root .event-datetime-error { color: #f0a9b0
 #ascla-root .chat-compose textarea,
 #ascla-root .bubble-body,
 #ascla-root .chat-emoji-picker {
-  font-family: var(--ascla-font, system-ui, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+  font-family: var(--ascla-font, system-ui, sans-serif), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
 }
 #ascla-root .chat-emoji-picker { position: relative; align-self: center; flex: 0 0 auto; }
 #ascla-root .chat-emoji-picker[hidden] { display: none; }
@@ -4047,7 +4047,7 @@ html[data-ascla-theme="dark"] #ascla-root .admin-user-invite-box p{color:#9fb3be
 @media(max-width:640px){#ascla-root .admin-user-create-head{align-items:flex-start}}
 
 /* ASCLA 1.9.48 · cumpleaños privado y celebración en la comunidad */
-.birthday-privacy-note{display:flex;align-items:flex-start;gap:8px;margin-top:-2px}.birthday-privacy-note svg{width:16px;height:16px;flex:0 0 auto;margin-top:2px;color:#3483ad}.hero.hero-birthday{position:relative;overflow:hidden;background: var(--ascla-brand-edge);position:absolute;border-radius:50%;background:#ffffff12;pointer-events:none}.hero.hero-birthday:before{width:190px;height:190px;right:4%;top:-72px}.hero.hero-birthday:after{width:120px;height:120px;right:26%;bottom:-62px}.birthday-celebration{position:relative;overflow:hidden;text-align:center;padding:26px 24px 22px;border:1px solid #dceaf3;border-radius:4px;background: var(--ascla-brand-edge);height:72px;margin:0 auto 13px;display:grid;place-items:center;border-radius:4px;background:#fff;box-shadow: none;font-size:36px}.birthday-celebration h3{margin:0 0 8px;color:#193f60;font-size:22px}.birthday-celebration p{max-width:520px;margin:0 auto;color:#587084;line-height:1.65}.birthday-signature{margin-top:15px;color:#1d6f96;font-weight:700}.birthday-confetti span{position:absolute;width:8px;height:18px;border-radius:4px;background:#2c8bb3;transform:rotate(18deg)}.birthday-confetti span:nth-child(1){left:8%;top:16%;background:#e5a93f;transform:rotate(-28deg)}.birthday-confetti span:nth-child(2){left:20%;top:7%;background:#5aa678;transform:rotate(38deg)}.birthday-confetti span:nth-child(3){right:15%;top:10%;background:#cf6d80;transform:rotate(22deg)}.birthday-confetti span:nth-child(4){right:6%;top:28%;background:#6e7fc0;transform:rotate(-38deg)}.birthday-confetti span:nth-child(5){left:10%;bottom:13%;background:#8d74b9;transform:rotate(54deg)}html[data-ascla-theme="dark"] .birthday-celebration{border-color:#314757;background:var(--surface, var(--ascla-surface))}html[data-ascla-theme="dark"] .birthday-celebration h3{color:#e6f4fb}html[data-ascla-theme="dark"] .birthday-celebration p{color:#a9bdca}@media(max-width:640px){.birthday-celebration{padding:22px 16px 18px}.birthday-celebration h3{font-size:19px}}
+.birthday-privacy-note{display:flex;align-items:flex-start;gap:8px;margin-top:-2px}.birthday-privacy-note svg{width:16px;height:16px;flex:0 0 auto;margin-top:2px;color:#3483ad}.hero.hero-birthday{overflow:hidden;position:absolute;border-radius:50%;background:#ffffff12;pointer-events:none}.hero.hero-birthday:before{width:190px;height:190px;right:4%;top:-72px}.hero.hero-birthday:after{width:120px;height:120px;right:26%;bottom:-62px}.birthday-celebration{position:relative;overflow:hidden;text-align:center;padding:26px 24px 22px;border:1px solid #dceaf3;height:72px;margin:0 auto 13px;display:grid;place-items:center;border-radius:4px;background:#fff;box-shadow: none;font-size:36px}.birthday-celebration h3{margin:0 0 8px;color:#193f60;font-size:22px}.birthday-celebration p{max-width:520px;margin:0 auto;color:#587084;line-height:1.65}.birthday-signature{margin-top:15px;color:#1d6f96;font-weight:700}.birthday-confetti span{position:absolute;width:8px;height:18px;border-radius:4px;background:#2c8bb3;transform:rotate(18deg)}.birthday-confetti span:nth-child(1){left:8%;top:16%;background:#e5a93f;transform:rotate(-28deg)}.birthday-confetti span:nth-child(2){left:20%;top:7%;background:#5aa678;transform:rotate(38deg)}.birthday-confetti span:nth-child(3){right:15%;top:10%;background:#cf6d80;transform:rotate(22deg)}.birthday-confetti span:nth-child(4){right:6%;top:28%;background:#6e7fc0;transform:rotate(-38deg)}.birthday-confetti span:nth-child(5){left:10%;bottom:13%;background:#8d74b9;transform:rotate(54deg)}html[data-ascla-theme="dark"] .birthday-celebration{border-color:#314757;background:var(--surface, var(--ascla-surface))}html[data-ascla-theme="dark"] .birthday-celebration h3{color:#e6f4fb}html[data-ascla-theme="dark"] .birthday-celebration p{color:#a9bdca}@media(max-width:640px){.birthday-celebration{padding:22px 16px 18px}.birthday-celebration h3{font-size:19px}}
 
 /* ASCLA 1.9.49 · fecha de nacimiento integrada en la cuadrícula del perfil */
 #ascla-root .birthday-profile-field{min-width:0;margin-bottom:17px}
@@ -4640,7 +4640,7 @@ html[data-ascla-theme="dark"] #ascla-root .directory-pagination-summary select {
   #ascla-root .dismissed-recommendation-row>.btn{grid-column:1/-1;width:100%;justify-content:center}
 }
 
-.ascla-session-warning{position:fixed;z-index:10000;margin:0;box-shadow:none}
+.ascla-session-warning{position:fixed;z-index:10000;margin:0;box-shadow:none;box-sizing:border-box;display:flex;gap:16px;right:24px;bottom:24px;width:400px;max-width:calc(100vw - 32px);padding:20px;border:1px solid var(--ascla-rule);border-top:3px solid var(--ascla-brand-blue);border-radius:4px;background:var(--ascla-surface);color:var(--ascla-text);font-family:var(--ascla-font)}
 
 /* Directory: use the available width and keep discovery ahead of relationship tools. */
 #ascla-root .page-wrap:has(.directory-view){max-width:none;margin:0}
@@ -4917,9 +4917,9 @@ html[data-ascla-theme="dark"] #ascla-root .directory-pagination-summary select {
   #ascla-root .editorial-registry-row .ally-registry-logo { background:var(--surface); color:var(--ink); overflow:hidden;position:relative; }
   #ascla-root .editorial-registry-row .ally-registry-logo img { width:100%;height:100%;object-fit:cover;position:absolute;inset:0;background:var(--surface); }
   #ascla-root .comments > #comments-list { margin-top:22px; }
-  #ascla-root .micro-selection-panel { border:1px solid var(--line);border-radius:4px;padding:16px;margin:16px 0; }
+  #ascla-root .micro-selection-panel {border:1px solid var(--ascla-rule);border-radius:4px;padding:18px;margin:18px 0;background:var(--ascla-paper); }
   #ascla-root .micro-selection-panel h3 { margin:0 0 10px; }
-  #ascla-root .micro-candidate-row { display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line); }
+  #ascla-root .micro-candidate-row {border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--ascla-rule);border-radius:4px;background:var(--ascla-surface);margin-top:6px;font-size:13px; }
   #ascla-root .micro-candidate-row > span { overflow-wrap:anywhere;min-width:0; }
   #ascla-root .micro-candidate-search { display:flex;align-items:center;gap:8px;margin-bottom:12px; }
   #ascla-root .micro-candidate-search input { min-width:0;flex:1;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);font:inherit; }
@@ -5878,9 +5878,6 @@ html[data-ascla-theme="dark"] #ascla-root .pdf-page{background:#101b24}
 #ascla-root .invite-footer {display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:12px}
 #ascla-root .invite-counter {font-size:12px;color:var(--ascla-muted)}
 #ascla-root .invite-counter strong {color:var(--ascla-text);font-size:15px}
-#ascla-root .micro-selection-panel {border:1px solid var(--ascla-rule);border-radius:4px;padding:18px;margin:18px 0;background:var(--ascla-paper)}
-#ascla-root .micro-candidate-row {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--ascla-rule);border-radius:4px;background:var(--ascla-surface);margin-top:6px;font-size:13px}
-.ascla-session-warning {box-sizing:border-box;display:flex;gap:16px;right:24px;bottom:24px;width:400px;max-width:calc(100vw - 32px);padding:20px;border:1px solid var(--ascla-rule);border-top:3px solid var(--ascla-brand-blue);border-radius:4px;background:var(--ascla-surface);color:var(--ascla-text);font-family:var(--ascla-font)}
 .ascla-session-warning>svg {width:24px;height:24px;flex-shrink:0;color:var(--ascla-accent-text);margin-top:3px}
 .ascla-session-warning .ascla-session-content {min-width:0}
 .ascla-session-warning .ascla-session-eyebrow {font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:650;color:var(--ascla-accent-text)}

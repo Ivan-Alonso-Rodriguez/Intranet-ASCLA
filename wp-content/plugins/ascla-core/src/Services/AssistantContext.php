@@ -137,6 +137,26 @@ final class AssistantContext
         return [$safe,$protected,array_values(array_unique($identities))];
     }
 
+    private static function inEventPeriod(array $meta,bool $historical,int $now): bool
+    {
+                $end=strtotime((string)($meta['end']??''));
+        if (!$end) { return false; }
+        if ($historical) { return $end<=$now || !empty($meta['cancelled']); }
+        return $end>$now && empty($meta['cancelled']);
+    }
+
+    private static function collectEvents(array $posts,array $tokens,bool $historical,int $now,array &$matches,array &$upcoming): void
+    {
+            foreach($posts as $post){
+                if (!Content::canRead($post)) { continue; }
+                $meta=(array)get_post_meta($post->ID,'_ascla',true);
+                $view=EditorialPrivacy::reader($post->post_title,wp_strip_all_tags($post->post_content),$meta);
+                $score=\ASCLA\Core\Repositories\KnowledgeSearch::score($view['title'],$view['body'].' '.($view['meta']['agenda']??''),$tokens);
+                if ($score>0) { $matches[]=['post'=>$post,'score'=>$score]; }
+                if (count($upcoming)<8 && self::inEventPeriod($meta,$historical,$now)) { $upcoming[]=['post'=>$post,'score'=>0]; }
+            }
+    }
+
     private static function events(string $question): array
     {
         $matches=[];$upcoming=[];$now=time();$offset=0;
@@ -149,17 +169,7 @@ final class AssistantContext
                 'meta_key'=>'_ascla_start','orderby'=>['meta_value'=>$historical?'DESC':'ASC','ID'=>'ASC'],
             ]);
             $offset+=30;
-            foreach($posts as $post){
-                if (!Content::canRead($post)) { continue; }
-                $meta=(array)get_post_meta($post->ID,'_ascla',true);
-                $view=EditorialPrivacy::reader($post->post_title,wp_strip_all_tags($post->post_content),$meta);
-                $score=\ASCLA\Core\Repositories\KnowledgeSearch::score($view['title'],$view['body'].' '.($view['meta']['agenda']??''),$tokens);
-                if ($score>0) { $matches[]=['post'=>$post,'score'=>$score]; }
-                $end=strtotime((string)($meta['end']??''));
-                if (count($upcoming)<8 && $end && ($historical?($end<=$now || !empty($meta['cancelled'])):($end>$now && empty($meta['cancelled'])))) {
-                    $upcoming[]=['post'=>$post,'score'=>0];
-                }
-            }
+            self::collectEvents($posts,$tokens,$historical,$now,$matches,$upcoming);
         } while (count($posts)===30 && ($tokens || count($upcoming)<8));
         if ($matches) { usort($matches,static fn($a,$b)=>$b['score']<=>$a['score']); }
         $items=[];$sources=[];

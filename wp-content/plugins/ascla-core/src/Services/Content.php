@@ -224,6 +224,11 @@ final class ContentPublishing
             $meta[$field]=array_values(array_filter($meta[$field],[\ASCLA\Core\Domain\EntityRedactor::class,'meaningfulValue']));
         }
         if ($post->post_type!=='ascla_resource' || empty($meta['video_id'])) { return $meta; }
+        return self::readerVideoText($meta);
+    }
+
+    private static function readerVideoText(array $meta): array
+    {
         foreach (['summary','technical_note'] as $field) {
             if (!is_string($meta[$field]??null)) { continue; }
             $text=$meta[$field];
@@ -405,6 +410,14 @@ final class ContentPublishing
             Access::require(!$draftOnly || $post->post_status==='draft','El contenido ya no es un borrador.',409);
             $meta=(array)get_post_meta($id,'_ascla',true);
             Access::require((bool)wp_trash_post($id),'No se pudo eliminar el contenido.',500);
+            self::removeRelated($id,$post,$meta);
+            Audit::record('content_trashed',$id,$post->post_type);
+            return ['id'=>$id,'deleted'=>true,'message'=>'Contenido enviado a la papelera.'];
+        });
+    }
+
+    private static function removeRelated(int $id,\WP_Post $post,array $meta): void
+    {
             if ($post->post_type==='ascla_gallery') { MediaRemoval::gallery($id); }
             if($post->post_type==='ascla_event' && !empty($meta['micro'])) {
                 MicroEvents::forget($id);
@@ -414,9 +427,6 @@ final class ContentPublishing
                 foreach(get_posts(['post_type'=>'ascla_topic','post_parent'=>$id,'post_status'=>['publish','pending','draft','ascla_hidden','ascla_rejected'],'numberposts'=>-1]) as $child) { WordPressWrites::post(['ID'=>$child->ID,'post_parent'=>0]); }
             }
             foreach(['like','follow','report'] as $kind) { Store::delete('relations',['target_id'=>$id,'kind'=>$kind]); }
-            Audit::record('content_trashed',$id,$post->post_type);
-            return ['id'=>$id,'deleted'=>true,'message'=>'Contenido enviado a la papelera.'];
-        });
     }
 
     public static function tags(int $id,array $names): void
@@ -582,6 +592,18 @@ final class ContentSaveState
         }
         Access::require(in_array($requested,['draft','pending','publish','scheduled'],true) || ($type==='ally' && $requested==='inactive')
             || (in_array($type,['gallery','resource'],true) && $requested==='ascla_hidden' && $context['publisher']),'Estado no válido.',400);
+        self::validateEvent($type,$requested,$id,$meta,$context);
+        $direct=$type==='resource' && $context['publisher'] && $requested==='publish' && !empty($meta['generated']);
+        $status=$type==='ally'?Allies::publicationStatus($requested):self::status($type,$requested,$meta,$context['editor'],$context['publisher'],$direct);
+        $parent=self::parent($type,$input);
+        if ($id && !empty($meta['generated']) && !$direct) { $meta['reviewed']=false; }
+        if ($direct) { $meta['reviewed']=true; }
+        ContentSchedule::prepare($type,$input,$status,$meta);
+        return [$status,$direct,$parent,$meta];
+    }
+
+    private static function validateEvent(string $type,string $requested,int $id,array $meta,array $context): void
+    {
         if ($type==='event' && $requested!=='draft') {
             ContentMeta::requireEventDetails($meta);
         }
@@ -592,13 +614,6 @@ final class ContentSaveState
                 ContentMeta::requireCurrentEventStart($meta);
             }
         }
-        $direct=$type==='resource' && $context['publisher'] && $requested==='publish' && !empty($meta['generated']);
-        $status=$type==='ally'?Allies::publicationStatus($requested):self::status($type,$requested,$meta,$context['editor'],$context['publisher'],$direct);
-        $parent=self::parent($type,$input);
-        if ($id && !empty($meta['generated']) && !$direct) { $meta['reviewed']=false; }
-        if ($direct) { $meta['reviewed']=true; }
-        ContentSchedule::prepare($type,$input,$status,$meta);
-        return [$status,$direct,$parent,$meta];
     }
 
     private static function status(string $type,string $requested,array $meta,bool $editor,bool $publisher,bool $direct): string
@@ -804,6 +819,26 @@ final class ContentInteractions
         return Store::atomic((get_post_type($id)==='ascla_event'?'event:':'content:').$id,static fn()=>self::moderateLocked($id,$decision,$reason,$reviewed,$meeting));
     }
 
+    private static function meetingMeta(\WP_Post $post,array $meta,array $meeting,string $decision): array
+    {
+        if ($meeting && $decision==='approve') {
+            Access::require($post->post_type==='ascla_event' && !empty($meta['micro']),'Selecciona un microevento para completar la reunión.',400);
+            Access::require(!array_diff(array_keys($meeting),['modality','url','location']),'Datos de reunión no válidos.',400);
+            $meta=ContentMeta::sanitize('event',$meeting,$post->ID);
+        }
+        return $meta;
+    }
+
+    private static function afterModeration(int $id,\WP_Post $post,array $meta,array $previousMeta,array $meeting,string $decision,string $reason): void
+    {
+        if ($meeting && $decision==='approve' && !empty($meta['micro']) && $previousMeta!==$meta) {
+            Audit::changes('microevent_updated',$id,$previousMeta,$meta);
+            MicroProposalText::schedule($id);
+        }
+        if (!empty($meta['micro']) && $decision==='reject') { MicroArchive::set($id,true); }
+        Notifications::send((int)$post->post_author,'moderation','Tu publicación fue '.($decision==='approve'?'aprobada':'revisada').'.',Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$id]),['type'=>'post','id'=>$id,'actor'=>get_current_user_id()]);
+    }
+
     private static function moderateLocked(int $id,string $decision,string $reason,bool $reviewed,array $meeting): array
     {
         clean_post_cache($id);
@@ -814,11 +849,7 @@ final class ContentInteractions
         Access::require(!in_array($post->post_type,['ascla_gallery','ascla_resource','ascla_event'],true)||Access::canPublish(),'Solo un Ejecutivo o un administrador pueden gestionar estas publicaciones.',403);
         $meta=(array)get_post_meta($id,'_ascla',true);
         $previousMeta=$meta;
-        if ($meeting && $decision==='approve') {
-            Access::require($post->post_type==='ascla_event' && !empty($meta['micro']),'Selecciona un microevento para completar la reunión.',400);
-            Access::require(!array_diff(array_keys($meeting),['modality','url','location']),'Datos de reunión no válidos.',400);
-            $meta=ContentMeta::sanitize('event',$meeting,$id);
-        }
+        $meta=self::meetingMeta($post,$meta,$meeting,$decision);
         $reason=trim(Access::text($reason,1000));
         Access::require(!empty($meta['micro']) || $reason!=='','Indique un motivo de moderación.',400);
         $before=['state'=>$post->post_status,'reason'=>$meta['moderation']['reason']??''];
@@ -838,12 +869,7 @@ final class ContentInteractions
         ContentSchedule::sync($id);
         Audit::changes('moderation',$id,$before,['state'=>get_post_status($id),'reason'=>$reason]);
         EditorialRegistry::recordState($id,$post->post_status,$reason);
-        if ($meeting && $decision==='approve' && !empty($meta['micro']) && $previousMeta!==$meta) {
-            Audit::changes('microevent_updated',$id,$previousMeta,$meta);
-            MicroProposalText::schedule($id);
-        }
-        if (!empty($meta['micro']) && $decision==='reject') { MicroArchive::set($id,true); }
-        Notifications::send((int)$post->post_author,'moderation','Tu publicación fue '.($decision==='approve'?'aprobada':'revisada').'.',Catalog::url(Content::page(substr($post->post_type,6)),['item'=>$id]),['type'=>'post','id'=>$id,'actor'=>get_current_user_id()]);
+        self::afterModeration($id,$post,$meta,$previousMeta,$meeting,$decision,$reason);
         return Content::serialize(get_post($id));
     }
 }

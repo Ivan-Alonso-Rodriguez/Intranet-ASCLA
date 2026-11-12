@@ -70,38 +70,40 @@ final class MockAIProvider implements AIProviderInterface
         return $topic;
     }
 
-    private function answer(array $context): array
+    private function galleryAnswer(array $sources,array $live,bool $english): array
     {
-        $sources=$context['sources']??[];
-        $live=(array)($context['live_context']??[]);
-        $question=mb_strtolower(remove_accents((string)($context['question']??'')));
-        $english=(($live['language']??'')==='English');
-        if (!empty($live['intents']['gallery'])) {
             if (!$sources) { return ['answer'=>$english?'I could not find a published gallery you can access. Try its title.':'No encontré una galería publicada a la que tengas acceso. Prueba con su título.','source_ids'=>[],'mode'=>$this->mode()]; }
             if (($live['gallery_request']??'')==='choose') {
                 return ['answer'=>($english?'Which gallery would you like to explore?':'¿Qué galería quieres consultar?')."\n".implode("\n",array_map(static fn($s)=>'• '.$s['title'],$sources)),'source_ids'=>array_column($sources,'id'),'mode'=>$this->mode()];
             }
             $source=$sources[0];
             return ['answer'=>$source['title']."\n\n".$source['body']."\n\n".($english?'This gallery contains '.count($source['files']??[]).' files. Demo mode can read the description, but cannot visually analyze photos. Enable an image-capable AI provider to analyze them.':'Esta galería contiene '.count($source['files']??[]).' archivos. En modo demo puedo consultar su descripción, pero no analizar visualmente las fotos. Activa un proveedor de IA con visión para analizarlas.'),'source_ids'=>[$source['id']],'mode'=>$this->mode()];
-        }
-        if (!empty($live['intents']['organization'])) {
-            return ['answer'=>\ASCLA\Core\Services\AssistantContext::describe($live),'source_ids'=>[],'mode'=>$this->mode()];
-        }
-        if (($live['video_request']??'')==='choose') {
-            $options=array_slice($sources,0,3);
-            return ['answer'=>($english?'Which video do you mean?':'¿Sobre cuál de estos videos quieres preguntar?')."\n".implode("\n",array_map(static fn($s)=>'• '.$s['title'],$options)),'source_ids'=>array_column($options,'id'),'mode'=>$this->mode()];
-        }
-        if (($live['video_request']??'')==='answer' && $sources) {
-            return $this->sourceAnswer([$sources[0]],$english);
-        }
+    }
+
+    private function answer(array $context): array
+    {
+        $sources=$context['sources']??[];
+        $live=(array)($context['live_context']??[]);
+        $question=mb_strtolower(remove_accents((string)($context['question']??'')));
+        $english=(($live['language']??'')==='English');
         $liveAnswer=$this->liveAnswer($live,$english);
-        if ($liveAnswer!==null) { return $liveAnswer; }
         $isGreeting=(bool)preg_match('/^(?:hola|hello|hi|buenas)/u',$question);
         $asksCapabilities=(bool)preg_match('/\b(?:que puedes hacer|como me ayudas|help|what can you do)\b/u',$question);
-        if ($isGreeting || $asksCapabilities) {
-            return ['answer'=>$english?'Hello! I can help you check upcoming ASCLA events, recent posts, community resources, galleries, notifications, and member recommendations. Ask me naturally.':'¡Hola! Puedo ayudarte a consultar eventos próximos, publicaciones recientes, recursos de la comunidad, galerías, notificaciones y recomendaciones de asociados. Pregúntame con naturalidad.','source_ids'=>[],'mode'=>$this->mode()];
-        }
-        return $this->sourceAnswer($sources,$english);
+        return match(true) {
+            !empty($live['intents']['gallery'])=>$this->galleryAnswer($sources,$live,$english),
+            !empty($live['intents']['organization'])=>['answer'=>\ASCLA\Core\Services\AssistantContext::describe($live),'source_ids'=>[],'mode'=>$this->mode()],
+            ($live['video_request']??'')==='choose'=>$this->videoOptions($sources,$english),
+            ($live['video_request']??'')==='answer' && (bool)$sources=>$this->sourceAnswer([$sources[0]],$english),
+            $liveAnswer!==null=>$liveAnswer,
+            $isGreeting || $asksCapabilities=>['answer'=>$english?'Hello! I can help you check upcoming ASCLA events, recent posts, community resources, galleries, notifications, and member recommendations. Ask me naturally.':'¡Hola! Puedo ayudarte a consultar eventos próximos, publicaciones recientes, recursos de la comunidad, galerías, notificaciones y recomendaciones de asociados. Pregúntame con naturalidad.','source_ids'=>[],'mode'=>$this->mode()],
+            default=>$this->sourceAnswer($sources,$english),
+        };
+    }
+
+    private function videoOptions(array $sources,bool $english): array
+    {
+        $options=array_slice($sources,0,3);
+        return ['answer'=>($english?'Which video do you mean?':'¿Sobre cuál de estos videos quieres preguntar?')."\n".implode("\n",array_map(static fn($s)=>'• '.$s['title'],$options)),'source_ids'=>array_column($options,'id'),'mode'=>$this->mode()];
     }
 
     private function liveAnswer(array $live,bool $english): ?array
@@ -122,6 +124,20 @@ final class MockAIProvider implements AIProviderInterface
         };
     }
 
+    private function eventLine(array $event,bool $english): string
+    {
+        $availability=($english?'Available seats: ':'Cupos disponibles: ').(int)($event['remaining']??0);
+        if (!empty($event['unlimited'])) { $availability=$english?'Unlimited capacity':'Sin límite de cupos'; }
+        $status=match(true) {
+            !empty($event['cancelled'])=>$english?'Cancelled':'Cancelado',
+            !empty($event['is_past'])=>$english?'Finished':'Finalizado',
+            !empty($event['registration_closed'])=>$english?'Registration closed':'Inscripciones cerradas',
+            default=>'',
+        };
+            return '• '.($event['title']??'Evento')."\n".($event['start']??'').' · '.($event['modality']??'')."\n".$availability.($status!==''?' · '.$status:'')
+                ."\n".($event['description']??'').(!empty($event['agenda'])?"\n".$event['agenda']:'');
+    }
+
     private function eventsAnswer(array $events,bool $english): array
     {
         if (!$events) {
@@ -129,10 +145,7 @@ final class MockAIProvider implements AIProviderInterface
         }
         $lines=[];
         foreach (array_slice($events,0,3) as $event) {
-            $availability=!empty($event['unlimited'])?($english?'Unlimited capacity':'Sin límite de cupos'):($english?'Available seats: ':'Cupos disponibles: ').(int)($event['remaining']??0);
-            $status=!empty($event['cancelled'])?($english?'Cancelled':'Cancelado'):(!empty($event['is_past'])?($english?'Finished':'Finalizado'):(!empty($event['registration_closed'])?($english?'Registration closed':'Inscripciones cerradas'):''));
-            $lines[]='• '.($event['title']??'Evento')."\n".($event['start']??'').' · '.($event['modality']??'')."\n".$availability.($status!==''?' · '.$status:'')
-                ."\n".($event['description']??'').(!empty($event['agenda'])?"\n".$event['agenda']:'');
+            $lines[]=$this->eventLine($event,$english);
         }
         return ['answer'=>($english?'These are the ASCLA events I can see:':'Estos son los eventos de ASCLA que puedo consultar:')."\n".implode("\n\n",$lines),'source_ids'=>array_map('intval',array_column(array_slice($events,0,3),'id')),'mode'=>$this->mode()];
     }

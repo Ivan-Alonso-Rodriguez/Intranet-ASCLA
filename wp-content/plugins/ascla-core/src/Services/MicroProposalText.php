@@ -88,29 +88,33 @@ final class MicroProposalText
         }
         $result=NetworkingAI::generate('microevent_copy',['event'=>$event]);
         Access::require(empty($result['fallback']),'No se pudieron actualizar los textos de la propuesta. Puedes volver a intentarlo.',502);
-        return Store::atomic('event:'.$id,static function()use($id,$job,$signature,$result){
-            clean_post_cache($id);
-            $post=Content::get($id);$meta=(array)get_post_meta($id,'_ascla',true);
-            $state=(array)get_post_meta($id,self::META,true);
-            if (!empty($meta['cancelled']) || (int)($state['job_id']??0)!==$job || self::signature($post,$meta)!==$signature) {
-                return ['event_id'=>$id,'skipped'=>true];
-            }
-            $copy=EntityRedactor::cleanTree($result);
-            if (!empty($meta['chatham'])) {
-                $copy=EntityRedactor::tree($copy,preg_split('/[\n,;]+/u',(string)($meta['identities']??''))?:[],[$post->post_title]);
-            }
-            $duration=(strtotime($meta['end']??'')-strtotime($meta['start']??''))/60;
-            $meta['agenda_ai']=[
-                'title'=>$post->post_title,'theme'=>$post->post_title,
-                'objective'=>$copy['objective'],'icebreaker'=>$copy['icebreaker'],
-                'closing_question'=>$copy['closing_question'],'mode'=>$copy['mode']??'ASCLA',
-                'duration_minutes'=>$duration>0?(int)$duration:(int)($meta['agenda_ai']['duration_minutes']??0),
-                'agenda'=>[],'fallback'=>false,
-            ];
-            WordPressWrites::meta('post',$id,'_ascla',$meta,true);
-            WordPressWrites::meta('post',$id,self::META,array_replace($state,['ready'=>true]));
-            Audit::record('microevent_text_refreshed',$id);
-            return ['event_id'=>$id,'refreshed'=>true];
-        });
+        return Store::atomic('event:'.$id,static fn()=>self::saveCopy($id,$job,$signature,$result));
+    }
+
+    private static function saveCopy(int $id,int $job,string $signature,array $result): array
+    {
+        clean_post_cache($id);
+        $post=Content::get($id);$meta=(array)get_post_meta($id,'_ascla',true);
+        $state=(array)get_post_meta($id,self::META,true);
+        if (!empty($meta['cancelled']) || (int)($state['job_id']??0)!==$job || self::signature($post,$meta)!==$signature) {
+            return ['event_id'=>$id,'skipped'=>true];
+        }
+        $copy=EntityRedactor::cleanTree($result);
+        if (!empty($meta['chatham'])) {
+            $copy=EntityRedactor::tree($copy,preg_split('/[\n,;]+/u',(string)($meta['identities']??''))?:[],[$post->post_title]);
+        }
+        $duration=(strtotime($meta['end']??'')-strtotime($meta['start']??''))/60;
+        $meta['agenda_ai']=[
+            'title'=>$post->post_title,'theme'=>$post->post_title,
+            'objective'=>$copy['objective'],'icebreaker'=>$copy['icebreaker'],
+            'closing_question'=>$copy['closing_question'],'mode'=>$copy['mode']??'ASCLA',
+            'duration_minutes'=>$duration>0?(int)$duration:(int)($meta['agenda_ai']['duration_minutes']??0),
+            'agenda'=>[],'fallback'=>false,
+        ];
+        WordPressWrites::meta('post',$id,'_ascla',$meta,true);
+        WordPressWrites::meta('post',$id,self::META,array_replace($state,['ready'=>true]));
+        Audit::record('microevent_text_refreshed',$id);
+        return ['event_id'=>$id,'refreshed'=>true];
+
     }
 }

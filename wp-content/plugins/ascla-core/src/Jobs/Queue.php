@@ -48,6 +48,13 @@ final class Queue
         }
         return array_reverse($items);
     }
+    private static function verifiedHistory(array $result): ?array
+    {
+            $verified=Knowledge::storedAnswer($result);
+            if (!empty($result['grounding']['context_source_ids']) && empty($verified['grounding'])) { return null; }
+        return $verified;
+    }
+
     private static function history(int $user,string $thread,int $beforeId): array
     {
         $thread=self::threadKey($thread);if($thread==='') {return []; }
@@ -57,8 +64,8 @@ final class Queue
             if(self::threadKey((string)($payload['thread']??'legacy'))!==$thread) {continue; }
             $result=json_decode($row['result']??'null',true);
             if(!is_array($result)||trim((string)($result['answer']??''))==='') {continue; }
-            $verified=Knowledge::storedAnswer($result);
-            if (!empty($result['grounding']['context_source_ids']) && empty($verified['grounding'])) { continue; }
+            $verified=self::verifiedHistory($result);
+            if ($verified===null) { continue; }
             $turn=['question'=>Access::text($payload['question']??'',2000),'answer'=>Access::text($verified['answer'],20000)];
             if ($verified['sources']) { $turn['source_ids']=array_map('intval',array_column($verified['sources'],'id')); }
             $turns[]=$turn;

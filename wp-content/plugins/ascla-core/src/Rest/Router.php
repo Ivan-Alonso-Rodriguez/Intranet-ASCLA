@@ -52,15 +52,20 @@ final class Router
 
 final class RouterRoutes
 {
-    public static function community(): void
+    private static function profiles(): void
     {
-        Router::route('/bootstrap','GET',[\ASCLA\Core\Services\Bootstrap::class,'get']);
-        Router::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
         Router::route('/profiles','GET',static fn($r)=>Profiles::directory($r->get_params()));
         Router::route('/locations/countries','GET',static fn()=>Locations::countries());
         Router::route('/locations/cities','GET',static fn($r)=>Locations::cities((string)$r['country'],(string)($r['q']??''),rest_sanitize_boolean($r['exact']??false)));
         Router::route('/profiles/review','POST',static fn($r)=>\ASCLA\Core\Services\ProfileReview::forClient(\ASCLA\Core\Services\ProfileReview::respond((string)$r['decision'])),'ascla_write');
         Router::route('/profiles/me','POST',static fn($r)=>Profiles::save($r->get_json_params()?:[]),'ascla_write');
+    }
+
+    public static function community(): void
+    {
+        Router::route('/bootstrap','GET',[\ASCLA\Core\Services\Bootstrap::class,'get']);
+        Router::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
+        self::profiles();
         Router::route('/interests/learned','GET',static fn()=>\ASCLA\Core\Services\LearnedInterests::get());
         Router::route('/interest-catalog','GET',static fn()=>\ASCLA\Core\Domain\InterestCatalog::terms());
         Router::route('/items/(?P<id>\d+)/reading','POST',static fn($r)=>\ASCLA\Core\Services\LearnedInterests::start((int)$r['id']),'ascla_write');

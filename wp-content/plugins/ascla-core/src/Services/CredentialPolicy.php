@@ -65,7 +65,7 @@ final class CredentialPolicy
         return $login;
     }
 
-    public static function error(string $password,object $user): string
+    public static function error(string $password): string
     {
         $minimum=Settings::get()['password_min_length'];
         if (strlen($password)>4096 || mb_strlen(trim($password))<$minimum) {
@@ -75,30 +75,26 @@ final class CredentialPolicy
             return Language::text('La contraseña no debe contener caracteres de control.','The password must not contain control characters.');
         }
         $normalized=mb_strtolower(remove_accents(trim($password)));
-        if (in_array($normalized,self::COMMON,true) || preg_match('/^(.)\1+$/u',$normalized)) {
-            return Language::text('Esta contraseña es muy común. Elige otra menos predecible.','This password is very common. Choose a less predictable one.');
-        }
-        return '';
+        return in_array($normalized,self::COMMON,true) || preg_match('/^(.)\1+$/u',$normalized)
+            ? Language::text('Esta contraseña es muy común. Elige otra menos predecible.','This password is very common. Choose a less predictable one.') : '';
     }
     public static function resetValidation(\WP_Error $errors,mixed $user): void
     {
         if (!$user instanceof \WP_User || empty($_POST['pass1'])) { return; }
-        $error=self::error((string)wp_unslash($_POST['pass1']),$user);
+        $error=self::error((string)wp_unslash($_POST['pass1']));
         if ($error!=='') { $errors->add('ascla_password_policy',$error); }
     }
     public static function profileValidation(\WP_Error $errors,bool $update,object $user): void
     {
         unset($update); // WordPress callback signature includes this argument.
         if (empty($user->user_pass)) { return; }
-        $error=self::error((string)$user->user_pass,$user);
+        $error=self::error((string)$user->user_pass);
         if ($error!=='') { $errors->add('ascla_password_policy',$error); }
     }
     public static function restValidation(mixed $user,\WP_REST_Request $request): mixed
     {
         if (is_wp_error($user) || !$request->get_param('password')) { return $user; }
-        $existing=$request['id']?get_userdata((int)$request['id']):false;
-        $identity=(object)array_merge($existing?array_merge((array)$existing->data,['first_name'=>$existing->first_name,'last_name'=>$existing->last_name]):[],(array)$user);
-        $error=self::error((string)$request['password'],$identity);
+        $error=self::error((string)$request['password']);
         return $error!==''?new \WP_Error('ascla_password_policy',$error,['status'=>400]):$user;
     }
     public static function cookieExpiration(int $duration,int $user,bool $remember): int

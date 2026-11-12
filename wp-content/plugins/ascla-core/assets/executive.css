@@ -57,7 +57,7 @@ html[data-ascla-theme] #ascla-root .nav-link.active { background: var(--ascla-br
 #ascla-root .ascla-sidebar a:focus-visible { outline-color: var(--blue); }
 #ascla-root .nav-bottom { margin-top: auto; padding-top: 12px; border-color: var(--line); }
 #ascla-root .ascla-main { margin-left: var(--executive-sidebar); }
-#ascla-root .ascla-header { height: 68px; padding: 0 36px; gap: 16px; background: var(--surface); border-color: var(--line); }
+#ascla-root .ascla-header { height: 68px; padding: 0 36px; gap: 16px; background: var(--surface); border-color: var(--line); box-shadow: none; }
 .ascla-app-body #ascla-root .ascla-header { position: sticky; top: 0; z-index: 25; box-shadow: none; }
 html:has(.ascla-app-body) { scroll-padding-top: 80px; }
 #ascla-root .ascla-header .breadcrumb { margin: 0; color: var(--muted); font-size: 13px; min-width: 0; overflow-wrap: anywhere; }
@@ -76,14 +76,14 @@ html[data-ascla-theme="dark"] #ascla-root .header-brand { background: transparen
 #ascla-root .demo-footer { border-top: 1px solid var(--line); padding-top: 22px; margin-top: 38px; font-size: 10px; line-height: 1.8; color: var(--muted); }
 
 /* The welcome and next real event share one editorial panel. */
-#ascla-root .hero { min-height: 190px; padding: 28px 32px; gap: 32px; border-radius: 4px; margin-bottom: 16px; align-items: center; }
+#ascla-root .hero { min-height: 190px; padding: 28px 32px; gap: 32px; border-radius: 4px; margin-bottom: 16px; align-items: center; border-color: #063159; }
 html[data-ascla-theme] #ascla-root .hero { border: 1px solid var(--ascla-welcome-rule); background: var(--ascla-brand-edge); color: var(--ascla-welcome-ink); box-shadow: none; }
 #ascla-root .hero-copy { flex: 1; max-width: none; min-width: 0; }
 html[data-ascla-theme] #ascla-root .hero h1 { color: var(--ascla-welcome-ink); font-size: clamp(27px, 2.5vw, 36px) !important; line-height: 1.2 !important; letter-spacing: -.8px !important; max-width: none; overflow-wrap: anywhere; }
 html[data-ascla-theme] #ascla-root .hero-copy > p { color: var(--ascla-welcome-ink); max-width: 52ch; font-size: 14px; line-height: 1.55; margin: 9px 0 18px !important; }
 #ascla-root .hero-copy .btn { min-height: 38px; font-size: 12px; }
-#ascla-root .hero-agenda { flex: 0 0 31%; min-width: 210px; padding: 4px 0 4px 25px; border-left: 1px solid var(--ascla-welcome-rule); overflow-wrap: anywhere; }
-#ascla-root .hero-agenda-label { display: flex; align-items: center; gap: 8px; color: var(--ascla-welcome-ink); font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+#ascla-root .hero-agenda { flex: 0 0 31%; min-width: 210px; padding: 4px 0 4px 25px; border-left: 1px solid var(--ascla-welcome-rule); overflow-wrap: anywhere; border-color: #74beff; }
+#ascla-root .hero-agenda-label { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; margin-bottom: 8px; color: #74beff; }
 #ascla-root .hero-agenda-label svg { width: 16px; height: 16px; }
 #ascla-root .hero-agenda h2 { color: var(--ascla-welcome-ink); font-size: 19px; line-height: 1.35; letter-spacing: -.2px; }
 html[data-ascla-theme] #ascla-root .hero-agenda p { color: var(--ascla-welcome-ink); font-size: 12px; line-height: 1.55; margin: 7px 0 !important; }
@@ -297,7 +297,7 @@ html[data-ascla-theme="dark"] {
 }
 html[data-ascla-theme="dark"] #ascla-root .ascla-sidebar { background: var(--sidebar-surface); border-color: var(--line); }
 html[data-ascla-theme="dark"] #ascla-root .ascla-header { background: var(--surface); }
-html[data-ascla-theme="dark"] #ascla-root .btn.danger { color: #f2b3ba; background: #432d36; border-color: #7f505d; }
+html[data-ascla-theme="dark"] #ascla-root .btn.danger { color: #fff; background: var(--ascla-danger); border-color: var(--ascla-danger); }
 html[data-ascla-theme="dark"] #ascla-root .btn.ghost { background: transparent; color: var(--blue); }
 html[data-ascla-theme="dark"] #ascla-root :is(.field input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]), .field select, .field textarea, .filters input:not([type="checkbox"], [type="radio"]), .filters select, .assistant-compose textarea) { background-color: var(--bg); color: var(--ink); border-color: var(--control-border); }
 html[data-ascla-theme="dark"] #ascla-root .directory-search { border-top-color: var(--ascla-brand-blue); }
@@ -632,15 +632,10 @@ html[data-ascla-theme] #ascla-root .ascla-sidebar .nav-link.active { color: #063
 html[data-ascla-theme] #ascla-root .ascla-sidebar a:focus-visible { outline-color: #74beff; }
 #ascla-root :is(.avatar, .member-identity .avatar.xl, .directory .member-card-profile > .avatar) { border-radius: 4px; }
 #ascla-root :is(.card, .member-card, .stat, .admin-stat, .admin-user, .admin-filters, .audit-summary-card, .settings-group):hover { box-shadow: none; }
-#ascla-root .ascla-header { box-shadow: none; }
-#ascla-root .hero { border-color: #063159; }
-#ascla-root .hero-agenda { border-color: #74beff; }
-#ascla-root .hero-agenda-label { color: #74beff; }
 #ascla-root .hero.hero-birthday::before, #ascla-root .hero.hero-birthday::after { display: none; }
 #ascla-root .completion-ring { border: 2px solid var(--blue); background: var(--surface); }
 #ascla-root .completion-ring::after { background: var(--surface); }
 html[data-ascla-theme] #ascla-root .btn.danger { color: var(--ascla-danger); background: var(--surface); border-color: var(--ascla-danger); }
 html[data-ascla-theme] #ascla-root .btn.primary.danger { color: #fff; background: var(--ascla-danger); border-color: var(--ascla-danger); }
-html[data-ascla-theme="dark"] #ascla-root .btn.danger { color: #fff; background: var(--ascla-danger); border-color: var(--ascla-danger); }
 #ascla-root .account-recovery-status { margin-top: 14px; padding: 12px 14px; border-inline-start: 3px solid var(--blue); background: var(--blue-soft); color: var(--ink); border-radius: 3px; }
 #ascla-root .account-recovery-status[hidden] { display: none; }

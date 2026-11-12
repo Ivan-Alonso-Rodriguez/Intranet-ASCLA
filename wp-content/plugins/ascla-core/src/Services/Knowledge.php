@@ -58,22 +58,40 @@ final class Knowledge
         return ['answer'=>$answer,'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url']],$verified['sources']),'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL,'grounding'=>$verified['grounding']];
     }
 
+    private static function readableSource(int $id): ?\WP_Post
+    {
+        $post=get_post($id);
+        if (!$post || $post->post_status!=='publish' || !Content::canRead($post)) { return null; }
+        $meta=(array)get_post_meta($post->ID,'_ascla',true);
+        return !empty($meta['generated']) && empty($meta['reviewed'])?null:$post;
+    }
+
+    private static function storedBody(\WP_Post $post,array $meta,array $digests,array $eventDigests,array $galleryDigests): ?array
+    {
+        $sourceId=$post->ID;
+        [$title,$body,$digest]=AssistantContext::safeText($post,$meta);
+        $valid=!isset($digests[$sourceId]) || $digests[$sourceId]===$digest;
+        if ($post->post_type==='ascla_event') {
+            [, $event]=AssistantContext::eventData($post);
+            $valid=$valid && (!isset($eventDigests[$sourceId]) || $eventDigests[$sourceId]===$event['event_digest']);
+            $title=$event['title'];$body=$event['body'];
+        }
+        if ($post->post_type==='ascla_gallery' && isset($galleryDigests[$sourceId])) {
+            $valid=$valid && $galleryDigests[$sourceId]===GalleryEvidence::digest($post);
+        }
+        return $valid?[$title,$body]:null;
+    }
+
     private static function storedSources(array $originalIds,array $digests,array $eventDigests=[],array $galleryDigests=[]): array
     {
         $sources=[];$identities=[];$protected=false;
         foreach ($originalIds as $sourceId) {
-            $post=get_post($sourceId);
-            if (!$post || $post->post_status!=='publish' || !Content::canRead($post)) { continue; }
+            $post=self::readableSource($sourceId);
+            if (!$post) { continue; }
             $meta=(array)get_post_meta($post->ID,'_ascla',true);
-            if (!empty($meta['generated']) && empty($meta['reviewed'])) { continue; }
-            [$title,$body,$digest]=AssistantContext::safeText($post,$meta);
-            if (isset($digests[$sourceId]) && $digests[$sourceId]!==$digest) { continue; }
-            if ($post->post_type==='ascla_event') {
-                [, $event]=AssistantContext::eventData($post);
-                if (isset($eventDigests[$sourceId]) && $eventDigests[$sourceId]!==$event['event_digest']) { continue; }
-                $title=$event['title'];$body=$event['body'];
-            }
-            if ($post->post_type==='ascla_gallery' && isset($galleryDigests[$sourceId]) && $galleryDigests[$sourceId]!==GalleryEvidence::digest($post)) { continue; }
+            $body=self::storedBody($post,$meta,$digests,$eventDigests,$galleryDigests);
+            if ($body===null) { continue; }
+            [$title,$body]=$body;
             if (!empty($meta['chatham'])) {
                 $protected=true;$known=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];$identities=array_merge($identities,$known);
             }
@@ -137,10 +155,7 @@ final class Knowledge
         foreach (['frameworks','norms','conclusions','concepts','tags'] as $field) {
             $structured[$field]=self::cleanStructuredList((array)($result[$field]??[]));
         }
-        $info=is_array($result['infographic']??null)?$result['infographic']:[];
-        foreach (['sections','key_points'] as $field) {
-            if (isset($info[$field])) { $info[$field]=self::cleanStructuredList((array)$info[$field]); }
-        }
+        $info=self::cleanInfographic($result);
 
         // Keep only timed excerpts grounded in timestamps actually present in the source and inside the detected duration.
         $grounded=$durationSeconds>0
@@ -206,6 +221,16 @@ final class Knowledge
         Audit::record('ai_enriched',$id,$ai->mode());
         return ['resource_id'=>$id,'capsule_ids'=>[],'hub_id'=>0,'mode'=>$ai->mode(),'video_mode'=>$videoMode,'duration_seconds'=>$durationSeconds,'topics'=>$autoTopics,'message'=>'Resumen y nota técnica integrados en la publicación original.'.($autoTopics?' Temas activados: '.implode(', ',$autoTopics).'.':'')];
     }
+    private static function cleanInfographic(array $result): array
+    {
+        $info=is_array($result['infographic']??null)?$result['infographic']:[];
+        foreach (['sections','key_points'] as $field) {
+            if (isset($info[$field])) { $info[$field]=self::cleanStructuredList((array)$info[$field]); }
+        }
+
+        return $info;
+    }
+
     private static function naturalizeVideoLanguage(string $text): string
     {
         if ($text==='') { return ''; }
@@ -367,10 +392,36 @@ final class KnowledgeAnswer
         $sources=self::sources($context,$ranked);
         $conversation=self::conversational($question);
         if (!$sources && empty($context['answerable']) && !$conversation) {
-            $empty=$videos?\ASCLA\Core\Frontend\Language::text('No encontré un video publicado al que tengas acceso con esos datos. Prueba con su título o con un tema del video.','I could not find a published video you can access with those details. Try its title or a topic from the video.'):self::ABSTENTION;
-            return ['answer'=>$empty,'sources'=>[],'mode'=>Knowledge::provider()->mode(),'grounding'=>['policy'=>Grounding::POLICY,'context_source_ids'=>[],'valid_references'=>0,'ignored_references'=>0,'live_context_used'=>false,'conversation_only'=>false,'no_evidence'=>true]];
+            return self::noEvidence($videos);
         }
         return self::generate($question,$history,$context,$sources,$conversation,$protected,$identities);
+    }
+
+    private static function noEvidence(bool $videos): array
+    {
+            $empty=$videos?\ASCLA\Core\Frontend\Language::text('No encontré un video publicado al que tengas acceso con esos datos. Prueba con su título o con un tema del video.','I could not find a published video you can access with those details. Try its title or a topic from the video.'):self::ABSTENTION;
+            return ['answer'=>$empty,'sources'=>[],'mode'=>Knowledge::provider()->mode(),'grounding'=>['policy'=>Grounding::POLICY,'context_source_ids'=>[],'valid_references'=>0,'ignored_references'=>0,'live_context_used'=>false,'conversation_only'=>false,'no_evidence'=>true]];
+    }
+
+    private static function videoReference(string $question,array $history): int
+    {
+        $previous=end($history);
+        $ids=array_values((array)($previous['source_ids']??[]));
+        $follow=mb_strtolower(remove_accents(trim($question)));
+        $reference=0;
+        $selection=preg_replace('/^[¿\s]*(?:(?:el|la|the) )?/u','',$follow);
+        $selection=preg_replace('/ (?:video|one)$/u','',rtrim($selection,".?! \t\r\n"));
+        if (count($ids)===1 && (preg_match('/^[¿\s]*y\b/u',$follow) || preg_match('/\b(?:ese video|esa grabacion|sus conclusiones|that video|its conclusions)\b/u',$follow))) {
+            $reference=(int)$ids[0];
+        } elseif ($ids && preg_match('/^(primer[oa]?|segund[oa]|tercer[oa]?|first|second|third)$/u',$selection,$number)) {
+            $position=match(true) {
+                (bool)preg_match('/^(?:primer|first)/',$number[1])=>0,
+                (bool)preg_match('/^(?:segund|second)/',$number[1])=>1,
+                default=>2,
+            };
+            $reference=(int)($ids[$position]??0);
+        }
+        return $reference;
     }
 
     private static function videoSearch(string $question,string $plain,array $tokens,array $history): array
@@ -385,20 +436,21 @@ final class KnowledgeAnswer
             $query=preg_match('/\b(?:videos?|grabacion|recording)\s+(?:sobre|acerca de|titulado|about|called|on)\s+(.+)/u',$plain,$topic)
                 ? KnowledgeSearch::tokens($topic[1]) : [];
         }
-        $previous=end($history);
-        $ids=array_values((array)($previous['source_ids']??[]));
-        $follow=mb_strtolower(remove_accents(trim($question)));
-        $reference=0;
-        if (count($ids)===1 && preg_match('/(?:^[¿\s]*y\b|\b(?:ese video|esa grabacion|sus conclusiones|that video|its conclusions)\b)/u',$follow)) {
-            $reference=(int)$ids[0];
-        } elseif ($ids && preg_match('/^[¿\s]*(?:(?:el|la|the) )?(primer[oa]?|segund[oa]|tercer[oa]?|first|second|third)(?: video| one)?[.?!\s]*$/u',$follow,$number)) {
-            $position=preg_match('/^(primer|first)/',$number[1])?0:(preg_match('/^(segund|second)/',$number[1])?1:2);
-            $reference=(int)($ids[$position]??0);
-        }
+        $reference=self::videoReference($question,$history);
         [$ranked,$protected,$identities]=self::ranked($query,$focus,true,$mine?get_current_user_id():0,$reference,$latest);
         if ($latest) { $ranked=array_slice($ranked,0,1); }
         $request=(!$query && !$latest && !$reference && count($ranked)>1)?'choose':'answer';
         return [$ranked,$protected,$identities,$request];
+    }
+
+    private static function resourceCandidate(?\WP_Post $post,bool $videos,int $author): ?array
+    {
+            if (!$post || $post->post_type!=='ascla_resource' || $post->post_status!=='publish' || ($author && (int)$post->post_author!==$author) || !Content::canRead($post)) { return null; }
+            $meta=(array)get_post_meta($post->ID,'_ascla',true);
+            if (!empty($meta['generated']) && empty($meta['reviewed'])) { return null; }
+            [$title,$body,$digest]=AssistantContext::safeText($post,$meta);
+        $isVideo=$digest!=='' || !empty($meta['video_id']) || ($meta['resource_type']??'')==='Video';
+        return $videos && !$isVideo?null:[$title,$body,$digest,$meta];
     }
 
     private static function ranked(array $query,array $tokens,bool $videos=false,int $author=0,int $reference=0,bool $latest=false): array
@@ -406,12 +458,11 @@ final class KnowledgeAnswer
         $ranked=[];$protected=false;$allIdentities=[];
         $candidates=$reference?[get_post($reference)]:KnowledgeSearch::candidates($query,$videos,$author,$latest);
         foreach ($candidates as $post) {
-            if (!$post || $post->post_type!=='ascla_resource' || $post->post_status!=='publish' || ($author && (int)$post->post_author!==$author) || !Content::canRead($post)) { continue; }
-            $meta=(array)get_post_meta($post->ID,'_ascla',true);
-            if (!empty($meta['generated']) && empty($meta['reviewed'])) { continue; }
-            [$title,$body,$digest]=AssistantContext::safeText($post,$meta);
-            if ($videos && $digest==='' && empty($meta['video_id']) && ($meta['resource_type']??'')!=='Video') { continue; }
-            $identities=!empty($meta['chatham'])?(preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[]):[];
+            $candidate=self::resourceCandidate($post,$videos,$author);
+            if (!$candidate) { continue; }
+            [$title,$body,$digest,$meta]=$candidate;
+            $identities=[];
+            if (!empty($meta['chatham'])) { $identities=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[]; }
             $score=$reference || ($videos && !$query)?1:KnowledgeSearch::score($title,$body,$query);
             if ($score>0) {
                 $protected=$protected || !empty($meta['chatham']);
@@ -455,10 +506,8 @@ final class KnowledgeAnswer
         return $sources;
     }
 
-    private static function generate(string $question,array $history,array $context,array $sources,bool $conversation,bool $protected,array $identities): array
+    private static function galleryImages(array &$context,array $sources): array
     {
-        $references=array_column($sources,'title');
-        $inputQuestion=$protected?EntityRedactor::redact($question,$identities,$references):$question;
         $images=[];
         if (!empty($context['live']['intents']['gallery'])) {
             $provider=Settings::get()['ai_provider'];
@@ -466,6 +515,14 @@ final class KnowledgeAnswer
             if ($vision && ($context['live']['gallery_request']??'')!=='choose') { $images=GalleryEvidence::images($sources); }
             $context['live']['gallery_visual_coverage']=['analyzed_images'=>array_map(static fn($image)=>['source_id'=>$image['source_id'],'media_id'=>$image['media_id']],$images),'vision_available'=>$vision];
         }
+        return $images;
+    }
+
+    private static function generate(string $question,array $history,array $context,array $sources,bool $conversation,bool $protected,array $identities): array
+    {
+        $references=array_column($sources,'title');
+        $inputQuestion=$protected?EntityRedactor::redact($question,$identities,$references):$question;
+        $images=self::galleryImages($context,$sources);
         $digests=[];$eventDigests=[];$galleryDigests=[];
         foreach ($sources as $index=>$source) {
             if (!empty($source['video_digest'])) { $digests[$source['id']]=$source['video_digest']; }
