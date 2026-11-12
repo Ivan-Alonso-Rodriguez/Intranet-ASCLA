@@ -23,7 +23,7 @@ async function closeEditor(){await admin.locator('.modal-top [aria-label="Cerrar
  const b=await upload({name:'conversaciones-compartidas.jpg',mimeType:'image/jpeg',buffer:fs.readFileSync('C:/Windows/Web/Wallpaper/ThemeD/img35.jpg')});
  const pdf=await upload({name:'ASCLA_Guia_de_la_comunidad_y_programa_del_encuentro.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Count 0/Kids[]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF')});
  const album=await create('gallery',{title:'Momentos de nuestra comunidad',body:'Fotos y materiales para recordar nuestro encuentro.',status:'publish',meta:{media_ids:[a.id,b.id,pdf.id],chatham:false}});
- const events=[];for(let i=1;i<=21;i++)events.push(await create('event',{title:'Encuentro regional '+String(i).padStart(2,'0'),body:'Conversaciones para la comunidad.',status:'publish',meta:{start:new Date(Date.now()+i*86400000).toISOString(),end:new Date(Date.now()+i*86400000+3600000).toISOString(),capacity:20,chatham:false}}));
+ const events=[];for(let i=1;i<=21;i++)events.push(await create('event',{title:'Encuentro regional '+String(i).padStart(2,'0'),body:'Conversaciones para la comunidad.',status:'publish',meta:{start:new Date(Date.now()+i*86400000).toISOString(),end:new Date(Date.now()+i*86400000+3600000).toISOString(),capacity:20,url:'https://example.invalid/ascla-meeting',chatham:false}}));
  const catalogs=(await ok(member,'bootstrap')).catalogs;
  const topics={};for(const [key,tax] of Object.entries({areas:'area',languages:'language',learn:'area',help:'area',connect_topics:'interest'}))topics[key]=catalogs[tax].slice(0,2).map(t=>t.id);
  await ok(member,'profiles/me',topics);

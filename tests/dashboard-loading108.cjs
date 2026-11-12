@@ -57,6 +57,7 @@ async function clickAfterReview(locator){
  });
  await page.goto(base+'/wp-login.php');await page.locator('#user_login').fill('demo.asociado');await page.locator('#user_pass').fill(env.ASCLA_DEMO_PASSWORD);
  await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),page.locator('#wp-submit').click()]);
+ const language=page.locator('.header-language select[name="_ascla_locale"]');await language.waitFor();if(await language.inputValue()!=='es_ES')await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),language.selectOption('es_ES')]);
  await page.goto(base+'/intranet/');await page.locator('.hero h1').waitFor({timeout:10000});
  assert.ok(held.length);await page.waitForFunction(()=>!document.querySelector('#page-content').hasAttribute('aria-busy'));await page.keyboard.press('Escape');
  await page.locator('#dashboard-recommendations [role=status]').waitFor();assert.equal(await page.locator('.stat-grid .stat').count(),4);
@@ -71,7 +72,7 @@ async function clickAfterReview(locator){
  assert.equal(await page.locator('#dashboard-recommendations [role=status]').count(),0);assert.equal(await page.locator('.hero h1').count(),1);pass('Reintentar sustituye el aviso por la respuesta y conserva el contenido de Inicio');
  await checkRecommendationLayout();
  assert.deepEqual(errors,[]);
-}catch(error){errors.push(error.message);console.error(error.stack);process.exitCode=1;}finally{
+}catch(error){errors.push(error.message);console.error(error.stack);if(page)console.error('Pager diagnostic: '+JSON.stringify(await page.locator('#recommendation-people').evaluate(n=>({left:n.scrollLeft,width:n.clientWidth,card:n.firstElementChild?.getBoundingClientRect().width,label:n.nextElementSibling?.textContent,language:ASCLA.language})).catch(()=>null)));process.exitCode=1;}finally{
  for(const release of held.splice(0))release();
  if(browser)await browser.close();fs.writeFileSync(root+'/test-results/dashboard-loading108.json',JSON.stringify({scope:'Injected delayed/error responses on disposable local WordPress; no provider performance claim',checks,errors},null,2));
 }})();
