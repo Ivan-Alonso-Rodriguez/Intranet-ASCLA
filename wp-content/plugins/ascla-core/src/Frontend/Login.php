@@ -217,6 +217,9 @@ final class Login
     /** Spanish UI copy is scoped to wp-login.php; native form handling stays with WordPress. */
     public static function translate(string $translation, string $text, string $domain): string
     {
+        if ($domain==='default' && $text==='Enter your new password below or generate one.') {
+            return Language::english()?'Enter and confirm your new password.':'Escribe y confirma tu nueva contraseña.';
+        }
         if ($domain !== 'default' || Language::english()) { return $translation; }
         $adminLabels=['Log In'=>'Entrar a administración','Log in'=>'Volver al acceso administrativo'];
         if (self::nativeAdminContext() && isset($adminLabels[$text])) { return $adminLabels[$text]; }
@@ -241,7 +244,6 @@ final class Login
             'Strength indicator' => 'Seguridad de la contraseña',
             'Confirm use of weak password' => 'Confirmar el uso de una contraseña débil',
             'Please enter your username or email address. You will receive an email message with instructions on how to reset your password.' => 'Escribe tu usuario o correo electrónico. Recibirás un enlace para restablecer tu contraseña.',
-            'Enter your new password below or generate one.' => 'Escribe una nueva contraseña o genera una automáticamente.',
             'Your password has been reset.' => 'Tu contraseña se ha restablecido.',
             'You are now logged out.' => 'Has cerrado sesión.',
             'You have logged in successfully.' => 'Has iniciado sesión correctamente.',

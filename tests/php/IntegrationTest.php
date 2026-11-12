@@ -84,7 +84,9 @@ final class IntegrationTest extends TestCase
 
     {
 
-        $p=$this->make('event',['meta'=>['start'=>gmdate('c',time()-7200),'end'=>gmdate('c',time()-3600),'capacity'=>20,'modality'=>'Virtual']]);$this->user(1);
+        $p=$this->make('event',['meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>20,'modality'=>'Virtual']]);
+        update_post_meta($p['id'],'_ascla',array_replace($p['meta'],['start'=>gmdate('c',time()-7200),'end'=>gmdate('c',time()-3600)]));
+        $this->user(1);
 
         $detail=Events::detail($p['id']);self::assertTrue($detail['is_past']);self::assertSame('', $detail['google_url']);self::assertArrayNotHasKey('ics',$detail);
 

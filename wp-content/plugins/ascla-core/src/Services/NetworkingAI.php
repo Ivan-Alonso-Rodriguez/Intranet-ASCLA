@@ -61,7 +61,7 @@ final class NetworkingAI
     private static function validateProse(string $task,array $result): array
     {
         if($task==='microagenda'){return self::validateAgenda($result);}
-        $fields=match($task){'matching'=>['explanation'=>2000,'conversation_proposal'=>2000],'intro'=>['text'=>5000,'conversation_proposal'=>2000],default=>[]};
+        $fields=match($task){'matching'=>['explanation'=>2000,'conversation_proposal'=>2000],'intro'=>['text'=>5000,'conversation_proposal'=>2000],'microevent_copy'=>['objective'=>1000,'icebreaker'=>1000,'closing_question'=>1000],default=>[]};
         $clean=[];
         foreach($fields as $field=>$limit){
             Access::require(is_string($result[$field]??null),'Respuesta de IA incompleta.',502);

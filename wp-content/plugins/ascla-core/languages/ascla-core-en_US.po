@@ -102,6 +102,9 @@ msgstr "Open group"
 msgid "Abrir historial"
 msgstr "Open history"
 
+msgid "Abrir importación"
+msgstr "Open import"
+
 msgid "Abrir información del grupo"
 msgstr "Open group information"
 
@@ -152,6 +155,9 @@ msgstr "Action"
 
 msgid "Acepta la solicitud para continuar la conversación"
 msgstr "Accept the request to continue the conversation"
+
+msgid "Acepta o ignora cada fila pendiente. Cuando termines, confirma para actualizar los perfiles."
+msgstr "Accept or ignore each pending row. When you finish, confirm to update profiles."
 
 msgid "Acepta o ignora todas las filas antes de confirmar."
 msgstr "Accept or ignore every row before confirming."
@@ -207,6 +213,9 @@ msgstr "Enable learning"
 msgid "Activar en el catálogo"
 msgstr "Activate in catalogue"
 
+msgid "Activas"
+msgstr "Active"
+
 msgid "Active JavaScript para utilizar la intranet."
 msgstr "Enable JavaScript to use the intranet."
 
@@ -237,6 +246,9 @@ msgstr "Update the start date before approving."
 msgid "Actualiza la fecha del evento antes de reactivarlo: ya finalizó."
 msgstr "Update the event date before reactivating it: it has already ended."
 
+msgid "Actualiza los intereses de los asociados a partir de las respuestas de un formulario."
+msgstr "Update member interests from form responses."
+
 msgid "Actualización automática semanal"
 msgstr "Automatic weekly update"
 
@@ -248,6 +260,9 @@ msgstr "Updated weekly"
 
 msgid "Actualizada"
 msgstr "Updated"
+
+msgid "Actualizando los textos de la propuesta con los cambios guardados…"
+msgstr "Updating proposal text from the saved changes…"
 
 msgid "Actualizando resumen…"
 msgstr "Updating summary…"
@@ -336,6 +351,9 @@ msgstr "Now"
 msgid "Ahora no"
 msgstr "Not now"
 
+msgid "Ajusta los límites de grupo en este apartado y revisa los intereses autorizados de los perfiles."
+msgstr "Adjust group limits here and review authorized profile interests."
+
 msgid "Ajustar fotografía"
 msgstr "Adjust photo"
 
@@ -359,6 +377,9 @@ msgstr "On publication"
 
 msgid "Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."
 msgstr "By publishing or scheduling, you confirm that you reviewed sources, anonymization and rights."
+
+msgid "Alcanzaste el máximo de asistentes. Quita a una persona para elegir otra."
+msgstr "You reached the maximum attendance. Remove someone to select another member."
 
 msgid "Aliado activo en el catálogo."
 msgstr "Partner active in the catalogue."
@@ -408,6 +429,9 @@ msgstr "Analyzed"
 msgid "Analizando"
 msgstr "Analyzing"
 
+msgid "Analizando columnas…"
+msgstr "Analyzing columns…"
+
 msgid "Analizar columnas"
 msgstr "Analyze columns"
 
@@ -437,6 +461,9 @@ msgstr "Last name: this field is required."
 
 msgid "Apertura a la comunidad"
 msgstr "Opens to the community"
+
+msgid "Aplica los cambios"
+msgstr "Apply the changes"
 
 msgid "Aplicación"
 msgstr "Application"
@@ -489,6 +516,9 @@ msgstr "You will receive messages, invitations, and assistant responses here."
 msgid "Archivada"
 msgstr "Archived"
 
+msgid "Archivadas"
+msgstr "Archived"
+
 msgid "Archivados"
 msgstr "Archived"
 
@@ -512,6 +542,9 @@ msgstr "CSV file · UTF-8 · up to 512 KB"
 
 msgid "Archivo cargado."
 msgstr "File uploaded."
+
+msgid "Archivo de respuestas"
+msgstr "Response file"
 
 msgid "Archivos"
 msgstr "Files"
@@ -612,6 +645,9 @@ msgstr "Blocked members"
 msgid "Asociados de ASCLA"
 msgstr "ASCLA members"
 
+msgid "Asociados disponibles"
+msgstr "Available members"
+
 msgid "Asociados elegibles"
 msgstr "Eligible members"
 
@@ -623,6 +659,9 @@ msgstr "Members who share a visible interest."
 
 msgid "Atención actualizada."
 msgstr "Request handling updated."
+
+msgid "Atención compartida por el equipo ASCLA"
+msgstr "Shared support by the ASCLA team"
 
 msgid "Atiende las solicitudes"
 msgstr "Handle requests"
@@ -675,6 +714,9 @@ msgstr "New resource notifications"
 msgid "Ayer"
 msgstr "Yesterday"
 
+msgid "Añade al catálogo los temas base de Forms que todavía falten. Los temas existentes se conservan."
+msgstr "Add missing standard Forms topics to the catalog. Existing topics are kept."
+
 msgid "Añade contexto que ayude al equipo de moderación…"
 msgstr "Add context that will help the moderation team…"
 
@@ -695,6 +737,9 @@ msgstr "Add or update a participant"
 
 msgid "Añadir tema"
 msgstr "Add topic"
+
+msgid "Añadir temas base de Forms"
+msgstr "Add standard Forms topics"
 
 msgid "Aún no encontramos contenidos afines"
 msgstr "We have not found relevant content yet"
@@ -740,6 +785,9 @@ msgstr "No participants are listed yet. Add a participant or import the Zoom fil
 
 msgid "Aún no hay registros para representar en este gráfico."
 msgstr "There are no records to display in this chart yet."
+
+msgid "Aún no hay temas en el catálogo."
+msgstr "The catalog has no topics yet."
 
 msgid "Aún no tienes consultas"
 msgstr "You do not have any questions yet"
@@ -885,6 +933,9 @@ msgstr "UTF-8 CSV · up to 512 KB and 5,000 rows"
 msgid "CSV hasta 512 KB · PDF, HTML o ZIP hasta 5 MB · máximo 5000 filas"
 msgstr "CSV up to 512 KB · PDF, HTML or ZIP up to 5 MB · maximum 5000 rows"
 
+msgid "CSV hasta 512 KB. PDF con tablas, HTML o ZIP de una hoja hasta 5 MB. Máximo 5000 filas."
+msgstr "CSV up to 512 KB. PDF with tables, HTML, or single-sheet ZIP up to 5 MB. Maximum 5,000 rows."
+
 msgid "CSV no válido."
 msgstr "Invalid CSV."
 
@@ -1029,6 +1080,9 @@ msgstr "Loading section…"
 msgid "Cargando tu comunidad ASCLA…"
 msgstr "Loading your ASCLA community…"
 
+msgid "Cargar respuestas"
+msgstr "Upload responses"
+
 msgid "Cargo"
 msgstr "Position"
 
@@ -1055,6 +1109,9 @@ msgstr "Contact categories (one per line)"
 
 msgid "Catálogo"
 msgstr "Catalog"
+
+msgid "Catálogo de temas"
+msgstr "Topic catalog"
 
 msgid "Catálogo preparado."
 msgstr "Catalog prepared."
@@ -1241,6 +1298,9 @@ msgstr "Complete"
 
 msgid "Comprueba estados y duración."
 msgstr "Check statuses and durations."
+
+msgid "Comprueba si el proveedor de IA configurado puede sugerir temas. La prueba usa un texto de ejemplo."
+msgstr "Check whether the configured AI provider can suggest topics. This test uses sample text."
 
 msgid "Comunidad"
 msgstr "Community"
@@ -1470,11 +1530,17 @@ msgstr "Review registrations, attendance and trends by topic and period."
 msgid "Consulta intereses y actividad de cada asociado, o administra sus cuentas."
 msgstr "Explore each member’s interests and activity, or manage their accounts."
 
+msgid "Consulta las primeras filas para comprobar que elegiste las columnas correctas."
+msgstr "Check the first few rows to verify that you selected the right columns."
+
 msgid "Consulta lo que ASCLA está preparando. Si una tarea falla, puedes abrirla y volver a intentarlo."
 msgstr "See what ASCLA is preparing. If a task fails, you can open it and try again."
 
 msgid "Consulta los archivos privados de todos los asociados y elimina los que corresponda."
 msgstr "Browse private files from all members and remove them when appropriate."
+
+msgid "Consulta los resultados o abre una importación pendiente para continuar."
+msgstr "View results or open a pending import to continue."
 
 msgid "Consulta privada"
 msgstr "Private request"
@@ -1539,6 +1605,9 @@ msgstr "Published content and approved comments during the selected dates."
 msgid "Contenido reportado por la comunidad"
 msgstr "Content reported by the community"
 
+msgid "Contenido reservado al asociado y al equipo autorizado."
+msgstr "Content is restricted to the member and authorized staff."
+
 msgid "Contenido reservado al asociado y al responsable asignado."
 msgstr "Content is restricted to the member and the assigned staff member."
 
@@ -1577,6 +1646,9 @@ msgstr "Agreement"
 
 msgid "Conversa con el asistente sobre eventos, publicaciones, recursos y conexiones. Primero consulta la información disponible en la propia intranet."
 msgstr "Chat with the assistant about events, posts, resources, and connections. It checks the information available in the intranet first."
+
+msgid "Conversa con el asistente sobre eventos, publicaciones, recursos, galerías y conexiones. Primero consulta la información disponible en la propia intranet."
+msgstr "Chat with the assistant about events, posts, resources, galleries, and connections. It first checks information available within the intranet."
 
 msgid "Conversaciones"
 msgstr "Conversations"
@@ -1778,6 +1850,12 @@ msgstr "Private information. It is used only to send birthday greetings and noti
 
 msgid "Dato privado. Solo yo y administradores."
 msgstr "Private information. Only me and administrators."
+
+msgid "Datos de la reunión"
+msgstr "Meeting details"
+
+msgid "Datos de reunión no válidos."
+msgstr "Invalid meeting details."
 
 msgid "Datos ficticios de demostración"
 msgstr "Fictional demo data"
@@ -1995,6 +2073,9 @@ msgstr "Edit my profile"
 msgid "Editar mis intereses"
 msgstr "Edit my interests"
 
+msgid "Editar propuesta"
+msgstr "Edit proposal"
+
 msgid "Editar y publicar"
 msgstr "Edit and publish"
 
@@ -2067,6 +2148,9 @@ msgstr "The assistant prioritizes information your account can access in ASCLA. 
 msgid "El asociado puede desactivar o reiniciar este aprendizaje desde Perfil → Intereses. Este resumen no cambia con los filtros del historial."
 msgstr "Members can disable or reset learning under Profile → Interests. This summary is independent of the history filters."
 
+msgid "El asociado y el equipo autorizado de ASCLA pueden ver la consulta. Cualquier integrante del equipo puede responder y resolverla."
+msgstr "The member and authorized ASCLA staff can view this case. Any staff member can reply and resolve it."
+
 msgid "El borrador se moverá a la papelera."
 msgstr "The draft will be moved to the trash."
 
@@ -2136,6 +2220,9 @@ msgstr "The event or threshold changed. Generate a new preview."
 msgid "El evento se conservará como cancelado y se notificará a las personas inscritas, invitadas o en lista de espera. Esta acción no elimina el historial."
 msgstr "The event will be kept as cancelled and registered, invited, or waitlisted people will be notified. This action does not delete the history."
 
+msgid "El evento se guardará y podrás seleccionar a los asociados que quieres invitar."
+msgstr "The event will be saved, then you can select the members to invite."
+
 msgid "El evento ya está activo."
 msgstr "The event is already active."
 
@@ -2202,6 +2289,9 @@ msgstr "The result exceeds the 20 allowed interests."
 msgid "El rol principal siempre está seleccionado. Acumular varios roles exige una autorización previa de la Junta registrada en ASCLA."
 msgstr "The primary role is always selected. Multiple roles require prior Board authorization recorded in ASCLA."
 
+msgid "El servicio de IA no está disponible para generar propuestas. Inténtalo de nuevo más tarde."
+msgstr "The AI service is unavailable to generate proposals. Please try again later."
+
 msgid "El servidor no devolvió un PDF. Tu sesión puede haber caducado; vuelve a iniciar sesión e inténtalo nuevamente."
 msgstr "The server did not return a PDF. Your session may have expired; sign in again and retry."
 
@@ -2216,6 +2306,12 @@ msgstr "The phone number must use international format: +, country code, and 8 t
 
 msgid "El tema del evento es una propuesta contextual, no un interés declarado. Revisa antes de aceptar."
 msgstr "The event topic is a contextual proposal, not a declared interest. Review it before accepting."
+
+msgid "El tema se quitará de los eventos y de los intereses de los perfiles que lo tienen seleccionado."
+msgstr "The topic will be removed from events and from profiles that selected it as an interest."
+
+msgid "El tema ya existe en el catálogo."
+msgstr "The topic already exists in the catalog."
 
 msgid "El texto supera el límite de %d caracteres."
 msgstr "The text exceeds the limit of %d characters."
@@ -2250,6 +2346,9 @@ msgstr "The ZIP index is incomplete."
 msgid "El índice del ZIP no es válido."
 msgstr "The ZIP index is invalid."
 
+msgid "Elegir cómo actualizar los perfiles"
+msgstr "Choose how to update profiles"
+
 msgid "Elegir foto"
 msgstr "Choose photo"
 
@@ -2270,6 +2369,12 @@ msgstr "Choose which optional alerts you also want to receive by email. They are
 
 msgid "Elige qué quieres revisar. Cada sección muestra las acciones disponibles para tu rol."
 msgstr "Choose what to review. Each section shows the actions available for your role."
+
+msgid "Elige si quieres añadir los intereses aprobados o sustituir los existentes. Podrás revisar cada fila antes de aplicar los cambios."
+msgstr "Choose whether to add approved interests or replace existing ones. You can review each row before applying changes."
+
+msgid "Elige una columna de correo, código o nombre. Si hay correo o código, se usan primero."
+msgstr "Choose an email, member ID, or name column. Email and member ID take priority when available."
 
 msgid "Elige una fecha de inicio anterior al fin y un período de hasta 366 días."
 msgstr "Choose a start date before the end date and a period of up to 366 days."
@@ -2324,6 +2429,9 @@ msgstr "Delete report"
 
 msgid "Eliminar solicitud"
 msgstr "Delete request"
+
+msgid "Eliminar tema"
+msgstr "Delete topic"
 
 msgid "Eliminar todas"
 msgstr "Delete all"
@@ -2595,11 +2703,20 @@ msgstr "This member has not added a biography yet."
 msgid "Este navegador no puede leer ZIP. Extrae la hoja HTML o exporta un CSV."
 msgstr "This browser cannot read ZIP files. Extract the HTML sheet or export a CSV."
 
+msgid "Este paso prepara las propuestas para revisión."
+msgstr "This step prepares suggestions for review."
+
 msgid "Este primer mensaje llegará como una solicitud. Podrá leerlo y decidir si acepta la conversación."
 msgstr "This first message will arrive as a request. The recipient can read it and decide whether to accept the conversation."
 
 msgid "Estos controles se guardan al instante, sin guardar el perfil."
 msgstr "These controls save immediately, without saving your profile."
+
+msgid "Estos límites se aplican a las nuevas propuestas. Puedes ajustar los cupos de cada encuentro al editarlo."
+msgstr "These limits apply to new proposals. You can adjust each meeting’s capacity when editing it."
+
+msgid "Estos temas se usan en las importaciones, los perfiles y los eventos."
+msgstr "These topics are used in imports, profiles, and events."
 
 msgid "Están sin publicar y aún se pueden editar. No son solicitudes de aprobación."
 msgstr "They are unpublished and can still be edited. They are not approval requests."
@@ -2765,6 +2882,9 @@ msgstr "Date to be confirmed"
 
 msgid "Fecha por definir"
 msgstr "Date to be set"
+
+msgid "Fecha y administrador"
+msgstr "Date and administrator"
 
 msgid "Fecha y hora de publicación"
 msgstr "Publication date and time"
@@ -2976,6 +3096,9 @@ msgstr "Save event"
 msgid "Guardar la selección requiere una nueva aprobación. Todavía no se envían invitaciones."
 msgstr "Saving the selection requires a new approval. Invitations are not sent yet."
 
+msgid "Guardar límites"
+msgstr "Save limits"
+
 msgid "Guardar perfil"
 msgstr "Save profile"
 
@@ -3054,6 +3177,9 @@ msgstr "Inherit from role"
 msgid "Herramientas"
 msgstr "Tools"
 
+msgid "Herramientas para Google Forms"
+msgstr "Google Forms tools"
+
 msgid "Historial"
 msgstr "History"
 
@@ -3086,6 +3212,9 @@ msgstr "Hello"
 
 msgid "Hola. Puedo revisar lo que hay en ASCLA y ayudarte a encontrar eventos próximos, publicaciones recientes, recursos y conexiones recomendadas. ¿Qué quieres saber?"
 msgstr "Hello. I can check what is available in ASCLA and help you find upcoming events, recent posts, resources, and recommended connections. What would you like to know?"
+
+msgid "Hola. Puedo revisar lo que hay en ASCLA y ayudarte a encontrar eventos próximos, publicaciones recientes, recursos, galerías y conexiones recomendadas. ¿Qué quieres saber?"
+msgstr "Hello. I can check ASCLA and help you find upcoming events, recent posts, resources, galleries, and recommended connections. What would you like to know?"
 
 msgid "Hora"
 msgstr "Time"
@@ -3129,11 +3258,17 @@ msgstr "Valid IDs"
 msgid "INTERESES DE LA COMUNIDAD"
 msgstr "COMMUNITY INTERESTS"
 
+msgid "INVITACIÓN AL EVENTO"
+msgstr "EVENT INVITATION"
+
 msgid "Ideas, experiencias y conversaciones que nos acercan."
 msgstr "Ideas, experiences and conversations that bring us together."
 
 msgid "Identificación de la cuenta"
 msgstr "Account identification"
+
+msgid "Identificar a los asociados"
+msgstr "Identify members"
 
 msgid "Idioma"
 msgstr "Language"
@@ -3152,6 +3287,9 @@ msgstr "Languages for conversations"
 
 msgid "Ignorada"
 msgstr "Ignored"
+
+msgid "Ignorar"
+msgstr "Ignore"
 
 msgid "Imagen anterior"
 msgstr "Previous image"
@@ -3212,6 +3350,9 @@ msgstr "Include +, country code and number; for example +51 987 654 321"
 
 msgid "Independiente"
 msgstr "Independent"
+
+msgid "Indica dónde están los nombres y las respuestas."
+msgstr "Choose the columns that contain names and responses."
 
 msgid "Indica el motivo del cambio de candidatos."
 msgstr "Explain why the candidates are being changed."
@@ -3516,6 +3657,9 @@ msgstr "The AI explanation is unavailable right now. You can keep using the prof
 msgid "La fecha de fin debe tener un año de cuatro dígitos."
 msgstr "The end date must have a four-digit year."
 
+msgid "La fecha de inicio debe ser hoy o posterior."
+msgstr "The start date must be today or later."
+
 msgid "La fecha de inicio debe tener un año de cuatro dígitos."
 msgstr "The start date must have a four-digit year."
 
@@ -3561,6 +3705,9 @@ msgstr "The import has not been confirmed."
 msgid "La importación ya fue analizada."
 msgstr "The import has already been analyzed."
 
+msgid "La invitación no reserva un cupo. Cada asociado confirma su asistencia según la disponibilidad."
+msgstr "An invitation does not reserve a seat. Each member confirms attendance subject to availability."
+
 msgid "La mensajería está bloqueada entre estas cuentas."
 msgstr "Messaging is blocked between these accounts."
 
@@ -3603,6 +3750,9 @@ msgstr "The recommendation was dismissed privately."
 msgid "La respuesta contiene más de tres opciones."
 msgstr "The response contains more than three options."
 
+msgid "La selección supera el máximo de asistentes del evento."
+msgstr "The selection exceeds the event’s maximum attendance."
+
 msgid "La sesión del formulario expiró. Recarga la página e inténtalo nuevamente."
 msgstr "The form session expired. Reload the page and try again."
 
@@ -3614,6 +3764,9 @@ msgstr "The closed request will be hidden from the active inbox. The member will
 
 msgid "La solicitud debe pertenecer al asociado, estar activa y no haber sido utilizada."
 msgstr "The request must belong to the member, be active and not have been used."
+
+msgid "La solicitud no puede volver a un estado anterior."
+msgstr "This case cannot return to an earlier state."
 
 msgid "La solicitud resuelta se enviará a la papelera."
 msgstr "The resolved request will be moved to the trash."
@@ -3708,6 +3861,12 @@ msgstr "Pending lists may change the comparison. Increased or Decreased describe
 msgid "Las notificaciones internas de ASCLA seguirán disponibles aunque desactives estos correos."
 msgstr "ASCLA in-app notifications will remain available even if you turn off these emails."
 
+msgid "Las nuevas contraseñas no coinciden."
+msgstr "The new passwords do not match."
+
+msgid "Las propuestas descartadas pasan a Archivadas. También puedes archivar los encuentros cancelados o finalizados."
+msgstr "Discarded proposals move to Archived. You can also archive cancelled or completed meetings."
+
 msgid "Las tasas solo se calculan con listas verificadas. Las demás cifras pueden incluir registros parciales."
 msgstr "Rates are calculated only from verified lists. Other figures may include incomplete records."
 
@@ -3731,6 +3890,9 @@ msgstr "Read answer"
 
 msgid "Leyendo PDF"
 msgstr "Reading PDF"
+
+msgid "Leyendo archivo…"
+msgstr "Reading file…"
 
 msgid "Leído"
 msgstr "Read"
@@ -3783,6 +3945,9 @@ msgstr "Changes to Information, Interests and Privacy are saved together."
 msgid "Los cambios se aplican al guardar tu perfil."
 msgstr "Changes take effect when you save your profile."
 
+msgid "Los cambios se guardaron. La IA no pudo actualizar los textos de la propuesta."
+msgstr "Your changes were saved. AI could not update the proposal text."
+
 msgid "Los campos marcados son obligatorios. En Intereses, elige al menos un sector, un interés y un objetivo."
 msgstr "Marked fields are required. Under Interests, choose at least one industry, one interest and one networking goal."
 
@@ -3795,6 +3960,9 @@ msgstr "Your visible forum comments will appear here."
 msgid "Los contadores muestran los elementos disponibles en cada sección."
 msgstr "Counts show the items available in each section."
 
+msgid "Los datos de los eventos cambiaron. Vuelve a consultar para conocer la información y los cupos actuales."
+msgstr "Event details have changed. Ask again for current information and available seats."
+
 msgid "Los datos del video están actualizados"
 msgstr "The video data has been updated"
 
@@ -3803,6 +3971,9 @@ msgstr "Current internal data takes priority over the conversation history."
 
 msgid "Los datos personales del asociado se editan desde ASCLA."
 msgstr "Member personal details are edited in ASCLA."
+
+msgid "Los eventos y los perfiles comparten estos temas."
+msgstr "Events and profiles share these topics."
 
 msgid "Los inscritos sin una marca de asistencia se contarán como ausentes al calcular la tasa. Comprueba la lista antes de confirmar."
 msgstr "Registrants without an attendance mark count as absent when calculating the rate. Check the list before confirming."
@@ -3824,6 +3995,9 @@ msgstr "New comments that need approval will appear here."
 
 msgid "Los ocho grupos mínimos siempre se incluyen y son obligatorios al guardar. Los criterios adicionales cuentan para llegar al 100 %, pero no impiden guardar un perfil con sus mínimos completos."
 msgstr "The eight minimum groups are always included and required when saving. Additional criteria count towards 100%, but do not prevent saving a profile with its minimum fields complete."
+
+msgid "Los perfiles se actualizan al confirmar."
+msgstr "Profiles are updated after you confirm."
 
 msgid "Los permisos no pueden superar los del rol asignado."
 msgstr "Permissions cannot exceed the assigned role."
@@ -3848,6 +4022,9 @@ msgstr "Topics you are interested in"
 
 msgid "Lugar o sala"
 msgstr "Location or room"
+
+msgid "Límites de grupo guardados."
+msgstr "Group limits saved."
 
 msgid "Mantener conexión"
 msgstr "Keep connection"
@@ -4047,6 +4224,9 @@ msgstr "Moderate"
 msgid "Moderar contenido e interacciones"
 msgstr "Moderate content and interactions"
 
+msgid "Modo de actualización"
+msgstr "Update mode"
+
 msgid "Modo de importación no válido."
 msgstr "Invalid import mode."
 
@@ -4071,6 +4251,9 @@ msgstr "Reason"
 msgid "Motivo de cancelación"
 msgstr "Cancellation reason"
 
+msgid "Motivo de la decisión (opcional)"
+msgstr "Decision reason (optional)"
+
 msgid "Motivo de reprogramación"
 msgstr "Rescheduling reason"
 
@@ -4082,6 +4265,9 @@ msgstr "Reason for change"
 
 msgid "Motivo del cambio de candidatos"
 msgstr "Reason for changing candidates"
+
+msgid "Muestra del archivo"
+msgstr "File sample"
 
 msgid "Más filtros"
 msgstr "More filters"
@@ -4095,6 +4281,9 @@ msgstr "More account options"
 msgid "Máximo de asistentes"
 msgstr "Maximum attendees"
 
+msgid "Máximo de asociados"
+msgstr "Maximum members"
+
 msgid "Máximo de propuestas por generación"
 msgstr "Maximum proposals per batch"
 
@@ -4106,6 +4295,9 @@ msgstr "Maximum proposals per week"
 
 msgid "Método / confianza"
 msgstr "Method / confidence"
+
+msgid "Mínimo de asociados"
+msgstr "Minimum members"
 
 msgid "Mínimo de caracteres:"
 msgstr "Minimum characters:"
@@ -4284,6 +4476,9 @@ msgstr "No valid response table was found (maximum 5000 rows)."
 msgid "No se generaron propuestas con las condiciones actuales."
 msgstr "No proposals were generated under the current conditions."
 
+msgid "No se pudieron actualizar los textos de la propuesta. Puedes volver a intentarlo."
+msgstr "The proposal text could not be updated. You can try again."
+
 msgid "No se pudieron cargar las ciudades en este momento."
 msgstr "Cities could not be loaded right now."
 
@@ -4365,6 +4560,9 @@ msgstr "Activity could not be retrieved. Please try again."
 msgid "No se pudo descargar el PDF. Comprueba tu conexión e inténtalo nuevamente."
 msgstr "The PDF could not be downloaded. Check your connection and try again."
 
+msgid "No se pudo eliminar el tema."
+msgstr "The topic could not be deleted."
+
 msgid "No se pudo guardar el rol de la cuenta."
 msgstr "The account role could not be saved."
 
@@ -4424,6 +4622,12 @@ msgstr "You have no confirmed connections yet."
 
 msgid "No tienes notificaciones pendientes"
 msgstr "You have no pending notifications"
+
+msgid "No tienes permiso para archivar esta solicitud."
+msgstr "You do not have permission to archive this case."
+
+msgid "No tienes permiso para atender esta solicitud."
+msgstr "You do not have permission to handle this case."
 
 msgid "No tienes permisos para revisar reportes."
 msgstr "You do not have permission to review reports."
@@ -4598,6 +4802,9 @@ msgstr "Hidden / scheduled"
 
 msgid "Oferta vencida"
 msgstr "Expired offer"
+
+msgid "Omitir filas sin una cuenta ASCLA identificada"
+msgstr "Skip rows without a matched ASCLA account"
 
 msgid "Opciones de la solicitud"
 msgstr "Connection request options"
@@ -5028,6 +5235,9 @@ msgstr "Test Gemini for Forms"
 msgid "Probar IA para Forms"
 msgstr "Test AI for Forms"
 
+msgid "Probar conexión de IA"
+msgstr "Test AI connection"
+
 msgid "Probar sugerencias de redes sociales"
 msgstr "Try social media suggestions"
 
@@ -5049,6 +5259,9 @@ msgstr "Schedule saved. Administrative approval is still required."
 msgid "Programada"
 msgstr "Scheduled"
 
+msgid "Programadas o publicadas"
+msgstr "Scheduled or published"
+
 msgid "Programado"
 msgstr "Scheduled"
 
@@ -5060,6 +5273,9 @@ msgstr "Schedule publication"
 
 msgid "Progreso"
 msgstr "Progress"
+
+msgid "Progreso de la importación"
+msgstr "Import progress"
 
 msgid "Promedio de asistentes"
 msgstr "Average attendance"
@@ -5135,6 +5351,9 @@ msgstr "Upcoming events"
 
 msgid "Próximos eventos"
 msgstr "Upcoming events"
+
+msgid "Publica el evento para enviar invitaciones a los asociados."
+msgstr "Publish the event to send member invitations."
 
 msgid "Publicaciones"
 msgstr "Posts"
@@ -5231,6 +5450,9 @@ msgstr "You can save a draft even if some information is still missing. Complete
 
 msgid "Puedes leer este mensaje antes de decidir. Acepta para poder responder."
 msgstr "You can read this message before deciding. Accept the request to reply."
+
+msgid "Puedes pausar y continuar desde el historial."
+msgstr "You can pause and resume from the import history."
 
 msgid "Puedes presentarte antes de conectar. Máximo 1000 caracteres."
 msgstr "Introduce yourself before connecting. Maximum 1000 characters."
@@ -5493,6 +5715,9 @@ msgstr "Retry preview"
 msgid "Reintentar sincronización"
 msgstr "Retry synchronization"
 
+msgid "Relaciona las columnas"
+msgstr "Match the columns"
+
 msgid "Relacionado con tu actividad reciente"
 msgstr "Related to your recent activity"
 
@@ -5501,6 +5726,9 @@ msgstr "Related to your professional profile"
 
 msgid "Relacionar columnas"
 msgstr "Map columns"
+
+msgid "Relacionar las respuestas"
+msgstr "Match the responses"
 
 msgid "Reportar"
 msgstr "Report"
@@ -5580,6 +5808,9 @@ msgstr "Restore to panel"
 msgid "Restituir"
 msgstr "Restore"
 
+msgid "Resuelve la solicitud antes de archivarla."
+msgstr "Resolve the case before archiving it."
+
 msgid "Resultado"
 msgstr "Result"
 
@@ -5621,6 +5852,9 @@ msgstr "Review content"
 
 msgid "Revisa el grupo, la fecha y la agenda para decidir su publicación."
 msgstr "Review the group, date and agenda before deciding to publish."
+
+msgid "Revisa la propuesta"
+msgstr "Review the suggestions"
 
 msgid "Revisa las condiciones o ajusta los mínimos antes de preparar propuestas."
 msgstr "Review the conditions or adjust the minimum group size before preparing proposals."
@@ -5778,6 +6012,9 @@ msgstr "The connection will be removed and the conversation hidden for both memb
 msgid "Se eliminarán todas tus notificaciones actuales, incluidas las que están en otras páginas. Las nuevas notificaciones seguirán llegando."
 msgstr "All your current notifications will be deleted, including those on other pages. You will continue to receive new notifications."
 
+msgid "Se eliminó un tema de la fila aprobada. Revisa la selección."
+msgstr "A topic in the approved row was deleted. Review the selection."
+
 msgid "Se envían únicamente títulos depurados y el catálogo de temas al proveedor configurado. Se excluyen microeventos privados y sesiones Chatham House. No se envían correos, perfiles ni listas de asistencia."
 msgstr "Only sanitized titles and the topic catalog are sent to the configured provider. Private microevents and Chatham House sessions are excluded. Emails, profiles and attendance lists are not sent."
 
@@ -5886,8 +6123,14 @@ msgstr "Select at least two confirmed connections. Groups allow up to 50 members
 msgid "Selecciona al menos dos roles para registrar una autorización."
 msgstr "Select at least two roles to record an authorization."
 
+msgid "Selecciona al menos un asociado."
+msgstr "Select at least one member."
+
 msgid "Selecciona al menos una opción."
 msgstr "Select at least one option."
+
+msgid "Selecciona asociados de la lista. Tu selección se conserva al buscar o cambiar de página."
+msgstr "Select members from the list. Your selection is kept when searching or changing pages."
 
 msgid "Selecciona como máximo 3 intereses provenientes del formulario."
 msgstr "Select at most 3 interests from the form."
@@ -5904,6 +6147,9 @@ msgstr "Select identity and response columns or an event topic for review."
 msgid "Selecciona identidad y respuestas."
 msgstr "Select identity and response columns."
 
+msgid "Selecciona las columnas que contienen intereses. Si el archivo trata de un evento, puedes proponer sus temas para revisarlos."
+msgstr "Select the columns that contain interests. For an event file, you can suggest its topics for review."
+
 msgid "Selecciona las columnas."
 msgstr "Select the columns."
 
@@ -5918,6 +6164,15 @@ msgstr "Select a country first"
 
 msgid "Selecciona primero un país."
 msgstr "Select a country first."
+
+msgid "Selecciona un archivo exportado de Google Forms o Sheets."
+msgstr "Select a file exported from Google Forms or Sheets."
+
+msgid "Selecciona un microevento para completar la reunión."
+msgstr "Select a microevent to complete its meeting details."
+
+msgid "Selecciona un microevento."
+msgstr "Select a microevent."
 
 msgid "Selecciona un país de la lista de sugerencias."
 msgstr "Choose a country from the suggestions."
@@ -5972,6 +6227,9 @@ msgstr "If YouTube does not expose it publicly, open the player to verify it."
 
 msgid "Si YouTube no la expone públicamente, conecta YouTube OAuth y vuelve a intentar."
 msgstr "If YouTube does not expose it publicly, connect YouTube OAuth and try again."
+
+msgid "Si el organizador tiene Google Calendar conectado, se enviará también la invitación oficial por correo."
+msgstr "If the organizer has Google Calendar connected, the official invitation will also be emailed."
 
 msgid "Si estaba programada, deberás volver a elegir su fecha de publicación."
 msgstr "If publication was scheduled, you will need to choose its date again."
@@ -6288,6 +6546,9 @@ msgstr "YOUR PRIVACY FIRST"
 msgid "Tabla de datos"
 msgstr "Data table"
 
+msgid "Tamaño de los próximos grupos"
+msgstr "Size of upcoming groups"
+
 msgid "Tarea"
 msgstr "Task"
 
@@ -6324,8 +6585,20 @@ msgstr "Topic"
 msgid "Tema contextual"
 msgstr "Contextual topic"
 
+msgid "Tema del catálogo creado"
+msgstr "Catalog topic created"
+
+msgid "Tema del catálogo eliminado"
+msgstr "Catalog topic deleted"
+
 msgid "Tema del formulario o evento (opcional)"
 msgstr "Form or event topic (optional)"
+
+msgid "Tema eliminado."
+msgstr "Topic deleted."
+
+msgid "Tema no encontrado."
+msgstr "Topic not found."
 
 msgid "Tema no válido."
 msgstr "Invalid topic."
@@ -6366,6 +6639,9 @@ msgstr "Topics you want to learn"
 msgid "Temas seleccionados (checkbox)"
 msgstr "Selected topics (checkbox)"
 
+msgid "Temas seleccionados en el formulario"
+msgstr "Topics selected in the form"
+
 msgid "Temas sobre los que quieres conectar"
 msgstr "Topics you want to connect on"
 
@@ -6383,6 +6659,9 @@ msgstr "Free text is pending classification or review."
 
 msgid "Texto no válido."
 msgstr "Invalid text."
+
+msgid "Textos de propuesta"
+msgstr "Proposal text"
 
 msgid "Tienes una nueva respuesta a tu comentario."
 msgstr "You have a new reply to your comment."
@@ -6509,6 +6788,12 @@ msgstr "Your report will be reviewed by the ASCLA moderation team."
 
 msgid "Tu respuesta del asistente está lista"
 msgstr "Your assistant answer is ready"
+
+msgid "Tu seguridad"
+msgstr "Your security"
+
+msgid "Tu selección"
+msgstr "Your selection"
 
 msgid "Tu sesión está por vencer"
 msgstr "Your session is about to expire"
@@ -6684,6 +6969,9 @@ msgstr "Expires"
 msgid "Vencida"
 msgstr "Expired"
 
+msgid "Vencidas"
+msgstr "Expired"
+
 msgid "Ver"
 msgstr "View"
 
@@ -6807,6 +7095,9 @@ msgstr "View all"
 msgid "Ver transcripción"
 msgstr "View transcript"
 
+msgid "Verifica la cuenta y los temas de cada fila."
+msgstr "Check the account and topics for each row."
+
 msgid "Verifica la lista al terminar."
 msgstr "Verify the list when finished."
 
@@ -6854,6 +7145,9 @@ msgstr "Back"
 
 msgid "Volver a ASCLA"
 msgstr "Back to ASCLA"
+
+msgid "Volver a generar textos"
+msgstr "Regenerate text"
 
 msgid "Volver a la ficha"
 msgstr "Back to details"
@@ -6977,6 +7271,9 @@ msgstr "related item"
 
 msgid "contenidos relacionados"
 msgstr "related items"
+
+msgid "cuentas identificadas"
+msgstr "matched accounts"
 
 msgid "cupos"
 msgstr "spots"

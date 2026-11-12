@@ -2,6 +2,7 @@
 namespace ASCLA\Core\Services;
 
 use ASCLA\Core\Repositories\{Store,Transaction,WordPressWrites};
+use ASCLA\Core\Domain\InterestCatalog;
 
 /** Manual removals always take priority over subsequent automatic topic selection. */
 final class AutomaticInterests
@@ -30,7 +31,7 @@ final class AutomaticInterests
             wp_cache_delete($user,'user_meta');LearnedInterests::invalidate($user);
             $choices=(array)get_user_meta($user,'_ascla_interest_choices',true);
             $profile=(array)get_user_meta($user,'_ascla_profile',true);
-            $selected=array_values(array_unique(array_map('intval',(array)($profile['interests']??[]))));
+            $selected=InterestCatalog::activeIds((array)($profile['interests']??[]));
             $add=[];
             foreach (LearnedInterests::estimate($user)['topics'] as $topic) {
                 // Only canonical interest choices can be checked. Categories/tags never create new choices.

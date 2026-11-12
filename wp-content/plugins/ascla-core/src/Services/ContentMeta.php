@@ -132,6 +132,17 @@ final class ContentMeta
         }
     }
 
+    public static function eventStartMinimum(): \DateTimeImmutable
+    {
+        return current_datetime()->setTime(0,0);
+    }
+
+    public static function requireCurrentEventStart(array $meta): void
+    {
+        if (empty($meta['start'])) { return; }
+        Access::require(strtotime($meta['start'])>=self::eventStartMinimum()->getTimestamp(),'La fecha de inicio debe ser hoy o posterior.',400);
+    }
+
     public static function eventDate(mixed $value,string $field=''): string
     {
         $invalid=match($field) {

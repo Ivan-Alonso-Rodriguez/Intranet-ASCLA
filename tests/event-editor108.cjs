@@ -16,7 +16,20 @@ async function scan(name){await admin.addScriptTag({path:require.resolve('axe-co
  assert.equal(await form.locator('select[name=status]').count(),0);assert.equal(await form.locator('[name=status]:checked').inputValue(),'publish');await scan('editor-desktop');pass('Fecha/hora separadas y estados visibles, accesibles en escritorio');
  await form.locator('[name=title]').fill(fixture.prefix+' Programación');await form.locator('[name=body]').fill('Fecha, hora y publicación programada conservadas.');
  assert.equal(await form.locator('.event-datetime-field .required-mark:visible').count(),4);
- const day=new Date(Date.now()+6*86400000).toISOString().slice(0,10);for(const name of ['start','end'])await form.locator('[name='+name+'_date]').fill(day);await form.locator('[name=start_time]').fill('09:30');await form.locator('[name=end_time]').fill('10:45');await form.locator('[name=chatham]').uncheck();
+ const day=new Date(Date.now()+6*86400000).toISOString().slice(0,10);
+ const nextDay=new Date(Date.now()+7*86400000).toISOString().slice(0,10);
+ const customEnd=new Date(Date.now()+8*86400000).toISOString().slice(0,10);
+ const startDate=form.locator('[name=start_date]'),endDate=form.locator('[name=end_date]'),endTime=form.locator('[name=end_time]');
+ await startDate.fill('2000-01-01');
+ assert.equal(await form.locator('#f-start-error').innerText(),'La fecha de inicio debe ser hoy o posterior.');
+ assert.equal(await startDate.evaluate(input=>input.validity.rangeUnderflow),true);
+ assert.equal(await endDate.inputValue(),'');
+ pass('El formulario rechaza fechas anteriores a hoy');
+ await startDate.fill(day);assert.equal(await endDate.inputValue(),day);assert.equal(await endTime.inputValue(),'');
+ await startDate.fill(nextDay);assert.equal(await endDate.inputValue(),nextDay);
+ await endDate.fill(customEnd);await startDate.fill(day);assert.equal(await endDate.inputValue(),customEnd);
+ pass('La fecha de fin sigue a la de inicio hasta que el usuario la edita');
+ await endDate.fill(day);await form.locator('[name=start_time]').fill('09:30');await endTime.fill('10:45');await form.locator('[name=chatham]').uncheck();
  const modality=form.locator('[name=modality]'),link=form.locator('[name=url]'),room=form.locator('[name=location]');
  for(const [value,fields] of [['Virtual',['url']],['Presencial',['location']],['Híbrido',['url','location']]]){
   await modality.selectOption(value);
@@ -30,7 +43,6 @@ async function scan(name){await admin.addScriptTag({path:require.resolve('axe-co
  }
  await link.fill('https://example.invalid/meeting');assert.equal(await form.evaluate(f=>f.checkValidity()),false);
  await room.fill('Sala principal');assert.equal(await form.evaluate(f=>f.checkValidity()),true);
- const startDate=form.locator('[name=start_date]'),endDate=form.locator('[name=end_date]'),endTime=form.locator('[name=end_time]');
  await endDate.fill('33333-11-05');
  assert.equal(await form.locator('#f-end-error').innerText(),'La fecha de fin debe tener un año de cuatro dígitos.');
  assert.equal(await endDate.getAttribute('aria-invalid'),'true');

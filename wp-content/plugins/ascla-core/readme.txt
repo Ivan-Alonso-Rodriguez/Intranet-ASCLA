@@ -11,6 +11,10 @@ ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 == Changelog ==
 
 = 1.12 =
+* Corrección de carga de Hub ASCLA conservando su nuevo icono. Casilla de consultas archivadas compacta y alineada. Controles independientes para mostrar u ocultar la nueva contraseña y su confirmación, con etiquetas accesibles y validación conservada.
+* Encuentros: mínimo y máximo de grupo editables en el apartado; propuestas de IA enviadas a revisión al editar, descarte con motivo opcional e invitaciones limitadas al aforo del evento, con selección conservada entre búsquedas y páginas.
+* Consultas de Contacto compartidas por el equipo autorizado, con respuesta y resolución directa sin asignaciones. Biografía opcional en perfil y elegibilidad. Aviso de sesión y selector de invitados adaptados a los temas claro, oscuro y móvil; iconos de navegación diferenciados.
+* Asistente con consulta de galerías y análisis de fotos mediante proveedores con visión, respetando acceso y vinculación de archivos, con cobertura explícita e invalidación de respuestas cuando cambian los materiales. El modo demo consulta descripciones sin simular análisis visual.
 * Rediseño de la intranet, administración y acceso con Geist local, colores de la guía ASCLA, fondos planos y bordes más rectos. Navegación y formularios adaptados a móvil y a los temas claro y oscuro.
 * Directorio: vuelve Bloquear a la ficha de perfil, se corrigen las fotos en administración y Mis conexiones usa un icono de recarga.
 * Acceso: confirmación de solicitud de recuperación y resultado junto al botón en el perfil. Mínimo predeterminado de 8 caracteres, sin reglas de composición y con bloqueo de contraseñas muy comunes. Correo de alta con la plantilla HTML de ASCLA.

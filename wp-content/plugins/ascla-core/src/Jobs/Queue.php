@@ -9,7 +9,7 @@ final class Queue
     public static function boot(): void { add_action('ascla_event_offers',[\ASCLA\Core\Services\Events::class,'refreshWaitlist']); add_action('ascla_jobs',[self::class,'run']); add_action('ascla_jobs',[Birthdays::class,'maybeProcess'],20); add_action('ascla_jobs_continue',[self::class,'run']); add_action('ascla_microevents',[MicroEvents::class,'monthly']); add_action('ascla_micro_tick',[\ASCLA\Core\Services\MicroLifecycle::class,'tick']); add_action('ascla_event_reminder',[\ASCLA\Core\Services\EventReminders::class,'send'],10,2); add_action('ascla_discovery',static fn()=>self::enqueue('discovery',[],0)); add_action('ascla_recommendations',static fn()=>self::enqueue('recommendations',[],0)); }
     public static function enqueue(string $kind,array $payload,int $user=-1): array
     {
-        Access::require(in_array($kind,['transcript','multimedia','answer','microevents','social','resource_notifications','discovery','recommendations','video_metadata'],true),'Trabajo no válido.',400);
+        Access::require(in_array($kind,['transcript','multimedia','answer','microevents','microevent_copy','social','resource_notifications','discovery','recommendations','video_metadata'],true),'Trabajo no válido.',400);
         $id=Store::insert('jobs',['kind'=>$kind,'user_id'=>$user<0?get_current_user_id():$user,'payload'=>wp_json_encode($payload),'status'=>'pending','created_at'=>current_time('mysql',true)]);
         self::wake(); return ['id'=>$id,'status'=>'pending'];
     }
@@ -88,6 +88,7 @@ final class Queue
         $kind=(string)$row['kind'];$user=(int)$row['user_id'];
         if (!in_array($kind,['microevents','resource_notifications','discovery','recommendations'],true) || $user!==0) { Access::require(Access::member(),'La cuenta ya no tiene acceso.'); }
         if ($kind==='microevents' && $user!==0) { Access::require(Access::canPublish(),self::PUBLISH_REVOKED); }
+        if ($kind==='microevent_copy') { Access::require(Access::canPublish(),self::PUBLISH_REVOKED); }
         if ($kind==='social') { Access::require(current_user_can('ascla_moderate'),'Permiso de moderación revocado.'); }
         if (in_array($kind,['transcript','multimedia','video_metadata'],true)) { Access::require(Access::canPublish(),self::PUBLISH_REVOKED); }
     }
@@ -99,6 +100,7 @@ final class Queue
             'answer'=>Knowledge::answer($payload['question']??'',self::history((int)$row['user_id'],(string)($payload['thread']??'legacy'),(int)$row['id'])),
             'multimedia'=>!empty($payload['automatic'])?\ASCLA\Core\Services\VideoPreparation::run((int)($payload['resource_id']??0),(int)$row['id'],(string)($payload['source_signature']??'')):Knowledge::multimedia((int)($payload['resource_id']??0)),
             'microevents'=>MicroEvents::create([],((int)$row['user_id']>0)?(int)$row['id']:0),
+            'microevent_copy'=>\ASCLA\Core\Services\MicroProposalText::run((int)($payload['event_id']??0),(int)$row['id'],(string)($payload['signature']??'')),
             'social'=>self::social(),
             'resource_notifications'=>Discovery::resource((int)($payload['resource_id']??0)),
             'discovery'=>Discovery::networking(),
@@ -111,7 +113,7 @@ final class Queue
     {
         Store::update('jobs',['status'=>'completed','result'=>wp_json_encode($result),'error'=>null,'locked_at'=>null],['id'=>$row['id']]);
         $payload=json_decode($row['payload'],true)?:[];
-        if (empty($payload['automatic'])) { Notifications::send((int)$row['user_id'],'job','Tu trabajo en segundo plano ha finalizado.','',['type'=>'job','id'=>(int)$row['id']]); }
+        if (empty($payload['automatic']) && $row['kind']!=='microevent_copy') { Notifications::send((int)$row['user_id'],'job','Tu trabajo en segundo plano ha finalizado.','',['type'=>'job','id'=>(int)$row['id']]); }
         Audit::record('job_completed',(int)$row['id'],$row['kind']);
     }
 

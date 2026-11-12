@@ -37,11 +37,15 @@ final class CredentialPolicy
     public static function resetAssets(): void
     {
         if (!in_array($GLOBALS['action']??'',['rp','resetpass'],true)) { return; }
-        wp_enqueue_script('ascla-password-policy',ASCLA_URL.'assets/password-policy.js',['jquery','user-profile'],\ASCLA\Core\Frontend\App::assetVersion('assets/password-policy.js'),true);
+        wp_dequeue_script('user-profile');
+        wp_enqueue_script('ascla-password-policy',ASCLA_URL.'assets/password-policy.js',['jquery'],\ASCLA\Core\Frontend\App::assetVersion('assets/password-policy.js'),true);
         wp_localize_script('ascla-password-policy','ASCLA_PASSWORD_POLICY',[
             'minimum'=>Settings::get()['password_min_length'],'common'=>self::COMMON,
             'valid'=>Language::text('Cumple los requisitos','Meets the requirements'),
             'invalid'=>Language::text('Revisa los requisitos de la contraseña','Check the password requirements'),
+            'mismatch'=>Language::text('Las nuevas contraseñas no coinciden.','The new passwords do not match.'),
+            'show'=>Language::text('Mostrar contraseña','Show password'),
+            'hide'=>Language::text('Ocultar contraseña','Hide password'),
         ]);
     }
     public static function settings(array &$data,array $input): void

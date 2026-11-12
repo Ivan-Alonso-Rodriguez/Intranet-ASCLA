@@ -152,6 +152,7 @@ collect_php_reports
 dc exec -T wordpress env ASCLA_PLUGIN_ROOT=/var/www/html/wp-content/plugins/ascla-core php /opt/ascla-tests/release-sanity.php
 
 printf '%s' '{"action":"setup"}' | dc exec -T wordpress php /opt/ascla-tests/statistics-fixture.php > test-results/statistics-fixture.json
+dc exec -T -e ASCLA_E2E_EPHEMERAL=1 wordpress php /opt/ascla-tests/events108-fixture.php > test-results/events108-fixture.json
 dc run --rm -e ASCLA_E2E_EPHEMERAL=1 cli wp eval-file /opt/ascla-tests/privacy108-fixture.php > test-results/privacy108-fixture.json
 
 dc up -d cron

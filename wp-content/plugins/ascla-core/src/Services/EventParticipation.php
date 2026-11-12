@@ -14,10 +14,22 @@ final class EventParticipation
         return false;
     }
 
+    public static function changedConditions(array $before,array $after): bool
+    {
+        $changed=self::changedSchedule($before,$after);
+        if (!empty($before['micro'])) {
+            foreach (['micro_min','registration_deadline'] as $key) {
+                $changed=$changed || ($before[$key]??null)!==($after[$key]??null);
+            }
+        }
+        return $changed;
+    }
+
     public static function validateChange(int $id,array $before,array &$after,array $input): void
     {
-        $after['change_reason']=self::changedSchedule($before,$after)?trim(Access::text($input['change_reason']??'',1000)):($before['change_reason']??'');
-        if ($id && get_post_status($id)==='publish' && !empty($before['micro']) && self::changedSchedule($before,$after)) {
+        $changed=self::changedConditions($before,$after);
+        $after['change_reason']=$changed?trim(Access::text($input['change_reason']??'',1000)):($before['change_reason']??'');
+        if ($id && get_post_status($id)==='publish' && !empty($before['micro']) && $changed) {
             Access::require($after['change_reason']!=='','Indica el motivo de la reprogramación del microevento.',400);
         }
     }

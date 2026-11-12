@@ -59,6 +59,10 @@ body.login.ascla-login {
 .ascla-login #login form .input:focus { border-color: var(--ascla-blue); box-shadow: 0 0 0 3px #116da31c; outline: 2px solid transparent; }
 .ascla-login #login form .password-input { padding-right: 45px; }
 .ascla-login #login .wp-pwd button { color: var(--ascla-muted); height: 48px; width: 44px; top: 0; }
+.ascla-login #resetpassform .ascla-confirm-password { display: block; position: relative; }
+.ascla-login #resetpassform .wp-pwd .ascla-password-toggle { display: flex; position: absolute; top: 0; right: 1px; align-items: center; justify-content: center; width: 44px; height: 48px; padding: 0; border: 0; border-radius: 0 4px 4px 0; background: transparent; color: var(--ascla-accent-text); box-shadow: none; cursor: pointer; }
+.ascla-login #resetpassform .ascla-password-toggle:focus-visible { outline: 2px solid var(--ascla-accent-text); outline-offset: -4px; }
+.ascla-login #resetpassform .password-input { padding-right: 48px; }
 .ascla-login #login form .forgetmenot { float: none; display:flex; align-items:center; gap:8px; margin: 0 0 24px; }
 .ascla-login #login form .forgetmenot label { display:inline-flex; align-items:center; gap:8px; font-weight: 400; color: var(--ascla-muted); margin:0; }
 .ascla-login #rememberme { flex:0 0 17px; margin:0; border-color: #91a6bb; border-radius: 4px; width: 17px; height: 17px; }
@@ -282,3 +286,4 @@ html[data-ascla-theme] .ascla-login #login #login_error { background: var(--ascl
 .ascla-login .ascla-recovery-retry a { color: var(--ascla-accent-text); }
 .ascla-login .pw-weak[hidden] { display: none !important; }
 html[data-ascla-theme] .ascla-login #pass-strength-result { color: var(--ascla-accent-text); background: var(--ascla-accent-tint); border-color: var(--ascla-control); border-radius: 3px; }
+#resetpassform .wp-generate-pw { display: none !important; }

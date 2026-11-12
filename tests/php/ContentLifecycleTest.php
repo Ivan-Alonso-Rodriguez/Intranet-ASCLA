@@ -26,6 +26,26 @@ final class ContentLifecycleTest extends TestCase
     {
         $r=new WP_REST_Request($method,'/ascla/v1/'.$route);$r->set_header('Content-Type','application/json');$r->set_body(wp_json_encode($body));return rest_do_request($r);
     }
+    public function testNewEventsCannotStartBeforeTodayButHistoricalEventsCanStillBeEdited():void
+    {
+        $today=current_datetime()->setTime(0,0);
+        $yesterday=$today->modify('-1 day');
+        $past=['start'=>$yesterday->format(DATE_ATOM),'end'=>$yesterday->modify('+1 hour')->format(DATE_ATOM),'url'=>'https://example.invalid/meeting'];
+        $payload=['title'=>'Fecha de prueba','body'=>'Descripción de prueba'];
+        foreach (['draft','publish'] as $status) {
+            $response=$this->api('POST','content/event',$payload+['status'=>$status,'meta'=>$past]);
+            self::assertSame(400,$response->get_status());
+            self::assertSame(Language::label('La fecha de inicio debe ser hoy o posterior.'),$response->get_data()['message']);
+        }
+        $created=$this->api('POST','content/event',$payload+['status'=>'publish','meta'=>[
+            'start'=>$today->format(DATE_ATOM),'end'=>$today->modify('+1 hour')->format(DATE_ATOM),'url'=>$past['url'],
+        ]]);
+        self::assertSame(200,$created->get_status());
+        $id=$created->get_data()['id'];$this->posts[]=$id;
+        self::assertSame(400,$this->api('POST','content/event/'.$id,$payload+['status'=>'publish','meta'=>$past])->get_status());
+        update_post_meta($id,'_ascla',$past);
+        self::assertSame(200,$this->api('POST','content/event/'.$id,['title'=>'Título corregido','body'=>$payload['body'],'status'=>'publish'])->get_status());
+    }
     public function testEveryEditorialTypeCanBeTrashedByAnAdministrator():void
     {
         foreach(array_keys(ASCLA\Core\Domain\Catalog::TYPES) as $type){

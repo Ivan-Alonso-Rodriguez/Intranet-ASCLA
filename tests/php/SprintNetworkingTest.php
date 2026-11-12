@@ -105,6 +105,19 @@ final class SprintNetworkingTest extends TestCase
         Settings::save(['ai_model'=>'gemini-offline-'.bin2hex(random_bytes(5))]);
         $this->http=static fn()=>new WP_Error('offline','Transport unavailable');add_filter('pre_http_request',$this->http,10,3);
         $agenda=NetworkingAI::agenda($this->users);self::assertSame('DEMO MODE',$agenda['mode']);self::assertTrue($agenda['fallback']);self::assertSame($agenda['duration_minutes'],array_sum(array_column($agenda['agenda'],'minutes')));
+        Settings::save(['micro_min'=>2,'micro_capacity'=>4,'micro_limit'=>1]);
+        self::assertSame('ready',ASCLA\Core\Services\MicroEvents::diagnostics()['reason']);
+        $before=get_posts(['post_type'=>'ascla_event','post_status'=>'any','numberposts'=>-1,'fields'=>'ids']);
+        $history=get_option('ascla_group_history',[]);
+        $job=Store::insert('jobs',['user_id'=>get_current_user_id(),'kind'=>'microevents','status'=>'processing','payload'=>'{}','created_at'=>current_time('mysql',true)]);
+        try {
+            ASCLA\Core\Services\MicroEvents::create([],$job);
+            self::fail('An unavailable AI provider must leave proposals unchanged.');
+        } catch (ASCLA\Core\Services\ServiceException $error) {
+            self::assertStringContainsString('servicio de IA no está disponible',$error->getMessage());
+        }
+        self::assertSame($before,get_posts(['post_type'=>'ascla_event','post_status'=>'any','numberposts'=>-1,'fields'=>'ids']));
+        self::assertSame($history,get_option('ascla_group_history',[]));
         remove_filter('pre_http_request',$this->http,10);Settings::save(['ai_model'=>'gemini-invalid-agenda-test']);
         $this->http=static fn()=>['response'=>['code'=>200],'headers'=>[],'body'=>wp_json_encode(['candidates'=>[['content'=>['parts'=>[['text'=>wp_json_encode(['duration_minutes'=>5,'agenda'=>[]])]]],'finishReason'=>'STOP']]])];add_filter('pre_http_request',$this->http,10,3);
         $agenda=NetworkingAI::agenda($this->users);self::assertSame('DEMO MODE',$agenda['mode']);self::assertTrue($agenda['fallback']);

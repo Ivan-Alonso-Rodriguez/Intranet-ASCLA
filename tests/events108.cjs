@@ -3,8 +3,9 @@ const {chromium}=require('playwright');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 if(process.env.ASCLA_E2E_EPHEMERAL!=='1')throw Error('Disposable environment required');
 const root=path.resolve(__dirname,'..'),base=process.env.ASCLA_SITE_URL||'http://ascla_audit-wordpress';
+const historical=JSON.parse(fs.readFileSync(process.env.ASCLA_EVENTS_FIXTURE||root+'/test-results/events108-fixture.json','utf8'));
 const env=Object.fromEntries(fs.readFileSync(process.env.ASCLA_ENV_FILE||root+'/.env.audit','utf8').split(/\r?\n/).filter(v=>v.includes('=')).map(v=>[v.slice(0,v.indexOf('=')),v.slice(v.indexOf('=')+1)]));
-const checks=[],errors=[],posts=[],users=[],scans=[];let browser,admin,member,executive,originalLocale;
+const checks=[],errors=[],posts=[...historical.ids],users=[],scans=[];let browser,admin,member,executive,originalLocale;
 async function api(p,route,body,method){return p.evaluate(async({route,body,method})=>{const url=route.startsWith('native:')?ASCLA.api.replace(/ascla\/v1\/?$/,'wp/v2/')+route.slice(7):ASCLA.api+route;const r=await fetch(url,{method:method||(body?'POST':'GET'),headers:{'X-WP-Nonce':ASCLA.nonce,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});return{status:r.status,body:await r.json()};},{route,body,method});}
 async function ok(p,route,body,method){const r=await api(p,route,body,method);assert.ok(r.status>=200&&r.status<300,route+': '+r.status+' '+r.body.message);return r.body;}
 async function goto(p,route){await p.goto(base+'/'+route);await p.locator('#page-content h1').waitFor();await p.keyboard.press('Escape');}
@@ -34,11 +35,10 @@ async function change(p,selector,key){const response=p.waitForResponse(r=>r.url(
 async function scan(p,name){await p.addScriptTag({path:require.resolve('axe-core/axe.min.js')});const result=await p.evaluate(async()=>{const a=await axe.run('#ascla-root',{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});return{violations:a.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),incomplete:a.incomplete.map(v=>v.id),overflow:document.documentElement.scrollWidth>innerWidth+1};});scans.push({name,...result});assert.deepEqual(result.violations,[]);assert.equal(result.overflow,false);}
 (async()=>{try{
  browser=await chromium.launch({headless:true});admin=await login('ascla.admin',env.ASCLA_ADMIN_PASSWORD);originalLocale=(await ok(admin,'native:users/me?context=edit')).locale;await locale('es_ES');
- const suffix=crypto.randomBytes(4).toString('hex'),prefix='Eventos108 '+suffix,upcoming=[],past=[],start=Date.now()+3*86400000;
+ const suffix=crypto.randomBytes(4).toString('hex'),prefix=historical.prefix,upcoming=[],past=historical.ids,start=Date.now()+3*86400000;
  for(const role of ['ascla_member','ascla_executive']){const username='events108_'+role+'_'+suffix,password='J9!kR4#'+crypto.randomBytes(18).toString('base64url');const u=await ok(admin,'native:users',{username,password,email:username+'@example.invalid',roles:[role]});users.push(u.id);const p=await login(username,password);if(role==='ascla_member')member={...u,page:p};else executive={...u,page:p};}
  async function event(p,title,at,extra={},status='publish'){const response=await fixtureRequest(p,'content/event',{title,body:'Encuentro de prueba de paginación',status,meta:{start:new Date(at).toISOString(),end:new Date(at+3600000).toISOString(),chatham:false,location:'Sala QA',url:'https://example.invalid/meeting',...extra}});assert.ok(response.status>=200&&response.status<300,'Fixture event creation failed: HTTP '+response.status+' '+(response.body?.message||''));const item=response.body;posts.push(item.id);return item;}
  for(let i=0;i<23;i++)upcoming.push((await event(admin,prefix+' próximo '+i,start,{modality:'Presencial'})).id);
- for(let i=0;i<19;i++)past.push((await event(admin,prefix+' anterior '+i,Date.now()-3*86400000)).id);
  const pending=await event(admin,prefix+' borrador ajeno',start,{},'draft');assert.equal(pending.status,'draft');
  const draft=await event(executive.page,prefix+' borrador propio',start,{},'draft');assert.equal(draft.status,'draft');
  await goto(member.page,'eventos/');let data=await query(member.page,prefix);assert.equal(data.total,23);assert.equal(data.per_page,18);assert.equal(data.pages,2);assert.deepEqual(data.items.map(i=>i.id),upcoming.slice(0,18));assert.equal(await member.page.locator('.event-card').count(),18);

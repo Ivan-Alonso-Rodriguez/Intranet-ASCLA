@@ -23,7 +23,7 @@ final class SupportRequestsTest extends TestCase
     {
         wp_set_current_user($this->users[4]);
         $post=Content::save('contact',['title'=>'Asunto confidencial '.bin2hex(random_bytes(4)),'body'=>'Detalle reservado del asociado']);
-        $id=(int)$post['id'];$this->posts[]=$id;wp_set_current_user($this->users[0]);SupportRequests::assign($id,$this->users[0]);return $id;
+        $id=(int)$post['id'];$this->posts[]=$id;wp_set_current_user($this->users[0]);return $id;
     }
     private function api(string $method,string $path,array $body=[]): WP_REST_Response
     {
@@ -33,29 +33,38 @@ final class SupportRequestsTest extends TestCase
     {
         try{$fn();self::fail('Expected rejection');}catch(ASCLA\Core\Rest\ApiException $e){self::assertSame($code,$e->getCode());}
     }
-    public function testOnlyCreatorAndAssignedStaffReadContentAndSearchCannotRevealOtherCases(): void
+    public function testStaffShareTheInboxWhileOtherMembersCannotReadOrSearchCases(): void
     {
-        $id=$this->request();$title=get_the_title($id);
-        foreach([1,2,3,5] as $i){wp_set_current_user($this->users[$i]);self::assertSame(404,$this->api('GET','items/'.$id)->get_status());}
-        wp_set_current_user($this->users[1]);
-        $list=SupportRequests::listing([]);$row=array_column($list['items'],null,'id')[$id];
-        self::assertTrue($row['redacted']);self::assertArrayNotHasKey('body',$row);self::assertArrayNotHasKey('title',$row);self::assertArrayNotHasKey('request_history',$row['meta']);
-        self::assertSame(0,SupportRequests::listing(['q'=>$title])['total']);
-        wp_set_current_user($this->users[3]);self::assertSame(403,$this->api('GET','admin/contacts')->get_status());
-        wp_set_current_user($this->users[4]);self::assertSame(200,$this->api('GET','items/'.$id)->get_status());
+        $id=$this->request();$title=get_post($id)->post_title;
+        foreach([0,1,2] as $i){
+            wp_set_current_user($this->users[$i]);
+            self::assertSame(200,$this->api('GET','items/'.$id)->get_status());
+            $list=SupportRequests::listing(['q'=>$title]);self::assertContains($id,array_column($list['items'],'id'),'actor='.$i);
+            $row=array_column($list['items'],null,'id')[$id];
+            self::assertSame('Detalle reservado del asociado',$row['body']);
+            self::assertTrue($row['can_handle']);self::assertArrayNotHasKey('assignee',$row);
+        }
+        foreach([3,5] as $i){
+            wp_set_current_user($this->users[$i]);
+            self::assertSame(404,$this->api('GET','items/'.$id)->get_status());
+            self::assertSame(403,$this->api('GET','admin/contacts')->get_status());
+        }
+        wp_set_current_user($this->users[4]);
+        self::assertSame(200,$this->api('GET','items/'.$id)->get_status());
         self::assertSame(403,$this->api('POST','content/contact/'.$id,['title'=>'Overwrite','body'=>'Changed'])->get_status());
         wp_set_current_user($this->users[5]);self::assertSame(0,Content::listing('contact',['author'=>$this->users[4]])['total']);
     }
-    public function testReassignmentImmediatelyRevokesPreviousStaffAndValidatesRole(): void
+    public function testLegacyAssignmentDoesNotRestrictStaffAndDirectResolutionIsAllowed(): void
     {
-        $id=$this->request();$this->deny(fn()=>SupportRequests::assign($id,$this->users[3]),400);
-        SupportRequests::assign($id,$this->users[2]);
-        self::assertSame(404,$this->api('GET','items/'.$id)->get_status());
-        $this->deny(fn()=>SupportRequests::change($id,'progress'),403);
-        wp_set_current_user($this->users[2]);self::assertSame(200,$this->api('GET','items/'.$id)->get_status());
-        self::assertSame('progress',SupportRequests::change($id,'progress')['meta']['request_status']);
-        self::assertSame(200,$this->api('POST','admin/contact/'.$id.'/assign',['assignee'=>$this->users[0]])->get_status());
-        update_user_meta($this->users[2],'_ascla_suspended',true);
+        $id=$this->request();update_post_meta($id,'_ascla_support_assignee',$this->users[0]);
+        wp_set_current_user($this->users[2]);
+        self::assertTrue(SupportRequests::canHandle($id));
+        self::assertSame(404,$this->api('POST','admin/contact/'.$id.'/assign',['assignee'=>$this->users[0]])->get_status());
+        $this->deny(fn()=>SupportRequests::change($id,'resolved'),400);
+        self::assertSame('resolved',SupportRequests::change($id,'resolved','Resuelto por el equipo.')['meta']['request_status']);
+        wp_set_current_user($this->users[1]);SupportRequests::archive($id);
+        wp_set_current_user($this->users[4]);self::assertSame(200,$this->api('GET','items/'.$id)->get_status());
+        wp_set_current_user($this->users[2]);update_user_meta($this->users[2],'_ascla_suspended',true);
         self::assertFalse(SupportRequests::canHandle($id));
     }
     public function testOrderedResolutionRequiresResponseAndArchivePreservesMemberHistory(): void
@@ -64,7 +73,7 @@ final class SupportRequestsTest extends TestCase
         SupportRequests::change($id,'progress');
         $this->deny(fn()=>SupportRequests::change($id,'resolved'),400);
         SupportRequests::change($id,'resolved','La incidencia fue corregida.');
-        $this->deny(fn()=>SupportRequests::archive($id),409);
+
         SupportRequests::change($id,'closed');SupportRequests::archive($id);
         self::assertSame('private',get_post_status($id));self::assertNotContains($id,array_column(SupportRequests::listing([])['items'],'id'));
         self::assertContains($id,array_column(SupportRequests::listing(['archived'=>1])['items'],'id'));

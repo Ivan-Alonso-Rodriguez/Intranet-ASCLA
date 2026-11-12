@@ -9,7 +9,7 @@ defined('ABSPATH') || exit;
 $page=$args['page'];$profile=$args['profile'];$settings=$args['settings'];
 $administrator=Access::isAdministrator();$homeUrl=App::homeUrl();
 $administrationLabel='Administración';
-$icons=['intranet'=>'home','perfil'=>'users','eventos'=>'calendar','hub'=>'hub','galeria'=>'gallery','foros'=>'hub','directorio'=>'users','centro-conocimiento'=>'book','asistente'=>'spark','aliados'=>'ally','mensajeria'=>'mail','contacto'=>'contact'];
+$icons=['intranet'=>'home','perfil'=>'profile','eventos'=>'calendar','hub'=>'feed','galeria'=>'gallery','foros'=>'forum','directorio'=>'directory','centro-conocimiento'=>'book','asistente'=>'spark','aliados'=>'ally','mensajeria'=>'mail','contacto'=>'contact'];
 $logo=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo.png');
 $logoWhite=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo-white.png');
 $initials=implode('',array_map(static fn($word)=>mb_substr($word,0,1),array_slice(preg_split('/\s+/u',$profile['name']),0,2)));

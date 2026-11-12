@@ -5,7 +5,7 @@ namespace ASCLA\Core\Services;
 final class ProfileRequirements
 {
     public const DEFAULTS=['profile_completion_extra'=>[]];
-    private const LABELS=['name'=>'Nombres y apellidos','position'=>'Cargo o profesión','company'=>'Empresa u organización','industries'=>'Sector profesional','location'=>'Ciudad o país','bio'=>'Descripción profesional','interests'=>'Al menos un interés','goals'=>'Al menos un objetivo de networking'];
+    private const LABELS=['name'=>'Nombres y apellidos','position'=>'Cargo o profesión','company'=>'Empresa u organización','industries'=>'Sector profesional','location'=>'Ciudad o país','interests'=>'Al menos un interés','goals'=>'Al menos un objetivo de networking'];
     private const EXTRA=['areas'=>'Áreas de conocimiento','languages'=>'Idiomas','experience'=>'Experiencia profesional','learn'=>'Áreas que quiero aprender','help'=>'Áreas en las que puedo ayudar','linkedin'=>'LinkedIn','website'=>'Sitio web'];
 
     public static function options(): array
@@ -33,7 +33,6 @@ final class ProfileRequirements
             'company'=>$text('company'),
             'industries'=>!empty($profile['industries']),
             'location'=>$text('country') || $text('city'),
-            'bio'=>$text('bio'),
             'interests'=>!empty($profile['interests']),
             'goals'=>!empty($profile['goals']),
         ];

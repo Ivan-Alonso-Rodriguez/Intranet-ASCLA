@@ -3,6 +3,10 @@ namespace ASCLA\Core\Frontend;
 final class Icons
 {
     public const PATHS=[
+        'profile'=>'M20 21v-2a6 6 0 0 0-6-6h-4a6 6 0 0 0-6 6v2M12 9a4 4 0 1 0 0-8 4 4 0 0 0 0 8',
+        'directory'=>'M5 3h15v18H5ZM2 7h5M2 12h5M2 17h5M12 11a2 2 0 1 0 0-4 2 2 0 0 0 0 4M9 17v-1a3 3 0 0 1 6 0v1',
+        'feed'=>'M3 3h18v18H3ZM7 7h10M7 11h10M7 15h4M7 18h4M14 15h3v3h-3Z',
+        'forum'=>'M3 3h14v11H8l-5 4ZM10 17h6l5 4V9h-2',
         'home'=>'M3 10 12 3l9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z',
         'users'=>'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
         'calendar'=>'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z',

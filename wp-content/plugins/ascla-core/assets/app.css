@@ -4131,7 +4131,247 @@ html[data-ascla-theme="dark"] #ascla-root .live-toast-close:hover,html[data-ascl
   #ascla-root .header-language select{min-width:70px;max-width:80px}
 }
 
-#ascla-root .import-progress{margin-bottom:20px}#ascla-root .import-progress progress{display:block;width:100%;height:18px;margin-top:10px}#ascla-root .import-rows{display:grid;gap:16px}#ascla-root .import-row dl{display:grid;grid-template-columns:180px minmax(0,1fr);gap:10px;font-size:13px}#ascla-root .import-row dd{margin:0;overflow-wrap:anywhere;white-space:pre-wrap}#ascla-root .import-row select[multiple]{min-height:145px;width:100%}#ascla-root .import-warnings{border-left:3px solid var(--primary);padding:12px 12px 12px 30px;background:var(--bg)}#ascla-root .admin-panel .import-row .table-wrap{overflow-x:auto}@media(max-width:680px){#ascla-root .import-row dl{grid-template-columns:1fr}}
+/* Administration: reviewed interest imports */
+#ascla-root .interest-import-workspace {
+  container-type: inline-size;
+  color: var(--ink);
+}
+#ascla-root .interest-import-workspace .card {
+  padding: clamp(16px, 3vw, 24px);
+}
+#ascla-root .interest-import-workspace .admin-section-heading > div,
+#ascla-root .interest-import-workspace .field {
+  min-width: 0;
+}
+#ascla-root .interest-import-workspace .admin-section-heading h2 { margin-top: 0; }
+#ascla-root .interest-import-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+#ascla-root .interest-import-grid > .card { margin: 0; }
+#ascla-root .interest-import-workspace .interest-import-grid > .card.interest-upload {
+  border-top: 3px solid var(--ascla-brand-blue);
+}
+#ascla-root .import-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+#ascla-root .import-panel-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+#ascla-root .import-panel-icon svg { width: 19px; height: 19px; }
+#ascla-root .interest-import-workspace h3 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.35;
+}
+#ascla-root .interest-import-workspace :is(.import-panel-heading p, .import-hint) {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+#ascla-root .interest-upload-form .field,
+#ascla-root .interest-topic-form .field { margin: 0; }
+#ascla-root .interest-upload-form input[type="file"] {
+  width: 100%;
+  min-height: 44px;
+  padding: 5px;
+  border-color: var(--control-border);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: inherit;
+}
+#ascla-root .interest-upload-form input::file-selector-button {
+  margin-inline-end: 8px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--blue-soft);
+  color: var(--blue);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+#ascla-root .interest-upload-form > .btn { margin-top: 14px; }
+#ascla-root .import-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 26px;
+  margin: 20px 0 0;
+  padding: 14px 14px 14px 32px;
+  border-inline-start: 3px solid var(--ascla-brand-blue);
+  border-radius: var(--radius);
+  background: var(--blue-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
+#ascla-root .import-steps strong,
+#ascla-root .import-steps li::marker { color: var(--blue); font-weight: 650; }
+#ascla-root .import-steps span { display: block; color: var(--ink); }
+#ascla-root .interest-topic-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+#ascla-root .interest-topic-form > .btn { min-height: 44px; }
+#ascla-root .interest-topic-list {
+  max-height: 18rem;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+#ascla-root .interest-topic-list > li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 5px 5px 5px 0;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+#ascla-root .interest-topic-list .btn { flex: 0 0 auto; }
+#ascla-root .interest-topic-list .btn.import-topic-remove {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+#ascla-root .interest-topic-list .btn.import-topic-remove:hover {
+  border-color: var(--line);
+  background: var(--bg);
+  color: var(--ink);
+}
+#ascla-root .interest-import-workspace .import-empty {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--muted);
+}
+#ascla-root .interest-history,
+#ascla-root .import-sample { margin-top: 16px; }
+#ascla-root .import-history-table { min-width: 650px; }
+#ascla-root .interest-import-workspace .import-history-table tbody th {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-size: inherit;
+  overflow-wrap: anywhere;
+  text-transform: none;
+}
+#ascla-root .import-history-table small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: inherit;
+}
+#ascla-root .interest-import-workspace .import-status {
+  display: inline-block;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  white-space: normal;
+}
+#ascla-root .interest-import-workspace .import-status:is([data-state="review"], [data-state="processing"], [data-state="applying"], [data-state="approved"], [data-state="complete"]) {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+#ascla-root .interest-tools summary {
+  color: var(--ink);
+  font-weight: 650;
+  cursor: pointer;
+}
+#ascla-root .interest-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+#ascla-root .interest-tools-grid > div { padding-top: 14px; border-top: 1px solid var(--line); }
+#ascla-root .interest-tools-grid p { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+#ascla-root .interest-mapping fieldset {
+  min-width: 0;
+  margin: 0 0 16px;
+  padding: 12px 16px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+#ascla-root .interest-mapping legend { padding: 0 6px; font-size: 15px; font-weight: 650; }
+#ascla-root .interest-mapping fieldset > .import-hint { margin: 0 0 12px; }
+#ascla-root .interest-import-workspace .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#ascla-root .import-sample .table-wrap { margin-top: 14px; }
+#ascla-root .import-filename { overflow-wrap: anywhere; }
+#ascla-root .import-submit { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+#ascla-root .import-submit:not(:has(.btn)) { display: none; }
+#ascla-root .import-submit .import-hint { margin: 0; }
+#ascla-root .import-progress { margin-bottom: 16px; }
+#ascla-root .import-progress progress {
+  display: block;
+  width: 100%;
+  height: 14px;
+  margin-top: 14px;
+  accent-color: var(--blue);
+}
+#ascla-root .import-counts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 12px 0; color: var(--muted); }
+#ascla-root .import-progress .import-submit { margin-top: 12px; }
+#ascla-root .import-rows { display: grid; gap: 16px; }
+#ascla-root .import-row-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+#ascla-root .import-row-heading p { margin: 0 0 3px; color: var(--muted); font-size: 12px; }
+#ascla-root .import-row dl {
+  display: grid;
+  grid-template-columns: minmax(0, 180px) minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 16px 0;
+  font-size: 13px;
+}
+#ascla-root .import-row dt { color: var(--muted); font-weight: 600; }
+#ascla-root .import-row dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+#ascla-root .import-row form { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 14px; }
+#ascla-root .import-warnings {
+  border-inline-start: 3px solid var(--ascla-brand-blue);
+  padding: 12px 16px;
+  background: var(--bg);
+}
+#ascla-root ul.import-warnings { padding-inline-start: 30px; }
+
+@container (min-width: 48rem) {
+  #ascla-root .interest-import-grid {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "upload catalog"
+      "tools catalog";
+    align-items: start;
+  }
+  #ascla-root .interest-upload { grid-area: upload; }
+  #ascla-root .interest-catalog { grid-area: catalog; }
+  #ascla-root .interest-tools { grid-area: tools; }
+}
+@container (max-width: 38rem) {
+  #ascla-root .import-steps,
+  #ascla-root .interest-tools-grid,
+  #ascla-root .interest-import-workspace .form-grid { grid-template-columns: minmax(0, 1fr); }
+  #ascla-root .interest-upload-form input[type="file"] { font-size: 12px; }
+  #ascla-root .import-row dl { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  #ascla-root .import-row dd { margin-bottom: 8px; }
+}
 
 /* RF-013 / CP-021: numeric directory pagination and visible result limit */
 .directory-pagination {
@@ -4400,7 +4640,7 @@ html[data-ascla-theme="dark"] #ascla-root .directory-pagination-summary select {
   #ascla-root .dismissed-recommendation-row>.btn{grid-column:1/-1;width:100%;justify-content:center}
 }
 
-.ascla-session-warning{position:fixed;right:20px;bottom:20px;z-index:10000;margin:0;max-width:min(440px,calc(100vw - 40px));padding:1.5rem;border:1px solid CanvasText;border-radius:4px;color:CanvasText;background:Canvas;box-shadow: none}
+.ascla-session-warning{position:fixed;z-index:10000;margin:0;box-shadow:none}
 
 /* Directory: use the available width and keep discovery ahead of relationship tools. */
 #ascla-root .page-wrap:has(.directory-view){max-width:none;margin:0}
@@ -5597,4 +5837,67 @@ html[data-ascla-theme="dark"] #ascla-root .pdf-page{background:#101b24}
   #ascla-root .moderation-history>summary{padding:18px}
   #ascla-root .moderation-history>.moderation-help{padding:0 18px}
   #ascla-root .moderation-empty{min-height:245px;padding:30px 20px}
+}
+
+/* Encounter controls and invitations follow the shared ASCLA surfaces in both themes. */
+#ascla-root .micro-group-settings {grid-column:1/-1;border-top:1px solid var(--ascla-rule);padding-top:24px;display:flex;gap:24px;align-items:center;justify-content:space-between}
+#ascla-root .micro-group-settings h3 {margin:0 0 6px;font-size:16px}
+#ascla-root .micro-group-settings p {max-width:460px;margin:0}
+#ascla-root .micro-group-fields {display:flex;gap:12px;align-items:end}
+#ascla-root .micro-group-fields .field {max-width:160px;margin:0}
+#ascla-root .micro-group-fields .btn {white-space:nowrap}
+#ascla-root .invite-event-heading {display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--ascla-rule);border-radius:4px;background:var(--ascla-accent-tint)}
+#ascla-root .invite-event-icon {display:grid;place-items:center;width:46px;height:46px;flex-shrink:0;color:var(--ascla-accent-text)}
+#ascla-root .invite-event-icon svg {width:28px;height:28px}
+#ascla-root .invite-event-heading small {font-size:10px;font-weight:650;letter-spacing:.09em;color:var(--ascla-accent-text)}
+#ascla-root .invite-event-heading h3 {margin:5px 0;font-size:18px}
+#ascla-root .invite-event-heading p {margin:0}
+#ascla-root .invite-search {display:flex;gap:10px;margin:20px 0}
+#ascla-root .invite-search>span {display:flex;align-items:center;gap:10px;flex:1;min-width:0;border:1px solid var(--ascla-control);border-radius:4px;padding-left:12px}
+#ascla-root .invite-search input {border:0;background:transparent;min-width:0;width:100%;margin:0}
+#ascla-root .invite-search svg {width:18px;color:var(--ascla-muted)}
+#ascla-root .invite-layout {display:grid;grid-template-columns:minmax(0,1.35fr) minmax(220px,1fr);gap:24px}
+#ascla-root .invite-layout h4 {margin:0 0 12px;font-size:14px;display:flex;gap:8px;align-items:center}
+#ascla-root .invite-options {max-height:340px;overflow:auto;padding:0 4px 0 0;display:grid;gap:6px}
+#ascla-root .invite-person {display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--ascla-rule);border-radius:4px;margin:0;cursor:pointer;background:var(--ascla-surface)}
+#ascla-root .invite-person:has(input:checked) {background:var(--ascla-accent-tint);border-color:var(--ascla-brand-blue)}
+#ascla-root .invite-person:has(input:disabled) {opacity:.5;cursor:default}
+#ascla-root .invite-person input {width:16px;height:16px;flex-shrink:0;margin:0;accent-color:var(--ascla-brand-edge)}
+#ascla-root .invite-person>span:last-child {display:grid;gap:3px;min-width:0}
+#ascla-root .invite-person strong {font-size:13px;overflow-wrap:anywhere}
+#ascla-root .invite-person small {font-size:12px;color:var(--ascla-muted)}
+#ascla-root .invite-person .avatar {width:36px;height:36px;flex-shrink:0}
+#ascla-root .invite-selection {background:var(--ascla-paper);border:1px solid var(--ascla-rule);border-radius:4px;padding:16px;min-width:0}
+#ascla-root [data-invite-summary] {display:flex;flex-wrap:wrap;gap:8px;max-height:280px;overflow:auto}
+#ascla-root .invite-selected-chip {display:inline-flex;gap:6px;align-items:center;border:1px solid var(--ascla-rule);border-radius:4px;padding:6px 8px;background:var(--ascla-surface);font-size:12px;max-width:100%;overflow-wrap:anywhere}
+#ascla-root .invite-selected-chip button {display:grid;place-items:center;flex-shrink:0;border:0;background:transparent;color:var(--ascla-accent-text);padding:2px;cursor:pointer}
+#ascla-root .invite-selected-chip svg {width:14px;height:14px}
+#ascla-root .invite-limit-note {font-size:12px;color:var(--ascla-accent-text);margin:16px 0 0}
+#ascla-root .invite-calendar-note {display:flex;gap:8px;border-top:1px solid var(--ascla-rule);padding-top:16px;margin-top:20px}
+#ascla-root .invite-calendar-note svg {flex-shrink:0;width:16px}
+#ascla-root .invite-footer {display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:12px}
+#ascla-root .invite-counter {font-size:12px;color:var(--ascla-muted)}
+#ascla-root .invite-counter strong {color:var(--ascla-text);font-size:15px}
+#ascla-root .micro-selection-panel {border:1px solid var(--ascla-rule);border-radius:4px;padding:18px;margin:18px 0;background:var(--ascla-paper)}
+#ascla-root .micro-candidate-row {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--ascla-rule);border-radius:4px;background:var(--ascla-surface);margin-top:6px;font-size:13px}
+.ascla-session-warning {box-sizing:border-box;display:flex;gap:16px;right:24px;bottom:24px;width:400px;max-width:calc(100vw - 32px);padding:20px;border:1px solid var(--ascla-rule);border-top:3px solid var(--ascla-brand-blue);border-radius:4px;background:var(--ascla-surface);color:var(--ascla-text);font-family:var(--ascla-font)}
+.ascla-session-warning>svg {width:24px;height:24px;flex-shrink:0;color:var(--ascla-accent-text);margin-top:3px}
+.ascla-session-warning .ascla-session-content {min-width:0}
+.ascla-session-warning .ascla-session-eyebrow {font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:650;color:var(--ascla-accent-text)}
+.ascla-session-warning h2 {font-size:18px;line-height:1.35;letter-spacing:-.02em;margin:6px 0 8px;font-weight:650;color:var(--ascla-text)}
+.ascla-session-warning p {font-size:13px;line-height:1.6;color:var(--ascla-muted);margin:0 0 16px}
+.ascla-session-warning .btn {font-family:inherit;font-size:13px;font-weight:600;line-height:1.4;background:var(--ascla-brand-blue);color:var(--ascla-brand-ink);border:1px solid var(--ascla-brand-edge);border-radius:4px;padding:10px 14px;cursor:pointer}
+.ascla-session-warning .btn:hover {background:var(--ascla-brand-hover)}
+.ascla-session-warning .btn:focus-visible {outline:2px solid var(--ascla-accent-text);outline-offset:3px}
+.ascla-session-warning .btn:disabled {opacity:.6;cursor:wait}
+@media(max-width:700px) {
+ #ascla-root .micro-group-settings {display:block}
+ #ascla-root .micro-group-fields {flex-wrap:wrap;margin-top:16px}
+ #ascla-root .micro-group-fields .field {flex:1;min-width:100px}
+ #ascla-root .invite-layout {grid-template-columns:1fr;gap:16px}
+ #ascla-root .invite-options {max-height:260px}
+ #ascla-root [data-invite-summary] {max-height:140px}
+ #ascla-root .invite-footer {flex-wrap:wrap}
+ #ascla-root .invite-footer .btn {width:100%}
+ .ascla-session-warning {right:16px;bottom:16px;padding:16px}
 }

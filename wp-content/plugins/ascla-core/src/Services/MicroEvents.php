@@ -131,6 +131,9 @@ final class MicroEvents
     private static function proposal(array $group,bool $demo,int $topic,int $edition): int
     {
                 $proposal=NetworkingAI::agenda($group,$demo,$topic,$edition);
+                if (!$demo && !empty($proposal['fallback'])) {
+                    throw new ServiceException('El servicio de IA no está disponible para generar propuestas. Inténtalo de nuevo más tarde.');
+                }
                 $start=(new \DateTimeImmutable('+14 days 16:00',wp_timezone()))->setTimezone(new \DateTimeZone('UTC'));
                 $meta=['micro'=>true,'invitees'=>$group,'start'=>$start->format('c'),'end'=>$start->modify('+'.$proposal['duration_minutes'].' minutes')->format('c'),'capacity'=>Settings::get()['micro_capacity'],'chatham'=>true,'modality'=>'Virtual','agenda'=>implode("\n",array_map(static fn($item)=>$item['minutes'].' min · '.$item['topic'],$proposal['agenda'])),'agenda_ai'=>$proposal,'invited'=>false];
                 $id=wp_insert_post(wp_slash(['post_type'=>'ascla_event','post_title'=>$proposal['title'],'post_content'=>$proposal['objective'],'post_status'=>'draft','post_author'=>get_current_user_id()]),true);
@@ -139,6 +142,7 @@ final class MicroEvents
                 WordPressWrites::terms($id,[$topic],'ascla_interest');
                 MicroLifecycle::history($id,'pending');
                 if (is_wp_error(wp_update_post(['ID'=>$id,'post_status'=>'pending'],true))) { throw new ServiceException('No se pudo preparar la propuesta para revisión.'); }
+                MicroProposalText::markCurrent((int)$id);
 
         return $id;
     }

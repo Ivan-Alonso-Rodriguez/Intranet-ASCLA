@@ -54,7 +54,7 @@ final class Language
         echo '<div class="language-switcher"><form id="language-switcher" method="get" action="'.esc_url(site_url('wp-login.php','login')).'"><label for="ascla-login-language">'.esc_html(self::text('Idioma','Language')).'</label><select id="ascla-login-language" name="wp_lang">';
         foreach(self::SUPPORTED as $locale=>$name) {echo '<option value="'.esc_attr($locale).'"'.selected(self::current(),$locale,false).'>'.esc_html($name).'</option>'; }
         echo '</select>';
-        foreach(['action','redirect_to','interim-login','key','login'] as $key){
+        foreach(['action','redirect_to','interim-login','key','login','ascla_login_context','ascla_recovery','error'] as $key){
             $value=$_GET[$key]??($_POST[$key]??'');
             if(is_string($value) && $value!=='') {echo '<input type="hidden" name="'.esc_attr($key).'" value="'.esc_attr($value).'">'; }
         }

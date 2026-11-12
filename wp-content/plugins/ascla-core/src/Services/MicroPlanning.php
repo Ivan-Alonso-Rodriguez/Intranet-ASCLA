@@ -28,6 +28,20 @@ final class MicroPlanning
         Access::require($data['micro_min']<=$data['micro_capacity'],'El mínimo no puede superar los cupos.',400);
         $data['micro_approval']=true;
     }
+    /** Scoped controls for future groups; existing encounters keep their own limits. */
+    public static function saveGroupSize(array $input): array
+    {
+        Access::require(Access::member() && current_user_can('ascla_manage'));
+        return \ASCLA\Core\Repositories\Store::atomic('settings',static function()use($input){
+            $data=Settings::get();
+            self::settings($data,array_intersect_key($input,array_flip(['micro_min','micro_capacity'])));
+            $stored=(array)get_option('ascla_settings',[]);
+            $limits=array_intersect_key($data,array_flip(['micro_min','micro_capacity']));
+            \ASCLA\Core\Repositories\WordPressWrites::option('ascla_settings',array_merge($stored,$limits));
+            Audit::record('microevent_group_limits_updated',0,wp_json_encode($limits));
+            return $limits;
+        });
+    }
     public static function plan(array $profiles,array $history,array $blocked,array $recentTopics=[]): array
     {
         $settings=Settings::get();$topics=[];$used=[];$groups=[];

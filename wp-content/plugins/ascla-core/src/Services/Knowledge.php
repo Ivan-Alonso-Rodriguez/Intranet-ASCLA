@@ -44,8 +44,13 @@ final class Knowledge
             $grounding=$result['grounding']??[];$usable=!empty($grounding['live_context_used']) || !empty($grounding['conversation_only']) || !empty($grounding['no_evidence']);
             return $usable?['answer'=>Access::text($result['answer']??'',20000),'sources'=>[],'mode'=>$result['mode']??'ASCLA','grounding'=>$grounding]:['answer'=>self::ABSTENTION,'sources'=>[],'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL];
         }
-        [$sources,$identities,$protected]=self::storedSources($originalIds,$result['grounding']['video_digests']??[]);
-        if (count($sources)!==count($originalIds)) {return ['answer'=>'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar al Asistente ASCLA.','sources'=>[],'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL];}
+        [$sources,$identities,$protected]=self::storedSources($originalIds,$result['grounding']['video_digests']??[],$result['grounding']['event_digests']??[],$result['grounding']['gallery_digests']??[]);
+        if (count($sources)!==count($originalIds)) {
+            $message=!empty($result['grounding']['event_digests'])
+                ? \ASCLA\Core\Frontend\Language::text('Los datos de los eventos cambiaron. Vuelve a consultar para conocer la información y los cupos actuales.','Event details have changed. Ask again for current information and available seats.')
+                : 'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar al Asistente ASCLA.';
+            return ['answer'=>$message,'sources'=>[],'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL];
+        }
         $candidate=['answer'=>$result['answer']??'','source_ids'=>array_column($result['sources']??[],'id')];
         if ($protected) { $candidate=EntityRedactor::tree($candidate,$identities,array_column($sources,'title')); }
         $verified=Grounding::answer($candidate,$sources);$answer=$verified['answer']?:'No existe suficiente información verificable en las fuentes actuales. Puedes volver a consultar al Asistente ASCLA.';
@@ -53,7 +58,7 @@ final class Knowledge
         return ['answer'=>$answer,'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url']],$verified['sources']),'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL,'grounding'=>$verified['grounding']];
     }
 
-    private static function storedSources(array $originalIds,array $digests): array
+    private static function storedSources(array $originalIds,array $digests,array $eventDigests=[],array $galleryDigests=[]): array
     {
         $sources=[];$identities=[];$protected=false;
         foreach ($originalIds as $sourceId) {
@@ -63,6 +68,12 @@ final class Knowledge
             if (!empty($meta['generated']) && empty($meta['reviewed'])) { continue; }
             [$title,$body,$digest]=AssistantContext::safeText($post,$meta);
             if (isset($digests[$sourceId]) && $digests[$sourceId]!==$digest) { continue; }
+            if ($post->post_type==='ascla_event') {
+                [, $event]=AssistantContext::eventData($post);
+                if (isset($eventDigests[$sourceId]) && $eventDigests[$sourceId]!==$event['event_digest']) { continue; }
+                $title=$event['title'];$body=$event['body'];
+            }
+            if ($post->post_type==='ascla_gallery' && isset($galleryDigests[$sourceId]) && $galleryDigests[$sourceId]!==GalleryEvidence::digest($post)) { continue; }
             if (!empty($meta['chatham'])) {
                 $protected=true;$known=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];$identities=array_merge($identities,$known);
             }
@@ -326,7 +337,15 @@ final class KnowledgeAnswer
         // RAG retrieves the current follow-up topic before sending authorized evidence to the model.
         $plain=mb_strtolower(remove_accents($contextQuestion));
         $videos=(bool)preg_match('/\b(?:videos?|grabaciones?|grabacion|recordings?|capsulas?)\b/u',$plain);
-        $context=AssistantContext::build($contextQuestion,$videos);
+        $gallery=GalleryEvidence::requested($contextQuestion);
+        $context=AssistantContext::build($contextQuestion,$videos || $gallery);
+        if ($gallery) {
+            $evidence=GalleryEvidence::context($contextQuestion,$history);
+            $context['sources']=$evidence['sources'];$context['protected']=$evidence['protected'];$context['identities']=$evidence['identities'];
+            $context['answerable']=true;$context['live']['intents']['gallery']=true;
+            $context['live']['gallery_request']=$evidence['request'];
+            $context['live']['galleries']=$evidence['sources'];
+        }
         if ($context['live']['intents']['organization'] && count(array_filter($context['live']['intents']))===1) {
             // The official description and role-specific navigation are already authoritative.
             return ['answer'=>AssistantContext::describe($context['live']),'sources'=>[],'mode'=>'ASCLA','grounding'=>[
@@ -335,7 +354,9 @@ final class KnowledgeAnswer
             ]];
         }
         $tokens=KnowledgeSearch::tokens($contextQuestion);
-        if ($videos) {
+        if ($gallery) {
+            $ranked=[];$protected=false;$identities=[];
+        } elseif ($videos) {
             [$ranked,$protected,$identities,$request]=self::videoSearch($question,$plain,$tokens,$history);
             $context['live']['video_request']=$request;
         } else {
@@ -438,17 +459,28 @@ final class KnowledgeAnswer
     {
         $references=array_column($sources,'title');
         $inputQuestion=$protected?EntityRedactor::redact($question,$identities,$references):$question;
-        $digests=[];
+        $images=[];
+        if (!empty($context['live']['intents']['gallery'])) {
+            $provider=Settings::get()['ai_provider'];
+            $vision=$provider!=='mock' && ($provider!=='deepseek' || in_array(Settings::get()['deepseek_model'],['deepseek-flash','deepseek-chat','deepseek-reasoner','deepseek-v4-flash','deepseek-v4-flash-vision-exp'],true));
+            if ($vision && ($context['live']['gallery_request']??'')!=='choose') { $images=GalleryEvidence::images($sources); }
+            $context['live']['gallery_visual_coverage']=['analyzed_images'=>array_map(static fn($image)=>['source_id'=>$image['source_id'],'media_id'=>$image['media_id']],$images),'vision_available'=>$vision];
+        }
+        $digests=[];$eventDigests=[];$galleryDigests=[];
         foreach ($sources as $index=>$source) {
             if (!empty($source['video_digest'])) { $digests[$source['id']]=$source['video_digest']; }
-            unset($sources[$index]['video_digest']);
+            if (!empty($source['event_digest'])) { $eventDigests[$source['id']]=$source['event_digest']; }
+            if (!empty($source['gallery_digest'])) { $galleryDigests[$source['id']]=$source['gallery_digest']; }
+            unset($sources[$index]['video_digest'],$sources[$index]['event_digest'],$sources[$index]['gallery_digest']);
         }
         $history=EntityRedactor::cleanTree(array_map(static fn($turn)=>['question'=>$turn['question'],'answer'=>$turn['answer']],$history));
         if ($protected) { $history=EntityRedactor::tree($history,$identities,$references); }
-        $result=EntityRedactor::cleanTree(Knowledge::provider()->generate('answer',['question'=>$inputQuestion,'sources'=>$sources,'live_context'=>$context['live'],'history'=>$history]));
+        $result=EntityRedactor::cleanTree(Knowledge::provider()->generate('answer',['question'=>$inputQuestion,'sources'=>$sources,'live_context'=>$context['live'],'history'=>$history,'gallery_images'=>$images]));
         if ($protected) { $result=EntityRedactor::tree($result,$identities,$references); }
         $verified=Grounding::answer($result,$sources);
         if ($digests) { $verified['grounding']['video_digests']=$digests; }
+        if ($eventDigests) { $verified['grounding']['event_digests']=$eventDigests; }
+        if ($galleryDigests) { $verified['grounding']['gallery_digests']=$galleryDigests; }
         $verified['grounding']['live_context_used']=!empty($context['answerable']);
         $verified['grounding']['conversation_only']=$conversation&&!$sources&&!$context['answerable'];
         $verified['grounding']['snapshot_at']=current_datetime()->format(DATE_ATOM);
