@@ -1,6 +1,6 @@
 const fs=require("node:fs"),assert=require("node:assert/strict");
 module.exports=async({browser,admin,member,base,request,test,login,coverage,root})=>{
-  const f=JSON.parse(fs.readFileSync(root+"/test-results/statistics-fixture.json","utf8"));
+  const f=JSON.parse(fs.readFileSync(process.env.ASCLA_STATISTICS_FIXTURE||root+"/test-results/statistics-fixture.json","utf8"));
   const account=f.users.find(u=>u.role==="ascla_member");
   const executive=f.users.find(u=>u.role==="ascla_executive");
   await test("Membresía: vencer, denegar acceso y reactivar conserva el perfil",async()=>{

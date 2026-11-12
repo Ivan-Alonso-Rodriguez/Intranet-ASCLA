@@ -3435,7 +3435,7 @@ html[data-ascla-theme="dark"] #ascla-root .admin-feature-card .admin-feature-ico
 #ascla-root .audit-summary-card{display:flex;align-items:center;gap:13px;min-height:82px;padding:16px 18px;border:1px solid #dfe8ee;border-radius:4px;background: var(--surface, var(--ascla-surface));box-shadow: none}
 #ascla-root .audit-summary-icon{display:flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 42px;border-radius:4px;background:#e8f5fb;color:#13749d;}
 #ascla-root .audit-summary-icon svg{width:20px;height:20px}
-#ascla-root .audit-summary-card small{display:block;color:#728896;font-size:10px;text-transform:uppercase;letter-spacing:.45px;font-weight:750;margin-bottom:5px}
+#ascla-root .audit-summary-card small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.45px;font-weight:750;margin-bottom:5px}
 #ascla-root .audit-summary-card strong{display:block;color:#173f58;font-size:21px;line-height:1.15}
 #ascla-root .audit-card{padding:0;overflow:hidden}
 #ascla-root .audit-card-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid #e4edf2;background:var(--surface, var(--ascla-surface))}
