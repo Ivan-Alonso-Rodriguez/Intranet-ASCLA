@@ -116,7 +116,7 @@ final class NiceToHaveStatisticsTest extends TestCase
     {
         $start=gmdate('c',time()+14*DAY_IN_SECONDS);$end=gmdate('c',time()+14*DAY_IN_SECONDS+3600);
         $id=wp_insert_post(['post_type'=>'ascla_event','post_status'=>'draft','post_title'=>'Reviewed circle','post_content'=>'Agenda','post_author'=>$this->users[0]]);$this->posts[]=$id;
-        update_post_meta($id,'_ascla',ASCLA\Core\Services\MicroLifecycle::defaults(['micro'=>true,'start'=>$start,'end'=>$end,'capacity'=>4,'micro_min'=>2]));
+        update_post_meta($id,'_ascla',ASCLA\Core\Services\MicroLifecycle::defaults(['micro'=>true,'start'=>$start,'end'=>$end,'capacity'=>4,'micro_min'=>2,'url'=>'https://example.invalid/meeting']));
         $saved=Content::serialize(get_post($id));
         $later=gmdate('c',strtotime($start)+DAY_IN_SECONDS);
         Content::save('event',['title'=>$saved['title'],'body'=>$saved['body'],'status'=>'draft','meta'=>['start'=>$later,'end'=>gmdate('c',strtotime($end)+DAY_IN_SECONDS)]],$saved['id']);

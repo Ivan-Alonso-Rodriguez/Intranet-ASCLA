@@ -92,7 +92,7 @@ async function fault(action,user=0,mode='audit',email='',post=0){
  await ok(a.page,'events/'+localEvent.id+'/cancel',{reason:'Cancelación confirmada'});assert.equal((await ok(b.page,'events/'+localEvent.id)).cancelled,true);
  pass('Eventos: reprogramación, reconfirmación, invitaciones y cancelación se confirman o revierten completas');
  const contact=await ok(b.page,'content/contact',{title:'Cambio autorizado '+suffix,body:'Solicito actualizar mi cargo',meta:{description:(await ok(b.page,'bootstrap')).support_categories[0]}});posts.push(contact.id);
- await ok(admin,'admin/contact/'+contact.id+'/assign',{assignee:a.id});
+ assert.equal((await api(a.page,'items/'+contact.id)).status,200);
  await fault('enable',a.id);assert.equal((await api(a.page,'admin/contact/'+contact.id,{status:'progress'})).status,500);assert.equal((await ok(b.page,'items/'+contact.id)).meta.request_status,'open');
  await fault('disable');await ok(a.page,'admin/contact/'+contact.id,{status:'progress'});
  const oldUser=await ok(a.page,'admin/users/'+b.id),newEmail='atomic_changed_'+suffix+'@example.invalid';

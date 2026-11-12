@@ -56,7 +56,7 @@ final class MicroProposalText
 
     public static function current(int $id): bool
     {
-        $state=(array)get_post_meta($id,self::META,true);
+        $state=(array)(get_post_meta($id,self::META,true)?:[]);
         if (!$state) { return true; }
         $post=get_post($id);$meta=(array)get_post_meta($id,'_ascla',true);
         if (!$post || self::signature($post,$meta)!==($state['signature']??'')) { return false; }

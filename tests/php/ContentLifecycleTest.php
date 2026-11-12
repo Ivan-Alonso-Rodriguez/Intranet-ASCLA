@@ -241,20 +241,24 @@ final class ContentLifecycleTest extends TestCase
         self::assertSame('draft',$hub->get_data()['status']);
         self::assertSame(400,$this->api('POST','content/hub',['title'=>'','body'=>'','status'=>'publish'])->get_status());
     }
-    public function testMicroeventDraftAllowsMissingDeadlineWithoutWeakeningIntegerValidation():void
+    public function testMicroeventEditsRequirePendingDetailsWithoutWeakeningIntegerValidation():void
     {
         $created=$this->api('POST','content/event',['title'=>'Microevento en preparación','body'=>'','status'=>'draft','meta'=>['capacity'=>0]]);
         self::assertSame(200,$created->get_status());$id=$created->get_data()['id'];$this->posts[]=$id;
         // Microevent identity is server-owned, created by the proposal service rather than REST input.
         update_post_meta($id,'_ascla',get_post_meta($id,'_ascla',true)+['micro'=>true]);
-        self::assertSame(200,$this->api('POST','content/event/'.$id,['title'=>'Microevento en preparación','body'=>'','status'=>'draft','meta'=>['registration_deadline'=>'']])->get_status());
-        $before=get_post_meta($id,'_ascla',true);self::assertArrayNotHasKey('registration_deadline',$before);
+        $incomplete=get_post_meta($id,'_ascla',true);
+        self::assertSame(400,$this->api('POST','content/event/'.$id,['title'=>'Microevento en preparación','body'=>'','status'=>'draft','meta'=>['registration_deadline'=>'']])->get_status());
+        self::assertSame($incomplete,get_post_meta($id,'_ascla',true));
+        $complete=['title'=>'Microevento en preparación','body'=>'Descripción','status'=>'draft','meta'=>['start'=>gmdate('c',time()+14*DAY_IN_SECONDS),'end'=>gmdate('c',time()+14*DAY_IN_SECONDS+3600),'url'=>'https://example.invalid/meeting','capacity'=>6]];
+        $saved=$this->api('POST','content/event/'.$id,$complete);self::assertSame(200,$saved->get_status());self::assertSame('pending',$saved->get_data()['status']);
+        $before=get_post_meta($id,'_ascla',true);self::assertNotEmpty($before['registration_deadline']);
         foreach ([['micro_min'=>true],['micro_min'=>1.5],['priority_hours'=>false],['priority_hours'=>169]] as $meta) {
             self::assertSame(400,$this->api('POST','content/event/'.$id,['title'=>'Sin modificar','body'=>'','status'=>'draft','meta'=>$meta])->get_status());
             self::assertSame($before,get_post_meta($id,'_ascla',true));
         }
-        self::assertSame(400,$this->api('POST','content/event/'.$id,['title'=>'Microevento','body'=>'Descripción','status'=>'pending','meta'=>[]])->get_status());
-        self::assertSame('draft',get_post_status($id));
+        self::assertSame(400,$this->api('POST','content/event/'.$id,['title'=>'Microevento','body'=>'Descripción','status'=>'pending','meta'=>['url'=>'']])->get_status());
+        self::assertSame('pending',get_post_status($id));self::assertSame($before,get_post_meta($id,'_ascla',true));
     }
     public function testEventCoverAcceptsOneImageAndRejectsMultipleFilesOrPdf():void
     {

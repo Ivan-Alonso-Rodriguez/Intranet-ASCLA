@@ -21,7 +21,8 @@ module.exports=async function({fixture,out}) {
       if(fixture.sharedAccounts){
         await page.locator('#page-content h1').waitFor();
         assert.equal(new URL(page.url()).pathname,actor==='admin'?'/administracion/':'/intranet/','El login debe abrir el inicio del rol.');
-        assert.equal(await page.locator('#ascla-root img[alt="ASCLA"]:visible').count(),1,'Debe verse un único logo.');
+        assert.equal(await page.locator('#ascla-root .brand img:visible').count(),1,'Debe verse un único logo en el menú.');
+        assert.equal(await page.locator('.brand').getAttribute('aria-label'),'ASCLA inicio');
         assert.equal(await page.locator('.ascla-sidebar').count(),1);
         if(actor==='admin'){
           await page.getByRole('heading',{name:'Administración ASCLA',exact:true}).waitFor();

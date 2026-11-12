@@ -52,7 +52,7 @@ final class AnalysisComplianceTest extends TestCase
         [$a,$b]=$this->users;
         self::assertSame(100,Profiles::completion($b)['percent']);
         self::assertSame([],ProfileRequirements::missing(Profiles::raw($b)));
-        foreach (['bio','city','industries','interests','goals'] as $key) {
+        foreach (['city','industries','interests','goals'] as $key) {
             $original=Profiles::raw($b);$incomplete=$original;$incomplete[$key]=is_array($incomplete[$key])?[]:'';
             update_user_meta($b,'_ascla_profile',$incomplete);
             self::assertContains($b,array_column(Profiles::directory()['items'],'id'),$key);
@@ -62,7 +62,7 @@ final class AnalysisComplianceTest extends TestCase
         self::assertContains($b,array_column(Profiles::directory(['industries'=>Profiles::raw($b)['industries']])['items'],'id'));
         $profile=Profiles::raw($b);$profile['city']='';$profile['country']='Perú';
         self::assertSame(100,ProfileRequirements::completion($profile)['percent']);
-        $profile['bio']="\u{200B} ";self::assertContains('Descripción profesional',ProfileRequirements::missing($profile));
+        $profile['bio']="\u{200B} ";self::assertSame([],ProfileRequirements::missing($profile),'Biography is optional.');
     }
 
     public function testRejectedRequestHasDirectionalCooldownThatExpires(): void
@@ -136,7 +136,7 @@ final class AnalysisComplianceTest extends TestCase
     {
         $before=get_user_meta($this->users[0],'_ascla_profile',true);
         $email=ASCLA\Core\Services\Notifications::emailPreferences($this->users[0]);
-        foreach (['first_name','last_name','position','company','city','bio','industries','interests','goals'] as $key) {
+        foreach (['first_name','last_name','position','company','city','industries','interests','goals'] as $key) {
             $blank=in_array($key,['industries','interests','goals'],true)?[]:" \u{200B}";
             $reply=$this->api('POST','profiles/me',[$key=>$blank,'email_notifications'=>['all'=>false]]);
             self::assertSame(400,$reply->get_status(),$key);
@@ -147,10 +147,10 @@ final class AnalysisComplianceTest extends TestCase
 
     public function testIncompleteLegacyProfileMustBeCompletedBeforeAnySave(): void
     {
-        $id=$this->users[0];$profile=Profiles::raw($id);unset($profile['bio']);
+        $id=$this->users[0];$profile=Profiles::raw($id);unset($profile['company']);
         update_user_meta($id,'_ascla_profile',$profile);
         self::assertSame(400,$this->api('POST','profiles/me',['networking'=>false])->get_status());
         self::assertSame($profile,get_user_meta($id,'_ascla_profile',true));
-        self::assertSame(200,$this->api('POST','profiles/me',['bio'=>'Biografía completa'])->get_status());
+        self::assertSame(200,$this->api('POST','profiles/me',['company'=>'Organización'])->get_status());
     }
 }

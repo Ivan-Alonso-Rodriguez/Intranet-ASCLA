@@ -26,7 +26,7 @@ settings {
 }
 
 script:pre-request {
-  req.setBody({title:"Encuentro ASCLA con cupo limitado",body:"Demostración de aforo, lista de espera y cancelación.",status:"publish",meta:{start:new Date(Date.now()+5*86400000).toISOString(),end:new Date(Date.now()+5*86400000+3600000).toISOString(),capacity:1,modality:"Virtual",location:"Sala de pruebas ASCLA",chatham:false}});
+  req.setBody({title:"Encuentro ASCLA con cupo limitado",body:"Demostración de aforo, lista de espera y cancelación.",status:"publish",meta:{start:new Date(Date.now()+5*86400000).toISOString(),end:new Date(Date.now()+5*86400000+3600000).toISOString(),capacity:1,modality:"Virtual",url:"https://example.invalid/ascla-meeting",location:"Sala de pruebas ASCLA",chatham:false}});
 }
 
 script:post-response {

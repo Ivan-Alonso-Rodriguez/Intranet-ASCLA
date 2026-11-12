@@ -52,7 +52,7 @@ final class FormIntegrity108Test extends TestCase
     }
     public static function invisibleFields(): array
     {
-        return [['first_name',"\u{200D}"],['last_name',"\u{2060}"],['position',"\u{202E}\u{202C}"],['company'," \u{200C}\u{FEFF} "],['bio',"\u{2060}"]];
+        return [['first_name',"\u{200D}"],['last_name',"\u{2060}"],['position',"\u{202E}\u{202C}"],['company'," \u{200C}\u{FEFF} "]];
     }
     #[DataProvider('invisibleFields')]
     public function testInvisibleRequiredProfileFieldDoesNotChangeOtherPreferences(string $field,string $value): void
@@ -80,11 +80,11 @@ final class FormIntegrity108Test extends TestCase
     }
     public function testIncompleteInvisibleLegacyProfileIsStillVisibleButCannotBeSaved(): void
     {
-        wp_set_current_user($this->member);$data=get_user_meta($this->member,'_ascla_profile',true);$data['bio']="\u{200D}\u{2060}";update_user_meta($this->member,'_ascla_profile',$data);
-        self::assertLessThan(100,Profiles::completion($this->member)['percent']);self::assertContains('Descripción profesional',Profiles::completion($this->member)['missing']);
+        wp_set_current_user($this->member);$data=get_user_meta($this->member,'_ascla_profile',true);$data['company']="\u{200D}\u{2060}";update_user_meta($this->member,'_ascla_profile',$data);
+        self::assertLessThan(100,Profiles::completion($this->member)['percent']);self::assertContains('Empresa u organización',Profiles::completion($this->member)['missing']);
         self::assertSame(400,$this->api('profiles/me',['networking'=>false])->get_status());self::assertSame($data,get_user_meta($this->member,'_ascla_profile',true));
         update_user_meta($this->member,'locale','en_US');
-        self::assertSame('Complete the required fields: Professional description.',$this->api('profiles/me',['networking'=>false])->get_data()['message']);
+        self::assertSame('Complete the required fields: Company or organization.',$this->api('profiles/me',['networking'=>false])->get_data()['message']);
         wp_set_current_user($this->admin);self::assertContains($this->member,array_column(Profiles::directory(['q'=>Profiles::publicName($this->member)])['items'],'id'));
         self::assertSame(400,$this->api('admin/users',['login'=>'invisible_'.bin2hex(random_bytes(4)),'email'=>'invisible@example.invalid','first_name'=>"\u{200D}",'last_name'=>'','role'=>'ascla_member'])->get_status());
     }

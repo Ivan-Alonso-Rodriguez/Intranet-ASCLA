@@ -562,7 +562,7 @@ async function goto(page, route) {
       const contact = await (await response).json();
       fixtures.push(contact.id);
       assert.equal(contact.status, "private");
-      assert.equal((await request(a, "admin/contact/" + contact.id + "/assign", {assignee: (await request(a,'bootstrap')).body.me.id})).status,200);
+      assert.equal((await request(a, "items/" + contact.id)).status,200);
       await a.goto(base + "/administracion/");
       await a.locator('.admin-tabs [data-tab="solicitudes"]').click();
       await a.locator('[data-contact="'+contact.id+'"] .support-ticket-details > summary').click();

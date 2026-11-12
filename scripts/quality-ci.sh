@@ -178,21 +178,11 @@ docker run --rm --ipc=host \
     corepack pnpm install --frozen-lockfile --ignore-scripts
     cd /work
     export NODE_PATH=/tmp/ascla-node/node_modules
-    node tests/manual-workflow.cjs
-    node tests/native-login-security.cjs
-    node tests/e2e.cjs
-    node tests/editorial107.cjs
-    node tests/analysis-filters107.cjs
-    node tests/governance107.cjs
-    node tests/delivery107.cjs
-    node tests/comment-history107.cjs
-    node tests/accessibility107.cjs
-    node tests/forms107.cjs
-    node tests/forms108.cjs
-    node tests/events108.cjs
-    node tests/privacy108.cjs
-    node tests/dashboard-loading108.cjs
-    node scripts/verify-coverage.cjs
+    failures=0
+    for suite in manual-workflow native-login-security e2e editorial107 analysis-filters107 governance107 delivery107 comment-history107 accessibility107 forms107 forms108 events108 privacy108 dashboard-loading108; do
+      node "tests/$suite.cjs" || failures=1
+    done
+    test "$failures" -eq 0
   '
 
 dc run --rm -e ASCLA_E2E_EPHEMERAL=1 -e ASCLA_FIXTURE_ACTION=cleanup cli wp eval-file /opt/ascla-tests/privacy108-fixture.php

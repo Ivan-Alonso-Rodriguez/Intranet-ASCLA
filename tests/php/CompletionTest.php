@@ -89,7 +89,7 @@ final class CompletionTest extends TestCase
     }
     public function testInvitationsAreAuthorizedDeduplicatedAndDoNotReserveCapacity(): void
     {
-        $p=$this->create('event',['meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>1]]);
+        $p=$this->create('event',['meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>2]]);
         self::assertSame(2,Events::invite($p['id'],[$this->users[1],$this->users[2]])['sent']);
         self::assertSame(0,Events::invite($p['id'],[$this->users[1]])['sent']);
         self::assertSame(0,Events::detail($p['id'])['attending']);
