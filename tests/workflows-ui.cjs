@@ -18,10 +18,11 @@ async function until(check, timeout=45000){const end=Date.now()+timeout;while(Da
  await ok(admin,'settings',{support_categories:categories,micro_interval_days:14});
  assert.deepEqual((await ok(member,'bootstrap')).support_categories,categories);
  assert.equal((await ok(admin,'settings')).micro_interval_days,14);
- assert.equal((await api(admin,'settings',{micro_interval_days:1})).status,400);
+ assert.equal((await api(admin,'settings',{micro_interval_days:1})).status,200);
+ assert.equal((await api(admin,'settings',{micro_interval_days:0})).status,400);
  assert.equal((await api(member,'content/contact',{title:'Soporte QA',body:'Necesito ayuda.',meta:{description:'Categoría inexistente'}})).status,400);
  const request=await ok(member,'content/contact',{title:'Ayuda con mi perfil',body:'Solicito corregir mis nombres y teléfono.',meta:{description:categories[0]}});
- await ok(admin,'admin/contact/'+request.id+'/assign',{assignee:fixture.users[0].id});
+ assert.equal((await api(admin,'items/'+request.id)).status,200);
  await goto(member,'contacto/');assert.deepEqual(await member.locator('[data-form="contact"] [name="category"] option').allTextContents(),categories);
  pass('Contacto usa categorías vigentes, configurables y validadas por el servidor');
  let u=await ok(admin,'admin/users/'+account.id);

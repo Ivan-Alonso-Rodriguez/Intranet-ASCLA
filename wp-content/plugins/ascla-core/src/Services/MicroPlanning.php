@@ -5,7 +5,7 @@ use ASCLA\Core\Domain\GroupPlanner;
 /** A bounded batch, one proposal per interest, with independent consent. */
 final class MicroPlanning
 {
-    public static function interval(): int { return max(7,min(90,(int)(Settings::get()['micro_interval_days']??7))); }
+    public static function interval(): int { return max(1,min(90,(int)(Settings::get()['micro_interval_days']??7))); }
     public static function period(): string
     {
         $days=self::interval();
@@ -28,11 +28,29 @@ final class MicroPlanning
         Access::require($data['micro_min']<=$data['micro_capacity'],'El mínimo no puede superar los cupos.',400);
         $data['micro_approval']=true;
     }
-    public static function plan(array $profiles,array $history,array $blocked): array
+    /** Scoped controls for future groups; existing encounters keep their own limits. */
+    public static function saveGroupSize(array $input): array
+    {
+        Access::require(Access::member() && current_user_can('ascla_manage'));
+        return \ASCLA\Core\Repositories\Store::atomic('settings',static function()use($input){
+            $data=Settings::get();
+            self::settings($data,array_intersect_key($input,array_flip(['micro_min','micro_capacity'])));
+            $stored=(array)get_option('ascla_settings',[]);
+            $limits=array_intersect_key($data,array_flip(['micro_min','micro_capacity']));
+            \ASCLA\Core\Repositories\WordPressWrites::option('ascla_settings',array_merge($stored,$limits));
+            Audit::record('microevent_group_limits_updated',0,wp_json_encode($limits));
+            return $limits;
+        });
+    }
+    public static function plan(array $profiles,array $history,array $blocked,array $recentTopics=[]): array
     {
         $settings=Settings::get();$topics=[];$used=[];$groups=[];
         foreach ($profiles as $p) { foreach ((array)($p['interests']??[]) as $topic) { $topics[(int)$topic]=($topics[(int)$topic]??0)+1; } }
         arsort($topics);
+        // When preparing another option, try other shared interests first. Ties keep their eligibility order.
+        if ($recentTopics) {
+            uksort($topics,static fn($a,$b)=>($recentTopics[$a]??0)<=>($recentTopics[$b]??0));
+        }
         foreach (array_keys($topics) as $topic) {
             $candidates=array_values(array_filter($profiles,static fn($p)=>!isset($used[$p['id']]) && in_array($topic,array_map('intval',(array)($p['interests']??[])),true)));
             $plan=GroupPlanner::plan($candidates,$history,(int)wp_date('W'),$blocked,$settings['micro_min'],$settings['micro_capacity'],1);

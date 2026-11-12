@@ -6,9 +6,16 @@
     if(source==='zoom')return 'Zoom';
     return 'Sin verificar';
   }
-  globalThis.ASCLAStatistics = ({root, api, E, T, I, modal, closeModal, toast, date}) => {
+    function revealForm(form) {
+      for (let node=form.parentElement;node;node=node.parentElement) {
+        if (node.tagName==='DETAILS') node.open=true;
+      }
+    }
+  globalThis.ASCLAStatistics = ({root, api, E, T, I, modal, toast, date, formSnapshot, registerGuard, confirmGuardedDialog}) => {
     let panel, data, filters = {}, section = "overview", insights, roster, preview, csv = "", page = 1;
     let generation = 0, zoomOptions={}, eventPage=1;
+    const rosterBaselines=new WeakMap();
+    let savingRoster=false;
     const label = text => E(T(text));
     const reason = text => {
       let value=String(text||"");
@@ -29,11 +36,11 @@
     const cell = value => `<td>${value}</td>`;
     const small = value => `<small>${value}</small>`;
     const row = values => `<tr>${values.map(cell).join("")}</tr>`;
-    const table = (headers, rows) => {
+    const table = (headers, rows, emptyMessage='No hay datos para este período.') => {
       const headerHtml = headers.map(h => `<th scope="col">${label(h)}</th>`).join("");
       const bodyHtml = rows.length
         ? rows.join("")
-        : `<tr><td colspan="${headers.length}">${label("No hay datos para este período.")}</td></tr>`;
+        : `<tr><td colspan="${headers.length}">${label(emptyMessage)}</td></tr>`;
       return `<p class="stats-table-hint">${label('Desliza la tabla para ver todas las columnas.')}</p><div class="table-wrap" tabindex="0" role="region" aria-label="${E(headers.map(T).join(' · '))}"><table class="data-table stats-table"><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table></div>`;
     };
     const tabs = [['overview','Resumen','La comunidad de un vistazo','users'],['users','Participación','Quiénes asisten a los eventos','calendar'],['topics','Intereses','Los temas que reúnen a la comunidad','heart'],['trends','Comparar períodos','Qué cambió respecto al período anterior','clock'],['ai','Temas con IA','Agrupar eventos por su contenido','spark']];
@@ -70,13 +77,13 @@
         ['Actividad','calendar',['events',number(s.events),'Eventos finalizados'],[['registrations',number(s.registrations),'Inscripciones confirmadas']],'Una persona inscrita en tres eventos suma tres inscripciones. Son reservas, no asistencias.'],
         ['Asistencias','check',['attendances',number(s.attendances),'Asistencias registradas'],[['average',s.average===null?T('Sin datos'):number(s.average),'Promedio por evento verificado'],['recurring',number(s.recurring),'Personas que asistieron a 2 o más eventos']],'Cuenta una asistencia por persona y evento con estado Asistió. El promedio usa solo listas verificadas.'],
         ['Personas','users',['registrants',number(s.registrants),'Personas con inscripción confirmada'],[['attendees',number(s.attendees),'Personas distintas que asistieron']],'Cada persona inscrita cuenta una sola vez, aunque tenga varias reservas. No incluye lista de espera ni inscripciones canceladas.']
-      ].map(([title,icon,main,others,description])=>{const support=others.map(other=>`<div class="stats-summary-support" data-stat="${other[0]}"><strong>${E(other[1])}</strong><span>${label(other[2])}</span></div>`).join('');return `<article class="card stats-summary-card"><header><span class="stats-metric-icon" aria-hidden="true">${I(icon)}</span><h4>${label(title)}</h4></header><div class="stats-summary-main" data-stat="${main[0]}"><strong>${E(main[1])}</strong><span>${label(main[2])}</span></div>${support}<p>${label(description)}</p></article>`;}).join('');
+      ].map(([title,icon,main,others,description])=>{const support=others.map(other=>`<div class="stats-summary-support" data-stat="${other[0]}"><strong>${E(other[1])}</strong><span>${label(other[2])}</span></div>`).join('');return `<article class="card stats-summary-card" aria-description="${label(description)}"><header><span class="stats-metric-icon" aria-hidden="true">${I(icon)}</span><h4>${label(title)}</h4></header><div class="stats-summary-main" data-stat="${main[0]}"><strong>${E(main[1])}</strong><span>${label(main[2])}</span></div>${support}</article>`;}).join('');
       const pending=Math.max(0,s.events-s.complete_events);
       let message='Las listas del período están verificadas. La tasa y el promedio utilizan esa base.';
       if (!s.events) message='No hay eventos finalizados con estos filtros. Prueba otras fechas para consultar la participación.';
       else if (pending && !s.attendances) message='Aún no hay asistencias registradas. Las listas pendientes pueden cambiar estas cifras.';
       else if (pending) message='Hay listas por revisar. Los totales registrados pueden crecer al completar la asistencia.';
-      return `<section class="stats-participation-summary"><div class="stats-overview-heading">${intro('Participación en eventos','Distingue los eventos y sus reservas, la asistencia registrada y las personas inscritas sin duplicar.')}<span class="stats-scope-label">${I('calendar')}${label('Eventos del período')}</span></div><div class="stats-summary-groups">${cards}</div><div class="stats-summary-note"><span class="stats-summary-review-icon" aria-hidden="true">${I(pending?'clock':'check')}</span><div class="stats-summary-review-copy"><strong>${label('¿Qué tan completos están los registros?')}</strong><p>${label(message)}</p></div><div class="stats-summary-completion"><span><b>${number(s.complete_events)} / ${number(s.events)}</b> ${label('listas verificadas')}</span><progress value="${count(s.complete_events)}" max="${Math.max(1,count(s.events))}" aria-label="${label('Listas de asistencia verificadas')}"></progress><small>${number(pending)} ${label('por revisar')}</small></div>${s.events?action('Revisar asistencias','show-events','','small'):''}</div></section>`;
+      return `<section class="stats-participation-summary"><div class="stats-overview-heading"><h3>${label('Participación en eventos')}</h3><span class="stats-scope-label">${range(data.period.from,data.period.to)}</span></div><div class="stats-summary-groups">${cards}</div><div class="stats-summary-note"><span class="stats-summary-review-icon" aria-hidden="true">${I(pending?'clock':'check')}</span><div class="stats-summary-review-copy"><strong>${label('¿Qué tan completos están los registros?')}</strong><p>${label(message)}</p></div><div class="stats-summary-completion"><span><b>${number(s.complete_events)} / ${number(s.events)}</b> ${label('listas verificadas')}</span><progress value="${count(s.complete_events)}" max="${Math.max(1,count(s.events))}" aria-label="${label('Listas de asistencia verificadas')}"></progress><small>${number(pending)} ${label('por revisar')}</small></div>${s.events?action('Revisar asistencias','show-events','','small'):''}</div></section>`;
     }
     function barsChart(title,description,items) {
       const rows=items.filter(x=>count(x.value)>0).sort((a,b)=>count(b.value)-count(a.value)).slice(0,6);
@@ -107,16 +114,17 @@
     function render() {
       if(!panel?.isConnected || !data)return;
       const p=data.period;
-      const tabsHtml=tabs.map(([key,title,description,icon])=>`<button type="button" class="stats-view-button ${section===key?'selected':''}" data-stats-action="section" data-section="${key}" aria-pressed="${section===key}" aria-controls="stats-view"><span class="stats-view-icon" aria-hidden="true">${I(icon)}</span><span><strong>${label(title)}</strong><small>${label(description)}</small></span></button>`).join('');
+      const tabsHtml=tabs.map(([key,title,description,icon])=>`<button type="button" class="stats-view-button ${section===key?'selected':''}" data-stats-action="section" data-section="${key}" aria-pressed="${section===key}" aria-controls="stats-view" title="${label(description)}">${I(icon)}<strong>${label(title)}</strong></button>`).join('');
       const advanced=Number(filters.category)||Number(filters.event)||filters.event_search;
       const eventHint=number(data.options.events_total)+' '+label('eventos encontrados. El selector incluye el período elegido y el anterior. Busca por título si no aparece el evento: se muestran hasta 100 coincidencias. Elige una opción para filtrar las cifras.');
-      panel.innerHTML=`<div class="admin-section-heading stats-title"><div><span class="eyebrow">${label('PARTICIPACIÓN E INTERESES')}</span><h2>${label('Estadísticas de la comunidad')}</h2><p>${label('Conoce la participación, descubre intereses y revisa la asistencia de tus eventos.')}</p></div><span class="stats-period-tag">${I('calendar')} ${number(p.days)} ${label('días')}</span></div>
-        <form data-stats-form="filter" class="card stats-filter-card"><div class="stats-filter-heading"><div><h3>${label('¿Qué período quieres consultar?')}</h3><p>${label('Se incluyen los eventos que finalizaron entre estas fechas. Máximo 366 días.')}</p></div><span class="private-note">${label('Zona horaria')}: ${E(p.timezone)}</span></div>
+      panel.innerHTML=`<div class="admin-section-heading stats-title"><div><h2>${label('Estadísticas de la comunidad')}</h2><p>${label('Conoce la participación, descubre intereses y revisa la asistencia de tus eventos.')}</p></div>
+        ${action('Registro de asistencia','show-events','','stats-roster-shortcut')}</div>
+        <nav class="stats-tabs" aria-label="${label('Vistas de estadísticas')}">${tabsHtml}</nav>
+        <form data-stats-form="filter" class="card stats-filter-card"><div class="stats-filter-heading"><h3>${I('calendar')}${label('Período de análisis')}</h3><span class="private-note">${number(p.days)} ${label('días')} · ${E(p.timezone)}</span></div>
           <div class="stats-filters"><label class="field"><span>${label('Desde')}</span><input required type="date" name="from" value="${E(p.from)}"></label><label class="field"><span>${label('Hasta')}</span><input required type="date" name="to" value="${E(p.to)}"></label>${select('topic','Tema',data.options.topics,filters.topic)}<button class="btn primary">${I('search')} ${label('Aplicar filtros')}</button></div>
           <details class="stats-advanced" ${advanced?'open':''}><summary>${label('Filtrar por categoría o evento')}${advanced?` <span class="tag">${label('Hay filtros adicionales')}</span>`:''}</summary><div class="stats-advanced-grid">${select('category','Categoría',data.options.categories,filters.category)}<label class="field"><span>${label('Buscar un evento en el selector')}</span><input name="event_search" value="${E(filters.event_search||'')}" maxlength="100" placeholder="${label('Escribe parte del título')}"></label>${select('event','Evento',data.options.events,filters.event)}<p class="private-note full">${eventHint}</p></div></details>
-          <div class="stats-filter-footer"><p>${label('Mostrando')}: <strong>${range(p.from,p.to)}</strong></p>${action('Quitar filtros','clear-filters','title="'+label('Conserva las fechas y quita tema, categoría y evento.')+'"','ghost small')}</div><div data-stats-error role="alert" hidden></div>
-        </form>
-        <nav class="stats-tabs" aria-label="${label('Vistas de estadísticas')}">${tabsHtml}</nav>${section==='overview'?'':coverage()}<div id="stats-view"></div>`;
+          ${Number(filters.topic)||advanced?'<div class="stats-filter-footer">'+action('Quitar filtros','clear-filters','title="'+label('Conserva las fechas y quita tema, categoría y evento.')+'"','ghost small')+'</div>':''}<div data-stats-error role="alert" hidden></div>
+        </form>${section==='overview'?'':coverage()}<div id="stats-view"></div>`;
       const view=panel.querySelector('#stats-view');
       if(section==='overview') overview(view);
       else if(section==='users') users(view);
@@ -143,7 +151,7 @@
         ['new_users','Nuevas cuentas',number(s.new_users),'Cuentas creadas durante las fechas elegidas.','users'],
         ['active_users','Cuentas con actividad',number(s.active_users),'Cuentas con acciones en el historial. No es un contador de visitas.','clock']
       ].map(args=>metric(...args)).join('');
-      const guide=help('Cómo leer estos indicadores',`<div class="stats-explainer"><div><strong>${label('Persona o asistencia')}</strong><p>${label('Si una persona asiste a varios eventos, aparece una vez en personas y una vez por evento en asistencias.')}</p></div><div><strong>${label('¿Por qué aparece Sin datos?')}</strong><p>${label('La tasa necesita inscritos con una lista verificada. El promedio necesita al menos una lista verificada. Sin esa base, no se muestra un cero.')}</p></div></div>`);
+      const guide=help('Cómo leer estos indicadores',`<p>${label('El promedio usa solo listas verificadas. Cada persona cuenta una vez aunque asista a varios eventos.')}</p><div class="stats-explainer"><div><strong>${label('Persona o asistencia')}</strong><p>${label('Si una persona asiste a varios eventos, aparece una vez en personas y una vez por evento en asistencias.')}</p></div><div><strong>${label('¿Por qué aparece Sin datos?')}</strong><p>${label('La tasa necesita inscritos con una lista verificada. El promedio necesita al menos una lista verificada. Sin esa base, no se muestra un cero.')}</p></div></div>`);
       const eventTable=table(['Evento','Inscripciones','Asistencias','Estado de la lista','Acciones'],data.events.map(renderEventRow));
       const previous=action('Anterior','event-page',pagerAttrs(eventPage-1,eventPage===1));
       const next=action('Siguiente','event-page',pagerAttrs(eventPage+1,eventPage*20>=data.events_total));
@@ -242,23 +250,78 @@
       const attendance=attendanceForm+small(duration)+(u.review_reason?small(reason(u.review_reason)):'')+renderSessions(u.sessions);
       return row([identity,label(u.registered?'Inscrito':'Sin inscripción'),attendance]);
     }
-    function showRoster(value) {
-      roster=value;preview=null;csv='';
-      const peopleTable=table(['Persona','Inscripción','Asistencia y duración'],roster.people.map(renderRosterRow));
+    function rosterSnapshot(form) {
+      const file=form.elements.file?.files[0];
+      return JSON.stringify([formSnapshot(form),file && [file.name,file.size,file.lastModified]]);
+    }
+    function dirtyRosterForms(node) {
+      return [...(node?.querySelectorAll('form[data-stats-form]') || [])].filter(form=>rosterBaselines.has(form) && rosterBaselines.get(form)!==rosterSnapshot(form));
+    }
+    async function writeAttendance(form) {
+      const values=Object.fromEntries(new FormData(form)),key=form.dataset.statsForm;
+      const path='admin/attendance/'+roster.id;
+      if (key==='threshold') return api(path+'/settings',values);
+      if (key==='complete') return api(path+'/complete',{complete:true});
+      if (key==='row') values.user_id=Number(form.dataset.user);
+      return api(path,values);
+    }
+    async function saveRosterChanges(dialog) {
+      if (savingRoster) return false;
+      const forms=dirtyRosterForms(dialog);
+      for (const form of forms) {
+        if (form.dataset.statsForm==='csv') {
+          revealForm(form);
+          if (!form.reportValidity()) return false;
+          if (preview) form.querySelector('[data-stats-action="import"]')?.focus();
+          else form.requestSubmit();
+          toast(T('Revisa y confirma la importación de Zoom antes de salir.'));
+          return false;
+        }
+        if (!form.checkValidity()) { revealForm(form);form.reportValidity();return false; }
+      }
+      savingRoster=true;
+      try {
+        // The list may be verified only after all participant edits and settings have succeeded.
+        const ordered=forms.filter(f=>f.dataset.statsForm!=='complete').concat(forms.filter(f=>f.dataset.statsForm==='complete'));
+        for (const form of ordered) {
+          await writeAttendance(form);
+          rosterBaselines.set(form,rosterSnapshot(form));
+        }
+        await refresh();toast(T('Cambios guardados.'));return true;
+      } finally { savingRoster=false; }
+    }
+    function showRoster(value,savedForm=null) {
+      const sameEvent=roster?.id===value.id;
+      const pending=sameEvent?dirtyRosterForms(root.querySelector('.stats-roster')).filter(form=>form!==savedForm):[];
+      if (!pending.some(form=>form.dataset.statsForm==='csv')) { preview=null;csv=''; }
+      roster=value;
+      const peopleTable=table(['Persona','Inscripción','Asistencia y duración'],roster.people.map(renderRosterRow),'Aún no hay participantes en la lista. Añade una persona o importa el archivo de Zoom.');
       const previous=action('Anterior','roster-page',pagerAttrs(roster.page-1,roster.page===1));
       const next=action('Siguiente','roster-page',pagerAttrs(roster.page+1,roster.page>=roster.pages));
       const completion=roster.complete
         ? `<div class="stats-completion-done">${I('check')}<div><strong>${label('Esta lista ya está verificada')}</strong><p>${label('Se utiliza para calcular la tasa de asistencia. Si corriges un dato, tendrás que verificarla otra vez.')}</p></div>${action('Volver a revisar la lista','reopen','','small')}</div>`
-        : `<form data-stats-form="complete" class="stats-complete"><h4>${label('3. Finaliza la revisión')}</h4><p>${label('Los inscritos sin una marca de asistencia se contarán como ausentes al calcular la tasa. Comprueba la lista antes de confirmar.')}</p><label class="check"><input required name="confirm" type="checkbox"><span>${label('He revisado toda la lista y confirmo que está completa.')}</span></label><button class="btn primary">${label('Confirmar lista verificada')}</button></form>`;
+        : `<form data-stats-form="complete" class="stats-complete"><h4>${label('Verificar la lista')}</h4><p>${label('Los inscritos sin una marca de asistencia se contarán como ausentes al calcular la tasa. Comprueba la lista antes de confirmar.')}</p><label class="check"><input required name="confirm" type="checkbox"><span>${label('He revisado toda la lista y confirmo que está completa.')}</span></label><button class="btn primary">${label('Confirmar lista verificada')}</button></form>`;
       const states=help('Qué significa cada estado',`<dl class="stats-definitions"><div><dt>${label('Asistió')}</dt><dd>${label('Cuenta como asistencia en los indicadores.')}</dd></div><div><dt>${label('Asistencia parcial')}</dt><dd>${label('Se registra su participación, pero no cuenta como Asistió.')}</dd></div><div><dt>${label('Sin verificar / Revisión manual')}</dt><dd>${label('Falta confirmar la evidencia. Revisa estos casos antes de cerrar la lista.')}</dd></div><div><dt>${label('No asistió')}</dt><dd>${label('Se conserva como ausencia, sin sumar una asistencia.')}</dd></div></dl>`);
       const summary=[['Asistió',roster.summary.present],['Asistencia parcial',roster.summary.partial],['Revisión manual',roster.summary.review],['No asistió',roster.summary.absent]].map(([title,value])=>`<div><strong>${number(value)}</strong><span>${label(title)}</span></div>`).join('');
-      const body=`<div class="stats-roster"><div class="stats-roster-heading"><h3>${E(roster.title)}</h3><span class="stats-state ${roster.complete?'complete':'pending'}">${label(roster.complete?'Lista verificada':'Revisión pendiente')}</span></div><ol class="stats-steps"><li><strong>${label('Registra')}</strong><span>${label('Añade personas o importa Zoom.')}</span></li><li><strong>${label('Revisa')}</strong><span>${label('Comprueba estados y duración.')}</span></li><li><strong>${label('Confirma')}</strong><span>${label('Verifica la lista al terminar.')}</span></li></ol><div class="stats-roster-summary">${summary}</div>
-        <details class="stats-workflow" data-stats-workflow="manual" open><summary>${label('1. Añadir o corregir una persona')}</summary><div><p>${label('Usa el correo de su cuenta ASCLA. Si ya está en la lista, se actualizará su registro.')}</p><form data-stats-form="manual"><div class="stats-manual-fields"><label class="field"><span>${label('Correo del usuario ASCLA')}</span><input name="email" type="email" required maxlength="100"></label><label class="field"><span>${label('Asistencia')}</span><select name="status">${attendanceOptions('present')}</select></label><label class="field"><span>${label('Minutos conectados · opcional')}</span><input name="minutes" type="number" min="0" max="${roster.max_minutes}" step="1"></label><button class="btn primary">${label('Guardar asistencia')}</button></div></form></div></details>
-        <details class="stats-workflow" data-stats-workflow="csv"><summary>${label('O importar participantes desde Zoom')}</summary><div><form data-stats-form="csv"><p>${label('Carga el CSV, revisa la vista previa y confirma la importación. Cargar el archivo todavía no guarda asistencias.')}</p><label class="field"><span>${label('Archivo CSV · UTF-8 · hasta 512 KB')}</span><input type="file" name="file" accept=".csv,text/csv" required></label><div class="form-grid"><label class="field"><span>${label('Zona horaria del CSV')}</span><input name="timezone" value="${E(data.period.timezone)}" required></label><label class="field"><span>${label('Formato de fecha del CSV')}</span><select name="date_format"><option value="auto">${label('Detectar formato automáticamente')}</option><option value="ymd">AAAA-MM-DD / ISO 8601</option><option value="dmy">DD/MM/AAAA</option><option value="mdy">MM/DD/AAAA</option></select></label></div>${note('Se identifica por correo o nombre. Revisa las coincidencias por nombre antes de confirmar. Se agrupan reconexiones y se conservan las correcciones manuales.')}<button class="btn">${label('Revisar archivo antes de importar')}</button><div id="stats-csv-preview" aria-live="polite"></div></form><div class="stats-history-action">${action('Ver importaciones anteriores','zoom-history')}</div><div id="stats-zoom-history"></div></div></details>
-        <div class="stats-subheading"><h4>${label('2. Revisa participantes e inscritos')}</h4><p>${label('Puedes corregir el estado y los minutos de cada persona. Guarda cada fila que modifiques.')}</p></div>${peopleTable}<div class="admin-pager">${previous}<span>${roster.page} / ${roster.pages} · ${roster.total}</span>${next}</div>${states}${completion}
+      const body=`<div class="stats-roster"><div class="stats-roster-heading"><span class="roster-event-icon" aria-hidden="true">${I('calendar')}</span><div><h3>${E(roster.title)}</h3><span class="stats-state ${roster.complete?'complete':'pending'}">${label(roster.complete?'Lista verificada':'Revisión pendiente')}</span></div></div><div class="stats-roster-summary">${summary}</div>
+        <details class="stats-workflow" data-stats-workflow="manual" open><summary>${I('users')}${label('Añadir o corregir una persona')}</summary><div><p>${label('Usa el correo de su cuenta ASCLA. Si ya está en la lista, se actualizará su registro.')}</p><form data-stats-form="manual"><div class="stats-manual-fields"><label class="field"><span>${label('Correo del usuario ASCLA')}</span><input name="email" type="email" required maxlength="100"></label><label class="field"><span>${label('Asistencia')}</span><select name="status">${attendanceOptions('present')}</select></label><label class="field"><span>${label('Minutos conectados · opcional')}</span><input name="minutes" type="number" min="0" max="${roster.max_minutes}" step="1"></label><button class="btn primary">${label('Guardar asistencia')}</button></div></form></div></details>
+        <details class="stats-workflow" data-stats-workflow="csv"><summary>${I('upload')}${label('Importar participantes desde Zoom')}</summary><div><form data-stats-form="csv"><p>${label('Carga el CSV, revisa la vista previa y confirma la importación. Cargar el archivo todavía no guarda asistencias.')}</p><label class="field"><span>${label('Archivo CSV · UTF-8 · hasta 512 KB')}</span><input type="file" name="file" accept=".csv,text/csv" required></label><div class="form-grid"><label class="field"><span>${label('Zona horaria del CSV')}</span><input name="timezone" value="${E(data.period.timezone)}" required></label><label class="field"><span>${label('Formato de fecha del CSV')}</span><select name="date_format"><option value="auto">${label('Detectar formato automáticamente')}</option><option value="ymd">AAAA-MM-DD / ISO 8601</option><option value="dmy">DD/MM/AAAA</option><option value="mdy">MM/DD/AAAA</option></select></label></div>${note('Se identifica por correo o nombre. Revisa las coincidencias por nombre antes de confirmar. Se agrupan reconexiones y se conservan las correcciones manuales.')}<button class="btn">${label('Revisar archivo antes de importar')}</button><div id="stats-csv-preview" aria-live="polite"></div></form><div class="stats-history-action">${action('Ver importaciones anteriores','zoom-history')}</div><div id="stats-zoom-history"></div></div></details>
+        <div class="stats-subheading"><h4>${label('Participantes e inscritos')}</h4><p>${label('Puedes corregir el estado y los minutos de cada persona. Guarda cada fila que modifiques.')}</p></div>${peopleTable}${roster.pages>1?`<div class="admin-pager">${previous}<span>${roster.page} / ${roster.pages} · ${roster.total}</span>${next}</div>`:""}${states}${completion}
         ${help('Opciones del registro de Zoom',`<p>${label('El porcentaje mínimo de permanencia decide si una conexión de Zoom cuenta como asistencia completa o parcial. Las correcciones manuales se conservan.')}</p><form data-stats-form="threshold" class="stats-threshold"><label class="field"><span>${label('Permanencia mínima (%)')}</span><input name="threshold" type="number" min="1" max="100" value="${roster.threshold}" required></label><button class="btn">${label('Guardar criterio de Zoom')}</button></form>`)}
       </div>`;
-      modal(T('Registro de asistencia'),body,true);
+      const dialog=modal(T('Registro de asistencia'),body,true);
+      dialog.querySelector('.modal').classList.add('attendance-dialog');
+      for (const form of dialog.querySelectorAll('form[data-stats-form]')) {
+        const edited=pending.find(other=>other.dataset.statsForm===form.dataset.statsForm && other.dataset.user===form.dataset.user);
+        if (edited) { form.replaceWith(edited);revealForm(edited); }
+        else rosterBaselines.set(form,rosterSnapshot(form));
+      }
+      registerGuard(dialog,{
+        busy:()=>savingRoster || !!dialog.querySelector('[data-stats-action="import"][aria-busy="true"],[data-stats-action="zoom-resume"][aria-busy="true"],[data-stats-action="reopen"][aria-busy="true"]'),
+        dirty:()=>savingRoster || dirtyRosterForms(dialog).length>0,
+        save:()=>saveRosterChanges(dialog),
+        discard:()=>dirtyRosterForms(dialog).forEach(form=>{form.reset();rosterBaselines.set(form,rosterSnapshot(form));})
+      });
     }
     function renderPreviewMatchedRow(u) {
       const methods=(u.identity_methods||['email']).map(method=>label({email:'Correo exacto',name:'Nombre coincidente',similar_name:'Nombre similar: revisa la identidad'}[method]||method)).join(' · ');
@@ -328,14 +391,16 @@
         case 'page': page=Number(b.dataset.page);await load();break;
         case 'event-page': eventPage=Number(b.dataset.page);await load();break;
         case 'roster': showRoster(await api('admin/attendance/'+Number(b.dataset.id)));break;
-        case 'roster-page': showRoster(await api(`admin/attendance/${roster.id}?page=${Number(b.dataset.page)}`));break;
+        case 'roster-page':
+          if (await confirmGuardedDialog()) showRoster(await api(`admin/attendance/${roster.id}?page=${Number(b.dataset.page)}`));
+          break;
         case 'preview-page': showPreview(await api(`admin/attendance/${roster.id}/preview`,{csv,...zoomOptions,page:Number(b.dataset.page)}));break;
         case 'zoom-history': await zoomHistory(Number(b.dataset.page)||1);break;
         case 'zoom-detail': await zoomDetail(Number(b.dataset.import),Number(b.dataset.page)||1);break;
         case 'zoom-resume': {let result;do{result=await api(`admin/attendance/${roster.id}/imports/${Number(b.dataset.import)}`,{});b.textContent=`${result.processed}/${result.total}`;}while(!result.complete);await refresh();showRoster(result.roster);break;}
         case 'reopen': {const result=await api(`admin/attendance/${roster.id}/complete`,{complete:false});await refresh();showRoster(result);break;}
         case 'analyze': {b.textContent=T('Clasificando…');const current=JSON.stringify(filters);const result=await api('admin/statistics/topics',{...filters});if(current===JSON.stringify(filters)){insights=result;render();}toast(T('Clasificación actualizada.'));break;}
-        case 'import': {let result=await api(`admin/attendance/${roster.id}/import`,{csv,token:preview.token,...zoomOptions});while(!result.complete){b.textContent=`${result.processed}/${result.total}`;result=await api(`admin/attendance/${roster.id}/imports/${result.import_id}`,{});}await refresh();showRoster(result.roster);toast(T('Asistencia importada.'));break;}
+        case 'import': {let result=await api(`admin/attendance/${roster.id}/import`,{csv,token:preview.token,...zoomOptions});while(!result.complete){b.textContent=`${result.processed}/${result.total}`;result=await api(`admin/attendance/${roster.id}/imports/${result.import_id}`,{});}await refresh();showRoster(result.roster,b.closest('form'));toast(T('Asistencia importada.'));break;}
       }
     }
     root.addEventListener('click',event=>{
@@ -344,6 +409,22 @@
       event.preventDefault();
       void perform(b,()=>handleStatsAction(b));
     });
+    root.addEventListener('input',event=>{
+      const form=event.target.closest('form[data-stats-form="csv"]');
+      if (!form) return;
+      preview=null;csv='';
+      form.querySelector('#stats-csv-preview').replaceChildren();
+    });
+    async function previewCsvFile(form,values) {
+          preview=null;root.querySelector('#stats-csv-preview').innerHTML='';
+          const file=form.elements.file.files[0];if(!file || file.size>524288)throw new Error(T('El CSV debe ocupar como máximo 512 KB.'));
+          const signature=rosterSnapshot(form),text=await file.text();
+          const options={timezone:values.timezone,date_format:values.date_format,filename:file.name};
+          const result=await api(`admin/attendance/${roster.id}/preview`,{csv:text,...options});
+          if (form.isConnected && rosterSnapshot(form)===signature) {
+            csv=text;zoomOptions=options;showPreview(result);
+          }
+    }
     root.addEventListener('submit',event=>{
       const form=event.target.closest('form[data-stats-form]');
       if(!form)return;
@@ -357,16 +438,17 @@
           filters=values;page=1;eventPage=1;await load();
         }
         else if(key==='csv'){
-          preview=null;root.querySelector('#stats-csv-preview').innerHTML='';
-          const file=form.elements.file.files[0];if(!file || file.size>524288)throw new Error(T('El CSV debe ocupar como máximo 512 KB.'));
-          csv=await file.text();zoomOptions={timezone:values.timezone,date_format:values.date_format,filename:file.name};showPreview(await api(`admin/attendance/${roster.id}/preview`,{csv,...zoomOptions}));
-        } else if(key==='threshold'){const r=await api(`admin/attendance/${roster.id}/settings`,values);await refresh();showRoster(r);
-        } else if(key==='manual' || key==='row'){
-          const result=await api(`admin/attendance/${roster.id}`,{...values,...(key==='row'?{user_id:Number(form.dataset.user)}:{})});
-          await refresh();showRoster(result);toast(T('Asistencia guardada.'));
-        } else if(key==='complete'){
-          const result=await api(`admin/attendance/${roster.id}/complete`,{complete:true});
-          await refresh();showRoster(result);toast(T('Registro completo.'));
+          await previewCsvFile(form,values);
+        } else {
+          if (savingRoster) return;
+          if (key==='complete' && dirtyRosterForms(form.closest('.stats-roster')).some(other=>other!==form)) {
+            toast(T('Guarda las correcciones de los participantes antes de verificar la lista.'));return;
+          }
+          savingRoster=true;
+          try {
+            const result=await writeAttendance(form);
+            await refresh();showRoster(result,form);toast(T(({complete:'Registro completo.',threshold:'Cambios guardados.'})[key]||'Asistencia guardada.'));
+          } finally { savingRoster=false; }
         }
       });
     });

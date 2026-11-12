@@ -39,6 +39,7 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  await viewer.page.locator('#directory-search').fill(suffix);await viewer.page.locator('.directory-search button[type="submit"], .directory-search button.btn.primary').click();
  await viewer.page.waitForFunction(()=>document.querySelector('.directory-results-heading')?.innerText.includes('2 perfiles'));
  await viewer.page.locator('[data-action="directory-reset"]').click();await viewer.page.waitForFunction(()=>document.querySelector('#directory-search')?.value==='');
+ await viewer.page.locator('.directory-search .search-options > summary').click();
  await viewer.page.locator('.directory-facet').first().locator('summary').click();
  await viewer.page.locator('.directory-facet input[name="industries"]').first().check();
  assert.equal(await viewer.page.locator('.directory-facet').first().locator('[data-facet-count]').innerText(),'1');
@@ -54,7 +55,7 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
   await viewer.page.screenshot({path:root+'/test-results/directory-'+width+'.png',fullPage:width!==390});
  }
  pass('Directorio verificado a 1920, 1440, 768 y 390 px');
- const input={title:'Publicación programada '+suffix,body:'Contenido institucional de aceptación.',status:'scheduled',publish_at:new Date(Date.now()+120000).toISOString(),meta:{start:new Date(Date.now()+3*86400000).toISOString(),end:new Date(Date.now()+3*86400000+3600000).toISOString(),capacity:8}};
+ const input={title:'Publicación programada '+suffix,body:'Contenido institucional de aceptación.',status:'scheduled',publish_at:new Date(Date.now()+120000).toISOString(),meta:{start:new Date(Date.now()+3*86400000).toISOString(),end:new Date(Date.now()+3*86400000+3600000).toISOString(),capacity:8,url:'https://example.invalid/meeting'}};
  assert.equal((await api(viewer.page,'content/hub',input)).status,403);
  assert.equal((await api(admin,'content/event',{...input,publish_at:new Date(Date.now()-1000).toISOString()})).status,400);
  let event=await ok(admin,'content/event',input);posts.push(event.id);assert.equal(event.status,'ascla_hidden');assert.equal((await api(viewer.page,'items/'+event.id)).status,404);

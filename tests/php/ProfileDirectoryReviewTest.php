@@ -29,11 +29,11 @@ final class ProfileDirectoryReviewTest extends TestCase
         $result=ProfileReview::respond('snooze');self::assertFalse($result['due']);self::assertEqualsWithDelta(time()+3*DAY_IN_SECONDS,$result['next_at'],2);
         wp_set_current_user(0);wp_set_current_user($id);self::assertFalse(ProfileReview::status($id)['due']);
         $result=ProfileReview::respond('confirm');self::assertFalse($result['due']);self::assertEqualsWithDelta(time()+30*DAY_IN_SECONDS,$result['next_at'],2);
-        $profile=Profiles::raw($id);$profile['bio']='';update_user_meta($id,'_ascla_profile',$profile);
+        $profile=Profiles::raw($id);$profile['position']='';update_user_meta($id,'_ascla_profile',$profile);
         self::assertTrue(ProfileReview::status($id)['due']);
         try{ProfileReview::respond('confirm');self::fail('Incomplete profile confirmed');}catch(ASCLA\Core\Rest\ApiException $e){self::assertSame(400,$e->getCode());}
         self::assertFalse(ProfileReview::respond('snooze')['due']);
-        Profiles::save(['bio'=>'Información profesional vigente']);self::assertFalse(ProfileReview::status($id)['incomplete']);
+        Profiles::save(['position'=>'Consultora']);self::assertFalse(ProfileReview::status($id)['incomplete']);
     }
     public function testExactNamePrecedesSubstringAndPaginationUsesTwelveProfilesDespiteLegacySetting(): void
     {

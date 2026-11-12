@@ -23,7 +23,7 @@ for($n=1;$n<=32;$n++) {
 wp_update_comment_count_now($post['id']);
 $id=wp_insert_post(['post_type'=>'ascla_event','post_status'=>'draft','post_title'=>'Gobernanza y nuevas conexiones','post_content'=>'Una conversación con las personas seleccionadas por administración.','post_author'=>$admin->ID]);
 $ids=array_map(static fn($key)=>$actors[$key]['id'],['candidate1','candidate2','candidate3','candidate4']);
-$meta=MicroLifecycle::defaults(['micro'=>true,'invitees'=>$ids,'start'=>gmdate('c',time()+14*DAY_IN_SECONDS),'end'=>gmdate('c',time()+14*DAY_IN_SECONDS+3600),'capacity'=>4,'chatham'=>true,'modality'=>'Virtual','location'=>'Sala virtual','invited'=>false,'agenda'=>'Presentaciones y diálogo']);
+$meta=MicroLifecycle::defaults(['micro'=>true,'invitees'=>$ids,'start'=>gmdate('c',time()+14*DAY_IN_SECONDS),'end'=>gmdate('c',time()+14*DAY_IN_SECONDS+3600),'capacity'=>4,'chatham'=>true,'modality'=>'Virtual','url'=>'https://example.invalid/meeting','invited'=>false,'agenda'=>'Presentaciones y diálogo']);
 update_post_meta($id,'_ascla',$meta);MicroLifecycle::history($id,'pending');wp_update_post(['ID'=>$id,'post_status'=>'pending']);
 $legacy=wp_insert_post(['post_type'=>'ascla_event','post_status'=>'draft','post_title'=>'Propuesta aprobada pendiente de publicación','post_content'=>'Representa una aprobación anterior al cambio de flujo.','post_author'=>$admin->ID]);
 update_post_meta($legacy,'_ascla',$meta+['micro_approved'=>true]);MicroLifecycle::history($legacy,'approved');wp_update_post(['ID'=>$legacy,'post_status'=>'ascla_hidden']);

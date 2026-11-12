@@ -113,13 +113,16 @@ final class ProfileAttendance1110Test extends TestCase
     public function testRecoveryReturnTracksCommunityOriginWhileTechnicalLoginKeepsItsDestination(): void
     {
         $GLOBALS['pagenow']='wp-login.php';$GLOBALS['action']='lostpassword';
-        $native=site_url('wp-login.php','login');self::assertSame($native,wp_login_url());
+        $native=site_url('wp-login.php','login');self::assertSame(Login::url(),wp_login_url());
         $link=wp_lostpassword_url(Login::url());parse_str(wp_parse_url($link,PHP_URL_QUERY),$_GET);
         self::assertSame('community',$_GET['ascla_login_context']);self::assertSame(Login::url(),wp_login_url());
         parse_str(wp_parse_url(AccountRecovery::confirmationUrl(),PHP_URL_QUERY),$query);self::assertSame('community',$query['ascla_login_context']);
         ob_start();do_action('lostpassword_form');$hidden=ob_get_clean();self::assertStringContainsString('ascla_login_context',$hidden);
-        $reset=network_site_url('wp-login.php?action=rp&key=SYNTHETIC&login=member','login');
+        $reset=network_site_url('wp-login.php?login=member&key=SYNTHETIC&action=rp&wp_lang=es_ES','login');
         self::assertStringContainsString('ascla_login_context=community',apply_filters('retrieve_password_message',$reset,'SYNTHETIC','member',get_userdata($this->users[1])));
-        $_GET=[];self::assertSame($native,wp_login_url());self::assertSame($reset,apply_filters('retrieve_password_message',$reset,'SYNTHETIC','member',get_userdata($this->users[1])));
+        parse_str(wp_parse_url(wp_lostpassword_url(admin_url()),PHP_URL_QUERY),$_GET);
+        self::assertSame('admin',$_GET['ascla_login_context']);
+        self::assertSame($native,wp_login_url());
+        self::assertStringContainsString('ascla_login_context=admin',apply_filters('retrieve_password_message',$reset,'SYNTHETIC','member',get_userdata($this->users[1])));
     }
 }

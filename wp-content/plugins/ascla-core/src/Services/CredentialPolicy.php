@@ -1,10 +1,12 @@
 <?php
 namespace ASCLA\Core\Services;
+use ASCLA\Core\Frontend\Language;
 
 /** Institutional credentials policy, applied to ASCLA and native WordPress forms. */
 final class CredentialPolicy
 {
-    public const DEFAULTS=['password_min_length'=>12,'password_reset_minutes'=>60,'remember_days'=>14,'login_challenge_after'=>3,'login_lock_after'=>5,'login_ip_lock_after'=>20,'login_lock_minutes'=>15];
+    public const DEFAULTS=['password_min_length'=>8,'password_reset_minutes'=>60,'remember_days'=>14,'login_challenge_after'=>3,'login_lock_after'=>5,'login_ip_lock_after'=>20,'login_lock_minutes'=>15];
+    private const COMMON=['password','password1','password123','contrasena','12345678','123456789','1234567890','87654321','qwerty123','qwertyuiop','abcdefgh','admin123','letmein123'];
 
     public static function boot(): void
     {
@@ -14,6 +16,37 @@ final class CredentialPolicy
         add_action('user_profile_update_errors',[self::class,'profileValidation'],10,3);
         add_filter('rest_pre_insert_user',[self::class,'restValidation'],10,2);
         add_filter('rest_request_before_callbacks',[NativeAccountPolicy::class,'validate'],10,3);
+        add_filter('password_hint',[self::class,'hint']);
+        add_action('login_enqueue_scripts',[self::class,'resetAssets']);
+    }
+    public static function upgrade(): void
+    {
+        if ((int)get_option('ascla_password_policy_version',0)>=1) { return; }
+        $stored=(array)get_option('ascla_settings',[]);
+        // Replace the old default once; preserve deliberately configured lengths.
+        if ((int)($stored['password_min_length']??0)===12) {
+            $stored['password_min_length']=self::DEFAULTS['password_min_length'];
+            update_option('ascla_settings',$stored,false);
+        }
+        update_option('ascla_password_policy_version',1,false);
+    }
+    public static function hint(): string
+    {
+        return sprintf(Language::text('Usa al menos %d caracteres. No es obligatorio combinar mayúsculas, números y símbolos. Evita contraseñas muy comunes.','Use at least %d characters. Uppercase letters, numbers and symbols are optional. Avoid very common passwords.'),Settings::get()['password_min_length']);
+    }
+    public static function resetAssets(): void
+    {
+        if (!in_array($GLOBALS['action']??'',['rp','resetpass'],true)) { return; }
+        wp_dequeue_script('user-profile');
+        wp_enqueue_script('ascla-password-policy',ASCLA_URL.'assets/password-policy.js',['jquery'],\ASCLA\Core\Frontend\App::assetVersion('assets/password-policy.js'),true);
+        wp_localize_script('ascla-password-policy','ASCLA_PASSWORD_POLICY',[
+            'minimum'=>Settings::get()['password_min_length'],'common'=>self::COMMON,
+            'valid'=>Language::text('Cumple los requisitos','Meets the requirements'),
+            'invalid'=>Language::text('Revisa los requisitos de la contraseña','Check the password requirements'),
+            'mismatch'=>Language::text('Las nuevas contraseñas no coinciden.','The new passwords do not match.'),
+            'show'=>Language::text('Mostrar contraseña','Show password'),
+            'hide'=>Language::text('Ocultar contraseña','Hide password'),
+        ]);
     }
     public static function settings(array &$data,array $input): void
     {
@@ -32,71 +65,36 @@ final class CredentialPolicy
         return $login;
     }
 
-    public static function error(string $password,object $user): string
+    public static function error(string $password): string
     {
         $minimum=Settings::get()['password_min_length'];
-        $error='';
-        if (strlen($password)>4096 || mb_strlen($password)<$minimum) {
-            $error='La nueva contraseña debe tener al menos '.$minimum.' caracteres y como máximo 4096 bytes.';
-        } elseif (!self::hasRequiredCharacters($password)) {
-            $error='Combina mayúsculas, minúsculas, números y símbolos.';
-        } else {
-            $normalized=mb_strtolower(remove_accents($password));
-            if (preg_match('/(.)\1{3}/u',$normalized) || self::sequence($normalized)) {
-                $error='Evita secuencias predecibles y caracteres repetidos.';
-            } elseif (self::containsPersonalData($normalized,$user)) {
-                $error='La contraseña no debe contener tu nombre, usuario ni correo.';
-            }
+        if (strlen($password)>4096 || mb_strlen(trim($password))<$minimum) {
+            return 'La nueva contraseña debe tener al menos '.$minimum.' caracteres y como máximo 4096 bytes.';
         }
-        return $error;
-    }
-
-    private static function hasRequiredCharacters(string $password): bool
-    {
-        foreach (['/\p{Lu}/u','/\p{Ll}/u','/\p{N}/u','/[^\p{L}\p{N}\s]/u'] as $pattern) {
-            if (!preg_match($pattern,$password)) { return false; }
+        if (preg_match('/[\x00-\x1f\x7f]/u',$password)) {
+            return Language::text('La contraseña no debe contener caracteres de control.','The password must not contain control characters.');
         }
-        return true;
-    }
-
-    private static function containsPersonalData(string $normalized,object $user): bool
-    {
-        $personal=implode(' ',[(string)($user->user_login??''),explode('@',(string)($user->user_email??''))[0],(string)($user->first_name??''),(string)($user->last_name??'')]);
-        foreach (preg_split('/[^\p{L}\p{N}]+/u',mb_strtolower(remove_accents($personal)))?:[] as $token) {
-            if (mb_strlen($token)>=3 && str_contains($normalized,$token)) { return true; }
-        }
-        return false;
-    }
-
-    private static function sequence(string $password): bool
-    {
-        foreach (['0123456789','abcdefghijklmnopqrstuvwxyz','qwertyuiop','asdfghjkl','zxcvbnm'] as $sequence) {
-            for ($i=0;$i<=strlen($sequence)-4;$i++) {
-                $part=substr($sequence,$i,4);
-                if (str_contains($password,$part) || str_contains($password,strrev($part))) { return true; }
-            }
-        }
-        return false;
+        $normalized=mb_strtolower(remove_accents(trim($password)));
+        return in_array($normalized,self::COMMON,true) || preg_match('/^(.)\1+$/u',$normalized)
+            ? Language::text('Esta contraseña es muy común. Elige otra menos predecible.','This password is very common. Choose a less predictable one.') : '';
     }
     public static function resetValidation(\WP_Error $errors,mixed $user): void
     {
         if (!$user instanceof \WP_User || empty($_POST['pass1'])) { return; }
-        $error=self::error((string)wp_unslash($_POST['pass1']),$user);
+        $error=self::error((string)wp_unslash($_POST['pass1']));
         if ($error!=='') { $errors->add('ascla_password_policy',$error); }
     }
     public static function profileValidation(\WP_Error $errors,bool $update,object $user): void
     {
         unset($update); // WordPress callback signature includes this argument.
         if (empty($user->user_pass)) { return; }
-        $error=self::error((string)$user->user_pass,$user);
+        $error=self::error((string)$user->user_pass);
         if ($error!=='') { $errors->add('ascla_password_policy',$error); }
     }
     public static function restValidation(mixed $user,\WP_REST_Request $request): mixed
     {
         if (is_wp_error($user) || !$request->get_param('password')) { return $user; }
-        $existing=$request['id']?get_userdata((int)$request['id']):false;
-        $identity=(object)array_merge($existing?array_merge((array)$existing->data,['first_name'=>$existing->first_name,'last_name'=>$existing->last_name]):[],(array)$user);
-        $error=self::error((string)$request['password'],$identity);
+        $error=self::error((string)$request['password']);
         return $error!==''?new \WP_Error('ascla_password_policy',$error,['status'=>400]):$user;
     }
     public static function cookieExpiration(int $duration,int $user,bool $remember): int

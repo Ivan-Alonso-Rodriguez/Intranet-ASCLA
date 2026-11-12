@@ -1,6 +1,7 @@
 <?php
 namespace ASCLA\Core\Services;
 use ASCLA\Core\Frontend\{Language,Login};
+use ASCLA\Core\Domain\Catalog;
 
 /** The public recovery response never discloses whether an account exists. */
 final class AccountRecovery
@@ -16,23 +17,25 @@ final class AccountRecovery
         add_action('lostpassword_form',[self::class,'contextField']);
         add_action('resetpass_form',[self::class,'contextField']);
         add_filter('retrieve_password_message',[self::class,'resetMessage'],20,3);
+        add_action('after_password_reset',[self::class,'enterIntranet'],20,2);
     }
     public static function confirmationUrl(): string
     {
         $args=['action'=>'lostpassword','ascla_recovery'=>'sent','wp_lang'=>Language::requested()?:Language::current()];
-        if (self::communityContext()) { $args['ascla_login_context']='community'; }
+        $args['ascla_login_context']=self::communityContext()?'community':'admin';
         return add_query_arg($args,network_site_url('wp-login.php','login'));
     }
     private static function communityContext(): bool
     {
         $context=$_POST['ascla_login_context']??$_GET['ascla_login_context']??'';
-        if ($context==='community') { return true; }
+        if (in_array($context,['community','admin'],true)) { return $context==='community'; }
         $redirect=$_POST['redirect_to']??$_GET['redirect_to']??'';
-        return is_string($redirect) && untrailingslashit(wp_unslash($redirect))===untrailingslashit(Login::url());
+        return !is_string($redirect) || untrailingslashit(wp_unslash($redirect))!==untrailingslashit(admin_url());
     }
     public static function lostPasswordUrl(string $url,string $redirect): string
     {
-        return untrailingslashit($redirect)===untrailingslashit(Login::url())?add_query_arg('ascla_login_context','community',$url):$url;
+        $context=untrailingslashit($redirect)===untrailingslashit(admin_url())?'admin':'community';
+        return add_query_arg('ascla_login_context',$context,$url);
     }
     public static function loginUrl(string $url): string
     {
@@ -40,13 +43,40 @@ final class AccountRecovery
     }
     public static function contextField(): void
     {
-        if (self::communityContext()) { echo '<input type="hidden" name="ascla_login_context" value="community">'; }
+        echo '<input type="hidden" name="ascla_login_context" value="'.(self::communityContext()?'community':'admin').'">';
     }
     public static function resetMessage(string $message,string $key,string $login): string
     {
-        if (!self::communityContext()) { return $message; }
-        $url=network_site_url('wp-login.php?action=rp&key='.$key.'&login='.rawurlencode($login),'login');
-        return str_replace($url,add_query_arg('ascla_login_context','community',$url),$message);
+        $page=network_site_url('wp-login.php','login').'?';
+        $context=self::communityContext()?'community':'admin';
+        return preg_replace_callback('~https?://[^\s<>"]+~i',static function(array $match) use ($page,$key,$login,$context): string {
+            $url=$match[0];
+            if (!str_starts_with($url,$page)) { return $url; }
+            parse_str(substr($url,strlen($page)),$query);
+            if (($query['action']??'')!=='rp' || ($query['login']??'')!==$login || ($query['key']??'')!==$key) { return $url; }
+            return add_query_arg('ascla_login_context',$context,$url);
+        },$message)??$message;
+    }
+
+    public static function enterIntranet(\WP_User $user,#[\SensitiveParameter] string $password): void
+    {
+        if (($GLOBALS['pagenow']??'')!=='wp-login.php'
+            || !in_array($GLOBALS['action']??'',['rp','resetpass'],true)
+            || ($_SERVER['REQUEST_METHOD']??'')!=='POST'
+            || !self::communityContext() || !Access::member($user->ID)) { return; }
+
+        $stored=get_userdata($user->ID);
+        if (!$stored || !wp_check_password($password,$stored->user_pass,$user->ID)) { return; }
+
+        $path=wp_parse_url((string)($_SERVER['REQUEST_URI']??''),PHP_URL_PATH);
+        if (is_string($path) && $path!=='') {
+            setcookie('wp-resetpass-'.COOKIEHASH,'',time()-YEAR_IN_SECONDS,$path,COOKIE_DOMAIN,is_ssl(),true);
+        }
+        wp_set_current_user($user->ID);
+        wp_set_auth_cookie($user->ID);
+        do_action('wp_login',$user->user_login,$user);
+        wp_safe_redirect(Catalog::url('intranet'),303);
+        exit;
     }
     public static function confirmationMessage(): string
     {
@@ -84,12 +114,16 @@ final class AccountRecovery
         nocache_headers();
         if ($posted&&$result===true) { wp_safe_redirect(self::confirmationUrl(),303);exit; }
         if ($result===true) {
-            login_header(Language::text('Recuperar contraseña','Reset password'),'<p class="message" role="status">'.esc_html(self::confirmationMessage()).'</p>');
+            login_header(Language::text('Revisa tu correo','Check your email'),'<div class="message ascla-recovery-confirmation" role="status"><strong>'.esc_html(Language::text('Solicitud enviada','Request sent')).'</strong><p>'.esc_html(self::confirmationMessage()).'</p></div>');
         } else {
             login_header(Language::text('Recuperar contraseña','Reset password'),'',$result);
+            self::form($identifier);
         }
-        self::form($identifier);
         echo '<p id="nav"><a href="'.esc_url(self::communityContext()?Login::url():site_url('wp-login.php','login')).'">'.esc_html(Language::text('Volver al inicio de sesión','Back to sign in')).'</a></p>';
+        if ($result===true) {
+            $retry=remove_query_arg('ascla_recovery',self::confirmationUrl());
+            echo '<p class="ascla-recovery-retry"><a href="'.esc_url($retry).'">'.esc_html(Language::text('Enviar otro enlace de recuperación','Send another recovery link')).'</a></p>';
+        }
         login_footer();exit;
     }
     private static function form(string $identifier): void

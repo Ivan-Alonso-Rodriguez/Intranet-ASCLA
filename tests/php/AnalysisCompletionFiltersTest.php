@@ -94,15 +94,15 @@ final class AnalysisCompletionFiltersTest extends TestCase
         wp_set_current_user($this->users[0]);
         $response=$this->api('POST','settings',['profile_completion_extra'=>['experience','languages','experience']]);
         self::assertSame(200,$response->get_status());self::assertSame(['experience','languages'],Settings::get()['profile_completion_extra']);
-        self::assertCount(8,$response->get_data()['profile_completion_options']['required']);
+        self::assertCount(7,$response->get_data()['profile_completion_options']['required']);
         wp_set_current_user($this->users[1]);
-        $result=Profiles::completion($this->users[1]);self::assertSame(10,$result['total']);self::assertSame(80,$result['percent']);
+        $result=Profiles::completion($this->users[1]);self::assertSame(9,$result['total']);self::assertSame(78,$result['percent']);
         self::assertSame(['Experiencia profesional','Idiomas'],$result['missing']);self::assertSame([],ProfileRequirements::missing($profile));
         self::assertTrue(ProfileReview::status($this->users[1])['incomplete']);
         self::assertFalse(ProfileReview::respond('snooze')['due']);
         self::assertSame(400,$this->api('POST','profiles/review',['decision'=>'confirm'])->get_status());
         Profiles::save(['bio'=>'Descripción actualizada']); // Additional calculation criteria do not block a minimum-complete save.
-        self::assertSame(80,Profiles::completion($this->users[1])['percent']);
+        self::assertSame(78,Profiles::completion($this->users[1])['percent']);
         $profile=Profiles::raw($this->users[1]);$profile['experience']="\u{200B} ";
         self::assertFalse(ProfileRequirements::completion($profile)['checks']['experience']);
         $language=(int)Profiles::catalogs()['language'][0]['id'];
@@ -110,7 +110,8 @@ final class AnalysisCompletionFiltersTest extends TestCase
         self::assertSame(100,Profiles::completion($this->users[1])['percent']);
         self::assertFalse(ProfileReview::status($this->users[1])['incomplete']);
         self::assertSame([],ProfileRequirements::missing(Profiles::raw($this->users[1])));
-        foreach (['bio','position','company'] as $field) {
+        self::assertSame(200,$this->api('POST','profiles/me',['bio'=>''])->get_status());
+        foreach (['position','company'] as $field) {
             self::assertSame(400,$this->api('POST','profiles/me',[$field=>''])->get_status());
         }
     }
@@ -125,7 +126,7 @@ final class AnalysisCompletionFiltersTest extends TestCase
         Settings::save(['directory_page_size'=>12]);self::assertSame(['website'],Settings::get()['profile_completion_extra']);
         Settings::save(['profile_completion_extra'=>[]]);
         $profile=Profiles::raw($this->users[1]);$profile['website']='';$profile['experience']='';$profile['languages']=[];
-        $result=ProfileRequirements::completion($profile);self::assertSame(8,$result['total']);self::assertSame(100,$result['percent']);
-        $profile['bio']='';self::assertLessThan(100,ProfileRequirements::completion($profile)['percent']);
+        $result=ProfileRequirements::completion($profile);self::assertSame(7,$result['total']);self::assertSame(100,$result['percent']);
+        $profile['bio']='';self::assertSame(100,ProfileRequirements::completion($profile)['percent']);
     }
 }

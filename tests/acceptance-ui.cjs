@@ -21,11 +21,12 @@ module.exports=async function({fixture,out}) {
       if(fixture.sharedAccounts){
         await page.locator('#page-content h1').waitFor();
         assert.equal(new URL(page.url()).pathname,actor==='admin'?'/administracion/':'/intranet/','El login debe abrir el inicio del rol.');
-        assert.equal(await page.locator('#ascla-root img[alt="ASCLA"]:visible').count(),1,'Debe verse un único logo.');
+        assert.equal(await page.locator('#ascla-root .brand img:visible').count(),1,'Debe verse un único logo en el menú.');
+        assert.equal(await page.locator('.brand').getAttribute('aria-label'),'ASCLA inicio');
         assert.equal(await page.locator('.ascla-sidebar').count(),1);
         if(actor==='admin'){
           await page.getByRole('heading',{name:'Administración ASCLA',exact:true}).waitFor();
-          await page.locator('#admin-panel h2').waitFor();
+          await page.getByRole('heading',{name:'Resumen de actividad',exact:true}).waitFor();
           const nav=await page.locator('.admin-tabs').boundingBox(),panel=await page.locator('#admin-panel').boundingBox();
           assert.ok(nav.y+nav.height<=panel.y+1,'Las secciones van encima del panel.');
           assert.equal(await page.locator('.ascla-sidebar .nav-link[href*="administracion"]').count(),1);
@@ -68,11 +69,12 @@ module.exports=async function({fixture,out}) {
       await incoming.getByText('QA: presentación desde la interfaz.',{exact:true}).waitFor();
       await incoming.locator('[data-action="connection-respond"][data-decision="accept"]').click();
       await visit(a,'perfil/?member='+target);await a.locator('.modal [data-action="message-start"][data-id="'+target+'"]').click();await a.locator('.chat-compose textarea').waitFor();
-      const text='QA: historial UI '+fixture.prefix;await a.locator('.chat-compose textarea').fill(text);await a.locator('.chat-compose button').click();await a.locator('.bubble').filter({hasText:text}).waitFor();
+      const text='QA: historial UI '+fixture.prefix;await a.locator('.chat-compose textarea').fill(text);await a.locator('.chat-compose button[type="submit"]').click();await a.locator('.bubble').filter({hasText:text}).waitFor();
       const conversation=new URL(a.url()).searchParams.get('conversation');assert.ok(conversation);
       await visit(b,'mensajeria/?conversation='+conversation);await b.locator('.bubble').filter({hasText:text}).waitFor();assert.equal(await a.locator('[data-action="delete-message"]').count(),0);
       if(fixture.sharedAccounts){
         await visit(b,'perfil/?member='+fixture.actors.ui_a.id);
+        await b.locator('.modal [data-action="block"][data-active="true"]').waitFor({state:'visible'});
         await b.locator('.modal [data-action="block"][data-active="true"]').click();
         await b.getByRole('button',{name:'Confirmar bloqueo',exact:true}).click();
         await b.getByRole('status').filter({hasText:'Asociado bloqueado.'}).waitFor();
@@ -80,6 +82,7 @@ module.exports=async function({fixture,out}) {
         await a.getByText('La mensajería está bloqueada entre estas cuentas.',{exact:true}).waitFor();
         assert.equal(await a.locator('.modal [data-action="message-start"]').count(),0);
         await visit(b,'perfil/?member='+fixture.actors.ui_a.id);
+        await b.locator('.modal [data-action="block"][data-active="false"]').waitFor({state:'visible'});
         await b.locator('.modal [data-action="block"][data-active="false"]').click();
         await b.getByRole('status').filter({hasText:'Asociado desbloqueado.'}).waitFor();
         await visit(a,'perfil/?member='+target);
@@ -114,7 +117,7 @@ module.exports=async function({fixture,out}) {
       await edit.locator('[name=status][value=scheduled]').check();assert.equal(await edit.locator('[name=publish_at]').isVisible(),true);await edit.locator('[name=status][value=publish]').check();assert.equal(await edit.locator('[name=publish_at]').isVisible(),false);
       let writes=0;const observe=r=>{if(r.url().includes('/content/event/')&&r.method()==='POST')writes++;};admin.on('request',observe);await edit.getByRole('button',{name:'Guardar evento',exact:true}).click();assert.equal(writes,0);assert.equal(await edit.locator('[name=body]').evaluate(n=>n.validity.valueMissing),true);admin.off('request',observe);
       await edit.locator('[name=body]').fill('Encuentro creado con los controles reales de ASCLA.');
-      const day=new Date(Date.now()+5*86400000).toISOString().slice(0,10);for(const name of ['start','end'])await edit.locator('[name='+name+'_date]').fill(day);await edit.locator('[name=start_time]').fill('10:15');await edit.locator('[name=end_time]').fill('11:45');await edit.locator('[name=capacity]').fill('5');await edit.locator('[name=location]').fill('Sala QA');await edit.locator('[name=chatham]').uncheck();
+      const day=new Date(Date.now()+5*86400000).toISOString().slice(0,10);for(const name of ['start','end'])await edit.locator('[name='+name+'_date]').fill(day);await edit.locator('[name=start_time]').fill('10:15');await edit.locator('[name=end_time]').fill('11:45');await edit.locator('[name=capacity]').fill('5');await edit.locator('[name=modality]').selectOption('Presencial');await edit.locator('[name=location]').fill('Sala QA');await edit.locator('[name=chatham]').uncheck();
       const [publish]=await Promise.all([admin.waitForResponse(r=>r.url().includes('/content/event/')&&r.request().method()==='POST'),edit.getByRole('button',{name:'Guardar evento',exact:true}).click()]);const published=await publish.json();assert.equal(published.status,'publish');assert.equal(Date.parse(published.meta.start),Date.parse(day+'T15:15:00Z'));assert.equal(Date.parse(published.meta.end),Date.parse(day+'T16:45:00Z'));
       await visit(admin,'eventos/?item='+draft.id);await admin.locator('.modal [data-action="editor"]').click();const reopened=admin.locator('[data-form="editor"]');assert.equal(await reopened.locator('[name=start_date]').inputValue(),day);assert.equal(await reopened.locator('[name=start_time]').inputValue(),'10:15');assert.equal(await reopened.locator('[name=end_time]').inputValue(),'11:45');await admin.keyboard.press('Escape');
       await visit(member,'eventos/?q='+encodeURIComponent(title));await member.locator('[data-action="item"][data-id="'+draft.id+'"]').click();await member.getByRole('button',{name:'Registrarme',exact:true}).click();await member.getByRole('button',{name:'Cancelar inscripción',exact:true}).waitFor();
@@ -138,7 +141,7 @@ module.exports=async function({fixture,out}) {
         const day=new Date(Date.now()+6*86400000).toISOString().slice(0,10);
         for(const field of ['start','end'])await form.locator('[name='+field+'_date]').fill(day);
         await form.locator('[name=start_time]').fill('10:00');await form.locator('[name=end_time]').fill('11:00');
-        await form.locator('[name=capacity]').fill('1');await form.locator('[name=location]').fill('Sala QA de aforo');await form.locator('[name=chatham]').uncheck();
+        await form.locator('[name=capacity]').fill('1');await form.locator('[name=modality]').selectOption('Presencial');await form.locator('[name=location]').fill('Sala QA de aforo');await form.locator('[name=chatham]').uncheck();
         const invalid=await form.locator(':invalid').evaluateAll(fields=>fields.map(field=>({name:field.name,message:field.validationMessage})));
         assert.deepEqual(invalid,[],'El evento debe tener todos sus campos válidos antes de publicar.');
         const [createdResponse]=await Promise.all([admin.waitForResponse(r=>r.url().includes('/content/event')&&r.request().method()==='POST'),form.getByRole('button',{name:'Publicar evento',exact:true}).click()]);assert.equal(createdResponse.status(),200);

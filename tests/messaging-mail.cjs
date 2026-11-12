@@ -78,7 +78,7 @@ async function login(browser,user) {
    await b.locator('[data-action="older-messages"]').click(); await until(async()=>await bubbles.count()===133,'Tercera página incompleta');
    await b.locator('#chat-messages').evaluate(el=>el.scrollTop=0);
    await a.goto(base+`/mensajeria/?conversation=${ab.id}`); await a.locator('.chat-compose textarea').fill('Enviado desde el formulario real');
-   await a.locator('.chat-compose button').click();
+   await a.locator('.chat-compose button[type="submit"]').click();
    await until(()=>bubbles.filter({hasText:'Enviado desde el formulario real'}).count(),'Mensaje desde formulario no recibido');
    assert.equal(await bubbles.count(),134); assert.equal(await b.locator('#chat-messages').evaluate(el=>el.scrollTop),0);
    assert.equal(await b.locator('[data-action="older-messages"]').count(),0);
@@ -118,6 +118,7 @@ async function login(browser,user) {
   });
   await test('SMTP configurable en administración y envío de prueba al buzón local',async()=>{
    const admin=await login(browser,users[3]); await admin.goto(base+'/wp-admin/admin.php?page=ascla-configuracion');
+   await admin.locator('[data-settings-group=servicios]').click();await admin.locator('.settings-group').filter({has:admin.locator('[name=smtp_host]')}).locator('summary').first().click();
    await admin.locator('[name="smtp_host"]').waitFor();
    assert.equal(await admin.locator('[name="smtp_password"]').inputValue(),'');
    await admin.locator('[data-action="mail-test"]').click(); await until(()=>admin.locator('.toast').filter({hasText:'buzón local'}).count(),'Prueba SMTP sin confirmación');

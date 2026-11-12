@@ -93,4 +93,30 @@ final class DraftWorkflowTest extends TestCase
         $request->set_query_params(['mine'=>1,'status'=>'draft','include_forums'=>['true']]);
         self::assertSame(400,rest_get_server()->dispatch($request)->get_status());
     }
+
+    public function testDraftOnlyDeletionRespectsPermissionsAndProtectsPublishedContent(): void
+    {
+        $draft = $this->draft('hub');
+        $id = $draft['id'];
+        self::assertTrue($draft['can_delete']);
+        $request = new WP_REST_Request('DELETE', '/ascla/v1/items/' . $id);
+        $request->set_query_params(['draft_only' => '1']);
+
+        wp_set_current_user($this->users[1]);
+        self::assertContains(rest_get_server()->dispatch($request)->get_status(), [403, 404]);
+        self::assertSame('draft', get_post_status($id));
+
+        wp_set_current_user($this->users[0]);
+        $published = $this->request('hub', ['status' => 'publish', 'title' => 'Publicación protegida', 'body' => 'Contenido de prueba'], $id);
+        self::assertSame('publish', $published->get_data()['status']);
+        self::assertSame(409, rest_get_server()->dispatch($request)->get_status());
+        self::assertSame('publish', get_post_status($id));
+
+        $draft = $this->draft('hub');
+        $request = new WP_REST_Request('DELETE', '/ascla/v1/items/' . $draft['id']);
+        $request->set_query_params(['draft_only' => '1']);
+        self::assertSame(200, rest_get_server()->dispatch($request)->get_status());
+        self::assertSame('trash', get_post_status($draft['id']));
+        self::assertNotContains($draft['id'], array_column(Content::listing('hub', ['mine' => true, 'status' => 'draft'])['items'], 'id'));
+    }
 }

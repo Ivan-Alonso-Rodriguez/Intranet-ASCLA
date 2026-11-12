@@ -26,7 +26,7 @@ settings {
 }
 
 script:pre-request {
-  const day=new Date(Date.now()+5*86400000).toISOString().slice(0,10);bru.setCollectionVar("inicioPublicacion",day+"T15:15:00Z");bru.setCollectionVar("finPublicacion",day+"T16:45:00Z");req.setBody({title:bru.getCollectionVar("tituloEventoPublicacion"),status:"publish",body:"Encuentro ficticio publicado por la prueba Bruno.",meta:{start:bru.getCollectionVar("inicioPublicacion"),end:bru.getCollectionVar("finPublicacion"),capacity:5,modality:"Virtual",location:"Sala QA",chatham:false}});
+  const day=new Date(Date.now()+5*86400000).toISOString().slice(0,10);bru.setCollectionVar("inicioPublicacion",day+"T15:15:00Z");bru.setCollectionVar("finPublicacion",day+"T16:45:00Z");req.setBody({title:bru.getCollectionVar("tituloEventoPublicacion"),status:"publish",body:"Encuentro ficticio publicado por la prueba Bruno.",meta:{start:bru.getCollectionVar("inicioPublicacion"),end:bru.getCollectionVar("finPublicacion"),capacity:5,modality:"Virtual",url:"https://example.invalid/ascla-meeting",location:"Sala QA",chatham:false}});
 }
 
 tests {

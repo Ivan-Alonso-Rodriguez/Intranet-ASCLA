@@ -52,7 +52,7 @@ final class RoleWorkflowTest extends TestCase
             'title' => 'Encuentro ' . bin2hex(random_bytes(4)),
             'body' => 'Contenido de prueba',
             'status' => 'publish',
-            'meta' => ['start' => gmdate('c', time() + 86400), 'end' => gmdate('c', time() + 90000)],
+            'meta' => ['start' => gmdate('c', time() + 86400), 'end' => gmdate('c', time() + 90000), 'url' => 'https://example.invalid/meeting'],
         ];
     }
 

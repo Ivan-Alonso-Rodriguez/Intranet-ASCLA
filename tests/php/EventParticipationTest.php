@@ -21,7 +21,7 @@ final class EventParticipationTest extends TestCase
     }
     private function event(int $capacity=4): array
     {
-        $post=Content::save('event',['title'=>'Revisión de RSVP','body'=>'Encuentro profesional','status'=>'publish','meta'=>['start'=>gmdate('c',time()+DAY_IN_SECONDS),'end'=>gmdate('c',time()+2*DAY_IN_SECONDS),'modality'=>'Virtual','capacity'=>$capacity,'offer_hours'=>2]]);
+        $post=Content::save('event',['title'=>'Revisión de RSVP','body'=>'Encuentro profesional','status'=>'publish','meta'=>['start'=>gmdate('c',time()+DAY_IN_SECONDS),'end'=>gmdate('c',time()+2*DAY_IN_SECONDS),'modality'=>'Virtual','url'=>'https://example.invalid/meeting','capacity'=>$capacity,'offer_hours'=>2]]);
         $this->posts[]=$post['id'];return $post;
     }
     private function edit(array $post,array $meta): array
@@ -38,7 +38,7 @@ final class EventParticipationTest extends TestCase
         $post=$this->event();$id=$post['id'];wp_set_current_user($this->users[1]);Events::register($id,'accepted');
         wp_set_current_user($this->users[0]);$this->edit($post,['agenda'=>'Nueva descripción']);
         wp_set_current_user($this->users[1]);self::assertSame('accepted',Events::detail($id)['registered']);
-        wp_set_current_user($this->users[0]);$this->edit($post,['modality'=>'Presencial','change_reason'=>'Cambio de sede']);
+        wp_set_current_user($this->users[0]);$this->edit($post,['modality'=>'Presencial','location'=>'Auditorio','change_reason'=>'Cambio de sede']);
         wp_set_current_user($this->users[1]);$detail=Events::detail($id);
         self::assertSame('reconfirm',$detail['registered']);self::assertSame(0,$detail['attending']);self::assertArrayNotHasKey('attendees',$detail);
         self::assertSame('accepted',get_post_meta($id,'_ascla_rsvp_history',true)[0]['registrations'][0]['status']);
@@ -69,9 +69,9 @@ final class EventParticipationTest extends TestCase
     {
         $post=$this->event();$id=$post['id'];$old=get_post_meta($id,'_ascla',true);$old['micro']=true;$old['invitees']=$this->users;$old['invited']=true;
         update_post_meta($id,'_ascla',$old);
-        $this->denied(fn()=>$this->edit($post,['modality'=>'Presencial']),400);
+        $this->denied(fn()=>$this->edit($post,['modality'=>'Presencial','location'=>'Auditorio']),400);
         self::assertSame('Virtual',get_post_meta($id,'_ascla',true)['modality']);
-        $this->edit($post,['modality'=>'Presencial','change_reason'=>'Preferencia del grupo']);
+        $this->edit($post,['modality'=>'Presencial','location'=>'Auditorio','change_reason'=>'Preferencia del grupo']);
         self::assertSame('Preferencia del grupo',get_post_meta($id,'_ascla_rsvp_history',true)[0]['reason']);
     }
 }

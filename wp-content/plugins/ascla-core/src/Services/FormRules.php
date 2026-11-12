@@ -8,8 +8,8 @@ final class FormRules
     public const INTEGERS=[
         'capacity'=>[0,100000],'offer_hours'=>[1,168],'duration_seconds'=>[0,604800],
         'matching_min_affinity'=>[0,100],'matching_max_suggestions'=>[1,5],'matching_weight'=>[0,100],
-        'micro_min'=>[2,50],'micro_capacity'=>[2,100],'micro_limit'=>[1,4],'micro_priority_hours'=>[0,168],'micro_interval_days'=>[7,90],'priority_hours'=>[0,168],
-        'password_min_length'=>[12,128],'password_reset_minutes'=>[5,1440],'remember_days'=>[1,90],
+        'micro_min'=>[2,50],'micro_capacity'=>[2,100],'micro_limit'=>[1,4],'micro_priority_hours'=>[0,168],'micro_interval_days'=>[1,90],'priority_hours'=>[0,168],
+        'password_min_length'=>[8,128],'password_reset_minutes'=>[5,1440],'remember_days'=>[1,90],
         'login_challenge_after'=>[1,10],'login_lock_after'=>[2,20],'login_ip_lock_after'=>[2,100],'login_lock_minutes'=>[15,60],
         'profile_review_days'=>[1,730],'profile_snooze_days'=>[1,30],'directory_page_size'=>[ProfileDirectory::PAGE_SIZE,ProfileDirectory::PAGE_SIZE],
         'reminder_hours'=>[1,720],

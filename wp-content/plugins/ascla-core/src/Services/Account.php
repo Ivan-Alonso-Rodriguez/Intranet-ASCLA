@@ -27,7 +27,7 @@ final class Account
         Access::require(strlen($current)<=4096 && strlen($password)<=4096 && strlen($confirm)<=4096,'Contraseña no válida.',400);
         Access::require(wp_check_password($current,$user->user_pass,$user->ID),'La contraseña actual no es correcta.',400);
         Access::require($password===$confirm,'Las nuevas contraseñas no coinciden.',400);
-        $policyError=CredentialPolicy::error($password,$user);
+        $policyError=CredentialPolicy::error($password);
         Access::require($policyError==='',$policyError,400);
         Access::require(!wp_check_password($password,$user->user_pass,$user->ID),'La nueva contraseña debe ser diferente de la actual.',400);
 

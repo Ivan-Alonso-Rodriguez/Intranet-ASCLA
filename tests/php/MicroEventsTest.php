@@ -25,13 +25,17 @@ final class MicroEventsTest extends TestCase
             foreach([1,24,48] as $h)wp_clear_scheduled_hook('ascla_event_reminder',[$id,$h]);
             Store::delete('registrations',['event_id'=>$id]);wp_delete_post($id,true);
         }
-        foreach($this->users as $id){Store::delete('notifications',['user_id'=>$id]);Store::delete('audit',['actor_id'=>$id]);Store::delete('relations',['user_id'=>$id]);wp_delete_user($id);}
+        foreach($this->users as $id){Store::delete('notifications',['user_id'=>$id]);Store::delete('audit',['actor_id'=>$id]);Store::delete('relations',['user_id'=>$id]);Store::delete('jobs',['user_id'=>$id]);wp_delete_user($id);}
         delete_option($this->key);update_option('ascla_settings',$this->settings,false);update_option('ascla_group_history',$this->history,false);wp_set_current_user(0);
     }
     private function proposal(): int
     {
         $result=MicroEvents::create($this->users);$this->events=array_unique(array_merge($this->events,$result['events']));
-        self::assertNotEmpty($result['events']);return $result['events'][0];
+        self::assertNotEmpty($result['events']);$id=$result['events'][0];
+        $meta=get_post_meta($id,'_ascla',true);
+        $meta['url']='https://example.invalid/meeting';
+        update_post_meta($id,'_ascla',$meta);
+        return $id;
     }
     private function reject(callable $fn,int $code): void
     {
@@ -125,7 +129,7 @@ final class MicroEventsTest extends TestCase
         update_user_meta($outsider,'_ascla_profile',ascla_test_profile(['microevents'=>false,'directory'=>false]));
         wp_set_current_user($outsider);$this->reject(fn()=>Events::register($id,'accepted'),user_can($outsider,'ascla_manage')?403:404);
         $meta['public_at']=time()-1;update_post_meta($id,'_ascla',$meta);
-        self::assertTrue(Content::canRead(get_post($id)));self::assertContains($id,array_column(Content::listing('event')['items'],'id'));
+        self::assertTrue(Content::canRead(get_post($id)));self::assertContains($id,array_column(Content::listing('event',['author'=>(int)get_post($id)->post_author])['items'],'id'));
         self::assertSame('accepted',Events::register($id,'accepted')['registered']);
         self::assertSame('cancelled',Events::register($id,'cancelled')['registered']);
     }
@@ -135,20 +139,138 @@ final class MicroEventsTest extends TestCase
         update_post_meta($id,'_ascla',$meta);MicroLifecycle::tick($id);self::assertSame('insufficient',get_post_meta($id,'_ascla_micro_state',true));
         wp_set_current_user($meta['invitees'][0]);$this->reject(fn()=>Events::register($id,'accepted'),409);
         wp_set_current_user($this->users[0]);$post=get_post($id);
-        Content::save('event',['title'=>$post->post_title,'body'=>$post->post_content,'status'=>'publish','meta'=>['registration_deadline'=>gmdate('c',time()+DAY_IN_SECONDS),'micro_min'=>2]],$id);
+        $changes=['registration_deadline'=>gmdate('c',time()+DAY_IN_SECONDS),'micro_min'=>2];
+        $this->reject(fn()=>Content::save('event',['title'=>$post->post_title,'body'=>$post->post_content,'status'=>'publish','meta'=>$changes],$id),400);
+        $changes['change_reason']='Ampliamos la convocatoria para completar el grupo.';
+        Content::save('event',['title'=>$post->post_title,'body'=>$post->post_content,'status'=>'publish','meta'=>$changes],$id);
         self::assertSame('published',get_post_meta($id,'_ascla_micro_state',true));
         self::assertContains('insufficient',array_column(get_post_meta($id,'_ascla_micro_history',true),'state'));
+        $history=get_post_meta($id,'_ascla_micro_history',true);
+        self::assertSame($changes['change_reason'],end($history)['reason']);
         $this->reject(fn()=>Content::save('event',['title'=>$post->post_title,'body'=>$post->post_content,'status'=>'publish','meta'=>['reminder_hours'=>[48]]],$id),409);
         Events::cancel($id,'No hay disponibilidad');
         self::assertSame('cancelled',get_post_meta($id,'_ascla_micro_state',true));self::assertSame('No hay disponibilidad',get_post_meta($id,'_ascla',true)['cancellation_reason']);
         self::assertFalse(Content::canDelete(get_post($id)));
     }
-    public function testDenialNeedsReasonAndCannotDeleteOrRegenerateTheSameProposal(): void
+    public function testDenialAllowsOptionalReasonAndCannotDeleteOrRegenerateTheSameProposal(): void
     {
-        $id=$this->proposal();$this->reject(fn()=>Content::moderate($id,'reject',''),400);
-        Content::moderate($id,'reject','Tema ya cubierto');$this->reject(fn()=>Content::remove($id),403);
+        $id=$this->proposal();Content::moderate($id,'reject','');$this->reject(fn()=>Content::remove($id),403);
         self::assertSame('ascla_rejected',get_post_status($id));self::assertSame([$id],MicroEvents::create($this->users)['events']);
-        self::assertSame('Tema ya cubierto',get_post_meta($id,'_ascla_micro_history',true)[1]['reason']);
+        self::assertTrue((bool)get_post_meta($id,'_ascla_micro_archived',true));
+        self::assertSame('',get_post_meta($id,'_ascla_micro_history',true)[1]['reason']);
+    }
+    public function testProposalEditsRemainPendingAndBiographyIsOptionalForEligibility(): void
+    {
+        foreach($this->users as $uid){
+            $profile=get_user_meta($uid,'_ascla_profile',true);$profile['bio']='';update_user_meta($uid,'_ascla_profile',$profile);
+        }
+        $id=$this->proposal();$post=get_post($id);$meta=get_post_meta($id,'_ascla',true);
+        $meta['url']='https://example.invalid/meeting';
+        $result=Content::save('event',['title'=>$post->post_title,'body'=>$post->post_content,'status'=>'draft','meta'=>$meta],$id);
+        self::assertSame('pending',$result['status']);
+        self::assertSame('pending',get_post_status($id));
+    }
+
+    public function testReviewCanCompleteTheMeetingLinkBeforePublishing(): void
+    {
+        $id=$this->proposal();$meta=get_post_meta($id,'_ascla',true);unset($meta['url']);update_post_meta($id,'_ascla',$meta);
+        $this->reject(fn()=>Content::moderate($id,'approve',''),400);
+        $this->reject(fn()=>Content::moderate($id,'approve','',false,['url'=>'invalid']),400);
+        self::assertSame('pending',get_post_status($id));
+        $approved=Content::moderate($id,'approve','',false,['modality'=>'Virtual','url'=>'https://example.invalid/review-meeting']);
+        self::assertSame('publish',$approved['status']);
+        self::assertSame('https://example.invalid/review-meeting',$approved['meta']['url']);
+        self::assertTrue($approved['meta']['invited']);
+    }
+    public function testEditingRefreshesProposedMessagesAndPreservesTheManualProgram(): void
+    {
+        $id=$this->proposal();$post=get_post($id);
+        Content::save('event',['title'=>'Laboratorio Boreal','body'=>'Evaluar decisiones de sostenibilidad.','status'=>'pending','meta'=>['agenda'=>'Análisis de un caso y acuerdos del grupo.']],$id);
+        $state=ASCLA\Core\Services\MicroProposalText::status($id);
+        self::assertSame('pending',$state['status']);
+        $firstSignature=ASCLA\Core\Services\MicroProposalText::signature(get_post($id),get_post_meta($id,'_ascla',true));
+        Content::save('event',['title'=>'Laboratorio Austral','body'=>'Evaluar decisiones de cumplimiento.','status'=>'pending','meta'=>['agenda'=>'Preguntas sobre cumplimiento y compromisos.']],$id);
+        self::assertTrue(ASCLA\Core\Services\MicroProposalText::run($id,$state['job_id'],$firstSignature)['skipped']);
+        for ($i=0;$i<5 && ASCLA\Core\Services\MicroProposalText::status($id)['status']==='pending';$i++) { ASCLA\Core\Jobs\Queue::run(); }
+        self::assertSame('completed',ASCLA\Core\Services\MicroProposalText::status($id)['status']);
+        $meta=get_post_meta($id,'_ascla',true);
+        self::assertSame('Laboratorio Austral',get_post($id)->post_title);
+        self::assertSame('Preguntas sobre cumplimiento y compromisos.',$meta['agenda']);
+        self::assertStringContainsString('Laboratorio Austral',$meta['agenda_ai']['icebreaker']);
+        self::assertStringContainsString('Laboratorio Austral',$meta['agenda_ai']['closing_question']);
+        self::assertStringNotContainsString('Laboratorio Boreal',wp_json_encode($meta['agenda_ai']));
+        $completed=ASCLA\Core\Services\MicroProposalText::status($id);
+        Store::delete('jobs',['id'=>$completed['job_id']]);
+        self::assertArrayHasKey('agenda_ai',Content::serialize(get_post($id))['meta']);
+    }
+    public function testFailedTextRefreshKeepsEditsAndCanBeRetried(): void
+    {
+        $id=$this->proposal();$old=get_post_meta($id,'_ascla',true)['agenda_ai'];
+        $key=ASCLA\Core\Integrations\Secrets::get('ai_key');
+        $offline=static fn()=>new WP_Error('offline','Synthetic transport failure');
+        try {
+            Settings::save(['ai_provider'=>'gemini','ai_key'=>'synthetic-key-for-copy-test','ai_model'=>'gemini-copy-offline-test']);
+            add_filter('pre_http_request',$offline,10,3);
+            Content::save('event',['title'=>'Propuesta editada','body'=>'Descripción guardada por administración.','status'=>'pending'],$id);
+            ASCLA\Core\Jobs\Queue::run();
+            self::assertSame('error',ASCLA\Core\Services\MicroProposalText::status($id)['status']);
+            self::assertSame('Propuesta editada',get_post($id)->post_title);
+            self::assertSame($old,get_post_meta($id,'_ascla',true)['agenda_ai']);
+            self::assertArrayNotHasKey('agenda_ai',Content::serialize(get_post($id))['meta']);
+        } finally {
+            remove_filter('pre_http_request',$offline,10);
+            ASCLA\Core\Integrations\Secrets::remove('ai_key');
+            if ($key!=='') { ASCLA\Core\Integrations\Secrets::set('ai_key',$key); }
+            Settings::save(['ai_provider'=>'mock']);
+        }
+        ASCLA\Core\Services\MicroProposalText::schedule($id,true);
+        ASCLA\Core\Jobs\Queue::run();
+        self::assertSame('completed',ASCLA\Core\Services\MicroProposalText::status($id)['status']);
+        self::assertStringContainsString('Propuesta editada',get_post_meta($id,'_ascla',true)['agenda_ai']['icebreaker']);
+        self::assertArrayHasKey('agenda_ai',Content::serialize(get_post($id))['meta']);
+    }
+    public function testProposalOwnerWithPublishingPermissionCanRefreshAfterEditing(): void
+    {
+        $owner=get_userdata($this->users[1]);
+        $owner->add_cap('ascla_manage',false);
+        wp_set_current_user($owner->ID);
+        $id=$this->proposal();
+        self::assertTrue(Content::canEdit(get_post($id)));
+        Content::save('event',['title'=>'Propuesta del ejecutivo','body'=>'Programa revisado por su autor.','status'=>'pending'],$id);
+        ASCLA\Core\Jobs\Queue::run();
+        self::assertSame('completed',ASCLA\Core\Services\MicroProposalText::status($id)['status']);
+        self::assertStringContainsString('Propuesta del ejecutivo',Content::serialize(get_post($id))['meta']['agenda_ai']['icebreaker']);
+    }
+    public function testExecutiveCanApproveWithoutReasonAndMembersCanCommentAndReplyWithoutUnpublishing(): void
+    {
+        $id=$this->proposal();
+        wp_set_current_user($this->users[1]);
+        self::assertTrue(Content::canModerate(get_post($id)));
+        $approved=Content::moderate($id,'approve','');
+        self::assertSame('publish',$approved['status']);
+        $invitees=get_post_meta($id,'_ascla',true)['invitees'];
+        $history=get_post_meta($id,'_ascla_micro_history',true);
+        $registrationCount=Store::count('registrations','event_id=%d',[$id]);
+
+        Settings::save(['moderate_comments'=>false]);
+        wp_set_current_user($invitees[0]);
+        $comment=Content::comment($id,'Buena propuesta para compartir experiencias.');
+        self::assertSame('publish',$comment['status']);
+        self::assertSame('publish',get_post_status($id));
+        self::assertSame($id,(int)Content::get($id)->ID);
+        self::assertContains($comment['id'],array_column(Content::comments($id),'id'));
+
+        wp_set_current_user($invitees[1]);
+        $reply=Content::comment($id,'De acuerdo, participaré.',$comment['id']);
+        self::assertSame($comment['id'],(int)get_comment($reply['id'])->comment_parent);
+        self::assertSame('publish',get_post_status($id));
+
+        wp_set_current_user($this->users[0]);Settings::save(['moderate_comments'=>true]);
+        wp_set_current_user($invitees[0]);
+        self::assertSame('pending',Content::comment($id,'Comentario que requiere revisión.')['status']);
+        self::assertSame('publish',get_post_status($id));
+        self::assertSame($history,get_post_meta($id,'_ascla_micro_history',true));
+        self::assertSame($registrationCount,Store::count('registrations','event_id=%d',[$id]));
     }
     public function testPlanningRespectsVolumeDistinctInterestsMinimumAndBlockedPairs(): void
     {
@@ -203,7 +325,7 @@ final class MicroEventsTest extends TestCase
     {
         $id=$this->proposal();$meta=get_post_meta($id,'_ascla',true);$meta['micro_min']=2;update_post_meta($id,'_ascla',$meta);
         $this->approveLater($id,'Grupo inicialmente revisado');self::assertSame('approved',get_post_meta($id,'_ascla_micro_state',true));
-        $removed=$meta['invitees'][0];$profile=get_user_meta($removed,'_ascla_profile',true);$profile['bio']='';update_user_meta($removed,'_ascla_profile',$profile);
+        $removed=$meta['invitees'][0];$profile=get_user_meta($removed,'_ascla_profile',true);$profile['position']='';update_user_meta($removed,'_ascla_profile',$profile);
         $review=MicroEligibility::review($id);
         self::assertSame(1,$review['removed']);self::assertSame(count($meta['invitees'])-1,$review['candidates']);
         self::assertNotContains($removed,$review['item']['meta']['invitees']);self::assertFalse($review['item']['meta']['micro_approved']);

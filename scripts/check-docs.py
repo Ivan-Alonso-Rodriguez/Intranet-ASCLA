@@ -14,7 +14,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCUMENTS = (
-    'README.md', 'MANUAL_QA_UAT.md', 'COMPLIANCE.md', 'VERSION_HISTORY.md',
+    'README.md', 'MANUAL_QA_UAT.md', 'COMPLIANCE.md', 'VERSION_HISTORY.md', 'DESIGN.md',
     'requirements/ascla-analysis.md',
     'ci/README.md',
     'pruebas/README.md', 'pruebas/backend/README.md', 'pruebas/frontend/README.md',
@@ -58,7 +58,7 @@ def render_matrix(matrix):
     output = [
         '# Matriz de requisitos ASCLA', '',
         'Fuente: DOCUMENTO DE ANALISIS Y DISEÑO ASCLA .pdf, 86 páginas. '
-        f"Revisión: {matrix['review_date']}. Plugin {matrix['plugin_version']}, esquema 15.", '',
+        f"Revisión de requisitos: {matrix['review_date']}. Versión del plugin: {matrix['plugin_version']}, esquema 15.", '',
         'Esta vista se genera desde el [JSON de requisitos](ascla-analysis.json). '
         'Conserva 302 textos originales y 240 prioridades RF/RNF. '
         'Código revisado identifica implementación y evidencia; no acredita aceptación integral. '

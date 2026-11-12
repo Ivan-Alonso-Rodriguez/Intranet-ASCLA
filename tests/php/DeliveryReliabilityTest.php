@@ -40,7 +40,7 @@ final class DeliveryReliabilityTest extends TestCase
     private function due(int $id): void { Store::update('deliveries',['available_at'=>gmdate('Y-m-d H:i:s',time()-1)],['id'=>$id]); }
     private function event(): int
     {
-        $post=Content::save('event',['title'=>'Evento fiable','body'=>'Datos privados','status'=>'publish','meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200)]]);
+        $post=Content::save('event',['title'=>'Evento fiable','body'=>'Datos privados','status'=>'publish','meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'url'=>'https://example.invalid/meeting']]);
         $this->posts[]=(int)$post['id'];return (int)$post['id'];
     }
     public function testOverviewStaysWithinMemoryBudgetWithThirtyLargePendingPayloads(): void

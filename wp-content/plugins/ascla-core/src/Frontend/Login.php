@@ -90,8 +90,9 @@ final class Login
         if (!self::isFrontendPage()) { return; }
         // This template owns its layout. Reuse form primitives without loading
         // the native admin login layout and all of its administration palettes.
+        Theme::registerBrandStyle();
         wp_enqueue_style('ascla-login-layout',ASCLA_URL.'assets/login-layout.css',['dashicons','buttons','forms','l10n'],App::assetVersion('assets/login-layout.css'));
-        wp_enqueue_style('ascla-login', ASCLA_URL . 'assets/login.css', ['ascla-login-layout'], App::assetVersion('assets/login.css'));
+        wp_enqueue_style('ascla-login', ASCLA_URL . 'assets/login.css', ['ascla-login-layout','ascla-brand'], App::assetVersion('assets/login.css'));
         // Turnstile normally enqueues itself on wp-login.php. The dedicated ASCLA login
         // calls the same policy so adaptive protection is preserved instead of duplicated.
         Turnstile::enqueue();
@@ -216,9 +217,12 @@ final class Login
     /** Spanish UI copy is scoped to wp-login.php; native form handling stays with WordPress. */
     public static function translate(string $translation, string $text, string $domain): string
     {
+        if ($domain==='default' && $text==='Enter your new password below or generate one.') {
+            return Language::english()?'Enter and confirm your new password.':'Escribe y confirma tu nueva contraseña.';
+        }
         if ($domain !== 'default' || Language::english()) { return $translation; }
         $adminLabels=['Log In'=>'Entrar a administración','Log in'=>'Volver al acceso administrativo'];
-        if (self::nativeAdminContext() && isset($adminLabels[$text])) { return $adminLabels[$text]; }
+
         static $labels = [
             'Log In' => 'Entrar a la comunidad',
             'Log in' => 'Volver al inicio de sesión',
@@ -240,7 +244,6 @@ final class Login
             'Strength indicator' => 'Seguridad de la contraseña',
             'Confirm use of weak password' => 'Confirmar el uso de una contraseña débil',
             'Please enter your username or email address. You will receive an email message with instructions on how to reset your password.' => 'Escribe tu usuario o correo electrónico. Recibirás un enlace para restablecer tu contraseña.',
-            'Enter your new password below or generate one.' => 'Escribe una nueva contraseña o genera una automáticamente.',
             'Your password has been reset.' => 'Tu contraseña se ha restablecido.',
             'You are now logged out.' => 'Has cerrado sesión.',
             'You have logged in successfully.' => 'Has iniciado sesión correctamente.',
@@ -252,7 +255,9 @@ final class Login
             '<strong>Error:</strong> The username <strong>%s</strong> is not registered on this site. If you are unsure of your username, try your email address instead.' => '<strong>Error:</strong> El usuario <strong>%s</strong> no está registrado. Prueba con tu correo electrónico.',
             'Unknown email address. Check again or try your username.' => 'No se reconoce ese correo electrónico. Revísalo o prueba con tu usuario.',
         ];
-        return $labels[$text] ?? $translation;
+        $selected=$labels[$text]??$translation;
+        if (self::nativeAdminContext() && isset($adminLabels[$text])) { $selected=$adminLabels[$text]; }
+        return $selected;
     }
 
     public static function welcome(string $message): string
@@ -262,7 +267,6 @@ final class Login
             $copy = Language::english()
                 ? ['Administrative access','Sign in with an administrator account to manage WordPress and the ASCLA platform.']
                 : ['Acceso administrativo','Ingresa con una cuenta administradora para gestionar WordPress y la plataforma ASCLA.'];
-            $eyebrow = Language::text('ADMINISTRACIÓN ASCLA','ASCLA ADMINISTRATION');
         } else {
             $copy = match ($GLOBALS['action'] ?? 'login') {
                 'login' => ['Te damos la bienvenida', 'Ingresa con tu cuenta para acceder a la comunidad.'],
@@ -279,9 +283,13 @@ final class Login
                 default=>['Your ASCLA account','Manage access to your community.'],
             };
             }
-            $eyebrow = 'INTRANET ASCLA';
         }
-        return '<div class="ascla-login-intro"><p class="ascla-login-eyebrow">' . esc_html($eyebrow) . '</p><h2>'
+        if (in_array($GLOBALS['action']??'',['lostpassword','retrievepassword'],true) && (($_GET['ascla_recovery']??'')==='sent'||($_GET['checkemail']??'')==='confirm')) {
+            $copy=Language::english()
+                ? ['Check your email','Look for the link to reset your password.']
+                : ['Revisa tu correo','Busca el enlace para restablecer tu contraseña.'];
+        }
+        return '<div class="ascla-login-intro"><h2>'
             . esc_html($copy[0]) . '</h2><p>' . esc_html($copy[1]) . '</p></div>' . $message;
     }
 

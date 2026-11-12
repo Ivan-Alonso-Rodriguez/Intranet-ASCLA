@@ -54,6 +54,10 @@ final class IntegrationTest extends TestCase
 
     {
 
+        if ($type==='event') {
+            $meta=$data['meta']??[];
+            $data['meta']=$meta+(($meta['modality']??'Virtual')==='Presencial'?['location'=>'Auditorio']:['url'=>'https://example.invalid/meeting']);
+        }
         $item=Content::save($type,array_merge(['title'=>'Test '.$type,'body'=>'La gobernanza y los riesgos requieren supervisión.','status'=>'publish'],$data));$this->posts[]=$item['id'];return $item;
 
     }
@@ -80,7 +84,9 @@ final class IntegrationTest extends TestCase
 
     {
 
-        $p=$this->make('event',['meta'=>['start'=>gmdate('c',time()-7200),'end'=>gmdate('c',time()-3600),'capacity'=>20,'modality'=>'Virtual']]);$this->user(1);
+        $p=$this->make('event',['meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>20,'modality'=>'Virtual']]);
+        update_post_meta($p['id'],'_ascla',array_replace($p['meta'],['start'=>gmdate('c',time()-7200),'end'=>gmdate('c',time()-3600)]));
+        $this->user(1);
 
         $detail=Events::detail($p['id']);self::assertTrue($detail['is_past']);self::assertSame('', $detail['google_url']);self::assertArrayNotHasKey('ics',$detail);
 
@@ -341,7 +347,7 @@ Compañía Privada"]]);
 
     {
 
-        $event=$this->make('event',['title'=>'Reunión próxima ASCLA','body'=>'Encuentro interno para conversar sobre gobierno corporativo.','meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>20,'modality'=>'Virtual','location'=>'Sala virtual']]);
+        $event=$this->make('event',['title'=>'Reunión próxima ASCLA','body'=>'Encuentro interno para conversar sobre gobierno corporativo.','meta'=>['start'=>gmdate('c',time()+3600),'end'=>gmdate('c',time()+7200),'capacity'=>20,'modality'=>'Virtual']]);
         $this->user(1);$answer=Knowledge::answer('¿Hay alguna reunión pronto?');
         self::assertContains($event['id'],array_column($answer['sources'],'id'));
         self::assertStringContainsString('Reunión próxima ASCLA',$answer['answer']);

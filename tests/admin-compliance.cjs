@@ -1,6 +1,6 @@
 const fs=require("node:fs"),assert=require("node:assert/strict");
 module.exports=async({browser,admin,member,base,request,test,login,coverage,root})=>{
-  const f=JSON.parse(fs.readFileSync(root+"/test-results/statistics-fixture.json","utf8"));
+  const f=JSON.parse(fs.readFileSync(process.env.ASCLA_STATISTICS_FIXTURE||root+"/test-results/statistics-fixture.json","utf8"));
   const account=f.users.find(u=>u.role==="ascla_member");
   const executive=f.users.find(u=>u.role==="ascla_executive");
   await test("Membresía: vencer, denegar acceso y reactivar conserva el perfil",async()=>{
@@ -34,12 +34,16 @@ module.exports=async({browser,admin,member,base,request,test,login,coverage,root
     try{assert.equal((await request(session.page,"bootstrap")).status,200);}
     finally{await require("./helpers/browser.cjs").stopCoverage(session.page,coverage);await session.context.close();}
   });
-  await test("Contacto: asignar ejecutivo revoca acceso del responsable anterior",async()=>{
-    const ticket=(await request(member,"content/contact",{title:"E2E Asignación confidencial",body:"Contenido reservado para su responsable."})).body;
-    const assigned=await request(admin,"admin/contact/"+ticket.id+"/assign",{assignee:executive.id});assert.equal(assigned.status,200);
-    assert.equal((await request(admin,"items/"+ticket.id)).status,404);
+  await test("Contacto: equipo autorizado atiende sin asignación y otros asociados no acceden",async()=>{
+    const ticket=(await request(member,"content/contact",{title:"E2E Consulta privada para el equipo",body:"Contenido reservado para el autor y el equipo autorizado."})).body;
+    assert.equal((await request(admin,"admin/contact/"+ticket.id+"/assign",{assignee:executive.id})).status,404);
+    assert.equal((await request(admin,"items/"+ticket.id)).status,200);
+    const outsider=await login(browser,account.login,account.password);
+    try{assert.equal((await request(outsider.page,"items/"+ticket.id)).status,404);assert.equal((await request(outsider.page,"admin/contacts")).status,403);}
+    finally{await require("./helpers/browser.cjs").stopCoverage(outsider.page,coverage);await outsider.context.close();}
     const session=await login(browser,executive.login,executive.password);
     try{
+      assert.equal((await request(session.page,"items/"+ticket.id)).status,200);
       await session.page.goto(base+"/administracion/?section=solicitudes");
       await session.page.locator('[data-contact="'+ticket.id+'"] .support-ticket-details > summary').click();
       const form=session.page.locator('[data-form="contact-update"][data-id="'+ticket.id+'"]');
@@ -47,6 +51,7 @@ module.exports=async({browser,admin,member,base,request,test,login,coverage,root
       await form.locator('[name="response"]').fill("Recibido por el equipo ejecutivo.");await form.locator("button").click();
       await session.page.locator('[data-contact="'+ticket.id+'"][data-state="progress"]').waitFor();
       assert.equal((await request(member,"items/"+ticket.id)).body.meta.request_status,"progress");
+      assert.equal((await request(admin,"items/"+ticket.id)).status,200);
       await session.page.setViewportSize({width:390,height:844});
       await session.page.screenshot({path:root+"/test-results/support-mobile.png",fullPage:true});
       assert.ok(await session.page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));

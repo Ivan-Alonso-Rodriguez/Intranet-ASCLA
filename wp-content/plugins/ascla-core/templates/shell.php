@@ -9,24 +9,35 @@ defined('ABSPATH') || exit;
 $page=$args['page'];$profile=$args['profile'];$settings=$args['settings'];
 $administrator=Access::isAdministrator();$homeUrl=App::homeUrl();
 $administrationLabel='Administración';
-$icons=['intranet'=>'home','perfil'=>'users','eventos'=>'calendar','hub'=>'hub','galeria'=>'gallery','foros'=>'hub','directorio'=>'users','centro-conocimiento'=>'book','asistente'=>'spark','aliados'=>'ally','mensajeria'=>'mail','contacto'=>'contact'];
+$icons=['intranet'=>'home','perfil'=>'profile','eventos'=>'calendar','hub'=>'feed','galeria'=>'gallery','foros'=>'forum','directorio'=>'directory','centro-conocimiento'=>'book','asistente'=>'spark','aliados'=>'ally','mensajeria'=>'mail','contacto'=>'contact'];
 $logo=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo.png');
 $logoWhite=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo-white.png');
 $initials=implode('',array_map(static fn($word)=>mb_substr($word,0,1),array_slice(preg_split('/\s+/u',$profile['name']),0,2)));
+$navigationGroups=[
+    'Mi espacio'=>['intranet','perfil'],
+    'Comunidad'=>['directorio','mensajeria','hub','foros','aliados'],
+    'Agenda y conocimiento'=>['eventos','centro-conocimiento','galeria','asistente'],
+    'Soporte'=>['contacto'],
+];
 ?>
-<aside class="ascla-sidebar">
-<a class="brand" href="<?php echo esc_url($homeUrl); ?>" aria-label="<?php echo esc_attr(Language::label('ASCLA inicio')); ?>"><img src="<?php echo esc_url($logoWhite); ?>" alt="ASCLA" width="1608" height="472"></a>
-<div class="brand-sub"><?php echo esc_html(Language::label('COMUNIDAD DE ASOCIADOS')); ?></div><nav aria-label="<?php echo esc_attr(Language::label('Navegación principal')); ?>">
-<?php foreach(Catalog::PAGES as $key=>$label):
+<aside class="ascla-sidebar" id="ascla-navigation">
+<a class="brand" href="<?php echo esc_url($homeUrl); ?>" aria-label="<?php echo esc_attr(Language::label('ASCLA inicio')); ?>"><img class="brand-logo-normal" src="<?php echo esc_url($logo); ?>" alt="ASCLA" width="1343" height="382"><img class="brand-logo-inverse" src="<?php echo esc_url($logoWhite); ?>" alt="" aria-hidden="true" width="1608" height="472"></a>
+<div class="brand-sub"><?php echo esc_html(Language::label('Comunidad de asociados')); ?></div><nav aria-label="<?php echo esc_attr(Language::label('Navegación principal')); ?>">
+<?php foreach($navigationGroups as $group=>$keys):
+    $visibleKeys=array_filter($keys,static fn($key)=>!$administrator || !in_array($key,['directorio','mensajeria','contacto'],true));
+    if(!$visibleKeys){continue;}
+?><div class="nav-group"><div class="sidebar-label"><?php echo esc_html(Language::label($group)); ?></div>
+<?php foreach($visibleKeys as $key): $label=Catalog::PAGES[$key];
     if($administrator && in_array($key,['directorio','mensajeria','contacto'],true)){continue;}
     $adminHome=$administrator && $key==='intranet';
     $active=$adminHome?$page==='admin':$page===$key;
     $url=$adminHome?$homeUrl:Catalog::url($key);
     if($adminHome){$label=$administrationLabel;}
-?><a class="nav-link <?php echo $active?'active':''; ?>" href="<?php echo esc_url($url); ?>" <?php if($active){echo 'aria-current="page"';} ?>><?php echo Icons::html($adminHome?'settings':$icons[$key]); ?><span><?php echo esc_html(Language::label($label)); ?></span></a><?php endforeach; ?>
+?><a class="nav-link <?php echo $active?'active':''; ?>" href="<?php echo esc_url($url); ?>" <?php if($active){echo 'aria-current="page"';} ?>><?php echo Icons::html($adminHome?'settings':$icons[$key]); ?><span><?php echo esc_html(Language::label($label)); ?></span></a><?php endforeach; ?></div><?php endforeach; ?>
 </nav><div class="nav-bottom"><?php if(current_user_can('ascla_admin_area') && !$administrator): ?><a class="nav-link" href="<?php echo esc_url(App::adminUrl()); ?>"><?php echo Icons::html('settings'); ?><?php echo esc_html(Language::label($administrationLabel)); ?></a><?php endif; ?><a class="nav-link" href="<?php echo esc_url(wp_logout_url(Login::url())); ?>"><?php echo Icons::html('logout'); ?><?php echo esc_html(Language::label('Cerrar sesión')); ?></a></div></aside>
 <div class="ascla-main"><header class="ascla-header">
 <a class="header-brand" href="<?php echo esc_url($homeUrl); ?>" aria-label="<?php echo esc_attr(Language::label('ASCLA inicio')); ?>"><img class="brand-logo-normal" src="<?php echo esc_url($logo); ?>" alt="ASCLA" width="1343" height="382"><img class="brand-logo-inverse" src="<?php echo esc_url($logoWhite); ?>" alt="" aria-hidden="true" width="1608" height="472"></a>
+<div class="breadcrumb">ASCLA › <?php echo esc_html(Language::label(Catalog::PAGES[$page]??($page==='admin'?$administrationLabel:'Inicio'))); ?></div>
 <button type="button" class="btn icon-button mobile-menu" data-action="menu" aria-label="<?php echo esc_attr(Language::label('Abrir navegación')); ?>"><?php echo Icons::html('menu'); ?></button>
 <div class="header-right"><?php if($settings['demo']): ?><span class="demo-badge">DEMO MODE</span><?php endif; ?>
 <form class="header-language" method="post" action="" aria-label="<?php echo esc_attr(Language::text('Cambiar idioma','Change language')); ?>">
@@ -38,4 +49,4 @@ $initials=implode('',array_map(static fn($word)=>mb_substr($word,0,1),array_slic
 <button type="button" class="btn icon-button theme-button" data-action="theme-menu" aria-label="<?php echo esc_attr(Language::text('Apariencia','Appearance')); ?>" title="<?php echo esc_attr(Language::text('Apariencia','Appearance')); ?>"><span class="theme-icon theme-icon-light"><?php echo Icons::html('sun'); ?></span><span class="theme-icon theme-icon-dark"><?php echo Icons::html('moon'); ?></span></button>
 <button type="button" class="btn icon-button" data-action="notifications" aria-label="<?php echo esc_attr(Language::label('Notificaciones')); ?>"><?php echo Icons::html('bell'); ?><span class="notification-count" hidden></span></button>
 <a class="header-profile" href="<?php echo esc_url(Catalog::url('perfil')); ?>"><span class="avatar"><?php if(!empty($profile['photo_url'])): ?><img src="<?php echo esc_url($profile['photo_url']); ?>" alt="<?php echo esc_attr($profile['name']); ?>"><?php else: echo esc_html($initials); endif; ?></span><span><strong><?php echo esc_html($profile['name']); ?></strong><small class="muted"><?php echo esc_html(Language::label(current_user_can('ascla_admin_area')?($profile['role_label']??'Comunidad ASCLA'):($profile['member_type']??'Comunidad ASCLA'))); ?></small></span><?php echo Icons::html('chevron'); ?></a></div></header>
-<main id="main" class="page-wrap" tabindex="-1"><div class="breadcrumb">ASCLA › <?php echo esc_html(Language::label(Catalog::PAGES[$page]??($page==='admin'?$administrationLabel:'Inicio'))); ?></div><div id="page-content"><output class="view-loading"><?php echo esc_html(Language::label('Cargando tu comunidad ASCLA…')); ?></output></div><div class="demo-footer">© <?php echo esc_html(wp_date('Y')); ?> ASCLA · <?php echo esc_html(Language::label('Conectamos conocimiento, fortalecemos la gobernanza.')); ?><?php if($settings['demo']){echo ' · '.esc_html(Language::label('Datos ficticios de demostración.'));} ?></div></main></div>
+<main id="main" class="page-wrap" tabindex="-1"><div id="page-content"><output class="view-loading"><?php echo esc_html(Language::label('Cargando tu comunidad ASCLA…')); ?></output></div><div class="demo-footer">© <?php echo esc_html(wp_date('Y')); ?> ASCLA · <?php echo esc_html(Language::label('Conectamos conocimiento, fortalecemos la gobernanza.')); ?><?php if($settings['demo']){echo ' · '.esc_html(Language::label('Datos ficticios de demostración.'));} ?></div></main></div>

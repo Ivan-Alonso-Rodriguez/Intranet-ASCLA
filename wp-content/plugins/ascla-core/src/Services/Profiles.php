@@ -1,6 +1,6 @@
 <?php
 namespace ASCLA\Core\Services;
-use ASCLA\Core\Domain\Catalog;
+use ASCLA\Core\Domain\{Catalog,InterestCatalog};
 use ASCLA\Core\Repositories\{Store,Transaction,WordPressWrites};
 
 final class Profiles
@@ -47,6 +47,9 @@ final class Profiles
         $user=get_userdata($id); Access::require($user && Access::member($id),'Perfil no encontrado.',404);
         $data=(array)get_user_meta($id,'_ascla_profile',true);
         $profile=array_merge(['id'=>$id,'name'=>$user->display_name,'first_name'=>$user->first_name,'last_name'=>$user->last_name,'birth_date'=>'','phone'=>'','phone_visibility'=>'private','directory'=>true,'networking'=>true,'microevents'=>true,'hidden'=>[],'revision'=>0],$data,['id'=>$id,'name'=>$user->display_name]);
+        foreach (['interests','connect_topics'] as $field) {
+            if (!empty($profile[$field])) { $profile[$field]=InterestCatalog::activeIds((array)$profile[$field]); }
+        }
         $profile['community_participant']=!Access::isAdministrator($id);
         if (!$profile['community_participant']) {
             $profile['directory']=false;$profile['networking']=false;$profile['microevents']=false;
@@ -220,7 +223,9 @@ final class Profiles
     public static function catalogs(): array
     {
         $out=[];
-        foreach (Catalog::TAXONOMIES as $key=>$label) { $out[$key]=array_values(array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name],get_terms(['taxonomy'=>'ascla_'.$key,'hide_empty'=>$key==='tag'&&!current_user_can('ascla_moderate')]))); }
+        foreach (Catalog::TAXONOMIES as $key=>$label) {
+            $out[$key]=$key==='interest'?InterestCatalog::terms():array_values(array_map(static fn($t)=>['id'=>$t->term_id,'name'=>$t->name],get_terms(['taxonomy'=>'ascla_'.$key,'hide_empty'=>$key==='tag'&&!current_user_can('ascla_moderate')])));
+        }
         return $out;
     }
 }

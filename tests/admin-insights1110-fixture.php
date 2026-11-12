@@ -12,9 +12,10 @@ if (getenv('ASCLA_FIXTURE_ACTION')==='repair_finished') {
     foreach (get_posts(['post_type'=>'ascla_event','post_status'=>'publish','author'=>$admin->ID,'title'=>'Experiencias compartidas en la gestión de riesgos']) as $post) MicroLifecycle::history($post->ID,'finished','Encuentro sintético finalizado.');
     echo '{}';return;
 }
-$topic=(int)wp_insert_term('Gobierno corporativo y gestión de riesgos · panel de prueba','ascla_interest')['term_id'];
-$other=(int)wp_insert_term('Sostenibilidad y colaboración · panel de prueba','ascla_interest')['term_id'];
-$empty=(int)wp_insert_term('Sin eventos · panel de prueba','ascla_interest')['term_id'];
+$suffix=' · '.bin2hex(random_bytes(4));
+$topic=(int)wp_insert_term('Gobierno corporativo y gestión de riesgos · panel de prueba'.$suffix,'ascla_interest')['term_id'];
+$other=(int)wp_insert_term('Sostenibilidad y colaboración · panel de prueba'.$suffix,'ascla_interest')['term_id'];
+$empty=(int)wp_insert_term('Sin eventos · panel de prueba'.$suffix,'ascla_interest')['term_id'];
 $events=[];
 foreach ([-3,-8,-15,-100,-115] as $i=>$offset) {
     $start=time()+$offset*DAY_IN_SECONDS;
@@ -30,7 +31,7 @@ $micro=[];
 foreach (['pending','published','cancelled','finished'] as $i=>$state) {
     $start=time()+($state==='finished'?-400:14)*DAY_IN_SECONDS;
     $id=wp_insert_post(['post_type'=>'ascla_event','post_status'=>'draft','post_title'=>['Riesgos e innovación: una conversación entre asociados','Conexiones que impulsan la sostenibilidad','Gobernanza e inteligencia artificial: nuevas perspectivas','Experiencias compartidas en la gestión de riesgos'][$i],'post_author'=>$admin->ID]);
-    $meta=MicroLifecycle::defaults(['micro'=>true,'invitees'=>$members,'start'=>gmdate('c',$start),'end'=>gmdate('c',$start+3600),'capacity'=>4,'chatham'=>true,'modality'=>'Virtual','location'=>'Sala virtual','agenda'=>'Presentaciones y conversación guiada.','invited'=>false,'micro_approved'=>$state==='published'||$state==='finished']);
+    $meta=MicroLifecycle::defaults(['micro'=>true,'invitees'=>$members,'start'=>gmdate('c',$start),'end'=>gmdate('c',$start+3600),'capacity'=>4,'chatham'=>true,'modality'=>'Virtual','url'=>'https://example.invalid/ascla-meeting','agenda'=>'Presentaciones y conversación guiada.','invited'=>false,'micro_approved'=>$state==='published'||$state==='finished']);
     if ($state==='cancelled') {$meta['cancelled']=true;$meta['cancellation_reason']='Se revisará la disponibilidad del grupo.';}
     update_post_meta($id,'_ascla',$meta);MicroLifecycle::history($id,$state,'Estado sintético del encuentro para comprobar su presentación.');
     wp_update_post(['ID'=>$id,'post_status'=>$state==='pending'?'pending':($state==='cancelled'?'ascla_hidden':'publish')]);MicroLifecycle::history($id,$state,'Estado sintético para la presentación.');$micro[$state]=$id;

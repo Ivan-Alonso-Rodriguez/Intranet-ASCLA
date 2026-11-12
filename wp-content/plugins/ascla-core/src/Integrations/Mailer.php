@@ -19,6 +19,52 @@ final class Mailer
     {
         return wp_get_environment_type()==='local' && defined('ASCLA_LOCAL_MAIL_CAPTURE') && ASCLA_LOCAL_MAIL_CAPTURE===true;
     }
+
+    public static function sendInvitation(int $id): void
+    {
+        $format = static function (array $mail, \WP_User $user) use ($id): array {
+            return (int)$user->ID === $id ? self::formatInvitation($mail, $user) : $mail;
+        };
+        add_filter('wp_new_user_notification_email', $format, 20, 2);
+        try {
+            wp_new_user_notification($id, null, 'user');
+        } finally {
+            remove_filter('wp_new_user_notification_email', $format, 20);
+        }
+    }
+
+    private static function formatInvitation(array $mail, \WP_User $user): array
+    {
+        // Reuse the original link and key that WordPress generated for this recipient.
+        $loginPage = network_site_url('wp-login.php', 'login') . '?';
+        preg_match_all('~https?://[^\s<>"]+~i', $mail['message'], $links);
+        foreach ($links[0] as $link) {
+            if (!str_starts_with($link, $loginPage)) {
+                continue;
+            }
+            parse_str(substr($link, strlen($loginPage)), $query);
+            if (($query['action'] ?? '') !== 'rp' || ($query['login'] ?? '') !== $user->user_login || !is_string($query['key'] ?? null) || $query['key'] === '') {
+                continue;
+            }
+
+            $mail['subject'] = 'ASCLA · Configura tu acceso';
+            $mail['message'] = EmailTemplate::render(
+                'Te damos la bienvenida a ASCLA',
+                $user->display_name ?: $user->user_login,
+                'Tu cuenta de la comunidad ASCLA está lista. Establece tu contraseña para ingresar y acceder a los recursos de la intranet.',
+                'Establecer mi contraseña',
+                $link,
+                "Tu usuario es {$user->user_login}. Si no esperabas este correo, puedes ignorarlo."
+            );
+            $headers = is_array($mail['headers']) ? $mail['headers'] : preg_split('/\R/', $mail['headers']);
+            $mail['headers'] = array_values(array_filter($headers, static fn($header) => stripos(ltrim($header), 'Content-Type:') !== 0));
+            $mail['headers'][] = self::HTML_CONTENT_TYPE;
+            return $mail;
+        }
+
+        return $mail;
+    }
+
     public static function from(string $original): string
     {
         if (self::local()) { return 'ascla@example.test'; }

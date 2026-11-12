@@ -89,6 +89,36 @@ final class ReleaseCompletionTest extends TestCase
     {
         $term=InterestCatalog::create('Ciberseguridad');if(!$term['existing'])$this->terms[]=$term['id'];$p=InterestCatalog::propose('CyberSecurity; Seguridad informática');self::assertSame([$term['id']],$p['ids']);self::assertSame(2,$p['selected_count']);$before=count(InterestCatalog::terms());$p=InterestCatalog::propose('Tema inexistente QZX');self::assertSame([],$p['ids']);self::assertNotEmpty($p['unknown']);self::assertCount($before,InterestCatalog::terms());$this->rejected(400,fn()=>InterestCatalog::validate([999999999]));
     }
+    public function testDeletingATopicUpdatesProfilesAndEventsAndReturnsApprovedImportsToReview():void
+    {
+        $topic=InterestCatalog::create('Catálogo compartido '.bin2hex(random_bytes(4)));
+        $id=$topic['id'];$keep=$this->terms[0];$this->terms[]=$id;
+        $event=\ASCLA\Core\Services\Content::save('event',[
+            'title'=>'Temas compartidos','body'=>'Evento de prueba','status'=>'publish','interest'=>[$id,$keep],
+            'meta'=>['start'=>gmdate('c',time()+DAY_IN_SECONDS),'end'=>gmdate('c',time()+DAY_IN_SECONDS+3600),'url'=>'https://example.invalid/meeting'],
+        ]);
+        $this->posts[]=$event['id'];
+        wp_set_current_user($this->users[1]);
+        Profiles::save(ascla_test_profile(['interests'=>[$keep,$id],'connect_topics'=>[$id]]));
+        self::assertSame([$keep,$id],Profiles::raw($this->users[1])['interests']);
+        $this->rejected(403,fn()=>InterestCatalog::delete($id));
+        wp_set_current_user($this->users[0]);
+        $import=$this->start([[$this->email(),'',$topic['name'],'']]);
+        $import=InterestImports::process($import['id']);
+        InterestImports::review($import['id'],$import['rows'][0]['id'],['decision'=>'accept','topics'=>[$id]]);
+        InterestImports::confirm($import['id']);
+        self::assertNotContains($id,array_column(InterestCatalog::delete($id),'id'));
+        self::assertSame([$keep],wp_get_post_terms($event['id'],'ascla_interest',['fields'=>'ids']));
+        self::assertSame([$keep],Profiles::raw($this->users[1])['interests']);
+        self::assertSame([],Profiles::raw($this->users[1])['connect_topics']);
+        self::assertSame(0,Store::count('user_interests','term_id=%d',[$id]));
+        $result=InterestImports::apply($import['id']);
+        self::assertSame('review',$result['status']);
+        self::assertSame(1,$result['counts']['conflict']);
+        wp_set_current_user($this->users[1]);
+        Profiles::save(['interests'=>[$keep]]);
+        self::assertSame([$keep],get_user_meta($this->users[1],'_ascla_profile',true)['interests']);
+    }
     public function testFreeTextAiCannotInventIdsOrApplyWithoutHumanReview():void
     {
         $i=$this->start([[$this->email(),'','','Deseo formación; contacto persona@example.invalid']]);$i=InterestImports::process((int)$i['id']);$row=$i['rows'][0];$provider=new class($this->terms[0]) implements AIProviderInterface{public array $context=[];public function __construct(private int $term){}public function mode():string{return 'test';}public function generate(string $task,array $context):array{$this->context=$context;return ['intereses'=>[$this->term],'confianza'=>'media'];}};
@@ -117,12 +147,12 @@ final class ReleaseCompletionTest extends TestCase
         $sonar=file_get_contents($root.'/sonar-project.properties');
         $docs=file_get_contents($root.'/README.md');
         $history=file_get_contents($root.'/VERSION_HISTORY.md');
-        self::assertMatchesRegularExpression('/Version:\s*1\.11\.1/', $plugin);
-        self::assertStringContainsString("define('ASCLA_VERSION', '1.11.1');", $plugin);
-        self::assertMatchesRegularExpression('/Stable tag:\s*1\.11\.1/', $readme);
-        self::assertStringContainsString('sonar.projectVersion=1.11.1', $sonar);
-        self::assertStringContainsString('Versión actual: 1.11.1 · esquema 15', $docs);
-        self::assertStringContainsString('**Versión actual:** `1.11.1`', $history);
+        self::assertMatchesRegularExpression('/Version:\s*1\.12\h*$/m', $plugin);
+        self::assertStringContainsString("define('ASCLA_VERSION', '1.12');", $plugin);
+        self::assertMatchesRegularExpression('/Stable tag:\s*1\.12\h*$/m', $readme);
+        self::assertMatchesRegularExpression('/^sonar\.projectVersion=1\.12\h*$/m', $sonar);
+        self::assertStringContainsString('Versión actual: 1.12 · esquema 15', $docs);
+        self::assertStringContainsString('**Versión actual:** `1.12`', $history);
         self::assertSame(15, \ASCLA\Core\Database\Installer::SCHEMA_VERSION);
     }
     public function testSqlRankingAndRosterReturnPagesWithoutLosingTotals():void

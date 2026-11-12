@@ -67,6 +67,57 @@ final class AdminUserManagementTest extends TestCase
         self::assertFalse((bool)$data['invite_requested']);
     }
 
+    public function testAsclaInvitationUsesBrandedEmailWithTheNativeResetLink(): void
+    {
+        wp_set_current_user($this->admin);
+        $login = 'invite_' . bin2hex(random_bytes(5));
+        $email = $login . '@example.invalid';
+        $captured = [];
+        $capture = static function ($result, array $mail) use (&$captured) {
+            if ($result !== null) {
+                return $result;
+            }
+            $captured[] = $mail;
+            return true;
+        };
+        add_filter('pre_wp_mail', $capture, PHP_INT_MAX, 2);
+        try {
+            $response = $this->api('POST', 'admin/users', [
+                'login' => $login,
+                'email' => $email,
+                'role' => 'ascla_member',
+                'first_name' => 'María',
+                'last_name' => 'Prueba',
+                'send_invite' => true,
+            ]);
+            self::assertSame(200, $response->get_status());
+            $id = (int)$response->get_data()['id'];
+            $this->createdUsers[] = $id;
+
+            self::assertCount(1, $captured);
+            $mail = $captured[0];
+            self::assertSame([$email], (array)$mail['to']);
+            self::assertSame('ASCLA · Configura tu acceso', $mail['subject']);
+            self::assertStringContainsString('Content-Type: text/html', implode(' ', (array)$mail['headers']));
+            self::assertStringContainsString('assets/ascla-logo.png', $mail['message']);
+            self::assertStringContainsString('Hola, María Prueba:', $mail['message']);
+            self::assertStringContainsString('Tu usuario es ' . $login, $mail['message']);
+            self::assertSame(1, preg_match('/href="([^"]+)"[^>]*>Establecer mi contraseña<\/a>/', $mail['message'], $link));
+            parse_str(wp_parse_url(html_entity_decode($link[1]), PHP_URL_QUERY), $query);
+            self::assertSame('rp', $query['action']);
+            self::assertSame($login, $query['login']);
+            $recipient = check_password_reset_key($query['key'], $query['login']);
+            self::assertInstanceOf(WP_User::class, $recipient);
+            self::assertSame($id, (int)$recipient->ID);
+
+            wp_new_user_notification($this->member, null, 'user');
+            self::assertCount(2, $captured);
+            self::assertStringNotContainsString('Establecer mi contraseña', $captured[1]['message']);
+        } finally {
+            remove_filter('pre_wp_mail', $capture, PHP_INT_MAX);
+        }
+    }
+
     public function testCreateUserRejectsDuplicateEmailAndTechnicalRole(): void
     {
         wp_set_current_user($this->admin);

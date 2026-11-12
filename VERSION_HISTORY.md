@@ -1,8 +1,25 @@
 # Historial de versiones — Intranet ASCLA
 
-**Versión actual:** `1.11.1` · **Esquema:** `15`.
+**Versión actual:** `1.12` · **Esquema:** `15`.
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
+
+<a id="release-112"></a>
+
+## 1.12 — Rediseño y mejoras de la comunidad
+
+Entrega del 10 de noviembre de 2026. Consolida el rediseño y los ajustes recientes sobre la base de GitHub/UAT 1.11.1.
+
+- **Interfaz:** tipografía Geist local, azul oscuro `#063159` y celeste `#74BEFF` de ASCLA, superficies planas y bordes rectos. Se mantiene la navegación lateral de UAT y se adaptan los módulos, administración y acceso a móvil y a los temas claro y oscuro. Inicio reúne agenda y recomendaciones; la ficha del asociado separa identidad y afinidad; «Más filtros» agrupa las opciones secundarias. El rediseño conserva los permisos y los flujos de los módulos. Ver [referencias visuales](DESIGN.md).
+- **Perfiles y Directorio:** vuelve la acción «Bloquear» a la ficha del asociado, se corrige la alineación de las fotos en administración y «Mis conexiones» muestra un icono de recarga.
+- **Acceso:** el formulario público confirma la solicitud de recuperación sin revelar si existe la cuenta. Cuenta y seguridad muestra el resultado del envío junto al botón. El mínimo predeterminado baja de 12 a 8 caracteres y ya no exige combinar tipos de caracteres; siguen rechazándose contraseñas muy comunes y repeticiones de un solo carácter. Se conservan las contraseñas vigentes, otros mínimos configurados y la protección contra intentos fallidos. Las invitaciones de alta usan el correo HTML de ASCLA con el enlace original de WordPress.
+- **Mensajería y Hub:** los emojis se muestran como caracteres nativos y se pueden insertar desde el selector del chat. En «Mis borradores», el autor puede enviar un borrador a la papelera previa confirmación; si ya se publicó, esa acción se rechaza.
+- **Eventos:** la pestaña activa se distingue en modo oscuro. Inicio y fin marcan fecha y hora obligatorias y señalan junto al campo los años inválidos y el fin anterior o igual al inicio. Virtual exige enlace, Presencial exige lugar o sala e Híbrido exige ambos. Las tarjetas y fichas virtuales omiten la ubicación, incluso si un evento anterior guardaba «Por confirmar». Los borradores pueden guardarse incompletos.
+- **Administración y conocimiento:** Estadísticas reúne indicadores por período y enlaza al registro de asistencia. Configuración agrupa los ajustes y conserva los cambios al cambiar de sección. Encuentros admite intervalos automáticos de 1 a 90 días, con 7 por defecto, y permite generar propuestas manuales y descartar cada una con historial. El asistente usa contexto institucional y materiales de videos publicados, incluidos los ya guardados, con sus fuentes y controles de privacidad.
+
+Se conserva el esquema 15. El [manifiesto del ZIP 1.12](docs/evidence/release-1.12/package.json) identifica el paquete y sus fuentes; los informes históricos de QA/UAT y seguridad corresponden a sus respectivas versiones.
+
+<a id="release-1111"></a>
 
 ## 1.11.1 — Importación revisada y perfiles
 

@@ -1,7 +1,7 @@
 /* Institutional ally cards, details and administration. WordPress enforces every permission. */
 (() => {
   'use strict';
-  globalThis.ASCLAAllies=({root,api,E,T,I,modal,closeModal,toast,btn,field,select,date,config:C,safeURL,afterChange})=>{
+  globalThis.ASCLAAllies=({root,api,E,T,I,modal,closeModal,toast,btn,field,select,date,config:C,safeURL,searchForm,afterChange})=>{
     const text=value=>E(T(value));
     const states={active:'Activo',inactive:'Inactivo',draft:'Borrador',scheduled:'Programado',pending:'Pendiente de revisión'};
     const state=p=>p.meta.ally_status||({publish:'active',ascla_hidden:'inactive',draft:'draft'}[p.status]||'pending');
@@ -19,7 +19,7 @@
       const registryUrl=C.adminUrl+(C.adminUrl.includes('?')?'&':'?')+'section=aliados';
       const controls=admin?`<div class="form-actions"><a class="btn" data-native href="${E(registryUrl)}">${I('settings')}${text('Registro de aliados')}</a>${btn(I('plus')+' '+text('Crear aliado'),'editor','data-type="ally"','primary')}</div>`:'';
       const catalogContent=drafts !== null ? drafts : `<p class="private-note">${list.total} ${text('alianzas en el catálogo')}</p><div class="ally-cards">${list.items.map(card).join('')}</div>`;
-      return `<header class="ally-catalog-header"><div><span class="eyebrow">${text('ALIANZAS INSTITUCIONALES')}</span><h1>${text('Nuestros aliados')}</h1><p>${text('Conoce las organizaciones que colaboran con ASCLA y los beneficios para nuestra comunidad.')}</p></div>${controls}</header><form class="filters ally-catalog-search" data-form="filters" role="search" aria-label="${text('Buscar aliados')}"><label class="field"><span>${text('Buscar aliados')}</span><input type="search" name="q" maxlength="150" value="${E(filter.q||'')}" placeholder="${text('Nombre, tipo de convenio o descripción…')}"></label><button class="btn primary">${I('search')} ${text('Buscar')}</button>${btn('Limpiar filtros','filter-reset','','ghost')}</form>${tabs}${catalogContent}${drafts === null && !list.items.length?("<div class=\"card ally-empty\"><h2>" + (text('No encontramos aliados')) + "</h2><p>" + (text('Prueba otro nombre o tipo de convenio, o limpia la búsqueda.')) + "</p></div>"):''}`;
+      return `<header class="ally-catalog-header"><div><span class="eyebrow">${text('ALIANZAS INSTITUCIONALES')}</span><h1>${text('Nuestros aliados')}</h1><p>${text('Conoce las organizaciones que colaboran con ASCLA y los beneficios para nuestra comunidad.')}</p></div>${controls}</header>${searchForm({label:'Buscar aliados',placeholder:'Nombre, tipo de convenio o descripción…',id:'ally-search',filter,css:'ally-catalog-search'})}${tabs}${catalogContent}${drafts === null && !list.items.length?("<div class=\"card ally-empty\"><h2>" + (text('No encontramos aliados')) + "</h2><p>" + (text('Prueba otro nombre o tipo de convenio, o limpia la búsqueda.')) + "</p></div>"):''}`;
     }
     const excerpt=(value,limit)=>E(value.slice(0,limit))+(value.length>limit?'…':'');
     function contactDetails(m){
@@ -85,7 +85,9 @@
       try{
         const list=await api('admin/allies?'+new URLSearchParams(filters));
         if(request!==generation||!panel.isConnected)return;
-        panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${text('ALIANZAS INSTITUCIONALES')}</span><h2>${text('Registro de aliados')}</h2><p>${text('Consulta aliados activos, inactivos y borradores de toda la administración. Retirarlos del catálogo no elimina su información.')}</p></div>${btn(I('plus')+' '+text('Crear aliado'),'editor','data-type="ally"','primary')}</div><form class="filters ally-registry-filters" data-allies-search><label class="field"><span>${text('Buscar por nombre, tipo o descripción')}</span><input type="search" name="q" maxlength="150" value="${E(filters.q||'')}"></label>${select('state','Estado',[['','Todos los estados'],...Object.entries(states)],filters.state||'')}<button class="btn primary">${text('Buscar')}</button></form><p class="private-note">${list.total} ${text('aliados registrados')}</p><div class="ally-registry">${list.items.map(registryRow).join('')||("<div class=\"card ally-empty\"><h3>" + (text('No hay aliados para estos filtros')) + "</h3><p>" + (text('Cambia la búsqueda o el estado seleccionado.')) + "</p></div>")}</div>${registryPagination(list)}`;
+        panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${text('ALIANZAS INSTITUCIONALES')}</span><h2>${text('Registro de aliados')}</h2><p>${text('Consulta aliados activos, inactivos y borradores de toda la administración. Retirarlos del catálogo no elimina su información.')}</p></div>${btn(I('plus')+' '+text('Crear aliado'),'editor','data-type="ally"','primary')}</div>${searchForm({label:'Buscar por nombre, tipo o descripción',placeholder:'Nombre, tipo de convenio o descripción…',id:'ally-registry-search',
+          filter:filters,css:'ally-registry-filters',binding:'data-allies-search',keys:['state'],reset:null,
+          controls:select('state','Estado',[['','Todos los estados'],...Object.entries(states)],filters.state||'')})}<p class="private-note">${list.total} ${text('aliados registrados')}</p><div class="ally-registry">${list.items.map(registryRow).join('')||("<div class=\"card ally-empty\"><h3>" + (text('No hay aliados para estos filtros')) + "</h3><p>" + (text('Cambia la búsqueda o el estado seleccionado.')) + "</p></div>")}</div>${registryPagination(list)}`;
       }finally{if(request===generation)panel.removeAttribute('aria-busy');}
     }
     root.addEventListener('submit',async event=>{

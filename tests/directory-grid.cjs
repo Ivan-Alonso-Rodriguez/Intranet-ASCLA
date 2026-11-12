@@ -22,6 +22,7 @@ const pass=name=>{checks.push(name);console.log('PASS '+name);};
   await page.goto(fixture.base+'/directorio/?'+new URLSearchParams({q:fixture.prefix}));
   await page.waitForFunction(()=>document.querySelectorAll('.cards.directory .member-card').length===12);
   const search=page.locator('.directory-search'),oldSearch=await search.elementHandle();
+  await search.locator('.search-options > summary').click();
   await search.locator('#directory-country').fill('Perú');await search.getByRole('button',{name:'Buscar',exact:true}).click();
   await page.waitForFunction(element=>!element.isConnected,oldSearch);await page.waitForFunction(()=>document.querySelectorAll('.cards.directory .member-card').length===12);
   assert.deepEqual(await layout(),{columns:4,rows:3});

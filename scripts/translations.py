@@ -72,7 +72,7 @@ def sync_catalogs():
         previous = read_po(path) if path.exists() else {}
         header = f'Project-Id-Version: ASCLA Core {version}\nLanguage: {locale}\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\n'
         rows = [('', header)] + [(key, previous.get(key, value if locale == 'en_US' else key)) for key, value in sorted(source.items())]
-        path.write_text('# ASCLA Core UI catalog. Source language: es_ES.\n\n' + '\n\n'.join('msgid ' + json.dumps(key, ensure_ascii=False) + '\nmsgstr ' + json.dumps(value, ensure_ascii=False) for key, value in rows) + '\n', encoding='utf-8')
+        path.write_text('# ASCLA Core UI catalog. Source language: es_ES.\n\n' + '\n\n'.join('msgid ' + json.dumps(key, ensure_ascii=False) + '\nmsgstr ' + json.dumps(value, ensure_ascii=False) for key, value in rows) + '\n', encoding='utf-8', newline='\n')
 
 
 if __name__ == '__main__':

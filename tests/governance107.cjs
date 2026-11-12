@@ -45,7 +45,7 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
   for(const source of Object.values(body.secret_sources||{})){source.managed_externally=true;source.source='environment';}
   await route.fulfill({response,json:body});
  });
- await admin.goto(base+'/administracion/?section=configuracion');const settingsForm=admin.locator('[data-form="settings"]');await settingsForm.waitFor();
+ await admin.goto(base+'/administracion/?section=configuracion');const settingsForm=admin.locator('[data-form="settings"]');await settingsForm.waitFor();await settingsForm.locator('[data-settings-group=servicios]').click();
  await settingsForm.locator('[name="ai_provider"]').selectOption('openai');
  assert.equal(await settingsForm.locator('[name="openai_key"]').isDisabled(),true);assert.equal(await settingsForm.locator('[name="clear_openai_key"]').isDisabled(),true);assert.equal(await settingsForm.locator('[name="openai_key"]').inputValue(),'');
  await settingsForm.locator('[name="ai_provider"]').selectOption('gemini');await settingsForm.locator('[name="ai_provider"]').selectOption('openai');assert.equal(await settingsForm.locator('[name="openai_key"]').isDisabled(),true);

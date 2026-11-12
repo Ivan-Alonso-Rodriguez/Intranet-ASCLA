@@ -161,7 +161,8 @@ final class StatisticsTest extends TestCase
     {
         wp_set_current_user($this->users[3]);$p=Content::save('contact',['title'=>'Solicitud de prueba','body'=>'Detalle']);$id=$p['id'];$this->posts[]=$id;self::assertFalse($p['can_delete']);self::assertSame(403,$this->api('DELETE','items/'.$id)->get_status());
         wp_set_current_user($this->users[2]);self::assertSame(403,$this->api('DELETE','admin/contact/'.$id)->get_status());
-        ascla_test_support_state($id,$this->users[0],'resolved');self::assertSame(409,$this->api('DELETE','admin/contact/'.$id)->get_status());Administration::contactStatus($id,'closed');self::assertTrue(Content::serialize(Content::get($id))['can_delete']);self::assertSame(200,$this->api('DELETE','admin/contact/'.$id)->get_status());self::assertSame('private',get_post_status($id));self::assertSame(409,$this->api('POST','admin/contact/'.$id,['status'=>'open'])->get_status());
+        ascla_test_support_state($id,$this->users[0],'progress');self::assertSame(409,$this->api('DELETE','admin/contact/'.$id)->get_status());
+        Administration::contactStatus($id,'resolved','Solicitud atendida.');self::assertTrue(Content::serialize(Content::get($id))['can_delete']);self::assertSame(200,$this->api('DELETE','admin/contact/'.$id)->get_status());self::assertSame('private',get_post_status($id));self::assertSame(409,$this->api('POST','admin/contact/'.$id,['status'=>'open'])->get_status());
     }
     public function testDeletingAUserOrEventCleansOnlyTheirAttendance():void
     {

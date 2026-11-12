@@ -23,7 +23,7 @@ settings {
   timeout: 30000
 }
 script:pre-request {
-  req.setBody({title:bru.getEnvVar("prefix")+" Evento HTTP",body:"Encuentro sintético de aceptación QA.",status:"draft",meta:{chatham:false,start:new Date(Date.now()+3*86400000).toISOString(),end:new Date(Date.now()+3*86400000+3600000).toISOString(),capacity:5,modality:"Virtual",location:"Sala QA"}});
+  req.setBody({title:bru.getEnvVar("prefix")+" Evento HTTP",body:"Encuentro sintético de aceptación QA.",status:"draft",meta:{chatham:false,start:new Date(Date.now()+3*86400000).toISOString(),end:new Date(Date.now()+3*86400000+3600000).toISOString(),capacity:5,modality:"Presencial",location:"Sala QA"}});
 }
 script:post-response {
   if(res.getStatus()===200) { bru.setVar("eventId",res.getBody().id);bru.setVar("eventDraft",res.getBody()); }

@@ -29,6 +29,7 @@ final class Bootstrap
             'ai_mode'=>Knowledge::provider()->mode(),
             'google_connected'=>Secrets::get('google_calendar_'.$user)!=='',
             'password_min_length'=>$settings['password_min_length'],
+            'event_start_min'=>ContentMeta::eventStartMinimum()->format(DATE_ATOM),
             'notification_cursor'=>Notifications::latestId(),
         ];
     }

@@ -104,7 +104,7 @@ final class MicroEligibility
     public static function replace(int $id,mixed $ids,string $reason): array
     {
         Access::require(Access::member() && current_user_can('ascla_manage'),self::REVIEW_PERMISSION,403);
-        Access::require(is_array($ids) && count($ids)<=50,'Selecciona una lista de candidatos válida.',400);
+        Access::require(is_array($ids) && array_is_list($ids) && count($ids)<=100,'Selecciona una lista de candidatos válida.',400);
         foreach($ids as $uid) { Access::require((is_int($uid) || (is_string($uid) && ctype_digit($uid))) && (int)$uid>0,'Selecciona una lista de candidatos válida.',400); }
         $ids=array_values(array_unique(array_map('intval',$ids)));
         $reason=trim(Access::text($reason,1000));Access::require($reason!=='','Indica el motivo del cambio de candidatos.',400);
@@ -117,6 +117,7 @@ final class MicroEligibility
                 WordPressWrites::meta('post',$id,'_ascla',$updated);ContentSchedule::cancel($id);
                 WordPressWrites::post(['ID'=>$id,'post_status'=>'pending']);MicroLifecycle::history($id,'pending',$reason);
                 Audit::changes('microevent_candidates_updated',$id,['invitees'=>$before],['invitees'=>$ids,'reason'=>$reason]);
+                MicroProposalText::schedule($id);
             }
             $item=Content::serialize(get_post($id));
             MicroInvitations::apply($item,$id,(array)get_post_meta($id,'_ascla',true));

@@ -168,9 +168,12 @@ final class InterestImports
     private static function applyApprovedRow(array $row,array $import,int $id): void
     {
         $uid=(int)$row['user_id'];$p=$row['payload'];clean_user_cache($uid);
-        $valid=InterestCatalog::validate($p['topics']);
+        $approved=FormRules::ids($p['topics']);
+        $valid=InterestCatalog::activeIds($approved);
         $error='';
-        if (!user_can($uid,'ascla_access') || !Access::canManageAccount('edit_user',$uid) || !hash_equals($p['profile_hash'],InterestImportAccounts::fingerprint($uid))) {
+        if (count($valid)!==count($approved)) {
+            $error='Se eliminó un tema de la fila aprobada. Revisa la selección.';
+        } elseif (!user_can($uid,'ascla_access') || !Access::canManageAccount('edit_user',$uid) || !hash_equals($p['profile_hash'],InterestImportAccounts::fingerprint($uid))) {
             $error='El perfil cambió o ya no tienes permiso. Revisa la fila.';
         } elseif (count($valid)>self::MAX_FORM_INTERESTS) {
             $error='La fila aprobada supera el máximo de 3 intereses provenientes del formulario.';
@@ -183,7 +186,7 @@ final class InterestImports
         $p['topics']=$valid;
         $profile=InterestImportAccounts::profile($uid);
         $old=array_map('intval',(array)($profile['interests']??[]));
-        $next=$import['config']['mode']==='replace'?$p['topics']:array_values(array_unique(array_merge($old,$p['topics'])));
+        $next=$import['config']['mode']==='replace'?$p['topics']:array_values(array_unique(array_merge(InterestCatalog::activeIds($old),$p['topics'])));
         if (count($next)>20) {
             $p['warnings'][]='El resultado supera los 20 intereses permitidos.';
             ImportRecords::save($row,'conflict',$p,$uid);

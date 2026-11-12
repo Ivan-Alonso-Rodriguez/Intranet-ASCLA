@@ -1,8 +1,10 @@
 # ASCLA Core — Intranet ASCLA
 
-## Versión actual: 1.11.1 · esquema 15
+## Versión actual: 1.12 · esquema 15
 
-Incluye importación revisada de intereses desde exportaciones CSV, PDF tabular, HTML y ZIP de una hoja de Forms/Sheets, priorizando cuentas existentes. Añade claridad a las cifras de inscritos y asistencias y una caché acotada de estadísticas, con [pruebas de carga local](docs/evidence/release-1.11.1/statistics-load1111.json). También reúne los cambios del 5 de noviembre en fotografía, edición administrativa, recuperación de acceso y asistencia Zoom. Ver el [historial de 1.11.1](VERSION_HISTORY.md#1111-importación-revisada-y-perfiles) y la [evidencia de esta entrega](docs/evidence/release-1.11.1/interest-import1111.json).
+La versión 1.12 reúne el [rediseño de la interfaz](DESIGN.md), las mejoras de acceso y recuperación, el selector de emojis, la eliminación de borradores propios y la validación de eventos por modalidad. Consulta el [historial de 1.12](VERSION_HISTORY.md#release-112) para ver el detalle.
+
+La [versión 1.11.1](VERSION_HISTORY.md#release-1111) incorporó la importación revisada de intereses desde CSV, PDF tabular, HTML y ZIP de una hoja, además de mejoras en estadísticas y asistencia de Zoom.
 
 Plugin WordPress para una comunidad profesional privada: perfiles, Directorio, conexiones, mensajería, Hub, foros, eventos, microeventos, Centro de Conocimiento, Galería, Aliados, Contacto y administración. Elementor es opcional; no se modifica WordPress Core.
 
@@ -10,7 +12,7 @@ El código instalable está en [wp-content/plugins/ascla-core](wp-content/plugin
 
 ## Documentación
 
-Se mantienen nueve Markdown con funciones distintas:
+Se mantienen diez Markdown con funciones distintas:
 
 | Documento | Contenido |
 |---|---|
@@ -18,6 +20,7 @@ Se mantienen nueve Markdown con funciones distintas:
 | [Manual QA/UAT](MANUAL_QA_UAT.md) | Ejecución de herramientas, instalación y aceptación, con resultados esperados y solución de errores. |
 | [Cumplimiento](COMPLIANCE.md) | Estado vigente, decisiones, evidencias y pendientes. |
 | [Historial](VERSION_HISTORY.md) | Cambios por versión y alcance de cada ejecución. |
+| [Diseño](DESIGN.md) | Referencias, tipografía, paleta y criterios de la interfaz. |
 | [Matriz](requirements/ascla-analysis.md) | Los 302 requisitos originales y su trazabilidad; la fuente editable es el [JSON](requirements/ascla-analysis.json). |
 | [Integración continua](ci/README.md) | Jenkins, imágenes, Trivy, ZAP/CSP, archivado y configuración del entorno. |
 | [Entrega de pruebas](pruebas/README.md) | Resultados publicables, accesos privados y procedencia de las copias. |
@@ -37,7 +40,7 @@ python3 scripts/build.py
 python3 scripts/verify-package.py
 ```
 
-Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto actual de 1.11.1](docs/evidence/release-1.11.1/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
+Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto de 1.12](docs/evidence/release-1.12/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
 
 ## Calidad y entrega
 
@@ -53,7 +56,7 @@ La revisión documental conserva los reportes de cobertura existentes. `quality-
 
 ## Política documental y evidencias
 
-Los nueve Markdown y el JSON de requisitos viajan con el repositorio. Usa rutas relativas y dominios del proyecto; evita carpetas personales, rutas de equipos, nombres de dispositivo e IP privadas. Los ejemplos de loopback son genéricos.
+Los diez Markdown y el JSON de requisitos viajan con el repositorio. Usa rutas relativas y dominios del proyecto; evita carpetas personales, rutas de equipos, nombres de dispositivo e IP privadas. Los ejemplos de loopback son genéricos.
 
 `docs/evidence/` contiene resúmenes JSON y JUnit revisados y permitidos expresamente por `.gitignore`. `pruebas/` conserva la entrega publicable de Bruno/Playwright y las copias revisadas de seguridad, con procedencia y huellas. Los originales privados que se retienen, las sesiones y los accesos temporales permanecen en `test-results/`, fuera de Git; también se excluyen cobertura, dependencias y ZIP con contraseñas. La procedencia indica cuándo un original histórico ya no está disponible y conserva su huella.
 

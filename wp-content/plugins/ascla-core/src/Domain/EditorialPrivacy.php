@@ -18,7 +18,7 @@ final class EditorialPrivacy
         if(!empty($meta['chatham'])){
             $title=self::title($title,$meta);
             $body=EntityRedactor::redact($body,$identities,[$title]);
-            foreach(['source','description','summary','location','modality','agenda','agenda_ai','technical_note','video_source_title','infographic','moments','excerpts','frameworks','norms','conclusions','concepts','tags'] as $field){
+            foreach(['source','description','summary','location','modality','agenda','agenda_ai','technical_note','suggested_hub','video_source_title','infographic','moments','excerpts','frameworks','norms','conclusions','concepts','tags'] as $field){
                 if(isset($meta[$field])){$meta[$field]=EntityRedactor::tree($meta[$field],$identities,[$title]);}
             }
             foreach(['moments','excerpts'] as $field){

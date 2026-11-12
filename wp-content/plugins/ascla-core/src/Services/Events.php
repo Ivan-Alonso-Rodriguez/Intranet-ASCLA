@@ -79,7 +79,7 @@ final class Events
         Access::require($post->post_type==='ascla_event' && $post->post_status==='publish' && empty($meta['micro']) && empty($meta['cancelled']),'Seleccione un evento publicado y activo de la comunidad.',400);
         Access::require(strtotime($meta['end']??'')>time(),self::EVENT_FINISHED,400);
         $users=array_values(array_unique(array_map('absint',$users)));
-        Access::require(!empty($users) && count($users)<=50,'Seleccione entre 1 y 50 asociados.',400);
+        self::validateInvitationCount($users,$meta);
         foreach ($users as $uid) { Access::require(Access::member($uid),'Asociado no disponible.',400); }
         $invited=self::storeInvitations($id,$users);
         $calendar=['available'=>false,'sent'=>0,'queued'=>false];
@@ -88,12 +88,19 @@ final class Events
         return ['sent'=>$sent,'skipped'=>count($users)-$sent,'google_calendar'=>$calendar,'message'=>self::invitationMessage($sent,$calendar)];
     }
 
+    private static function validateInvitationCount(array $users,array $meta): void
+    {
+        Access::require(!empty($users),'Selecciona al menos un asociado.',400);
+        $capacity=(int)($meta['capacity']??0);
+        Access::require($capacity===0 || count($users)<=$capacity,'La selección supera el máximo de asistentes del evento.',400);
+    }
     private static function storeInvitations(int $id,array $users): array
     {
         return Store::atomic('event:'.$id,static function () use($id,$users) {
             clean_post_cache($id);
             $post=Content::get($id);$meta=(array)get_post_meta($id,'_ascla',true);
             Access::require($post->post_status==='publish' && empty($meta['micro']) && empty($meta['cancelled']) && strtotime($meta['end']??'')>time(),self::EVENT_UNAVAILABLE,409);
+            self::validateInvitationCount($users,$meta);
             $invited=[];
             foreach ($users as $uid) {
                 if (Store::count('registrations',self::REGISTRATION,[$id,$uid])) { continue; }

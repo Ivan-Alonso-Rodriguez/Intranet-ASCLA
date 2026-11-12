@@ -32,6 +32,15 @@
     warning.setAttribute("role", "status");
     warning.className = "ascla-session-warning";
     warning.setAttribute("aria-labelledby", "ascla-session-warning-title");
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    icon.setAttribute("viewBox", "0 0 24 24");icon.setAttribute("fill", "none");
+    icon.setAttribute("stroke", "currentColor");icon.setAttribute("stroke-width", "1.6");
+    icon.setAttribute("aria-hidden", "true");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "M12 8v4l3 3M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20");icon.append(path);
+    const content = document.createElement("div");content.className = "ascla-session-content";
+    const eyebrow = document.createElement("span");eyebrow.className = "ascla-session-eyebrow";
+    eyebrow.textContent = "ASCLA · " + text("Tu seguridad");
     const heading = document.createElement("h2");
     heading.id = "ascla-session-warning-title";
     heading.textContent = text("Tu sesión está por vencer");
@@ -41,7 +50,8 @@
     extend.type = "button"; extend.className = "btn primary";
     extend.textContent = text("Continuar mi sesión");
     extend.addEventListener("click", async () => { extend.disabled = true; await update(true); extend.disabled = false; });
-    warning.append(heading, body, extend);
+    content.append(eyebrow, heading, body, extend);
+    warning.append(icon, content);
     document.body.append(warning);
   }
   function activity(event) {

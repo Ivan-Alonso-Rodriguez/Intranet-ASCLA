@@ -3,7 +3,6 @@ namespace ASCLA\Core\Services;
 
 use ASCLA\Core\Domain\{EditorialPrivacy,EntityRedactor,Catalog};
 use ASCLA\Core\Frontend\Language;
-use ASCLA\Core\Repositories\Store;
 
 /**
  * Builds a small, permission-aware snapshot of the intranet for the assistant.
@@ -13,31 +12,41 @@ final class AssistantContext
 {
     private const IDENTITIES_SEPARATOR='/[\n,;]+/u';
 
-    public static function build(string $question): array
+    public static function build(string $question,bool $videoQuestion=false): array
     {
         $plain=mb_strtolower(remove_accents($question));
         $intents=self::intents($plain);
+        if ($videoQuestion) { $intents=array_fill_keys(array_keys($intents),false); }
         $live=[
             'current_datetime'=>current_datetime()->format(DATE_ATOM),
             'timezone'=>wp_timezone_string()?:'UTC',
             'language'=>Language::english()?'English':'Español',
+            'organization'=>self::organization(),
             'unread_notifications'=>Notifications::summary()['unread_total'],
             'intents'=>$intents,
         ];
         $sources=[];
-        self::appendIntentContext($live,$sources,$intents);
+        self::appendIntentContext($live,$sources,$intents,$question);
         [$safe,$protected,$identities]=self::safeSources($sources);
         return ['live'=>$live,'sources'=>array_slice($safe,0,8),'answerable'=>in_array(true,$intents,true),'protected'=>$protected,'identities'=>$identities];
     }
 
     private static function intents(string $plain): array
     {
+        $resourceTopic=preg_match('/\b(?:recursos?|resources?)\b.*?\b(?:sobre|acerca de|about|on)\s+\S/u',$plain);
         return [
-            'events'=>self::matchesAny($plain,[
-                '/\b(evento|eventos|reunion|reuniones|encuentro|encuentros|capacitacion|capacitaciones|agenda|calendario|proximo|proximos|pronto|semana|mes|inscrito|inscripcion)\b/u',
-                '/\b(event|events|meeting|meetings|training|calendar|upcoming|soon|week|month|registered)\b/u',
+            'organization'=>self::matchesAny($plain,[
+                '/\b(?:cuentame|explicame|dime) (?:un poco |mas )?(?:sobre|acerca de|de) ascla\b/u',
+                '/\b(?:que (?:es|significa|hace|ofrece|contiene|incluye)|que puedo (?:hacer|encontrar) en|para que sirve|a que se dedica|de que (?:trata|se trata)|hablame (?:de|sobre)) (?:la |esta )?(?:ascla|asociacion|intranet|plataforma|comunidad)\b/u',
+                '/\b(?:que (?:hay|encuentro) en|que (?:secciones|modulos|servicios|herramientas) (?:hay|tiene|ofrece)) (?:la |esta )?(?:ascla|intranet|comunidad|plataforma)\b/u',
+                '/\b(?:what is|what does|tell me about|what can i (?:do|find) (?:in|on)) (?:the )?(?:ascla|intranet|platform|association)\b/u',
+                '/^\W*ascla\W*$/u',
             ]),
-            'recent'=>self::matchesAny($plain,[
+            'events'=>self::matchesAny($plain,[
+                '/\b(evento|eventos|reunion|reuniones|encuentro|encuentros|capacitacion|capacitaciones|agenda|calendario|proximo|proximos|pronto|semana|mes|inscrito|inscripcion|cupos?|aforo|vacantes?|plazas?)\b/u',
+                '/\b(event|events|meeting|meetings|training|calendar|upcoming|soon|week|month|registered|seats?|capacity|availability)\b/u',
+            ]),
+            'recent'=>!$resourceTopic && self::matchesAny($plain,[
                 '/\b(reciente|recientes|nuevo|nuevos|nueva|nuevas|publicado|publicados|publicacion|publicaciones|novedad|novedades)\b/u',
                 '/\b(contenido|contenidos|recurso|recursos|articulo|articulos|hub|conocimiento|ultimo|ultimos)\b/u',
                 '/\b(recent|new|latest|published|posts|content|resources|knowledge)\b/u',
@@ -53,6 +62,32 @@ final class AssistantContext
         ];
     }
 
+    private static function organization(): array
+    {
+        $english=Language::english();
+        $pages=Catalog::PAGES;
+        if (Access::isAdministrator()) { unset($pages['intranet'],$pages['directorio'],$pages['mensajeria'],$pages['contacto']); }
+        if (current_user_can('ascla_admin_area')) { $pages['admin']='Administración'; }
+        return [
+            'name'=>'Asociación de Secretarios Corporativos de América Latina',
+            'overview'=>$english
+                ? 'ASCLA brings together corporate secretaries in Latin America to exchange professional experience and knowledge about corporate governance. Its private intranet helps members learn, meet and collaborate.'
+                : 'ASCLA reúne a profesionales de la secretaría corporativa de América Latina para intercambiar experiencias y conocimientos sobre gobierno corporativo. Su intranet es el espacio privado donde los asociados pueden formarse, encontrarse y colaborar.',
+            'knowledge'=>$english
+                ? 'The Knowledge Center contains member resources such as articles, documents and videos. Processed videos can include a summary, technical note and timestamped highlights.'
+                : 'El Centro de Conocimiento reúne artículos, documentos y videos. Los videos procesados pueden incluir un resumen, una nota técnica y cápsulas con marcas de tiempo.',
+            'sections'=>array_values(array_map([Language::class,'label'],$pages)),
+        ];
+    }
+
+    public static function describe(array $live): string
+    {
+        $org=$live['organization'];
+        $english=$live['language']==='English';
+        return 'ASCLA '.($english?'stands for the ':'es la ').$org['name'].".\n\n".$org['overview']
+            ."\n\n".($english?'Available sections':'Secciones disponibles').' · '.implode(', ',$org['sections']).".\n\n".$org['knowledge'];
+    }
+
     private static function matchesAny(string $plain,array $patterns): bool
     {
         foreach($patterns as $pattern){
@@ -61,10 +96,10 @@ final class AssistantContext
         return false;
     }
 
-    private static function appendIntentContext(array &$live,array &$sources,array $intents): void
+    private static function appendIntentContext(array &$live,array &$sources,array $intents,string $question): void
     {
         if($intents['events']){
-            [$live['upcoming_events'],$eventSources]=self::events();
+            [$live['upcoming_events'],$eventSources]=self::events($question);
             $sources=array_merge($sources,$eventSources);
         }
         if($intents['recent']){
@@ -102,39 +137,87 @@ final class AssistantContext
         return [$safe,$protected,array_values(array_unique($identities))];
     }
 
-    private static function events(): array
+    private static function inEventPeriod(array $meta,bool $historical,int $now): bool
     {
-        $items=[];$sources=[];$now=time();$offset=0;
+                $end=strtotime((string)($meta['end']??''));
+        if (!$end) { return false; }
+        if ($historical) { return $end<=$now || !empty($meta['cancelled']); }
+        return $end>$now && empty($meta['cancelled']);
+    }
+
+    private static function collectEvents(array $posts,array $tokens,bool $historical,int $now,array &$matches,array &$upcoming): void
+    {
+            foreach($posts as $post){
+                if (!Content::canRead($post)) { continue; }
+                $meta=(array)get_post_meta($post->ID,'_ascla',true);
+                $view=EditorialPrivacy::reader($post->post_title,wp_strip_all_tags($post->post_content),$meta);
+                $score=\ASCLA\Core\Repositories\KnowledgeSearch::score($view['title'],$view['body'].' '.($view['meta']['agenda']??''),$tokens);
+                if ($score>0) { $matches[]=['post'=>$post,'score'=>$score]; }
+                if (count($upcoming)<8 && self::inEventPeriod($meta,$historical,$now)) { $upcoming[]=['post'=>$post,'score'=>0]; }
+            }
+    }
+
+    private static function events(string $question): array
+    {
+        $matches=[];$upcoming=[];$now=time();$offset=0;
+        $generic=['evento','eventos','reunion','reuniones','encuentro','encuentros','capacitacion','capacitaciones','cupos','cupo','disponibles','disponible','cuantos','cantidad','quedan','aforo','vacantes','plazas','proximos','proximo','pronto','semanas','semana','mes','todos','todas','detalle','detalles','seats','capacity','available','events','event','meeting','training'];
+        $tokens=array_values(array_diff(\ASCLA\Core\Repositories\KnowledgeSearch::tokens($question),$generic));
+        $historical=(bool)preg_match('/\b(?:anterior|anteriores|pasado|pasados|finalizado|finalizados|cancelado|cancelados|past|previous|cancelled|canceled)\b/u',mb_strtolower(remove_accents($question)));
         do {
             $posts=get_posts([
                 'post_type'=>'ascla_event','post_status'=>'publish','numberposts'=>30,'offset'=>$offset,
-                'meta_key'=>'_ascla_start','orderby'=>['meta_value'=>'ASC','ID'=>'ASC'],
-                'meta_query'=>[['key'=>'_ascla_end','value'=>gmdate('c',$now),'compare'=>'>']],
+                'meta_key'=>'_ascla_start','orderby'=>['meta_value'=>$historical?'DESC':'ASC','ID'=>'ASC'],
             ]);
             $offset+=30;
-            foreach($posts as $post){
-                $event=self::eventData($post,$now);
-                if (!$event) { continue; }
-                [$item,$source]=$event;$items[]=$item;$sources[]=$source;
-                if(count($items)>=8) {break; }
-            }
-        } while (count($posts)===30 && count($items)<8);
+            self::collectEvents($posts,$tokens,$historical,$now,$matches,$upcoming);
+        } while (count($posts)===30 && ($tokens || count($upcoming)<8));
+        if ($matches) { usort($matches,static fn($a,$b)=>$b['score']<=>$a['score']); }
+        $items=[];$sources=[];
+        foreach (array_slice($matches?:$upcoming,0,8) as $selected) {
+            [$item,$source]=self::eventData($selected['post']);
+            $items[]=$item;$sources[]=$source;
+        }
         return [$items,$sources];
     }
 
-    private static function eventData(\WP_Post $post,int $now): ?array
+    public static function eventData(\WP_Post $post): array
     {
-        if(!Content::canRead($post)) {return null; }
-        $meta=(array)get_post_meta($post->ID,'_ascla',true);
-        $start=strtotime((string)($meta['start']??''));$end=strtotime((string)($meta['end']??''));
-        if (!$start || !$end || $end<=$now || !empty($meta['cancelled'])) { return null; }
-        $view=EditorialPrivacy::reader($post->post_title,wp_strip_all_tags($post->post_content),$meta);
-        $title=$view['title'];$body=$view['body'];$meta=$view['meta'];
-        $registration=Store::rows('registrations','event_id=%d AND user_id=%d',[$post->ID,get_current_user_id()],'LIMIT 1')[0]['status']??'none';
-        $url=Content::serialize($post)['url'];
-        $humanStart=wp_date('Y-m-d H:i T',$start,wp_timezone());$humanEnd=wp_date('Y-m-d H:i T',$end,wp_timezone());
-        $item=['id'=>(int)$post->ID,'title'=>$title,'start'=>$humanStart,'end'=>$humanEnd,'modality'=>$meta['modality']??'','location'=>$meta['location']??'','registration'=>$registration,'url'=>$url];
-        $source=['id'=>(int)$post->ID,'title'=>$title,'body'=>trim("Evento ASCLA. Inicio: {$humanStart}. Fin: {$humanEnd}. Modalidad: ".($meta['modality']??'').". Lugar: ".($meta['location']??'').". Estado de inscripción del usuario: {$registration}. ".$body),'score'=>100,'url'=>$url,'kind'=>'event'];
+        $detail=Events::detail($post->ID);
+        $meta=$detail['meta'];
+        $humanStart=!empty($meta['start'])?wp_date('Y-m-d H:i T',strtotime($meta['start']),wp_timezone()):'';
+        $humanEnd=!empty($meta['end'])?wp_date('Y-m-d H:i T',strtotime($meta['end']),wp_timezone()):'';
+        $item=[
+            'id'=>(int)$post->ID,'title'=>$detail['title'],'description'=>$detail['body'],
+            'start'=>$humanStart,'end'=>$humanEnd,'timezone'=>wp_timezone_string(),
+            'modality'=>$meta['modality']??'Virtual','location'=>$meta['location']??'',
+            'meeting_url'=>$meta['url']??'','agenda'=>$meta['agenda']??'',
+            'discussion'=>$meta['agenda_ai']??null,'topics'=>array_column($detail['tags'],'name'),
+            'capacity'=>$detail['capacity'],'unlimited'=>$detail['capacity']===0,
+            'attending'=>$detail['attending'],'reserved'=>$detail['reserved'],'remaining'=>$detail['remaining'],
+            'waitlist_count'=>$detail['waitlist_count'],'registration'=>$detail['registered'],
+            'registration_closed'=>$detail['registration_closed'],'is_past'=>$detail['is_past'],
+            'cancelled'=>$detail['cancelled'],'cancellation_reason'=>$meta['cancellation_reason']??'',
+            'registration_deadline'=>$meta['registration_deadline']??'','priority_until'=>!empty($meta['public_at'])?gmdate('c',(int)$meta['public_at']):'',
+            'micro'=>!empty($meta['micro']),'chatham'=>!empty($meta['chatham']),'url'=>$detail['url'],
+        ];
+        $facts=[
+            'Título'=>$item['title'],'Inicio'=>$humanStart,'Fin'=>$humanEnd,'Modalidad'=>$item['modality'],
+            'Lugar'=>$item['location'],'Enlace autorizado para asistir'=>$item['meeting_url'],
+            'Capacidad'=>$item['unlimited']?'Sin límite de cupos':$item['capacity'],
+            'Cupos disponibles'=>$item['unlimited']?'Sin límite':$item['remaining'],
+            'Asistencias confirmadas'=>$item['attending'],'Cupos ocupados o reservados'=>$item['reserved'],
+            'Personas en lista de espera'=>$item['waitlist_count'],'Inscripción del usuario'=>$item['registration'],
+            'Inscripciones cerradas'=>$item['registration_closed']?'Sí':'No','Finalizado'=>$item['is_past']?'Sí':'No',
+            'Cancelado'=>$item['cancelled']?'Sí':'No','Motivo de cancelación'=>$item['cancellation_reason'],
+            'Cierre de inscripciones'=>$item['registration_deadline'],'Programa'=>$item['agenda'],
+            'Temas'=>implode(', ',$item['topics']),
+        ];
+        $text=[];
+        foreach ($facts as $label=>$value) { if ($value!=='') { $text[]=$label.': '.$value; } }
+        if ($item['discussion']) { $text[]=wp_json_encode($item['discussion'],JSON_UNESCAPED_UNICODE); }
+        $text[]=$item['description'];
+        $source=['id'=>$item['id'],'title'=>$item['title'],'body'=>implode("\n",$text),'score'=>100,'url'=>$item['url'],'kind'=>'event'];
+        $source['event_digest']=hash('sha256',wp_json_encode($item));
         return [$item,$source];
     }
 
@@ -146,12 +229,12 @@ final class AssistantContext
             if(!Content::canRead($post)) {continue; }
             $meta=(array)get_post_meta($post->ID,'_ascla',true);
             if(!empty($meta['generated'])&&empty($meta['reviewed'])) {continue; }
-            [$title,$body]=self::safeText($post,$meta);
+            [$title,$body,$digest]=self::safeText($post,$meta);
             $url=Content::serialize($post)['url'];
             $date=$post->post_date_gmt?:get_gmt_from_date($post->post_date);
             $kind=substr($post->post_type,6);
             $items[]=['id'=>(int)$post->ID,'type'=>$kind,'title'=>$title,'date'=>$date,'url'=>$url];
-            $sources[]=['id'=>(int)$post->ID,'title'=>$title,'body'=>trim('Contenido ASCLA publicado el '.$date.'. '.mb_substr(wp_strip_all_tags($body),0,4500)),'score'=>80,'url'=>$url,'kind'=>$kind];
+            $sources[]=['id'=>(int)$post->ID,'title'=>$title,'body'=>trim('Contenido ASCLA publicado el '.$date.'. '.mb_substr(wp_strip_all_tags($body),0,4500)),'score'=>80,'url'=>$url,'kind'=>$kind,'video_digest'=>$digest];
             if(count($items)>=6) {break; }
         }
         return [$items,$sources];
@@ -174,13 +257,15 @@ final class AssistantContext
         return $items;
     }
 
-    private static function safeText(\WP_Post $post,array $meta): array
+    public static function safeText(\WP_Post $post,array $meta): array
     {
         $title=$post->post_title;$body=wp_strip_all_tags($post->post_content);
         if(!empty($meta['chatham'])){
             $identities=preg_split(self::IDENTITIES_SEPARATOR,$meta['identities']??'')?:[];
             $title=EditorialPrivacy::title($title,$meta);$body=EntityRedactor::redact($body,$identities,[$title]);
         }
-        return [$title,$body];
+        $evidence=$post->post_type==='ascla_resource'?VideoEvidence::text($meta):'';
+        if ($evidence!=='') { $body=trim($body."\n".$evidence); }
+        return [$title,$body,$evidence===''?'':hash('sha256',$evidence)];
     }
 }

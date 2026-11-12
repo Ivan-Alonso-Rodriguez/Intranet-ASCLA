@@ -19,6 +19,8 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  for(const [type,route] of [['hub','hub/'],['topic','foros/'],['gallery','galeria/']]){
   const post=await ok(admin,'content/'+type,{title:'Rango '+suffix+' '+type,body:'Publicación para comprobar rangos',status:'publish',meta:{chatham:false}});posts.push(post.id);
   const day=new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(post.date.replace(' ','T')+'Z'));await goto(member.page,route);const form=member.page.locator('.content-list-filters');
+  assert.equal(await form.locator('[name="after"]').isVisible(),false);
+  await form.locator('.search-options > summary').press('Enter');
   await form.locator('[name="q"]').fill('Rango '+suffix+' '+type);await form.locator('[name="after"]').fill(day);await form.locator('[name="before"]').fill(day);
   const response=member.page.waitForResponse(r=>r.url().includes('/content/'+type+'?')&&r.url().includes('before='+day));
   await form.locator('button:not([type])').first().click();const data=await (await response).json();assert.equal(data.total,1,JSON.stringify(data));assert.equal(data.items[0].id,post.id);
@@ -32,20 +34,20 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
   assert.equal(await member.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);await member.page.setViewportSize({width:1440,height:1000});
   pass(type+': rango inclusivo, controles persistentes, aviso de rango inválido, limpieza y ancho móvil');
  }
- await goto(admin,'administracion/?section=configuracion');const form=admin.locator('[data-form="settings"]');await form.waitFor();
+ await goto(admin,'administracion/?section=configuracion');const form=admin.locator('[data-form="settings"]');await form.waitFor();await form.locator('details.settings-group').filter({has:admin.locator('[name=profile_completion_extra]')}).locator('summary').first().click();
  for(const choice of await form.locator('[name="profile_completion_extra"]').all())await choice.uncheck();
  await form.locator('[name="profile_completion_extra"][value="experience"]').check();
  let response=admin.waitForResponse(r=>r.url().endsWith('/settings')&&r.request().method()==='POST');await form.locator('.settings-savebar button').click();assert.equal((await response).status(),200);
  assert.deepEqual((await ok(admin,'settings')).profile_completion_extra,['experience']);
- const progress=(await ok(member.page,'bootstrap')).profile_completion;assert.equal(progress.total,9);assert.equal(progress.percent,89);assert.deepEqual(progress.missing,['Experiencia profesional']);
+ const progress=(await ok(member.page,'bootstrap')).profile_completion;assert.equal(progress.total,8);assert.equal(progress.percent,88);assert.deepEqual(progress.missing,['Experiencia profesional']);
  pass('Administración: criterios guardados desde casillas y reflejados en el cálculo tras autenticación');
  await goto(member.page,'intranet/',false);await member.page.getByText('Completa tu perfil',{exact:true}).waitFor();await member.page.getByText('Ahora no',{exact:true}).click();
  await goto(member.page,'hub/');assert.equal((await ok(member.page,'bootstrap')).profile_review.due,false);
  pass('Aviso de completitud adicional: no bloquea la navegación y conserva la posposición');
- await goto(admin,'administracion/?section=configuracion');const reset=admin.locator('[data-form="settings"]');await reset.waitFor();await reset.locator('[name="profile_completion_extra"][value="experience"]').uncheck();
+ await goto(admin,'administracion/?section=configuracion');const reset=admin.locator('[data-form="settings"]');await reset.waitFor();await reset.locator('details.settings-group').filter({has:admin.locator('[name=profile_completion_extra]')}).locator('summary').first().click();await reset.locator('[name="profile_completion_extra"][value="experience"]').uncheck();
  response=admin.waitForResponse(r=>r.url().endsWith('/settings')&&r.request().method()==='POST');await reset.locator('.settings-savebar button').click();assert.equal((await response).status(),200);
  assert.deepEqual((await ok(admin,'settings')).profile_completion_extra,[]);assert.equal((await ok(member.page,'bootstrap')).profile_completion.percent,100);
- pass('Desmarcar todos los criterios adicionales restaura los ocho mínimos y el 100 %');
+ pass('Desmarcar todos los criterios adicionales restaura los siete mínimos y el 100 %');
  assert.deepEqual(errors,[]);pass('Sin errores JavaScript');
 }catch(e){errors.push(e.message);console.error(e.stack);process.exitCode=1;}finally{
  if(admin){if(settings)await api(admin,'settings',{profile_completion_extra:settings.profile_completion_extra||[]}).catch(()=>{});for(const id of posts)await api(admin,'items/'+id,null,'DELETE').catch(()=>{});if(member)await api(admin,'native:users/'+member.id+'?force=true&reassign=1',null,'DELETE').catch(()=>{});}
