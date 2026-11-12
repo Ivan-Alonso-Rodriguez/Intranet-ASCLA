@@ -3981,6 +3981,9 @@ msgstr "Los datos personales del asociado se editan desde ASCLA."
 msgid "Los eventos y los perfiles comparten estos temas."
 msgstr "Los eventos y los perfiles comparten estos temas."
 
+msgid "Los grupos mínimos siempre se incluyen y son obligatorios al guardar. Los criterios adicionales cuentan para llegar al 100 %, pero no impiden guardar un perfil con sus mínimos completos."
+msgstr "Los grupos mínimos siempre se incluyen y son obligatorios al guardar. Los criterios adicionales cuentan para llegar al 100 %, pero no impiden guardar un perfil con sus mínimos completos."
+
 msgid "Los inscritos sin una marca de asistencia se contarán como ausentes al calcular la tasa. Comprueba la lista antes de confirmar."
 msgstr "Los inscritos sin una marca de asistencia se contarán como ausentes al calcular la tasa. Comprueba la lista antes de confirmar."
 

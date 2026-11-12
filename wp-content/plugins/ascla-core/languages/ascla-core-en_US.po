@@ -3981,6 +3981,9 @@ msgstr "Member personal details are edited in ASCLA."
 msgid "Los eventos y los perfiles comparten estos temas."
 msgstr "Events and profiles share these topics."
 
+msgid "Los grupos mínimos siempre se incluyen y son obligatorios al guardar. Los criterios adicionales cuentan para llegar al 100 %, pero no impiden guardar un perfil con sus mínimos completos."
+msgstr "The minimum groups are always included and required when saving. Additional criteria count toward 100%, but do not prevent saving a profile that meets the minimum requirements."
+
 msgid "Los inscritos sin una marca de asistencia se contarán como ausentes al calcular la tasa. Comprueba la lista antes de confirmar."
 msgstr "Registrants without an attendance mark count as absent when calculating the rate. Check the list before confirming."
 

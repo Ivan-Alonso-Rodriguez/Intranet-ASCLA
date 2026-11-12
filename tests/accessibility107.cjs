@@ -88,7 +88,7 @@ async function trap(selector){
   for(const width of [360,1024]){
    await adminPage.setViewportSize({width,height:1000});await goto('administracion');
    const tabs=await page.locator('.admin-tab[data-tab]').evaluateAll(nodes=>nodes.map(n=>n.dataset.tab));
-   for(const tab of tabs){await page.locator('.admin-tab[data-tab="'+tab+'"]').click();await page.waitForFunction(key=>document.querySelector('.admin-tab.active')?.dataset.tab===key&&document.querySelector('#admin-panel')?.textContent.trim().length>0,tab);await scan('admin '+tab+' '+theme+' '+width);}
+   for(const tab of tabs){const picker=page.locator('[data-admin-section]');if(await picker.isVisible())await picker.selectOption(tab);else await page.locator('.admin-tab[data-tab="'+tab+'"]').click();await page.waitForFunction(key=>document.querySelector('.admin-tab.active')?.dataset.tab===key&&document.querySelector('#admin-panel')?.textContent.trim().length>0,tab);await scan('admin '+tab+' '+theme+' '+width);}
   }
   for(const actorPage of [adminPage,memberPage])await actorPage.setViewportSize({width:360,height:900});
   let uploadChecked = false;

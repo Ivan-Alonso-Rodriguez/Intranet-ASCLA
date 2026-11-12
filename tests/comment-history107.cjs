@@ -17,7 +17,7 @@ const pass=name=>{checks.push(name);console.log('PASS '+name);};
  await page.locator('[data-action="filter-mine"]').click();await page.getByRole('heading',{name:title,exact:true}).waitFor();assert.ok(await page.getByRole('button',{name:'Mis temas',exact:true}).isVisible());
  pass('Mis temas conserva las publicaciones propias separadas de comentarios');
  await page.locator('[data-action="filter-comments"]').click();const form=page.locator('[data-form="filters"]');await form.locator('[name="q"]').fill(token);await form.locator('button:not([type])').click();
- const entry=page.locator('[data-own-comment]').filter({hasText:body});await entry.waitFor();assert.equal(await page.locator('[data-own-comment]').count(),1);assert.ok(await page.getByText('Fecha del comentario',{exact:true}).isVisible());
+ const entry=page.locator('[data-own-comment]').filter({hasText:body});await entry.waitFor();assert.equal(await page.locator('[data-own-comment]').count(),1);await page.locator('[data-form="filters"] .search-options > summary').click();assert.ok(await page.getByText('Fecha del comentario',{exact:true}).isVisible());
  pass('Mis comentarios busca aportes propios y muestra el tema original y fechas');
  await entry.locator('[data-action="item"]').click();await page.locator('[role="dialog"]').getByText(body,{exact:true}).waitFor();await page.keyboard.press('Escape');
  pass('Ver conversación abre el tema y conserva el comentario en su contexto');

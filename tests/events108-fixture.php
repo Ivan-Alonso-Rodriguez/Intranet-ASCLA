@@ -7,6 +7,7 @@ $admin=get_user_by('login','ascla.admin');
 if (!$admin || !user_can($admin,'ascla_manage')) {
     throw new RuntimeException('Test administrator required.');
 }
+wp_set_current_user($admin->ID);
 $prefix='Eventos108 '.bin2hex(random_bytes(4));
 $start=time()-3*DAY_IN_SECONDS;
 $ids=[];

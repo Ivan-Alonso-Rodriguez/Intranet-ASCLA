@@ -304,6 +304,7 @@ async function goto(page, route) {
           await card.waitFor();
           await card.locator('[data-action="member"]').click();
           const profile = p.locator('.modal');
+          await profile.getByRole('button', { name: 'Bloquear', exact: true }).waitFor();
           assert.equal(await profile.getByRole('button', { name: 'Bloquear', exact: true }).isVisible(), true);
           await profile.getByRole('button', { name: 'Bloquear', exact: true }).click();
           await p.getByRole('button', {name:'Confirmar bloqueo',exact:true}).click();

@@ -18,7 +18,7 @@ async function filter(values){const form=page.locator('[data-stats-form=filter]'
 const micro=id=>page.locator(`[data-micro-id="${id}"]`);
 (async()=>{try{
  browser=await chromium.launch({headless:true,channel:'chrome'});page=await login('Administrador');await go('estadisticas');
- const d=await ok('admin/statistics');for(const [key,value] of Object.entries({events:3,registrations:9,attendees:3,attendances:5,rate_registered:6,rate_attended:3,rate:50,average:1.5,recurring:1}))assert.equal(d.summary[key],value,key);
+ const d=await ok('admin/statistics');for(const [key,value] of Object.entries(Object.fromEntries(['events','registrations','attendees','attendances','rate_registered','rate_attended','rate','average','recurring'].map(key=>[key,f.expected_summary[key]]))))assert.equal(d.summary[key],value,key);
  assert.deepEqual(await page.locator('.stats-summary-card h4').allTextContents(),['Actividad','Asistencias','Personas']);
  for(const key of ['events','registrations','registrants','attendees','attendances','recurring','users','new_users','active_users'])assert.equal(await page.locator(`[data-stat=${key}] > strong`).innerText(),String(d.summary[key]));
  assert.equal(await page.locator('.stats-summary-completion progress').getAttribute('value'),String(d.summary.complete_events));assert.equal(await page.locator('.stats-summary-completion progress').getAttribute('max'),String(d.summary.events));pass('Resumen distingue inscripciones, personas y asistencias; la base verificada coincide con los datos y la tasa del servidor');

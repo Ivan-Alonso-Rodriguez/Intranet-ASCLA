@@ -686,7 +686,7 @@
       throw new Error(T("Selecciona un país de la lista de sugerencias."));
     }
     countryValue.value = selectedCountryValue(country, countryChanged, countryInput.value.trim());
-    if (!countryInput.value.trim()) cityValue.value = '';
+    if (!countryInput.value.trim() && (countryChanged || cityChanged)) cityValue.value = '';
     if (cityInput.value.trim() && country && (cityChanged || countryChanged)) {
       await validateChangedCity(form, cityInput, cityValue);
     } else if (!cityInput.value.trim()) {
@@ -1876,7 +1876,7 @@
     const options = settings.profile_completion_options || { required: {}, additional: {} };
     const selected = settings.profile_completion_extra || [];
     const checkboxes = Object.entries(options.additional).map(([key, label]) => `<label class="completion-choice"><input type="checkbox" name="profile_completion_extra" value="${E(key)}" ${selected.includes(key) ? "checked" : ""}><span>${E(T(label))}</span></label>`).join("");
-    return `<fieldset class="profile-completion-settings"><legend>${E(T("Criterios de completitud"))}</legend><p class="private-note">${E(T("Los ocho grupos mínimos siempre se incluyen y son obligatorios al guardar. Los criterios adicionales cuentan para llegar al 100 %, pero no impiden guardar un perfil con sus mínimos completos."))}</p><p>${E(Object.values(options.required).map(T).join(", "))}</p><div class="completion-choices">${checkboxes}</div><p class="private-note">${E(T("Los campos no seleccionados son opcionales y no afectan el porcentaje."))}</p></fieldset>`;
+    return `<fieldset class="profile-completion-settings"><legend>${E(T("Criterios de completitud"))}</legend><p class="private-note">${E(T("Los grupos mínimos siempre se incluyen y son obligatorios al guardar. Los criterios adicionales cuentan para llegar al 100 %, pero no impiden guardar un perfil con sus mínimos completos."))}</p><p>${E(Object.values(options.required).map(T).join(", "))}</p><div class="completion-choices">${checkboxes}</div><p class="private-note">${E(T("Los campos no seleccionados son opcionales y no afectan el porcentaje."))}</p></fieldset>`;
   }
   function listingCreateAction(type, canWrite) {
     let createType = type;
@@ -3929,7 +3929,7 @@
       `<span class="stat-icon">${I(icon)}</span><span class="admin-stat-copy"><strong>${Number(number)}</strong><small>${E(T(label))}</small></span>`,
       'admin-tab',`data-tab="${target}"`,'admin-stat')).join('');
     const tasks=cards.map(([key,icon,title,description,action])=>`<article class="admin-task-card">
-      <button type="button" data-action="admin-tab" data-tab="${key}" aria-label="${E(T(action))}">
+      <button type="button" data-action="admin-tab" data-tab="${key}">
         <span class="admin-task-icon">${I(icon)}</span><span class="admin-task-copy"><strong>${E(T(title))}</strong><small>${E(T(description))}</small></span>${I('chevron')}
       </button></article>`).join('');
     panel.innerHTML=`<div class="admin-section-heading"><h2>${E(T('Resumen de actividad'))}</h2>${btn(I('clock')+' '+E(T('Actualizar')),'admin-refresh','','small')}</div>
@@ -5289,7 +5289,7 @@ root.addEventListener("click", async (event) => {
     const missing = [];
     let missingInput;
     const markMissing=(key,label)=>{ missing.push(label); missingInput ||= (key === "country" ? form.querySelector("[data-location-country]") : form.querySelector(`[name="${key}"]`)); };
-    for (const key of ["first_name","last_name","position","company","bio"]) {
+    for (const key of ["first_name","last_name","position","company"]) {
       if (!String(profileData[key] || "").replace(/[\s\u200B\uFEFF]/gu,"")) markMissing(key,profileLabels[key] || "Biografía");
     }
     if (!String(profileData.country || "").trim() && !String(profileData.city || "").trim()) markMissing("country","Ciudad o país");
