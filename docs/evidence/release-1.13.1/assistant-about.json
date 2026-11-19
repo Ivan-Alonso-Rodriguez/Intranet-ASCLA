@@ -1,0 +1,217 @@
+{
+  "version": "1.13.1",
+  "date": "2026-11-19T20:14:19.871902+00:00",
+  "base_commit": "c7be99b4348ef360c1ce54310754a510b08e9bc7",
+  "package_sha256": "b1b8f0ab6f807642faeb491bea1a7d5d6473772d1f54cca0f862463f12b575c6",
+  "installed_production_files": 249,
+  "focused_php": {
+    "tests": 93,
+    "assertions": 932,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "release_sanity_checks": 49,
+  "browser": {
+    "status": "PASS",
+    "checks": [
+      "ES: real chat changes from video context to institutional explanation",
+      "EN: real chat changes from gallery context and uses the account language",
+      "Verified response persists after reload"
+    ],
+    "answers": [
+      {
+        "question": "¿Qué videos hay disponibles?",
+        "answer": "No encontré un video publicado al que tengas acceso con esos datos. Prueba con su título o con un tema del video.",
+        "mode": "DEMO MODE",
+        "grounding": {
+          "policy": "source-references-v2",
+          "context_source_ids": [],
+          "valid_references": 0,
+          "ignored_references": 0,
+          "live_context_used": false,
+          "conversation_only": false,
+          "no_evidence": true
+        }
+      },
+      {
+        "question": "¿Qué es esta intranet de ASCLA?",
+        "answer": "ASCLA es la Asociación de Secretarios Corporativos de América Latina.\n\nASCLA reúne a profesionales de la secretaría corporativa de América Latina para intercambiar experiencias y conocimientos sobre gobierno corporativo.\n\nLa intranet de ASCLA es su plataforma privada para la comunidad de asociados. Reúne perfiles profesionales, eventos y capacitaciones, publicaciones, foros, recursos de conocimiento, galerías y aliados. Se accede con una cuenta autorizada; las secciones y acciones disponibles dependen de tus permisos.\n\nSecciones disponibles · Inicio, Perfil, Eventos y Capacitaciones, Hub ASCLA, Galerías, Foros, Directorio, Centro de Conocimiento, Asistente IA, Aliados, Mensajería, Contacto.\n\nEl Centro de Conocimiento reúne artículos, documentos y videos. Los videos procesados pueden incluir un resumen, una nota técnica y cápsulas con marcas de tiempo.",
+        "mode": "ASCLA",
+        "grounding": {
+          "policy": "source-references-v2",
+          "context_source_ids": [],
+          "valid_references": 0,
+          "ignored_references": 0,
+          "live_context_used": true,
+          "conversation_only": false,
+          "snapshot_at": "2026-11-19T15:11:52-05:00"
+        }
+      },
+      {
+        "question": "¿Y qué contiene?",
+        "answer": "ASCLA es la Asociación de Secretarios Corporativos de América Latina.\n\nASCLA reúne a profesionales de la secretaría corporativa de América Latina para intercambiar experiencias y conocimientos sobre gobierno corporativo.\n\nLa intranet de ASCLA es su plataforma privada para la comunidad de asociados. Reúne perfiles profesionales, eventos y capacitaciones, publicaciones, foros, recursos de conocimiento, galerías y aliados. Se accede con una cuenta autorizada; las secciones y acciones disponibles dependen de tus permisos.\n\nSecciones disponibles · Inicio, Perfil, Eventos y Capacitaciones, Hub ASCLA, Galerías, Foros, Directorio, Centro de Conocimiento, Asistente IA, Aliados, Mensajería, Contacto.\n\nEl Centro de Conocimiento reúne artículos, documentos y videos. Los videos procesados pueden incluir un resumen, una nota técnica y cápsulas con marcas de tiempo.",
+        "mode": "ASCLA",
+        "grounding": {
+          "policy": "source-references-v2",
+          "context_source_ids": [],
+          "valid_references": 0,
+          "ignored_references": 0,
+          "live_context_used": true,
+          "conversation_only": false,
+          "snapshot_at": "2026-11-19T15:12:02-05:00"
+        }
+      },
+      {
+        "question": "What galleries are available?",
+        "answer": "I could not find a published gallery you can access. Try its title.",
+        "mode": "DEMO MODE",
+        "grounding": {
+          "policy": "source-references-v2",
+          "context_source_ids": [],
+          "valid_references": 0,
+          "ignored_references": 0,
+          "live_context_used": true,
+          "conversation_only": false,
+          "snapshot_at": "2026-11-19T15:12:13-05:00"
+        }
+      },
+      {
+        "question": "What is this ASCLA intranet for members?",
+        "answer": "ASCLA stands for the Asociación de Secretarios Corporativos de América Latina.\n\nASCLA brings together corporate secretaries in Latin America to exchange professional experience and knowledge about corporate governance.\n\nThe ASCLA intranet is its private platform for the member community. It brings together professional profiles, events and training, publications, forums, knowledge resources, galleries and partners. Access requires an authorized account; the sections and actions available depend on your permissions.\n\nAvailable sections · Home, Profile, Events and training, ASCLA Hub, Galleries, Forums, Directory, Knowledge Center, AI Assistant, Partners, Messages, Contact.\n\nThe Knowledge Center contains member resources such as articles, documents and videos. Processed videos can include a summary, technical note and timestamped highlights.",
+        "mode": "ASCLA",
+        "grounding": {
+          "policy": "source-references-v2",
+          "context_source_ids": [],
+          "valid_references": 0,
+          "ignored_references": 0,
+          "live_context_used": true,
+          "conversation_only": false,
+          "snapshot_at": "2026-11-19T15:12:24-05:00"
+        }
+      },
+      {
+        "question": "And what does it contain?",
+        "answer": "ASCLA stands for the Asociación de Secretarios Corporativos de América Latina.\n\nASCLA brings together corporate secretaries in Latin America to exchange professional experience and knowledge about corporate governance.\n\nThe ASCLA intranet is its private platform for the member community. It brings together professional profiles, events and training, publications, forums, knowledge resources, galleries and partners. Access requires an authorized account; the sections and actions available depend on your permissions.\n\nAvailable sections · Home, Profile, Events and training, ASCLA Hub, Galleries, Forums, Directory, Knowledge Center, AI Assistant, Partners, Messages, Contact.\n\nThe Knowledge Center contains member resources such as articles, documents and videos. Processed videos can include a summary, technical note and timestamped highlights.",
+        "mode": "ASCLA",
+        "grounding": {
+          "policy": "source-references-v2",
+          "context_source_ids": [],
+          "valid_references": 0,
+          "ignored_references": 0,
+          "live_context_used": true,
+          "conversation_only": false,
+          "snapshot_at": "2026-11-19T15:12:34-05:00"
+        }
+      }
+    ],
+    "errors": [],
+    "target": "http://127.0.0.1:18383",
+    "scope": "Actual local WordPress, HTTP ask endpoint, background queue, ES/EN account language and UI persistence."
+  },
+  "before": [
+    {
+      "question": "¿Qué es la intranet de ASCLA?",
+      "previous_video": false,
+      "no_evidence": false
+    },
+    {
+      "question": "¿Qué es la intranet de ASCLA?",
+      "previous_video": true,
+      "no_evidence": false
+    },
+    {
+      "question": "¿Qué es esta intranet de ASCLA?",
+      "previous_video": false,
+      "no_evidence": false
+    },
+    {
+      "question": "¿Qué es esta intranet de ASCLA?",
+      "previous_video": true,
+      "no_evidence": true
+    },
+    {
+      "question": "¿Y qué es la intranet de ASCLA?",
+      "previous_video": false,
+      "no_evidence": false
+    },
+    {
+      "question": "¿Y qué es la intranet de ASCLA?",
+      "previous_video": true,
+      "no_evidence": true
+    },
+    {
+      "question": "La intranet de ASCLA, ¿qué es?",
+      "previous_video": false,
+      "no_evidence": true
+    },
+    {
+      "question": "La intranet de ASCLA, ¿qué es?",
+      "previous_video": true,
+      "no_evidence": true
+    },
+    {
+      "question": "¿Para qué sirve esta plataforma?",
+      "previous_video": false,
+      "no_evidence": false
+    },
+    {
+      "question": "¿Para qué sirve esta plataforma?",
+      "previous_video": true,
+      "no_evidence": true
+    }
+  ],
+  "after": [
+    {
+      "question": "¿Qué es la intranet de ASCLA?",
+      "previous_video": false,
+      "live_context_used": true
+    },
+    {
+      "question": "¿Qué es la intranet de ASCLA?",
+      "previous_video": true,
+      "live_context_used": true
+    },
+    {
+      "question": "¿Qué es esta intranet de ASCLA?",
+      "previous_video": false,
+      "live_context_used": true
+    },
+    {
+      "question": "¿Qué es esta intranet de ASCLA?",
+      "previous_video": true,
+      "live_context_used": true
+    },
+    {
+      "question": "¿Y qué es la intranet de ASCLA?",
+      "previous_video": false,
+      "live_context_used": true
+    },
+    {
+      "question": "¿Y qué es la intranet de ASCLA?",
+      "previous_video": true,
+      "live_context_used": true
+    },
+    {
+      "question": "La intranet de ASCLA, ¿qué es?",
+      "previous_video": false,
+      "live_context_used": true
+    },
+    {
+      "question": "La intranet de ASCLA, ¿qué es?",
+      "previous_video": true,
+      "live_context_used": true
+    },
+    {
+      "question": "¿Para qué sirve esta plataforma?",
+      "previous_video": false,
+      "live_context_used": true
+    },
+    {
+      "question": "¿Para qué sirve esta plataforma?",
+      "previous_video": true,
+      "live_context_used": true
+    }
+  ],
+  "scope": "Focused assistant intent, institutional context, ES/EN, privacy, media evidence, live requests and UI queue regression on local WordPress. The full 1.13 Sonar/Trivy/ZAP/QA/UAT reports keep their original package SHA and do not certify this patch."
+}

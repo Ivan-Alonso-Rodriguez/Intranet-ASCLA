@@ -1,6 +1,10 @@
 # Guía práctica de QA, SonarQube y UAT
 
-Versión documentada: **1.13**, esquema **17**. El [historial de 1.13](VERSION_HISTORY.md#release-113) detalla el alcance de la entrega; los resultados históricos se indican por versión.
+Versión documentada: **1.13.1**, esquema **17**. El [historial de 1.13.1](VERSION_HISTORY.md#release-1131) detalla el alcance de la entrega; los resultados históricos se indican por versión.
+
+## Explicación institucional · 1.13.1
+
+En Asistente pregunta «¿Qué es la intranet de ASCLA?» y «La intranet de ASCLA, ¿qué es?». Consulta primero videos o galerías y después pregunta «¿Qué es esta intranet?»: debe explicar la plataforma. Repite en inglés y verifica las secciones por rol. Las preguntas sobre fuentes concretas conservan la evidencia autorizada; los datos no verificables siguen rechazándose.
 
 ## Revisión de ASCLA 1.13
 

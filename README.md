@@ -1,6 +1,10 @@
 # ASCLA Core — Intranet ASCLA
 
-## Versión actual: 1.13 · esquema 17
+## Versión actual: 1.13.1 · esquema 17
+
+La corrección 1.13.1 mejora la explicación institucional del asistente y evita arrastrar el tema de videos o galerías anteriores.
+
+Su [regresión focalizada](docs/evidence/release-1.13.1/assistant-about.json) aprobó 93 pruebas PHP, 932 aserciones, 49 controles de versión y el chat real en español e inglés, incluida la persistencia tras recargar.
 
 La versión 1.13 reúne las mejoras de grupos, los recorridos interactivos por usuario, el menú de cuenta, los idiomas de IA, los banners, las reacciones animadas y el modo oscuro en gris carbón. Consulta el [historial de 1.13](VERSION_HISTORY.md#release-113) para ver el alcance desde el último commit de 1.12.
 
@@ -44,7 +48,7 @@ python3 scripts/build.py
 python3 scripts/verify-package.py
 ```
 
-Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto de 1.13](docs/evidence/release-1.13/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
+Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto de 1.13.1](docs/evidence/release-1.13.1/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
 
 ## Calidad y entrega
 

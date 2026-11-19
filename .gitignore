@@ -251,3 +251,9 @@ __pycache__/
 !/docs/evidence/release-1.13/validation.json
 !/docs/evidence/release-1.13/qa-junit.xml
 !/docs/evidence/release-1.13/uat-junit.xml
+
+!/docs/evidence/release-1.13.1/
+/docs/evidence/release-1.13.1/*
+!/docs/evidence/release-1.13.1/package.json
+!/docs/evidence/release-1.13.1/assistant-about.json
+!/docs/evidence/release-1.13.1/assistant-about-junit.xml

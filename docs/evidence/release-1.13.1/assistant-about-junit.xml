@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="93" assertions="932" errors="0" failures="0" skipped="0" time="27.578032">
+    <testsuite name="AILanguageTest" file="/tmp/ascla-about-tests/php/AILanguageTest.php" tests="11" assertions="98" errors="0" failures="0" skipped="0" time="2.259948">
+      <testcase name="testLanguageSwitchSeparatesCachesAndKeepsTheSamePeopleAndScores" file="/tmp/ascla-about-tests/php/AILanguageTest.php" line="54" class="AILanguageTest" classname="AILanguageTest" assertions="16" time="0.230481"/>
+      <testcase name="testAnOlderCacheWithoutALanguageCannotReturnSpanishToEnglishUsers" file="/tmp/ascla-about-tests/php/AILanguageTest.php" line="66" class="AILanguageTest" classname="AILanguageTest" assertions="9" time="0.202621"/>
+      <testcase name="testDeterministicAndDemoExplanationsUseEnglishWithoutTranslatingProfileData" file="/tmp/ascla-about-tests/php/AILanguageTest.php" line="76" class="AILanguageTest" classname="AILanguageTest" assertions="7" time="0.206114"/>
+      <testcase name="testNewSuggestedMessagesUseTheAccountLanguageAndRemainSingleUse" file="/tmp/ascla-about-tests/php/AILanguageTest.php" line="85" class="AILanguageTest" classname="AILanguageTest" assertions="8" time="0.204219"/>
+      <testsuite name="AILanguageTest::testProviderFailureAndItsCachedFallbackRespectEachLanguage" tests="2" assertions="24" errors="0" failures="0" skipped="0" time="0.417304">
+        <testcase name="testProviderFailureAndItsCachedFallbackRespectEachLanguage with data set #0" file="/tmp/ascla-about-tests/php/AILanguageTest.php" line="96" class="AILanguageTest" classname="AILanguageTest" assertions="12" time="0.214328"/>
+        <testcase name="testProviderFailureAndItsCachedFallbackRespectEachLanguage with data set #1" file="/tmp/ascla-about-tests/php/AILanguageTest.php" line="96" class="AILanguageTest" classname="AILanguageTest" assertions="12" time="0.202976"/>
+      </testsuite>
+      <testcase name="testRateLimitFallbackUsesEnglishWithoutCallingTheProvider" file="/tmp/ascla-about-tests/php/AILanguageTest.php" line="103" class="AILanguageTest" classname="AILanguageTest" assertions="5" time="0.198138"/>
+      <testcase name="testAnEnglishAssistantImpersonationIsReplacedWithAnEnglishHumanDraft" file="/tmp/ascla-about-tests/php/AILanguageTest.php" line="110" class="AILanguageTest" classname="AILanguageTest" assertions="7" time="0.211111"/>
+      <testcase name="testAllRealTransportsGetAnExplicitLanguageEvenWithoutLiveContext" file="/tmp/ascla-about-tests/php/AILanguageTest.php" line="115" class="AILanguageTest" classname="AILanguageTest" assertions="11" time="0.189419"/>
+      <testcase name="testDemoAgendaAndMeetingCopyUseEnglishWithoutChangingSourceTitles" file="/tmp/ascla-about-tests/php/AILanguageTest.php" line="125" class="AILanguageTest" classname="AILanguageTest" assertions="7" time="0.189974"/>
+      <testcase name="testAssistantEvidenceFallbackMessagesAreAlsoLocalized" file="/tmp/ascla-about-tests/php/AILanguageTest.php" line="137" class="AILanguageTest" classname="AILanguageTest" assertions="4" time="0.210567"/>
+    </testsuite>
+    <testsuite name="AdminGeminiTest" file="/tmp/ascla-about-tests/php/AdminGeminiTest.php" tests="2" assertions="22" errors="0" failures="0" skipped="0" time="0.592446">
+      <testcase name="testGalleryAndKnowledgeRequireAdministratorEvenWhenIdsAreManipulated" file="/tmp/ascla-about-tests/php/AdminGeminiTest.php" line="44" class="AdminGeminiTest" classname="AdminGeminiTest" assertions="20" time="0.386512"/>
+      <testcase name="testNoRelevantKnowledgeAbstainsWithoutCallingGemini" file="/tmp/ascla-about-tests/php/AdminGeminiTest.php" line="125" class="AdminGeminiTest" classname="AdminGeminiTest" assertions="2" time="0.205935"/>
+    </testsuite>
+    <testsuite name="AnalysisComplianceTest" file="/tmp/ascla-about-tests/php/AnalysisComplianceTest.php" tests="1" assertions="8" errors="0" failures="0" skipped="0" time="0.369297">
+      <testcase name="testMessagesAreImmutableAndReadOnlyWhenExplicitlyAcknowledged" file="/tmp/ascla-about-tests/php/AnalysisComplianceTest.php" line="111" class="AnalysisComplianceTest" classname="AnalysisComplianceTest" assertions="8" time="0.369297"/>
+    </testsuite>
+    <testsuite name="AssistantEventContextTest" file="/tmp/ascla-about-tests/php/AssistantEventContextTest.php" tests="4" assertions="23" errors="0" failures="0" skipped="0" time="1.660942">
+      <testcase name="testAssistantReceivesCompleteDetailsAndCountsConfirmedAndOfferedSeats" file="/tmp/ascla-about-tests/php/AssistantEventContextTest.php" line="40" class="AssistantEventContextTest" classname="AssistantEventContextTest" assertions="10" time="0.324843"/>
+      <testcase name="testSpecificEventCanBeFoundAfterEightUpcomingEventsAndHistoricalDetailsStayAvailable" file="/tmp/ascla-about-tests/php/AssistantEventContextTest.php" line="60" class="AssistantEventContextTest" classname="AssistantEventContextTest" assertions="5" time="0.663044"/>
+      <testcase name="testCurrentAvailabilityReplacesEarlierCountsAndUnlimitedCapacityIsExplicit" file="/tmp/ascla-about-tests/php/AssistantEventContextTest.php" line="75" class="AssistantEventContextTest" classname="AssistantEventContextTest" assertions="7" time="0.366932"/>
+      <testcase name="testRestrictedMicroeventIsExcludedFromTheAssistant" file="/tmp/ascla-about-tests/php/AssistantEventContextTest.php" line="91" class="AssistantEventContextTest" classname="AssistantEventContextTest" assertions="1" time="0.306123"/>
+    </testsuite>
+    <testsuite name="AssistantOrganizationTest" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" tests="16" assertions="303" errors="0" failures="0" skipped="0" time="1.119459">
+      <testsuite name="AssistantOrganizationTest::testInstitutionalHelpIsIndependentOfEarlierMediaAndExternalAi" tests="11" assertions="275" errors="0" failures="0" skipped="0" time="0.774710">
+        <testcase name="testInstitutionalHelpIsIndependentOfEarlierMediaAndExternalAi with data set #0" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="46" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="25" time="0.072654"/>
+        <testcase name="testInstitutionalHelpIsIndependentOfEarlierMediaAndExternalAi with data set #1" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="46" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="25" time="0.078283"/>
+        <testcase name="testInstitutionalHelpIsIndependentOfEarlierMediaAndExternalAi with data set #2" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="46" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="25" time="0.073921"/>
+        <testcase name="testInstitutionalHelpIsIndependentOfEarlierMediaAndExternalAi with data set #3" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="46" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="25" time="0.073173"/>
+        <testcase name="testInstitutionalHelpIsIndependentOfEarlierMediaAndExternalAi with data set #4" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="46" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="25" time="0.068249"/>
+        <testcase name="testInstitutionalHelpIsIndependentOfEarlierMediaAndExternalAi with data set #5" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="46" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="25" time="0.069832"/>
+        <testcase name="testInstitutionalHelpIsIndependentOfEarlierMediaAndExternalAi with data set #6" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="46" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="25" time="0.068126"/>
+        <testcase name="testInstitutionalHelpIsIndependentOfEarlierMediaAndExternalAi with data set #7" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="46" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="25" time="0.067661"/>
+        <testcase name="testInstitutionalHelpIsIndependentOfEarlierMediaAndExternalAi with data set #8" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="46" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="25" time="0.068420"/>
+        <testcase name="testInstitutionalHelpIsIndependentOfEarlierMediaAndExternalAi with data set #9" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="46" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="25" time="0.067163"/>
+        <testcase name="testInstitutionalHelpIsIndependentOfEarlierMediaAndExternalAi with data set #10" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="46" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="25" time="0.067227"/>
+      </testsuite>
+      <testcase name="testSourceSpecificQuestionsStillRequireAuthorizedEvidence" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="63" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="6" time="0.070403"/>
+      <testcase name="testUnknownFactsAreNotReplacedByTheInstitutionalDescription" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="72" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="3" time="0.067984"/>
+      <testcase name="testExplicitLiveRequestsKeepTheirDataIntent" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="77" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="8" time="0.067481"/>
+      <testcase name="testDefinitionExplainsThePrivatePlatformAndAuthorizedAccess" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="84" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="4" time="0.067658"/>
+      <testcase name="testFollowUpsStayOnTheNewInstitutionalTopic" file="/tmp/ascla-about-tests/php/AssistantOrganizationTest.php" line="92" class="AssistantOrganizationTest" classname="AssistantOrganizationTest" assertions="7" time="0.071223"/>
+    </testsuite>
+    <testsuite name="AssistantReset108Test" file="/tmp/ascla-about-tests/php/AssistantReset108Test.php" tests="3" assertions="32" errors="0" failures="0" skipped="0" time="0.479704">
+      <testcase name="testFreshThreadSendsNoPreviousConversationToGeminiAndKeepsHistory" file="/tmp/ascla-about-tests/php/AssistantReset108Test.php" line="59" class="AssistantReset108Test" classname="AssistantReset108Test" assertions="11" time="0.159243"/>
+      <testcase name="testContinuingAnExplicitThreadUsesOnlyItsOwnCompletedTurns" file="/tmp/ascla-about-tests/php/AssistantReset108Test.php" line="66" class="AssistantReset108Test" classname="AssistantReset108Test" assertions="7" time="0.154033"/>
+      <testcase name="testAnOldJobCompletedAfterResetDoesNotBecomeTheNewThreadsContext" file="/tmp/ascla-about-tests/php/AssistantReset108Test.php" line="76" class="AssistantReset108Test" classname="AssistantReset108Test" assertions="14" time="0.166428"/>
+    </testsuite>
+    <testsuite name="AssistantVideoEvidenceTest" file="/tmp/ascla-about-tests/php/AssistantVideoEvidenceTest.php" tests="4" assertions="43" errors="0" failures="0" skipped="0" time="0.786898">
+      <testcase name="testOrganizationAndVisibleSectionsAreAvailableWithoutAnyPublication" file="/tmp/ascla-about-tests/php/AssistantVideoEvidenceTest.php" line="45" class="AssistantVideoEvidenceTest" classname="AssistantVideoEvidenceTest" assertions="10" time="0.132354"/>
+      <testcase name="testGenerationCitationFollowUpAndChangedSource" file="/tmp/ascla-about-tests/php/AssistantVideoEvidenceTest.php" line="58" class="AssistantVideoEvidenceTest" classname="AssistantVideoEvidenceTest" assertions="13" time="0.189368"/>
+      <testcase name="testChatReloadAndFollowUpUsePublishedVideoEvidence" file="/tmp/ascla-about-tests/php/AssistantVideoEvidenceTest.php" line="86" class="AssistantVideoEvidenceTest" classname="AssistantVideoEvidenceTest" assertions="12" time="0.214135"/>
+      <testcase name="testExistingStructuredMaterialIsBackfilledWithoutPrivateDataOrRegeneration" file="/tmp/ascla-about-tests/php/AssistantVideoEvidenceTest.php" line="113" class="AssistantVideoEvidenceTest" classname="AssistantVideoEvidenceTest" assertions="8" time="0.251042"/>
+    </testsuite>
+    <testsuite name="CacheRecoveryTest" file="/tmp/ascla-about-tests/php/CacheRecoveryTest.php" tests="1" assertions="6" errors="0" failures="0" skipped="0" time="0.163591">
+      <testcase name="testHealthyCacheMissIsAcknowledgedAndEncryptedKeysAreNotExposedByOverview" file="/tmp/ascla-about-tests/php/CacheRecoveryTest.php" line="109" class="CacheRecoveryTest" classname="CacheRecoveryTest" assertions="6" time="0.163591"/>
+    </testsuite>
+    <testsuite name="CompletionTest" file="/tmp/ascla-about-tests/php/CompletionTest.php" tests="1" assertions="12" errors="0" failures="0" skipped="0" time="0.561586">
+      <testcase name="testKnowledgeRecommendationsUseKeywordsAsSecondarySignal" file="/tmp/ascla-about-tests/php/CompletionTest.php" line="101" class="CompletionTest" classname="CompletionTest" assertions="12" time="0.561586"/>
+    </testsuite>
+    <testsuite name="ConnectionsTest" file="/tmp/ascla-about-tests/php/ConnectionsTest.php" tests="1" assertions="7" errors="0" failures="0" skipped="0" time="0.494584">
+      <testcase name="testChatPhotoUsesTheSamePrivateMediaUrlAndHonorsPrivacyAndMissingImages" file="/tmp/ascla-about-tests/php/ConnectionsTest.php" line="164" class="ConnectionsTest" classname="ConnectionsTest" assertions="7" time="0.494584"/>
+    </testsuite>
+    <testsuite name="EditorialPrivacyTest" file="/tmp/ascla-about-tests/php/EditorialPrivacyTest.php" tests="5" assertions="50" errors="0" failures="0" skipped="0" time="1.685019">
+      <testcase name="testReadersIncludingModeratorsReceiveAnonymousDataWithoutLosingVideoLinks" file="/tmp/ascla-about-tests/php/EditorialPrivacyTest.php" line="28" class="EditorialPrivacyTest" classname="EditorialPrivacyTest" assertions="16" time="0.308987"/>
+      <testcase name="testOnlyAuthorizedEditorsSeeTheOriginalSourceAndOptOutKeepsAuthoredAttribution" file="/tmp/ascla-about-tests/php/EditorialPrivacyTest.php" line="41" class="EditorialPrivacyTest" classname="EditorialPrivacyTest" assertions="8" time="0.318158"/>
+      <testcase name="testVideoLinksCannotReuseProviderSuppliedUrlsOrInvalidVideoIds" file="/tmp/ascla-about-tests/php/EditorialPrivacyTest.php" line="52" class="EditorialPrivacyTest" classname="EditorialPrivacyTest" assertions="4" time="0.314629"/>
+      <testcase name="testPublicTitlesRemainIntactInListingsAssistantAndSavedReferences" file="/tmp/ascla-about-tests/php/EditorialPrivacyTest.php" line="58" class="EditorialPrivacyTest" classname="EditorialPrivacyTest" assertions="21" time="0.397602"/>
+      <testcase name="testPublicAttributionIsPreservedWhenChathamIsDisabled" file="/tmp/ascla-about-tests/php/EditorialPrivacyTest.php" line="77" class="EditorialPrivacyTest" classname="EditorialPrivacyTest" assertions="1" time="0.345643"/>
+    </testsuite>
+    <testsuite name="EncounterGalleryChangesTest" file="/tmp/ascla-about-tests/php/EncounterGalleryChangesTest.php" tests="5" assertions="37" errors="0" failures="0" skipped="0" time="3.253341">
+      <testcase name="testGroupControlsValidatePermissionsAndPreserveUnrelatedSettings" file="/tmp/ascla-about-tests/php/EncounterGalleryChangesTest.php" line="39" class="EncounterGalleryChangesTest" classname="EncounterGalleryChangesTest" assertions="6" time="0.379614"/>
+      <testcase name="testInvitationsUseEventCapacityAndUnlimitedEventsKeepTheirMeaning" file="/tmp/ascla-about-tests/php/EncounterGalleryChangesTest.php" line="49" class="EncounterGalleryChangesTest" classname="EncounterGalleryChangesTest" assertions="5" time="0.878341"/>
+      <testcase name="testGalleryEvidenceRespectsPublicationAndFileBindingsAndInvalidatesOldAnswers" file="/tmp/ascla-about-tests/php/EncounterGalleryChangesTest.php" line="60" class="EncounterGalleryChangesTest" classname="EncounterGalleryChangesTest" assertions="9" time="0.404556"/>
+      <testcase name="testVisionProvidersReceiveImagesAsMultimodalPartsWithoutPersistingBinaryEvidence" file="/tmp/ascla-about-tests/php/EncounterGalleryChangesTest.php" line="75" class="EncounterGalleryChangesTest" classname="EncounterGalleryChangesTest" assertions="12" time="0.414315"/>
+      <testcase name="testOlderGalleryIsRankedBeforeTheLimitAndAmbiguousRequestsAskForAChoice" file="/tmp/ascla-about-tests/php/EncounterGalleryChangesTest.php" line="102" class="EncounterGalleryChangesTest" classname="EncounterGalleryChangesTest" assertions="5" time="1.176515"/>
+    </testsuite>
+    <testsuite name="FormsInput108Test" file="/tmp/ascla-about-tests/php/FormsInput108Test.php" tests="6" assertions="24" errors="0" failures="0" skipped="0" time="1.176588">
+      <testsuite name="FormsInput108Test::testWarningsRequireAValidTrueAcknowledgement" tests="5" assertions="20" errors="0" failures="0" skipped="0" time="0.985817">
+        <testcase name="testWarningsRequireAValidTrueAcknowledgement with data set #0" file="/tmp/ascla-about-tests/php/FormsInput108Test.php" line="57" class="FormsInput108Test" classname="FormsInput108Test" assertions="4" time="0.220599"/>
+        <testcase name="testWarningsRequireAValidTrueAcknowledgement with data set #1" file="/tmp/ascla-about-tests/php/FormsInput108Test.php" line="57" class="FormsInput108Test" classname="FormsInput108Test" assertions="4" time="0.192183"/>
+        <testcase name="testWarningsRequireAValidTrueAcknowledgement with data set #2" file="/tmp/ascla-about-tests/php/FormsInput108Test.php" line="57" class="FormsInput108Test" classname="FormsInput108Test" assertions="4" time="0.191435"/>
+        <testcase name="testWarningsRequireAValidTrueAcknowledgement with data set #3" file="/tmp/ascla-about-tests/php/FormsInput108Test.php" line="57" class="FormsInput108Test" classname="FormsInput108Test" assertions="4" time="0.191172"/>
+        <testcase name="testWarningsRequireAValidTrueAcknowledgement with data set #4" file="/tmp/ascla-about-tests/php/FormsInput108Test.php" line="57" class="FormsInput108Test" classname="FormsInput108Test" assertions="4" time="0.190427"/>
+      </testsuite>
+      <testcase name="testCanonicalColumnsInterestsAndAcknowledgementRemainSupported" file="/tmp/ascla-about-tests/php/FormsInput108Test.php" line="62" class="FormsInput108Test" classname="FormsInput108Test" assertions="4" time="0.190772"/>
+    </testsuite>
+    <testsuite name="GalleryProfile1110Test" file="/tmp/ascla-about-tests/php/GalleryProfile1110Test.php" tests="5" assertions="24" errors="0" failures="0" skipped="0" time="1.225619">
+      <testcase name="testRemovingGalleryDeletesImagesPdfAndUnusedMasterButPreservesOtherFiles" file="/tmp/ascla-about-tests/php/GalleryProfile1110Test.php" line="31" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="8" time="0.269880"/>
+      <testcase name="testSharedMasterSurvivesUntilItsLastGalleryDerivativeIsRemoved" file="/tmp/ascla-about-tests/php/GalleryProfile1110Test.php" line="39" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="5" time="0.292968"/>
+      <testcase name="testUnauthorizedGalleryDeletionPreservesThePostAndItsBytes" file="/tmp/ascla-about-tests/php/GalleryProfile1110Test.php" line="45" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="3" time="0.232969"/>
+      <testcase name="testDatabaseFailureRollsBackGalleryAndFileDeletionTogether" file="/tmp/ascla-about-tests/php/GalleryProfile1110Test.php" line="52" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="4" time="0.231830"/>
+      <testcase name="testUsernameIsAvailableOnlyOnOwnProfile" file="/tmp/ascla-about-tests/php/GalleryProfile1110Test.php" line="62" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="4" time="0.197971"/>
+    </testsuite>
+    <testsuite name="IntegrationTest" file="/tmp/ascla-about-tests/php/IntegrationTest.php" tests="6" assertions="55" errors="0" failures="0" skipped="0" time="5.102236">
+      <testcase name="testProfilePrivacyCannotBeBypassedBySearchOrMatching" file="/tmp/ascla-about-tests/php/IntegrationTest.php" line="144" class="IntegrationTest" classname="IntegrationTest" assertions="9" time="0.359331"/>
+      <testcase name="testConfirmedAttendeesCanSeeOnlyPrivacySafeParticipantProfiles" file="/tmp/ascla-about-tests/php/IntegrationTest.php" line="281" class="IntegrationTest" classname="IntegrationTest" assertions="16" time="0.434696"/>
+      <testcase name="testAssistantUsesOnlyPublishedSourcesAndAbstains" file="/tmp/ascla-about-tests/php/IntegrationTest.php" line="347" class="IntegrationTest" classname="IntegrationTest" assertions="10" time="0.319368"/>
+      <testcase name="testAssistantKnowsUpcomingEventsFromTheIntranet" file="/tmp/ascla-about-tests/php/IntegrationTest.php" line="361" class="IntegrationTest" classname="IntegrationTest" assertions="6" time="0.303653"/>
+      <testcase name="testAssistantThreadsKeepConversationHistoryScopedToTheMember" file="/tmp/ascla-about-tests/php/IntegrationTest.php" line="372" class="IntegrationTest" classname="IntegrationTest" assertions="9" time="0.287898"/>
+      <testcase name="testKnowledgeFindsOldSourcesBeyondTheFirst300Posts" file="/tmp/ascla-about-tests/php/IntegrationTest.php" line="384" class="IntegrationTest" classname="IntegrationTest" assertions="5" time="3.397290"/>
+    </testsuite>
+    <testsuite name="LoginBehaviorTest" file="/tmp/ascla-about-tests/php/LoginBehaviorTest.php" tests="1" assertions="18" errors="0" failures="0" skipped="0" time="0.003048">
+      <testcase name="testBootRegistersAuthenticationPrivacyAndBrandingHooks" file="/tmp/ascla-about-tests/php/LoginBehaviorTest.php" line="99" class="LoginBehaviorTest" classname="LoginBehaviorTest" assertions="18" time="0.003048"/>
+    </testsuite>
+    <testsuite name="PrivacyLabels108Test" file="/tmp/ascla-about-tests/php/PrivacyLabels108Test.php" tests="9" assertions="47" errors="0" failures="0" skipped="0" time="2.733581">
+      <testsuite name="PrivacyLabels108Test::testLegacyLabelsAreNaturalForAllReadersWithoutOverwritingTheSource" tests="4" assertions="24" errors="0" failures="0" skipped="0" time="1.257712">
+        <testcase name="testLegacyLabelsAreNaturalForAllReadersWithoutOverwritingTheSource with data set #0" file="/tmp/ascla-about-tests/php/PrivacyLabels108Test.php" line="26" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="5" time="0.305616"/>
+        <testcase name="testLegacyLabelsAreNaturalForAllReadersWithoutOverwritingTheSource with data set #1" file="/tmp/ascla-about-tests/php/PrivacyLabels108Test.php" line="26" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="5" time="0.324390"/>
+        <testcase name="testLegacyLabelsAreNaturalForAllReadersWithoutOverwritingTheSource with data set #2" file="/tmp/ascla-about-tests/php/PrivacyLabels108Test.php" line="26" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="7" time="0.324045"/>
+        <testcase name="testLegacyLabelsAreNaturalForAllReadersWithoutOverwritingTheSource with data set #3" file="/tmp/ascla-about-tests/php/PrivacyLabels108Test.php" line="26" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="7" time="0.303660"/>
+      </testsuite>
+      <testcase name="testAuthoredTitlesAndLiteralUsesOfTheWordAreNotRewritten" file="/tmp/ascla-about-tests/php/PrivacyLabels108Test.php" line="35" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="9" time="0.286169"/>
+      <testcase name="testNewProposalsKeepTheInstitutionalLabel" file="/tmp/ascla-about-tests/php/PrivacyLabels108Test.php" line="43" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="2" time="0.308774"/>
+      <testcase name="testGeneratedLegacySuffixIsRemovedWithoutRewritingAuthoredTitlesOrStoredSources" file="/tmp/ascla-about-tests/php/PrivacyLabels108Test.php" line="47" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="3" time="0.290036"/>
+      <testcase name="testVisibleLegacyTitleIsSearchableAndHiddenIdentitiesRemainExcluded" file="/tmp/ascla-about-tests/php/PrivacyLabels108Test.php" line="54" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="7" time="0.296517"/>
+      <testcase name="testSavedAssistantReferencesUseTheCurrentLabelAndStillHideIdentity" file="/tmp/ascla-about-tests/php/PrivacyLabels108Test.php" line="62" class="PrivacyLabels108Test" classname="PrivacyLabels108Test" assertions="2" time="0.294374"/>
+    </testsuite>
+    <testsuite name="ProfileEditorial109Test" file="/tmp/ascla-about-tests/php/ProfileEditorial109Test.php" tests="1" assertions="26" errors="0" failures="0" skipped="0" time="0.569142">
+      <testcase name="testGalleryAndResourceCanBeHiddenListedAndRepublishedWithoutLosingData" file="/tmp/ascla-about-tests/php/ProfileEditorial109Test.php" line="69" class="ProfileEditorial109Test" classname="ProfileEditorial109Test" assertions="26" time="0.569142"/>
+    </testsuite>
+    <testsuite name="ProfileLoadingTest" file="/tmp/ascla-about-tests/php/ProfileLoadingTest.php" tests="1" assertions="9" errors="0" failures="0" skipped="0" time="0.275549">
+      <testcase name="testCachedProseNeverBypassesNetworkingPrivacyOrBlocks" file="/tmp/ascla-about-tests/php/ProfileLoadingTest.php" line="83" class="ProfileLoadingTest" classname="ProfileLoadingTest" assertions="9" time="0.275549"/>
+    </testsuite>
+    <testsuite name="QueryOptimizationTest" file="/tmp/ascla-about-tests/php/QueryOptimizationTest.php" tests="1" assertions="3" errors="0" failures="0" skipped="0" time="0.217158">
+      <testcase name="testCheapScoresUseNoPairTransientsAndStillHonorLivePrivacy" file="/tmp/ascla-about-tests/php/QueryOptimizationTest.php" line="151" class="QueryOptimizationTest" classname="QueryOptimizationTest" assertions="3" time="0.217158"/>
+    </testsuite>
+    <testsuite name="Release107PriorityTest" file="/tmp/ascla-about-tests/php/Release107PriorityTest.php" tests="1" assertions="2" errors="0" failures="0" skipped="0" time="0.369443">
+      <testcase name="testSearchDoesNotFallBackToOriginalTextWhenPrivacyQueryFails" file="/tmp/ascla-about-tests/php/Release107PriorityTest.php" line="100" class="Release107PriorityTest" classname="Release107PriorityTest" assertions="2" time="0.369443"/>
+    </testsuite>
+    <testsuite name="ReleaseCompletionTest" file="/tmp/ascla-about-tests/php/ReleaseCompletionTest.php" tests="1" assertions="20" errors="0" failures="0" skipped="0" time="0.374004">
+      <testcase name="testPhonePrivacyEditClearAndNoAiExposure" file="/tmp/ascla-about-tests/php/ReleaseCompletionTest.php" line="36" class="ReleaseCompletionTest" classname="ReleaseCompletionTest" assertions="20" time="0.374004"/>
+    </testsuite>
+    <testsuite name="RoleWorkflowTest" file="/tmp/ascla-about-tests/php/RoleWorkflowTest.php" tests="4" assertions="10" errors="0" failures="0" skipped="0" time="1.222639">
+      <testcase name="testExecutiveCanPublishEventsGalleryAndResourcesDirectly" file="/tmp/ascla-about-tests/php/RoleWorkflowTest.php" line="59" class="RoleWorkflowTest" classname="RoleWorkflowTest" assertions="6" time="0.357394"/>
+      <testcase name="testExecutiveCanPublishReviewedGeneratedKnowledgeDirectly" file="/tmp/ascla-about-tests/php/RoleWorkflowTest.php" line="72" class="RoleWorkflowTest" classname="RoleWorkflowTest" assertions="2" time="0.310860"/>
+      <testcase name="testMemberContentIsHeldForReviewWhenTypeIsEventGalleryOrResource" file="/tmp/ascla-about-tests/php/RoleWorkflowTest.php" line="99" class="RoleWorkflowTest" classname="RoleWorkflowTest" assertions="1" time="0.272256"/>
+      <testcase name="testModeratorAloneCannotManageEventsGalleryOrResources" file="/tmp/ascla-about-tests/php/RoleWorkflowTest.php" line="106" class="RoleWorkflowTest" classname="RoleWorkflowTest" assertions="1" time="0.282129"/>
+    </testsuite>
+    <testsuite name="SprintEditorialTest" file="/tmp/ascla-about-tests/php/SprintEditorialTest.php" tests="1" assertions="25" errors="0" failures="0" skipped="0" time="0.000167">
+      <testcase name="testLegacyAndProviderLabelsAreRemovedWithoutChangingLegitimatePrivacyVocabulary" file="/tmp/ascla-about-tests/php/SprintEditorialTest.php" line="35" class="SprintEditorialTest" classname="SprintEditorialTest" assertions="25" time="0.000167"/>
+    </testsuite>
+    <testsuite name="SprintNetworkingTest" file="/tmp/ascla-about-tests/php/SprintNetworkingTest.php" tests="1" assertions="16" errors="0" failures="0" skipped="0" time="0.617718">
+      <testcase name="testAssistantKeepsPublicReferencesAndRedactsProviderIdentitiesWithoutAnExplicitIdentityList" file="/tmp/ascla-about-tests/php/SprintNetworkingTest.php" line="126" class="SprintNetworkingTest" classname="SprintNetworkingTest" assertions="16" time="0.617718"/>
+    </testsuite>
+    <testsuite name="SupadataTranscriptTest" file="/tmp/ascla-about-tests/php/SupadataTranscriptTest.php" tests="1" assertions="12" errors="0" failures="0" skipped="0" time="0.264323">
+      <testcase name="testRolePrivacyAndApiKeyEncryptionFromWordPress" file="/tmp/ascla-about-tests/php/SupadataTranscriptTest.php" line="151" class="SupadataTranscriptTest" classname="SupadataTranscriptTest" assertions="12" time="0.264323"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

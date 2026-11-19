@@ -1,8 +1,16 @@
 # Historial de versiones — Intranet ASCLA
 
-**Versión actual:** `1.13` · **Esquema:** `17`.
+**Versión actual:** `1.13.1` · **Esquema:** `17`.
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
+
+<a id="release-1131"></a>
+
+## 1.13.1 — Explicación institucional del asistente
+
+Corrección del 19 de noviembre de 2026. El asistente explica qué es la intranet de ASCLA y para qué sirve, en español e inglés, con contexto institucional. Una pregunta explícita sobre la plataforma cambia de tema aunque antes se consultaran videos o galerías. Funciona sin una llamada a una IA externa y conserva los permisos y la evidencia para consultas sobre fuentes concretas. Se mantiene el esquema 17. El [manifiesto](docs/evidence/release-1.13.1/package.json) identifica este paquete. Los resultados completos de 1.13 conservan su propio ZIP.
+
+La [validación focalizada](docs/evidence/release-1.13.1/assistant-about.json) aprobó 93 pruebas PHP/932 aserciones, 49 controles de versión y el chat ES/EN con cola real y persistencia. El [JUnit](docs/evidence/release-1.13.1/assistant-about-junit.xml) registra cero fallos, errores y omisiones.
 
 <a id="release-113"></a>
 

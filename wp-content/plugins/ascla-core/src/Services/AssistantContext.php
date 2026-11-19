@@ -33,15 +33,12 @@ final class AssistantContext
 
     private static function intents(string $plain): array
     {
+        if (self::organizationQuestion($plain)) {
+            return ['organization'=>true,'events'=>false,'recent'=>false,'people'=>false,'notifications'=>false];
+        }
         $resourceTopic=preg_match('/\b(?:recursos?|resources?)\b.*?\b(?:sobre|acerca de|about|on)\s+\S/u',$plain);
         return [
-            'organization'=>self::matchesAny($plain,[
-                '/\b(?:cuentame|explicame|dime) (?:un poco |mas )?(?:sobre|acerca de|de) ascla\b/u',
-                '/\b(?:que (?:es|significa|hace|ofrece|contiene|incluye)|que puedo (?:hacer|encontrar) en|para que sirve|a que se dedica|de que (?:trata|se trata)|hablame (?:de|sobre)) (?:la |esta )?(?:ascla|asociacion|intranet|plataforma|comunidad)\b/u',
-                '/\b(?:que (?:hay|encuentro) en|que (?:secciones|modulos|servicios|herramientas) (?:hay|tiene|ofrece)) (?:la |esta )?(?:ascla|intranet|comunidad|plataforma)\b/u',
-                '/\b(?:what is|what does|tell me about|what can i (?:do|find) (?:in|on)) (?:the )?(?:ascla|intranet|platform|association)\b/u',
-                '/^\W*ascla\W*$/u',
-            ]),
+            'organization'=>false,
             'events'=>self::matchesAny($plain,[
                 '/\b(evento|eventos|reunion|reuniones|encuentro|encuentros|capacitacion|capacitaciones|agenda|calendario|proximo|proximos|pronto|semana|mes|inscrito|inscripcion|cupos?|aforo|vacantes?|plazas?)\b/u',
                 '/\b(event|events|meeting|meetings|training|calendar|upcoming|soon|week|month|registered|seats?|capacity|availability)\b/u',
@@ -62,6 +59,25 @@ final class AssistantContext
         ];
     }
 
+    /** An explicit platform overview starts a topic; requests about a source or live data do not. */
+    public static function organizationQuestion(string $question): bool
+    {
+        $plain=mb_strtolower(remove_accents($question));
+        if (preg_match('/\b(?:el|ese|este|un|la|esa|esta|una|the|that|this|a)\s+(?:video|grabacion|galeria|documento|articulo|recurso|publicacion|recording|gallery|document|article|resource|post)\b/u',$plain)
+            || preg_match('/\b(?:segun|en|del|according to|in|from)\s+(?:video|grabacion|galeria|documento|articulo|recording|gallery|document|article)\b/u',$plain)) { return false; }
+        if (preg_match('/\b(?:cuantos?|cuantas?|cupos?|aforo|proxim[oa]s?|recientes?|semanas?|mes(?:es)?|muestrame|recomiend\w*|sin leer|how many|seats?|capacity|upcoming|latest|weeks?|months?|show me|recommend\w*|unread)\b/u',$plain)) { return false; }
+        if (preg_match('/\b(?:que|what)\s+(?:eventos|encuentros|videos|galerias|publicaciones|recursos|notificaciones|asociados|events|meetings|galleries|posts|resources|notifications|members)\s+(?:hay|tenemos|estan|are|can)\b/u',$plain)) { return false; }
+        return self::matchesAny($plain,[
+            '/\b(?:cuentame|explicame|dime) (?:un poco |mas )?(?:sobre|acerca de|de) ascla\b/u',
+            '/\b(?:que (?:es|significa|hace|ofrece|contiene|incluye)|que puedo (?:hacer|encontrar) en|para que sirve|a que se dedica|de que (?:trata|se trata)|hablame (?:de|sobre)) (?:la |esta |nuestra )?(?:ascla|asociacion|intranet|plataforma|comunidad)\b/u',
+            '/\b(?:que (?:hay|encuentro) en|que (?:secciones|modulos|servicios|herramientas) (?:hay|tiene|ofrece)) (?:la |esta |nuestra )?(?:ascla|intranet|comunidad|plataforma)\b/u',
+            '/\b(?:explicame|describeme) (?:la |esta |nuestra )?(?:intranet|plataforma|ascla)\b/u',
+            '/\b(?:what is|what does|tell me about|what can i (?:do|find) (?:in|on)|(?:explain|describe)(?: to me)?(?: what)?) (?:the |this |our )?(?:ascla|intranet|platform|association|community)\b/u',
+            '/\b(?:ascla|intranet|plataforma|platform)(?: de ascla)?\s*[,;:—–-]?\s*[¿]?\s*(?:que es|para que sirve|what is it)\s*[?!.]*$/u',
+            '/^\W*ascla\W*$/u',
+        ]);
+    }
+
     private static function organization(): array
     {
         $english=Language::english();
@@ -71,8 +87,11 @@ final class AssistantContext
         return [
             'name'=>'Asociación de Secretarios Corporativos de América Latina',
             'overview'=>$english
-                ? 'ASCLA brings together corporate secretaries in Latin America to exchange professional experience and knowledge about corporate governance. Its private intranet helps members learn, meet and collaborate.'
-                : 'ASCLA reúne a profesionales de la secretaría corporativa de América Latina para intercambiar experiencias y conocimientos sobre gobierno corporativo. Su intranet es el espacio privado donde los asociados pueden formarse, encontrarse y colaborar.',
+                ? 'ASCLA brings together corporate secretaries in Latin America to exchange professional experience and knowledge about corporate governance.'
+                : 'ASCLA reúne a profesionales de la secretaría corporativa de América Latina para intercambiar experiencias y conocimientos sobre gobierno corporativo.',
+            'intranet'=>$english
+                ? 'The ASCLA intranet is its private platform for the member community. It brings together professional profiles, events and training, publications, forums, knowledge resources, galleries and partners. Access requires an authorized account; the sections and actions available depend on your permissions.'
+                : 'La intranet de ASCLA es su plataforma privada para la comunidad de asociados. Reúne perfiles profesionales, eventos y capacitaciones, publicaciones, foros, recursos de conocimiento, galerías y aliados. Se accede con una cuenta autorizada; las secciones y acciones disponibles dependen de tus permisos.',
             'knowledge'=>$english
                 ? 'The Knowledge Center contains member resources such as articles, documents and videos. Processed videos can include a summary, technical note and timestamped highlights.'
                 : 'El Centro de Conocimiento reúne artículos, documentos y videos. Los videos procesados pueden incluir un resumen, una nota técnica y cápsulas con marcas de tiempo.',
@@ -84,7 +103,7 @@ final class AssistantContext
     {
         $org=$live['organization'];
         $english=$live['language']==='English';
-        return 'ASCLA '.($english?'stands for the ':'es la ').$org['name'].".\n\n".$org['overview']
+        return 'ASCLA '.($english?'stands for the ':'es la ').$org['name'].".\n\n".$org['overview']."\n\n".$org['intranet']
             ."\n\n".($english?'Available sections':'Secciones disponibles').' · '.implode(', ',$org['sections']).".\n\n".$org['knowledge'];
     }
 

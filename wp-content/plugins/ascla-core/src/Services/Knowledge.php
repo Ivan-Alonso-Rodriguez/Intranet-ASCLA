@@ -338,8 +338,9 @@ final class KnowledgeAnswer
         $contextQuestion=self::contextQuestion($question,$history);
         // RAG retrieves the current follow-up topic before sending authorized evidence to the model.
         $plain=mb_strtolower(remove_accents($contextQuestion));
-        $videos=(bool)preg_match('/\b(?:videos?|grabaciones?|grabacion|recordings?|capsulas?)\b/u',$plain);
-        $gallery=GalleryEvidence::requested($contextQuestion);
+        $organization=AssistantContext::organizationQuestion($question);
+        $videos=!$organization && (bool)preg_match('/\b(?:videos?|grabaciones?|grabacion|recordings?|capsulas?)\b/u',$plain);
+        $gallery=!$organization && GalleryEvidence::requested($contextQuestion);
         $context=AssistantContext::build($contextQuestion,$videos || $gallery);
         if ($gallery) {
             $evidence=GalleryEvidence::context($contextQuestion,$history);
@@ -466,12 +467,12 @@ final class KnowledgeAnswer
 
     private static function contextQuestion(string $question,array $history): string
     {
-        if (!$history || !self::followUp($question)) { return $question; }
+        if (!$history || AssistantContext::organizationQuestion($question) || !self::followUp($question)) { return $question; }
         $topic=[];
         foreach (array_reverse($history) as $turn) {
             $previous=Access::text($turn['question']??'',1000);
             $topic[]=$previous;
-            if (!self::followUp($previous)) { break; }
+            if (AssistantContext::organizationQuestion($previous) || !self::followUp($previous)) { break; }
         }
         return $question.' '.implode(' ',array_reverse($topic));
     }
@@ -547,7 +548,7 @@ final class KnowledgeAnswer
     {
         $plain=mb_strtolower(remove_accents(trim($question)));
         if (mb_strlen($plain)>120) { return false; }
-        return (bool)preg_match('/^[¿¡\s]*(?:y|pero|entonces|amplia|detalla)\b/u',$plain)
+        return (bool)preg_match('/^[¿¡\s]*(?:y|pero|entonces|amplia|detalla|and|but|then)\b/u',$plain)
             || (bool)preg_match('/\bmas (?:detalles|informacion)\b/u',$plain)
             || (bool)preg_match('/^[¿\s]*(?:que (?:contiene|ofrece|secciones tiene)|what does it (?:contain|offer))\b/u',$plain)
             || (bool)preg_match('/\b(?:sus (?:conclusiones|recomendaciones|normas)|its (?:conclusions|recommendations))\b/u',$plain)

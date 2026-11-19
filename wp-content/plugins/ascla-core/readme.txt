@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.13
+Stable tag: 1.13.1
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,9 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.13.1 =
+* El asistente explica qué es la intranet de ASCLA y para qué sirve, en español e inglés, con contexto institucional. Una pregunta explícita sobre la plataforma cambia de tema aunque antes se consultaran videos o galerías. Funciona sin una llamada a una IA externa y conserva los permisos y la evidencia para consultas sobre fuentes concretas.
 
 = 1.13 =
 * Grupos: agregar conexiones, expulsar integrantes, salir, transferir la gestión y eliminar el grupo con confirmación. Avisos de salida y expulsión; historial limitado a la incorporación. Esquema 17.

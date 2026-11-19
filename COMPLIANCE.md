@@ -1,6 +1,12 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 19 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+Revisión documental: 19 de noviembre de 2026. Plugin **1.13.1**, esquema **17**. El [historial](VERSION_HISTORY.md#release-1131) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+
+## Explicación institucional del asistente · 1.13.1
+
+La [corrección focalizada](docs/evidence/release-1.13.1/assistant-about.json) reproduce el fallo de intención e historial: después de consultar videos, «¿Qué es esta intranet de ASCLA?» buscaba otra grabación. Las variantes invertidas tampoco reconocían la explicación institucional. Ahora una pregunta explícita sobre la plataforma inicia un tema nuevo; describe su finalidad y las secciones disponibles según la cuenta, en español e inglés y sin una llamada al proveedor de IA. Las consultas sobre fuentes concretas, datos actuales y hechos no verificables conservan sus controles de evidencia y acceso.
+
+El ZIP 1.13.1 se verificó en sus 249 archivos instalados. Aprobaron 93 pruebas/932 aserciones, 49 controles de versión y tres comprobaciones del chat real: cambio de videos a explicación en español, cambio desde galerías en inglés y persistencia al recargar. Los informes completos de la entrega 1.13 conservan su propio paquete y alcance.
 
 ## Validación técnica 1.13 del 19 de noviembre de 2026
 
