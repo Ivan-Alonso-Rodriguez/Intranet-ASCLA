@@ -348,11 +348,11 @@ Compañía Privada"]]);
 
     {
 
-        $published=$this->make('resource',['title'=>'Tema QXZTR123','body'=>'QXZTR123 exige seguimiento documentado de responsabilidades.']);$private=$this->make('resource',['title'=>'Secreto PRIV987','body'=>'PRIV987 no debe mostrarse.','status'=>'draft']);$this->user(1);update_user_meta(get_current_user_id(),'locale','es_ES');
+        $published=$this->make('resource',['title'=>'Tema QXZTR123','body'=>'QXZTR123 exige seguimiento documentado de responsabilidades.']);$private=$this->make('resource',['title'=>'Secreto PRIV987','body'=>'PRIV987 no debe mostrarse.','status'=>'draft']);$this->user(1);
 
         $answer=Knowledge::answer('QXZTR123');self::assertSame([$published['id']],array_column($answer['sources'],'id'));
 
-        $answer=Knowledge::answer('PRIV987');self::assertSame([],$answer['sources']);self::assertStringContainsString('suficiente información',$answer['answer']);
+        $answer=Knowledge::answer('PRIV987');self::assertSame([],$answer['sources']);self::assertNotEmpty($answer['answer']);self::assertTrue($answer['grounding']['no_evidence']);self::assertFalse($answer['grounding']['live_context_used']);
 
         $answer=Knowledge::answer('Tema completamente inexistente ZXCV1234444');self::assertSame([],$answer['sources']);
 
