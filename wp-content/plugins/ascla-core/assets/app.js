@@ -3527,13 +3527,12 @@
     if (!chatAlive(chat)) return;
     S.conversations = conversations;
     const urlSelected = Number(new URLSearchParams(location.search).get('conversation')) || 0;
-    let selected = S.conversation || urlSelected || 0;
+    const selected = S.conversation || urlSelected || 0;
     let {current,unavailable}=await selectedConversation(chat,conversations,selected);
     if (current && isIncomingRequest(current)) S.messageTab = 'requests';
     else if (current && urlSelected) S.messageTab = 'chats';
     if (!current && !unavailable && !mobileMessaging()) {
       const first = conversationBucket(S.messageTab, conversations)[0];
-      selected = Number(first?.id) || 0;
       current = first || null;
     }
     if (!chatAlive(chat)) return;
