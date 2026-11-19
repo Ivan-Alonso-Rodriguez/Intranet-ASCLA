@@ -170,16 +170,31 @@ final class IntegrationTest extends TestCase
     }
 
 
-    public function testMemberCanPublishHubButCannotModerateOrPublishEditorialContentOrReadOthersDrafts(): void
+    public function testMemberHubPostsRequireReviewAndStayPrivateUntilApproved(): void
 
     {
 
-        $this->user(1);$published=$this->make('hub');self::assertSame('publish',$published['status']);
-        $draft=$this->make('hub',['status'=>'draft']);$p=$this->make('hub',['status'=>'pending']);self::assertSame('pending',$p['status']);
-        $this->user(2);self::assertSame(200,$this->api('GET','/items/'.$published['id'])->get_status());
+        Settings::save(['moderation_required'=>false]);
+        $this->user(1);
+        $draft=$this->make('hub',['status'=>'draft']);
+        $input=['title'=>'Publicación del asociado','body'=>'Contenido para moderar.','status'=>'publish'];
+        $created=$this->api('POST','/content/hub',$input);
+        self::assertSame(200,$created->get_status());
+        $p=$created->get_data();$this->posts[]=$p['id'];
+        self::assertSame('pending',$p['status']);
+        $edited=$this->api('POST','/content/hub/'.$draft['id'],$input);
+        self::assertSame(200,$edited->get_status());
+        self::assertSame('pending',$edited->get_data()['status']);
+        $this->user(2);
         self::assertSame(404,$this->api('GET','/items/'.$draft['id'])->get_status());self::assertSame(404,$this->api('GET','/items/'.$p['id'])->get_status());self::assertSame(403,$this->api('POST','/items/'.$p['id'].'/moderate',['decision'=>'approve','reason'=>'Test'])->get_status());
 
-        $this->user(0);$p=Content::moderate($p['id'],'approve','Contenido relevante.');self::assertSame('publish',$p['status']);$this->user(2);self::assertSame(200,$this->api('GET','/items/'.$p['id'])->get_status());
+        $this->user(0);
+        $published=$this->make('hub');
+        self::assertSame('publish',$published['status']);
+        $p=Content::moderate($p['id'],'approve','Contenido relevante.');
+        self::assertSame('publish',$p['status']);
+        $this->user(2);
+        self::assertSame(200,$this->api('GET','/items/'.$p['id'])->get_status());
 
         self::assertSame(403,$this->api('POST','/content/resource',['title'=>'Prueba','body'=>'Prueba'])->get_status());
 
@@ -337,7 +352,7 @@ Compañía Privada"]]);
 
         $answer=Knowledge::answer('QXZTR123');self::assertSame([$published['id']],array_column($answer['sources'],'id'));
 
-        $answer=Knowledge::answer('PRIV987');self::assertSame([],$answer['sources']);self::assertStringContainsString('suficiente información',$answer['answer']);
+        $answer=Knowledge::answer('PRIV987');self::assertSame([],$answer['sources']);self::assertNotEmpty($answer['answer']);self::assertTrue($answer['grounding']['no_evidence']);self::assertFalse($answer['grounding']['live_context_used']);
 
         $answer=Knowledge::answer('Tema completamente inexistente ZXCV1234444');self::assertSame([],$answer['sources']);
 

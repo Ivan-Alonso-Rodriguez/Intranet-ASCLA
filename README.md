@@ -1,14 +1,16 @@
 # ASCLA Core — Intranet ASCLA
 
-## Versión actual: 1.12 · esquema 15
+## Versión actual: 1.13 · esquema 17
 
-La versión 1.12 reúne el [rediseño de la interfaz](DESIGN.md), las mejoras de acceso y recuperación, el selector de emojis, la eliminación de borradores propios y la validación de eventos por modalidad. Consulta el [historial de 1.12](VERSION_HISTORY.md#release-112) para ver el detalle.
+La versión 1.13 reúne las mejoras de grupos, los recorridos interactivos por usuario, el menú de cuenta, los idiomas de IA, los banners, las reacciones animadas y el modo oscuro en gris carbón. Consulta el [historial de 1.13](VERSION_HISTORY.md#release-113) para ver el alcance desde el último commit de 1.12.
 
 La [versión 1.11.1](VERSION_HISTORY.md#release-1111) incorporó la importación revisada de intereses desde CSV, PDF tabular, HTML y ZIP de una hoja, además de mejoras en estadísticas y asistencia de Zoom.
 
 Plugin WordPress para una comunidad profesional privada: perfiles, Directorio, conexiones, mensajería, Hub, foros, eventos, microeventos, Centro de Conocimiento, Galería, Aliados, Contacto y administración. Elementor es opcional; no se modifica WordPress Core.
 
 El código instalable está en [wp-content/plugins/ascla-core](wp-content/plugins/ascla-core). La carpeta del plugin siempre es `ascla-core`; el número de versión no forma parte de su nombre. Sus datos se conservan al desactivarlo o desinstalarlo.
+
+Los recorridos de ayuda se definen en `Domain/OnboardingTours.php` y se pueden extender con el filtro `ascla_onboarding_tours`. Cada recorrido usa una clave estable, `page`, `section`, `cap` y una lista de `steps` con `id`, `target`, `title`, `body` y `cap`. `target` admite un selector o una lista de alternativas ordenadas; los controles ausentes se omiten. El motor de interfaz y el servicio de progreso se reutilizan sin cambios. El corte de cuentas antiguas se conserva en `ascla_onboarding_rollout`; los avances están en metadatos del usuario y no se reinician al actualizar el plugin. El botón «?» de cada módulo permite continuar o repetir el recorrido.
 
 ## Documentación
 
@@ -40,7 +42,7 @@ python3 scripts/build.py
 python3 scripts/verify-package.py
 ```
 
-Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto de 1.12](docs/evidence/release-1.12/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
+Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto de 1.13](docs/evidence/release-1.13/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
 
 ## Calidad y entrega
 
@@ -64,5 +66,6 @@ Antes de confirmar cambios, revisa `git status --short` y `git diff`, comprueba 
 
 ```bash
 python3 scripts/check-docs.py
+python3 scripts/check-translations.py
 python3 scripts/verify-qa-delivery.py
 ```

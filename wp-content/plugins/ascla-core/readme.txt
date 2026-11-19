@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.12
+Stable tag: 1.13
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -9,6 +9,15 @@ Activación por sitio. Elementor opcional. Datos conservados al desinstalar.
 ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
+
+= 1.13 =
+* Grupos: agregar conexiones, expulsar integrantes, salir, transferir la gestión y eliminar el grupo con confirmación. Avisos de salida y expulsión; historial limitado a la incorporación. Esquema 17.
+* Onboarding por módulo y rol, automático solo en cuentas nuevas, con progreso por usuario en WordPress y ayuda para repetir.
+* Menú de cuenta con Mi perfil y Cerrar sesión; sugerencia de primer mensaje una vez por persona e idiomas de interfaz/IA coherentes con la cuenta.
+* Hub según rol, edición de contenido propio y moderación de publicaciones ajenas según permisos.
+* Banners institucionales, Galerías en plural, portadas de eventos consistentes y conocimiento sin recargar; miniaturas de YouTube de mayor resolución y reproducción compatible con Firefox.
+* Corazones rojos, estado del like sincronizado y animaciones breves de reacciones y ventanas con movimiento reducido. Fondos oscuros en negro y gris carbón.
+* Corrección de títulos sobre portadas, cumpleaños y contraste de las opciones de comentarios.
 
 = 1.12 =
 * Corrección de carga de Hub ASCLA conservando su nuevo icono. Casilla de consultas archivadas compacta y alineada. Controles independientes para mostrar u ocultar la nueva contraseña y su confirmación, con etiquetas accesibles y validación conservada.

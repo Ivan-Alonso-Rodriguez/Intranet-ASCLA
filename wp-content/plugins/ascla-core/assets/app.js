@@ -8,6 +8,39 @@
   const providerMode=value=>String(value||'').replace(/\bAPI\s+real\b/gi,'API');
   const THEME_KEY = "ascla-theme";
   const themeMedia = globalThis.matchMedia?.("(prefers-color-scheme: dark)");
+  const reducedMotion = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)");
+  const activeMotions = new Set();
+  const reactionMotions = new WeakMap();
+  function playMotion(node, frames, duration) {
+    if (!node?.animate || reducedMotion?.matches) return;
+    const animation = node.animate(frames, {duration, easing: 'cubic-bezier(.2,.8,.2,1)'});
+    activeMotions.add(animation);
+    const release = () => activeMotions.delete(animation);
+    animation.finished.then(release, release);
+    return animation;
+  }
+  function revealModal(backdrop) {
+    playMotion(backdrop, [{opacity: 0}, {opacity: 1}], 180);
+    playMotion(backdrop.querySelector('.modal'), [
+      {transform: 'translateY(8px) scale(.985)'}, {transform: 'none'},
+    ], 200);
+  }
+  function animateReaction(button, selected) {
+    const icon = button.querySelector('svg');
+    if (!icon) return;
+    reactionMotions.get(icon)?.cancel();
+    if (!selected) return;
+    const animation = playMotion(icon, [
+      {transform: 'scale(1)', offset: 0},
+      {transform: 'scale(1.28)', offset: .4},
+      {transform: 'scale(.94)', offset: .7},
+      {transform: 'scale(1)', offset: 1},
+    ], 240);
+    if (animation) reactionMotions.set(icon, animation);
+  }
+  reducedMotion?.addEventListener('change', event => {
+    if (event.matches) for (const animation of activeMotions) animation.cancel();
+  });
   const themeMode = () => {
     try {
       const mode = localStorage.getItem(THEME_KEY);
@@ -77,6 +110,7 @@
     liveToastPolling: false,
   };
   let liveToasts = null;
+  let onboarding = null;
   const ASSISTANT_THREAD_PREFIX = "ascla-assistant-thread-";
   function secureRandomId() {
     if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
@@ -158,8 +192,9 @@
     try { const candidate = new URL(p.photo_url); if (['http:', 'https:'].includes(candidate.protocol)) url = candidate.href; } catch { /* Initials are the shared fallback. */ }
     return `<span class="avatar ${size}">${url ? ("<img src=\"" + (E(url)) + "\" alt=\"" + (E(p.name)) + "\">") : ''}<span class="avatar-initials">${E(initials(p.name))}</span></span>`;
   };
+  const accountLabel = p => `${T('Menú de cuenta')}: ${initials(p.name)} ${p.name} ${T((S.boot.admin_area && p.role_label) || p.member_type || 'Comunidad ASCLA')}`;
   root.addEventListener('error', event => {
-    if (event.target.matches?.('.avatar img')) event.target.remove();
+    if (event.target.matches?.('.avatar img, .event-card-cover img')) event.target.remove();
   }, true);
   const btn = (label, action, extra = "", kind = "") =>
     `<button type="button" class="btn ${kind}" data-action="${action}" ${extra}>${labelHTML(label)}</button>`;
@@ -293,6 +328,7 @@
     div.className = "modal-backdrop modal-decision-backdrop";
     div.innerHTML = `<section role="alertdialog" aria-modal="true" aria-label="${E(title)}" class="modal modal-decision"><div class="modal-top"><h2>${E(title)}</h2>${btn(I("close"), "modal-unsaved-stay", ("aria-label=\"" + (E(T("Seguir editando"))) + "\""), "ghost")}</div><div class="modal-content">${body}</div></section>`;
     root.append(div);
+    revealModal(div);
     accessibility?.refresh();
     bindBackdropDismiss(div, closeModalDecision);
     div.querySelector("button")?.focus();
@@ -394,6 +430,7 @@
     div.innerHTML = `<section role="dialog" aria-modal="true" aria-label="${E(title)}" class="modal ${wide ? "wide" : ""}"><div class="modal-top">${modalHistory.length ? btn('← '+T('Volver'),'modal-back','','ghost modal-back') : ''}<h2>${E(title)}</h2>${btn(I("close"), "close", ("aria-label=\"" + (E(T("Cerrar"))) + "\""), "ghost")}</div><div class="modal-content">${body}</div></section>`;
     modalContexts.set(div, {item:S.item, event:S.event, edit:S.edit, focus:S.focus});
     root.append(div);
+    if (previous?.dataset.modalKey !== key) revealModal(div);
     pdfPreview.mount(div);
     accessibility?.refresh();
     const guarded = div.querySelector("form[data-guard-modal-unsaved]");
@@ -712,7 +749,7 @@
   }
   function maybeBirthdayGreeting() {
     const birthday = S.boot?.birthday;
-    if (!birthday?.today) return false;
+    if (!birthday?.today || activeModal()) return false;
     const key = `ascla-birthday-${S.boot.me.id}-${birthday.date || new Date().toISOString().slice(0,10)}`;
     try {
       if (localStorage.getItem(key)) return false;
@@ -886,7 +923,7 @@
             ${adminLanguageControl()}
             ${btn(themeIcons(), "theme-menu", ("aria-label=\"" + (E(T("Apariencia"))) + "\""), "icon-button theme-button")}
             ${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", ("aria-label=\"" + (E(T("Notificaciones"))) + "\""), "icon-button")}
-            <a class="header-profile" href="${E(C.pages.perfil.url)}">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(T((S.boot.admin_area && p.role_label) || p.member_type || "Comunidad ASCLA"))}</small></span>${I("chevron")}</a>
+            <details class="overflow-menu account-menu"><summary class="header-profile" aria-label="${E(accountLabel(p))}" aria-expanded="false">${avatar(p)} <span><strong>${E(p.name)}</strong> <small class="muted">${E(T((S.boot.admin_area && p.role_label) || p.member_type || "Comunidad ASCLA"))}</small></span>${I("chevron")}</summary><nav class="account-menu-panel" aria-label="${E(T('Mi cuenta'))}"><a class="account-profile-link" href="${E(C.pages.perfil.url)}">${I('profile')}<span>${E(T('Mi perfil'))}</span></a><a data-native href="${E(C.logout)}">${I('logout')}<span>${E(T('Cerrar sesión'))}</span></a></nav></details>
           </div>
         </header>
         <main id="main" class="page-wrap" tabindex="-1">
@@ -897,9 +934,14 @@
     refreshNotifications();
   }
   function heading(title, subtitle, action = "") {
-    return `<div class="page-heading"><div><h1>${E(T(title))}</h1><p>${E(T(subtitle))}</p></div>${action}</div>`;
+    return `<div class="page-heading">${sectionBanner()}<div><h1>${E(T(title))}</h1><p>${E(T(subtitle))}</p></div>${action}</div>`;
   }
   const content = () => document.getElementById("page-content");
+  function sectionBanner() {
+    const url = C.pages[S.page]?.banner;
+    const className = S.page === 'foros' ? 'section-banner forum-section-banner' : 'section-banner';
+    return url ? `<img class="${className}" src="${E(url)}" alt="" decoding="async">` : "";
+  }
   function conversationRequestActions(p) {
     const c = p.connection || {}, r = p.conversation || {}, id = Number(p.id);
     if (c.state === 'connected') return '';
@@ -914,6 +956,11 @@
     }
     return `<div class="conversation-request-actions">${btn(I('mail')+' '+T('Enviar mensaje'),'conversation-request',("data-id=\"" + (id) + "\" " + (r.can_request ? '' : 'disabled') + ""),'small')}</div>`;
   }
+  function connectedActions(c,id,suggested,compactConnected) {
+      let actions = compactConnected ? '' : '<span class="connection-state connected">' + I('check') + ' ' + E(T('Conectados')) + '</span>';
+      if (c.can_message) actions += btn(I('mail') + ' ' + T('Enviar mensaje'), 'message-start', `data-id="${id}"`, 'primary small') + (suggested && c.can_suggest_intro ? btn(T('Mensaje sugerido'), 'intro', `data-id="${id}"`, 'small') : '');
+      return actions + btn(T('Eliminar conexión'), 'connection-remove-request', `data-id="${id}" data-mode="disconnect"`, 'ghost danger small');
+  }
   function connectionPrimaryActions(c, id, suggested, compactConnected) {
     if (c.state === 'incoming_pending') {
       return btn('Aceptar conexión', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="accept" ${c.blocked ? 'disabled' : ''}`, 'primary small') + btn('Rechazar solicitud', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="reject"`, 'small');
@@ -922,9 +969,7 @@
       return '<div class="connection-pending"><span class="connection-sent">'+I('check')+E(T('Solicitud enviada'))+'</span>'+btn(T('Cancelar'),'connection-remove-request','data-id="'+id+'" data-mode="cancel" aria-label="'+E(T('Cancelar solicitud'))+'"','connection-cancel ghost small')+'</div>';
     }
     if (c.state === 'connected') {
-      let actions = compactConnected ? '' : '<span class="connection-state connected">' + I('check') + ' ' + E(T('Conectados')) + '</span>';
-      if (c.can_message) actions += btn(I('mail') + ' ' + T('Enviar mensaje'), 'message-start', `data-id="${id}"`, 'primary small') + (suggested ? btn(T('Mensaje sugerido'), 'intro', `data-id="${id}"`, 'small') : '');
-      return actions + btn(T('Eliminar conexión'), 'connection-remove-request', `data-id="${id}" data-mode="disconnect"`, 'ghost danger small');
+      return connectedActions(c,id,suggested,compactConnected);
     }
     if (c.retry_at) return '<span class="connection-availability" title="'+E(connectionNote(c))+'">'+I('clock')+E(T('Disponible a partir del'))+' '+E(date(c.retry_at))+'</span>';
     return btn(compactConnected ? 'Conectar' : 'Enviar solicitud de conexión', 'connect', `data-id="${id}" ${c.networking_available ? '' : 'disabled'}`, 'small');
@@ -1189,13 +1234,30 @@
     if (!labels.length) labels.push(T("Seleccionado para ti"));
     return `<div class="recommendation-context" title="${E(T("Por qué te lo recomendamos"))}">${I("spark")}<span>${E(labels.slice(0, 2).join(" · "))}</span></div>`;
   }
+  const youtubeThumbnailSizes = [
+    { file: 'maxresdefault.jpg', minWidth: 640 },
+    { file: 'sddefault.jpg', minWidth: 480 },
+    { file: 'hqdefault.jpg', minWidth: 320 },
+  ];
+  const youtubeThumbnailUrl = (videoId, quality) => `https://i.ytimg.com/vi/${videoId}/${youtubeThumbnailSizes[quality].file}`;
+  function resourceThumbnail(meta) {
+    const url = meta.thumbnail_url || '';
+    const videoId = url
+      ? /^https:\/\/(?:i\.ytimg\.com|img\.youtube\.com)\/vi\/([\w-]{11})\/(?:maxres|sd|hq|mq)?default\.jpg(?:[?#].*)?$/.exec(url)?.[1]
+      : /^[\w-]{11}$/.exec(meta.video_id || '')?.[0];
+    if (!url && !videoId) return '';
+    const youtube = videoId ? ` data-youtube-id="${videoId}" data-youtube-quality="0"` : '';
+    const source = videoId ? youtubeThumbnailUrl(videoId, 0) : url;
+    return `<img class="resource-thumbnail" src="${E(source)}" alt="" loading="lazy" decoding="async"${youtube}>`;
+  }
   function resourceCard(p, i = 0, catalog = false) {
     if (catalog === true) return knowledgeCard(p, i);
     const durationLabel = p.meta.duration_seconds ? E(UI.duration(p.meta.duration_seconds)) : E(T("Duración por confirmar"));
     const resourceIcon = p.meta.resource_type === "Video" ? "play" : "book";
-    const cover = p.meta.thumbnail_url
-      ? `<a href="${E(p.url)}" class="resource-video-cover"><img class="resource-thumbnail" src="${E(p.meta.thumbnail_url)}" alt="${E(T("Miniatura de"))} ${E(p.title)}" loading="lazy"><span>${I("play")} ${durationLabel}</span></a>`
-      : `<a href="${E(p.url)}" class="resource-cover v${i % 3}"><div class="cover-label">${E(T("ASCLA · CONOCIMIENTO"))}</div><strong>${E(p.title.split(":")[0])}</strong><span class="cover-icon">${I(resourceIcon)}</span></a>`;
+    const fallback = `<span class="resource-cover v${i % 3}"><span class="cover-label">${E(T("ASCLA · CONOCIMIENTO"))}</span><strong>${E(p.title.split(":")[0])}</strong><span class="cover-icon">${I(resourceIcon)}</span></span>`;
+    const thumbnail = resourceThumbnail(p.meta);
+    const durationBadge = thumbnail ? `<span class="resource-video-duration">${I("play")} ${durationLabel}</span>` : '';
+    const cover = `<a href="${E(p.url)}" class="resource-video-cover" title="${E(p.title)}">${fallback}${thumbnail}${durationBadge}</a>`;
     const editorialState = p.status === "publish" ? "" : status(p.status);
     return `<article class="card resource-card">${cover}<div class="resource-content"><div class="resource-card-badges"><span class="tag">${E(T(p.meta.resource_type || "Artículo"))}</span>${editorialState}</div>${resourceRecommendation(p.recommendation)}<h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E((p.meta.summary || p.body).slice(0, 115))}${(p.meta.summary || p.body).length > 115 ? "…" : ""}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Explorar " + I("arrow"), "item", ("data-id=\"" + (p.id) + "\""), "ghost")}</div></div></article>`;
   }
@@ -1205,9 +1267,9 @@
     const duration = p.meta.duration_seconds ? UI.duration(p.meta.duration_seconds) : T('Duración por confirmar');
     const coverTitle = p.title.split(':')[0];
     const visual = `<span class="knowledge-cover-empty resource-cover v${i%3}"><span class="cover-label">${E(T('ASCLA · CONOCIMIENTO'))}</span> <strong>${E(coverTitle)}</strong><span class="cover-icon">${I(video?'play':'book')}</span></span>`
-      + (p.meta.thumbnail_url ? `<img class="resource-thumbnail" src="${E(p.meta.thumbnail_url)}" alt="" loading="lazy">` : '');
+      + resourceThumbnail(p.meta);
     const durationBadge = video?`<span class="knowledge-duration">${I('play')} ${E(duration)}</span>`:'';
-    const cover = `<a class="knowledge-cover" href="${E(p.url)}" aria-label="${E(T('Explorar'))}: ${E(T('ASCLA · CONOCIMIENTO'))} ${E(coverTitle)}${video?' '+E(duration):''}"><span class="knowledge-cover-visual" aria-hidden="true">${visual}${durationBadge}</span></a>`;
+    const cover = `<button type="button" class="knowledge-cover" data-action="item" data-id="${Number(p.id)}" title="${E(T('Explorar'))}: ${E(p.title)}"><span class="knowledge-cover-visual">${visual}${durationBadge}</span></button>`;
     const summary = p.meta.summary || p.body;
     return `<article class="card resource-card knowledge-card">${cover}<div class="resource-content"><div class="resource-card-badges"><span class="tag">${I(video?'play':'book')} ${E(T(type))}</span>${p.status==='publish'?'':status(p.status)}</div>${resourceRecommendation(p.recommendation)}<h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(summary.slice(0,190))}${summary.length>190?'…':''}</p><div class="resource-footer"><span class="knowledge-date">${I('calendar')}<time datetime="${E(p.date)}">${date(p.date)}</time></span>${btn('Explorar '+I('arrow'),'item','data-id="'+Number(p.id)+'"','small primary')}</div></div></article>`;
   }
@@ -1376,7 +1438,7 @@
     const agenda = nextEvent
       ? `<h2>${E(nextEvent.title)}</h2><p>${I('calendar')} ${E(date(nextEvent.meta.start))}</p>${btn(T('Ver encuentro') + I('arrow'), 'item', ("data-id=\"" + (Number(nextEvent.id)) + "\""), 'hero-agenda-link')}`
       : `<h2>${E(T('Sin eventos programados'))}</h2>${link('eventos', T('Explorar eventos') + I('arrow'), 'hero-agenda-link')}`;
-    const hero = `<section class="hero ${birthdayToday ? "hero-birthday" : ""}">
+    const hero = `<section class="hero">${sectionBanner()}
       <div class="hero-copy"><h1>${heroTitle}</h1><p>${E(heroText)}</p>${link("directorio", T("Explorar la comunidad") + " " + I("arrow"), "primary small")}</div>
       <div class="hero-agenda"><div class="hero-agenda-label">${I('calendar')}${E(T('Próximo encuentro'))}</div>${agenda}</div>
     </section>`;
@@ -1411,7 +1473,7 @@
   }
   function feedCard(p) {
     const editorialState = p.status === "publish" ? "" : status(p.status);
-    return `<article class="card feed-card" data-content-id="${Number(p.id)}" data-content-type="${E(p.type)}"><div class="feed-top">${avatar({ name: p.author.name })}<div><strong>${E(p.author.name)}</strong><small>${date(p.date)} · Comunidad ASCLA</small></div><span class="feed-editorial-state">${editorialState}</span></div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(p.body.slice(0, 450))}${p.body.length > 450 ? "…" : ""}</p>${UI.attachments(p, true)}${p.tags.length ? ("<div class=\"tag-row\">" + (p.tags.map((t) => ("<span class=\"tag\">" + (E(t.name)) + "</span>")).join("")) + "</div>") : ""}<div class="feed-actions">${btn(I("heart") + " " + p.reactions, "like", ("data-id=\"" + (p.id) + "\" data-active=\"" + (!p.liked) + "\" aria-label=\"" + (E(T("Me gusta") + " " + p.reactions)) + "\""))}${btn(I("hub") + (" <span data-comment-count=\"" + (Number(p.id)) + "\">" + (E(commentCountText(p.comments))) + "</span>"), "item", ("data-id=\"" + (p.id) + "\""))}${btn(I("arrow") + " " + T("Ver conversación"), "item", ("data-id=\"" + (p.id) + "\""))}</div></article>`;
+    return `<article class="card feed-card" data-content-id="${Number(p.id)}" data-content-type="${E(p.type)}"><div class="feed-top">${avatar({ name: p.author.name })}<div><strong>${E(p.author.name)}</strong><small>${date(p.date)} · Comunidad ASCLA</small></div><span class="feed-editorial-state">${editorialState}</span></div><h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(p.body.slice(0, 450))}${p.body.length > 450 ? "…" : ""}</p>${UI.attachments(p, true)}${p.tags.length ? ("<div class=\"tag-row\">" + (p.tags.map((t) => ("<span class=\"tag\">" + (E(t.name)) + "</span>")).join("")) + "</div>") : ""}<div class="feed-actions">${reactionButtons(p, p.id, false, true)}${btn(I("hub") + (" <span data-comment-count=\"" + (Number(p.id)) + "\">" + (E(commentCountText(p.comments))) + "</span>"), "item", ("data-id=\"" + (p.id) + "\""))}${btn(I("arrow") + " " + T("Ver conversación"), "item", ("data-id=\"" + (p.id) + "\""))}</div></article>`;
   }
   function pager(list) {
     const perPage = Number(list.per_page || 0);
@@ -1968,6 +2030,14 @@
     if(type==='ally' && !S.filter.drafts){params.status='publish';params.mine=false;}
     return params;
   }
+  function listingHeadingActions(type,canWrite) {
+    let actions=listingCreateAction(type, canWrite);
+    if (canWrite && ['gallery','resource'].includes(type)) {
+      const target=C.adminUrl+(C.adminUrl.includes('?')?'&':'?')+'section=contenidos&type='+type;
+      actions='<div class="page-heading-actions"><a class="btn" data-native href="'+E(target)+'">'+E(T('Registro e historial'))+'</a>'+actions+'</div>';
+    }
+    return actions;
+  }
   async function listing() {
     const type = typeByPage[S.page];
     if (type==='topic' && S.filter.comments) { await ownComments();return; }
@@ -1980,13 +2050,13 @@
     S.list = list;
     if (S.filter.page) S.filter.page = list.page;
     const canWrite = !!S.boot.can_create?.[type];
-    if(type==='ally'){content().innerHTML=alliesUI().catalog(list,S.filter,S.boot.admin,{tabs:listingTabs(type,canWrite),drafts:S.filter.drafts?listingDrafts(list.items):null})+pager(list);return;}
+    if(type==='ally'){content().innerHTML=alliesUI().catalog(list,S.filter,S.boot.admin,{banner:sectionBanner(),tabs:listingTabs(type,canWrite),drafts:S.filter.drafts?listingDrafts(list.items):null})+pager(list);return;}
     const labels = {
       hub: ["Hub ASCLA", "Ideas, experiencias y conversaciones que nos acercan."],
       topic: ["Foros de la comunidad", "Comparte una pregunta y construyamos respuestas juntos."],
       event: ["Eventos y Capacitaciones", "Encuentros para aprender, conversar y ampliar tu perspectiva."],
       resource: ["Centro de Conocimiento", "La experiencia de nuestra comunidad, siempre a tu alcance."],
-      gallery: ["Galería", "Los momentos que construyen nuestra comunidad."],
+      gallery: ["Galerías", "Los momentos que construyen nuestra comunidad."],
       ally: ["Nuestros aliados", "Colaboraciones que impulsan el buen gobierno corporativo."],
     };
     const searchPlaceholder = type === "resource" ? "Buscar por tema, autor o contenido…" : "Buscar en esta sección…";
@@ -1995,13 +2065,12 @@
     const filtersHtml = searchForm({label:'Buscar contenido', placeholder:searchPlaceholder, id:'content-search', filter:S.filter,
       controls:filterControls, keys:['resource_type','category','tag','keyword','author','parent','modality','after','before']});
     const items = list.items;
-    let actions=listingCreateAction(type, canWrite);
-    if (canWrite && ['gallery','resource'].includes(type)) {
-      const target=C.adminUrl+(C.adminUrl.includes('?')?'&':'?')+'section=contenidos&type='+type;
-      actions='<div class="page-heading-actions"><a class="btn" data-native href="'+E(target)+'">'+E(T('Registro e historial'))+'</a>'+actions+'</div>';
-    }
+    const actions=listingHeadingActions(type,canWrite);
     const results = S.filter.drafts ? listingDrafts(items) : listingItems(type, items) + listingEmpty(items);
-    content().innerHTML = heading(...labels[type], actions) + filtersHtml + listingTabs(type, canWrite) + results + pager(list);
+    const header = type === 'topic' && actions
+      ? `<div class="forum-heading">${heading(...labels[type])}<div class="forum-heading-actions">${actions}</div></div>`
+      : heading(...labels[type], actions);
+    content().innerHTML = header + filtersHtml + listingTabs(type, canWrite) + results + pager(list);
   }
   async function ownComments() {
     const list=await api('comments/mine?'+new URLSearchParams(S.filter));
@@ -2027,7 +2096,8 @@
       : `<div class="event-card-date is-pending">${I('calendar')}<span>${E(T('Por confirmar'))}</span></div>`;
     const endTime=p.meta.end && Number.isFinite(Date.parse(p.meta.end))?' – '+time(p.meta.end):'';
     const hours=scheduled ? time(p.meta.start)+endTime : T('Por confirmar');
-    const image=cover ? `<button type="button" class="event-card-cover" data-action="item" data-id="${Number(p.id)}" aria-label="${E(T('Ver evento'))}: ${E(p.title)}"><img src="${E(cover.url)}" alt="${E(p.title)}" loading="lazy"></button>` : '';
+    const photo=cover ? `<img src="${E(cover.url)}" alt="" loading="lazy">` : '';
+    const image=`<button type="button" class="event-card-cover" data-action="item" data-id="${Number(p.id)}" aria-label="${E(T('Ver evento'))}: ${E(p.title)}">${photo}</button>`;
     const location=eventPlace(p.meta, "", "event-card-location");
     const confidentiality=p.meta.chatham?`<span class="event-card-confidentiality">${I('shield')} Chatham House</span>`:'<span></span>';
     const open=btn('Ver encuentro '+I('arrow'),'item',`data-id="${Number(p.id)}"`,'small primary');
@@ -2046,20 +2116,43 @@
     if (c.can_report) items.push(`<button type="button" class="overflow-item" data-action="report-comment" data-id="${Number(c.id)}" data-post="${Number(postId)}">${E(T("Reportar comentario"))}</button>`);
     if (c.can_delete) items.push(`<button type="button" class="overflow-item danger-text" data-action="delete-comment" data-id="${Number(c.id)}" data-post="${Number(postId)}">${E(T("Eliminar comentario"))}</button>`);
     if (!items.length) return "";
-    return `<details class="overflow-menu"><summary aria-label="${E(T("Más opciones"))}" title="${E(T("Más opciones"))}">${I("more")}</summary><div class="overflow-popover">${items.join("")}</div></details>`;
+    return `<details class="overflow-menu comment-overflow"><summary aria-label="${E(T("Más opciones"))}" title="${E(T("Más opciones"))}">${I("more")}</summary><div class="overflow-popover">${items.join("")}</div></details>`;
   }
-  function reactionButtons(data, id, comment = false) {
-    const counts = data.reaction_counts || {like: data.likes || data.reactions || 0};
+  function reactionCount(data) {
+    return Number(data.reaction_counts?.like ?? data.likes ?? data.reactions ?? 0);
+  }
+  function reactionButtons(data, id, comment = false, compact = false) {
+    const count = reactionCount(data);
     const selected = data.reaction === 'like';
-    return '<div class="reaction-picker">'+btn(I('heart')+' '+E(T('Me gusta'))+' <span>'+Number(counts.like || 0)+'</span>', 'content-reaction', 'data-id="'+Number(id)+'" data-comment="'+comment+'" data-reaction="like" data-active="'+(!selected)+'" aria-pressed="'+selected+'"', 'ghost small'+(selected?' active':''))+'</div>';
+    const surface = compact ? 'card' : 'detail';
+    const countId = `reaction-count-${comment ? 'comment' : surface}-${Number(id)}`;
+    const label = (compact ? '' : ' ' + E(T('Me gusta'))) + ` <span id="${countId}" data-reaction-count>${count}</span>`;
+    const attrs = `data-id="${Number(id)}" data-comment="${comment}" data-active="${!selected}" data-reaction="like" aria-pressed="${selected}" aria-label="${E(T('Me gusta'))} ${count}"`;
+    const button = btn(I('heart') + label, 'content-reaction', attrs, 'ghost small');
+    return `<div class="reaction-picker">${button}</div>`;
   }
   async function changeContentReaction(button, id) {
     const comment = button.dataset.comment === 'true';
+    const wasSelected = button.getAttribute('aria-pressed') === 'true';
     const result = await api((comment?'comments/':'items/')+id+'/reaction', {kind:'like',reaction:button.dataset.reaction,active:button.dataset.active === 'true'});
-    const key = button.dataset.reaction;
-    const container = button.closest('.reaction-picker');
-    container.outerHTML = reactionButtons(result, id, comment);
-    root.querySelector('.reaction-picker [data-id="'+id+'"][data-comment="'+comment+'"][data-reaction="'+key+'"]')?.focus();
+    const selected = result.reaction === 'like';
+    root.querySelectorAll(`[data-action="content-reaction"][data-id="${id}"][data-comment="${comment}"]`).forEach(control => {
+      control.dataset.active = String(!selected);
+      control.setAttribute('aria-pressed', String(selected));
+      control.setAttribute('aria-label', `${T('Me gusta')} ${reactionCount(result)}`);
+      control.querySelector('[data-reaction-count]').textContent = reactionCount(result);
+    });
+    animateReaction(button, selected && !wasSelected);
+    if (!comment) {
+      const cached = S.list?.items?.find(entry => Number(entry.id) === id);
+      for (const entry of [S.item, cached]) {
+        if (Number(entry?.id) === id) Object.assign(entry, result, {liked: selected, reactions: reactionCount(result)});
+      }
+    }
+    if (button.isConnected && !button.closest('[inert]') && document.activeElement === document.body) {
+      button.disabled = false;
+      button.focus();
+    }
   }
   const commentViews = new WeakMap();
   const COMMENT_BATCH = 10, REPLY_BATCH = 5;
@@ -2714,7 +2807,9 @@
     if (type==='event' && m.micro && p.status!=='publish') return [['pending','Pendiente de revisión']];
     if (directContentPublisher && ['gallery','resource'].includes(type)) return [['draft','Borrador'],['pending','Pendiente de revisión'],['publish','Publicado'],['ascla_hidden','Oculto']];
     if(type==='ally')return [['publish','Activo · Visible en el catálogo'],['inactive','Inactivo · Fuera del catálogo'],['draft','Borrador']];
-    if (type === 'hub' && !m.generated) return [['draft','Borrador'],['pending','Enviar a revisión'],['publish','Publicar ahora']];
+    if (type === 'hub') {
+      return [['draft', 'Borrador'], directContentPublisher ? ['publish', 'Publicar ahora'] : ['pending', 'Enviar a revisión']];
+    }
     const directPublishType = ["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated);
     if (directPublishType) return [["draft", "Borrador"], ["publish", "Publicar ahora"]];
     if (directContentPublisher && (!m.generated || directResourcePublisher)) {
@@ -2723,10 +2818,14 @@
     }
     return [["draft", "Borrador"], ["pending", "Enviar a revisión"]];
   }
+  function hubEditorStatus(id,p,directPublisher) {
+    if (id && !['pending', 'publish'].includes(p.status)) return p.status;
+    return directPublisher ? 'publish' : 'pending';
+  }
   function editorStatusValue(type, id, p, m, directResourcePublisher, directContentPublisher) {
     if (type==='event' && m.micro && p.status!=='publish') return 'pending';
     if(type==='ally')return allyEditorStatus(id,p,m);
-    if (type === 'hub' && !m.generated) return id ? p.status : 'publish';
+    if (type === 'hub') return hubEditorStatus(id,p,directContentPublisher);
     const directPublishType = ["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated);
     if (directPublishType) return id && p.status === "draft" ? "draft" : "publish";
     if ((!id && ["gallery","resource"].includes(type) && directContentPublisher) || (p.status === "publish" && directContentPublisher)) return "publish";
@@ -2991,7 +3090,7 @@
     if(type==='ally')return alliesUI().editorMarkup({id,p,m,statusOptions,statusValue,publicationControl,draftAction});
     const eventWorkflow = type === "event" ? `<section class="event-editor-status">${statusControl}${publicationControl}<p class="private-note">${E(T("Puedes guardar un borrador aunque todavía falten datos. Para publicar, completa los campos obligatorios."))}</p></section>` : "";
     const trailingWorkflow = type === "event" ? "" : statusControl + publicationControl + `<p class="private-note">${E(T("Puedes guardar un borrador aunque todavía falten datos. Para publicar, completa los campos obligatorios."))}</p>`;
-    return `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", type === "event" ? "Descripción del evento" : "Contenido", p.body, "textarea", 'required maxlength="30000"')}${eventWorkflow}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>Temas</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => ("<label class=\"chip-check\"><input type=\"checkbox\" name=\"interest\" value=\"" + (t.id) + "\" " + (p.tags.some((x) => x.id === t.id) ? "checked" : "") + ">" + (E(t.name)) + "</label>")).join("")}</div>${editorAttachments(type,p,m)}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${trailingWorkflow}${m.generated && directResourcePublisher ? ("<p class=\"private-note\">" + (E(T("Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."))) + "</p>") : ""}<div class="alert">Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa.</div>${inviteNote}<div class="form-actions">${btn("Cancelar", "close")}${draftAction}${inviteAction}<button class="btn primary" data-editor-primary>Guardar ${typeLabel[type]}</button></div></form>`;
+    return `<form data-form="editor" data-guard-modal-unsaved data-type="${type}" data-id="${id}">${field("title", "Título", p.title, "text", 'required maxlength="200"')}${field("body", type === "event" ? "Descripción del evento" : "Contenido", p.body, "textarea", 'required maxlength="30000"')}${eventWorkflow}${extra}${eventCoverEditor}${select("category", "Categoría", [["", "Sin categoría"], ...S.boot.catalogs.category.map(t => [t.id, t.name])], p.tags.find(t => t.taxonomy === "ascla_category")?.id || "")}${field("tag_names", "Etiquetas (separadas por comas)", p.tags.filter(t => t.taxonomy === "ascla_tag").map(t => t.name).join(", ") || (m.tags || []).join(", "))}<label>${E(T("Temas"))}</label><div class="multi-select">${S.boot.catalogs.interest.map((t) => ("<label class=\"chip-check\"><input type=\"checkbox\" name=\"interest\" value=\"" + (t.id) + "\" " + (p.tags.some((x) => x.id === t.id) ? "checked" : "") + ">" + (E(t.name)) + "</label>")).join("")}</div>${editorAttachments(type,p,m)}${(S.boot.moderator || S.boot.executive) ? check("chatham", "Aplicar Regla de Chatham House", m.chatham !== false) : ""}${trailingWorkflow}${m.generated && directResourcePublisher ? ("<p class=\"private-note\">" + (E(T("Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."))) + "</p>") : ""}<div class="alert">${E(T("Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa."))}</div>${inviteNote}<div class="form-actions">${btn("Cancelar", "close")}${draftAction}${inviteAction}<button class="btn primary" data-editor-primary>${E(T("Guardar "+typeLabel[type]))}</button></div></form>`;
   }
   async function editor(type, id = 0, returnToReview = false) {
     const [p, topics] = await Promise.all([
@@ -3006,14 +3105,14 @@
     const directResourcePublisher = type === "resource" && (S.boot.admin || S.boot.executive);
     const directContentPublisher = (["gallery", "resource"].includes(type) ? (S.boot.admin || S.boot.executive) : S.boot.moderator);
     const statusOptions = editorStatusOptions(type, m, directResourcePublisher, directContentPublisher, p);
-    const canSchedule = (S.boot.admin || S.boot.executive) && ['event','gallery','resource','hub','ally'].includes(type) && !(type==='event' && m.micro && p.status!=='publish');
+    const canSchedule = (S.boot.admin || S.boot.executive) && ['event','gallery','resource','ally'].includes(type) && !(type==='event' && m.micro && p.status!=='publish');
     if (canSchedule) statusOptions.push(['scheduled','Programar publicación']);
     const initialStatus = editorStatusValue(type, id, p, m, directResourcePublisher, directContentPublisher);
     const statusValue = editorStatusSelection(m, canSchedule, statusOptions, initialStatus);
     const eventCoverFile = type === "event" ? (p.media || []).find(file => file.mime?.startsWith("image/")) : null;
     const eventCoverEditor = eventCoverEditorMarkup(type, eventCoverFile);
     const formMarkup = editorFormMarkup({type, id, p, m, extra, eventCoverEditor, statusOptions, statusValue, canSchedule, directResourcePublisher});
-    const dialog = modal((id ? "Editar " : "Crear ") + typeLabel[type], formMarkup, true);
+    const dialog = modal(T((id ? "Editar " : "Crear ") + typeLabel[type]), formMarkup, true);
     dialog.querySelector('[data-form="editor"]').dataset.returnReview=String(returnToReview);
     syncEditorRequirements(dialog.querySelector('[data-form="editor"]'));
     const picker=dialog.querySelector('.related-event-picker');
@@ -3066,7 +3165,7 @@
     const ownerFilter = fileOwnerFilter(list, scope);
     const markup = `<form data-form="file-search" class="filters file-library-filters"><div class="field"><label for="file-query">${E(T("Buscar archivos"))}</label><input id="file-query" name="q" aria-label="${E(T("Buscar archivos"))}" placeholder="${E(T("Buscar por nombre…"))}" value="${E(q)}"></div>${ownerFilter}<button class="btn">${E(T("Buscar"))}</button></form><p class="private-note">${list.total} ${E(T("archivos"))} · ${E(T("La eliminación es permanente y retira sus referencias."))}</p><div class="file-library">${list.items.map(m => ("<article class=\"file-row\" data-file=\"" + (m.id) + "\"><div>" + (I(m.mime.startsWith('image/') ? 'gallery' : 'book')) + "<strong>" + (E(m.name)) + "</strong><small>" + (E(m.author)) + " · " + (Math.ceil((m.stored_size || m.size) / 1024)) + " KB" + (m.has_master ? " · " + E(T("incluye copia maestra optimizada")) : "") + " · " + (date(m.date)) + "</small></div><div class=\"form-actions\"><a class=\"btn small\" href=\"" + (E(m.url)) + "\" target=\"_blank\" rel=\"noopener\">" + (E(T("Abrir archivo"))) + "</a>" + (btn("Eliminar archivo", "delete-media", ("data-id=\"" + (m.id) + "\" data-name=\"" + (E(m.name)) + "\" data-library=\"true\""), "danger small")) + "</div></article>")).join("") || empty("No hay archivos")}</div>${fileLibraryPager(page, list.pages)}`;
     if (inline) panel.innerHTML = `<div class="admin-section-heading"><div><span class="eyebrow">${E(T('BIBLIOTECA PRIVADA'))}</span><h2>${E(T('Archivos de la comunidad'))}</h2><p>${E(T('Consulta los archivos privados de todos los asociados y elimina los que corresponda.'))}</p></div></div><section class="card file-library-panel">${markup}</section>`;
-    else modal(scope === "all" ? "Archivos de la comunidad" : "Mis archivos", markup, true);
+    else modal(T(scope === "all" ? "Archivos de la comunidad" : "Mis archivos"), markup, true);
   }
   function confirmDeletion(kind, id, {post = 0, title = "", library = false, forum = false, gallery = false, conversation = 0} = {}) {
     const descriptions = {
@@ -3076,7 +3175,7 @@
       draft: 'El borrador se moverá a la papelera.',
     };
     const description = gallery?'La galería dejará de estar disponible y se eliminarán permanentemente sus imágenes y archivos adjuntos, incluidas las copias maestras que ya no se utilicen.':descriptions[kind] || 'El contenido dejará de estar disponible en la comunidad.';
-    modal(T('Confirmar eliminación'), `<p class="detail-body">${E(title)}</p><p>${E(T(description))}</p>${forum?'<p>Los temas de este foro se conservarán en la lista general.</p>':''}<div class="form-actions">${btn('Cancelar','delete-cancel',("data-kind=\"" + (kind) + "\" data-id=\"" + (id) + "\" data-post=\"" + (post) + "\" data-library=\"" + (library) + "\" data-conversation=\"" + (conversation) + "\""))}${btn('Eliminar','delete-confirm',("data-kind=\"" + (kind) + "\" data-id=\"" + (id) + "\" data-post=\"" + (post) + "\" data-library=\"" + (library) + "\" data-conversation=\"" + (conversation) + "\""),'danger primary')}</div>`);
+    modal(T('Confirmar eliminación'), `<p class="detail-body">${E(title)}</p><p>${E(T(description))}</p>${forum?("<p>" + E(T("Los temas de este foro se conservarán en la lista general.")) + "</p>"):''}<div class="form-actions">${btn('Cancelar','delete-cancel',("data-kind=\"" + (kind) + "\" data-id=\"" + (id) + "\" data-post=\"" + (post) + "\" data-library=\"" + (library) + "\" data-conversation=\"" + (conversation) + "\""))}${btn('Eliminar','delete-confirm',("data-kind=\"" + (kind) + "\" data-id=\"" + (id) + "\" data-post=\"" + (post) + "\" data-library=\"" + (library) + "\" data-conversation=\"" + (conversation) + "\""),'danger primary')}</div>`);
   }
   function inviteSelectionSummary() {
     const state=S.invite, count=state.selected.size, limit=Number(state.event.meta.capacity);
@@ -3100,7 +3199,7 @@
     const list=await api("profiles?"+new URLSearchParams({q:query,page}));
     list.items.forEach(person=>S.invite.people.set(Number(person.id),person));
     const event=S.invite.event,limit=Number(event.meta.capacity);
-    modal("Invitar asociados",`<section class="invite-dialog"><div class="invite-event-heading"><span class="invite-event-icon">${I('calendar')}</span><div><small>${E(T('INVITACIÓN AL EVENTO'))}</small><h3>${E(event.title)}</h3><p class="private-note">${E(T('Máximo de asistentes'))}: ${limit || E(T('Sin límite'))}</p></div></div><p class="private-note">${E(T('La invitación no reserva un cupo. Cada asociado confirma su asistencia según la disponibilidad.'))}</p><form data-form="invite-search" data-id="${id}" class="invite-search"><label class="screen-reader-text" for="invite-search-input">${E(T('Buscar invitados'))}</label><span>${I('search')}<input id="invite-search-input" name="q" type="search" maxlength="120" value="${E(query)}" placeholder="${E(T('Nombre, empresa o interés'))}"></span><button class="btn">${E(T('Buscar'))}</button></form><form data-form="event-invite" data-id="${id}"><div class="invite-layout"><section class="invite-directory"><h4>${E(T('Asociados disponibles'))} <span class="tag">${Number(list.total)}</span></h4><div class="invite-options">${list.items.map(p=>("<label class=\"invite-person\"><input type=\"checkbox\" data-invite-member=\"" + (Number(p.id)) + "\">" + (avatar(p)) + "<span><strong>" + (E(p.name)) + "</strong><small>" + (E(p.company||'ASCLA')) + "</small></span></label>")).join('') || empty("No encontramos asociados")}</div><div class="pagination">${btn("Anterior","invite-page",("data-page=\"" + (page-1) + "\" " + (page<=1?'disabled':'')),"small")}<span>${page} / ${list.pages}</span>${btn("Siguiente","invite-page",("data-page=\"" + (page+1) + "\" " + (page>=list.pages?'disabled':'')),"small")}</div></section><section class="invite-selection"><h4>${E(T('Tu selección'))}</h4><div data-invite-summary></div><p class="invite-limit-note" data-invite-limit role="status" hidden>${E(T('Alcanzaste el máximo de asistentes. Quita a una persona para elegir otra.'))}</p></section></div><p class="private-note invite-calendar-note">${I('mail')}${E(T('Si el organizador tiene Google Calendar conectado, se enviará también la invitación oficial por correo.'))}</p><div class="invite-footer"><span class="invite-counter" aria-live="polite"><strong data-invite-count></strong> ${E(T('seleccionados'))}</span><button class="btn primary" data-invite-submit>${I('mail')} ${E(T('Enviar invitaciones'))}</button></div></form></section>`,true);
+    modal(T("Invitar asociados"),`<section class="invite-dialog"><div class="invite-event-heading"><span class="invite-event-icon">${I('calendar')}</span><div><small>${E(T('INVITACIÓN AL EVENTO'))}</small><h3>${E(event.title)}</h3><p class="private-note">${E(T('Máximo de asistentes'))}: ${limit || E(T('Sin límite'))}</p></div></div><p class="private-note">${E(T('La invitación no reserva un cupo. Cada asociado confirma su asistencia según la disponibilidad.'))}</p><form data-form="invite-search" data-id="${id}" class="invite-search"><label class="screen-reader-text" for="invite-search-input">${E(T('Buscar invitados'))}</label><span>${I('search')}<input id="invite-search-input" name="q" type="search" maxlength="120" value="${E(query)}" placeholder="${E(T('Nombre, empresa o interés'))}"></span><button class="btn">${E(T('Buscar'))}</button></form><form data-form="event-invite" data-id="${id}"><div class="invite-layout"><section class="invite-directory"><h4>${E(T('Asociados disponibles'))} <span class="tag">${Number(list.total)}</span></h4><div class="invite-options">${list.items.map(p=>("<label class=\"invite-person\"><input type=\"checkbox\" data-invite-member=\"" + (Number(p.id)) + "\">" + (avatar(p)) + "<span><strong>" + (E(p.name)) + "</strong><small>" + (E(p.company||'ASCLA')) + "</small></span></label>")).join('') || empty("No encontramos asociados")}</div><div class="pagination">${btn("Anterior","invite-page",("data-page=\"" + (page-1) + "\" " + (page<=1?'disabled':'')),"small")}<span>${page} / ${list.pages}</span>${btn("Siguiente","invite-page",("data-page=\"" + (page+1) + "\" " + (page>=list.pages?'disabled':'')),"small")}</div></section><section class="invite-selection"><h4>${E(T('Tu selección'))}</h4><div data-invite-summary></div><p class="invite-limit-note" data-invite-limit role="status" hidden>${E(T('Alcanzaste el máximo de asistentes. Quita a una persona para elegir otra.'))}</p></section></div><p class="private-note invite-calendar-note">${I('mail')}${E(T('Si el organizador tiene Google Calendar conectado, se enviará también la invitación oficial por correo.'))}</p><div class="invite-footer"><span class="invite-counter" aria-live="polite"><strong data-invite-count></strong> ${E(T('seleccionados'))}</span><button class="btn primary" data-invite-submit>${I('mail')} ${E(T('Enviar invitaciones'))}</button></div></form></section>`,true);
     inviteSelectionSummary();
   }
   root.addEventListener("change", event => {
@@ -3143,6 +3242,11 @@
     if (form) chatDrafts.set(Number(form.dataset.id), form.elements.body.value);
   });
   root.addEventListener('change', event => {
+    const picker = event.target.closest('form[data-form="group-add-members"]');
+    if (picker && event.target.matches('[name="users"]')) {
+      updateGroupMemberPicker(picker);
+      return;
+    }
     const input = event.target.closest('[data-group-member]');
     if (!input || !S.groupChat) return;
     const id = Number(input.dataset.groupMember);
@@ -3152,7 +3256,7 @@
   });
   async function conversationRequestDialog(id) {
     const p = await api('profiles/' + Number(id));
-    modal('Enviar solicitud de conversación', `<form data-form="conversation-request-message" data-id="${Number(id)}"><div class="request-message-recipient">${avatar(p)}<div><strong>${E(p.name)}</strong><small>${E(T('Este primer mensaje llegará como una solicitud. Podrá leerlo y decidir si acepta la conversación.'))}</small></div></div>${field('body','Mensaje','','textarea','required maxlength="5000" placeholder="Escribe tu mensaje…"')}<div class="form-actions">${btn('Cancelar','close')}<button class="btn primary">${I('mail')} Enviar solicitud</button></div></form>`);
+    modal(T('Enviar solicitud de conversación'), `<form data-form="conversation-request-message" data-id="${Number(id)}"><div class="request-message-recipient">${avatar(p)}<div><strong>${E(p.name)}</strong><small>${E(T('Este primer mensaje llegará como una solicitud. Podrá leerlo y decidir si acepta la conversación.'))}</small></div></div>${field('body','Mensaje','','textarea','required maxlength="5000" placeholder="Escribe tu mensaje…"')}<div class="form-actions">${btn('Cancelar','close')}<button class="btn primary">${I('mail')} Enviar solicitud</button></div></form>`);
   }
   async function groupChatDialog() {
     const data = await api('connections');
@@ -3171,6 +3275,40 @@
     const photo = `<div class="group-photo-field"><div id="group-edit-photo-preview" class="group-photo-preview">${preview}</div><div><label class="btn small">${I('plus')} ${E(T("Cambiar foto"))}<input type="file" accept="image/jpeg,image/png,image/webp" data-upload="group-photo-edit" hidden></label><input type="hidden" name="photo_id" value="${Number(current.photo_id || 0)}"><p class="private-note">${E(T("JPG, PNG o WebP. La nueva foto reemplazará a la actual al guardar."))}</p></div></div>`;
     modal(T('Editar grupo'), `<form data-form="group-edit" data-guard-modal-unsaved data-id="${Number(current.id)}">${photo}${field('title','Nombre del grupo',current.title || '','text','required maxlength="120"')}${field('description','Descripción breve',current.description || '','textarea','maxlength="240" placeholder="'+E(T("Añade una breve descripción del propósito del grupo"))+'"')}<div class="form-actions">${btn('Cancelar','group-menu',("data-id=\"" + (Number(current.id)) + "\""))}<button class="btn primary">${I('check')} ${E(T('Guardar cambios'))}</button></div></form>`);
   }
+  async function groupMembersDialog(id) {
+    const current = await api('conversations/' + id);
+    if (!current.can_add_group_members) return;
+    const { connected = [] } = await api('connections');
+    const existing = new Set(current.members.map(member => Number(member.id)));
+    const options = connected.filter(person => !existing.has(Number(person.id)));
+    const slots = current.member_limit - current.member_count;
+    const picker = options.length ? `
+      ${field('group_connection_search', 'Buscar en mis conexiones', '', 'search', 'data-group-connection-search autocomplete="off"')}
+      <div class="group-member-list">${options.map(person => `
+        <label class="check group-member-option" data-group-choice="${E(locationNormalize(person.name + ' ' + (person.company || '')))}">
+          <input type="checkbox" name="users" value="${Number(person.id)}">
+          <span>${avatar(person)}<span><strong>${E(person.name)}</strong><small>${E(person.company || T('Conexión ASCLA'))}</small></span></span>
+        </label>`).join('')}</div>
+      <p class="private-note" data-group-search-empty role="status" hidden>${E(T('No hay conexiones que coincidan con ese nombre.'))}</p>`
+      : empty('No tienes conexiones disponibles para agregar.');
+    modal(T('Agregar integrantes'), `<form data-form="group-add-members" data-id="${Number(id)}" data-slots="${slots}">
+      <p class="private-note">${E(T('Puedes agregar conexiones confirmadas. Verán los mensajes enviados desde que se incorporen.'))}</p>
+      <p class="private-note"><strong>${slots}</strong> ${E(T(slots === 1 ? 'cupo disponible' : 'cupos disponibles'))}</p>
+      ${picker}<div class="form-actions">${btn('Cancelar','modal-back')}<button type="submit" class="btn primary" disabled>${I('plus')} ${E(T('Agregar al grupo'))}</button></div>
+    </form>`);
+  }
+  function updateGroupMemberPicker(form) {
+    const selected = form.querySelectorAll('[name="users"]:checked').length;
+    const full = selected >= Number(form.dataset.slots);
+    for (const input of form.querySelectorAll('[name="users"]')) input.disabled = full && !input.checked;
+    form.querySelector('[type="submit"]').disabled = selected === 0 || form.dataset.submitting === 'true';
+  }
+  function filterGroupMemberPicker(input) {
+    const query = locationNormalize(input.value);
+    const choices = [...input.form.querySelectorAll('[data-group-choice]')];
+    for (const choice of choices) choice.hidden = !choice.dataset.groupChoice.includes(query);
+    input.form.querySelector('[data-group-search-empty]').hidden = choices.some(choice => !choice.hidden);
+  }
   async function groupInfoDialog(id) {
     const current = await api('conversations/' + Number(id));
     if (current.kind !== 'group') return;
@@ -3180,16 +3318,58 @@
       const memberId = Number(member.id);
       const creator = memberId === Number(current.created_by);
       const isMe = memberId === me;
+      const name = member.name || T('Asociado ASCLA');
       const profileAction = btn(T('Ver perfil')+' '+I('arrow'),'member',`data-id="${memberId}"`,'ghost small group-member-action');
       const messageAction = isMe ? '' : btn(I('mail')+' '+T('Mensaje privado'),'group-member-message',`data-id="${memberId}"`,'small group-member-action');
-      const ownerBadge = creator ? '<span class="group-owner-badge">' + E(T('Creador')) + '</span>' : '';
+      const removeAction = current.can_remove_group_members && !creator
+        ? btn('Expulsar','group-remove-open',`data-id="${Number(current.id)}" data-user="${memberId}" data-name="${E(name)}" aria-label="${E(T('Expulsar a {name}').replace('{name}', () => name))}"`,'danger small group-member-action')
+        : '';
+      const ownerBadge = creator ? '<span class="group-owner-badge">' + E(T('Responsable del grupo')) + '</span>' : '';
       const meBadge = isMe ? '<span class="group-me-badge">' + E(T('Tú')) + '</span>' : '';
-      return `<div class="group-info-member"><div class="group-info-member-main">${avatar(member)}<div class="group-info-member-copy"><div class="group-info-member-name"><strong>${E(member.name || T('Asociado ASCLA'))}</strong>${ownerBadge}${meBadge}</div><small>${E(member.company || member.role_label || T('Integrante'))}</small></div></div><div class="group-info-member-actions">${profileAction}${messageAction}</div></div>`;
+      return `<div class="group-info-member"><div class="group-info-member-main">${avatar(member)}<div class="group-info-member-copy"><div class="group-info-member-name"><strong>${E(name)}</strong>${ownerBadge}${meBadge}</div><small>${E(member.company || T(member.role_label || 'Integrante'))}</small></div></div><div class="group-info-member-actions">${profileAction}${messageAction}${removeAction}</div></div>`;
     }).join('');
-    const editAction = current.can_edit_group ? btn(I('edit')+' '+T('Editar grupo'),'group-edit-open',`data-id="${Number(current.id)}"`,'ghost small') : '';
+    const groupData = `data-id="${Number(current.id)}"`;
+    const editAction = current.can_edit_group ? btn(I('edit')+' '+T('Editar grupo'),'group-edit-open',groupData,'ghost small') : '';
+    const addAction = current.can_add_group_members ? btn(I('plus')+' '+T('Agregar integrantes'),'group-add-open',groupData,'primary small') : '';
     const description = current.description ? `<p class="group-info-description">${E(current.description)}</p>` : `<p class="group-info-description muted">${E(T('Sin descripción del grupo.'))}</p>`;
-    const danger = current.can_delete_group ? `<div class="group-info-danger"><div><strong>${E(T('Eliminar grupo'))}</strong><p class="private-note">${E(T('Elimina esta conversación y sus mensajes para todos los integrantes. Esta acción no se puede deshacer.'))}</p></div>${btn('Eliminar grupo','group-delete-request',("data-id=\"" + (Number(current.id)) + "\" data-name=\"" + (E(identity.name)) + "\""),'danger')}</div>` : '';
-    modal(T('Información del grupo'), `<div class="group-info-head">${avatar(identity)}<div class="group-info-head-copy"><h3>${E(identity.name)}</h3><p>${Number(current.member_count || current.members?.length || 0)} ${E(T('integrantes'))}</p>${description}</div>${editAction ? ("<div class=\"group-info-head-action\">" + (editAction) + "</div>") : ''}</div><div class="group-info-section"><div class="group-info-section-title"><h4>${E(T('Integrantes'))}</h4><span>${Number(current.member_count || current.members?.length || 0)}</span></div><div class="group-info-members">${members}</div></div>${danger}`);
+    const leaveData = groupData + ` data-owner="${Number(current.created_by) === me}"`;
+    const leave = current.can_leave_group ? btn('Salir del grupo','group-leave-request',leaveData,'small') : '';
+    const remove = current.can_delete_group ? btn('Eliminar grupo','group-delete-request',groupData,'danger small') : '';
+    const dangerTitle=remove?'Administrar grupo':'Tu participación';
+    const danger = leave || remove ? `<div class="group-info-danger"><div><strong>${E(T(dangerTitle))}</strong></div><div class="group-info-danger-actions">${leave}${remove}</div></div>` : '';
+    modal(T('Información del grupo'), `<div class="group-info-head">${avatar(identity)}<div class="group-info-head-copy"><h3>${E(identity.name)}</h3><p>${Number(current.member_count || current.members?.length || 0)} ${E(T('integrantes'))}</p>${description}</div>${editAction ? ("<div class=\"group-info-head-action\">" + (editAction) + "</div>") : ''}</div><div class="group-info-section"><div class="group-info-section-title"><h4>${E(T('Integrantes'))}</h4><span>${Number(current.member_count || current.members?.length || 0)}</span>${addAction}</div><div class="group-info-members">${members}</div></div>${danger}`);
+  }
+
+  function groupRemoveMemberDialog(button, id) {
+    const title = T('Expulsar del grupo');
+    const prompt = T('¿Quieres expulsar a {name}?').replace('{name}', () => button.dataset.name);
+    modal(title, `<form data-form="group-remove-member" data-id="${id}" data-user="${Number(button.dataset.user)}">
+      <p><strong>${E(prompt)}</strong></p>
+      <p>${E(T('Esta persona perderá acceso a la conversación del grupo.'))}</p>
+      <div class="form-actions">${btn('Cancelar','modal-back')}<button type="submit" class="btn danger">${E(title)}</button></div>
+    </form>`);
+  }
+
+  function groupExitDialog(action, id, owner) {
+    const leave = action === 'group-leave-request';
+    const title = T(leave ? 'Salir del grupo' : 'Eliminar grupo');
+    let explanation = 'Elimina esta conversación y sus mensajes para todos los integrantes. Esta acción no se puede deshacer.';
+    if (leave) explanation = owner
+      ? 'Un integrante activo elegido al azar pasará a gestionar el grupo. Perderás el acceso a la conversación.'
+      : 'Al salir, perderás el acceso a la conversación del grupo.';
+    modal(title, `<form data-form="group-exit" data-mode="${leave ? 'leave' : 'delete'}" data-id="${id}">
+      <p>${E(T(explanation))}</p>
+      <div class="form-actions">${btn('Cancelar','modal-back')}<button type="submit" class="btn danger">${E(title)}</button></div>
+    </form>`);
+  }
+
+  async function refreshGroupMembership(form, id, notice) {
+    if (form.isConnected) {
+      closeModal(false);
+      if (S.page === 'mensajeria') await messages();
+      if (S.page === 'mensajeria') await groupInfoDialog(id);
+    }
+    toast(notice);
   }
 
   function stopChat() {
@@ -3213,6 +3393,9 @@
     return `${T('Leído por')} ${Math.min(read,total)} ${T('de')} ${total}`;
   }
   function messageBubble(m) {
+    if (m.kind === 'member_left' || m.kind === 'member_removed') {
+      return `<div class="chat-group-activity" data-message-id="${Number(m.id)}">${E(m.body)}</div>`;
+    }
     const mine = Number(m.sender_id) === Number(S.boot.me.id);
     const group = S.chat?.current?.kind === 'group';
     const menu = '';
@@ -3224,9 +3407,10 @@
     const states = Array.isArray(readState) ? readState : [];
     document.querySelectorAll('.bubble.me[data-message-id]').forEach(bubble => {
       const id = Number(bubble.dataset.messageId);
-      const count = states.filter(state => Number(state.last_read) >= id).length;
+      const recipients = states.filter(state => Number(state.joined_after || 0) < id);
+      const count = recipients.filter(state => Number(state.last_read) >= id).length;
       const holder = bubble.querySelector('[data-receipt-for]');
-      if (holder) holder.textContent = receiptText(count, states.length);
+      if (holder) holder.textContent = receiptText(count, recipients.length);
     });
   }
   function chatIdentity(c) {
@@ -3250,7 +3434,7 @@
     const list = rows.map(c => {
       const person=chatIdentity(c);
       const requestMark = isIncomingRequest(c) ? `<span class="request-pill">${E(T('Solicitud'))}</span>` : '';
-      return `<button class="chat-person ${Number(c.id) === S.conversation ? "active" : ""} ${c.unread ? 'has-unread' : ''}" data-action="conversation" data-id="${Number(c.id)}">${avatar(person)}<span><strong>${E(person.name)} ${c.kind==='group'?'<span class="group-badge">Grupo</span>':''} ${requestMark} ${c.unread ? '<span class="tag" aria-label="' + Number(c.unread) + ' sin leer">' + Number(c.unread) + '</span>' : ''}</strong><small>${E((c.preview || '').slice(0, 42))}</small></span></button>`;
+      return `<button class="chat-person ${Number(c.id) === S.conversation ? "active" : ""} ${c.unread ? 'has-unread' : ''}" data-action="conversation" data-id="${Number(c.id)}">${avatar(person)}<span><strong>${E(person.name)} ${c.kind==='group'?("<span class=\"group-badge\">" + E(T("Grupo")) + "</span>"):''} ${requestMark} ${c.unread ? '<span class="tag" aria-label="' + Number(c.unread) + ' sin leer">' + Number(c.unread) + '</span>' : ''}</strong><small>${E((c.preview || '').slice(0, 42))}</small></span></button>`;
     }).join("") || (S.messageTab === 'requests'
       ? `<p class="private-note chat-sidebar-empty">${E(T('No tienes solicitudes de conversación pendientes.'))}</p>`
       : `<p class="private-note chat-sidebar-empty">${E(T('No hay conversaciones para mostrar. Puedes iniciar una desde el directorio o crear un grupo.'))}</p>`);
@@ -3271,9 +3455,12 @@
       picker.hidden = disabled;
       if (disabled) picker.open = false;
     }
-    if (current.kind !== 'group') {
+    if (current.kind === 'group') {
+      const count = document.querySelector('.group-info-trigger [data-chat-member-count]');
+      if (count) count.textContent = current.member_count;
+    } else {
       const block = document.querySelector('.chat-title [data-action="block"]');
-      if (block) { block.textContent = current.blocked_by_me ? 'Desbloquear' : 'Bloquear'; block.dataset.active = String(!current.blocked_by_me); }
+      if (block) { block.textContent = T(current.blocked_by_me ? 'Desbloquear' : 'Bloquear'); block.dataset.active = String(!current.blocked_by_me); }
     }
   }
   function openChat(chat, current) {
@@ -3283,9 +3470,9 @@
     const identity = chatIdentity(current);
     let title;
     if (group) {
-      title = `<button type="button" class="chat-profile group-chat-profile group-info-trigger" data-action="group-menu" data-id="${Number(current.id)}">${avatar(identity)}<span><strong>${E(identity.name)}</strong><small>${Number(current.member_count || current.members?.length || 0)} participantes · ${E(T('Ver integrantes'))}</small></span></button>`;
+      title = `<button type="button" class="chat-profile group-chat-profile group-info-trigger" data-action="group-menu" data-id="${Number(current.id)}">${avatar(identity)}<span><strong>${E(identity.name)}</strong><small><span data-chat-member-count>${Number(current.member_count)}</span> ${E(T('integrantes'))} · ${E(T('Ver integrantes'))}</small></span></button>`;
     } else if (current.other.profile_url) {
-      title = `<button type="button" class="chat-profile chat-profile-button" data-action="member" data-id="${Number(current.other.id)}">${avatar(current.other)}<span><strong>${E(current.other.name)}</strong><small>Ver perfil</small></span></button>`;
+      title = `<button type="button" class="chat-profile chat-profile-button" data-action="member" data-id="${Number(current.other.id)}">${avatar(current.other)}<span><strong>${E(current.other.name)}</strong><small>${E(T("Ver perfil"))}</small></span></button>`;
     } else {
       title = `<span class="chat-profile">${avatar(current.other)}<strong>${E(current.other.name)}</strong></span>`;
     }
@@ -3311,6 +3498,26 @@
     document.querySelector('.chat-compose textarea').value = chatDrafts.get(chat.id) || '';
     chatControls(current); chatSidebar();
   }
+  function clearChatSelection() {
+    S.conversation = 0;
+    const url = new URL(location.href);
+    url.searchParams.delete('conversation');
+    history.replaceState(history.state, '', url);
+  }
+
+  async function selectedConversation(chat,conversations,selected) {
+    let current = selected ? conversations.find(c => Number(c.id) === selected) : null;
+    let unavailable = false;
+    if (selected && !current) {
+      try { current = await api('conversations/' + selected); }
+      catch (error) {
+        if (error.status !== 404 || !chatAlive(chat)) throw error;
+        clearChatSelection();
+        unavailable = true;
+      }
+    }
+    return {current,unavailable};
+  }
   async function messages() {
     const previous = document.querySelector('.chat-compose');
     if (previous) chatDrafts.set(Number(previous.dataset.id), previous.elements.body.value);
@@ -3320,21 +3527,20 @@
     if (!chatAlive(chat)) return;
     S.conversations = conversations;
     const urlSelected = Number(new URLSearchParams(location.search).get('conversation')) || 0;
-    let selected = S.conversation || urlSelected || 0;
-    let current = selected ? conversations.find(c => Number(c.id) === selected) : null;
-    if (selected && !current) current = await api('conversations/' + selected);
+    const selected = S.conversation || urlSelected || 0;
+    let {current,unavailable}=await selectedConversation(chat,conversations,selected);
     if (current && isIncomingRequest(current)) S.messageTab = 'requests';
     else if (current && urlSelected) S.messageTab = 'chats';
-    if (!current && !mobileMessaging()) {
+    if (!current && !unavailable && !mobileMessaging()) {
       const first = conversationBucket(S.messageTab, conversations)[0];
-      selected = Number(first?.id) || 0;
       current = first || null;
     }
     if (!chatAlive(chat)) return;
     const headingActions = `<div class="chat-heading-actions">${link('directorio', I('plus') + ' Nueva conversación', 'primary')}${btn(I('users') + ' Crear grupo','group-chat-open','','small')}</div>`;
-    content().innerHTML = heading('Mensajería', 'Conversaciones directas y grupales para colaborar dentro de ASCLA.', headingActions) + `<div class="chat-sync" id="chat-sync" role="status" hidden></div><form class="filters" data-form="filters"><input name="q" aria-label="Buscar conversaciones" placeholder="Buscar conversaciones o grupos…" value="${E(S.filter.q || '')}"><button class="btn">Buscar</button></form><div class="chat-layout ${current ? 'conversation-open' : 'conversation-list-open'}"><aside class="chat-sidebar" aria-label="Conversaciones"></aside><section class="chat-conversation">${empty('Inicia una conversación', 'Puedes conversar con una conexión, aceptar una solicitud de conversación o crear un grupo.')}</section></div>`;
+    content().innerHTML = heading('Mensajería', 'Conversaciones directas y grupales para colaborar dentro de ASCLA.', headingActions) + `<div class="chat-sync" id="chat-sync" role="status" hidden></div><form class="filters" data-form="filters"><input name="q" aria-label="Buscar conversaciones" placeholder="Buscar conversaciones o grupos…" value="${E(S.filter.q || '')}"><button class="btn">${E(T("Buscar"))}</button></form><div class="chat-layout ${current ? 'conversation-open' : 'conversation-list-open'}"><aside class="chat-sidebar" aria-label="${E(T("Conversaciones"))}"></aside><section class="chat-conversation">${empty('Inicia una conversación', 'Puedes conversar con una conexión, aceptar una solicitud de conversación o crear un grupo.')}</section></div>`;
     chatSidebar();
     if (current) openChat(chat, current);
+    if (unavailable) toast('La conversación ya no está disponible.');
     await syncChat();
   }
   async function loadMessages(chat = S.chat) {
@@ -3355,7 +3561,7 @@
       applyReadState(data.read_state);
       chat.last = Math.max(chat.last, Number(data.after)); chat.loaded = true;
       chat.more = !initial && data.has_more;
-      if (chat.last && !document.hidden && document.hasFocus() && chatAlive(chat)) await api(`conversations/${chat.id}/read`, { last: chat.last });
+      if (chat.ids.has(chat.last) && !document.hidden && document.hasFocus() && chatAlive(chat)) await api(`conversations/${chat.id}/read`, { last: chat.last });
       if (initial || bottom) area.scrollTop = area.scrollHeight;
     })();
     try { await chat.pending; } finally { chat.pending = null; }
@@ -3377,7 +3583,10 @@
     S.conversations = conversations;
     if (!chat.id && conversations.length && !mobileMessaging()) openChat(chat, conversations[0]);
     let current = conversations.find(c => Number(c.id) === chat.id);
-    if (chat.id && !current) current = await api('conversations/' + chat.id);
+    if (chat.id && !current) {
+      chatSidebar();
+      current = await api('conversations/' + chat.id);
+    }
     if (!chatAlive(chat)) return null;
     if (current) { chat.current=current; chatControls(current); }
     await loadMessages(chat);
@@ -3392,7 +3601,8 @@
     const form = document.querySelector('.chat-compose');
     if (form) chatDrafts.set(Number(form.dataset.id), form.elements.body.value);
     const pane = document.querySelector('.chat-conversation');
-    if (pane) pane.innerHTML = empty('Conversación no disponible', error.message) + link('directorio', 'Revisar mis conversaciones', 'small');
+    if (pane) pane.innerHTML = empty('Conversación no disponible', error.message) + btn('Volver a la lista de chats', 'chat-back', '', 'small');
+    if (error.status === 404) clearChatSelection();
     chatStatus(error.message || 'No se puede acceder a los mensajes. Recarga la página para revisar tu sesión.', true);
   }
   function syncChatFailure(chat, error) {
@@ -3421,10 +3631,14 @@
     }
   }
   async function intro(id) {
-    const r = await api("matching/" + id + "/intro");
+    let r;
+    const hide = () => root.querySelectorAll('[data-action="intro"][data-id="'+Number(id)+'"]').forEach(button => button.remove());
+    try { r = await api("matching/" + id + "/intro", {}); }
+    catch (error) { if (error.status === 409) { hide(); } throw error; }
+    hide();
     modal(
-      "Mensaje sugerido",
-      `<p class="alert">${E(T("Borrador sugerido según intereses compartidos. Puedes editarlo libremente antes de enviarlo."))}</p><form data-form="intro" data-id="${id}">${field("body", "Mensaje", r.text, "textarea", 'required maxlength="5000"')}<div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">Enviar mensaje</button></div></form>`,
+      T("Mensaje sugerido"),
+      `<p class="alert">${E(T("Borrador sugerido según intereses compartidos. Puedes editarlo libremente antes de enviarlo."))}</p><form data-form="intro" data-id="${id}">${field("body", "Mensaje", r.text, "textarea", 'required maxlength="5000"')}<div class="form-actions">${btn("Cancelar", "close")}<button class="btn primary">${E(T("Enviar mensaje"))}</button></div></form>`,
     );
   }
   function assistantSources(r) {
@@ -3464,7 +3678,7 @@
       "¿Qué videos puedo consultar?",
       "¿A quién me recomiendas conocer?",
     ];
-    content().innerHTML = `<section class="assistant-intro"><div class="assistant-mark">${I("spark")}</div><div class="eyebrow">${E(T("ASISTENTE ASCLA"))}</div><h1>${E(T("Pregunta a tu comunidad ASCLA"))}</h1><p>${E(T("Conversa con el asistente sobre eventos, publicaciones, recursos, galerías y conexiones. Primero consulta la información disponible en la propia intranet."))}</p><span class="demo-badge assistant-mode-badge">${E(providerMode(S.boot.ai_mode))}</span></section><div class="ask-suggestions">${suggestions.map(q => btn(E(T(q)) + " " + I("arrow"), "ask-suggestion", ("data-question=\"" + (E(T(q))) + "\""))).join("")}</div><section class="assistant-chat-shell"><header class="assistant-chat-head"><div><strong>${E(T("Conversación con ASCLA"))}</strong><span>${E(T("Los datos internos actuales tienen prioridad sobre el historial de la conversación."))}</span></div><div>${btn(I("plus") + " " + T("Nueva conversación"), "assistant-new", "", "ghost small")}${btn(I("clock") + " " + T("Historial"), "answer-history", "", "ghost small")}</div></header><div class="assistant-messages" id="assistant-messages" role="log" aria-live="polite"><article class="assistant-message assistant welcome"><div class="assistant-message-meta"><span>${I("spark")} ASCLA</span></div><div class="assistant-message-copy">${E(T("Hola. Puedo revisar lo que hay en ASCLA y ayudarte a encontrar eventos próximos, publicaciones recientes, recursos, galerías y conexiones recomendadas. ¿Qué quieres saber?"))}</div></article>${rows.map(j => {
+    content().innerHTML = `<section class="assistant-intro">${sectionBanner()}<div class="assistant-mark">${I("spark")}</div><div class="eyebrow">${E(T("ASISTENTE ASCLA"))}</div><h1>${E(T("Pregunta a tu comunidad ASCLA"))}</h1><p>${E(T("Conversa con el asistente sobre eventos, publicaciones, recursos, galerías y conexiones. Primero consulta la información disponible en la propia intranet."))}</p><span class="demo-badge assistant-mode-badge">${E(providerMode(S.boot.ai_mode))}</span></section><div class="ask-suggestions">${suggestions.map(q => btn(E(T(q)) + " " + I("arrow"), "ask-suggestion", ("data-question=\"" + (E(T(q))) + "\""))).join("")}</div><section class="assistant-chat-shell"><header class="assistant-chat-head"><div><strong>${E(T("Conversación con ASCLA"))}</strong><span>${E(T("Los datos internos actuales tienen prioridad sobre el historial de la conversación."))}</span></div><div>${btn(I("plus") + " " + T("Nueva conversación"), "assistant-new", "", "ghost small")}${btn(I("clock") + " " + T("Historial"), "answer-history", "", "ghost small")}</div></header><div class="assistant-messages" id="assistant-messages" role="log" aria-live="polite"><article class="assistant-message assistant welcome"><div class="assistant-message-meta"><span>${I("spark")} ASCLA</span></div><div class="assistant-message-copy">${E(T("Hola. Puedo revisar lo que hay en ASCLA y ayudarte a encontrar eventos próximos, publicaciones recientes, recursos, galerías y conexiones recomendadas. ¿Qué quieres saber?"))}</div></article>${rows.map(j => {
       const user = assistantUserBubble(j.question);
       if (j.status === "completed" && j.result) return user + assistantBotBubble(assistantAnswerBody(j.result), ("assistant-job-" + (j.id) + ""));
       if (j.status === "error") return user + assistantBotBubble(("<div class=\"error\">" + (E(T(j.error || "No se pudo completar la consulta."))) + " " + (btn(T("Reintentar"), "retry-job", ("data-id=\"" + (j.id) + "\""), "small")) + "</div>"), ("assistant-job-" + (j.id) + ""));
@@ -3481,14 +3695,14 @@
         const jobError=j.error?'<p>'+E(j.error)+'</p>':'';
         target.innerHTML = assistantMode ? assistantLoadingBody(j.status) : `<div class="alert">${I('clock')} ${jobStatusLabel} · Trabajo #${id}${jobError}</div>`;
         if (attempts < 90) return true;
-        target.innerHTML = assistantMode ? `<div class="assistant-message-meta"><span>${I('spark')} ASCLA</span></div><div class="assistant-message-copy">${E(T('La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta.'))}</div>` : '<div class="alert">El trabajo continúa en segundo plano. Recibirás una notificación cuando esté listo.</div>';
+        target.innerHTML = assistantMode ? `<div class="assistant-message-meta"><span>${I('spark')} ASCLA</span></div><div class="assistant-message-copy">${E(T('La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta.'))}</div>` : ("<div class=\"alert\">" + E(T("El trabajo continúa en segundo plano. Recibirás una notificación cuando esté listo.")) + "</div>");
     return false;
   }
   async function watchJob(id, target, onDone, onError = null) {
     if (!target.isConnected) return;
     let attempts = 0;
     const assistantMode = target.classList?.contains('assistant-message');
-    target.innerHTML = assistantMode ? assistantLoadingBody('pending') : '<div class="alert">Pendiente · Estamos preparando la respuesta…</div>';
+    target.innerHTML = assistantMode ? assistantLoadingBody('pending') : ("<div class=\"alert\">" + E(T("Pendiente · Estamos preparando la respuesta…")) + "</div>");
     while (target.isConnected) {
       await new Promise(resolve=>setTimeout(resolve,attempts ? 2500 : 1800));
       if (!target.isConnected) return;
@@ -3523,7 +3737,7 @@
       return `<article class="contact-request"><div class="contact-request-heading"><h3>${E(p.title)}</h3><span class="contact-status ${state}">${E(T(requestLabels[state]))}</span></div><p class="contact-request-date">#${Number(p.id)} · ${date(p.date)}</p>${supportHistory(p)}</article>`;
     }).join("");
     content().innerHTML = `<div class="contact-workspace">
-      <header class="contact-heading"><span class="contact-symbol">${I("mail")}</span><div><span class="eyebrow">${E(T("CONTACTO ASCLA"))}</span><h1>${E(T("Estamos para ayudarte"))}</h1><p>${E(T("Consultas, sugerencias y soporte para tu experiencia en ASCLA."))}</p></div></header>
+      <header class="contact-heading">${sectionBanner()}<span class="contact-symbol">${I("mail")}</span><div><span class="eyebrow">${E(T("CONTACTO ASCLA"))}</span><h1>${E(T("Estamos para ayudarte"))}</h1><p>${E(T("Consultas, sugerencias y soporte para tu experiencia en ASCLA."))}</p></div></header>
       <div class="contact-layout"><form class="card contact-form" data-form="contact" aria-labelledby="contact-form-title">
         <div class="contact-card-heading"><span class="contact-section-icon">${I("contact")}</span><div><h2 id="contact-form-title">${E(T("Envíanos tu consulta"))}</h2><p>${E(T("Cuéntanos qué necesitas y el equipo dará seguimiento a tu solicitud."))}</p></div></div>
         ${field("title", "Asunto", "", "text", ("required maxlength=\"200\" placeholder=\"" + (E(T("Resume el motivo de tu consulta"))) + "\""))}
@@ -3704,8 +3918,8 @@
   function adminUserCreator(roles) {
     const roleOptions=(roles||[]).map(r=>[r.id,r.name]);
     const dialog = modal(
-      'Añadir usuario',
-      `<form data-form="admin-user-create" data-guard-modal-unsaved class="admin-user-editor admin-user-creator"><div class="admin-user-editor-head admin-user-create-head"><span class="admin-user-create-icon">${I('users')}</span><div><span class="eyebrow">NUEVA CUENTA ASCLA</span><h3>Crear usuario de la comunidad</h3><p>La cuenta se crea directamente en ASCLA, sin abrir el panel de WordPress.</p></div></div><div class="form-section">Datos de acceso</div><div class="form-grid">${field('login','Nombre de usuario','','text','required maxlength="60" autocomplete="off" spellcheck="false" placeholder="ej. maria.perez"')}${field('email','Correo electrónico','','email','required maxlength="100" autocomplete="email" placeholder="nombre@correo.com"')}${select('role','Rol en ASCLA',roleOptions,'ascla_member')}</div>${membershipFields()}<p class="private-note full">El nombre de usuario se utilizará para iniciar sesión. La administración puede cambiarlo al editar la cuenta.</p><div class="form-section">Información del asociado</div><div class="form-grid">${profilePhoneFields()}${field('first_name','Nombres','','text','required maxlength="100" autocomplete="given-name"')}${field('last_name','Apellidos','','text','maxlength="100" autocomplete="family-name"')}${field('birth_date','Fecha de nacimiento','','date','min="1900-01-01" max="'+new Date().toISOString().slice(0,10)+'"')}${field('position','Cargo','','text','maxlength="200"')}${field('company','Empresa / organización','','text','maxlength="200"')}${memberTypeField()}</div><div class="admin-user-invite-box">${check('send_invite','Enviar un correo para que el usuario configure su contraseña',true)}<p>ASCLA genera una contraseña interna segura y no la muestra al administrador. El usuario recibe un enlace de WordPress para establecer su propia contraseña. Si el correo no llega, puede usar “¿Olvidaste tu contraseña?” desde <strong>/login/</strong>.</p></div><div class="admin-user-edit-note">${I('shield')}<div><strong>Acceso seguro desde el inicio</strong><p>La cuenta tendrá acceso según el rol elegido. Asociado, Ejecutivo y Moderador se gestionan desde ASCLA; los administradores técnicos continúan fuera de este formulario.</p></div></div><div class="form-actions"><button type="button" class="btn" data-action="close">Cancelar</button><button class="btn primary">${I('plus')} Crear usuario</button></div></form>`,
+      T('Añadir usuario'),
+      `<form data-form="admin-user-create" data-guard-modal-unsaved class="admin-user-editor admin-user-creator"><div class="admin-user-editor-head admin-user-create-head"><span class="admin-user-create-icon">${I('users')}</span><div><span class="eyebrow">${E(T("NUEVA CUENTA ASCLA"))}</span><h3>${E(T("Crear usuario de la comunidad"))}</h3><p>${E(T("La cuenta se crea directamente en ASCLA, sin abrir el panel de WordPress."))}</p></div></div><div class="form-section">${E(T("Datos de acceso"))}</div><div class="form-grid">${field('login','Nombre de usuario','','text','required maxlength="60" autocomplete="off" spellcheck="false" placeholder="ej. maria.perez"')}${field('email','Correo electrónico','','email','required maxlength="100" autocomplete="email" placeholder="nombre@correo.com"')}${select('role','Rol en ASCLA',roleOptions,'ascla_member')}</div>${membershipFields()}<p class="private-note full">${E(T("El nombre de usuario se utilizará para iniciar sesión. La administración puede cambiarlo al editar la cuenta."))}</p><div class="form-section">${E(T("Información del asociado"))}</div><div class="form-grid">${profilePhoneFields()}${field('first_name','Nombres','','text','required maxlength="100" autocomplete="given-name"')}${field('last_name','Apellidos','','text','maxlength="100" autocomplete="family-name"')}${field('birth_date','Fecha de nacimiento','','date','min="1900-01-01" max="'+new Date().toISOString().slice(0,10)+'"')}${field('position','Cargo','','text','maxlength="200"')}${field('company','Empresa / organización','','text','maxlength="200"')}${memberTypeField()}</div><div class="admin-user-invite-box">${check('send_invite','Enviar un correo para que el usuario configure su contraseña',true)}<p>${E(T("ASCLA genera una contraseña interna segura y no la muestra al administrador. El usuario recibe un enlace de WordPress para establecer su propia contraseña. Si el correo no llega, puede usar “¿Olvidaste tu contraseña?” desde"))} <strong>/login/</strong>.</p></div><div class="admin-user-edit-note">${I('shield')}<div><strong>${E(T("Acceso seguro desde el inicio"))}</strong><p>${E(T("La cuenta tendrá acceso según el rol elegido. Asociado, Ejecutivo y Moderador se gestionan desde ASCLA; los administradores técnicos continúan fuera de este formulario."))}</p></div></div><div class="form-actions"><button type="button" class="btn" data-action="close">${E(T("Cancelar"))}</button><button class="btn primary">${I('plus')} Crear usuario</button></div></form>`,
       true,
     );
     void setupProfilePhone(dialog.querySelector('form'));
@@ -3730,10 +3944,10 @@
     const u=await api(`admin/users/${Number(id)}`);
     const roleOptions=(u.roles||[]).map(r=>[r.id,r.name]);
     const dialog=modal(
-      'Editar usuario',
+      T('Editar usuario'),
       `<form data-form="admin-user-edit" data-id="${Number(u.id)}" data-guard-modal-unsaved class="admin-user-editor">
         <input type="hidden" name="profile_revision" value="${Number(u.profile_revision || 0)}">
-        <div class="admin-user-editor-head">${avatar({name:[u.first_name,u.last_name].filter(Boolean).join(' ')||u.login,photo_url:u.photo_url},'lg')}<div><span class="eyebrow">CUENTA ASCLA</span><h3>${E([u.first_name,u.last_name].filter(Boolean).join(' ')||u.login)}</h3><p>@${E(u.login)} · ${E(u.email)}</p>${btn('Restablecer fotografía','profile-photo-reset',u.photo_url?'':'disabled','small ghost')}<input type="hidden" name="photo_id" value="0" disabled><p class="private-note" data-photo-reset-status></p></div></div>
+        <div class="admin-user-editor-head">${avatar({name:[u.first_name,u.last_name].filter(Boolean).join(' ')||u.login,photo_url:u.photo_url},'lg')}<div><span class="eyebrow">${E(T("CUENTA ASCLA"))}</span><h3>${E([u.first_name,u.last_name].filter(Boolean).join(' ')||u.login)}</h3><p>@${E(u.login)} · ${E(u.email)}</p>${btn('Restablecer fotografía','profile-photo-reset',u.photo_url?'':'disabled','small ghost')}<input type="hidden" name="photo_id" value="0" disabled><p class="private-note" data-photo-reset-status></p></div></div>
         <p class="private-note">${E(T('Edita los datos del asociado y guarda al terminar. Los campos con * son obligatorios.'))}</p>
         <div class="form-section">${E(T('Información personal y profesional'))}</div>
         <div class="form-grid">
@@ -3760,7 +3974,7 @@
         </div></details>
         ${professionalRequestFields(u)}
         <div class="admin-user-edit-note">${I('shield')}<div><strong>${E(T('Cambios registrados'))}</strong><p>${E(T('El historial identifica al administrador, al usuario y los campos modificados. Las preferencias de privacidad y participación las conserva el asociado.'))}</p></div></div>
-        <div class="form-actions"><button type="button" class="btn" data-action="close">Cancelar</button><button class="btn primary">${I('check')} ${E(T('Guardar cambios'))}</button></div>
+        <div class="form-actions"><button type="button" class="btn" data-action="close">${E(T("Cancelar"))}</button><button class="btn primary">${I('check')} ${E(T('Guardar cambios'))}</button></div>
       </form>`,
       true,
     );
@@ -3775,12 +3989,12 @@
   function boardApprovalEditor(id) {
     const roles = [['administrator', 'Administrador'], ['ascla_executive', 'Ejecutivo ASCLA'], ['ascla_moderator', 'Moderador ASCLA'], ['ascla_member', 'Asociado ASCLA']];
     const choices = roles.map(([key, label]) => `<label class="completion-choice"><input type="checkbox" name="roles" value="${key}"><span>${E(T(label))}</span></label>`).join('');
-    modal('Autorización de roles de la Junta', `<form data-form="board-approval" data-id="${Number(id)}" data-guard-modal-unsaved><p>${E(T('Registra una decisión previa de la Junta. Esta acción no asigna roles ni emite la autorización. Las cuentas técnicas continúan gestionándose desde WordPress.'))}</p><div class="completion-choices">${choices}</div>${field('board_reference','Referencia del acta o autorización de la Junta','','text','required maxlength="200"')}${field('board_date','Fecha de la autorización','','date','required max="'+new Date().toISOString().slice(0,10)+'"')}${check('board_confirmed','Confirmo que la Junta autorizó los roles seleccionados',false)}<button class="btn primary">${E(T('Registrar autorización'))}</button></form>`);
+    modal(T('Autorización de roles de la Junta'), `<form data-form="board-approval" data-id="${Number(id)}" data-guard-modal-unsaved><p>${E(T('Registra una decisión previa de la Junta. Esta acción no asigna roles ni emite la autorización. Las cuentas técnicas continúan gestionándose desde WordPress.'))}</p><div class="completion-choices">${choices}</div>${field('board_reference','Referencia del acta o autorización de la Junta','','text','required maxlength="200"')}${field('board_date','Fecha de la autorización','','date','required max="'+new Date().toISOString().slice(0,10)+'"')}${check('board_confirmed','Confirmo que la Junta autorizó los roles seleccionados',false)}<button class="btn primary">${E(T('Registrar autorización'))}</button></form>`);
   }
   function adminUserCard(u, roles) {
     const accessClass = u.membership_status === 'active' && u.access_enabled !== false ? 'open' : 'closed';
     const accessLabel = u.membership_status === 'active' && u.access_enabled === false ? 'Acceso restringido por permisos' : ({active:'Acceso activo',suspended:'Acceso suspendido',expired:'Membresía vencida'}[u.membership_status] || 'Acceso activo');
-    const technicalBadge = u.technical_admin ? '<span class="tag admin-technical-tag">Administración técnica</span>' : '';
+    const technicalBadge = u.technical_admin ? ("<span class=\"tag admin-technical-tag\">" + E(T("Administración técnica")) + "</span>") : '';
     let actions = btn(I('users')+' Actividad e intereses','user-insights',`data-id="${Number(u.id)}"`,'primary small');
     if (u.profile_url) actions += btn('Ver perfil','member',("data-id=\"" + (Number(u.id)) + "\""),'small');
     if (u.can_record_role_approval) actions += btn('Autorización de roles','board-role-approval', 'data-id="'+Number(u.id)+'"','small');
@@ -3792,7 +4006,7 @@
     }
     if (u.can_delete) accountActions += btn('Eliminar usuario','user-delete',("data-id=\"" + (u.id) + "\" data-name=\"" + (E(u.name)) + "\" data-login=\"" + (E(u.login)) + "\" data-email=\"" + (E(u.email)) + "\""),'danger small');
     if(accountActions) actions+=`<details class="admin-user-more"><summary>${E(T('Más opciones de cuenta'))}</summary><div>${accountActions}</div></details>`;
-    const roleBadges = u.roles.map(r => "<span class=\"tag\">" + E(roles[r] || r) + "</span>").join('');
+    const roleBadges = u.roles.map(r => "<span class=\"tag\">" + E(T(roles[r] || r)) + "</span>").join('');
     return `<article class="admin-user" data-admin-user="${u.id}"><div class="admin-user-person">${avatar(u)}<div><h3>${E(u.name)}</h3><span>@${E(u.login)}</span>${u.email ? ("<a href=\"mailto:" + (E(u.email)) + "\">" + (E(u.email)) + "</a>") : ("<small>" + (E(T("Correo no registrado"))) + "</small>")}</div></div><div class="admin-user-access">${roleBadges}<span class="request-status ${accessClass}">${accessLabel}</span>${technicalBadge}<small>Registro: ${date(u.registered)}</small></div><div class="admin-user-actions">${actions}</div></article>`;
   }
   async function adminUsers(panel) {
@@ -3800,7 +4014,7 @@
     const roles=Object.fromEntries(list.roles.map(r=>[r.id,r.name]));
     const createAction = list.can_create ? btn(I('plus')+' Añadir usuario','user-create',("data-roles=\"" + (E(JSON.stringify(list.create_roles||[]))) + "\""),'primary') : '';
     const userCards = list.items.map(u => adminUserCard(u, roles)).join('') || empty('No encontramos usuarios','Prueba otro nombre o cambia los filtros.');
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">PERSONAS Y ACCESOS</span><h2>${E(T('Usuarios e intereses'))}</h2><p>${E(T('Busca un asociado y abre Actividad e intereses para conocer su participación en la comunidad.'))}</p></div>${createAction}</div>${adminUserFilters(list.roles,f)}<p class="private-note">${list.total} usuarios encontrados</p><div class="admin-users">${userCards}</div>${adminPager(list,'users')}`;
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T("PERSONAS Y ACCESOS"))}</span><h2>${E(T('Usuarios e intereses'))}</h2><p>${E(T('Busca un asociado y abre Actividad e intereses para conocer su participación en la comunidad.'))}</p></div>${createAction}</div>${adminUserFilters(list.roles,f)}<p class="private-note">${list.total} usuarios encontrados</p><div class="admin-users">${userCards}</div>${adminPager(list,'users')}`;
   }
   function adminUserFilters(roles, f) {
     return peopleFilters(f, roles);
@@ -3824,7 +4038,7 @@
     const stateClass = r.reviewed ? "success" : "";
     const stateLabel = r.reviewed ? "Revisado" : "Pendiente";
     const excerpt = r.excerpt ? `<p>${E(r.excerpt)}</p>` : "";
-    const detail = r.detail ? `<br><b>Detalle:</b> ${E(r.detail)}` : "";
+    const detail = r.detail ? `<br><b>${E(T("Detalle:"))}</b> ${E(r.detail)}` : "";
     const reviewedBy = r.reviewed && r.reviewed_by_name
       ? `<br><b>${E(T("Revisado por:"))}</b> ${E(r.reviewed_by_name)}`
       : "";
@@ -3837,7 +4051,7 @@
     const remove = r.can_delete
       ? btn("Eliminar reporte", "admin-delete", 'data-kind="report" data-id="' + r.id + '"', "danger small")
       : "";
-    return `<article class="admin-report ${cardClass}"><span class="moderation-kind-icon" aria-hidden="true">${I('shield')}</span><div class="moderation-report-main"><div class="admin-report-heading"><h4>${E(title)}</h4><span class="tag ${stateClass}">${E(T(stateLabel))}</span></div>${excerpt}<p class="private-note"><b>Motivo:</b> ${E(r.reason_label || "Sin motivo registrado")}${detail}${reviewedBy}</p></div><div class="form-actions">${open}${markReviewed}${remove}</div></article>`;
+    return `<article class="admin-report ${cardClass}"><span class="moderation-kind-icon" aria-hidden="true">${I('shield')}</span><div class="moderation-report-main"><div class="admin-report-heading"><h4>${E(title)}</h4><span class="tag ${stateClass}">${E(T(stateLabel))}</span></div>${excerpt}<p class="private-note"><b>${E(T("Motivo:"))}</b> ${E(r.reason_label || "Sin motivo registrado")}${detail}${reviewedBy}</p></div><div class="form-actions">${open}${markReviewed}${remove}</div></article>`;
   }
   function adminCommentCard(c) {
     const remove = c.can_delete
@@ -4055,13 +4269,13 @@
     labels.microevent_updated='Microevento actualizado';
     labels.interest_topic_created='Tema del catálogo creado';
     labels.interest_topic_deleted='Tema del catálogo eliminado';
-    return labels[action]||String(action||'Actividad del sistema').replaceAll('_',' ');
+    return T(labels[action]||String(action||'Actividad del sistema').replaceAll('_',' '));
   }
   function adminLogsTab(panel, d) {
     const auditRows=d.audit||[];
     const auditActors=new Set(auditRows.map(a=>Number(a.actor_id)).filter(Boolean)).size;
     const latest=auditRows[0]?.created_at||'';
-    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T("ACTIVIDAD REGISTRADA"))}</span><h2>${E(T("Historial de cambios"))}</h2><p>Este registro ayuda a entender qué cambios importantes ocurrieron en ASCLA, quién los realizó y sobre qué elemento actuaron.</p></div><span class="admin-total">${auditRows.length} registros</span></div><div class="audit-guide"><article>${I('clock')}<div><strong>¿Qué registra?</strong><p>Acciones relevantes como cambios de configuración, moderación, accesos, reportes, archivos e integraciones.</p></div></article><article>${I('users')}<div><strong>¿Para qué sirve?</strong><p>Permite revisar el historial cuando necesitas saber quién hizo un cambio o investigar un problema.</p></div></article><article>${I('shield')}<div><strong>¿Qué no guarda?</strong><p>No almacena contraseñas ni el contenido de mensajes privados. Solo registra metadatos de la acción.</p></div></article></div><div class="audit-summary"><article class="audit-summary-card"><span class="audit-summary-icon">${I('clock')}</span><div><small>Acciones registradas</small><strong>${auditRows.length}</strong></div></article><article class="audit-summary-card"><span class="audit-summary-icon">${I('users')}</span><div><small>Personas identificadas</small><strong>${auditActors}</strong></div></article><article class="audit-summary-card wide"><span class="audit-summary-icon">${I('shield')}</span><div><small>Última actividad</small><strong>${latest?E(date(latest,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):'Sin actividad'}</strong></div></article></div><div class="card audit-card"><div class="audit-card-head"><div><h3>Historial de actividad</h3><p class="private-note">Los eventos más recientes aparecen primero. “Elemento” identifica el registro afectado cuando corresponde.</p></div><span class="audit-privacy">${I('shield')} Registro protegido</span></div><div class="table-wrap"><table class="data-table audit-table"><thead><tr><th>Cuándo</th><th>Qué ocurrió</th><th>Quién</th><th>Elemento</th><th>Detalle técnico</th></tr></thead><tbody>${auditRows.map(a=>("<tr><td><time class=\"audit-time\" datetime=\"" + (E(a.created_at)) + "\" title=\"" + (E(a.created_at)) + "\">" + (E(date(a.created_at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))) + "</time></td><td><span class=\"audit-action\">" + (E(adminAuditActionName(a.action))) + "</span></td><td><span class=\"audit-actor\">" + (E(a.actor_name||'Sistema')) + "</span></td><td><span class=\"audit-object\">" + (a.object_id?'#'+Number(a.object_id):'—') + "</span></td><td class=\"audit-detail\">" + (E(a.detail||'—')) + "</td></tr>")).join('')||'<tr><td colspan="5"><div class="audit-empty">No hay acciones registradas todavía.</div></td></tr>'}</tbody></table></div></div>`;
+    panel.innerHTML=`<div class="admin-section-heading"><div><span class="eyebrow">${E(T("ACTIVIDAD REGISTRADA"))}</span><h2>${E(T("Historial de cambios"))}</h2><p>${E(T("Este registro ayuda a entender qué cambios importantes ocurrieron en ASCLA, quién los realizó y sobre qué elemento actuaron."))}</p></div><span class="admin-total">${auditRows.length} ${E(T(auditRows.length===1?"registro":"registros"))}</span></div><div class="audit-guide"><article>${I('clock')}<div><strong>${E(T("¿Qué registra?"))}</strong><p>${E(T("Acciones relevantes como cambios de configuración, moderación, accesos, reportes, archivos e integraciones."))}</p></div></article><article>${I('users')}<div><strong>${E(T("¿Para qué sirve?"))}</strong><p>${E(T("Permite revisar el historial cuando necesitas saber quién hizo un cambio o investigar un problema."))}</p></div></article><article>${I('shield')}<div><strong>${E(T("¿Qué no guarda?"))}</strong><p>${E(T("No almacena contraseñas ni el contenido de mensajes privados. Solo registra metadatos de la acción."))}</p></div></article></div><div class="audit-summary"><article class="audit-summary-card"><span class="audit-summary-icon">${I('clock')}</span><div><small>${E(T("Acciones registradas"))}</small><strong>${auditRows.length}</strong></div></article><article class="audit-summary-card"><span class="audit-summary-icon">${I('users')}</span><div><small>${E(T("Personas identificadas"))}</small><strong>${auditActors}</strong></div></article><article class="audit-summary-card wide"><span class="audit-summary-icon">${I('shield')}</span><div><small>${E(T("Última actividad"))}</small><strong>${latest?E(date(latest,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})):E(T('Sin actividad'))}</strong></div></article></div><div class="card audit-card"><div class="audit-card-head"><div><h3>${E(T("Historial de actividad"))}</h3><p class="private-note">${E(T("Los eventos más recientes aparecen primero. “Elemento” identifica el registro afectado cuando corresponde."))}</p></div><span class="audit-privacy">${I('shield')} ${E(T('Registro protegido'))}</span></div><div class="table-wrap"><table class="data-table audit-table"><thead><tr><th>${E(T("Cuándo"))}</th><th>${E(T("Qué ocurrió"))}</th><th>${E(T("Quién"))}</th><th>${E(T("Elemento"))}</th><th>${E(T("Detalle técnico"))}</th></tr></thead><tbody>${auditRows.map(a=>("<tr><td><time class=\"audit-time\" datetime=\"" + (E(a.created_at)) + "\" title=\"" + (E(a.created_at)) + "\">" + (E(date(a.created_at,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}))) + "</time></td><td><span class=\"audit-action\">" + (E(adminAuditActionName(a.action))) + "</span></td><td><span class=\"audit-actor\">" + (E(a.actor_name||T('Sistema'))) + "</span></td><td><span class=\"audit-object\">" + (a.object_id?'#'+Number(a.object_id):'—') + "</span></td><td class=\"audit-detail\">" + (E(a.detail||'—')) + "</td></tr>")).join('')||("<tr><td colspan=\"5\"><div class=\"audit-empty\">" + E(T("No hay acciones registradas todavía.")) + "</div></td></tr>")}</tbody></table></div></div>`;
   }
   async function adminSettingsTab(panel) { if (S.boot.configure) await settings(panel); }
   const ADMIN_TAB_HANDLERS = {
@@ -4112,6 +4326,7 @@
         await handler(panel, d);
       } else await handler(panel);
     }
+    if (panel.isConnected) onboarding?.enter({ page: S.page, section: S.adminTab });
   }
   function settingsSection(icon, title, description, body, wide = false) {
     return `<details class="settings-group${wide?' wide':''}"><summary class="settings-group-head"><span class="settings-group-icon">${I(icon)}</span><div><h3>${E(T(title))}</h3><p>${E(T(description))}</p></div><span class="settings-disclosure">${I('chevron')}</span></summary><div class="settings-group-body">${body}</div></details>`;
@@ -4132,14 +4347,14 @@
     return '<div class="form-grid">'+fields.map(([key,label,min,max])=>field(key,label,s[key],"number",'required min="'+min+'" max="'+max+'"')).join("")+'</div><p class="private-note">'+E(T("Recordarme no evita el cierre por 30 minutos de inactividad."))+'</p>';
   }
   function mailSettings(s) {
-    const local = s.mail_local ? '<div class="alert">Buzón local activo: los correos se consultan en <a href="http://localhost:8025/" target="_blank" rel="noopener">Abrir buzón de pruebas</a>. No llegan a una bandeja externa.</div>' : '';
+    const local = s.mail_local ? ("<div class=\"alert\">" + E(T("Buzón local activo: los correos se consultan en")) + " <a href=\"http://localhost:8025/\" target=\"_blank\" rel=\"noopener\">" + E(T("Abrir buzón de pruebas")) + "</a>" + E(T(". No llegan a una bandeja externa.")) + "</div>") : '';
     const last = s.mail_last_result;
     let lastAttempt = 'Aún no hay intentos registrados.';
     if (last) {
       const deliveryStatus = last.status === 'accepted' ? 'aceptado por el transporte' : 'falló el envío';
       lastAttempt = 'Último intento: ' + E(deliveryStatus) + ' · ' + E(date(last.at, {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}));
     }
-    const body=`${local}<p class="private-note">Usa el servicio de correo de tu hosting o un proveedor SMTP. Si otro plugin ya gestiona los envíos, conserva “Transporte de WordPress”. Guarda los cambios antes de enviar una prueba a tu correo de administrador.</p><div class="form-grid">${select('mail_mode', 'Envío de correos', [['wordpress', 'Transporte de WordPress / otro plugin'], ['smtp', 'Servidor SMTP']], s.mail_mode)}${field('smtp_host', 'Servidor SMTP', s.smtp_host, 'text', 'placeholder="smtp.tuproveedor.com" autocomplete="off"')}${select('smtp_port', 'Puerto', [[587,'587'],[465,'465'],[2525,'2525']], s.smtp_port)}${select('smtp_security', 'Cifrado', [['tls', 'STARTTLS (587 / 2525)'],['ssl', 'SSL/TLS (465)']], s.smtp_security)}${field('smtp_user','Usuario SMTP',s.smtp_user,'text','autocomplete="off"')}${field('smtp_password', s.has_smtp_password ? 'Contraseña SMTP (guardada; vacío para conservar)' : 'Contraseña SMTP', '', 'password', 'autocomplete="new-password"')}${field('smtp_from','Correo remitente autorizado',s.smtp_from,'email')}${field('smtp_name','Nombre del remitente',s.smtp_name)}</div>${check('clear_smtp_password','Eliminar contraseña SMTP guardada',false)}<p class="private-note">La contraseña se guarda cifrada. Para eliminarla, cambia primero al transporte de WordPress. ${lastAttempt}</p>${btn('Enviar correo de prueba a mi cuenta','mail-test','','small')}`;
+    const body=`${local}<p class="private-note">${E(T("Usa el servicio de correo de tu hosting o un proveedor SMTP. Si otro plugin ya gestiona los envíos, conserva “Transporte de WordPress”. Guarda los cambios antes de enviar una prueba a tu correo de administrador."))}</p><div class="form-grid">${select('mail_mode', 'Envío de correos', [['wordpress', 'Transporte de WordPress / otro plugin'], ['smtp', 'Servidor SMTP']], s.mail_mode)}${field('smtp_host', 'Servidor SMTP', s.smtp_host, 'text', 'placeholder="smtp.tuproveedor.com" autocomplete="off"')}${select('smtp_port', 'Puerto', [[587,'587'],[465,'465'],[2525,'2525']], s.smtp_port)}${select('smtp_security', 'Cifrado', [['tls', 'STARTTLS (587 / 2525)'],['ssl', 'SSL/TLS (465)']], s.smtp_security)}${field('smtp_user','Usuario SMTP',s.smtp_user,'text','autocomplete="off"')}${field('smtp_password', s.has_smtp_password ? 'Contraseña SMTP (guardada; vacío para conservar)' : 'Contraseña SMTP', '', 'password', 'autocomplete="new-password"')}${field('smtp_from','Correo remitente autorizado',s.smtp_from,'email')}${field('smtp_name','Nombre del remitente',s.smtp_name)}</div>${check('clear_smtp_password','Eliminar contraseña SMTP guardada',false)}<p class="private-note">La contraseña se guarda cifrada. Para eliminarla, cambia primero al transporte de WordPress. ${lastAttempt}</p>${btn('Enviar correo de prueba a mi cuenta','mail-test','','small')}`;
     const counts=s.deliveries||{};
     const deliveries=`<p>${E(T('Entregas pendientes'))}: ${Number(counts.pending||0)} · ${E(T('Entregas que requieren revisión'))}: ${Number(counts.failed||0)}</p>${btn('Revisar entregas','delivery-list','','small')}`;
     return settingsSection('contact','Correo y recuperación','Configura la salida de correos, recuperación de contraseña y pruebas de entrega.',body+deliveries,true);
@@ -4149,7 +4364,7 @@
     const kinds={mail:'Correo',notification:'Notificación por correo',calendar:'Google Calendar',cache:'Actualización interna'};
     const states={pending:'Pendiente',processing:'Procesando',failed:'Requiere revisión'};
     const rows=data.items.map(row=>`<div class="admin-job"><strong>#${Number(row.id)} · ${E(T(kinds[row.kind]||'Entrega'))}</strong><p>${E(T(states[row.status]||'Pendiente'))} · ${E(T('Intentos'))}: ${Number(row.attempts)}</p>${row.status==='failed'?btn('Reintentar','delivery-retry',("data-id=\"" + (Number(row.id)) + "\""),'small'):''}</div>`).join('');
-    modal('Entregas y actualizaciones',`<p>${E(T('Las entregas se reintentan automáticamente. Si requieren revisión, verifica primero la conexión del servicio.'))}</p>${rows||'<p>'+E(T('No hay entregas pendientes.'))+'</p>'}`);
+    modal(T('Entregas y actualizaciones'),`<p>${E(T('Las entregas se reintentan automáticamente. Si requieren revisión, verifica primero la conexión del servicio.'))}</p>${rows||'<p>'+E(T('No hay entregas pendientes.'))+'</p>'}`);
   }
   function bindServerSecrets(form, settings) {
     for (const [name, source] of Object.entries(settings.secret_sources || {})) {
@@ -4178,7 +4393,6 @@
     if (!panel.isConnected) return;
     const participation=settingsSection('users','Participación y revisión','Reglas de publicación y privacidad de la comunidad.',
       check('demo','Modo demo (datos e integraciones identificados)',s.demo)
-      +check('moderation_required','Revisar publicaciones del Hub antes de publicarlas',s.moderation_required)
       +check('moderate_comments','Revisar comentarios del Hub y otras secciones (excepto Foros)',s.moderate_comments)
       +check('chatham_default','Aplicar Chatham House por defecto',s.chatham_default));
     const planning=settingsSection('calendar','Programación de propuestas','Elige con qué frecuencia se preparan los círculos de conversación.',
@@ -4193,11 +4407,11 @@
     const manual=settingsSection('spark','Generación manual','Crea nuevas propuestas con los ajustes guardados, aunque ya haya propuestas esta semana.',
       `<div class="manual-proposal-actions">${btn(I('plus')+' '+E(T('Generar nuevas propuestas')),'micro-job','','primary')}${btn(T('Ver propuestas'),'admin-tab','data-tab="microeventos"','ghost')}</div>
       <p class="private-note">${E(T('Puedes revisar o descartar cada propuesta antes de invitar a los asociados.'))}</p><div id="micro-job-result" aria-live="polite"></div>`);
-    const security=settingsSection('shield','Seguridad','Protección adaptativa del acceso con Cloudflare y validación real en el servidor.',`${credentialSettings(s)}${check("turnstile_enabled", "Activar Cloudflare Turnstile", s.turnstile_enabled)}<p class="private-note">El widget debe crearse en Cloudflare con modo <strong>Managed</strong>. En el login normal no aparece ningún desafío al inicio. Al alcanzar el umbral configurado, ASCLA muestra el widget oficial de Cloudflare y valida el token nuevamente en el servidor.</p><div class="form-grid">${field("turnstile_site_key", "Turnstile Site Key", s.turnstile_site_key || "", "text", 'autocomplete="off" placeholder="0x4AAAA..."')}${field("turnstile_secret", s.has_turnstile_secret ? "Turnstile Secret Key (guardada; vacío para conservar)" : "Turnstile Secret Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_turnstile_secret", "Eliminar Turnstile Secret Key guardada", false)}<div class="turnstile-protection-options"><strong>Formularios protegidos</strong>${check("turnstile_login", "Inicio de sesión · desafío adaptativo según el umbral configurado", s.turnstile_login)}${check("turnstile_recovery", "Recuperación de contraseña · exigir después de 2 solicitudes seguidas", s.turnstile_recovery)}${check("turnstile_public", "Otros formularios públicos ASCLA · activar solo ante señales sospechosas o demasiados envíos", s.turnstile_public)}</div><p class="private-note">Al alcanzar el máximo de fallos del mismo usuario/correo se aplica la espera configurada. Una ráfaga mayor de intentos desde la misma IP también puede bloquear el acceso temporalmente. Cuando Turnstile aparece, la marca “Success” confirma solo la comprobación anti-bot; ASCLA todavía valida usuario y contraseña.</p>`,true);
+    const security=settingsSection('shield','Seguridad','Protección adaptativa del acceso con Cloudflare y validación real en el servidor.',`${credentialSettings(s)}${check("turnstile_enabled", "Activar Cloudflare Turnstile", s.turnstile_enabled)}<p class="private-note">${E(T("El widget debe crearse en Cloudflare con modo"))} <strong>Managed</strong>${E(T(". En el login normal no aparece ningún desafío al inicio. Al alcanzar el umbral configurado, ASCLA muestra el widget oficial de Cloudflare y valida el token nuevamente en el servidor."))}</p><div class="form-grid">${field("turnstile_site_key", "Turnstile Site Key", s.turnstile_site_key || "", "text", 'autocomplete="off" placeholder="0x4AAAA..."')}${field("turnstile_secret", s.has_turnstile_secret ? "Turnstile Secret Key (guardada; vacío para conservar)" : "Turnstile Secret Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_turnstile_secret", "Eliminar Turnstile Secret Key guardada", false)}<div class="turnstile-protection-options"><strong>${E(T("Formularios protegidos"))}</strong>${check("turnstile_login", "Inicio de sesión · desafío adaptativo según el umbral configurado", s.turnstile_login)}${check("turnstile_recovery", "Recuperación de contraseña · exigir después de 2 solicitudes seguidas", s.turnstile_recovery)}${check("turnstile_public", "Otros formularios públicos ASCLA · activar solo ante señales sospechosas o demasiados envíos", s.turnstile_public)}</div><p class="private-note">${E(T("Al alcanzar el máximo de fallos del mismo usuario/correo se aplica la espera configurada. Una ráfaga mayor de intentos desde la misma IP también puede bloquear el acceso temporalmente. Cuando Turnstile aparece, la marca “Success” confirma solo la comprobación anti-bot; ASCLA todavía valida usuario y contraseña."))}</p>`,true);
     const matching=settingsSection('spark','Motor de afinidad','Define el umbral y la cantidad máxima del lote semanal de recomendaciones.',`<div class="form-grid matching-threshold-setting">${field("matching_min_affinity", "Afinidad mínima para recomendar (%)", s.matching_min_affinity ?? 30, "number", 'min="0" max="100" step="1"')}${field("matching_max_suggestions", "Perfiles por lote semanal", s.matching_max_suggestions ?? 5, "number", 'min="1" max="5" step="1"')}</div><p class="private-note">${E(T("Solo se muestran perfiles elegibles que alcancen el umbral. El lote se recalcula cada siete días y nunca supera cinco personas."))}</p>`);
-    const ai=settingsSection('spark','Inteligencia artificial','Elige un único proveedor activo. ASCLA utilizará solo ese proveedor para redactar respuestas y sugerencias.',`<div class="ai-provider-config">${select("ai_provider","Proveedor activo",[["mock","DEMO MODE · sin API"],["gemini","Google Gemini · API"],["openai","OpenAI / ChatGPT · API"],["deepseek","DeepSeek · API"]],s.ai_provider)}<div class="ai-provider-panel" data-ai-provider-panel="mock"><div class="alert">Modo de demostración: ASCLA usa respuestas simuladas y no envía información a un proveedor externo.</div></div><div class="ai-provider-panel" data-ai-provider-panel="gemini"><div class="form-grid">${field("ai_model", "ID del modelo Gemini", s.ai_model, "text", 'placeholder="gemini-2.5-flash" autocomplete="off"')}${field("ai_key", s.has_ai_key ? "Gemini API Key (guardada; vacío para conservar)" : "Gemini API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_ai_key", "Eliminar Gemini API Key guardada", false)}</div><div class="ai-provider-panel" data-ai-provider-panel="openai"><div class="form-grid">${field("openai_model", "ID del modelo OpenAI", s.openai_model || "gpt-5.6-luna", "text", 'placeholder="gpt-5.6-luna" autocomplete="off"')}${field("openai_key", s.has_openai_key ? "OpenAI API Key (guardada; vacío para conservar)" : "OpenAI API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_openai_key", "Eliminar OpenAI API Key guardada", false)}</div><div class="ai-provider-panel" data-ai-provider-panel="deepseek"><div class="form-grid">${field("deepseek_model", "ID del modelo DeepSeek", s.deepseek_model || "deepseek-flash", "text", 'placeholder="deepseek-flash" autocomplete="off"')}${field("deepseek_key", s.has_deepseek_key ? "DeepSeek API Key (guardada; vacío para conservar)" : "DeepSeek API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_deepseek_key", "Eliminar DeepSeek API Key guardada", false)}</div><div class="ai-secondary-setting">${select("youtube_mode","Transcripciones YouTube",[["mock","Transcripción manual"],["supadata","Supadata · videos públicos sin Google OAuth"]],s.youtube_mode)}${field("supadata_key",s.has_supadata_key ? "Supadata API Key (guardada; vacío para conservar)" : "Supadata API Key","","password",'autocomplete="new-password"')}${check("clear_supadata_key","Eliminar Supadata API Key guardada",false)}${field("supadata_language","Idioma preferido de los subtítulos",s.supadata_language || "es","text",'maxlength="12" pattern="[a-z]{2,3}(-[A-Za-z0-9]{2,8})?" required')}${check("supadata_generate","Generar la transcripción si no existen subtítulos (consume más créditos)",s.supadata_generate)}<p class="private-note">Primero se buscan subtítulos existentes. La generación opcional usa el modo auto de Supadata. Las transcripciones completas se guardan con caché de 7 días; los trabajos largos continúan en segundo plano. Solo se envía la URL pública del video, sin comentarios ni datos de asociados.</p><p class="private-note">La clave se guarda cifrada en WordPress y nunca se devuelve al navegador. También puedes definir ASCLA_SUPADATA_KEY en el servidor. Si el servidor exige claves externas, ese ajuste tiene prioridad.</p></div><p class="private-note">Las claves permanecen protegidas en el servidor. Guarda la configuración antes de probar la conexión. Los datos internos autorizados de ASCLA se preparan antes de consultar al proveedor activo.</p><div class="settings-actions-row" data-ai-test-actions>${btn("Probar conexión", "ai-test", "", "small")}<p id="ai-test-result" class="private-note" role="status" aria-live="polite"></p></div></div>`,true);
-    const google=settingsSection('calendar','Google OAuth','Credenciales para que cada asociado conecte servicios autorizados de Google desde su cuenta.',`<div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert settings-code-alert"><span>URI de redirección</span><code>${E(s.google_redirect)}</code></div><p class="private-note">Cada asociado conecta su calendario desde Perfil. Los subtítulos públicos se consultan con Supadata sin Google OAuth.</p>`);
-    const social=settingsSection('contact','Social Listening','Estado de conectores sociales y restricciones de integración externa.',`<div class="alert">LinkedIn y X permanecen en DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; ASCLA no realiza scraping ni envía respuestas externas.</div>`);
+    const ai=settingsSection('spark','Inteligencia artificial','Elige un único proveedor activo. ASCLA utilizará solo ese proveedor para redactar respuestas y sugerencias.',`<div class="ai-provider-config">${select("ai_provider","Proveedor activo",[["mock","DEMO MODE · sin API"],["gemini","Google Gemini · API"],["openai","OpenAI / ChatGPT · API"],["deepseek","DeepSeek · API"]],s.ai_provider)}<div class="ai-provider-panel" data-ai-provider-panel="mock"><div class="alert">${E(T("Modo de demostración: ASCLA usa respuestas simuladas y no envía información a un proveedor externo."))}</div></div><div class="ai-provider-panel" data-ai-provider-panel="gemini"><div class="form-grid">${field("ai_model", "ID del modelo Gemini", s.ai_model, "text", 'placeholder="gemini-2.5-flash" autocomplete="off"')}${field("ai_key", s.has_ai_key ? "Gemini API Key (guardada; vacío para conservar)" : "Gemini API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_ai_key", "Eliminar Gemini API Key guardada", false)}</div><div class="ai-provider-panel" data-ai-provider-panel="openai"><div class="form-grid">${field("openai_model", "ID del modelo OpenAI", s.openai_model || "gpt-5.6-luna", "text", 'placeholder="gpt-5.6-luna" autocomplete="off"')}${field("openai_key", s.has_openai_key ? "OpenAI API Key (guardada; vacío para conservar)" : "OpenAI API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_openai_key", "Eliminar OpenAI API Key guardada", false)}</div><div class="ai-provider-panel" data-ai-provider-panel="deepseek"><div class="form-grid">${field("deepseek_model", "ID del modelo DeepSeek", s.deepseek_model || "deepseek-flash", "text", 'placeholder="deepseek-flash" autocomplete="off"')}${field("deepseek_key", s.has_deepseek_key ? "DeepSeek API Key (guardada; vacío para conservar)" : "DeepSeek API Key", "", "password", 'autocomplete="new-password"')}</div>${check("clear_deepseek_key", "Eliminar DeepSeek API Key guardada", false)}</div><div class="ai-secondary-setting">${select("youtube_mode","Transcripciones YouTube",[["mock","Transcripción manual"],["supadata","Supadata · videos públicos sin Google OAuth"]],s.youtube_mode)}${field("supadata_key",s.has_supadata_key ? "Supadata API Key (guardada; vacío para conservar)" : "Supadata API Key","","password",'autocomplete="new-password"')}${check("clear_supadata_key","Eliminar Supadata API Key guardada",false)}${field("supadata_language","Idioma preferido de los subtítulos",s.supadata_language || "es","text",'maxlength="12" pattern="[a-z]{2,3}(-[A-Za-z0-9]{2,8})?" required')}${check("supadata_generate","Generar la transcripción si no existen subtítulos (consume más créditos)",s.supadata_generate)}<p class="private-note">${E(T("Primero se buscan subtítulos existentes. La generación opcional usa el modo auto de Supadata. Las transcripciones completas se guardan con caché de 7 días; los trabajos largos continúan en segundo plano. Solo se envía la URL pública del video, sin comentarios ni datos de asociados."))}</p><p class="private-note">${E(T("La clave se guarda cifrada en WordPress y nunca se devuelve al navegador. También puedes definir ASCLA_SUPADATA_KEY en el servidor. Si el servidor exige claves externas, ese ajuste tiene prioridad."))}</p></div><p class="private-note">${E(T("Las claves permanecen protegidas en el servidor. Guarda la configuración antes de probar la conexión. Los datos internos autorizados de ASCLA se preparan antes de consultar al proveedor activo."))}</p><div class="settings-actions-row" data-ai-test-actions>${btn("Probar conexión", "ai-test", "", "small")}<p id="ai-test-result" class="private-note" role="status" aria-live="polite"></p></div></div>`,true);
+    const google=settingsSection('calendar','Google OAuth','Credenciales para que cada asociado conecte servicios autorizados de Google desde su cuenta.',`<div class="form-grid">${field("google_client_id", "Client ID", s.google_client_id)}${field("google_client_secret", s.has_google_secret ? "Client Secret (configurado)" : "Client Secret", "", "password", 'autocomplete="new-password"')}</div><div class="alert settings-code-alert"><span>${E(T("URI de redirección"))}</span><code>${E(s.google_redirect)}</code></div><p class="private-note">${E(T("Cada asociado conecta su calendario desde Perfil. Los subtítulos públicos se consultan con Supadata sin Google OAuth."))}</p>`);
+    const social=settingsSection('contact','Social Listening','Estado de conectores sociales y restricciones de integración externa.',`<div class="alert">${E(T("LinkedIn y X permanecen en DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; ASCLA no realiza scraping ni envía respuestas externas."))}</div>`);
     const legal=settingsSection('book','Identidad y propiedad intelectual','Texto institucional mostrado en las áreas correspondientes de la intranet.',`${field("copyright", "Propiedad intelectual", s.copyright)}`);
     const contacts=settingsSection('mail','Categorías de Contacto','Opciones vigentes del formulario de solicitudes.',
       field('support_categories','Una categoría por línea',(s.support_categories || []).join('\n'),'textarea','required rows="5"'));
@@ -4247,7 +4461,7 @@
   }
   function rules() {
     modal(
-      "Normas de nuestra comunidad",
+      T("Normas de nuestra comunidad"),
       `<div class="alert chatham">${I("shield")} Compartimos el conocimiento; protegemos las identidades.</div>${[
         [
           "Respeto y profesionalismo",
@@ -4288,18 +4502,23 @@
   async function render() {
     if (S.boot?.admin && S.page==='intranet') { location.replace(C.adminUrl); return; }
     const version = S.viewVersion;
+    let ready = false;
     stopChat();
-    content().innerHTML = '<div class="view-loading" role="status"><span class="loading-dot"></span> Cargando sección…</div>';
+    content().innerHTML = ("<div class=\"view-loading\" role=\"status\"><span class=\"loading-dot\"></span> " + E(T("Cargando sección…")) + "</div>");
     content().setAttribute('aria-busy', 'true');
     try {
       const views={intranet:dashboard,directorio:directory,perfil:profile,mensajeria:messages,asistente:assistant,contacto:contact,admin};
       await (views[S.page] || listing)();
+      ready = true;
     } catch (e) {
       if (e.name === "AbortError" || version !== S.viewVersion) return;
       if (e.status === 401 || e.code === "rest_cookie_invalid_nonce") { location.assign(location.href); return; }
-      content().innerHTML = `<div class="error">${E(e.message)} ${btn("Reintentar", "refresh", "", "small")} <a data-native href="${E(location.href)}">Recargar esta página</a></div>`;
+      content().innerHTML = `<div class="error">${E(e.message)} ${btn("Reintentar", "refresh", "", "small")} <a data-native href="${E(location.href)}">${E(T("Recargar esta página"))}</a></div>`;
     } finally {
-      if (version === S.viewVersion) content().removeAttribute('aria-busy');
+      if (version === S.viewVersion) {
+        content().removeAttribute('aria-busy');
+        if (ready) onboarding?.enter({ page: S.page, section: S.page === 'admin' ? S.adminTab : '' });
+      }
     }
   }
   async function navigateTo(url) {
@@ -4307,6 +4526,8 @@
     else location.assign(safeURL(url));
   }
   function prepareView(page) {
+    closeAccountMenu();
+    onboarding?.stop();
     recommendationResize?.disconnect();
     discardPendingWithin(content());
     S.controller.abort(); pendingReads.clear(); S.controller = new AbortController(); S.viewVersion++;
@@ -4351,6 +4572,23 @@
     else location.assign(destination.href);
   }, true);
   // Keep contextual three-dot menus exclusive: opening one closes any other.
+  function closeAccountMenu(focus = false) {
+    const menu = root.querySelector('.account-menu[open]');
+    if (!menu) return;
+    menu.removeAttribute('open');
+    if (focus) menu.querySelector('summary').focus();
+  }
+  root.addEventListener('toggle', event => {
+    if (event.target.matches?.('.account-menu')) event.target.querySelector('summary').setAttribute('aria-expanded', String(event.target.open));
+  }, true);
+  document.addEventListener('pointerdown', event => {
+    if (!event.target.closest?.('.account-menu')) closeAccountMenu();
+  });
+  root.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && event.target.closest?.('.account-menu[open]')) {
+      event.preventDefault();event.stopPropagation();closeAccountMenu(true);
+    }
+  });
   root.addEventListener("click", (event) => {
     const summary = event.target.closest(".overflow-menu > summary");
     if (summary) {
@@ -4358,6 +4596,7 @@
       root.querySelectorAll(".overflow-menu[open]").forEach(menu => { if (menu !== current) menu.removeAttribute("open"); });
       return;
     }
+    if (event.target.closest('.account-menu-panel a')) closeAccountMenu();
     if (!event.target.closest(".overflow-menu")) root.querySelectorAll(".overflow-menu[open]").forEach(menu => menu.removeAttribute("open"));
   });
 
@@ -4541,9 +4780,11 @@
   async function handleClickActions13(a, b, id, _event) {
     if (a === "content-reaction") return changeContentReaction(b, id);
     if (a === "comment-like") {
+      const wasSelected = b.getAttribute('aria-pressed') === 'true';
       const r = await api(`comments/${id}/reaction`, {active:b.dataset.active === 'true'});
-      b.dataset.active=String(!r.active); b.setAttribute('aria-pressed',String(!!r.active)); b.setAttribute('aria-label',T(r.active?'Quitar Me gusta':'Me gusta'));
+      b.dataset.active=String(!r.active); b.setAttribute('aria-pressed',String(!!r.active)); b.setAttribute('aria-label',`${T('Me gusta')} ${r.likes}`);
       b.classList.toggle('active',!!r.active); const count=b.querySelector('span'); if(count) count.textContent=String(r.likes);
+      animateReaction(b, r.active && !wasSelected);
     }
     else if (a === "delete-media") {
       confirmDeletion('media',id,{post:Number(b.dataset.post)||0,title:b.dataset.name,library:b.dataset.library==='true'});
@@ -4640,17 +4881,7 @@
       }
   }
   async function handleClickActions19(a, b, id, _event) {
-    if (a === "like") {
-      await api(`items/${id}/reaction`, {
-      kind: a,
-      active: b.dataset.active === "true",
-      });
-      toast("Actualizado.");
-      if (S.item?.id === id && document.querySelector(".modal"))
-      await item(id);
-      else await render();
-    }
-    else if (a === "recommendation-dismiss") {
+    if (a === "recommendation-dismiss") {
       await api(`recommendations/${id}/dismiss`, {});
       toast(T("La recomendación se descartó de forma privada."));
       await dashboard();
@@ -4766,15 +4997,6 @@
       await groupInfoDialog(id);
     }
   }
-  async function handleClickActions28(a, _b, id, _event) {
-    if (a === "group-delete-request") {
-      modal('Eliminar grupo', `<p>${E(T('¿Seguro que deseas eliminar este grupo? Se eliminarán sus mensajes para todos los participantes.'))}</p><div class="form-actions">${btn('Cancelar','close')}${btn('Eliminar grupo','group-delete-confirm',("data-id=\"" + (id) + "\""),'danger')}</div>`);
-    }
-    else if (a === "group-delete-confirm") {
-      await api(`conversations/${id}`, null, 'DELETE');
-      closeModal(); S.conversation=0; await messages(); toast('Grupo eliminado.');
-    }
-  }
   async function handleClickActions29(a, _b, id, _event) {
     if (a === "group-member-message") {
       const profile = await api('profiles/' + id);
@@ -4804,10 +5026,7 @@
   async function backToChatList() {
     const draft = document.querySelector('.chat-compose');
     if (draft) chatDrafts.set(Number(draft.dataset.id), draft.elements.body.value);
-    S.conversation = 0;
-    const url = new URL(location.href);
-    url.searchParams.delete('conversation');
-    history.replaceState(history.state, '', url);
+    clearChatSelection();
     await messages();
   }
   function blockConfirmation(id) {
@@ -4981,7 +5200,7 @@
     }
     else if (a === "user-access") {
       const suspended=b.dataset.suspended==='true';
-      modal(suspended?'Suspender acceso':'Reactivar acceso',`<p>¿${suspended?'Suspender':'Reactivar'} el acceso de <strong>${E(b.dataset.name)}</strong> a la comunidad?</p><p class="private-note">La cuenta y su contenido se conservan.</p><div class="form-actions">${btn('Cancelar','close')}${btn('Confirmar','user-status',("data-id=\"" + (id) + "\" data-suspended=\"" + (suspended) + "\""),'primary')}</div>`);
+      modal(T(suspended?'Suspender acceso':'Reactivar acceso'),`<p>${E(T(suspended?'¿Suspender el acceso de':'¿Reactivar el acceso de'))} <strong>${E(b.dataset.name)}</strong> ${E(T("a la comunidad?"))}</p><p class="private-note">${E(T("La cuenta y su contenido se conservan."))}</p><div class="form-actions">${btn('Cancelar','close')}${btn('Confirmar','user-status',("data-id=\"" + (id) + "\" data-suspended=\"" + (suspended) + "\""),'primary')}</div>`);
     }
   }
   async function handleClickActions41(a, b, id, _event) {
@@ -5005,7 +5224,7 @@
       await directoryManage(id);
     }
     else if (a === "user-delete") {
-      modal('Eliminar usuario',`<div class="admin-delete-warning">${I('shield')}<div><strong>Esta acción es permanente</strong><p>Se eliminará la cuenta de <strong>${E(b.dataset.name)}</strong> (@${E(b.dataset.login)}). Ya no podrá ingresar a ASCLA.</p></div></div><p class="detail-body">Las publicaciones y recursos ya creados se conservarán bajo administración de ASCLA. El historial técnico necesario para auditoría no se elimina.</p><p class="private-note">Correo de la cuenta: ${E(b.dataset.email)}</p><div class="form-actions">${btn('Cancelar','close')}${btn('Sí, eliminar usuario','user-delete-confirm',("data-id=\"" + (id) + "\" data-name=\"" + (E(b.dataset.name)) + "\""),'danger primary')}</div>`);
+      modal(T('Eliminar usuario'),`<div class="admin-delete-warning">${I('shield')}<div><strong>${E(T("Esta acción es permanente"))}</strong><p>${E(T("Se eliminará la cuenta de"))} <strong>${E(b.dataset.name)}</strong> (@${E(b.dataset.login)}). Ya no podrá ingresar a ASCLA.</p></div></div><p class="detail-body">${E(T("Las publicaciones y recursos ya creados se conservarán bajo administración de ASCLA. El historial técnico necesario para auditoría no se elimina."))}</p><p class="private-note">Correo de la cuenta: ${E(b.dataset.email)}</p><div class="form-actions">${btn('Cancelar','close')}${btn('Sí, eliminar usuario','user-delete-confirm',("data-id=\"" + (id) + "\" data-name=\"" + (E(b.dataset.name)) + "\""),'danger primary')}</div>`);
     }
   }
   async function handleClickActions43(a, b, id, _event) {
@@ -5200,16 +5419,18 @@
     { test: (a) => (a === "notification-filter") || (a === "notification-page"), run: handleClickActions16 },
     { test: (a) => (a === "notifications-read-all") || (a === "notification-open"), run: handleClickActions17 },
     { test: (a) => (a === "answer-history") || (a === "report"), run: handleClickActions18 },
-    { test: (a) => a === "like" || (["recommendation-dismiss", "recommendation-restore", "password-reset-email"].includes(a)), run: handleClickActions19 },
+    { test: (a) => ["recommendation-dismiss", "recommendation-restore", "password-reset-email"].includes(a), run: handleClickActions19 },
     { test: (a) => (a === "connect") || (a === "connection-respond"), run: handleClickActions20 },
     { test: (a) => (a === "conversation-request") || (a === "conversation-request-respond"), run: handleClickActions21 },
     { test: (a) => (a === "conversation-request-cancel") || (a === "connection-remove-request"), run: handleClickActions22 },
     { test: (a) => ["connection-remove-confirm","connections-refresh","directory-reset","connection-tab"].includes(a), run: handleClickActions23 },
     { test: (a) => (a === "intro") || (a === "group-chat-open"), run: handleClickActions24 },
     { test: (a) => (a === "group-photo-clear") || (a === "group-edit-open"), run: handleClickActions25 },
+    { test: a => a === "group-add-open", run: (_a, _button, id) => groupMembersDialog(id) },
+    { test: a => a === "group-remove-open", run: (_a, button, id) => groupRemoveMemberDialog(button, id) },
     { test: (a) => (a === "group-edit-photo-clear") || (a === "conversation-open"), run: handleClickActions26 },
     { test: (a) => (a === "chat-tab") || (a === "group-menu"), run: handleClickActions27 },
-    { test: (a) => (a === "group-delete-request") || (a === "group-delete-confirm"), run: handleClickActions28 },
+    { test: a => a === 'group-delete-request' || a === 'group-leave-request', run: (a, button, id) => groupExitDialog(a, id, button.dataset.owner === 'true') },
     { test: (a) => (a === "group-member-message") || (a === "message-start"), run: handleClickActions29 },
     { test: (a) => ['conversation', 'block', 'chat-back', 'chat-emoji'].includes(a), run: handleClickActions30 },
     { test: (a) => (a === "older-messages") || (a === "event-cancel-request"), run: handleClickActions31 },
@@ -5358,6 +5579,7 @@ root.addEventListener("click", async (event) => {
     if(headerAvatar) headerAvatar.outerHTML=avatar(S.boot.me);
     const label = root.querySelector(".header-profile strong");
     if (label) label.textContent = S.boot.me.name;
+    root.querySelector('.header-profile')?.setAttribute('aria-label', accountLabel(S.boot.me));
     toast("Perfil actualizado.");
     await profile();
   }
@@ -5675,7 +5897,6 @@ root.addEventListener("click", async (event) => {
     if (action === "settings") {
       for (const k of [
       "demo",
-      "moderation_required",
       "moderate_comments",
       "chatham_default",
       "micro_enabled",
@@ -5708,6 +5929,33 @@ root.addEventListener("click", async (event) => {
     }
   }
   const HANDLESUBMITACTIONS_DISPATCH = [
+    { test: action => action === "group-add-members", run: async (_action, form) => {
+      const users = new FormData(form).getAll('users').map(Number);
+      if (!users.length) return;
+      const id = Number(form.dataset.id);
+      await api(`conversations/${id}/group/members`, { users });
+      await refreshGroupMembership(form, id, 'Integrantes agregados.');
+    } },
+    { test: action => action === "group-remove-member", run: async (_action, form) => {
+      const id = Number(form.dataset.id);
+      const user = Number(form.dataset.user);
+      await api(`conversations/${id}/group/members/${user}`, null, 'DELETE');
+      await refreshGroupMembership(form, id, 'Integrante expulsado.');
+    } },
+    { test: action => action === 'group-exit', run: async (_action, form) => {
+      const id = Number(form.dataset.id);
+      const leave = form.dataset.mode === 'leave';
+      const path = `conversations/${id}`;
+      if (leave) await api(path + '/group/leave', null, 'POST');
+      else await api(path, null, 'DELETE');
+      if (form.isConnected) closeModal(false);
+      if (S.page === 'mensajeria') {
+        if (S.conversation === id) clearChatSelection();
+        await messages();
+      }
+      chatDrafts.delete(id);
+      toast(leave ? 'Saliste del grupo.' : 'Grupo eliminado.');
+    } },
     { test: action=>action==='micro-selection', run:async (_action,form,data)=>{
       await api(`events/${Number(form.dataset.id)}/candidates`,{invitees:[...form.microSelection.keys()],reason:data.reason});
       clearUnsavedGuard(form);closeModal();await openContentReview(Number(form.dataset.id));toast('Candidatos actualizados. Revisa la propuesta antes de aprobar.');
@@ -5781,13 +6029,15 @@ root.addEventListener("submit", async (event) => {
       if (e.name !== "AbortError") toast(e.message);
     } finally {
       delete form.dataset.submitting;
-      if (submit) submit.disabled = false;
+      if (action === 'group-add-members') updateGroupMemberPicker(form);
+      else if (submit) submit.disabled = false;
     }
   });
   root.addEventListener("invalid", (event) => {
     if (event.target.matches?.('.event-datetime-field input')) validateEventDateFields(event.target.form, true);
   }, true);
   root.addEventListener("input", (event) => {
+    if (event.target.matches?.('[data-group-connection-search]')) filterGroupMemberPicker(event.target);
     if (event.target.closest?.('[data-form="editor"][data-type="event"]')) syncMicroChangeReason(event.target.form);
     if (event.target.matches?.('.event-datetime-field input')) {
       defaultNewEventEndDate(event.target);
@@ -6001,11 +6251,26 @@ root.addEventListener("submit", async (event) => {
       else if (document.querySelector(".modal-backdrop")) requestModalClose();
     }
   });
+  function advanceYouTubeThumbnail(image) {
+    const quality = Number(image.dataset.youtubeQuality) + 1;
+    if (!image.dataset.youtubeId || quality >= youtubeThumbnailSizes.length) return false;
+    image.dataset.youtubeQuality = quality;
+    image.src = youtubeThumbnailUrl(image.dataset.youtubeId, quality);
+    return true;
+  }
+  function hideUnavailableResourceImage(image) {
+    if (advanceYouTubeThumbnail(image)) return;
+    image.hidden = true;
+    image.setAttribute("aria-hidden", "true");
+  }
   root.addEventListener("error", (event) => {
-    const image=event.target;
-    if (!(image instanceof HTMLImageElement) || !image.matches(".resource-thumbnail,[data-registry-image]")) return;
-    image.hidden=true;
-    image.setAttribute("aria-hidden","true");
+    if (event.target.matches?.(".resource-thumbnail,[data-registry-image]")) hideUnavailableResourceImage(event.target);
+  }, true);
+  root.addEventListener("load", (event) => {
+    const image = event.target;
+    if (!image.matches?.(".resource-thumbnail[data-youtube-id]")) return;
+    // YouTube can return a small placeholder when a rendition is unavailable.
+    if (image.naturalWidth < youtubeThumbnailSizes[Number(image.dataset.youtubeQuality)].minWidth) hideUnavailableResourceImage(image);
   }, true);
   async function start() {
     try {
@@ -6040,6 +6305,7 @@ root.addEventListener("submit", async (event) => {
           }[menu] || (S.boot.admin?'resumen':'moderacion');
       }
       shell();
+      onboarding = globalThis.ASCLAOnboarding?.({ root, api, T, toast }) || null;
       S.liveToastCursor = Number(S.boot.notification_cursor || 0);
       liveToasts = globalThis.ASCLALiveToasts?.({
         root, E, I, T, timeout: 7000, max: 3,
@@ -6063,7 +6329,7 @@ root.addEventListener("submit", async (event) => {
         if (initialVersion === S.viewVersion && !maybeBirthdayGreeting()) maybeProfileCompletionNudge();
       }
     } catch (e) {
-      (content() || root).innerHTML = `<div class="error">${E(e.message)} <a data-native href="${E(location.href)}">Recarga la página para renovar tu sesión.</a></div>`;
+      (content() || root).innerHTML = `<div class="error">${E(e.message)} <a data-native href="${E(location.href)}">${E(T("Recarga la página para renovar tu sesión."))}</a></div>`;
     }
   }
   start();

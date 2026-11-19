@@ -6,7 +6,7 @@ final class Installer
 {
     private const UPGRADE_INCLUDE='wp-admin/includes/upgrade.php';
     private const TABLE_EXISTS_SQL='SHOW TABLES LIKE %s';
-    public const SCHEMA_VERSION=15;
+    public const SCHEMA_VERSION=17;
     public static function activate(bool $networkWide=false): void
     {
         if ($networkWide) { wp_die('Active ASCLA Core individualmente en cada sitio; no se admite activación de red.'); }
@@ -21,6 +21,8 @@ final class Installer
         self::migrateImports();
         AuditMigration::run();
         self::migrateDeliveries();
+        self::migrateGroupMembership();
+        self::migrateGroupActivity();
         EventFiltersMigration::run();
         AllySearchMigration::run();
         VideoEvidenceMigration::run();
@@ -41,6 +43,20 @@ final class Installer
         if (get_option('ascla_version') !== ASCLA_VERSION || (int)get_option('ascla_schema',0)<self::SCHEMA_VERSION || !EventFiltersMigration::ready() || !AllySearchMigration::ready()) { self::activate(false); }
         elseif (!VideoEvidenceMigration::ready()) { VideoEvidenceMigration::run(); }
         \ASCLA\Core\Domain\Roles::upgrade();
+    }
+    private static function migrateGroupMembership(): void
+    {
+        if ((int)get_option('ascla_schema',0)>=16) { return; }
+        MigrationSchema::ensureColumn(\ASCLA\Core\Repositories\Store::table('participants'),'joined_after',
+            'joined_after bigint(20) unsigned NOT NULL DEFAULT 0','No se pudo actualizar el historial de integrantes de grupos.');
+        \ASCLA\Core\Repositories\WordPressWrites::option('ascla_schema',16);
+    }
+    private static function migrateGroupActivity(): void
+    {
+        if ((int)get_option('ascla_schema',0)>=17) { return; }
+        MigrationSchema::ensureColumn(\ASCLA\Core\Repositories\Store::table('messages'),'kind',
+            "kind varchar(16) NOT NULL DEFAULT 'message'",'No se pudo actualizar el historial de actividad de grupos.');
+        \ASCLA\Core\Repositories\WordPressWrites::option('ascla_schema',17);
     }
     private static function migrateIndexes(): void
     {

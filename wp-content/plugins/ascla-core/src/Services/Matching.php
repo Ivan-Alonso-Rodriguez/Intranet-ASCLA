@@ -230,20 +230,12 @@ final class Matching
     public static function intro(int $id): array
     {
         $me=get_current_user_id();$affinity=self::between($me,$id,false);
-        $context=NetworkingAI::context($me,$id,$affinity);
-        $result=NetworkingAI::generate('intro',$context,[$me,$id]);
-        $text=trim(Access::excerpt($result['text']??'',5000));
-        // A suggested private message must sound like the member, never like the AI service itself.
-        $claimsIdentity=(bool)preg_match('/\b(?:soy|somos)\s+(?:(?:el|la|un|una)\s+)?(?:asistente|chatbot|ASCLA)\b/iu',$text);
-        $claimsAssistantRole=(bool)preg_match('/\b(?:como|en calidad de)\s+(?:asistente|chatbot)\b/iu',$text);
-        if($text==='' || $claimsIdentity || $claimsAssistantRole){
-            $safe=(new \ASCLA\Core\Integrations\MockAIProvider())->generate('intro',$context);
-            $text=trim(Access::excerpt($safe['text']??'',5000));
-            $result['conversation_proposal']=$safe['conversation_proposal']??'';
-            $result['fallback']=true;
-        }
-        return ['text'=>$text,'conversation_proposal'=>Access::excerpt($result['conversation_proposal']??'',2000),'mode'=>$result['mode']??'IA','fallback'=>!empty($result['fallback']),'sent'=>false];
+        Access::require(current_user_can('ascla_write'));
+        $claim=IntroSuggestions::claim($me,$id);
+        try { return IntroSuggestions::draft($me,$id,$affinity); }
+        catch (\Throwable $error) { IntroSuggestions::release($claim,$me); throw $error; }
     }
+
 
 
 }

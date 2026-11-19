@@ -39,7 +39,7 @@ async function capture(name,width,theme){
  await page.route('**/admin/users/*/insights?**',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({message:'Fallo temporal controlado'})}));
  await page.locator('[data-member-period]').selectOption('30');await page.locator('[data-member-action=retry]').waitFor();assert.equal(await page.locator('.member-metrics').count(),0);pass('Un fallo de API ofrece reintento sin presentar cifras falsas');
  await page.unroute('**/admin/users/*/insights?**');await page.locator('[data-member-action=retry]').click();await page.locator('.member-metrics').waitFor();
- const axe=require('axe-core');await page.addScriptTag({path:require.resolve('axe-core')});
+ const axe=require('axe-core');await require('./helpers/browser.cjs').waitForMotion(page);await page.addScriptTag({path:require.resolve('axe-core')});
  const accessibility=await page.evaluate(async()=>await axe.run(document.querySelector('.admin-workspace'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa']}}));
  assert.deepEqual(accessibility.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length})),[]);pass('Panel sin infracciones automáticas WCAG A/AA en el alcance revisado');
  await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),page.locator('.header-language select[name="_ascla_locale"]').selectOption('en_US')]);

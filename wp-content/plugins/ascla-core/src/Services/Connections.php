@@ -9,7 +9,11 @@ final class Connections
     public const REQUIRED='Debes tener una conexión confirmada con este asociado para poder enviarle mensajes.';
     public static function lockPair(int $a,int $b,callable $callback): mixed
     {
-        $ids=[$a,$b]; sort($ids); return Store::atomic('connection:'.implode(':',$ids),$callback);
+        return Store::atomic(self::lockKey($a,$b),$callback);
+    }
+    public static function lockKey(int $a,int $b): string
+    {
+        return 'connection:'.min($a,$b).':'.max($a,$b);
     }
     private static function rows(int $me,array $targets=[]): array
     {
@@ -38,73 +42,34 @@ final class Connections
     {
         $targets=array_values(array_unique(array_map('intval',$targets)));
         if (!$targets) { return []; }
-        $states=self::emptyStates($targets);
-        self::applyRelationRows($states,$rows??self::rows($me,$targets),$me);
-        self::applyStatePermissions($states,$me);
-        return $states;
+        return ConnectionStates::build($me,$targets,$rows??self::rows($me,$targets));
     }
 
-    private static function emptyStates(array $targets): array
-    {
-        $states=[];
-        foreach ($targets as $id) {
-            $states[$id]=['state'=>'none','request_id'=>0,'connection_id'=>0,'connected_at'=>'','blocked'=>false,'blocked_by_me'=>false,'can_message'=>false,'can_read_messages'=>false,'can_request'=>false,'networking_available'=>false,'initial_message'=>''];
-        }
-        return $states;
-    }
 
-    private static function applyRelationRow(array &$states,array $row,int $me): void
-    {
-        $outgoing=(int)$row['user_id']===$me;
-        $id=(int)($outgoing?$row['target_id']:$row['user_id']);
-        if (!isset($states[$id])) { return; }
-        $state=&$states[$id];
-        if ($row['kind']==='block') {
-            $state['blocked']=true;
-            if ($outgoing) { $state['blocked_by_me']=true; }
-        } elseif ($row['kind']==='connected') {
-            $state['state']='connected';$state['connection_id']=(int)$row['id'];$state['request_id']=0;$state['connected_at']=(string)($row['connected_at']??$row['created_at']??'');
-        } elseif ($state['state']!=='connected' && ($state['state']==='none' || !$outgoing)) {
-            $state['state']=$outgoing?'outgoing_pending':'incoming_pending';$state['request_id']=(int)$row['id'];$state['initial_message']=(string)($row['detail']??'');
-        }
-        unset($state);
-    }
 
-    private static function applyRelationRows(array &$states,array $rows,int $me): void
-    {
-        foreach ($rows as $row) { self::applyRelationRow($states,$row,$me); }
-    }
 
-    private static function applyStatePermissions(array &$states,int $me): void
-    {
-        $mine=Access::member($me)?Profiles::raw($me):[];
-        foreach ($states as $id=>&$state) {
-            $valid=$id>0 && $id!==$me && Access::networkingMember($me) && Access::networkingMember($id);
-            $state['can_read_messages']=$valid && !$state['blocked'] && $state['state']==='connected';
-            $retry=ConnectionPolicy::retryAt($me,$id);
-            $state['retry_at']=ConnectionPolicy::visibleRetryAt($me,$id);
-            $state['can_message']=$state['can_read_messages'] && !$state['blocked'];
-            if ($valid && !$state['blocked'] && $state['state']==='none') {
-                $other=Profiles::raw($id);
-                $state['networking_available']=!empty($mine['networking']) && !empty($other['networking']) && !empty($other['directory']);
-                $state['can_request']=$state['networking_available'] && $retry<=time();
-            }
-        }
-        unset($state);
-    }
     public static function between(int $a,int $b): array { return self::statesFor($a,[$b])[$b]; }
     public static function areConnected(int $a,int $b): bool { return self::between($a,$b)['can_read_messages']; }
     public static function requireConnected(int $a,int $b): void { Access::require(self::areConnected($a,$b),self::REQUIRED,403); }
     public static function profile(int $id): array
     {
         $me=get_current_user_id();
-        return Profiles::visible($id)+['connection'=>self::between($me,$id),'conversation'=>ConversationRequests::between($me,$id)];
+        $profile=Profiles::visible($id)+['connection'=>self::between($me,$id),'conversation'=>ConversationRequests::between($me,$id)];
+        return self::suggestions([$profile],$me)[0];
     }
     public static function attach(array $profiles): array
     {
         $me=get_current_user_id(); $ids=array_column($profiles,'id');
         $states=self::statesFor($me,$ids); $conversations=ConversationRequests::statesFor($me,$ids);
-        return array_map(static fn($p)=>$p+['connection'=>$states[$p['id']],'conversation'=>$conversations[$p['id']]],$profiles);
+        return self::suggestions(array_map(static fn($p)=>$p+['connection'=>$states[$p['id']],'conversation'=>$conversations[$p['id']]],$profiles),$me);
+    }
+    private static function suggestions(array $profiles,int $me): array
+    {
+        $targets=current_user_can('ascla_write')?array_column(array_filter($profiles,static fn($p)=>!empty($p['connection']['can_message'])),'id'):[];
+        $available=IntroSuggestions::availableFor($me,$targets);
+        return array_map(static function($profile) use($available) {
+            $profile['connection']['can_suggest_intro']=!empty($available[$profile['id']]);return $profile;
+        },$profiles);
     }
     public static function listing(): array
     {

@@ -15,7 +15,7 @@ async function changeLocale(locale){
 }
 async function goto(route,administrative=false){page=administrative||route==='administracion'?adminPage:memberPage;await page.goto(base+'/'+route+'/');await page.locator('#page-content h1').waitFor();await page.locator('#page-content[aria-busy="true"]').waitFor({state:'hidden'});await page.keyboard.press('Escape');await page.evaluate(()=>document.fonts.ready);}
 async function scan(name){
- await page.addScriptTag({path:process.env.ASCLA_AXE_PATH||require.resolve('axe-core/axe.min.js')});
+ await require('./helpers/browser.cjs').waitForMotion(page);await page.addScriptTag({path:process.env.ASCLA_AXE_PATH||require.resolve('axe-core/axe.min.js')});
  const result=await page.evaluate(async()=>{
   const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});
   const simplify=v=>({id:v.id,impact:v.impact,help:v.help,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))});
@@ -32,7 +32,7 @@ async function nestedAdminDialogs(){
  const nested=await browser.newPage({viewport:{width:1280,height:900}});
  try{
   await nested.setContent('<style>.modal-backdrop{position:fixed;inset:0;background:#fff;padding:30px}.modal{padding:20px}</style><div id="wpwrap"><aside id="adminmenuwrap"><button>Menú WordPress</button></aside><div id="wpcontent"><div id="wpbody"><div id="wpbody-content"><div id="screen-help"><button>Ayuda</button></div><div id="ascla-root"><main class="ascla-main"><button>Contenido</button></main><div class="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" aria-label="Publicación"><button id="first">Moderar</button><button id="last">Cerrar</button></section></div></div></div></div></div></div><div id="wpadminbar"><button>Barra WordPress</button></div><aside id="kept-inert" inert>Fondo ya bloqueado</aside>');
-  await nested.addScriptTag({path:root+'/wp-content/plugins/ascla-core/assets/accessibility.js'});
+  await require('./helpers/browser.cjs').waitForMotion(nested);await nested.addScriptTag({path:root+'/wp-content/plugins/ascla-core/assets/accessibility.js'});
   await nested.evaluate(()=>{
    window.clicked=0;document.querySelector('#first').onclick=()=>window.clicked++;
    window.accessibility=ASCLAAccessibility(document.querySelector('#ascla-root'),v=>v);

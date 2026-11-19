@@ -44,7 +44,13 @@ final class SecurityHeaders
 
     public static function frontend(): void
     {
-        if (App::page() || Login::isFrontendPage()) { self::send(); }
+        if (App::page()) {
+            // Navigation keeps the initial document when opening an embedded video.
+            // Firefox enforces COEP but does not honor iframe credentialless.
+            self::send(true);
+        } elseif (Login::isFrontendPage()) {
+            self::send();
+        }
     }
 
     public static function nativeLogin(): void
@@ -55,23 +61,23 @@ final class SecurityHeaders
         self::send();
     }
 
-    public static function send(): void
+    public static function send(bool $allowExternalFrames=false): void
     {
         if (headers_sent()) { return; }
         self::$active=true;
         header_remove('X-Powered-By');
-        foreach (self::common() as $name=>$value) { header($name.': '.$value); }
+        foreach (self::common($allowExternalFrames) as $name=>$value) { header($name.': '.$value); }
         header('Content-Security-Policy: '.self::policy());
         if (is_ssl()) { header('Strict-Transport-Security: max-age=31536000'); }
         header_register_callback([self::class,'cookies']);
     }
 
-    private static function common(): array
+    private static function common(bool $allowExternalFrames=false): array
     {
         return ['X-Content-Type-Options'=>'nosniff','X-Frame-Options'=>'SAMEORIGIN',
             'Referrer-Policy'=>'same-origin','Permissions-Policy'=>'camera=(), microphone=(), geolocation=(), payment=()',
             'Cross-Origin-Resource-Policy'=>'same-origin','Cross-Origin-Opener-Policy'=>'same-origin',
-            'Cross-Origin-Embedder-Policy'=>'credentialless',
+            'Cross-Origin-Embedder-Policy'=>$allowExternalFrames?'unsafe-none':'credentialless',
             'Cache-Control'=>'private, no-store, max-age=0','Pragma'=>'no-cache'];
     }
 

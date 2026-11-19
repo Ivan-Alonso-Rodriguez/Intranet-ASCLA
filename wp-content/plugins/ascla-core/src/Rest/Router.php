@@ -61,8 +61,15 @@ final class RouterRoutes
         Router::route('/profiles/me','POST',static fn($r)=>Profiles::save($r->get_json_params()?:[]),'ascla_write');
     }
 
+    private static function onboarding(): void
+    {
+        Router::route('/onboarding','GET',[\ASCLA\Core\Services\Onboarding::class,'get']);
+        Router::route('/onboarding/(?P<module>[a-z][a-z0-9-]{0,63})','POST',static fn($r)=>\ASCLA\Core\Services\Onboarding::update((string)$r['module'],$r->get_json_params()?:[]));
+    }
+
     public static function community(): void
     {
+        self::onboarding();
         Router::route('/bootstrap','GET',[\ASCLA\Core\Services\Bootstrap::class,'get']);
         Router::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
         self::profiles();
@@ -82,7 +89,7 @@ final class RouterRoutes
         Router::route('/recommendations/(?P<id>\d+)/restore','POST',static fn($r)=>Matching::restore((int)$r['id']),'ascla_write');
         Router::route('/recommendations/(?P<id>\d+)/view','POST',static fn($r)=>Matching::select((int)$r['id']),'ascla_write');
         Router::route('/matching/(?P<id>\d+)','GET',static fn($r)=>Matching::between(get_current_user_id(),(int)$r['id'],$r->has_param('explain')?rest_sanitize_boolean($r['explain']):true));
-        Router::route('/matching/(?P<id>\d+)/intro','GET',static fn($r)=>Matching::intro((int)$r['id']));
+        Router::route('/matching/(?P<id>\d+)/intro','GET,POST',static fn($r)=>Matching::intro((int)$r['id']),'ascla_write');
         Router::route('/connections','GET',static fn()=>\ASCLA\Core\Services\Connections::listing());
         Router::route('/connections/(?P<id>\d+)/respond','POST',static fn($r)=>\ASCLA\Core\Services\Connections::respond((int)$r['id'],(string)$r['decision']),'ascla_write');
         Router::route('/conversation-requests','GET',static fn()=>ConversationRequests::listing());
@@ -140,6 +147,9 @@ final class RouterRoutes
         Router::route('/answers','GET',static fn()=>Queue::answers());
         Router::route('/conversations/(?P<id>\d+)','GET',static fn($r)=>Messaging::conversation((int)$r['id']));
         Router::route('/conversations/(?P<id>\d+)/group','POST',static fn($r)=>Messaging::updateGroup((int)$r['id'],(string)$r['title'],(string)($r['description']??''),(int)($r['photo_id']??0)),'ascla_write');
+        Router::route('/conversations/(?P<id>\d+)/group/members','POST',static fn($r)=>Messaging::addGroupMembers((int)$r['id'],$r->get_json_params()['users']??[]),'ascla_write');
+        Router::route('/conversations/(?P<id>\d+)/group/members/(?P<user_id>[1-9]\d*)','DELETE',static fn($r)=>Messaging::removeGroupMember((int)$r['id'],(int)$r['user_id']),'ascla_write');
+        Router::route('/conversations/(?P<id>\d+)/group/leave','POST',static fn($r)=>Messaging::leaveGroup((int)$r['id']));
         Router::route('/conversations/(?P<id>\d+)','DELETE',static fn($r)=>Messaging::removeGroup((int)$r['id']),'ascla_write');
         Router::route('/notifications/(?P<id>\d+)/read','POST',static fn($r)=>Notifications::read((int)$r['id']));
         Router::route('/notifications/(?P<id>\d+)','DELETE',static fn($r)=>Notifications::delete((int)$r['id']));
@@ -358,12 +368,12 @@ final class RouterAdmin
             $actorId=(int)($row['actor_id']??0);
             if ($actorId>0 && !array_key_exists($actorId,$actorNames)) {
                 $user=get_userdata($actorId);
-                $actorNames[$actorId]=$user?Profiles::publicName($actorId):'Usuario eliminado';
+                $actorNames[$actorId]=$user?Profiles::publicName($actorId):\ASCLA\Core\Frontend\Language::label('Usuario eliminado');
             }
         }
         foreach ($audit as &$row) {
             $actorId=(int)($row['actor_id']??0);
-            $row['actor_name']=$actorId>0?($actorNames[$actorId]??'Usuario'):'Sistema';
+            $row['actor_name']=$actorId>0?($actorNames[$actorId]??\ASCLA\Core\Frontend\Language::label('Usuario')):\ASCLA\Core\Frontend\Language::label('Sistema');
         }
         unset($row);
         return $audit;

@@ -25,6 +25,23 @@ module.exports = async function videoScenarios({test, admin, request, base, fixt
       assert.equal(await admin.locator('script[data-ascla-youtube-api]').count(), 0);
       assert.equal(await admin.getByText("Actualizar datos de YouTube", {exact: true}).count(), 0);
     });
+    await test("The YouTube player loads on the first opening after in-app navigation", async () => {
+      const data = await resource();
+      const embed = "https://www.youtube-nocookie.com/embed/abcdefghijk";
+      const player = route => route.fulfill({contentType:"text/html",body:"<title>YouTube test player</title><h1>Reproductor de prueba</h1>"});
+      await admin.route(embed, player);
+      try {
+        const response = await admin.goto(base + "/perfil/");
+        assert.equal(response.headers()["cross-origin-embedder-policy"], "unsafe-none");
+        const timeOrigin = await admin.evaluate(() => performance.timeOrigin);
+        await admin.locator('.nav-link[href$="/centro-conocimiento/"]').click();
+        await admin.locator(`.knowledge-card .knowledge-cover[data-id="${data.id}"]`).click();
+        await admin.frameLocator('.modal iframe[src^="https://www.youtube-nocookie.com/embed/"]').getByRole("heading", {name:"Reproductor de prueba"}).waitFor();
+        assert.equal(await admin.evaluate(() => performance.timeOrigin), timeOrigin);
+      } finally {
+        await admin.unroute(embed, player);
+      }
+    });
     await test("A simulated preparation error is escaped and does not change the stored duration", async () => {
       const data = await resource();
       const pattern = "**/ascla/v1/items/" + data.id;

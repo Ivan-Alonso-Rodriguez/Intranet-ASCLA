@@ -10,7 +10,7 @@ const pass=label=>{checks.push(label);console.log('PASS '+label);};
  browser=await chromium.launch({channel:process.env.ASCLA_BROWSER_CHANNEL||'chrome',headless:true});
  for(const width of [1440,390])for(const theme of ['light','dark'])for(const locale of ['es_ES','en_US']){
   const context=await browser.newContext({viewport:{width,height:1000}});await context.addInitScript(mode=>localStorage.setItem('ascla-theme',mode),theme);
-  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
+  const page=await context.newPage();await require('./helpers/browser.cjs').allowOnboardingSkip(page);page.on('pageerror',error=>errors.push(error.message));
   await page.goto(base+'/login/');
   if(locale==='en_US'){
    await page.locator('#ascla-login-language').selectOption(locale);
@@ -34,11 +34,11 @@ const pass=label=>{checks.push(label);console.log('PASS '+label);};
   views.push({width,theme,locale,styles:styles.map(({id,path})=>({id,path})),axe_violations:0});await context.close();
  }
  pass('Ocho vistas conservan diseño, idioma, teclado, mostrar contraseña, Recordarme y accesibilidad A/AA');
- const withoutScripts=await browser.newContext({javaScriptEnabled:false}),plain=await withoutScripts.newPage();
+ const withoutScripts=await browser.newContext({javaScriptEnabled:false}),plain=await withoutScripts.newPage();await require('./helpers/browser.cjs').allowOnboardingSkip(plain);
  await plain.goto(base+'/login/');assert.equal(await plain.locator('.wp-hide-pw').isVisible(),false);assert.equal(await plain.locator('#user_pass').getAttribute('type'),'password');await withoutScripts.close();
  pass('Sin JavaScript se conserva el campo de contraseña y se oculta el control que requiere scripts');
  for(const [index,name] of ['Administrador','Ana','Bruno','Carla'].entries()){
-  const context=await browser.newContext({viewport:{width:index%2?390:1440,height:1000}}),page=await context.newPage(),actor=fixture.actors[name];
+  const context=await browser.newContext({viewport:{width:index%2?390:1440,height:1000}}),page=await context.newPage(),actor=fixture.actors[name];await require('./helpers/browser.cjs').allowOnboardingSkip(page);
   await page.goto(base+'/login/');await page.locator('#user_login').fill(actor.login);await page.locator('#user_pass').fill(actor.password);
   if(index===0)await page.locator('#rememberme').check();
   await Promise.all([page.waitForNavigation(),page.locator('#wp-submit').click()]);await page.locator('#ascla-root').waitFor();
@@ -48,7 +48,7 @@ const pass=label=>{checks.push(label);console.log('PASS '+label);};
   await context.close();
  }
  pass('Los cuatro usuarios acceden mediante el formulario real y Recordarme conserva una cookie persistente');
- const context=await browser.newContext(),page=await context.newPage();await page.goto(base+'/login/');
+ const context=await browser.newContext(),page=await context.newPage();await require('./helpers/browser.cjs').allowOnboardingSkip(page);await page.goto(base+'/login/');
  await page.locator('#user_login').fill('synthetic-missing-login');await page.locator('#user_pass').fill('Synthetic-invalid-password');
  await Promise.all([page.waitForNavigation(),page.locator('#wp-submit').click()]);await page.locator('#login_error').waitFor();assert.ok(await page.locator('#login_error').isVisible());
  await page.locator('#nav a').click();await page.locator('#lostpasswordform').waitFor();assert.ok(await page.locator('#login-css').count());

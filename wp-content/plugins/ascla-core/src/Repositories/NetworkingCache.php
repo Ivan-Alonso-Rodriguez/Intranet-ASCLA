@@ -1,5 +1,6 @@
 <?php
 namespace ASCLA\Core\Repositories;
+use ASCLA\Core\Frontend\Language;
 
 /** Bounded, private cache of successful prose for directed member pairs. */
 final class NetworkingCache
@@ -12,7 +13,9 @@ final class NetworkingCache
         if($fresh){wp_cache_delete($viewer,'user_meta');}
         $entries=get_user_meta($viewer,self::META,true);
         $entry=is_array($entries)?($entries[$task.':'.$target]??[]):[];
-        return ($entry['hash']??'')===$hash && is_array($entry['result']??null)?$entry['result']:null;
+        if (($entry['locale']??'')===Language::current() && ($entry['hash']??'')===$hash && is_array($entry['result']??null)) { return $entry['result']; }
+        $localized=$entry['locales'][Language::current()]??[];
+        return ($localized['locale']??'')===Language::current() && ($localized['hash']??'')===$hash && is_array($localized['result']??null)?$localized['result']:null;
     }
 
     public static function put(int $viewer,int $target,string $task,string $hash,array $result): void
@@ -22,8 +25,11 @@ final class NetworkingCache
             wp_cache_delete($viewer,'user_meta');
             $entries=get_user_meta($viewer,self::META,true);
             if(!is_array($entries)){$entries=[];}
-            $key=$task.':'.$target;unset($entries[$key]);
-            $entries[$key]=['hash'=>$hash,'updated_at'=>time(),'result'=>$result];
+            $key=$task.':'.$target;$previous=$entries[$key]??[];unset($entries[$key]);
+            $locales=array_intersect_key((array)($previous['locales']??[]),Language::SUPPORTED);
+            $value=['hash'=>$hash,'locale'=>Language::current(),'updated_at'=>time(),'result'=>$result];
+            $locales[Language::current()]=$value;
+            $entries[$key]=$value+['locales'=>$locales];
             update_user_meta($viewer,self::META,array_slice($entries,-self::LIMIT,null,true));
         });
     }

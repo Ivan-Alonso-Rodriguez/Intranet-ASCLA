@@ -2,6 +2,7 @@
 namespace ASCLA\Core\Services;
 use ASCLA\Core\Integrations\{MockAIProvider,Secrets};
 use ASCLA\Core\Repositories\{NetworkingCache,Store};
+use ASCLA\Core\Frontend\Language;
 
 /** Optional prose generation; deterministic scores and explicit sending stay separate. */
 final class NetworkingAI
@@ -40,10 +41,11 @@ final class NetworkingAI
     /** Pair IDs are local cache metadata and are never sent to the provider. */
     public static function generate(string $task,array $context,array $pair=[]): array
     {
+        $context['output_locale']=Language::current();
         [$selected,$configured,$fallback,$provider,$model]=self::providerState(Settings::get());
         $persistent=count($pair)===2 && in_array($task,['matching','intro'],true);
         $fingerprints=$persistent?array_map([self::class,'profileFingerprint'],$pair):[];
-        $key='ascla_prose_'.hash('sha256',wp_json_encode([$task,$context,$selected,$configured,$provider->mode(),$model,$pair,$fingerprints,'v4']));
+        $key='ascla_prose_'.hash('sha256',wp_json_encode([$task,$context,$selected,$configured,$provider->mode(),$model,$pair,$fingerprints,'v5-language']));
         $cached=self::cachedResult($persistent,$pair,$task,$key);if($cached!==null){return $cached;}
         try {
             return Store::lock($key,static fn()=>self::generateLocked($task,$context,$pair,$persistent,$key,$provider,$fallback),0);
@@ -71,13 +73,15 @@ final class NetworkingAI
         if($task==='intro'){
             $claimsIdentity=(bool)preg_match('/\b(?:soy|somos)\s+(?:(?:el|la|un|una)\s+)?(?:asistente|chatbot|ASCLA)\b/iu',$clean['text']);
             $claimsAssistantRole=(bool)preg_match('/\b(?:como|en calidad de)\s+(?:asistente|chatbot)\b/iu',$clean['text']);
+            $claimsIdentity=$claimsIdentity || (bool)preg_match("/\b(?:i am|i'm|i’m|we are)\s+(?:(?:an?|the|your)\s+)?(?:AI|assistant|chatbot|ASCLA)\b/iu",$clean['text']);
+            $claimsAssistantRole=$claimsAssistantRole || (bool)preg_match('/\b(?:as|acting as)\s+(?:(?:an?|the|your)\s+)?(?:AI\s+)?(?:assistant|chatbot)\b/iu',$clean['text']);
             Access::require(!$claimsIdentity && !$claimsAssistantRole,'Mensaje de IA no válido.',502);
         }
         return $fields?$clean:$result;
     }
     public static function context(int $a,int $b,array $affinity): array
     {
-        return ['score'=>$affinity['score'],'shared'=>$affinity['shared'],'signals'=>$affinity['signals']??[],'left'=>Profiles::networkingContext($a),'right'=>Profiles::networkingContext($b)];
+        return ['output_locale'=>Language::current(),'score'=>$affinity['score'],'shared'=>$affinity['shared'],'signals'=>$affinity['signals']??[],'left'=>Profiles::networkingContext($a),'right'=>Profiles::networkingContext($b)];
     }
     public static function agenda(array $group,bool $demo=false,int $topic=0,int $edition=0): array
     {

@@ -26,11 +26,14 @@ final class ConversationVisibility
         delete_user_meta(get_current_user_id(),'_ascla_hidden_chat_'.$id);
     }
 
+    public static function forget(int $id): void
+    {
+        delete_metadata('user',0,'_ascla_hidden_chat_'.$id,'',true);
+    }
+
     public static function read(int $id,int $last): array
     {
-        Messaging::conversation($id);
-        $message=Store::one('messages',$last);
-        Access::require($message && (int)$message['conversation_id']===$id,'Mensaje no encontrado.',404);
+        Messaging::requireVisibleMessage($id,$last);
         global $wpdb;
         $table=Store::table('participants');
         $wpdb->query($wpdb->prepare("UPDATE $table SET last_read=GREATEST(last_read,%d) WHERE conversation_id=%d AND user_id=%d",$last,$id,get_current_user_id()));

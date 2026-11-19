@@ -6,7 +6,7 @@ const env=Object.fromEntries(fs.readFileSync(process.env.ASCLA_ENV_FILE||root+'/
 const checks=[],errors=[],users=[],posts=[];let browser,admin;
 async function api(page,route,body,method){return page.evaluate(async({route,body,method})=>{const url=route.startsWith('native:')?ASCLA.api.replace(/ascla\/v1\/?$/,'wp/v2/')+route.slice(7):ASCLA.api+route;const r=await fetch(url,{method:method||(body?'POST':'GET'),headers:{'X-WP-Nonce':ASCLA.nonce,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});return{status:r.status,body:await r.json()};},{route,body,method});}
 async function ok(page,route,body,method){const r=await api(page,route,body,method);assert.ok(r.status>=200&&r.status<300,route+': '+r.status+' '+r.body.message);return r.body;}
-async function login(name,password){const context=await browser.newContext({viewport:{width:1440,height:1000}}),p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(base+'/wp-login.php');await p.locator('#user_login').fill(name);await p.locator('#user_pass').fill(password);await Promise.all([p.waitForNavigation({waitUntil:'domcontentloaded'}),p.locator('#wp-submit').click()]);await p.goto(base+'/intranet/');await require('./helpers/browser.cjs').waitForHome(p);await p.keyboard.press('Escape');return p;}
+async function login(name,password){const context=await browser.newContext({viewport:{width:1440,height:1000}}),p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(base+'/wp-login.php');await require('./helpers/browser.cjs').waitForNativeLogin(p);await p.locator('#user_login').fill(name);await p.locator('#user_pass').fill(password);await Promise.all([p.waitForNavigation({waitUntil:'domcontentloaded'}),p.locator('#wp-submit').click()]);await p.goto(base+'/intranet/');await require('./helpers/browser.cjs').waitForHome(p);await p.keyboard.press('Escape');return p;}
 async function goto(p,route){await p.bringToFront();await p.goto(base+'/'+route);await p.locator('#page-content h1').waitFor();if(!new URL(p.url()).searchParams.has('item'))await p.keyboard.press('Escape');}
 function pass(name){checks.push(name);console.log('PASS '+name);}
 (async()=>{try{
@@ -18,11 +18,17 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
   users.push({...user,page:await login(username,password)});
  }
  const [writer,reader]=users;
- const hub=await ok(writer.page,'content/hub',{title:'Hub institucional '+suffix,body:'Publicación manual de aceptación '+suffix,status:'publish'});posts.push(hub.id);assert.equal(hub.status,'publish');assert.equal((await ok(reader.page,'items/'+hub.id)).title,hub.title);
+ const hub=await ok(writer.page,'content/hub',{title:'Hub institucional '+suffix,body:'Publicación manual de aceptación '+suffix,status:'pending'});
+ posts.push(hub.id);
+ assert.equal(hub.status,'pending');
+ assert.equal((await api(reader.page,'items/'+hub.id)).status,404);
+ const approved=await ok(admin,'items/'+hub.id+'/moderate',{decision:'approve',reason:'Publicación revisada'});
+ assert.equal(approved.status,'publish');
+ assert.equal((await ok(reader.page,'items/'+hub.id)).title,hub.title);
  const draft=await ok(writer.page,'content/hub',{title:'Borrador '+suffix,body:'Contenido aún privado',status:'draft'});posts.push(draft.id);assert.equal(draft.status,'draft');assert.equal((await api(reader.page,'items/'+draft.id)).status,404);
- await goto(writer.page,'hub/');await writer.page.locator('[data-action="editor"][data-type="hub"]').first().click();assert.equal(await writer.page.locator('[data-form="editor"] [name="status"]').inputValue(),'publish');await writer.page.keyboard.press('Escape');
+ await goto(writer.page,'hub/');await writer.page.locator('[data-action="editor"][data-type="hub"]').first().click();assert.equal(await writer.page.locator('[data-form="editor"] [name="status"]').inputValue(),'pending');await writer.page.keyboard.press('Escape');
  const mine=await ok(writer.page,'content/hub?mine=1&q='+suffix);assert.ok(mine.items.some(p=>p.id===hub.id));assert.ok(mine.items.some(p=>p.id===draft.id));
- pass('Hub: publicación explícita inmediata, borrador privado, editor e historial propio');
+ pass('Hub: envío a revisión, aprobación administrativa, borrador privado e historial propio');
  const topic=await ok(writer.page,'content/topic',{title:'Tema '+suffix,body:'Tema publicado para probar reacciones',status:'publish'});posts.push(topic.id);const comment=await ok(writer.page,'items/'+topic.id+'/comments',{body:'Comentario del foro'});
  const route='items/'+topic.id+'/reaction';
  const reaction=await ok(reader.page,route,{kind:'like',active:true});assert.equal(reaction.reaction,'like');assert.equal(reaction.reaction_total,1);
@@ -38,18 +44,18 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  await ok(reader.page,route,{kind:'like',active:false});assert.equal((await ok(reader.page,'items/'+topic.id)).reaction_total,1);
  pass('Solo Me gusta: API rechaza las reacciones retiradas; concurrencia sin duplicados y retiro');
  await goto(reader.page,'foros/?item='+topic.id);
- const topicButton=reader.page.locator('[data-action="content-reaction"][data-comment="false"][data-id="'+topic.id+'"][data-reaction="like"]');await topicButton.click();await reader.page.waitForFunction(id=>document.querySelector('[data-action="content-reaction"][data-comment="false"][data-id="'+id+'"][data-reaction="like"]')?.getAttribute('aria-pressed')==='true',topic.id);
- const commentButton=reader.page.locator('[data-action="content-reaction"][data-comment="true"][data-id="'+comment.id+'"][data-reaction="like"]');await commentButton.click();await reader.page.waitForFunction(id=>document.querySelector('[data-action="content-reaction"][data-comment="true"][data-id="'+id+'"][data-reaction="like"]')?.getAttribute('aria-pressed')==='true',comment.id);
+ const topicButton=reader.page.locator('.modal [data-action="content-reaction"][data-comment="false"][data-id="'+topic.id+'"][data-reaction="like"]');await topicButton.click();await reader.page.waitForFunction(id=>document.querySelector('.modal [data-action="content-reaction"][data-comment="false"][data-id="'+id+'"][data-reaction="like"]')?.getAttribute('aria-pressed')==='true',topic.id);
+ const commentButton=reader.page.locator('.modal [data-action="content-reaction"][data-comment="true"][data-id="'+comment.id+'"][data-reaction="like"]');await commentButton.click();await reader.page.waitForFunction(id=>document.querySelector('.modal [data-action="content-reaction"][data-comment="true"][data-id="'+id+'"][data-reaction="like"]')?.getAttribute('aria-pressed')==='true',comment.id);
  assert.equal((await ok(reader.page,'items/'+topic.id+'/comments')).find(c=>c.id===comment.id).reaction,'like');
- assert.deepEqual(await reader.page.locator('.reaction-picker').evaluateAll(groups=>groups.map(group=>[...group.querySelectorAll('button')].map(button=>button.dataset.reaction))),[['like'],['like']]);
+ assert.deepEqual(await reader.page.locator('.modal .reaction-picker').evaluateAll(groups=>groups.map(group=>[...group.querySelectorAll('button')].map(button=>button.dataset.reaction))),[['like'],['like']]);
  await reader.page.screenshot({path:root+'/test-results/editorial-reactions.png'});
  pass('Temas y comentarios muestran únicamente Me gusta, con estado accesible');
  const resource=await ok(admin,'content/resource',{title:'Recurso '+suffix,body:'Recurso publicado para comprobar Me gusta',status:'publish'});posts.push(resource.id);
  for(const [item,section] of [[hub,'hub'],[resource,'centro-conocimiento']]){
   await goto(reader.page,section+'/?item='+item.id);
-  const buttons=reader.page.locator('.reaction-picker [data-comment="false"][data-id="'+item.id+'"]');await buttons.first().waitFor();
+  const buttons=reader.page.locator('.modal .reaction-picker [data-comment="false"][data-id="'+item.id+'"]');await buttons.waitFor();
   assert.deepEqual(await buttons.evaluateAll(nodes=>nodes.map(node=>node.dataset.reaction)),['like']);
-  await buttons.click();await reader.page.waitForFunction(id=>document.querySelector('.reaction-picker [data-comment="false"][data-id="'+id+'"]')?.getAttribute('aria-pressed')==='true',item.id);
+  await buttons.click();await reader.page.waitForFunction(id=>document.querySelector('.modal .reaction-picker [data-comment="false"][data-id="'+id+'"]')?.getAttribute('aria-pressed')==='true',item.id);
  }
  pass('Hub y Centro de Conocimiento también conservan únicamente Me gusta');
  const moderation='admin/comments/'+comment.id;

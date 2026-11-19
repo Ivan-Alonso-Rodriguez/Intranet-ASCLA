@@ -64,7 +64,10 @@ final class ProfileLoadingTest extends TestCase
         $entries[$key]['updated_at']=time()-90*DAY_IN_SECONDS;update_user_meta($this->users[0],'_ascla_network_ai',$entries);
         wp_cache_delete($this->users[0],'user_meta');
         self::assertSame($first,$this->match());self::assertSame(1,$this->calls);
-        $intro=Matching::intro($this->users[1]);self::assertFalse($intro['sent']);self::assertSame($intro,Matching::intro($this->users[1]));self::assertSame(2,$this->calls);
+        $intro=Matching::intro($this->users[1]);self::assertFalse($intro['sent']);
+        try { Matching::intro($this->users[1]);self::fail('A first-contact draft is offered once.'); }
+        catch (\ASCLA\Core\Rest\ApiException $error) { self::assertSame(409,$error->getCode()); }
+        self::assertSame(2,$this->calls);
     }
     public function testOnlyRelevantProfileChangesAndProviderChangesRegenerateProse(): void
     {

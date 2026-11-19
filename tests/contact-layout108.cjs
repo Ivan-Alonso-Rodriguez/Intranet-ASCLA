@@ -18,7 +18,7 @@ async function capture(page,name,width,theme,scope){
  await page.mouse.move(0,0);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,name+' overflow');
  await page.screenshot({path:root+`/test-results/${name}.png`,fullPage:true,animations:'disabled'});
- await page.addScriptTag({path:require.resolve('axe-core')});
+ await require('./helpers/browser.cjs').waitForMotion(page);await page.addScriptTag({path:require.resolve('axe-core')});
  const violations=await page.evaluate(async selector=>(await axe.run(document.querySelector(selector),{runOnly:{type:'tag',values:['wcag2a','wcag2aa']}})).violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})),scope);
  assert.deepEqual(violations,[],name+' automatic WCAG checks');views.push({name,width,theme,overflow:false,violations});
 }

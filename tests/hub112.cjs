@@ -1,10 +1,10 @@
 /* Hub navigation, publication and draft regression on disposable WordPress.
- * Uses an ASCLA_ACCEPTANCE_FIXTURE with base, password and actors.member/member1. */
+ * Uses an ASCLA_ACCEPTANCE_FIXTURE with base and a member actor. */
 const {chromium}=require('playwright');
 const fs=require('node:fs'),assert=require('node:assert/strict');
 if(process.env.ASCLA_E2E_EPHEMERAL!=='1')throw Error('Disposable environment required');
 const f=JSON.parse(fs.readFileSync(process.env.ASCLA_ACCEPTANCE_FIXTURE,'utf8'));
-const actor=f.actors.member||f.actors.member1,created=[],errors=[];
+const actor=f.actors.member||f.actors.member1||f.actors.a,created=[],errors=[];
 let browser,page;
 async function api(route,body,method){
  return page.evaluate(async({route,body,method})=>{
@@ -27,23 +27,25 @@ async function api(route,body,method){
  await page.locator('#page-content [data-action=editor][data-type=hub]').click();
  let form=page.locator('[data-form=editor]');
  const title='Aporte Hub '+Date.now();await form.locator('[name=title]').fill(title);await form.locator('[name=body]').fill('Experiencias y aprendizajes de la comunidad.');
- await form.locator('[name=status]').selectOption('publish');
+ assert.deepEqual(await form.locator('[name=status] option').allTextContents(),['Borrador','Enviar a revisión']);
+ assert.equal(await form.locator('[name=status]').inputValue(),'pending');
  const save=page.waitForResponse(r=>r.url().includes('/content/hub')&&r.request().method()==='POST');
- await form.locator('[data-editor-primary]').click();const response=await save,result=await response.json();assert.equal(response.status(),200);created.push(result.id);
- await page.locator('.feed-card').filter({hasText:title}).waitFor();await page.reload();await page.locator('.feed-card').filter({hasText:title}).waitFor();
- console.log('PASS A publication can be created and stays visible after reload.');
+ await form.locator('[data-editor-primary]').click();const response=await save,result=await response.json();assert.equal(response.status(),200);created.push(result.id);assert.equal(result.status,'pending');
+ await page.locator('[data-action=filter-mine]').click();await page.locator('.feed-card').filter({hasText:title}).waitFor();
+ console.log('PASS A member submits a publication for review and finds it under My publications.');
  await page.locator('#page-content [data-action=editor][data-type=hub]').click();form=page.locator('[data-form=editor]');
  const draftTitle='Borrador Hub '+Date.now();await form.locator('[name=title]').fill(draftTitle);
  const savedDraft=page.waitForResponse(r=>r.url().includes('/content/hub')&&r.request().method()==='POST');
  await form.locator('[data-editor-draft]').click();const draft=await (await savedDraft).json();created.push(draft.id);assert.equal(draft.status,'draft');
  await page.locator('[data-action=filter-drafts]').click();await page.locator('[data-draft-id="'+draft.id+'"]').waitFor();
  await page.locator('[data-draft-id="'+draft.id+'"] [data-action=editor]').click();form=page.locator('[data-form=editor]');
- await form.locator('[name=body]').fill('Borrador completado para compartirlo con la comunidad.');await form.locator('[name=status]').selectOption('publish');
- const published=page.waitForResponse(r=>r.url().includes('/content/hub/'+draft.id)&&r.request().method()==='POST');
- await form.locator('[data-editor-primary]').click();assert.equal((await published).status(),200);
- await page.locator('[data-action=filter-all]').click();await page.locator('.feed-card').filter({hasText:draftTitle}).waitFor();
- await page.locator('[data-action=filter-mine]').click();await page.locator('.feed-card').filter({hasText:title}).waitFor();
- assert.deepEqual(errors,[]);console.log('PASS Drafts can be opened, completed and published, and My publications loads.');
+ assert.equal(await form.locator('[name=status]').inputValue(),'draft');
+ await form.locator('[name=body]').fill('Borrador completado para compartirlo con la comunidad.');await form.locator('[name=status]').selectOption('pending');
+ const submitted=page.waitForResponse(r=>r.url().includes('/content/hub/'+draft.id)&&r.request().method()==='POST');
+ await form.locator('[data-editor-primary]').click();
+ const updated=await submitted;assert.equal(updated.status(),200);assert.equal((await updated.json()).status,'pending');
+ await page.locator('[data-action=filter-mine]').click();await page.locator('.feed-card').filter({hasText:draftTitle}).waitFor();
+ assert.deepEqual(errors,[]);console.log('PASS A member can reopen a draft and submit it for review.');
 }finally{
  if(page)for(const id of created)await api('items/'+id,undefined,'DELETE').catch(()=>{});
  if(browser)await browser.close();

@@ -26,16 +26,20 @@
   --ascla-rule: #dedede;
   --ascla-control: #7c8792;
   --ascla-surface: #ffffff;
+  --ascla-surface-raised: #f0f0f0;
+  --ascla-hover: #ececec;
   --ascla-danger: #c6302c;
 }
 html[data-ascla-theme="dark"] {
   --ascla-accent-text: #74beff;
-  --ascla-accent-tint: #153c60;
-  --ascla-paper: #071f35;
+  --ascla-accent-tint: #272727;
+  --ascla-paper: #101010;
   --ascla-text: #f6f6f6;
-  --ascla-muted-text: #bacbd9;
+  --ascla-muted-text: #b8b8b8;
   --ascla-muted: var(--ascla-muted-text);
-  --ascla-rule: #35516b;
-  --ascla-control: #829db5;
-  --ascla-surface: #0d2a44;
+  --ascla-rule: #404040;
+  --ascla-control: #808080;
+  --ascla-surface: #1b1b1b;
+  --ascla-surface-raised: #252525;
+  --ascla-hover: #303030;
 }

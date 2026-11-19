@@ -2,73 +2,24 @@
 namespace ASCLA\Core\Integrations;
 final class MockAIProvider implements AIProviderInterface
 {
-    public function mode(): string { return 'DEMO MODE'; }
+    public const MODE='DEMO MODE';
+    public function mode(): string { return self::MODE; }
     public function generate(string $task,array $context): array
     {
         return match($task) {
-            'form_interests'=>$this->formInterests($context),
-            'interest_classification'=>$this->interestClassification($context),
+            'form_interests'=>MockInterestClassifier::formInterests($context),
+            'interest_classification'=>MockInterestClassifier::interestClassification($context),
             'answer'=>$this->answer($context),
             'matching','intro'=>$this->matching($context),
             'microagenda'=>$this->microagenda($context),
-            'microevent_copy'=>[
-                'objective'=>(string)($context['event']['description']??$context['event']['title']??'Conversar sobre intereses compartidos.'),
-                'icebreaker'=>'¿Qué experiencia te gustaría aportar a “'.($context['event']['title']??'este encuentro').'”?',
-                'closing_question'=>'¿Qué acción aplicarías después de “'.($context['event']['title']??'este encuentro').'”?',
-                'mode'=>$this->mode(),
-            ],
+            'microevent_copy'=>$this->microeventCopy($context),
             'social'=>$this->social($context),
             default=>$this->multimedia($context),
         };
     }
 
-    private function formInterests(array $context): array
-    {
-        $terms=$context['catalog']??[];
-        $text=mb_strtolower(remove_accents($context['text']??''));
-        $ids=[];
-        foreach ($terms as $term) {
-            $name=mb_strtolower(remove_accents($term['name']));
-            $direct=str_contains($text,$name);
-            $aiTopic=(str_contains($name,'gobernanza de la ia')||str_contains($name,'inteligencia artificial'))
-                && preg_match('/\b(chatgpt|gemini|llm|ia generativa)\b/',$text);
-            $cyber=str_contains($name,'ciberseguridad') && preg_match('/hackeo|cyber|seguridad informatica/',$text);
-            if ($direct || $aiTopic || $cyber) { $ids[]=(int)$term['id']; }
-        }
-        return ['intereses'=>array_slice(array_values(array_unique($ids)),0,3),'confianza'=>$ids?'media':'baja'];
-    }
 
-    private function interestClassification(array $context): array
-    {
-        $aliases=[
-            'inteligencia artificial'=>'/\b(ia|ai|llm|chatgpt|gemini|inteligencia artificial|machine learning)\b/u',
-            'gestion de riesgos'=>'/\b(riesgo|riesgos|risk|coso)\b/u',
-            'gobierno corporativo'=>'/\b(gobierno corporativo|gobernanza|corporate governance)\b/u',
-            'juntas directivas'=>'/\b(juntas? directivas?|directorio|directorios|board)\b/u',
-            'sostenibilidad'=>'/\b(sostenibilidad|sustentabilidad|esg|asg)\b/u',
-            'transformacion digital'=>'/\b(digital|digitalizacion|transformacion digital)\b/u',
-        ];
-        $assignments=[];
-        foreach ($context['items']??[] as $item) {
-            $text=mb_strtolower(remove_accents($item['title']));
-            $topic=$this->classifiedTopic($text,$context['topics']??[],$aliases);
-            $assignments[]=['id'=>(int)$item['id'],'topic_id'=>$topic];
-        }
-        return ['assignments'=>$assignments,'mode'=>$this->mode()];
-    }
 
-    private function classifiedTopic(string $text,array $topics,array $aliases): int
-    {
-        $topic=0;
-        foreach ($topics as $term) {
-            $label=mb_strtolower(remove_accents($term['name']));
-            if (preg_match($aliases[$label]??('/'.preg_quote($label,'/').'/u'),$text)) {
-                $topic=(int)$term['id'];
-                break;
-            }
-        }
-        return $topic;
-    }
 
     private function galleryAnswer(array $sources,array $live,bool $english): array
     {
@@ -197,6 +148,7 @@ final class MockAIProvider implements AIProviderInterface
 
     private function matching(array $context): array
     {
+        if (AIProviderSupport::outputLanguage($context)==='English') { return $this->englishMatching($context); }
         $shared=implode(' y ',array_slice($context['shared']??[],0,3));
         $signals=(array)($context['signals']??[]);
         $topic='sus objetivos de networking';
@@ -211,8 +163,24 @@ final class MockAIProvider implements AIProviderInterface
         return ['explanation'=>implode(' ',$details),'text'=>'Hola '.($context['right']['name']??'asociado').', vi que podemos conversar sobre '.$topic.'. '.$proposal,'conversation_proposal'=>$proposal,'mode'=>$this->mode()];
     }
 
+    private function englishMatching(array $context): array
+    {
+        $terms=['Gestión de riesgos'=>'Risk management','Gobierno corporativo'=>'Corporate governance','Inteligencia artificial'=>'Artificial intelligence','Juntas directivas'=>'Boards of directors','Sostenibilidad'=>'Sustainability','Transformación digital'=>'Digital transformation','Secretaría corporativa'=>'Corporate secretariat','Cumplimiento'=>'Compliance','Estrategia'=>'Strategy','Gobierno de IA'=>'AI governance','Servicios financieros'=>'Financial services','Energía'=>'Energy','Tecnología'=>'Technology','Industria'=>'Industry','Consultoría'=>'Consulting','Compartir experiencia'=>'Sharing experience','Aprender'=>'Learning','Colaborar'=>'Collaboration','Español'=>'Spanish','Inglés'=>'English','Portugués'=>'Portuguese'];
+        $shared=implode(' and ',array_map(static fn($name)=>$terms[$name]??$name,array_slice($context['shared']??[],0,3)));
+        $signals=(array)($context['signals']??[]);$details=[];
+        $fallback=in_array('experience',$signals,true)?'related professional experience':'your networking goals';
+        $topic=$shared!==''?$shared:$fallback;
+        if ($shared!=='') { $details[]='They share an interest in '.$shared.'.'; }
+        if (in_array('experience',$signals,true)) { $details[]='They also have related professional experience.'; }
+        if (in_array('participation',$signals,true)) { $details[]='Their public community activity shows topics in common.'; }
+        if (!$details) { $details[]='Complete your interests and experience to discover common ground.'; }
+        $proposal='What experience would you like to share about '.$topic.'?';
+        return ['explanation'=>implode(' ',$details),'text'=>'Hello '.($context['right']['name']??'there').', I noticed we could talk about '.$topic.'. '.$proposal,'conversation_proposal'=>$proposal,'mode'=>$this->mode()];
+    }
+
     private function microagenda(array $context): array
     {
+        if (AIProviderSupport::outputLanguage($context)==='English') { return $this->englishAgenda($context); }
         $theme=$context['selected_topic']??(implode(' y ',array_slice($context['interests']??[],0,2))?:'gobierno corporativo');
         $format=$context['meeting_format']??'';
         $activities=[
@@ -227,6 +195,34 @@ final class MockAIProvider implements AIProviderInterface
                 'icebreaker'=>$question,'closing_question'=>'¿Cómo aplicarías lo conversado en tu próxima reunión?','mode'=>$this->mode()];
         }
         return ['title'=>'Círculo ASCLA · '.$theme,'theme'=>$theme,'objective'=>'Intercambiar experiencias y preguntas sobre '.$theme.'.','duration_minutes'=>30,'agenda'=>[['minutes'=>5,'topic'=>'Presentaciones y objetivos'],['minutes'=>10,'topic'=>'Experiencias sobre '.$theme],['minutes'=>10,'topic'=>'Preguntas y aprendizajes compartidos'],['minutes'=>5,'topic'=>'Próximos pasos']],'icebreaker'=>'¿Qué pregunta sobre '.$theme.' te gustaría explorar?','closing_question'=>'¿Qué aprendizaje te gustaría llevar a tu próxima reunión?','mode'=>$this->mode()];
+    }
+
+    private function englishAgenda(array $context): array
+    {
+        $theme=$context['selected_topic']??(implode(' and ',array_slice($context['interests']??[],0,2))?:'corporate governance');
+        $formats=[
+            'caso práctico'=>['Practical case','Discuss an anonymized case about ','Present the case','Compare possible actions','What information would help you decide?'],
+            'clínica de preguntas'=>['Question clinic','Explore professional questions about ','Collect questions from the group','Discuss the selected questions in pairs','What question would you bring from your recent work?'],
+            'taller de decisiones'=>['Decision workshop','Agree on criteria for a decision about ','Define the decision and its limits','Compare criteria and agree on a plan','Which criterion should carry the most weight?'],
+        ];
+        if (isset($formats[$context['meeting_format']??''])) {
+            [$label,$goal,$opening,$discussion,$question]=$formats[$context['meeting_format']];
+            return ['title'=>$label.' · '.$theme,'theme'=>$theme,'objective'=>$goal.$theme.'.','duration_minutes'=>40,
+                'agenda'=>[['minutes'=>10,'topic'=>$opening],['minutes'=>20,'topic'=>$discussion],['minutes'=>10,'topic'=>'Agree on a next step about '.$theme]],
+                'icebreaker'=>$question,'closing_question'=>'How would you apply this discussion at your next meeting?','mode'=>$this->mode()];
+        }
+        return ['title'=>'ASCLA circle · '.$theme,'theme'=>$theme,'objective'=>'Exchange experience and questions about '.$theme.'.','duration_minutes'=>30,
+            'agenda'=>[['minutes'=>5,'topic'=>'Introductions and objectives'],['minutes'=>10,'topic'=>'Experience with '.$theme],['minutes'=>10,'topic'=>'Shared questions and lessons'],['minutes'=>5,'topic'=>'Next steps']],
+            'icebreaker'=>'What question about '.$theme.' would you like to explore?','closing_question'=>'What lesson would you bring to your next meeting?','mode'=>$this->mode()];
+    }
+
+    private function microeventCopy(array $context): array
+    {
+        if (AIProviderSupport::outputLanguage($context)==='English') {
+            $title=(string)($context['event']['title']??'this meeting');
+            return ['objective'=>'Exchange ideas and professional experience related to “'.$title.'”.','icebreaker'=>'What experience would you like to bring to “'.$title.'”?','closing_question'=>'What action would you take after “'.$title.'”?','mode'=>$this->mode()];
+        }
+        return ['objective'=>(string)($context['event']['description']??$context['event']['title']??'Conversar sobre intereses compartidos.'),'icebreaker'=>'¿Qué experiencia te gustaría aportar a “'.($context['event']['title']??'este encuentro').'”?','closing_question'=>'¿Qué acción aplicarías después de “'.($context['event']['title']??'este encuentro').'”?','mode'=>$this->mode()];
     }
 
     private function social(array $context): array

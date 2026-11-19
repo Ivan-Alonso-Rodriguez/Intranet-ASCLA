@@ -81,13 +81,13 @@ namespace {
     $plugin=$read('wp-content/plugins/ascla-core/ascla-core.php');
     $wpReadme=$read('wp-content/plugins/ascla-core/readme.txt');
     $installer=$read('wp-content/plugins/ascla-core/src/Database/Installer.php');
-    $assert((bool)preg_match('/Version:\s*1\.12\h*$/m',$plugin),'plugin header version');
-    $assert(str_contains($plugin,"define('ASCLA_VERSION', '1.12');"),'ASCLA_VERSION constant');
-    $assert((bool)preg_match('/Stable tag:\s*1\.12\h*$/m',$wpReadme),'WordPress stable tag');
-    $assert((bool)preg_match('/^sonar\.projectVersion=1\.12\h*$/m',$read('sonar-project.properties')),'Sonar version');
-    $assert((bool)preg_match('/SCHEMA_VERSION\s*=\s*15/',$installer),'schema version 15');
-    $assert(str_contains($read('README.md'),'Versión actual: 1.12 · esquema 15'),'README version/schema');
-    $assert(str_contains($read('VERSION_HISTORY.md'),'**Versión actual:** `1.12`'),'history current version');
+    $assert((bool)preg_match('/Version:\s*1\.13\h*$/m',$plugin),'plugin header version');
+    $assert(str_contains($plugin,"define('ASCLA_VERSION', '1.13');"),'ASCLA_VERSION constant');
+    $assert((bool)preg_match('/Stable tag:\s*1\.13\h*$/m',$wpReadme),'WordPress stable tag');
+    $assert((bool)preg_match('/^sonar\.projectVersion=1\.13\h*$/m',$read('sonar-project.properties')),'Sonar version');
+    $assert((bool)preg_match('/SCHEMA_VERSION\s*=\s*17/',$installer),'schema version 17');
+    $assert(str_contains($read('README.md'),'Versión actual: 1.13 · esquema 17'),'README version/schema');
+    $assert(str_contains($read('VERSION_HISTORY.md'),'**Versión actual:** `1.13`'),'history current version');
 
     // Point 1: both server and admin UI contain the hard three-interest guard.
     $imports=$read('wp-content/plugins/ascla-core/src/Services/InterestImports.php');
@@ -116,10 +116,13 @@ namespace {
     $translations=json_decode($read('wp-content/plugins/ascla-core/languages/en.json'),true);
     $assert(is_array($translations) && !empty($translations),'English translation catalog is valid JSON');
     $missing=[];
+    $literalCall= <<<'JS'
+~\b(?:T|L|label)\(\s*("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')\s*\)~
+JS;
     foreach(['wp-content/plugins/ascla-core/assets/interest-imports.js','wp-content/plugins/ascla-core/assets/admin-statistics.js','wp-content/plugins/ascla-core/assets/app.js'] as $asset){
         $source=$read($asset);
-        if(preg_match_all('/\b(?:T|L|label)\(\s*([\'"])(.*?)\1\s*\)/s',$source,$matches)){
-            foreach($matches[2] as $key){if(!array_key_exists($key,$translations))$missing[$key]=true;}
+        if(preg_match_all($literalCall,$source,$matches)){
+            foreach($matches[1] as $literal){$key=stripcslashes(substr($literal,1,-1));if(!array_key_exists($key,$translations))$missing[$key]=true;}
         }
     }
     $assert($missing===[],'new UI direct translation keys are complete');
