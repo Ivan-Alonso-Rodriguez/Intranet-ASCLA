@@ -69,7 +69,7 @@ final class AccountCoverageTest extends TestCase
             'too long'=>[['current_password'=>str_repeat('x',4097),'new_password'=>'Valid-next-Password!','confirm_password'=>'Valid-next-Password!'],'Contraseña no válida'],
             'wrong current'=>[['current_password'=>'wrong','new_password'=>'Valid-next-Password!','confirm_password'=>'Valid-next-Password!'],'actual no es correcta'],
             'mismatch'=>[['current_password'=>'Current-E2E-Password-457!','new_password'=>'Valid-next-Password!','confirm_password'=>'other'],'no coinciden'],
-            'short'=>[['current_password'=>'Current-E2E-Password-457!','new_password'=>'short','confirm_password'=>'short'],'al menos 12'],
+            'short'=>[['current_password'=>'Current-E2E-Password-457!','new_password'=>'short','confirm_password'=>'short'],'al menos 8'],
             'reuse'=>[['current_password'=>'Current-E2E-Password-457!','new_password'=>'Current-E2E-Password-457!','confirm_password'=>'Current-E2E-Password-457!'],'diferente de la actual'],
         ];
     }

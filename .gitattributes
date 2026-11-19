@@ -8,3 +8,7 @@
 *.ico binary
 *.zip binary
 *.pdf binary
+*.webm binary
+
+# Preserve exported evidence bytes so Git checkouts retain the manifest hashes.
+pruebas/** -text

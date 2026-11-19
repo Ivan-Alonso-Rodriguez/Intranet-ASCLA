@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<testsuites>
+  <testsuite name="01. Iniciar sesión como Administrador" file="flujos-e2e\03-borrador-publicacion-inscripcion\01-login-administrador.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:37.831" hostname="DESKTOP-VJV2FMV" time="0.427">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\01-login-administrador" time="0.213"/>
+    <testcase name="Sesión y nonce propios de Administrador" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\01-login-administrador" time="0.213"/>
+  </testsuite>
+  <testsuite name="02. Iniciar sesión como Ana" file="flujos-e2e\03-borrador-publicacion-inscripcion\02-login-ana.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:37.832" hostname="DESKTOP-VJV2FMV" time="0.309">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\02-login-ana" time="0.155"/>
+    <testcase name="Sesión y nonce propios de Ana" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\02-login-ana" time="0.155"/>
+  </testsuite>
+  <testsuite name="03. Crear un borrador sin descripción ni fechas" file="flujos-e2e\03-borrador-publicacion-inscripcion\03-borrador-incompleto.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:37.832" hostname="DESKTOP-VJV2FMV" time="0.251">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\03-borrador-incompleto" time="0.125"/>
+    <testcase name="Validación: 03. Crear un borrador sin descripción ni fechas" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\03-borrador-incompleto" time="0.125"/>
+  </testsuite>
+  <testsuite name="04. El asociado no puede abrir el borrador" file="flujos-e2e\03-borrador-publicacion-inscripcion\04-borrador-privado.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-05T19:08:37.832" hostname="DESKTOP-VJV2FMV" time="0.172">
+    <testcase name="Código HTTP esperado: 404" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\04-borrador-privado" time="0.172"/>
+  </testsuite>
+  <testsuite name="05. Publicar incompleto exige los campos obligatorios" file="flujos-e2e\03-borrador-publicacion-inscripcion\05-publicacion-invalida.bru" errors="0" failures="0" skipped="0" tests="1" timestamp="2026-11-05T19:08:37.832" hostname="DESKTOP-VJV2FMV" time="0.154">
+    <testcase name="Código HTTP esperado: 400" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\05-publicacion-invalida" time="0.154"/>
+  </testsuite>
+  <testsuite name="06. El rechazo conserva el borrador" file="flujos-e2e\03-borrador-publicacion-inscripcion\06-borrador-conservado.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:37.832" hostname="DESKTOP-VJV2FMV" time="0.173">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\06-borrador-conservado" time="0.086"/>
+    <testcase name="Validación: 06. El rechazo conserva el borrador" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\06-borrador-conservado" time="0.086"/>
+  </testsuite>
+  <testsuite name="07. Publicar con fecha, hora y cupo válidos" file="flujos-e2e\03-borrador-publicacion-inscripcion\07-publicar-evento.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:37.832" hostname="DESKTOP-VJV2FMV" time="0.201">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\07-publicar-evento" time="0.101"/>
+    <testcase name="Validación: 07. Publicar con fecha, hora y cupo válidos" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\07-publicar-evento" time="0.101"/>
+  </testsuite>
+  <testsuite name="08. Reabrir el evento y comprobar sus fechas" file="flujos-e2e\03-borrador-publicacion-inscripcion\08-fechas-persistentes.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:37.832" hostname="DESKTOP-VJV2FMV" time="0.189">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\08-fechas-persistentes" time="0.095"/>
+    <testcase name="Validación: 08. Reabrir el evento y comprobar sus fechas" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\08-fechas-persistentes" time="0.095"/>
+  </testsuite>
+  <testsuite name="09. Ana confirma su inscripción" file="flujos-e2e\03-borrador-publicacion-inscripcion\09-inscripcion.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:37.832" hostname="DESKTOP-VJV2FMV" time="0.217">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\09-inscripcion" time="0.108"/>
+    <testcase name="Validación: 09. Ana confirma su inscripción" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\09-inscripcion" time="0.108"/>
+  </testsuite>
+  <testsuite name="10. Recargar y comprobar la inscripción" file="flujos-e2e\03-borrador-publicacion-inscripcion\10-inscripcion-persistente.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:37.832" hostname="DESKTOP-VJV2FMV" time="0.203">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\10-inscripcion-persistente" time="0.101"/>
+    <testcase name="Validación: 10. Recargar y comprobar la inscripción" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\10-inscripcion-persistente" time="0.101"/>
+  </testsuite>
+  <testsuite name="11. Cancelar el evento ficticio" file="flujos-e2e\03-borrador-publicacion-inscripcion\11-cancelar-evento.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:37.832" hostname="DESKTOP-VJV2FMV" time="0.356">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\11-cancelar-evento" time="0.178"/>
+    <testcase name="Validación: 11. Cancelar el evento ficticio" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\11-cancelar-evento" time="0.178"/>
+  </testsuite>
+  <testsuite name="12. Comprobar el cierre del evento" file="flujos-e2e\03-borrador-publicacion-inscripcion\12-cancelacion-persistente.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:37.832" hostname="DESKTOP-VJV2FMV" time="0.157">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\12-cancelacion-persistente" time="0.079"/>
+    <testcase name="Validación: 12. Comprobar el cierre del evento" status="pass" classname="flujos-e2e\03-borrador-publicacion-inscripcion\12-cancelacion-persistente" time="0.079"/>
+  </testsuite>
+</testsuites>

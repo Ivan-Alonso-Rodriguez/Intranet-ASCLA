@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-22T05:45:04.731326+00:00",
+  "environment": "Disposable local WordPress",
+  "version": "1.10.9",
+  "php": {
+    "tests": 38,
+    "assertions": 335,
+    "errors": 0,
+    "failures": 0
+  },
+  "suite_filter": "AdminUserFiltersTest|AlliesLifecycleTest|AdministratorRoleTest|MemberInsightsTest|ProfileEditorial109Test|MembershipTest",
+  "browser": {
+    "checks": 9,
+    "passed": [
+      "Administrador sin Directorio, Mensajería, Contacto ni tareas de IA; enlace antiguo vuelve al resumen",
+      "Usuarios: país, facetas múltiples y rol se combinan, persisten y caben en móvil",
+      "Limpiar filtros restaura la lista y todas las selecciones",
+      "Menú de tres puntos accesible: cancelar, desactivar y reactivar el mismo aliado",
+      "Eliminar requiere confirmación y retira la ficha del registro",
+      "Directorio conserva múltiples valores con enlaces permanentes",
+      "Directorio conserva múltiples valores con rest_route",
+      "Tipo de asociado en la cabecera derecha del perfil, adaptable a móvil; Ejecutivo conserva su navegación",
+      "Registro e historial permanece junto a Nueva galería"
+    ],
+    "errors": []
+  },
+  "portable_checks": 49,
+  "package_sha256": "bc1c01bb5b7ae58a32d927875d02bb0748aa29f2a93ec1c588712d6f6b9ac951",
+  "package_files": 201,
+  "reports": {
+    "php-junit.xml": "f48683ddfa87fb5f8e76c00fe651a156935f0f3b16161898a06b89bb11f7264c",
+    "browser-result.json": "10bb11147d6e4b58d351aa31c8b30f4620520f0a7d2bc7cc0da53c94ccc08b4c"
+  },
+  "test_sources": [
+    "tests/php/AdminUserFiltersTest.php",
+    "tests/php/AlliesLifecycleTest.php",
+    "tests/admin-ui.cjs",
+    "tests/admin-ui-fixture.php"
+  ],
+  "scope": [
+    "Menú de tres puntos para activar/desactivar o enviar aliados a la papelera, con confirmación y permisos.",
+    "Retiro de Tareas de IA y de su contador; accesos comunitarios ocultos para Administrador ASCLA.",
+    "Tipo de asociado en la cabecera derecha del perfil, adaptable a móvil.",
+    "Filtros administrativos por país, industria, interés, área, rol y acceso, antes de totales y paginación.",
+    "Selecciones múltiples en Administración y Directorio, con enlaces permanentes y rest_route.",
+    "Registro e historial junto a Nueva galería."
+  ],
+  "temporary_environment_removed": true,
+  "temporary_credentials_removed": true,
+  "remote_deployment": false,
+  "new_zap_scan": false,
+  "full_php_suite": false,
+  "coverage_collected": false,
+  "limitations": [
+    "Validación dirigida local; no equivale a una suite completa, cobertura, Quality Gate ni aceptación UAT.",
+    "Las evidencias previas de integración, seguridad y borradores conservan su propia fecha y paquete."
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-22T01:58:28.907399+00:00",
+  "issues": [
+    573,
+    574,
+    575,
+    576
+  ],
+  "environment": "Disposable local WordPress",
+  "php": {
+    "tests": 76,
+    "assertions": 859,
+    "errors": 0,
+    "failures": 0
+  },
+  "browser": {
+    "checks": 10,
+    "errors": []
+  },
+  "portable_checks": 49,
+  "package_sha256": "b97fc859d10793dfab030da6697db73551d04d243122c3f56a163da700c7f0af",
+  "package_files": 201,
+  "reports": {
+    "php-junit.xml": "22749bf3a2516c78c3eca6254eb484f33e62f9c5f8545764d532250e1df3bf1c",
+    "browser-result.json": "16e434bdaf48c1f3a5f81d626d84b8a07ec099e78cf9debbef348e93b38143fe"
+  },
+  "remote_deployment": false,
+  "new_zap_scan": false,
+  "full_php_suite": false,
+  "coverage_collected": false,
+  "source_summary_sha256": "a01cc2aa56811c3754adb509a423ea1a1d667db8cffd5e3b07dbf62a52163556",
+  "suite_filter": "DraftWorkflowTest|EventFilters108Test|EventPagination108Test|ContentLifecycleTest|FormWriteValidationTest",
+  "test_sources": [
+    "tests/php/DraftWorkflowTest.php",
+    "tests/draft-workflow.cjs",
+    "tests/draft-workflow-fixture.php"
+  ],
+  "scope": [
+    "Borradores incompletos y validación al publicar en Hub, foros/temas, Galería, recursos, Eventos y Aliados.",
+    "Borradores propios recuperables, incluidos eventos sin fecha y foros/temas reunidos en su vista de borradores.",
+    "Tarjetas de foros visibles en escritorio y móvil; portada de Galería operable con clic y teclado."
+  ],
+  "limitations": [
+    "Validación dirigida en WordPress local temporal; no equivale a suite completa, cobertura, Quality Gate ni aceptación UAT.",
+    "Los resultados ZAP del 19 de octubre conservan su propio paquete y alcance; no se repitió ZAP sobre este ZIP.",
+    "Los contenedores, volúmenes y credenciales privados del entorno de prueba se retiraron."
+  ]
+}

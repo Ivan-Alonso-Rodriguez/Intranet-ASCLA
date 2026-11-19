@@ -73,6 +73,14 @@ final class LoginBehaviorTest extends TestCase
             self::assertStringContainsString('Existing notice',$message);
         }
     }
+    public function testRecoverySuccessHasADistinctHeading(): void
+    {
+        $GLOBALS['action']='lostpassword';$_GET['ascla_recovery']='sent';
+        foreach (['es_ES'=>'Revisa tu correo','en_US'=>'Check your email'] as $locale=>$heading) {
+            $_GET['wp_lang']=$locale;
+            self::assertStringContainsString($heading,Login::welcome('<p role="status">sent</p>'));
+        }
+    }
     public function testTranslationIsScopedAndSelectorEscapesRedirectInput(): void
     {
         self::assertSame('original',Login::translate('original','Password','another-plugin'));

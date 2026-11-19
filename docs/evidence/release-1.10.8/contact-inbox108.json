@@ -1,0 +1,203 @@
+{
+  "date": "2026-10-17T20:31:06.141175+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "baseline_commit": "877568c3fe16695ca3ede931ef5f1de911539ffa",
+  "scope": "Disposable local WordPress with synthetic accounts. Existing PHP integration tests and real UI/REST workflows. No new coverage, remote installation, full-suite rerun, Quality Gate or UAT acceptance claim.",
+  "source_snapshot": "current-19",
+  "production_matches_tested_snapshot": true,
+  "contact_inbox": {
+    "compact_summaries": true,
+    "one_request_open_at_a_time": true,
+    "state_filters": [
+      "All",
+      "Pending",
+      "Under review",
+      "Resolved",
+      "Closed"
+    ],
+    "search_preserves_state": true,
+    "keyboard_opening_checked": true,
+    "draft_survives_summary_close_without_rerender": true,
+    "successful_reply_keeps_request_open": true,
+    "reassignment_collapsible": true,
+    "ordered_states_and_response_required_to_resolve_preserved": true,
+    "unassigned_private_subject_and_body_absent_from_dom": true,
+    "reassignment_revokes_previous_assignee_access": true,
+    "archive_confirmation_and_member_history_preserved": true,
+    "archived_requests_can_be_included": true,
+    "english_labels_checked": true,
+    "selected_filter_visible_in_both_themes": true,
+    "gettext_messages_per_locale": 1836
+  },
+  "phpunit": {
+    "tests": 5,
+    "assertions": 38,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "suite": "SupportRequestsTest",
+    "coverage_collected": false,
+    "run": "test-results/contact-inbox108-20261017T202757Z-4131",
+    "source_snapshot": "current-18",
+    "php_sources_and_tests_match_final_snapshot": true,
+    "final_delta": [
+      "wp-content/plugins/ascla-core/assets/app.css"
+    ]
+  },
+  "portable_checks": 49,
+  "browser": {
+    "checks": [
+      "La bandeja muestra resúmenes cerrados y cinco filtros; una consulta ajena conserva su asunto y mensaje privados",
+      "Los filtros por estado y la búsqueda conservan la selección y no revelan coincidencias en consultas de otro responsable",
+      "Abrir con teclado funciona; solo una consulta queda abierta y cerrar su resumen conserva el borrador de respuesta",
+      "Responder conserva la consulta abierta; resolver exige respuesta y el asociado recibe el mismo historial",
+      "Archivar mantiene la confirmación y el historial; Incluir archivadas recupera la consulta con una etiqueta clara",
+      "Cambiar responsable revoca el mensaje al anterior; ejecutivo y asociado mantienen sus permisos reales",
+      "La bandeja, la privacidad y las acciones de respuesta también aparecen en inglés"
+    ],
+    "errors": [],
+    "scans": [
+      {
+        "name": "inbox-desktop-light",
+        "width": 1440,
+        "theme": "light",
+        "opened": false,
+        "violations": []
+      },
+      {
+        "name": "inbox-desktop-dark",
+        "width": 1440,
+        "theme": "dark",
+        "opened": true,
+        "violations": []
+      },
+      {
+        "name": "inbox-mobile-light",
+        "width": 390,
+        "theme": "light",
+        "opened": true,
+        "violations": []
+      },
+      {
+        "name": "inbox-mobile-dark",
+        "width": 390,
+        "theme": "dark",
+        "opened": false,
+        "violations": []
+      }
+    ],
+    "views": [
+      "inbox-desktop-light.png",
+      "inbox-desktop-dark.png",
+      "inbox-mobile-light.png",
+      "inbox-mobile-dark.png"
+    ],
+    "roles": [
+      "administrator",
+      "ascla_executive",
+      "ascla_member"
+    ],
+    "viewports": [
+      1440,
+      390
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "automated_wcag_a_aa_violations": 0,
+    "limitations": "Scoped Chromium/axe checks, not a complete WCAG audit or acceptance of the deployed site."
+  },
+  "coverage": {
+    "collected": false,
+    "previous_reports_unchanged": true,
+    "sha256": {
+      "clover.xml": "2008bce81b5693cc82662820d8ff8aa19004cdacc082295365e906b6b9d90709",
+      "junit.xml": "bea4733ddbfab15f29230c5b08f1c7aac5a9586fc4ad87c7ea4ad503c47440ae",
+      "lcov.info": "c68411ab949218a79986a9548e775a364d0535dfe58cb248f65389e8523adb10",
+      "source-revision": "5e9488a9dd2e9101025ac5963ac77c71771b7b8bc6d0ac170896e53374b6fa39"
+    }
+  },
+  "package": {
+    "files": 196,
+    "bytes": 1508801,
+    "sha256": "af3ffadb88630baea9fbf7971ad2f3bf7e46d1508fbefa145067ff91100ad007",
+    "manifest": "docs/evidence/release-1.10.8/package.json"
+  },
+  "cleanup": {
+    "temporary_project_removed": true,
+    "temporary_environment_removed": true,
+    "fixture_accounts_and_content_removed": true
+  },
+  "artifacts": [
+    {
+      "path": "test-results/contact-inbox108-20261017T203000Z-4847/contact-inbox108.json",
+      "sha256": "c894b5f5026c78f2494d1f8b2bb5ea0cee7fcf2743f8e7ff1e8d9d659c493a86"
+    },
+    {
+      "path": "test-results/contact-inbox108-20261017T203000Z-4847/browser.log",
+      "sha256": "1c34b1f1a788e26d69f4f0e7cf334476271b9c2b7d9cc7a3243c6aecb3c45897"
+    },
+    {
+      "path": "test-results/contact-inbox108-20261017T203000Z-4847/sanity.log",
+      "sha256": "8755860c11c8d3f9a1de749e02b68760d94f38c5cd87cadef867e4a455591434"
+    },
+    {
+      "path": "test-results/contact-inbox108-20261017T203000Z-4847/fixture-cleanup.log",
+      "sha256": "9def12f98b398d00a5dc434bc1e4deb78df0102c152e0b3c878fa22a4f737d62"
+    },
+    {
+      "path": "test-results/contact-inbox108-20261017T203000Z-4847/cleanup.log",
+      "sha256": "3c86be822917277f8ba4362d84dedba99a339db02ad281d7fdeb9b8b1863b622"
+    },
+    {
+      "path": "test-results/contact-inbox108-20261017T203000Z-4847/inbox-desktop-light.png",
+      "sha256": "85d8408c75012c2ab1fbc61545462cbd114d49f5db948b3a7d76fd707b165d73"
+    },
+    {
+      "path": "test-results/contact-inbox108-20261017T203000Z-4847/inbox-desktop-dark.png",
+      "sha256": "524d03d4b3e901f2d9cc5b103288c0fb379719768e4104b0d5b35bbdbff74cf0"
+    },
+    {
+      "path": "test-results/contact-inbox108-20261017T203000Z-4847/inbox-mobile-light.png",
+      "sha256": "15e3706802c1364ea5b635160a4e992d644cf80cf08e1213fe0acfec3e403623"
+    },
+    {
+      "path": "test-results/contact-inbox108-20261017T203000Z-4847/inbox-mobile-dark.png",
+      "sha256": "606b0f42f96fc3b1b4eac11f09bde844c7b673e59bb17ab0a5574e5adea2c14c"
+    },
+    {
+      "path": "test-results/contact-inbox108-20261017T202757Z-4131/junit.xml",
+      "sha256": "6cb3e2303fa20edc88a076d3c186ab7db334f5a3e5cccea59edaf655537bf5aa"
+    },
+    {
+      "path": "test-results/contact-inbox108-20261017T202757Z-4131/phpunit.log",
+      "sha256": "2012500fb878367fa4da5cb7b7a2a5311bec3ea22874926a5db6d0e898fe1b8a"
+    },
+    {
+      "path": "test-results/contact-inbox108-20261017T202757Z-4131/cleanup.log",
+      "sha256": "2b2579e93a7dff2de3c5cd37db54ca32b2e7246d8d46fd093c4756f40142a806"
+    },
+    {
+      "path": "test-results/contact-inbox108-ui.cjs",
+      "sha256": "9b2157530d9c03dac6b12d5b5e12bbb4711576c8894fec1be817ef83f8a9aef2"
+    },
+    {
+      "path": "test-results/contact-inbox108-run.sh",
+      "sha256": "e607fd397bd60a5e60a761c285088e1a9b510ac100070287711daf1311876d1f"
+    },
+    {
+      "path": "test-results/contact-inbox108-fixture.php",
+      "sha256": "ec50bb9563f03b3f4fb98652fb8f6e7dcafcf691bf2688160c20abe751f84ccf"
+    },
+    {
+      "path": "test-results/sonar/current-18-source-hashes.json",
+      "sha256": "f7aacf4beb3f5971f56f22f745a75fd12cfb34816bf396c0512ba294a2a23103"
+    },
+    {
+      "path": "test-results/sonar/current-19-source-hashes.json",
+      "sha256": "99db1f8b13af7cd8ae28c88c9b71d99d4aa385d5e7f88455c1862aae5dc9b113"
+    }
+  ]
+}

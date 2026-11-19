@@ -1,0 +1,75 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-24T20:32:50.345Z",
+  "scope": "Chrome real en Windows, WordPress local desechable; respuestas publicadas y notificaciones reales con usuarios sintéticos. Sin servicios externos ni cambios de esquema.",
+  "package_sha256": "6ec1f053a782032ac9cc77c4b41120ca04cc9b4f2db889081d325fd61180ffbc",
+  "package_manifest": "docs/evidence/release-1.11.0/package-comment-threads.json",
+  "previous_package_manifest": "docs/evidence/release-1.11.0/package-recovery-role-pdf.json",
+  "phpunit": {
+    "name": "CLI Arguments",
+    "tests": "84",
+    "assertions": "703",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "24.770085"
+  },
+  "checks": [
+    "Hub, foros, galería, conocimiento y eventos comparten hilos plegados; al abrir se dibujan cinco respuestas sin cascada",
+    "Las trece respuestas antiguas y la pendiente propia se agrupan en un nivel, por tandas de cinco, sin duplicados",
+    "Ocultar retira las respuestas del DOM y Ver más comentarios amplía los principales sin recargar",
+    "Responder a una respuesta añade @nombre público y conserva el destinatario; ampliar y cancelar el plegado conservan el borrador",
+    "La respuesta publicada mantiene su @mención, el hilo abierto y los demás hilos; el destinatario recibe su notificación",
+    "Me gusta y quitar Me gusta siguen funcionando dentro de las respuestas",
+    "Eliminar una respuesta conserva las demás y sincroniza la conversación",
+    "Responder al principal no añade una mención innecesaria y descartar confirma antes de cerrar el hilo",
+    "Diseño sin desbordamientos en móvil y escritorio, con revisión de accesibilidad en ambos temas",
+    "Los controles conservan singular, plural y traducción al inglés",
+    "La mención automática sin editar se cancela sin un aviso innecesario de borrador",
+    "Publicar un comentario principal muestra el nuevo aporte sin desplegar todos los comentarios ocultos"
+  ],
+  "counter_regression": {
+    "checks": [
+      "Publicar y cerrar actualiza de cero a un comentario sin sustituir la tarjeta ni recargar",
+      "Una respuesta actualiza solo el tema correspondiente y usa el plural",
+      "Eliminar una respuesta disminuye el contador al cerrar por el fondo",
+      "Se conservan la búsqueda y el documento durante publicación, respuesta y eliminación",
+      "El total usa los 102 comentarios del servidor aunque el detalle solo cargue cien",
+      "El Hub comparte la actualización y los comentarios pendientes no aumentan el total publicado",
+      "Abrir el detalle sincroniza también un comentario aprobado por moderación",
+      "El contador conserva singular y plural en inglés"
+    ],
+    "errors": []
+  },
+  "accessibility_scans": [
+    {
+      "name": "hilos-abiertos-claro",
+      "violations": []
+    },
+    {
+      "name": "hilos-plegados-claro",
+      "violations": []
+    },
+    {
+      "name": "hilos-abiertos-oscuro",
+      "violations": []
+    },
+    {
+      "name": "hilos-movil-oscuro",
+      "violations": []
+    }
+  ],
+  "page_errors": [],
+  "behavior": {
+    "initial_roots": 10,
+    "reply_batch": 5,
+    "reply_rendering": "on demand; one visual level; original parent IDs retained",
+    "mention_source": "public display name or privacy alias; no new login/email fields",
+    "existing_rest_query_limit": 100
+  },
+  "limits": [
+    "Grouping and batching are presentation changes; the existing 100-entry REST query bound is retained.",
+    "No database migration, remote deployment, new coverage run or third-party service validation is claimed."
+  ],
+  "local_report": "test-results/comment-threads1110/index.html"
+}

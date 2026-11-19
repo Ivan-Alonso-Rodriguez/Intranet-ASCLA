@@ -4,6 +4,28 @@ namespace ASCLA\Core\Domain;
 /** Select playable references to source timestamps; never create or download media files. */
 final class Transcript
 {
+    private const STAMP='\d{1,3}:\d{2}(?::\d{2})?(?:[.,]\d{1,3})?';
+
+    /** Keep every spoken word; subtitle timing and cue metadata never belong in the AI context. */
+    public static function plainText(string $text): string
+    {
+        $text=preg_replace('/^\xEF\xBB\xBF/','',str_replace("\r",'',$text))??$text;
+        $stamp=self::STAMP;
+        if (preg_match('/^WEBVTT(?:[ \t][^\n]*)?(?:\n|$)/',$text)) {
+            $text=preg_replace('/^WEBVTT[^\n]*(?:\n(?:Kind|Language|X-TIMESTAMP-MAP):[^\n]*)*(?:\n|$)/','',$text)??$text;
+            $blocks=preg_split('/\n[ \t]*\n/',trim($text))?:[$text];
+            $text=implode("\n\n",array_filter($blocks,static fn($block)=>!preg_match('/^(?:NOTE(?:[ \t][^\n]*)?|STYLE|REGION)(?:\n|$)/',$block)));
+            $text=trim($text);
+            // WebVTT permits named cue identifiers as well as numbered ones.
+            $text=preg_replace('/(\A|\n[ \t]*\n)[^\n]+\n(?=[ \t]*'.$stamp.'[ \t]+-->)/','$1',$text)??$text;
+        }
+        $text=preg_replace('/^[ \t]*\d+[ \t]*\n(?=[ \t]*'.$stamp.'[ \t]+-->)/m','',$text)??$text;
+        $text=preg_replace('/^[ \t]*'.$stamp.'[ \t]+-->[ \t]*'.$stamp.'[^\n]*(?:\n|$)/m','',$text)??$text;
+        $text=preg_replace('/^[ \t]*\['.$stamp.'\][ \t]*/m','',$text)??$text;
+        $text=preg_replace('/<'.$stamp.'>/','',$text)??$text;
+        return trim(preg_replace('/\s+/u',' ',$text)??$text);
+    }
+
     public static function videoLinks(array $clips,string $videoId): array
     {
         $valid=(bool)preg_match('/^[A-Za-z0-9_-]{11}$/D',$videoId);
@@ -23,8 +45,8 @@ final class Transcript
     public static function segments(string $text): array
     {
         $text=str_replace("\r",'', $text); $segments=[];
-        $stamp='\d{1,3}:\d{2}(?::\d{2})?(?:[.,]\d{1,3})?';
-        preg_match_all('/^('.$stamp.')\s+-->\s+('.$stamp.')[^\n]*\n(.*?)(?=\n\s*\n|\z)/msu',$text,$cues,PREG_SET_ORDER);
+        $stamp=self::STAMP;
+        preg_match_all('/^[ \t]*('.$stamp.')[ \t]+-->[ \t]+('.$stamp.')[^\n]*\n(.*?)(?=\n\s*\n|\z)/msu',$text,$cues,PREG_SET_ORDER);
         foreach ($cues as $cue) {
             $start=self::seconds($cue[1]); $end=self::seconds($cue[2]);
             if ($start>=0 && $end>$start) { $segments[]=['start'=>$start,'end'=>$end,'text'=>trim(strip_tags($cue[3]))]; }

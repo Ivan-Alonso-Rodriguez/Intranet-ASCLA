@@ -1,0 +1,227 @@
+{
+  "date": "2026-11-05T07:31:12.288549+00:00",
+  "version": "1.11.1",
+  "schema": 15,
+  "status": "PASS",
+  "package": {
+    "bytes": 2134308,
+    "sha256": "c3a5fc7c61f2bea69455611f3c2a430dbf4982b3dd41f31b3a08bf96ae86a5cb",
+    "files": 219
+  },
+  "php": {
+    "tests": 850,
+    "assertions": 9049,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "browser": {
+    "status": "PASS",
+    "checks": [
+      "PDF de dos páginas conserva tres respuestas y reconoce columnas de identidad",
+      "HTML y ZIP extraen solo la tabla sin ejecutar scripts ni cargar CSS o imágenes",
+      "Rechaza ZIP ambiguo, expansión excesiva, PDF narrativo y campos de identidad fusionados",
+      "Prioriza cuentas existentes, conserva la fila original, omite desconocidos y no cambia perfiles al analizar",
+      "La propuesta contextual exige revisión y confirmación; aplica solo los intereses y conserva la biografía",
+      "Importación adaptable en móvil y modo oscuro con controles accesibles"
+    ],
+    "errors": [],
+    "screenshots": [
+      "columnas-pdf.png",
+      "cuentas-priorizadas.png",
+      "importacion-completada.png",
+      "importacion-movil.png",
+      "importacion-oscura.png"
+    ],
+    "accessibility": [
+      {
+        "name": "mapeo-pdf",
+        "violations": []
+      },
+      {
+        "name": "revision",
+        "violations": []
+      },
+      {
+        "name": "movil",
+        "violations": []
+      },
+      {
+        "name": "oscuro",
+        "violations": []
+      }
+    ],
+    "video": "videos/page@479031c004383be3b9b3438a78805c80.webm",
+    "scope": "WordPress local desechable con usuarios y documentos sintéticos"
+  },
+  "sources": {
+    "reviewed": 14,
+    "accepted": 8,
+    "rows_extracted": 234,
+    "pdf_identity_rows_independently_verified": 196,
+    "files": [
+      {
+        "file": "BD Asociados ASCLA.xlsx - As. Corporativos.pdf",
+        "error": "El PDF tiene tablas sin identidad completa o columnas divididas entre pÃ¡ginas. Exporta la hoja completa como CSV o HTML.",
+        "sha256": "c1c2f2369ce29471c0fee8d574ee4dddea26b6f35305ca53309b59331090bc9c"
+      },
+      {
+        "file": "BD Asociados ASCLA.xlsx - As.Individuales.pdf",
+        "error": "El PDF incluye pÃ¡ginas que no forman una tabla de respuestas completa. Exporta la hoja completa como CSV o HTML.",
+        "sha256": "c14fbb9b9a93ee9f1b758f2390e0a68d64a1f42c5f89e4db0cf0b996643a21c5"
+      },
+      {
+        "file": "Count-Syscalls-Informe-Solucion.pdf",
+        "error": "El PDF incluye pÃ¡ginas que no forman una tabla de respuestas completa. Exporta la hoja completa como CSV o HTML.",
+        "sha256": "481cc3a07cb2adf1f4f1689d62b1d6e01627dd7c5a2459cf3bd9f9c3081ca315"
+      },
+      {
+        "file": "CS3081.T2.Requerimientos (3).pdf",
+        "error": "El PDF tiene tablas sin identidad completa o columnas divididas entre pÃ¡ginas. Exporta la hoja completa como CSV o HTML.",
+        "sha256": "6efddeff0fbdace84c0b92c62b3d6c54c2287d59810fc34aae2a4999d6b0b4fb"
+      },
+      {
+        "file": "DOCUMENTO DE ANALISIS Y DISEÑO ASCLA .pdf",
+        "error": "Usa CSV hasta 512 KB o PDF, HTML o ZIP hasta 5 MB.",
+        "sha256": "14ce2a2f987b084074dae4ef33b9227fec8a75ce7ebc81990b693942930b4f16"
+      },
+      {
+        "file": "LAB_Personal Branding & Board Reputation_ Hackeando el Algoritmo de LinkedIn - Respuestas de formulario 1.pdf",
+        "bytes": 1482,
+        "warnings": [],
+        "sha256": "e40d03398bed34e1cb2ba60bbec88172f5f13b38eaf2082dccd1591d3221118f",
+        "rows": 30,
+        "columns": 4,
+        "consistent_width": true,
+        "independent_nonempty_rows": 30,
+        "same_row_count": true,
+        "identities_present_in_pdf_text": 30,
+        "identity_count": 30
+      },
+      {
+        "file": "Pre-Registro LAB -Junio (respuestas) - Respuestas de formulario 1.pdf",
+        "bytes": 5482,
+        "warnings": [],
+        "sha256": "30a4fedfe0eea92a3dc9a476327b9d00b0bc1e7cd0b9637297afc69dfd493632",
+        "rows": 36,
+        "columns": 5,
+        "consistent_width": true,
+        "independent_nonempty_rows": 36,
+        "same_row_count": true,
+        "identities_present_in_pdf_text": 36,
+        "identity_count": 36
+      },
+      {
+        "file": "Pre-Registro LAB -Junio (respuestas).zip",
+        "bytes": 8363,
+        "warnings": [],
+        "sha256": "d14a9eab59f7102119c74d542459296a6f0a01b04b224111ca572c4827258e89",
+        "rows": 38,
+        "columns": 12,
+        "consistent_width": true
+      },
+      {
+        "file": "Pre-Registro Palestra y_LAB (respuestas) - Respuestas de formulario 1.pdf",
+        "bytes": 4319,
+        "warnings": [],
+        "sha256": "852c5d64da116f8106d787f9faa8bbab5160aaea8a3fca70569810a3b89c612c",
+        "rows": 18,
+        "columns": 4,
+        "consistent_width": true,
+        "independent_nonempty_rows": 18,
+        "same_row_count": true,
+        "identities_present_in_pdf_text": 18,
+        "identity_count": 18
+      },
+      {
+        "file": "REGISTRO A PALESTRA 05.08.26 (“¿Quién es el guardián del Gobierno Corporativo en la Empresa Familiar_ Una conversación con Gonzalo Jimenez_) (respuestas) - Respuestas de formulario 1.pdf",
+        "bytes": 2714,
+        "warnings": [],
+        "sha256": "6e5f847ac7d28db499c03560c91c04eaa6e467ea1695d3506a8092a23b0057bf",
+        "rows": 31,
+        "columns": 6,
+        "consistent_width": true,
+        "independent_nonempty_rows": 31,
+        "same_row_count": true,
+        "identities_present_in_pdf_text": 31,
+        "identity_count": 31
+      },
+      {
+        "file": "Registro a PALESTRA 08.05.26 (respuestas) - Encuentro de Secretarios y Directores.pdf",
+        "bytes": 1939,
+        "warnings": [],
+        "sha256": "7689f3ce28c0cf76a3ce552a0f1331d423238c12c4c328f635f3271cdb7740af",
+        "rows": 24,
+        "columns": 5,
+        "consistent_width": true,
+        "independent_nonempty_rows": 24,
+        "same_row_count": true,
+        "identities_present_in_pdf_text": 24,
+        "identity_count": 24
+      },
+      {
+        "file": "REGISTRO A PALESTRA 09.07.26 (Dominios Básicos del Board Member) (respuestas) - Respuestas de formulario 1.pdf",
+        "bytes": 2340,
+        "warnings": [],
+        "sha256": "8c0c199255c0562f4657a1da6ba786e9bca8ecf96422f07cf43069790d5535af",
+        "rows": 33,
+        "columns": 5,
+        "consistent_width": true,
+        "independent_nonempty_rows": 33,
+        "same_row_count": true,
+        "identities_present_in_pdf_text": 33,
+        "identity_count": 33
+      },
+      {
+        "file": "Registro a PALESTRA 15.04.26 (respuestas) Encuentro Transcontinental de Secretarios Corporativos_Latam y Europ - Respuestas de formulario 1.pdf",
+        "error": "El PDF une campos de identidad entre columnas. Exporta la hoja como CSV o HTML para identificar correctamente a cada persona.",
+        "sha256": "6e0027a4349d483fbf57b07c2de5a36f77e6fb5cea3e7ce44d624e30be65dc17"
+      },
+      {
+        "file": "Segundo Encuentro Transcontinental de Secretarios Corporativos - América Latina y Europa_ Uso Práctico de la IA en la Gestión del Directorio.” - Respuestas de formulario 1.pdf",
+        "bytes": 2376,
+        "warnings": [],
+        "sha256": "3852268db554e6bcc5f05c0f74f059962e8a59149a9f32e020be928ddabaf5cf",
+        "rows": 24,
+        "columns": 6,
+        "consistent_width": true,
+        "independent_nonempty_rows": 24,
+        "same_row_count": true,
+        "identities_present_in_pdf_text": 24,
+        "identity_count": 24
+      }
+    ],
+    "verification": "Independent pdfplumber row counts and pypdf textual identity presence; records stay private and were not imported to WordPress."
+  },
+  "safety": {
+    "existing_accounts_first": true,
+    "unknown_people_skipped_by_default": true,
+    "email_code_conflicts_not_overridden": true,
+    "unique_or_clear_similar_names_require_review": true,
+    "event_context_is_low_confidence_proposal": true,
+    "employment_membership_attendance_not_used_as_interests": true,
+    "human_review_before_profile_changes": true,
+    "no_account_creation": true,
+    "ai_optional_and_only_for_associated_accounts": true,
+    "html_inert_and_no_resources_loaded": true,
+    "zip_only_one_sheet_and_bounded_expansion": true,
+    "pdf_library_bundled_no_external_viewer": true
+  },
+  "sources_tested": [
+    "tests/php/InterestImport1111Test.php",
+    "tests/interest-import1111-fixture.php",
+    "tests/interest-import1111-files.py",
+    "tests/interest-import1111.cjs"
+  ],
+  "limits": [
+    "CSV UTF-8: 512 KiB; PDF/HTML/ZIP: 5 MiB; 5000 rows; PDF: 40 pages.",
+    "Scanned, split, merged-identity and non-tabular PDFs require complete CSV/HTML exports.",
+    "One historical translation-snapshot test is skipped. No new remote SonarQube, Trivy or ZAP scans or deployment were performed.",
+    "Browser: local Chrome on Windows; other browser/device combinations were not run in this review."
+  ],
+  "runtime_byte_match": {
+    "all_production_files_match_zip": true,
+    "files": 219,
+    "sha256": "c3a5fc7c61f2bea69455611f3c2a430dbf4982b3dd41f31b3a08bf96ae86a5cb"
+  }
+}

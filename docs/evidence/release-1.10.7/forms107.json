@@ -1,0 +1,41 @@
+{
+  "stage": "Formularios e idiomas del 14 de octubre",
+  "date": "2026-10-14",
+  "completed_at_utc": "2026-10-14T15:47:44.599978+00:00",
+  "base_revision": "d01e3d12b6c404ba5aaa9fc4648f5989565bf590",
+  "base_branch": "development",
+  "working_tree_modified": true,
+  "plugin_version": "1.10.7",
+  "schema_version": 15,
+  "php_tests": 434,
+  "php_assertions": 6086,
+  "php_line_coverage_percent": 84.18,
+  "browser_checks": 53,
+  "form_checks": 7,
+  "accessibility_states": 132,
+  "accessibility_violations": 0,
+  "accessibility_incomplete_rule_entries": 71,
+  "gettext_messages_per_locale": 1465,
+  "full_quality_ci_rerun": false,
+  "new_javascript_coverage": false,
+  "requirements_advanced": [
+    "RNF-013",
+    "RNF-017"
+  ],
+  "evidence": "docs/evidence/release-1.10.7/forms107.json",
+  "php_report": "test-results/forms107-junit.xml",
+  "clover_report": "test-results/forms107-clover.xml",
+  "browser_report": "test-results/forms107.json",
+  "limitations": "Revisión de todos los formularios y cadenas pendiente; sin certificación WCAG humana, otros navegadores, proveedores, despliegue ni Quality Gate remoto.",
+  "package": {
+    "version": "1.10.7",
+    "bytes": 1273005,
+    "sha256": "18b028736d2ee12e030d382ca3363a0ddbee8848e748d28360f6fb6605664baf",
+    "files": 169,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true,
+    "translation_catalog_included": true
+  },
+  "source_hashes_report": "test-results/forms107-source-hashes.json"
+}

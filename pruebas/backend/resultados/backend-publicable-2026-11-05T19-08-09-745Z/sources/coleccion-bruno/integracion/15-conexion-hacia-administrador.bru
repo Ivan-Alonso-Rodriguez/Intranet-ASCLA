@@ -1,0 +1,31 @@
+meta {
+  name: 15. Rechazar conexión hacia administración
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/relations
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAsociado}}
+  X-WP-Nonce: {{nonceAsociado}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"target": {{idAdministrador}}, "kind": "connect", "active": true}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 400", function () { expect(res.getStatus()).to.equal(400); });
+
+}

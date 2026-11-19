@@ -6,32 +6,53 @@ final class ContentMeta
 
 {
 
-    public static function sanitize(string $type,array $input,int $id=0): array
+    public static function sanitize(string $type,array $input,int $id=0,bool $allowIncomplete=false): array
     {
         $data=$id?(array)get_post_meta($id,'_ascla',true):[];
+        if ($type==='resource' && (!empty($data['generated_sections']) || !empty($data['ai_enriched']))) {
+            $data['ai_source_signature']??=VideoPreparation::signature($data);
+        }
+        $previousVideo=$data['video_id']??'';
         $mod=current_user_can('ascla_moderate');
         $editorial=$mod||($type==='resource'&&Access::canPublish());
         self::texts($data,$input,$editorial);
+        if ($type==='contact') { SupportCategories::validate($data,$input); }
         self::urls($data,$input);
+        self::clearPreviousCaptions($data,$previousVideo);
         if ($editorial && isset($input['chatham'])) { $data['chatham']=rest_sanitize_boolean($input['chatham']); }
         elseif (!isset($data['chatham'])) { $data['chatham']=Settings::get()['chatham_default']; }
+        if ($type==='ally') { Allies::metadata($data,$input); }
         self::media($data,$input,$id);
-        if ($type==='event') { self::event($data,$input); }
+        if ($type==='event') {
+            self::event($data,$input);
+            MicroLifecycle::sanitize($data,$input,$id,$allowIncomplete);
+            EventReminders::sanitize($data,$input,$id);
+            EventParticipation::validateChange($id,$id?(array)get_post_meta($id,'_ascla',true):[],$data,$input);
+        }
         self::eventReference($data,$input);
         self::duration($data,$input);
         $data['thumbnail_url']=\ASCLA\Core\Integrations\YouTubeVideoProvider::thumbnail($data['video_id']??'');
-        if ($type==='resource') { self::resource($data); }
+        if ($type==='resource') { self::resource($data);$data=VideoTranscripts::withDuration($data); }
         return $data;
+    }
+    private static function clearPreviousCaptions(array &$data,mixed $previousVideo): void
+    {
+        if (($data['video_id']??'')!==$previousVideo && ($data['transcript_status']??'')==='supadata') {
+            foreach (['transcript','transcript_status','transcript_video_id','transcript_mode','transcript_language','transcript_checked_at','transcript_error'] as $field) { unset($data[$field]); }
+        }
     }
 
     private static function texts(array &$data,array $input,bool $editorial): void
     {
         $texts=['source','copyright','description','agenda','location','modality','resource_type','alliance_type','benefits','initiatives','summary'];
+        $previousTranscript=(string)($data['transcript']??'');
         if ($editorial) { $texts=array_merge($texts,['transcript','identities']); }
         foreach ($texts as $key) {
-            if (isset($input[$key])) { $data[$key]=Access::text($input[$key],$key==='transcript'?100000:10000); }
+            if ($key==='transcript'&&($data['transcript_status']??'')==='supadata'&&($input[$key]??null)===$previousTranscript) { continue; }
+            if (isset($input[$key])) { $data[$key]=Access::text($input[$key],$key==='transcript'?VideoTranscripts::MAX_CHARACTERS:10000); }
         }
         if (!$editorial || !array_key_exists('transcript',$input)) { return; }
+        if (($data['transcript']??'')===$previousTranscript && ($data['transcript_status']??'')==='supadata') { return; }
         if (trim((string)($data['transcript']??''))!=='') {
             $data['transcript_status']='manual';
             $data['transcript_mode']='Transcripción manual autorizada';
@@ -47,7 +68,7 @@ final class ContentMeta
         foreach (['url','youtube_url'] as $key) {
             if (!isset($input[$key])) { continue; }
             $url=trim(Access::text($input[$key],2000));
-            Access::require($url===''||(filter_var($url,FILTER_VALIDATE_URL)&&in_array(wp_parse_url($url,PHP_URL_SCHEME),['https','http'],true)),'Enlace no válido.',400);
+            Access::require($url===''||self::validUrl($url),'Enlace no válido.',400);
             $data[$key]=esc_url_raw($url);
         }
         if (!empty($data['youtube_url'])) {
@@ -58,11 +79,16 @@ final class ContentMeta
         }
     }
 
+    private static function validUrl(string $url): bool
+    {
+        return filter_var($url,FILTER_VALIDATE_URL)!==false && in_array(wp_parse_url($url,PHP_URL_SCHEME),['https','http'],true);
+    }
+
     private static function media(array &$data,array $input,int $id): void
     {
         if (!isset($input['media_ids'])) { return; }
         Access::require(is_array($input['media_ids'])&&count($input['media_ids'])<=12,'Máximo 12 archivos.',400);
-        $data['media_ids']=array_values(array_unique(array_map('absint',$input['media_ids'])));
+        $data['media_ids']=FormRules::ids($input['media_ids']);
         foreach ($data['media_ids'] as $media) {
             $file=\ASCLA\Core\Repositories\Store::one('media',$media);
             Access::require($file && ((int)$file['user_id']===get_current_user_id()||($id&&(int)$file['post_id']===$id)),'Archivo no autorizado.');
@@ -79,19 +105,66 @@ final class ContentMeta
         }
         $data['media_ids']=$eventMedia;
         foreach (['start','end'] as $key) {
-            $data[$key]=self::eventDate($input[$key]??$data[$key]??'');
+            $value=$input[$key]??$data[$key]??'';
+            if ($value==='') { unset($data[$key]); }
+            else { $data[$key]=self::eventDate($value,$key); }
         }
-        Access::require(strtotime($data['end'])>strtotime($data['start']),'El fin debe ser posterior al inicio.',400);
-        $data['capacity']=max(0,min(100000,absint($input['capacity']??$data['capacity']??0)));
+        if (!empty($data['start']) && !empty($data['end'])) {
+            Access::require(strtotime($data['end'])>strtotime($data['start']),'La fecha y hora de fin deben ser posteriores al inicio.',400);
+        }
+        $data['offer_hours']=FormRules::integer('offer_hours',$input['offer_hours']??$data['offer_hours']??24);
+        $data['capacity']=FormRules::integer('capacity',$input['capacity']??$data['capacity']??0);
+        $modality=$data['modality']??'Virtual';
+        Access::require(in_array($modality,['Virtual','Presencial','Híbrido'],true),'Modalidad no válida.',400);
+        if ($modality==='Virtual') { unset($data['location']); }
+        if ($modality==='Presencial') { unset($data['url']); }
     }
 
-    private static function eventDate(mixed $value): string
+    public static function requireEventDetails(array $meta): void
     {
-        Access::require(is_string($value)&&preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,6})?)?(Z|[+-]\d{2}:\d{2})$/',$value),'Fechas de evento deben incluir zona horaria.',400);
-        try { $dt=new \DateTimeImmutable($value); } catch (\Exception) { throw new \ASCLA\Core\Rest\ApiException('Fecha inválida.',400); }
+        Access::require(!empty($meta['start']) && !empty($meta['end']),'Complete la fecha y hora de inicio y fin.',400);
+        $modality=$meta['modality']??'Virtual';
+        if ($modality!=='Virtual') {
+            Access::require(Access::hasText($meta['location']??''),'Completa el lugar o sala del evento.',400);
+        }
+        if ($modality!=='Presencial') {
+            Access::require(self::validUrl($meta['url']??''),'Ingresa un enlace válido para asistir al evento.',400);
+        }
+    }
+
+    public static function eventStartMinimum(): \DateTimeImmutable
+    {
+        return current_datetime()->setTime(0,0);
+    }
+
+    public static function requireCurrentEventStart(array $meta): void
+    {
+        if (empty($meta['start'])) { return; }
+        Access::require(strtotime($meta['start'])>=self::eventStartMinimum()->getTimestamp(),'La fecha de inicio debe ser hoy o posterior.',400);
+    }
+
+    public static function eventDate(mixed $value,string $field=''): string
+    {
+        $invalid=match($field) {
+            'start'=>'Introduce una fecha y hora de inicio válidas.',
+            'end'=>'Introduce una fecha y hora de fin válidas.',
+            default=>'Fecha inválida.',
+        };
+        if (is_string($value) && (str_starts_with($value,'0000-') || preg_match('/^\d{5,}-/',$value))) {
+            $year=match($field) {
+                'start'=>'La fecha de inicio debe tener un año de cuatro dígitos.',
+                'end'=>'La fecha de fin debe tener un año de cuatro dígitos.',
+                default=>$invalid,
+            };
+            Access::require(false,$year,400);
+        }
+        Access::require(is_string($value)&&preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,6})?)?(Z|[+-]\d{2}:\d{2})$/D',$value),$field===''?'Fechas de evento deben incluir zona horaria.':$invalid,400);
+        try { $dt=new \DateTimeImmutable($value); } catch (\Exception) { throw new \ASCLA\Core\Rest\ApiException($invalid,400); }
         $errors=\DateTimeImmutable::getLastErrors();
-        Access::require($errors===false || ($errors['warning_count']===0 && $errors['error_count']===0),'Fecha inválida.',400);
-        return $dt->setTimezone(new \DateTimeZone('UTC'))->format('c');
+        Access::require($errors===false || ($errors['warning_count']===0 && $errors['error_count']===0),$invalid,400);
+        $utc=$dt->setTimezone(new \DateTimeZone('UTC'));
+        Access::require((int)$utc->format('Y')>=1 && (int)$utc->format('Y')<=9999,$invalid,400);
+        return $utc->format('c');
     }
 
     private static function eventReference(array &$data,array $input): void
@@ -105,8 +178,7 @@ final class ContentMeta
     private static function duration(array &$data,array $input): void
     {
         if (!isset($input['duration_seconds'])) { return; }
-        Access::require(is_numeric($input['duration_seconds']) && (int)$input['duration_seconds']>=0 && (int)$input['duration_seconds']<=604800,'Duración no válida.',400);
-        $data['duration_seconds']=(int)$input['duration_seconds'];
+        $data['duration_seconds']=FormRules::integer('duration_seconds',$input['duration_seconds']);
         $data['video_metadata_mode']='Datos manuales';
     }
 

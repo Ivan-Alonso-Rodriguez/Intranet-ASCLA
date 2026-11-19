@@ -1,0 +1,37 @@
+meta {
+  name: 10. El bloqueo impide escribir
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/conversations/{{conversacionBloqueoId}}/messages
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAna}}
+  X-WP-Nonce: {{nonceAna}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "body": "Este mensaje no debe enviarse durante el bloqueo."
+  }
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 404", function () { expect(res.getStatus()).to.equal(404); });
+  test("El servidor oculta la conversación bloqueada", function () { expect(res.getBody().code).to.equal("ascla_error"); });
+}
+
+docs {
+  El contrato actual oculta la conversación bloqueada mediante 404. La propuesta de exposición indicaba 403; esta diferencia se conserva en la documentación y los reportes.
+}

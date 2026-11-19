@@ -1,0 +1,459 @@
+{
+  "date": "2026-10-26T03:35:26.359770+00:00",
+  "version": "1.11.0",
+  "schema": 15,
+  "scope": "Pruebas técnicas completas en WordPress desechable y Jenkins local autenticado, con SonarQube real del curso para QA/UAT. Sin promoción de ramas, despliegue remoto ni aprobación humana de UAT.",
+  "source_snapshots": {
+    "qa": "b56c78ec6fe572a38d97d3d2b4d97b4b075d80ed",
+    "uat": "b56c78ec6fe572a38d97d3d2b4d97b4b075d80ed"
+  },
+  "production_files_identical_between_environments": true,
+  "original_repository_commit": "d3304cfeef7668735690dc9f8cfc562fc3d5eadc",
+  "php": {
+    "qa": {
+      "tests": 810,
+      "assertions": 8796,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "uat": {
+      "tests": 810,
+      "assertions": 8796,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "historical_skip": "CodeOptimizationTest necesita catálogos anteriores; comparación separada ejecutada: 1 prueba, 4326 aserciones, PASS."
+  },
+  "browser_journeys": {
+    "qa": 27,
+    "uat": 27,
+    "failures": 0
+  },
+  "sonarqube": {
+    "qa": {
+      "project": "ASCLA-QA",
+      "status": "OK",
+      "task": "a477d874-f579-47d9-8988-b6bd9475bb3f",
+      "analysis": "be5344b0-8a5c-46de-b96a-0fda9e3310be",
+      "commit": "b56c78ec6fe572a38d97d3d2b4d97b4b075d80ed",
+      "conditions": [
+        {
+          "status": "OK",
+          "metricKey": "new_coverage",
+          "comparator": "LT",
+          "errorThreshold": "80",
+          "actualValue": "95.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "coverage",
+          "comparator": "LT",
+          "errorThreshold": "80",
+          "actualValue": "91.2"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_duplicated_lines_density",
+          "comparator": "GT",
+          "errorThreshold": "2",
+          "actualValue": "0.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "duplicated_lines_density",
+          "comparator": "GT",
+          "errorThreshold": "2",
+          "actualValue": "0.1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_software_quality_maintainability_rating",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "actualValue": "1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_violations",
+          "comparator": "GT",
+          "errorThreshold": "0",
+          "actualValue": "0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "software_quality_maintainability_rating",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "actualValue": "1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "test_success_density",
+          "comparator": "LT",
+          "errorThreshold": "100",
+          "actualValue": "100.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "violations",
+          "comparator": "GT",
+          "errorThreshold": "0",
+          "actualValue": "0"
+        }
+      ],
+      "measures": {
+        "coverage": "91.2",
+        "bugs": "0",
+        "duplicated_lines_density": "0.1",
+        "code_smells": "0",
+        "branch_coverage": "98.4",
+        "new_violations": null,
+        "ncloc": "28046",
+        "new_coverage": null,
+        "violations": "0",
+        "vulnerabilities": "0",
+        "line_coverage": "90.0",
+        "security_hotspots": "0"
+      },
+      "open_issues": 0
+    },
+    "uat": {
+      "project": "ASCLA-UAT",
+      "status": "OK",
+      "task": "a3264041-135b-4b05-a4d5-55f6227e0289",
+      "analysis": "2ea7040a-4b73-41c7-8a61-e8eddfc9e417",
+      "commit": "b56c78ec6fe572a38d97d3d2b4d97b4b075d80ed",
+      "conditions": [
+        {
+          "status": "OK",
+          "metricKey": "new_coverage",
+          "comparator": "LT",
+          "errorThreshold": "80",
+          "actualValue": "95.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "coverage",
+          "comparator": "LT",
+          "errorThreshold": "80",
+          "actualValue": "91.2"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_duplicated_lines_density",
+          "comparator": "GT",
+          "errorThreshold": "2",
+          "actualValue": "0.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "duplicated_lines_density",
+          "comparator": "GT",
+          "errorThreshold": "2",
+          "actualValue": "0.1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_software_quality_maintainability_rating",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "actualValue": "1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "new_violations",
+          "comparator": "GT",
+          "errorThreshold": "0",
+          "actualValue": "0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "software_quality_maintainability_rating",
+          "comparator": "GT",
+          "errorThreshold": "1",
+          "actualValue": "1"
+        },
+        {
+          "status": "OK",
+          "metricKey": "test_success_density",
+          "comparator": "LT",
+          "errorThreshold": "100",
+          "actualValue": "100.0"
+        },
+        {
+          "status": "OK",
+          "metricKey": "violations",
+          "comparator": "GT",
+          "errorThreshold": "0",
+          "actualValue": "0"
+        }
+      ],
+      "measures": {
+        "coverage": "91.2",
+        "bugs": "0",
+        "duplicated_lines_density": "0.1",
+        "code_smells": "0",
+        "branch_coverage": "98.3",
+        "new_violations": null,
+        "ncloc": "28046",
+        "new_coverage": null,
+        "violations": "0",
+        "vulnerabilities": "0",
+        "line_coverage": "90.0",
+        "security_hotspots": "0"
+      },
+      "open_issues": 0
+    }
+  },
+  "jenkins": {
+    "job": "ascla-qa",
+    "build": 5,
+    "result": "FAILURE",
+    "artifacts": 28,
+    "deploy_skipped": true,
+    "retention_success_then_failure": {
+      "success_followed_by_failure": true,
+      "older_success_and_its_artifacts_removed": true,
+      "latest_failure_artifact_preserved": true,
+      "results": [
+        {
+          "_class": "org.jenkinsci.plugins.workflow.job.WorkflowRun",
+          "artifacts": [
+            {
+              "fileName": "fixture.html"
+            }
+          ],
+          "building": false,
+          "number": 1,
+          "result": "SUCCESS"
+        },
+        {
+          "_class": "org.jenkinsci.plugins.workflow.job.WorkflowRun",
+          "artifacts": [
+            {
+              "fileName": "fixture.html"
+            }
+          ],
+          "building": false,
+          "number": 2,
+          "result": "FAILURE"
+        }
+      ],
+      "job_after_retention": {
+        "_class": "org.jenkinsci.plugins.workflow.job.WorkflowJob",
+        "builds": [
+          {
+            "_class": "org.jenkinsci.plugins.workflow.job.WorkflowRun",
+            "number": 2
+          }
+        ],
+        "lastStableBuild": null,
+        "lastSuccessfulBuild": null
+      }
+    },
+    "verification": {
+      "build": 5,
+      "sonarqube_scanner_executed": true,
+      "native_quality_gate_ok": true,
+      "deployment_skipped": true,
+      "only_latest_qa_build_retained": true,
+      "all_four_immutable_images_analyzed": true,
+      "artifact_fingerprints_valid": true,
+      "artifacts": 28,
+      "fix_availability_in_current_trivy_database": [
+        {
+          "role": "app",
+          "blocking": 357,
+          "with_fixed_version": 0
+        },
+        {
+          "role": "cli",
+          "blocking": 0,
+          "with_fixed_version": 0
+        },
+        {
+          "role": "db",
+          "blocking": 21,
+          "with_fixed_version": 0
+        },
+        {
+          "role": "mailpit",
+          "blocking": 1,
+          "with_fixed_version": 0
+        }
+      ]
+    }
+  },
+  "trivy": {
+    "date": "2026-10-26T03:15:56.623945+00:00",
+    "status": "BLOCKED",
+    "images": [
+      {
+        "role": "app",
+        "reference": "ascla-ci-app:jenkins-ascla-qa-5",
+        "id": "sha256:6aad582a0144eed53d8c6c74d0ea84bad50bfc47171b7a8b429486e521068af7",
+        "built": true,
+        "status": "BLOCKED",
+        "config_id": "sha256:bdef2c2fad15bbb5e8bc9584a43b7e751de72016023939056a605036e1715d77",
+        "counts": {
+          "UNKNOWN": 19,
+          "LOW": 318,
+          "MEDIUM": 237,
+          "HIGH": 100,
+          "CRITICAL": 1
+        },
+        "blocking": 357,
+        "report_sha256": "cb26d49abf8da0931336c4016c5ea6df29200f59a28422eea2a2787b527331a8"
+      },
+      {
+        "role": "cli",
+        "reference": "ascla-ci-cli:jenkins-ascla-qa-5",
+        "id": "sha256:155aef5e202977742763d6c1a9c3ec15d73a0acbc10f002637b6e74199627f27",
+        "built": true,
+        "status": "PASS",
+        "config_id": "sha256:80479d50d6c3d54cb4da290b49cb8d36dcc27db07154482b30a3a7b6396db088",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 0,
+        "report_sha256": "781e0138f7cc3e7ca00b11dc061c8e6a9ec74188b172a69270251d1acf0f4ae2"
+      },
+      {
+        "role": "db",
+        "reference": "ascla-ci-db:jenkins-ascla-qa-5",
+        "id": "sha256:93f72475d8730dc4e27cb6b27b6ed95289d41ce1c73503e405a768b19ad9dc3a",
+        "built": true,
+        "status": "BLOCKED",
+        "config_id": "sha256:e4b3e1e228c9f608d10a6b10212a884e4833a6e861fe102ff6627eaae09b688a",
+        "counts": {
+          "UNKNOWN": 0,
+          "LOW": 7,
+          "MEDIUM": 21,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 21,
+        "report_sha256": "00bdb16c1970310d0534b84f0dae890a94f604106d177aadcc7acaba23d15726"
+      },
+      {
+        "role": "mailpit",
+        "reference": "axllent/mailpit:latest@sha256:0790692be935ea4420d085694f7985b1f692ca6a8771ab0e0bd8ba75ac180498",
+        "id": "sha256:0790692be935ea4420d085694f7985b1f692ca6a8771ab0e0bd8ba75ac180498",
+        "built": false,
+        "status": "BLOCKED",
+        "config_id": "sha256:be0d4ccb6b40920bd7352ba0ab2e39ebc619d05914ac054ca3d4b90dbdb052df",
+        "counts": {
+          "UNKNOWN": 1,
+          "LOW": 0,
+          "MEDIUM": 0,
+          "HIGH": 0,
+          "CRITICAL": 0
+        },
+        "blocking": 1,
+        "report_sha256": "4f03ff41f15a2ff2cc78905ec1a26ae15b17a454d51a105053a3b018c67969a6"
+      }
+    ],
+    "commit": "b56c78ec6fe572a38d97d3d2b4d97b4b075d80ed",
+    "source_sha256": "aaf83ffdb8d2bda0525d0d6666a62ad2214e1204b27ec667a1452919b5ba5856",
+    "scanner": "aquasec/trivy:0.76.1@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c",
+    "run": "jenkins-ascla-qa-5"
+  },
+  "zap": {
+    "date": "2026-10-26T03:28:25.790030+00:00",
+    "status": "FAIL",
+    "scope_note": "ASCLA-owned HTML routes and 18 documented GET REST operations in disposable local QA. Excludes native WordPress admin, arbitrary CMS/theme/plugin routes, destructive writes and live external integrations. No universal absence-of-vulnerabilities claim.",
+    "phases": [
+      {
+        "phase": "frontend",
+        "status": "FAIL",
+        "risk_counts": {
+          "0": 9,
+          "1": 1,
+          "2": 0,
+          "3": 0
+        }
+      },
+      {
+        "phase": "backend",
+        "status": "PASS",
+        "risk_counts": {
+          "0": 1,
+          "1": 0,
+          "2": 0,
+          "3": 0
+        }
+      },
+      {
+        "phase": "CSP",
+        "status": "PASS"
+      },
+      {
+        "phase": "Browser",
+        "status": "PASS"
+      },
+      {
+        "phase": "Source consistency",
+        "status": "PASS"
+      }
+    ]
+  },
+  "zap_assessment": {
+    "date": "2026-10-25T22:53:09.949105+00:00",
+    "rule": "10096 Timestamp Disclosure - Unix",
+    "file": "wp-includes/css/dist/base-styles/admin-schemes.min.css",
+    "cases": [
+      {
+        "evidence": "1538461538",
+        "css_context": "--wp-admin-theme-color-darker-20--rgb:23.6923076923,58.1538461538,214.3076923077;--wp-admin-bor"
+      },
+      {
+        "evidence": "1594202899",
+        "css_context": "e-color-darker-10--rgb:75.4057971014,106.0942028986,77.1594202899;--wp-admin-theme-color-darker"
+      },
+      {
+        "evidence": "1884057971",
+        "css_context": "--wp-admin-theme-color-darker-20--rgb:64.8115942029,91.1884057971,66.3188405797;--wp-admin-bord"
+      }
+    ],
+    "assessment": "Review the literal CSS numeric contexts; no rule suppression, exception or gate change has been applied. ZAP retains its native FAIL result."
+  },
+  "policy_tests": {
+    "tests": 16,
+    "failures": 0,
+    "errors": 0
+  },
+  "targeted_ui": {
+    "comments_checks": 16,
+    "pdf_recovery_checks": 16,
+    "comments_scope": "Chrome real en Windows, WordPress local desechable; respuestas publicadas y notificaciones reales con usuarios sintéticos. Sin servicios externos ni cambios de esquema.",
+    "pdf_scope": "Chrome y Edge reales en Windows; sitio WordPress local desechable. Las carencias de funciones, el bloqueo de workers y los errores de red/HTTP se simulan explícitamente. No se identifica el navegador exacto del incidente original ni se afirma una prueba real de Safari."
+  },
+  "package": {
+    "bytes": 2098745,
+    "sha256": "ab1a742f5729d3c3979fd90b8e76f11a7832ce7c37555998f46c074579604a69",
+    "files": 214,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true
+  },
+  "limitations": [
+    "Las respuestas de IA y Supadata se simulan en las pruebas locales. No se consumieron créditos de la cuenta del usuario.",
+    "La validación técnica de UAT no sustituye la aprobación de los responsables ni acredita el servidor remoto.",
+    "Trivy conserva todos los hallazgos sin versión corregida. ZAP conserva FAIL ante sus coincidencias de números CSS con timestamps; no se añaden exclusiones ni se modifican las reglas."
+  ],
+  "fixes": [
+    "Identificación explícita de la rama SCM: QA/UAT ya no omiten etapas cuando Jenkins hace checkout detached y no proporciona GIT_BRANCH.",
+    "Cobertura ligada al commit completo y archivada incluso ante fallos posteriores, con diagnóstico seguro del acceso nativo.",
+    "Actualización de imágenes y dependencias disponibles; CLI sin vulnerabilidades detectadas y MariaDB sin HIGH/CRITICAL en esta ejecución.",
+    "Refactorizaciones de Supadata, notificaciones, calendario y vistas para corregir hallazgos de SonarQube conservando caché, trabajos asíncronos y permisos.",
+    "Pruebas del CSP nativo con un script real sin nonce, sin debilitar la política del navegador.",
+    "Regresión de metadatos ajustada al flujo automático vigente; procesamiento periódico de trabajos pendientes.",
+    "Traducciones faltantes en inglés y texto de ayuda de duración corregidos."
+  ]
+}

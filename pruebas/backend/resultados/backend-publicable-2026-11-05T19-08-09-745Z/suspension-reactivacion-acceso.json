@@ -1,0 +1,405 @@
+[
+  {
+    "iterationIndex": 0,
+    "results": [
+      {
+        "test": {
+          "filename": "flujos-e2e\\05-suspension-reactivacion\\01-iniciar-sesion-administrador.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-login.php",
+          "responseTime": 59,
+          "duration": 59,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "EUk6dths7Qsem4RJbcve8"
+          },
+          {
+            "description": "Sesión y nonce propios de Administrador",
+            "status": "pass",
+            "uid": "NnIeqrFV2cTdBVoGPETFM"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.4390758,
+        "name": "01. Iniciar sesión como Administrador",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\05-suspension-reactivacion\\01-iniciar-sesion-administrador",
+        "path": "flujos-e2e\\05-suspension-reactivacion\\01-iniciar-sesion-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\05-suspension-reactivacion\\02-iniciar-sesion-carla.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-login.php",
+          "responseTime": 57,
+          "duration": 57,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "Ap1XM9JmaDYQHlk3fX6do"
+          },
+          {
+            "description": "Sesión y nonce propios de Carla",
+            "status": "pass",
+            "uid": "AisnOSF0cN2-HkdRkMLM9"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.3255113,
+        "name": "02. Iniciar sesión como Carla",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\05-suspension-reactivacion\\02-iniciar-sesion-carla",
+        "path": "flujos-e2e\\05-suspension-reactivacion\\02-iniciar-sesion-carla",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\05-suspension-reactivacion\\03-carla-tiene-acceso-antes-de-la-suspension.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/bootstrap",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/bootstrap",
+          "responseTime": 29,
+          "duration": 29,
+          "size": 2693
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "WMRuB9-WslvE7Ch33NrQK"
+          },
+          {
+            "description": "La identidad corresponde a Carla",
+            "status": "pass",
+            "uid": "Eud903d0vpPKKuAHy7dEL"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1855784,
+        "name": "03. Carla tiene acceso antes de la suspensión",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\05-suspension-reactivacion\\03-carla-tiene-acceso-antes-de-la-suspension",
+        "path": "flujos-e2e\\05-suspension-reactivacion\\03-carla-tiene-acceso-antes-de-la-suspension",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\05-suspension-reactivacion\\04-el-administrador-suspende-a-carla.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/admin/member/4",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/admin/member/4",
+          "responseTime": 32,
+          "duration": 32,
+          "size": 25
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "Ad6znueglPXRpJsKiT3In"
+          },
+          {
+            "description": "La suspensión se aplica a la cuenta de prueba",
+            "status": "pass",
+            "uid": "pyVVLTfz9hkhkMh3kjc5r"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1554577,
+        "name": "04. El administrador suspende a Carla",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\05-suspension-reactivacion\\04-el-administrador-suspende-a-carla",
+        "path": "flujos-e2e\\05-suspension-reactivacion\\04-el-administrador-suspende-a-carla",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\05-suspension-reactivacion\\05-la-cuenta-suspendida-pierde-el-acceso.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/bootstrap",
+          "headers": {}
+        },
+        "response": {
+          "status": 403,
+          "statusText": "Forbidden",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/bootstrap",
+          "responseTime": 17,
+          "duration": 17,
+          "size": 90
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 403",
+            "status": "pass",
+            "uid": "smAamiDIc9zDP6g6rjMQQ"
+          },
+          {
+            "description": "La sesión anterior dejó de ser válida",
+            "status": "pass",
+            "uid": "diNjcETH9CeJ9LvqyHLak"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1706334,
+        "name": "05. La cuenta suspendida pierde el acceso",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\05-suspension-reactivacion\\05-la-cuenta-suspendida-pierde-el-acceso",
+        "path": "flujos-e2e\\05-suspension-reactivacion\\05-la-cuenta-suspendida-pierde-el-acceso",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\05-suspension-reactivacion\\06-el-administrador-reactiva-a-carla.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/admin/member/4",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/admin/member/4",
+          "responseTime": 30,
+          "duration": 30,
+          "size": 26
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "ihEizo9st_ZMHnQkqN4jN"
+          },
+          {
+            "description": "Cuenta de prueba reactivada",
+            "status": "pass",
+            "uid": "vReQvsgm5IlvGilIZw1vB"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1730172,
+        "name": "06. El administrador reactiva a Carla",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\05-suspension-reactivacion\\06-el-administrador-reactiva-a-carla",
+        "path": "flujos-e2e\\05-suspension-reactivacion\\06-el-administrador-reactiva-a-carla",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\05-suspension-reactivacion\\07-reactivar-no-revive-la-sesion-revocada.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/bootstrap",
+          "headers": {}
+        },
+        "response": {
+          "status": 403,
+          "statusText": "Forbidden",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/bootstrap",
+          "responseTime": 19,
+          "duration": 19,
+          "size": 90
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 403",
+            "status": "pass",
+            "uid": "4PxMqwnszHt1nnwEauLBq"
+          },
+          {
+            "description": "La sesión antigua sigue rechazada",
+            "status": "pass",
+            "uid": "G5S_2v-gMNpjbXVD8_atm"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1687488,
+        "name": "07. Reactivar no revive la sesión revocada",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\05-suspension-reactivacion\\07-reactivar-no-revive-la-sesion-revocada",
+        "path": "flujos-e2e\\05-suspension-reactivacion\\07-reactivar-no-revive-la-sesion-revocada",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\05-suspension-reactivacion\\08-iniciar-sesion-carla.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-login.php",
+          "responseTime": 54,
+          "duration": 54,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "gMReu_4VIB1b1cXeO6rJn"
+          },
+          {
+            "description": "Sesión y nonce propios de Carla",
+            "status": "pass",
+            "uid": "DZU8HJEpXdrfC6vsKx2Ei"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.3430212,
+        "name": "08. Iniciar sesión como Carla",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\05-suspension-reactivacion\\08-iniciar-sesion-carla",
+        "path": "flujos-e2e\\05-suspension-reactivacion\\08-iniciar-sesion-carla",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "flujos-e2e\\05-suspension-reactivacion\\09-carla-recupera-el-acceso-con-una-sesion-nueva.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/bootstrap",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/bootstrap",
+          "responseTime": 27,
+          "duration": 27,
+          "size": 2693
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "sFF1qWvregASutyyMs_aP"
+          },
+          {
+            "description": "Identidad y acceso recuperados",
+            "status": "pass",
+            "uid": "lrYuzXDU6s1NemW1h1Vt0"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1560226,
+        "name": "09. Carla recupera el acceso con una sesión nueva",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\flujos-e2e\\05-suspension-reactivacion\\09-carla-recupera-el-acceso-con-una-sesion-nueva",
+        "path": "flujos-e2e\\05-suspension-reactivacion\\09-carla-recupera-el-acceso-con-una-sesion-nueva",
+        "iterationIndex": 0
+      }
+    ],
+    "summary": {
+      "totalRequests": 9,
+      "passedRequests": 9,
+      "failedRequests": 0,
+      "errorRequests": 0,
+      "skippedRequests": 0,
+      "skippedByBail": 0,
+      "totalAssertions": 0,
+      "passedAssertions": 0,
+      "failedAssertions": 0,
+      "totalTests": 18,
+      "passedTests": 18,
+      "failedTests": 0,
+      "totalPreRequestTests": 0,
+      "passedPreRequestTests": 0,
+      "failedPreRequestTests": 0,
+      "totalPostResponseTests": 0,
+      "passedPostResponseTests": 0,
+      "failedPostResponseTests": 0
+    }
+  }
+]

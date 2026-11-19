@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="54" assertions="418" errors="0" failures="0" skipped="0" time="29.191783">
+    <testsuite name="EventParticipationTest" file="/opt/ascla-tests/php/EventParticipationTest.php" tests="3" assertions="21" errors="0" failures="0" skipped="0" time="1.560424">
+      <testcase name="testScheduleChangeRequiresNewRsvpAndCancellationPreservesReasonAndHistory" file="/opt/ascla-tests/php/EventParticipationTest.php" line="36" class="EventParticipationTest" classname="EventParticipationTest" assertions="11" time="0.712937"/>
+      <testcase name="testExpiredOfferAdvancesFifoAndCannotTakeTheNextMembersReservedSeat" file="/opt/ascla-tests/php/EventParticipationTest.php" line="53" class="EventParticipationTest" classname="EventParticipationTest" assertions="7" time="0.451324"/>
+      <testcase name="testMicroeventReschedulingNeedsReasonBeforeChangingStoredData" file="/opt/ascla-tests/php/EventParticipationTest.php" line="68" class="EventParticipationTest" classname="EventParticipationTest" assertions="3" time="0.396163"/>
+    </testsuite>
+    <testsuite name="EventReactivationTest" file="/opt/ascla-tests/php/EventReactivationTest.php" tests="10" assertions="46" errors="0" failures="0" skipped="0" time="5.408494">
+      <testcase name="testExecutiveReopensAndPreservesRegistrationHistoryAndNotifiesEachCycle" file="/opt/ascla-tests/php/EventReactivationTest.php" line="38" class="EventReactivationTest" classname="EventReactivationTest" assertions="12" time="0.763722"/>
+      <testcase name="testMembersAndModeratorsCannotReactivateAndRestRejectsTheirRequest" file="/opt/ascla-tests/php/EventReactivationTest.php" line="54" class="EventReactivationTest" classname="EventReactivationTest" assertions="5" time="0.434641"/>
+      <testcase name="testPastEventRequiresNewDatesAndKeepsCancellationOnFailure" file="/opt/ascla-tests/php/EventReactivationTest.php" line="65" class="EventReactivationTest" classname="EventReactivationTest" assertions="3" time="0.427851"/>
+      <testcase name="testChangedScheduleDuringCancellationRequiresReconfirmation" file="/opt/ascla-tests/php/EventReactivationTest.php" line="71" class="EventReactivationTest" classname="EventReactivationTest" assertions="3" time="0.601865"/>
+      <testcase name="testOfferedSeatsReceiveFreshDeadlineAndWaitlistNeverOverbooks" file="/opt/ascla-tests/php/EventReactivationTest.php" line="80" class="EventReactivationTest" classname="EventReactivationTest" assertions="4" time="0.650819"/>
+      <testcase name="testPublishedMicroeventRequiresManagementCapabilityAndRestoresLifecycle" file="/opt/ascla-tests/php/EventReactivationTest.php" line="92" class="EventReactivationTest" classname="EventReactivationTest" assertions="4" time="0.450418"/>
+      <testcase name="testUnpublishedMicroeventReturnsToDraftWithoutBypassingReview" file="/opt/ascla-tests/php/EventReactivationTest.php" line="100" class="EventReactivationTest" classname="EventReactivationTest" assertions="3" time="0.461520"/>
+      <testcase name="testExpiredMicroeventRegistrationWindowCannotReopen" file="/opt/ascla-tests/php/EventReactivationTest.php" line="105" class="EventReactivationTest" classname="EventReactivationTest" assertions="2" time="0.428428"/>
+      <testcase name="testReactivationRestoresPersonalGoogleCopyWithNewIdAfterDeletion" file="/opt/ascla-tests/php/EventReactivationTest.php" line="110" class="EventReactivationTest" classname="EventReactivationTest" assertions="5" time="0.594019"/>
+      <testcase name="testOrganizerIsRestoredBeforeConnectedMembersWithoutDuplicatePersonalCopies" file="/opt/ascla-tests/php/EventReactivationTest.php" line="125" class="EventReactivationTest" classname="EventReactivationTest" assertions="5" time="0.595210"/>
+    </testsuite>
+    <testsuite name="EventRemindersTest" file="/opt/ascla-tests/php/EventRemindersTest.php" tests="2" assertions="7" errors="0" failures="0" skipped="0" time="0.732101">
+      <testcase name="testOrdinaryEventSchedulesReplacesAndSendsOnlyConfirmedOnce" file="/opt/ascla-tests/php/EventRemindersTest.php" line="18" class="EventRemindersTest" classname="EventRemindersTest" assertions="5" time="0.387045"/>
+      <testcase name="testExecutiveCanManageEventRemindersAndInvalidDateIsRejected" file="/opt/ascla-tests/php/EventRemindersTest.php" line="29" class="EventRemindersTest" classname="EventRemindersTest" assertions="2" time="0.345056"/>
+    </testsuite>
+    <testsuite name="MicroEventsTest" file="/opt/ascla-tests/php/MicroEventsTest.php" tests="16" assertions="168" errors="0" failures="0" skipped="0" time="14.187976">
+      <testcase name="testWeeklyBatchIsIdempotentWithIndependentConsentAndMandatoryReview" file="/opt/ascla-tests/php/MicroEventsTest.php" line="45" class="MicroEventsTest" classname="MicroEventsTest" assertions="16" time="1.041863"/>
+      <testcase name="testPriorityWindowOpensToMembersWhoOptedOutAndCannotBeBypassedByAuthor" file="/opt/ascla-tests/php/MicroEventsTest.php" line="61" class="MicroEventsTest" classname="MicroEventsTest" assertions="6" time="1.052120"/>
+      <testcase name="testInsufficientRegistrationsReopenAfterAdminExtendsDeadlineAndHistoryIsRetained" file="/opt/ascla-tests/php/MicroEventsTest.php" line="72" class="MicroEventsTest" classname="MicroEventsTest" assertions="9" time="1.326517"/>
+      <testcase name="testDenialNeedsReasonAndCannotDeleteOrRegenerateTheSameProposal" file="/opt/ascla-tests/php/MicroEventsTest.php" line="86" class="MicroEventsTest" classname="MicroEventsTest" assertions="6" time="0.672445"/>
+      <testcase name="testPlanningRespectsVolumeDistinctInterestsMinimumAndBlockedPairs" file="/opt/ascla-tests/php/MicroEventsTest.php" line="93" class="MicroEventsTest" classname="MicroEventsTest" assertions="25" time="0.590458"/>
+      <testcase name="testOnlyConfirmedMembersReceiveOneReminderAndFinishedStateIsRecorded" file="/opt/ascla-tests/php/MicroEventsTest.php" line="103" class="MicroEventsTest" classname="MicroEventsTest" assertions="7" time="1.080910"/>
+      <testcase name="testPendingProposalCanBeCancelledWithReasonWithoutLosingItsHistoryOrRecurringBatch" file="/opt/ascla-tests/php/MicroEventsTest.php" line="115" class="MicroEventsTest" classname="MicroEventsTest" assertions="12" time="0.670162"/>
+      <testcase name="testCancellingAnApprovedScheduledProposalStopsFuturePublication" file="/opt/ascla-tests/php/MicroEventsTest.php" line="127" class="MicroEventsTest" classname="MicroEventsTest" assertions="9" time="0.748644"/>
+      <testcase name="testReviewRefreshReopensAnApprovedGroupAfterRemovingAnIncompleteCandidate" file="/opt/ascla-tests/php/MicroEventsTest.php" line="142" class="MicroEventsTest" classname="MicroEventsTest" assertions="10" time="1.035695"/>
+      <testcase name="testReviewCancelsAnInsufficientGroupImmediatelyAndIsIdempotent" file="/opt/ascla-tests/php/MicroEventsTest.php" line="156" class="MicroEventsTest" classname="MicroEventsTest" assertions="10" time="0.691877"/>
+      <testcase name="testConsentChangesAfterReviewCannotBeApprovedAndOnlyAdministrationMayReconcileOrCancel" file="/opt/ascla-tests/php/MicroEventsTest.php" line="169" class="MicroEventsTest" classname="MicroEventsTest" assertions="10" time="0.690336"/>
+      <testcase name="testPublishedCancellationPreservesRegistrationsNotifiesOnceAndStopsReminders" file="/opt/ascla-tests/php/MicroEventsTest.php" line="183" class="MicroEventsTest" classname="MicroEventsTest" assertions="12" time="1.311827"/>
+      <testcase name="testFailedCancellationRollsBackTheProposalHistoryAndPublicationSchedule" file="/opt/ascla-tests/php/MicroEventsTest.php" line="195" class="MicroEventsTest" classname="MicroEventsTest" assertions="5" time="0.749051"/>
+      <testcase name="testAdministrationCanInspectSelectedPeopleBeforeInvitationsExistWithoutChangingTheProposal" file="/opt/ascla-tests/php/MicroEventsTest.php" line="209" class="MicroEventsTest" classname="MicroEventsTest" assertions="10" time="0.706003"/>
+      <testcase name="testSelectedRosterTracksRealRsvpSeparatelyFromPeopleJoiningThePublicEvent" file="/opt/ascla-tests/php/MicroEventsTest.php" line="224" class="MicroEventsTest" classname="MicroEventsTest" assertions="16" time="1.126322"/>
+      <testcase name="testCancelledAndEmptySelectionsDoNotClaimInvitationsWereSent" file="/opt/ascla-tests/php/MicroEventsTest.php" line="247" class="MicroEventsTest" classname="MicroEventsTest" assertions="5" time="0.693748"/>
+    </testsuite>
+    <testsuite name="NotificationsTest" file="/opt/ascla-tests/php/NotificationsTest.php" tests="14" assertions="138" errors="0" failures="0" skipped="0" time="4.519735">
+      <testcase name="testReactionHasAuthorSubjectAndSafeDestination" file="/opt/ascla-tests/php/NotificationsTest.php" line="42" class="NotificationsTest" classname="NotificationsTest" assertions="9" time="0.304529"/>
+      <testcase name="testOwnCommentDoesNotNotifyOwnPublication" file="/opt/ascla-tests/php/NotificationsTest.php" line="53" class="NotificationsTest" classname="NotificationsTest" assertions="4" time="0.234135"/>
+      <testcase name="testCommentAndReplyNotificationsIdentifyTheAssociate" file="/opt/ascla-tests/php/NotificationsTest.php" line="61" class="NotificationsTest" classname="NotificationsTest" assertions="5" time="0.266992"/>
+      <testcase name="testUnavailableTargetAndChathamNeverExposeOldIdentities" file="/opt/ascla-tests/php/NotificationsTest.php" line="76" class="NotificationsTest" classname="NotificationsTest" assertions="9" time="0.269967"/>
+      <testcase name="testFeedCountsBeyondOneHundredAndReadAllIsOwned" file="/opt/ascla-tests/php/NotificationsTest.php" line="88" class="NotificationsTest" classname="NotificationsTest" assertions="13" time="0.788890"/>
+      <testcase name="testToastFeedShowsOnlyEligibleUnreadAndKeepsNotificationInCenter" file="/opt/ascla-tests/php/NotificationsTest.php" line="103" class="NotificationsTest" classname="NotificationsTest" assertions="12" time="0.291627"/>
+      <testcase name="testUserCanDeleteOnlyOwnNotifications" file="/opt/ascla-tests/php/NotificationsTest.php" line="134" class="NotificationsTest" classname="NotificationsTest" assertions="9" time="0.252650"/>
+      <testcase name="testLegacyLinksRebuildOnCurrentSiteAndUnknownLinksHaveFallback" file="/opt/ascla-tests/php/NotificationsTest.php" line="152" class="NotificationsTest" classname="NotificationsTest" assertions="15" time="0.275234"/>
+      <testcase name="testDirectConversationAndProfileDestinationsCheckAccess" file="/opt/ascla-tests/php/NotificationsTest.php" line="168" class="NotificationsTest" classname="NotificationsTest" assertions="10" time="0.424553"/>
+      <testcase name="testAssignedSupportStaffAndRequesterReceiveStatusNotifications" file="/opt/ascla-tests/php/NotificationsTest.php" line="184" class="NotificationsTest" classname="NotificationsTest" assertions="15" time="0.469497"/>
+      <testcase name="testSavedAnswersHistoryOwnershipAndRevokedSources" file="/opt/ascla-tests/php/NotificationsTest.php" line="233" class="NotificationsTest" classname="NotificationsTest" assertions="11" time="0.259208"/>
+      <testcase name="testEmailPreferencesDefaultActiveAndCanBeChangedPerCategory" file="/opt/ascla-tests/php/NotificationsTest.php" line="244" class="NotificationsTest" classname="NotificationsTest" assertions="9" time="0.222742"/>
+      <testcase name="testMessageEmailIsThrottledPerConversationButInternalNoticesAreNot" file="/opt/ascla-tests/php/NotificationsTest.php" line="257" class="NotificationsTest" classname="NotificationsTest" assertions="8" time="0.248800"/>
+      <testcase name="testNotificationEndpointsRequireAuthentication" file="/opt/ascla-tests/php/NotificationsTest.php" line="280" class="NotificationsTest" classname="NotificationsTest" assertions="9" time="0.210912"/>
+    </testsuite>
+    <testsuite name="UserExperience1110Test" file="/opt/ascla-tests/php/UserExperience1110Test.php" tests="9" assertions="38" errors="0" failures="0" skipped="0" time="2.783054">
+      <testcase name="testManualCalendarIncludesJoinUrlOnlyForConfirmedRegistration" file="/opt/ascla-tests/php/UserExperience1110Test.php" line="45" class="UserExperience1110Test" classname="UserExperience1110Test" assertions="4" time="0.296011"/>
+      <testcase name="testRegistrationAutomaticallySavesAndCancellationRemovesPersonalCalendar" file="/opt/ascla-tests/php/UserExperience1110Test.php" line="56" class="UserExperience1110Test" classname="UserExperience1110Test" assertions="9" time="0.343476"/>
+      <testcase name="testPersonalRetryUsesDeterministicIdAfterAmbiguousCreate" file="/opt/ascla-tests/php/UserExperience1110Test.php" line="79" class="UserExperience1110Test" classname="UserExperience1110Test" assertions="3" time="0.287371"/>
+      <testcase name="testWaitlistedMemberDoesNotReceiveJoinUrlOrPersonalCopy" file="/opt/ascla-tests/php/UserExperience1110Test.php" line="91" class="UserExperience1110Test" classname="UserExperience1110Test" assertions="3" time="0.318482"/>
+      <testcase name="testOrganizerInvitationIsReconciledOnAcceptanceAndCancellation" file="/opt/ascla-tests/php/UserExperience1110Test.php" line="101" class="UserExperience1110Test" classname="UserExperience1110Test" assertions="9" time="0.306234"/>
+      <testcase name="testFailedGoogleDeliveryPreservesRegistrationAndReportsPending" file="/opt/ascla-tests/php/UserExperience1110Test.php" line="119" class="UserExperience1110Test" classname="UserExperience1110Test" assertions="3" time="0.304890"/>
+      <testcase name="testDelayedJobNeverRecreatesACancelledRegistration" file="/opt/ascla-tests/php/UserExperience1110Test.php" line="127" class="UserExperience1110Test" classname="UserExperience1110Test" assertions="2" time="0.279889"/>
+      <testcase name="testBulkDeleteIncludesOtherPagesButPreservesOtherUsersAndNewNotices" file="/opt/ascla-tests/php/UserExperience1110Test.php" line="135" class="UserExperience1110Test" classname="UserExperience1110Test" assertions="4" time="0.395690"/>
+      <testcase name="testBulkDeleteRejectsMissingSnapshot" file="/opt/ascla-tests/php/UserExperience1110Test.php" line="147" class="UserExperience1110Test" classname="UserExperience1110Test" assertions="1" time="0.251009"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

@@ -1,6 +1,7 @@
 <?php
 namespace ASCLA\Core\Domain;
-use ASCLA\Core\Services\Access;
+use ASCLA\Core\Repositories\{Store,WordPressWrites};
+use ASCLA\Core\Services\{Access,Audit};
 final class InterestCatalog
 {
     private const GROUPS=[
@@ -46,9 +47,14 @@ final class InterestCatalog
     }
     public static function validate(array $ids): array
     {
-        Access::require(count($ids)<=20,'Selecciona como máximo 20 intereses.',400);$allowed=array_column(self::terms(),'id');$out=[];
-        foreach($ids as $id){Access::require((is_int($id)||(is_scalar($id) && ctype_digit((string)$id))) && in_array((int)$id,$allowed,true),'Interés fuera del catálogo.',400);$out[]=(int)$id;}
+        Access::require(count($ids)<=20,'Selecciona como máximo 20 intereses.',400);$ids=\ASCLA\Core\Services\FormRules::ids($ids);$allowed=array_column(self::terms(),'id');$out=[];
+        foreach($ids as $id){Access::require(in_array($id,$allowed,true),'Interés fuera del catálogo.',400);$out[]=$id;}
         return array_values(array_unique($out));
+    }
+    public static function activeIds(array $ids): array
+    {
+        return array_values(array_filter(array_unique(array_map('intval',$ids)),
+            static fn(int $id): bool => get_term($id,'ascla_interest') instanceof \WP_Term));
     }
     public static function seed(): array
     {
@@ -57,8 +63,34 @@ final class InterestCatalog
     }
     public static function create(string $name): array
     {
-        Access::require(Access::member() && current_user_can('ascla_manage'));$name=trim(Access::text($name,100));Access::require($name!=='','Escribe el nombre del tema.',400);
-        $aliases=self::aliases(self::terms());$key=self::fold($name);if(isset($aliases[$key])){$t=get_term($aliases[$key],'ascla_interest');return ['id'=>(int)$t->term_id,'name'=>$t->name,'existing'=>true];}
-        $t=wp_insert_term($name,'ascla_interest');Access::require(!is_wp_error($t),'No se pudo crear el tema.',400);return ['id'=>(int)$t['term_id'],'name'=>$name,'existing'=>false];
+        Access::require(Access::member() && current_user_can('ascla_manage'));
+        $name=trim(Access::text($name,100));
+        Access::require(Access::hasText($name),'Escribe el nombre del tema.',400);
+        return Store::atomic('interest-catalog',static function() use ($name) {
+            $aliases=self::aliases(self::terms());
+            $existing=$aliases[self::fold($name)]??0;
+            if ($existing) {
+                $term=get_term($existing,'ascla_interest');
+                return ['id'=>(int)$term->term_id,'name'=>$term->name,'existing'=>true];
+            }
+            $term=wp_insert_term($name,'ascla_interest');
+            Access::require(!is_wp_error($term),'No se pudo crear el tema.',400);
+            Audit::record('interest_topic_created',(int)$term['term_id'],$name);
+            return ['id'=>(int)$term['term_id'],'name'=>$name,'existing'=>false];
+        });
+    }
+
+    public static function delete(int $id): array
+    {
+        Access::require(Access::member() && current_user_can('ascla_manage'));
+        return Store::atomic('interest-catalog',static function() use ($id) {
+            $term=get_term($id,'ascla_interest');
+            Access::require($term instanceof \WP_Term,'Tema no encontrado.',404);
+            Access::require(wp_delete_term($id,'ascla_interest')===true,'No se pudo eliminar el tema.',409);
+            // Recalculate recommendations that depended on this topic in member profiles.
+            WordPressWrites::bumpProfileRevision();
+            Audit::record('interest_topic_deleted',$id,$term->name);
+            return self::terms();
+        });
     }
 }

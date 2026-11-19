@@ -5,6 +5,15 @@ use ASCLA\Core\Repositories\Store;
 /** Internal cleanup used by Media::remove so the public service stays focused. */
 final class MediaRemoval
 {
+    /** Delete the private files belonging to a removed gallery, including unused masters. */
+    public static function gallery(int $post): int
+    {
+        global $wpdb;
+        $table=Store::table('media');
+        $files=$wpdb->get_results($wpdb->prepare("SELECT id,user_id,post_id,original_id FROM $table WHERE post_id=%d ORDER BY id",$post),ARRAY_A)?:[];
+        foreach ($files as $file) { self::run((int)$file['id'],$file); }
+        return count($files);
+    }
     private static function clearPostReferences(int $id): void
     {
         global $wpdb;

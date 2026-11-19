@@ -39,15 +39,15 @@ globalThis.ASCLANotifications = ({ E, I, btn, T = (text) => text, locale = "es-P
       previous = label; return heading + card(n);
     }).join('');
     const pendingLabel = T(feed.unread_total === 1 ? 'novedad pendiente' : 'novedades pendientes');
-    const pending = feed.unread_total ? `${feed.unread_total} ${pendingLabel}` : T('No tienes avisos pendientes');
+    const pending = feed.unread_total ? `${feed.unread_total} ${pendingLabel}` : T('No tienes notificaciones pendientes');
     const filters = ['all', 'unread'].map(f => btn(f === 'all' ? T('Todas') : `${T('Sin leer')} (${feed.unread_total})`, 'notification-filter', `data-filter="${f}" aria-pressed="${filter === f}"`, filter === f ? 'selected' : '')).join('');
     const empty = `<div class="activity-empty">${I('check')}<h3>${E(T(filter === 'unread' ? 'Estás al día' : 'Tu comunidad empieza aquí'))}</h3><p>${E(T(filter === 'unread' ? 'Ya revisaste todos tus avisos. Las nuevas novedades aparecerán aquí.' : 'Aquí recibirás mensajes, invitaciones y respuestas del asistente.'))}</p></div>`;
     const previousButton = btn(T('Anterior'), 'notification-page', `data-page="${feed.page - 1}" ${feed.page === 1 ? 'disabled' : ''}`, 'ghost small');
     const nextButton = btn(T('Siguiente'), 'notification-page', `data-page="${feed.page + 1}" ${feed.page === feed.pages ? 'disabled' : ''}`, 'ghost small');
-    return `<div class="activity-inbox"><div class="activity-intro"><span class="activity-emblem">${I('bell')}</span><div><p class="eyebrow">${E(T("TU COMUNIDAD, AL DÍA"))}</p><p><strong>${E(pending)}</strong><br><span>${E(T("Conversaciones, encuentros y conocimiento en un solo lugar."))}</span></p></div></div>
-      <div class="activity-toolbar"><div class="activity-filters" role="group" aria-label="${E(T("Filtrar notificaciones"))}">${filters}</div>${btn(I('check') + ' ' + T('Marcar todas como leídas'), 'notifications-read-all', feed.unread_total ? '' : 'disabled', 'ghost small')}</div>
+    return `<div class="activity-inbox"><div class="activity-intro"><span class="activity-emblem">${I('bell')}</span><div><p class="activity-summary"><strong>${E(pending)}</strong></p><p class="activity-subtitle">${E(T('Mantente al tanto de tu comunidad.'))}</p></div></div>
+      <div class="activity-toolbar"><div class="activity-filters" role="group" aria-label="${E(T("Filtrar notificaciones"))}">${filters}</div><div class="activity-bulk-actions">${btn(I('check')+' '+T('Marcar leídas'),'notifications-read-all',`title="${E(T('Marcar todas como leídas'))}" ${feed.unread_total?'':'disabled'}`,'ghost small')}${btn(I('trash'),'notifications-delete-all-request',`aria-label="${E(T('Eliminar todas las notificaciones'))}" title="${E(T('Eliminar todas las notificaciones'))}" ${(feed.total_all??feed.total)?'':'disabled'}`,'ghost activity-delete-all')}</div></div>
       <div class="activity-list">${cards || empty}</div>
-      <div class="activity-footer"><span>${feed.total} ${E(T(feed.total === 1 ? 'aviso' : 'avisos'))} · ${E(T('Página'))} ${feed.page} ${E(T('de'))} ${feed.pages}</span><div>${previousButton}${nextButton}</div></div></div>`;
+      <div class="activity-footer"><span>${feed.total} ${E(T(feed.total === 1 ? 'notificación' : 'notificaciones'))} · ${E(T('Página'))} ${feed.page} ${E(T('de'))} ${feed.pages}</span><div>${previousButton}${nextButton}</div></div></div>`;
   }
   return { panel };
 };

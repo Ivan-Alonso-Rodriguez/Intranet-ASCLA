@@ -1,0 +1,39 @@
+meta {
+  name: 03. Ana solicita conexión con Bruno
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/relations
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAna}}
+  X-WP-Nonce: {{nonceAna}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:pre-request {
+  req.setBody({target:Number(bru.getCollectionVar("idBruno")),kind:"connect",active:true,message:"Hola Bruno, conectemos para la demostración de ASCLA."});
+}
+
+script:post-response {
+  if(res.getStatus()===200) bru.setCollectionVar("solicitudBloqueoId", Number(res.getBody().request_id));
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Solicitud pendiente con ID real", function () { expect(res.getBody().state).to.equal("outgoing_pending");expect(Number(res.getBody().request_id)).to.be.above(0); });
+}

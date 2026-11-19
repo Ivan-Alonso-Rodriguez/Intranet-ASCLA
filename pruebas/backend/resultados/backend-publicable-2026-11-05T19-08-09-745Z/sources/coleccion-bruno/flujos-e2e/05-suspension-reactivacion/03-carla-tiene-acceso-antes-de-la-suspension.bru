@@ -1,0 +1,26 @@
+meta {
+  name: 03. Carla tiene acceso antes de la suspensión
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/bootstrap
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionCarla}}
+  X-WP-Nonce: {{nonceCarla}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("La identidad corresponde a Carla", function () { expect(Number(res.getBody().me.id)).to.equal(Number(bru.getCollectionVar("idCarla"))); });
+}

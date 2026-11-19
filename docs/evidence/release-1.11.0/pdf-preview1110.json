@@ -1,0 +1,164 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-23T19:00:16.251Z",
+  "scope": "WordPress local desechable. PDF real de dos páginas, renderizado con PDF.js local, sin visor externo. Pruebas UI, descargas y permisos HTTP reales. No acredita despliegue ni auditoría de seguridad completa.",
+  "package_sha256": "82ff997bfc050e78adbae107e3901b7abfbfde601d0d6dbde85da74e79e73dd3",
+  "checks": [
+    "El PDF de la comunidad requiere sesión y un archivo privado sin publicar sigue denegado a otros asociados",
+    "La descarga conserva bytes originales, cabeceras restrictivas y disposición attachment",
+    "Carga local al desplegar; primera página renderizada sin modificar el comentario: desktop-light",
+    "Páginas distintas, límites, zoom y texto seleccionable; el comentario se conserva: desktop-light",
+    "Cerrar libera el worker; reabrir vuelve a cargar sin infracciones CSP: desktop-light",
+    "Carga local al desplegar; primera página renderizada sin modificar el comentario: mobile-light",
+    "Páginas distintas, límites, zoom y texto seleccionable; el comentario se conserva: mobile-light",
+    "Cerrar libera el worker; reabrir vuelve a cargar sin infracciones CSP: mobile-light",
+    "Carga local al desplegar; primera página renderizada sin modificar el comentario: desktop-dark",
+    "Páginas distintas, límites, zoom y texto seleccionable; el comentario se conserva: desktop-dark",
+    "Cerrar libera el worker; reabrir vuelve a cargar sin infracciones CSP: desktop-dark",
+    "Carga local al desplegar; primera página renderizada sin modificar el comentario: mobile-dark",
+    "Páginas distintas, límites, zoom y texto seleccionable; el comentario se conserva: mobile-dark",
+    "Cerrar libera el worker; reabrir vuelve a cargar sin infracciones CSP: mobile-dark",
+    "El mismo lector funciona en los PDF adjuntos de Galería",
+    "Cerrar la publicación también libera el documento y su worker",
+    "Ocultar y volver a publicar conserva los permisos vigentes del archivo",
+    "Un documento no válido muestra un mensaje claro y conserva la descarga",
+    "Eliminar la Galería retira también el PDF usado por la vista previa"
+  ],
+  "scans": [
+    {
+      "name": "lector-pdf-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "texto-y-controles-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "lector-pdf-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "texto-y-controles-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "lector-pdf-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "texto-y-controles-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "lector-pdf-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "texto-y-controles-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "pdf-en-galeria-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "pdf-no-valido",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    }
+  ],
+  "errors": [],
+  "status": "passed_local_targeted_validation",
+  "package_manifest": "docs/evidence/release-1.11.0/package-pdf-preview.json",
+  "report": "test-results/pdf-preview1110/index.html",
+  "phpunit": {
+    "tests": 31,
+    "assertions": 345,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "phpunit_report": "docs/evidence/release-1.11.0/pdf-preview1110-junit.xml",
+  "source_hashes": {
+    "tests/pdf-preview1110.cjs": "b6cad0922e4f8a05b3922b48310d018f8a93528da265f981e26ae180eca4a07b",
+    "tests/php/SecurityHeadersTest.php": "eee3aa1d4b61f4a50d448d296f80be381d21b595f45c330cbc9f319f58bbb547",
+    "tests/php/MediaTemporaryTest.php": "d46d76c44820e2e63a7b20b8821211d3b821f4e529818845f0a945ac26d6f73e",
+    "tests/php/GalleryProfile1110Test.php": "2f0b02d5188dbd4313e0e09af6bd7c713bf93302570d427f95f4056308792c08",
+    "tests/php/ContentLifecycleTest.php": "035ba7b53d141326abfd7ff8c565e147b3f0bcd9ff4f3be0a5c8a53acc4c00be"
+  },
+  "base_commit": "2daf0d9e5b0da8eee8b21076f2dc3915c77a4e3f",
+  "working_tree": "uncommitted; ZIP bytes match production source",
+  "prior_stage": "docs/evidence/release-1.11.0/gallery-profile1110.json; original package retained in package-gallery-profile.json",
+  "dependency": {
+    "name": "PDF.js",
+    "version": "6.4.299",
+    "official_project": "https://github.com/mozilla/pdf.js/releases/tag/v6.4.299",
+    "distribution": "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-6.4.299.tgz",
+    "verified_npm_integrity": "sha512-AVl138zALtfaAPvADulE0PZThbYzCBS79nL4pOSL/6Sm/4AH5A21BD9VHt97OlCuzJuCpmeZtAtkinisF4Vb1g==",
+    "license": "Apache-2.0",
+    "license_in_package": "ascla-core/assets/pdfjs/LICENSE.txt",
+    "unmodified_distribution_files": [
+      "pdf.min.mjs",
+      "pdf.worker.min.mjs"
+    ],
+    "sonar_scope": "Only the upstream assets/pdfjs directory is excluded as third-party code; the custom PDF preview remains in own-source analysis."
+  },
+  "file_service_and_security_policy_unchanged": true,
+  "architecture": "Lazy local PDF.js module and dedicated local worker via a blob entry that inherits the existing isolation policy. Authenticated same-origin fetch; canvas graphics and plain extracted text; original attachment download unchanged. No native iframe, external document viewer, PDF scripts, form editing or added unsafe-eval.",
+  "visual_review": "Capturas revisadas en escritorio/móvil, claro/oscuro: documento legible, controles, zoom, texto extraído y error de PDF no válido. Las reglas incompletas de axe se registran; no se afirma auditoría WCAG manual exhaustiva.",
+  "limitations": [
+    "Regresión local con documento real de dos páginas generado para la prueba; no se desplegó en QA/UAT ni se repitieron ZAP, SonarQube o todos los flujos compartidos Bruno/Playwright.",
+    "Vista de lectura: no ejecuta scripts, enlaces activos o formularios del PDF. Documentos protegidos con contraseña o formatos no compatibles conservan la descarga original.",
+    "No se envían los PDF a un servicio externo. El documento de las capturas es un fixture, no el archivo de la cuenta real del usuario."
+  ],
+  "temporary_environment_cleanup": "completed; isolated containers, volumes, test accounts, uploaded PDFs and private access files removed"
+}

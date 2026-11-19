@@ -1,0 +1,30 @@
+meta {
+  name: reschedule-event
+  type: http
+  seq: 21
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/content/event/{{eventId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{adminCookie}}
+  X-WP-Nonce: {{adminNonce}}
+  Content-Type: application/json
+}
+body:json {
+  {}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+script:pre-request {
+  const p=bru.getVar("publishedEvent");req.setBody({title:p.title,body:p.body,status:"publish",meta:{...p.meta,start:new Date(Date.now()+4*86400000).toISOString(),end:new Date(Date.now()+4*86400000+3600000).toISOString(),change_reason:"Reprogramación sintética QA."}});
+}
+tests {
+  test("Evento cambia de fecha", function () { expect(res.getStatus()).to.equal(200); });
+}

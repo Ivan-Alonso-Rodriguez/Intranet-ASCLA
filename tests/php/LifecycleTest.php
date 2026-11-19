@@ -15,7 +15,13 @@ final class LifecycleTest extends TestCase
     }
     public function testSeedIsIdempotentAndDoesNotResetPasswords(): void
     {
-        $admin=get_users(['role'=>'administrator','number'=>1])[0];wp_set_current_user($admin->ID);$user=get_user_by('login','demo.asociado');$before=$user->user_pass;$count=count(get_users(['meta_key'=>'_ascla_demo','meta_value'=>1]));$r=Demo::seed(wp_generate_password(30));self::assertSame(21,$r['users']);self::assertSame($before,get_user_by('login','demo.asociado')->user_pass);self::assertSame($count,count(get_users(['meta_key'=>'_ascla_demo','meta_value'=>1])));wp_set_current_user(0);
+        $id=wp_insert_user(['user_login'=>'seed_actor_'.bin2hex(random_bytes(5)),'user_pass'=>wp_generate_password(30),'role'=>'administrator']);wp_set_current_user($id);
+        $existing=get_posts(['post_type'=>'ascla_resource','post_status'=>'publish','meta_key'=>'_ascla_demo_key','numberposts'=>-1]);$authors=array_column($existing,'post_author','ID');
+        try {
+            $user=get_user_by('login','demo.asociado');$before=$user->user_pass;$count=count(get_users(['meta_key'=>'_ascla_demo','meta_value'=>1]));$r=Demo::seed(wp_generate_password(30));self::assertSame(21,$r['users']);self::assertSame($before,get_user_by('login','demo.asociado')->user_pass);self::assertSame($count,count(get_users(['meta_key'=>'_ascla_demo','meta_value'=>1])));
+            $resources=get_posts(['post_type'=>'ascla_resource','post_status'=>'publish','meta_key'=>'_ascla_demo_key','numberposts'=>-1]);self::assertNotEmpty($resources);
+            foreach($resources as $resource){if(isset($authors[$resource->ID]))self::assertSame($authors[$resource->ID],$resource->post_author);else self::assertNotSame($id,(int)$resource->post_author);}
+        } finally {Store::delete('audit',['actor_id'=>$id]);wp_delete_user($id);wp_set_current_user(0);}
     }
     public function testRecommendationsAndIntroAreDeterministicAndNeverSend(): void
     {

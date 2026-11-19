@@ -43,8 +43,10 @@ async function uploadPhoto(p){await p.goto(base+'/perfil/');await p.locator('[da
    await b.locator('.modal [data-decision="accept"]').click();await b.locator('.modal [data-state="connected"]').waitFor();
    await until(()=>a.locator('.modal [data-state="connected"]').count(),'Sender did not see acceptance');
    const left=(await ok(a,'profiles/'+ub.id)).connection,right=(await ok(b,'profiles/'+ua.id)).connection;
-   assert.equal(left.can_message,true);assert.equal(right.can_message,true);assert.equal((await ok(b,'connections')).incoming.length,0);
+   assert.equal(left.can_message,true);assert.equal(right.can_message,true);assert.ok(left.connected_at);assert.equal(left.connected_at,right.connected_at);assert.equal((await ok(b,'connections')).incoming.length,0);
    assert.equal(await b.locator('.modal [data-action="message-start"]').count(),1);
+   await b.goto(base+'/directorio/');const confirmed=b.locator('#connections-panel details').filter({hasText:'Conexiones confirmadas'});await confirmed.locator('summary').click();const confirmedRow=confirmed.locator('.connection-row').filter({has:b.locator(`[data-member-connection="${ua.id}"]`)});await confirmedRow.waitFor();
+   assert.equal((await confirmedRow.locator('.connection-position').innerText()).trim(),'Alba Cargo');assert.equal((await confirmedRow.locator('.connection-company').innerText()).trim(),'Organización Alba');assert.ok((await confirmedRow.locator('.connection-confirmed-date time').innerText()).trim());assert.ok(await confirmedRow.locator('.avatar').count());
   });
   await test('06 · Fotos reales subidas al módulo privado se guardan en ambos perfiles',async()=>{
    await uploadPhoto(a);await uploadPhoto(b);assert.ok((await ok(a,'profiles/'+ub.id)).photo_url);assert.ok((await ok(b,'profiles/'+ua.id)).photo_url);
@@ -53,9 +55,9 @@ async function uploadPhoto(p){await p.goto(base+'/perfil/');await p.locator('[da
    await profile(a,ub.id,'connected');await a.locator('.modal [data-action="message-start"]').click();await a.locator('.chat-compose').waitFor();
    conversation={id:Number(await a.locator('.chat-compose').getAttribute('data-id'))};const reverse=await ok(b,'conversations',{target:ua.id});assert.equal(Number(reverse.id),conversation.id);
    await b.goto(base+'/mensajeria/?conversation='+conversation.id);await b.locator('.chat-compose').waitFor();
-   await a.locator('.chat-compose textarea').fill('Mensaje A a B tras aceptación');await a.locator('.chat-compose button').click();
+   await a.locator('.chat-compose textarea').fill('Mensaje A a B tras aceptación');await a.locator('.chat-compose button[type="submit"]').click();
    await until(()=>b.locator('.bubble').filter({hasText:'Mensaje A a B tras aceptación'}).count(),'B did not receive A');
-   await b.locator('.chat-compose textarea').fill('Respuesta B a A con conexión confirmada');await b.locator('.chat-compose button').click();
+   await b.locator('.chat-compose textarea').fill('Respuesta B a A con conexión confirmada');await b.locator('.chat-compose button[type="submit"]').click();
    await until(()=>a.locator('.bubble').filter({hasText:'Respuesta B a A con conexión confirmada'}).count(),'A did not receive B');
    const chat=await ok(a,'conversations/'+conversation.id),p=await ok(a,'profiles/'+ub.id);assert.equal(chat.other.photo_url,p.photo_url);
   });

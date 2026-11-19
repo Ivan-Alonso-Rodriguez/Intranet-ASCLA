@@ -1,0 +1,171 @@
+{
+  "date": "2026-10-22T08:27:53.510Z",
+  "target": "https://wordpress.ingsoftware.lat",
+  "prefix": "QA22_mvja0jht",
+  "results": [
+    {
+      "name": "roles-administrativos",
+      "status": "passed",
+      "videos": [
+        "latest-videos/roles-administrativos/page@0389c2781517df292464bb4fa5cfec1f.webm",
+        "latest-videos/roles-administrativos/page@9f50092ed4aa9662e78970f6e5755040.webm"
+      ],
+      "screenshots": [
+        "latest-roles-administrativos-0-passed.png",
+        "latest-roles-administrativos-1-passed.png"
+      ],
+      "ms": 23324
+    },
+    {
+      "name": "usuarios-filtros",
+      "status": "passed",
+      "videos": [
+        "latest-videos/usuarios-filtros/page@159564311b14f3cbc9a8675574bae21a.webm"
+      ],
+      "screenshots": [
+        "latest-usuarios-filtros-0-passed.png"
+      ],
+      "ms": 6565
+    },
+    {
+      "name": "directorio-cuadricula-y-botones",
+      "status": "passed",
+      "videos": [
+        "latest-videos/directorio-cuadricula-y-botones/page@322e7e1398d2a7d4230accf293739c1f.webm"
+      ],
+      "screenshots": [
+        "latest-directorio-cuadricula-y-botones-0-passed.png"
+      ],
+      "ms": 7442
+    },
+    {
+      "name": "perfil-tipo-asociado",
+      "status": "passed",
+      "videos": [
+        "latest-videos/perfil-tipo-asociado/page@e48008b62bbaa687330ea99fdbacc5be.webm"
+      ],
+      "screenshots": [
+        "latest-perfil-tipo-asociado-0-passed.png"
+      ],
+      "ms": 5273
+    },
+    {
+      "name": "foros-lista-unica",
+      "status": "passed",
+      "videos": [
+        "latest-videos/foros-lista-unica/page@2287e50ac6248801a6b3746b02c764b5.webm"
+      ],
+      "screenshots": [
+        "latest-foros-lista-unica-0-passed.png"
+      ],
+      "ms": 7817
+    },
+    {
+      "name": "galeria-portada-y-cabecera",
+      "status": "passed",
+      "videos": [
+        "latest-videos/galeria-portada-y-cabecera/page@19e693fb4120ba93ad8fee693476b436.webm"
+      ],
+      "screenshots": [
+        "latest-galeria-portada-y-cabecera-0-passed.png"
+      ],
+      "ms": 7087
+    },
+    {
+      "name": "biblioteca-integrada",
+      "status": "passed",
+      "videos": [
+        "latest-videos/biblioteca-integrada/page@b670b1a52699ec26b7622f9a40188e72.webm",
+        "latest-videos/biblioteca-integrada/page@a8549d32df0fca87cfd9c2b33d79c9bc.webm"
+      ],
+      "screenshots": [
+        "latest-biblioteca-integrada-0-passed.png",
+        "latest-biblioteca-integrada-1-passed.png"
+      ],
+      "ms": 10712
+    },
+    {
+      "name": "aliados-menu-tres-puntos",
+      "status": "passed",
+      "videos": [
+        "latest-videos/aliados-menu-tres-puntos/page@0a681d18efcb669231831f5ab09639af.webm"
+      ],
+      "screenshots": [
+        "latest-aliados-menu-tres-puntos-0-passed.png"
+      ],
+      "ms": 8385
+    },
+    {
+      "name": "borrador-hub",
+      "status": "passed",
+      "videos": [
+        "latest-videos/borrador-hub/page@811db0f11628950022c900cc5a72ebc2.webm"
+      ],
+      "screenshots": [
+        "latest-borrador-hub-0-passed.png"
+      ],
+      "ms": 7981
+    },
+    {
+      "name": "borrador-forum",
+      "status": "passed",
+      "videos": [
+        "latest-videos/borrador-forum/page@3294f8e6e371a7a025417cf0122fc64b.webm"
+      ],
+      "screenshots": [
+        "latest-borrador-forum-0-passed.png"
+      ],
+      "ms": 7577
+    },
+    {
+      "name": "borrador-gallery",
+      "status": "passed",
+      "videos": [
+        "latest-videos/borrador-gallery/page@4da478c7c6329010d8cc63bf966a8814.webm"
+      ],
+      "screenshots": [
+        "latest-borrador-gallery-0-passed.png"
+      ],
+      "ms": 8370
+    },
+    {
+      "name": "borrador-resource",
+      "status": "passed",
+      "videos": [
+        "latest-videos/borrador-resource/page@da546ccc602981231fbf6037238c9b76.webm"
+      ],
+      "screenshots": [
+        "latest-borrador-resource-0-passed.png"
+      ],
+      "ms": 6972
+    },
+    {
+      "name": "borrador-event",
+      "status": "passed",
+      "videos": [
+        "latest-videos/borrador-event/page@95964c13b6313a2ba0aca82524da5bc4.webm"
+      ],
+      "screenshots": [
+        "latest-borrador-event-0-passed.png"
+      ],
+      "ms": 7004
+    },
+    {
+      "name": "borrador-ally",
+      "status": "passed",
+      "videos": [
+        "latest-videos/borrador-ally/page@f84ef65dbdd12c1611b98e8f7ccb6400.webm"
+      ],
+      "screenshots": [
+        "latest-borrador-ally-0-passed.png"
+      ],
+      "ms": 7369
+    }
+  ],
+  "cleanup": {
+    "status": "passed",
+    "owned_content": 9,
+    "removed": 9,
+    "method": "Owned test posts moved to trash; unrelated content and user profiles preserved."
+  }
+}

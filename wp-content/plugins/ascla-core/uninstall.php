@@ -3,8 +3,10 @@
 // procedure are required before removal. Uninstall never destroys member content.
 defined('WP_UNINSTALL_PLUGIN') || exit;
 wp_clear_scheduled_hook('ascla_jobs');
+wp_clear_scheduled_hook('ascla_deliveries');
     wp_clear_scheduled_hook('ascla_jobs_continue');
 wp_clear_scheduled_hook('ascla_monthly');
 
 wp_clear_scheduled_hook('ascla_discovery');
+wp_clear_scheduled_hook('ascla_recommendations');
 wp_clear_scheduled_hook('ascla_interest_index');

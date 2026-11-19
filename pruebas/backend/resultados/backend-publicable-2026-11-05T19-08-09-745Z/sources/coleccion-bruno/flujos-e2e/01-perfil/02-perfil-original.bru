@@ -1,0 +1,30 @@
+meta {
+  name: 02. Consultar Empresa y biografía originales
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/profiles/{{idCarla}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionCarla}}
+  X-WP-Nonce: {{nonceCarla}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:post-response {
+  if(res.getStatus()===200){bru.setCollectionVar("perfilEmpresaOriginal",res.getBody().company);bru.setCollectionVar("perfilBiografiaOriginal",res.getBody().bio);}
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Validación: 02. Consultar Empresa y biografía originales", function () { expect(res.getBody().id).to.equal(Number(bru.getCollectionVar("idCarla")));expect(res.getBody().company).to.be.a("string").and.not.empty; });
+}

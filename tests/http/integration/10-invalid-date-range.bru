@@ -1,0 +1,23 @@
+meta {
+  name: invalid-date-range
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/content/event?after=2099-12-31&before=2020-01-01
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("Rango de fechas invertido rechazado", function () { expect(res.getStatus()).to.equal(400); });
+}

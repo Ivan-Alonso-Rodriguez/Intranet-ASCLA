@@ -1,0 +1,127 @@
+{
+  "date": "2026-11-05",
+  "version": "1.11.0",
+  "status": "PASS",
+  "scope": "WordPress local desechable; cuentas sintéticas; CSV/XLSX originales leídos sin modificar; sin despliegue remoto ni nuevos análisis SonarQube/Trivy/ZAP.",
+  "php": {
+    "tests": 843,
+    "assertions": 9018,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 1
+  },
+  "browser": {
+    "status": "PASS",
+    "scope": "WordPress local desechable; usuarios y datos sintéticos; sin despliegue remoto",
+    "checks": [
+      "Recuperación y confirmación vuelven al login de comunidad; la recuperación administrativa conserva su acceso",
+      "El asociado restablece la fotografía, guarda y conserva el avatar predeterminado después de recargar",
+      "Administración restablece la foto y cambia el usuario; el nuevo usuario inicia sesión con la misma contraseña",
+      "Encabezado sin buscador global y administración sin Archivos, conservando Galerías y recursos",
+      "Las etiquetas de proveedores muestran API sin la palabra retirada",
+      "CSV: correo, nombre y errata clara; vista previa sin escritura, intervalos unidos, confirmación y desconocidos sin asociar",
+      "Perfil y administración conservan su ancho en móvil"
+    ],
+    "errors": [],
+    "screenshots": [
+      "recuperacion-comunidad.png",
+      "perfil-restablecido.png",
+      "edicion-administrativa.png",
+      "administracion-sin-archivos.png",
+      "csv-vista-previa.png",
+      "csv-importado.png",
+      "perfil-movil.png",
+      "asistencia-movil.png"
+    ],
+    "videos": [
+      {
+        "name": "recuperacion",
+        "path": "videos/recuperacion/page@a46be5726035c79aa0a6aed765bdf4b8.webm"
+      },
+      {
+        "name": "perfil",
+        "path": "videos/perfil/page@2e67453635caae7feb1fc400620e495a.webm"
+      },
+      {
+        "name": "administracion",
+        "path": "videos/administracion/page@e997a5505a1673f734689ecb6a7b013f.webm"
+      },
+      {
+        "name": "usuario-renombrado",
+        "path": "videos/usuario-renombrado/page@f5b99743bd1acfaa0954612e9523b186.webm"
+      }
+    ]
+  },
+  "governance": {
+    "checks": [
+      "El editor conserva rol y membresía, permite editar el usuario y retira los permisos avanzados",
+      "Editar el perfil conserva las restricciones existentes y el servidor sigue rechazando escrituras no autorizadas",
+      "La retirada del menú no permite asignar roles adicionales sin autorización",
+      "Editor administrativo sin desbordamiento móvil",
+      "Interfaz con metadatos externos: clave vacía e inmutable al alternar proveedores, sin mostrar su valor",
+      "Sin errores JavaScript"
+    ],
+    "errors": [],
+    "ok": true
+  },
+  "accessibility": {
+    "checks": [
+      "Diálogos en wp-admin anidado: clic real, Tab/Shift+Tab, confirmación y restauración del fondo sin bloquear ancestros",
+      "13 pantallas en 360, 768 y 1024 px, ambos temas; administración y editores con análisis WCAG 2.1",
+      "Adjuntos accesibles con teclado y campos de editores sin identificadores duplicados",
+      "Diálogos anidados: Tab, Shift+Tab, Escape, fondo inerte y retorno al control de origen",
+      "Error de guardado anunciado dentro del diálogo activo; respuesta HTTP simulada sin publicar",
+      "Menú móvil cerrado fuera del teclado, apertura/cierre accesibles y salto al contenido",
+      "El encabezado móvil conserva navegación y foco sin el buscador global retirado",
+      "Contacto vacío: bloqueo nativo con etiqueta y rechazo independiente del backend",
+      "Gettext inglés: navegación, salto al contenido y cierre del menú; idioma original restaurado",
+      "Sin infracciones automáticas A/AA ni desbordamiento en los estados examinados"
+    ],
+    "scans": 134,
+    "violations": 0,
+    "overflow": false,
+    "axe": "4.14.0"
+  },
+  "provided_csv": {
+    "rows": 159,
+    "names": 159,
+    "missing_email": 149,
+    "row_errors": 0,
+    "real_attendance_written": false
+  },
+  "inputs": {
+    "read_only": true,
+    "personal_rows_published": false,
+    "files": [
+      {
+        "name": "participants_84180583197_2026_09_25.csv",
+        "bytes": 15931,
+        "sha256": "468c5cd86b3c122f06e5561399869d01b968e3659dc3b5f797ba44b912fce749"
+      },
+      {
+        "name": "REPORTE CONVERSATORIO SEPTIEMBRE (1).xlsx",
+        "bytes": 545075,
+        "sha256": "128c12fd01a8811568023f46d90329612c193970f3c91d717ad12f569feb0fbe"
+      }
+    ]
+  },
+  "runtime_byte_match": {
+    "all_production_files_match_zip": true,
+    "files": 218,
+    "sha256": "518d5e765ec6d7bfb5612962312139ace162e097520fc86b4149942d17c0544f"
+  },
+  "package": {
+    "version": "1.11.0",
+    "bytes": 2120550,
+    "files": 218,
+    "sha256": "518d5e765ec6d7bfb5612962312139ace162e097520fc86b4149942d17c0544f",
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true
+  },
+  "limitations": [
+    "Una prueba histórica de traducciones omitida por faltar la instantánea original.",
+    "Las coincidencias ambiguas de nombre no se asignan automáticamente.",
+    "La importación de prueba usa cuentas y participantes sintéticos; no registra asistentes del archivo original en el hosting."
+  ]
+}

@@ -80,8 +80,8 @@ $GLOBALS['ascla_test_scheduled']=[];
 $GLOBALS['wpdb']=new MigrationWpdb();
 function get_option(string $key,mixed $default=false): mixed { return $GLOBALS['ascla_test_options'][$key]??$default; }
 function update_option(string $key,mixed $value,bool $autoload=false): bool { $GLOBALS['ascla_test_options'][$key]=$value;return true; }
-function wp_next_scheduled(string $hook): int|false { return $GLOBALS['ascla_test_scheduled'][$hook]??false; }
-function wp_schedule_single_event(int $timestamp,string $hook): bool { $GLOBALS['ascla_test_scheduled'][$hook]=$timestamp;return true; }
+function wp_next_scheduled(string $hook,array $args=[]): int|false { unset($args);return $GLOBALS['ascla_test_scheduled'][$hook]??false; }
+function wp_schedule_single_event(int $timestamp,string $hook,array $args=[],$wp_error=false): bool { unset($args,$wp_error);$GLOBALS['ascla_test_scheduled'][$hook]=$timestamp;return true; }
 function dbDelta(string $sql): void { $GLOBALS['wpdb']->dbDelta($sql); }
 
 require $root.'/wp-content/plugins/ascla-core/src/Database/MigrationException.php';

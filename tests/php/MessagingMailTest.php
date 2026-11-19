@@ -11,12 +11,13 @@ final class MessagingMailTest extends TestCase
     protected function setUp(): void
     {
         $this->settings=Settings::get(); $this->secret=Secrets::get('smtp_password');
-        foreach (['administrator','ascla_member','ascla_member'] as $role) {
+        foreach (['administrator','ascla_member','ascla_member','ascla_member'] as $role) {
             $this->users[]=wp_insert_user(['user_login'=>'mailmsg_'.bin2hex(random_bytes(6)),'user_pass'=>wp_generate_password(32),'role'=>$role]);
         }
-        wp_set_current_user($this->users[0]);
-        Store::insert('relations',['user_id'=>$this->users[0],'target_id'=>$this->users[1],'kind'=>'connected','created_at'=>current_time('mysql',true)]);
+        wp_set_current_user($this->users[3]);
+        Store::insert('relations',['user_id'=>$this->users[3],'target_id'=>$this->users[1],'kind'=>'connected','created_at'=>current_time('mysql',true)]);
         $this->conversation=(int)Messaging::start($this->users[1])['id'];
+        wp_set_current_user($this->users[0]);
     }
     protected function tearDown(): void
     {
@@ -30,17 +31,21 @@ final class MessagingMailTest extends TestCase
     public function testIncrementalMessagesNeverSkipBatchesAndKeepReadCursorMonotonic(): void
     {
         $ids=[];
-        foreach(range(1,135) as $i) $ids[]=Store::insert('messages',['conversation_id'=>$this->conversation,'sender_id'=>$this->users[0],'body'=>'Mensaje '.$i,'created_at'=>current_time('mysql',true)]);
+        foreach(range(1,135) as $i) $ids[]=Store::insert('messages',['conversation_id'=>$this->conversation,'sender_id'=>$this->users[3],'body'=>'Mensaje '.$i,'created_at'=>current_time('mysql',true)]);
         wp_set_current_user($this->users[1]);
         self::assertSame(135,Messaging::conversation($this->conversation)['unread']);
         $first=Messaging::messages($this->conversation,0,0);
         self::assertCount(60,$first['items']); self::assertTrue($first['has_more']);
         self::assertSame(array_slice($ids,0,60),array_map('intval',array_column($first['items'],'id')));
+        self::assertSame(135,Messaging::conversation($this->conversation)['unread']);
+        ASCLA\Core\Services\ConversationVisibility::read($this->conversation,(int)$first['after']);
         self::assertSame(75,Messaging::conversation($this->conversation)['unread']);
         $next=Messaging::messages($this->conversation,0,$first['after']);
         self::assertCount(60,$next['items']);self::assertTrue($next['has_more']);
         $last=Messaging::messages($this->conversation,0,$next['after']);
         self::assertCount(15,$last['items']);self::assertFalse($last['has_more']);
+        ASCLA\Core\Services\ConversationVisibility::read($this->conversation,(int)$last['after']);
+        ASCLA\Core\Services\ConversationVisibility::read($this->conversation,(int)$first['after']);
         self::assertSame(0,Messaging::conversation($this->conversation)['unread']);
         Messaging::messages($this->conversation,0,0);
         self::assertSame(0,Messaging::conversation($this->conversation)['unread']);

@@ -1,0 +1,31 @@
+meta {
+  name: 05. Rechazar Empresa vacía
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/profiles/me
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionCarla}}
+  X-WP-Nonce: {{nonceCarla}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"company": ""}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 400", function () { expect(res.getStatus()).to.equal(400); });
+  test("Validación: 05. Rechazar Empresa vacía", function () { expect(res.getBody().message).to.include("Empresa"); });
+}

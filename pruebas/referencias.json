@@ -1,0 +1,15 @@
+{
+  "reviewed_on": "2026-10-16",
+  "sources": [
+    {
+      "name": "DOCUMENTO DE ANALISIS Y DISEÑO ASCLA .docx",
+      "sha256": "70900a01347e43344140321bf4e449d43b1d63b774782445168095b2d1dde0a9"
+    },
+    {
+      "name": "Plan de Prueba y Casos de Prueba.docx",
+      "sha256": "3b202193c59fe066fde948fbf87215a37efe4ef4577ed087c97d6ecb3f4a0c80"
+    }
+  ],
+  "source_files_included": false,
+  "note": "Los Word originales se conservan fuera de la entrega. Las huellas identifican exactamente las versiones consultadas."
+}

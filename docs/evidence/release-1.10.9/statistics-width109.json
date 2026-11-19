@@ -1,0 +1,664 @@
+{
+  "date": "2026-10-18T01:45:27.338508+00:00",
+  "version": "1.10.9",
+  "schema": 15,
+  "scope": "CSS-only width correction for statistics under the native WordPress forms .card max-width rule. Real disposable local WordPress REST and fixtures; observed remote stylesheet rule reproduced locally. No authenticated remote statistics review or deployment.",
+  "source_snapshot": "current-34",
+  "production_matches_tested_snapshot": true,
+  "production_changes": [
+    "wp-content/plugins/ascla-core/assets/app.css"
+  ],
+  "previous_package": {
+    "version": "1.10.9",
+    "sha256": "0a024c94e5f85e4cfc17198d48bf94c059e034f56df7c89166c73ea5502ba509",
+    "bytes": 1545280,
+    "files": 197,
+    "crc_valid": true,
+    "source_bytes_match": true
+  },
+  "package": {
+    "version": "1.10.9",
+    "bytes": 1545358,
+    "sha256": "da54e5ad77ae5df90fe9a768c1456bc0fce1ed85fb4cbcd64444a87aa27e038b",
+    "files": 197,
+    "crc_valid": true,
+    "source_bytes_match": true
+  },
+  "root_cause": {
+    "observed_source": "WordPress forms.min.css?ver=7.1.3, visible on the deployed login page",
+    "rule": ".card{position:relative;margin-top:20px;padding:16px 24px;min-width:255px;max-width:520px;border:1px solid rgba(0,0,0,.1);border-radius:8px;background:#fff;box-sizing:border-box}",
+    "before": {
+      "panel": 1130,
+      "view": 1130,
+      "filter": 520,
+      "card": 520,
+      "cardMax": "520px",
+      "overflow": false
+    },
+    "reproduced_with_prior_css": true
+  },
+  "browser": {
+    "checks": [
+      "El CSS anterior reproduce la tarjeta de 520 px y el espacio vacÃ­o con la regla nativa observada en WordPress",
+      "Las cinco vistas y el filtro usan todo el ancho en 1920, 1440, 900, 390 y 360 px, con ambos temas y la regla nativa de WordPress",
+      "ParticipaciÃ³n muestra sus seis columnas sin desplazamiento horizontal en escritorio y mantiene el desplazamiento dentro de la tabla en mÃ³vil",
+      "Ocho vistas renderizadas no presentan incidencias automÃ¡ticas WCAG A/AA ni desbordamiento de pÃ¡gina"
+    ],
+    "errors": [],
+    "before": {
+      "panel": 1130,
+      "view": 1130,
+      "filter": 520,
+      "card": 520,
+      "cardMax": "520px",
+      "overflow": false
+    },
+    "layouts": [
+      {
+        "width": 1920,
+        "theme": "light",
+        "section": "overview",
+        "panel": 1420,
+        "view": 1420,
+        "filter": 1420,
+        "card": 1420,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1920,
+        "theme": "light",
+        "section": "users",
+        "panel": 1420,
+        "view": 1420,
+        "filter": 1420,
+        "card": 1420,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1920,
+        "theme": "light",
+        "section": "topics",
+        "panel": 1420,
+        "view": 1420,
+        "filter": 1420,
+        "card": 1420,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1920,
+        "theme": "light",
+        "section": "trends",
+        "panel": 1420,
+        "view": 1420,
+        "filter": 1420,
+        "card": 1420,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1920,
+        "theme": "light",
+        "section": "ai",
+        "panel": 1420,
+        "view": 1420,
+        "filter": 1420,
+        "card": 1420,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1920,
+        "theme": "dark",
+        "section": "overview",
+        "panel": 1420,
+        "view": 1420,
+        "filter": 1420,
+        "card": 1420,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1920,
+        "theme": "dark",
+        "section": "users",
+        "panel": 1420,
+        "view": 1420,
+        "filter": 1420,
+        "card": 1420,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1920,
+        "theme": "dark",
+        "section": "topics",
+        "panel": 1420,
+        "view": 1420,
+        "filter": 1420,
+        "card": 1420,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1920,
+        "theme": "dark",
+        "section": "trends",
+        "panel": 1420,
+        "view": 1420,
+        "filter": 1420,
+        "card": 1420,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1920,
+        "theme": "dark",
+        "section": "ai",
+        "panel": 1420,
+        "view": 1420,
+        "filter": 1420,
+        "card": 1420,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1440,
+        "theme": "light",
+        "section": "overview",
+        "panel": 1130,
+        "view": 1130,
+        "filter": 1130,
+        "card": 1130,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1440,
+        "theme": "light",
+        "section": "users",
+        "panel": 1130,
+        "view": 1130,
+        "filter": 1130,
+        "card": 1130,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1440,
+        "theme": "light",
+        "section": "topics",
+        "panel": 1130,
+        "view": 1130,
+        "filter": 1130,
+        "card": 1130,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1440,
+        "theme": "light",
+        "section": "trends",
+        "panel": 1130,
+        "view": 1130,
+        "filter": 1130,
+        "card": 1130,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1440,
+        "theme": "light",
+        "section": "ai",
+        "panel": 1130,
+        "view": 1130,
+        "filter": 1130,
+        "card": 1130,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1440,
+        "theme": "dark",
+        "section": "overview",
+        "panel": 1130,
+        "view": 1130,
+        "filter": 1130,
+        "card": 1130,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1440,
+        "theme": "dark",
+        "section": "users",
+        "panel": 1130,
+        "view": 1130,
+        "filter": 1130,
+        "card": 1130,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1440,
+        "theme": "dark",
+        "section": "topics",
+        "panel": 1130,
+        "view": 1130,
+        "filter": 1130,
+        "card": 1130,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1440,
+        "theme": "dark",
+        "section": "trends",
+        "panel": 1130,
+        "view": 1130,
+        "filter": 1130,
+        "card": 1130,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 1440,
+        "theme": "dark",
+        "section": "ai",
+        "panel": 1130,
+        "view": 1130,
+        "filter": 1130,
+        "card": 1130,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 900,
+        "theme": "light",
+        "section": "overview",
+        "panel": 850,
+        "view": 850,
+        "filter": 850,
+        "card": 850,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 900,
+        "theme": "light",
+        "section": "users",
+        "panel": 850,
+        "view": 850,
+        "filter": 850,
+        "card": 850,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 900,
+        "theme": "light",
+        "section": "topics",
+        "panel": 850,
+        "view": 850,
+        "filter": 850,
+        "card": 850,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 900,
+        "theme": "light",
+        "section": "trends",
+        "panel": 850,
+        "view": 850,
+        "filter": 850,
+        "card": 850,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 900,
+        "theme": "light",
+        "section": "ai",
+        "panel": 850,
+        "view": 850,
+        "filter": 850,
+        "card": 850,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 900,
+        "theme": "dark",
+        "section": "overview",
+        "panel": 850,
+        "view": 850,
+        "filter": 850,
+        "card": 850,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 900,
+        "theme": "dark",
+        "section": "users",
+        "panel": 850,
+        "view": 850,
+        "filter": 850,
+        "card": 850,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 900,
+        "theme": "dark",
+        "section": "topics",
+        "panel": 850,
+        "view": 850,
+        "filter": 850,
+        "card": 850,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 900,
+        "theme": "dark",
+        "section": "trends",
+        "panel": 850,
+        "view": 850,
+        "filter": 850,
+        "card": 850,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 900,
+        "theme": "dark",
+        "section": "ai",
+        "panel": 850,
+        "view": 850,
+        "filter": 850,
+        "card": 850,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "theme": "light",
+        "section": "overview",
+        "panel": 356,
+        "view": 356,
+        "filter": 356,
+        "card": 356,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "theme": "light",
+        "section": "users",
+        "panel": 356,
+        "view": 356,
+        "filter": 356,
+        "card": 356,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "theme": "light",
+        "section": "topics",
+        "panel": 356,
+        "view": 356,
+        "filter": 356,
+        "card": 356,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "theme": "light",
+        "section": "trends",
+        "panel": 356,
+        "view": 356,
+        "filter": 356,
+        "card": 356,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "theme": "light",
+        "section": "ai",
+        "panel": 356,
+        "view": 356,
+        "filter": 356,
+        "card": 356,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "section": "overview",
+        "panel": 356,
+        "view": 356,
+        "filter": 356,
+        "card": 356,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "section": "users",
+        "panel": 356,
+        "view": 356,
+        "filter": 356,
+        "card": 356,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "section": "topics",
+        "panel": 356,
+        "view": 356,
+        "filter": 356,
+        "card": 356,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "section": "trends",
+        "panel": 356,
+        "view": 356,
+        "filter": 356,
+        "card": 356,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "section": "ai",
+        "panel": 356,
+        "view": 356,
+        "filter": 356,
+        "card": 356,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 360,
+        "theme": "light",
+        "section": "overview",
+        "panel": 326,
+        "view": 326,
+        "filter": 326,
+        "card": 326,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 360,
+        "theme": "light",
+        "section": "users",
+        "panel": 326,
+        "view": 326,
+        "filter": 326,
+        "card": 326,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 360,
+        "theme": "light",
+        "section": "topics",
+        "panel": 326,
+        "view": 326,
+        "filter": 326,
+        "card": 326,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 360,
+        "theme": "light",
+        "section": "trends",
+        "panel": 326,
+        "view": 326,
+        "filter": 326,
+        "card": 326,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 360,
+        "theme": "light",
+        "section": "ai",
+        "panel": 326,
+        "view": 326,
+        "filter": 326,
+        "card": 326,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 360,
+        "theme": "dark",
+        "section": "overview",
+        "panel": 326,
+        "view": 326,
+        "filter": 326,
+        "card": 326,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 360,
+        "theme": "dark",
+        "section": "users",
+        "panel": 326,
+        "view": 326,
+        "filter": 326,
+        "card": 326,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 360,
+        "theme": "dark",
+        "section": "topics",
+        "panel": 326,
+        "view": 326,
+        "filter": 326,
+        "card": 326,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 360,
+        "theme": "dark",
+        "section": "trends",
+        "panel": 326,
+        "view": 326,
+        "filter": 326,
+        "card": 326,
+        "cardMax": "none",
+        "overflow": false
+      },
+      {
+        "width": 360,
+        "theme": "dark",
+        "section": "ai",
+        "panel": 326,
+        "view": 326,
+        "filter": 326,
+        "card": 326,
+        "cardMax": "none",
+        "overflow": false
+      }
+    ],
+    "views": [
+      "statistics-width109-users-1920-light.png",
+      "statistics-width109-overview-desktop-light.png",
+      "statistics-width109-users-desktop-light.png",
+      "statistics-width109-topics-desktop-light.png",
+      "statistics-width109-trends-desktop-light.png",
+      "statistics-width109-ai-desktop-light.png",
+      "statistics-width109-users-1440-dark.png",
+      "statistics-width109-users-360-dark.png"
+    ],
+    "scans": [
+      {
+        "name": "users-1920-light",
+        "violations": []
+      },
+      {
+        "name": "overview-desktop-light",
+        "violations": []
+      },
+      {
+        "name": "users-desktop-light",
+        "violations": []
+      },
+      {
+        "name": "topics-desktop-light",
+        "violations": []
+      },
+      {
+        "name": "trends-desktop-light",
+        "violations": []
+      },
+      {
+        "name": "ai-desktop-light",
+        "violations": []
+      },
+      {
+        "name": "users-1440-dark",
+        "violations": []
+      },
+      {
+        "name": "users-360-dark",
+        "violations": []
+      }
+    ],
+    "observed_wordpress_rule": ".card{position:relative;margin-top:20px;padding:16px 24px;min-width:255px;max-width:520px;border:1px solid rgba(0,0,0,.1);border-radius:8px;background:#fff;box-sizing:border-box}"
+  },
+  "portable_checks": 49,
+  "verification": "Five sections, five viewport widths and both themes: 50 full-width measurements. Desktop participation keeps all six columns visible; small viewports contain table scrolling. Eight rendered views pass the scoped automated WCAG A/AA checks. Original CSS reproduces a 520px card while the results container is 1130px wide.",
+  "cleanup": "Temporary actors, fixture data, disposable database and WordPress volumes removed; private environment file removed.",
+  "coverage_collected": false,
+  "existing_coverage_unchanged": true,
+  "full_php_suite_rerun": false,
+  "limitations": [
+    "The deployed statistics page required a new login, so the final correction was verified locally with the observed native stylesheet rule.",
+    "Scoped automated accessibility checks are not a full accessibility or UAT certification."
+  ]
+}

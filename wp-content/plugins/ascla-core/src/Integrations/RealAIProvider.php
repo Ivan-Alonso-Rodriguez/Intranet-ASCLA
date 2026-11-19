@@ -7,7 +7,7 @@ use ASCLA\Core\Rest\ApiException;
 final class RealAIProvider implements AIProviderInterface
 {
     public const SYSTEM_PROMPT='Eres el Asistente ASCLA, un chatbot interno de una comunidad profesional. Conversa con naturalidad, claridad y brevedad. Para cualquier dato sobre ASCLA, prioriza siempre el contexto en vivo de la intranet y las fuentes internas entregadas; nunca inventes eventos, personas, publicaciones, fechas, inscripciones, notificaciones ni datos de la comunidad. El historial sirve para mantener el hilo de la conversación, pero puede estar desactualizado: el contexto en vivo y las fuentes actuales tienen prioridad. Puedes saludar, explicar qué puedes hacer y guiar al usuario dentro de la intranet sin exigir una fuente. Si una pregunta factual no puede verificarse con la información interna disponible, dilo claramente y sugiere qué sección de ASCLA revisar. No reveles información que el usuario no tendría permiso de ver.';
-    public function mode(): string { return 'Google Gemini · API real'; }
+    public function mode(): string { return 'Google Gemini · API'; }
     public static function model(string $value): string
     {
         $value=preg_replace('~^models/~','',trim($value));
@@ -19,11 +19,17 @@ final class RealAIProvider implements AIProviderInterface
         $key=Secrets::get('ai_key');
         Access::require($key!=='' && !str_starts_with($key,'sk-'),'Configura una Gemini API Key; las claves de OpenAI no son compatibles.',400);
         $model=self::model(Settings::get()['ai_model']);
+        $images=AIProviderSupport::images($context);
+        $parts=[['text'=>wp_json_encode(['task'=>$task,'context'=>$context],JSON_UNESCAPED_UNICODE)]];
+        foreach ($images as $image) {
+            $parts[]=['text'=>AIProviderSupport::imageLabel($image)];
+            $parts[]=['inline_data'=>['mime_type'=>$image['mime'],'data'=>$image['data']]];
+        }
         $response=wp_remote_post('https://generativelanguage.googleapis.com/v1beta/models/'.$model.':generateContent',[
             'timeout'=>$task==='probe'?25:55,'redirection'=>0,'limit_response_size'=>1048576,
             'headers'=>['x-goog-api-key'=>$key,'Content-Type'=>'application/json'],
             'body'=>wp_json_encode(['systemInstruction'=>['parts'=>[['text'=>AIProviderSupport::instructions($task,$context)]]],
-                'contents'=>[['role'=>'user','parts'=>[['text'=>wp_json_encode(['task'=>$task,'context'=>$context],JSON_UNESCAPED_UNICODE)]]]],
+                'contents'=>[['role'=>'user','parts'=>$parts]],
                 'generationConfig'=>['responseMimeType'=>'application/json','temperature'=>$task==='answer'?0.35:0.2,'maxOutputTokens'=>$task==='probe'?1024:8192]])
         ]);
         if(is_wp_error($response)) { throw new ApiException('No se pudo conectar con Google Gemini. Revisa la conexión del servidor.',502); }

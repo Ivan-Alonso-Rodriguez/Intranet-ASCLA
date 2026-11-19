@@ -10,7 +10,7 @@ globalThis.ASCLANavigation = ({ root, pages, prepare, load, error, beforeNavigat
     return routes.find(route => path(route.url) === path(url) && [...route.url.searchParams].every(([k, v]) => url.searchParams.get(k) === v)) || null;
   }
   function activate(route) {
-    for (const anchor of root.querySelectorAll('.nav-link, .header-profile')) {
+    for (const anchor of root.querySelectorAll('.nav-link, .account-profile-link')) {
       const current = matches(anchor.href)?.key === route.key;
       anchor.classList.toggle('active', current);
       if (current) anchor.setAttribute('aria-current', 'page'); else anchor.removeAttribute('aria-current');
@@ -64,5 +64,10 @@ globalThis.ASCLANavigation = ({ root, pages, prepare, load, error, beforeNavigat
   history.scrollRestoration = 'manual';
   history.replaceState({ ...history.state, ascla: true, scroll: scrollY }, '', location.href);
   const initial = matches(location.href); if (initial) activate(initial);
-  return { matches, navigate };
+  function replaceUrl(value) {
+    const url=new URL(value,location.href);
+    if (!matches(url.href)) return;
+    activeUrl=url.href;history.replaceState({...history.state,ascla:true},'',url.href);
+  }
+  return { matches, navigate, replaceUrl };
 };

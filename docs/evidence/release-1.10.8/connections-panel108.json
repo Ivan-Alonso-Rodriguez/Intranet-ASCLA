@@ -1,0 +1,121 @@
+{
+  "scope": "Disposable local WordPress, real owned relationships and actions; no public QA deployment",
+  "checks": [
+    "Cuatro pestañas, una sola lista visible, introducciones plegadas y privacidad conservada",
+    "Solicitudes adaptadas a escritorio/móvil y ambos temas sin desbordamiento ni infracciones automáticas WCAG A/AA",
+    "Mensaje de presentación y perfil siguen accesibles desde la fila compacta",
+    "Buscador local conserva nombre y filtrado al cambiar de pestaña o actualizar",
+    "Pestañas utilizables con flechas, Inicio y Fin, con foco y selección sincronizados",
+    "Las acciones de ambas clases de solicitud conservan su traducción y nombre accesible",
+    "Aceptar una conexión actualiza los totales y mantiene la pestaña de trabajo",
+    "Rechazar conexión y aceptar conversación conservan sus flujos independientes y muestran el estado vacío",
+    "Cancelar conexiones y conversaciones enviadas funciona desde Más opciones",
+    "Desbloquear permanece accesible sin restaurar una conexión anterior",
+    "Eliminar una conexión conserva su confirmación y actualiza Contactos",
+    "El panel completo se puede plegar para dar espacio al directorio",
+    "Pestañas y estados vacíos se traducen con el idioma de la cuenta",
+    "Una cuenta sin relaciones muestra un panel vacío claro y compacto"
+  ],
+  "views": [
+    {
+      "name": "connections-panel108-received-light",
+      "width": 1440,
+      "theme": "light",
+      "height": 527,
+      "overflow": false,
+      "violations": []
+    },
+    {
+      "name": "connections-panel108-received-dark",
+      "width": 1440,
+      "theme": "dark",
+      "height": 527,
+      "overflow": false,
+      "violations": []
+    },
+    {
+      "name": "connections-panel108-mobile-light",
+      "width": 390,
+      "theme": "light",
+      "height": 736,
+      "overflow": false,
+      "violations": []
+    },
+    {
+      "name": "connections-panel108-mobile-dark",
+      "width": 390,
+      "theme": "dark",
+      "height": 736,
+      "overflow": false,
+      "violations": []
+    },
+    {
+      "name": "connections-panel108-contacts-dark",
+      "width": 1440,
+      "theme": "dark",
+      "height": 465,
+      "overflow": false,
+      "violations": []
+    },
+    {
+      "name": "connections-panel108-sent-light",
+      "width": 1440,
+      "theme": "light",
+      "height": 441,
+      "overflow": false,
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "date": "2026-10-15T12:15:36.349521+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "requirements": [
+    "RN-034",
+    "RF-022",
+    "RF-023"
+  ],
+  "previous_package_sha256": "512110ac06567553d89ec04118245fc70e24dcd66ae14e19692636db296cdef9",
+  "changed_production_files": [
+    "ascla-core/assets/app.css",
+    "ascla-core/assets/app.js",
+    "ascla-core/languages/ascla-core-en_US.mo",
+    "ascla-core/languages/ascla-core-en_US.po",
+    "ascla-core/languages/ascla-core-es_ES.mo",
+    "ascla-core/languages/ascla-core-es_ES.po",
+    "ascla-core/languages/en.json"
+  ],
+  "portable_checks_passed": 49,
+  "fixture_cleanup_confirmed": true,
+  "backend_changed": false,
+  "source_sha256": {
+    "wp-content/plugins/ascla-core/assets/app.js": "5170802fc7847849da680855010e0b5d2561888db734690b41b590f726d51cbe",
+    "wp-content/plugins/ascla-core/assets/app.css": "31252accce6572958a8a8197deaf4f6793c4ee2145cf544fabca2caf2754898d",
+    "wp-content/plugins/ascla-core/languages/en.json": "20b015f74fd1df9b838489795501faa56f0cec9fe6a1ddd67f62fac3c630daf4",
+    "tests/connections-panel108.cjs": "3a691a785030ba8d6d2ada4545d563185f931927124a67947088e974e05fb2ee",
+    "tests/connections-panel108-fixture.php": "9314ed2c72e612b60def72c515df35dc62ecea681b2389547e9453ce71d45869",
+    "tests/bugs-ui.cjs": "d7ca217a2cbaab344f641b0279396b80e1bd967ef598070f31c6125266b6c062",
+    "tests/e2e.cjs": "4e96f0563fa341cfc32a85e597e53f8ed5ab00e109a3455e75530f9031618bad"
+  },
+  "screenshots_sha256": {
+    "connections-panel108-received-light.png": "c629efda7cb56c225bf13d41af52a4694d91526a415c168ff42f1ee8dc098009",
+    "connections-panel108-received-dark.png": "6df57ccfa83a39e7236889ba19653952cac8999749bd9f443b85f71445687d35",
+    "connections-panel108-mobile-light.png": "44f40a04c13e32fc97084babc1882a5ff20541f900befc06c004613d7457e84e",
+    "connections-panel108-mobile-dark.png": "9c4b5de015f79fbe56c1ecf91757d0d1cd9208eca69d9607d40fe9972ee5214d",
+    "connections-panel108-contacts-dark.png": "c33d4c99f89ac4705bb0f260b4ba539a865a440985458b0d0bee5ed1baaeada9",
+    "connections-panel108-sent-light.png": "9e661007615183ed8874b574ed8b683d813eda30df5e35dfcef1045099e6fa09"
+  },
+  "package": {
+    "version": "1.10.8",
+    "bytes": 1342541,
+    "sha256": "0c1a428f86920f910cacc3486390c4c00fd6306b445bf9ceff7d33dafed6c541",
+    "files": 183,
+    "source_bytes_match": true,
+    "crc_valid": true
+  },
+  "limitations": [
+    "Local disposable WordPress only; not deployed to public QA.",
+    "Automated WCAG A/AA checks cover the six recorded panel views, not a full accessibility audit.",
+    "Legacy suite selectors were updated and syntax checked; no new complete PHP/legacy E2E suite or coverage run is claimed."
+  ]
+}

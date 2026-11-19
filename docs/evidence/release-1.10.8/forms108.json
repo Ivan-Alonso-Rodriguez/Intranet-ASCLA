@@ -1,0 +1,52 @@
+{
+  "stage": "Integridad de formularios 1.10.8",
+  "date": "2026-10-14",
+  "completed_at_utc": "2026-10-14T16:37:53.242793+00:00",
+  "base_revision": "d01e3d12b6c404ba5aaa9fc4648f5989565bf590",
+  "base_branch": "development",
+  "working_tree_modified": true,
+  "plugin_version": "1.10.8",
+  "schema_version": 15,
+  "php_tests": 462,
+  "php_assertions": 6179,
+  "php_line_coverage_percent": 84.21,
+  "browser_checks": 60,
+  "form_checks": 7,
+  "release_sanity_checks": 49,
+  "gettext_messages_per_locale": 1470,
+  "accessibility_states": 132,
+  "accessibility_violations": 0,
+  "accessibility_incomplete_rule_entries": 76,
+  "full_quality_ci_rerun": false,
+  "new_javascript_coverage": false,
+  "requirements_advanced": [
+    "RNF-013",
+    "RNF-017"
+  ],
+  "evidence": "docs/evidence/release-1.10.8/forms108.json",
+  "php_report": "test-results/forms108-junit.xml",
+  "clover_report": "test-results/forms108-clover.xml",
+  "browser_report": "test-results/forms108.json",
+  "browser_suites": [
+    "editorial107",
+    "analysis-filters107",
+    "governance107",
+    "delivery107",
+    "comment-history107",
+    "accessibility107",
+    "forms107",
+    "forms108"
+  ],
+  "source_hashes_report": "test-results/forms108-source-hashes.json",
+  "package": {
+    "version": "1.10.8",
+    "bytes": 1274616,
+    "sha256": "31f4aae6a920797f54aa018ac4dbd84c393fb6d1bc85f85c05ae8e5fcc4256ae",
+    "files": 169,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true,
+    "translation_catalog_included": true
+  },
+  "limitations": "Sin ejecución completa de quality-ci ni nueva cobertura JavaScript. Formularios y cadenas restantes, WCAG humano, otros navegadores, proveedores, despliegue y Quality Gate remoto pendientes."
+}

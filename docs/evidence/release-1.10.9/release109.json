@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-17T23:47:44.504170+00:00",
+  "version": "1.10.9",
+  "schema": 15,
+  "scope": "Consolidation of all changes made on 2026-10-17 as release 1.10.9. Version metadata, release history, current documentation, Sonar project and QA target checks updated. No remote installation or new coverage.",
+  "source_snapshot": "current-33",
+  "production_matches_snapshot": true,
+  "previous_package": {
+    "version": "1.10.8",
+    "sha256": "5cb8cfdd14ce6feb84d1bea675724a81786e6624997802f40dd891e1ec14cd60",
+    "bytes": 1544903,
+    "files": 197
+  },
+  "package": {
+    "version": "1.10.9",
+    "sha256": "0a024c94e5f85e4cfc17198d48bf94c059e034f56df7c89166c73ea5502ba509",
+    "bytes": 1545280,
+    "files": 197,
+    "crc_valid": true,
+    "source_bytes_match": true
+  },
+  "production_delta": [
+    "ascla-core.php",
+    "languages/ascla-core-en_US.mo",
+    "languages/ascla-core-en_US.po",
+    "languages/ascla-core-es_ES.mo",
+    "languages/ascla-core-es_ES.po",
+    "readme.txt"
+  ],
+  "production_delta_verified": "Only plugin version/header, WordPress stable tag/changelog and gettext project-version metadata differ from the final 1.10.8 snapshot. All application logic, styles, data schema, translations and bundled phone assets are byte-identical.",
+  "fresh_checks": {
+    "portable": 49,
+    "php_syntax": [
+      "ascla-core.php",
+      "tests/qa-tools/ascla-qa-tools.php",
+      "tests/php/ReleaseCompletionTest.php"
+    ],
+    "javascript_syntax": [
+      "tests/acceptance-runner.cjs",
+      "tests/acceptance-report.cjs"
+    ],
+    "shell_syntax": [
+      "scripts/acceptance-tests.sh"
+    ],
+    "package_crc_and_source_match": true
+  },
+  "qa_targets_updated": [
+    "scripts/acceptance-tests.sh",
+    "tests/acceptance-runner.cjs",
+    "tests/acceptance-report.cjs",
+    "tests/qa-tools/ascla-qa-tools.php"
+  ],
+  "qa_helper": {
+    "path": "dist/ascla-qa-tools.zip",
+    "sha256": "670fe9f318fa932a06111ac5073f21b9fc865674018384f5f581c0e93b426716",
+    "target_core_version": "1.10.9"
+  },
+  "today_functional_evidence": [
+    {
+      "path": "docs/evidence/release-1.10.8/profile-directory108.json",
+      "sha256": "82572c3e3bbf4e63207ecb23eca4f3398963865d14030774b894759dd3d514b2",
+      "original_version": "1.10.8"
+    },
+    {
+      "path": "docs/evidence/release-1.10.8/load108.json",
+      "sha256": "1c00c7f98bcee26e67d3a4463965391642ef12578d2d0b2bd4f488515aece666",
+      "original_version": "1.10.8"
+    },
+    {
+      "path": "docs/evidence/release-1.10.8/directory-phone108.json",
+      "sha256": "ba9629d6d509fc7195c4c87717f60923044cca040fef1e6a6e8ed5aa3678af23",
+      "original_version": "1.10.8"
+    },
+    {
+      "path": "docs/evidence/release-1.10.8/usability-rag108.json",
+      "sha256": "815a6fca553dbd0b710bee94e63e0396bb1120f36a085453e8aa666199239127",
+      "original_version": "1.10.8"
+    },
+    {
+      "path": "docs/evidence/release-1.10.8/contact-inbox108.json",
+      "sha256": "c40064aa0f7ec39d6eebb68cdb9c1df2d638a5d29a8ceb0c90144c2bf470720b",
+      "original_version": "1.10.8"
+    },
+    {
+      "path": "docs/evidence/release-1.10.8/ai-privacy108.json",
+      "sha256": "663ecc89f80fdb5101559a5a975d5b3bd3d9526b9841d5cd551331a3ddb6d097",
+      "original_version": "1.10.8"
+    },
+    {
+      "path": "docs/evidence/release-1.10.8/admin-edit108.json",
+      "sha256": "50be39ba5fc192b7d9fbf069f4968ccabf0cca9ae06025109881903f01672f58",
+      "original_version": "1.10.8"
+    },
+    {
+      "path": "docs/evidence/release-1.10.8/statistics-layout108.json",
+      "sha256": "fd4a146cdadaae130d0f58668b64a6aaa11c6683d11157cebdf8bc5e7500fb7a",
+      "original_version": "1.10.8"
+    },
+    {
+      "path": "docs/evidence/release-1.10.8/micro-invitations108.json",
+      "sha256": "807e75b3dd0b039113fb95dec9bcb81301dfbe070aff42409ec798964f1a3bd9",
+      "original_version": "1.10.8"
+    }
+  ],
+  "prior_validation_scope": "Functional runs were executed under provisional version 1.10.8 and retain their original version, hashes and counts. They are not claimed as fresh 1.10.9 integration/E2E executions. Byte comparison verifies application logic is unchanged by renumbering.",
+  "full_php_or_browser_suite_rerun": false,
+  "coverage_collected": false,
+  "existing_coverage_unchanged": true,
+  "limitations": [
+    "Remote WordPress installation is manual and has not been performed.",
+    "No new remote SonarQube Quality Gate or UAT approval is claimed."
+  ]
+}

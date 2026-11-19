@@ -1,0 +1,35 @@
+meta {
+  name: 07. Publicar con fecha, hora y cupo válidos
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/content/event/{{eventoPublicacionId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAdministrador}}
+  X-WP-Nonce: {{nonceAdministrador}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:pre-request {
+  const day=new Date(Date.now()+5*86400000).toISOString().slice(0,10);bru.setCollectionVar("inicioPublicacion",day+"T15:15:00Z");bru.setCollectionVar("finPublicacion",day+"T16:45:00Z");req.setBody({title:bru.getCollectionVar("tituloEventoPublicacion"),status:"publish",body:"Encuentro ficticio publicado por la prueba Bruno.",meta:{start:bru.getCollectionVar("inicioPublicacion"),end:bru.getCollectionVar("finPublicacion"),capacity:5,modality:"Virtual",location:"Sala QA",chatham:false}});
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Validación: 07. Publicar con fecha, hora y cupo válidos", function () { expect(res.getBody().status).to.equal("publish");expect(Date.parse(res.getBody().meta.start)).to.equal(Date.parse(bru.getCollectionVar("inicioPublicacion")));expect(Date.parse(res.getBody().meta.end)).to.equal(Date.parse(bru.getCollectionVar("finPublicacion"))); });
+}

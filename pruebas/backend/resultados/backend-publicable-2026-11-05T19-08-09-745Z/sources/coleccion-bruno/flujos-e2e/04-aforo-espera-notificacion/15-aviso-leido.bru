@@ -1,0 +1,26 @@
+meta {
+  name: 15. La notificación queda leída
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/notifications
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionBruno}}
+  X-WP-Nonce: {{nonceBruno}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Validación: 15. La notificación queda leída", function () { const n=res.getBody().find(n=>Number(n.id)===Number(bru.getCollectionVar("avisoCupoId")));expect(n).to.be.an("object");expect(n.read_at).to.be.a("string").and.not.empty; });
+}

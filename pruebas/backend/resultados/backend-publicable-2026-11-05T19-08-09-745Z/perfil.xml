@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<testsuites>
+  <testsuite name="01. Iniciar sesión como Carla" file="flujos-e2e\01-perfil\01-login-carla.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:26.967" hostname="DESKTOP-VJV2FMV" time="0.399">
+    <testcase name="Código HTTP esperado: 302" status="pass" classname="flujos-e2e\01-perfil\01-login-carla" time="0.199"/>
+    <testcase name="Sesión y nonce propios de Carla" status="pass" classname="flujos-e2e\01-perfil\01-login-carla" time="0.199"/>
+  </testsuite>
+  <testsuite name="02. Consultar Empresa y biografía originales" file="flujos-e2e\01-perfil\02-perfil-original.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:26.967" hostname="DESKTOP-VJV2FMV" time="0.201">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\01-perfil\02-perfil-original" time="0.101"/>
+    <testcase name="Validación: 02. Consultar Empresa y biografía originales" status="pass" classname="flujos-e2e\01-perfil\02-perfil-original" time="0.101"/>
+  </testsuite>
+  <testsuite name="03. Guardar biografía de prueba" file="flujos-e2e\01-perfil\03-guardar-biografia.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:26.967" hostname="DESKTOP-VJV2FMV" time="0.170">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\01-perfil\03-guardar-biografia" time="0.085"/>
+    <testcase name="Validación: 03. Guardar biografía de prueba" status="pass" classname="flujos-e2e\01-perfil\03-guardar-biografia" time="0.085"/>
+  </testsuite>
+  <testsuite name="04. Recargar perfil y comprobar persistencia" file="flujos-e2e\01-perfil\04-persistencia.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:26.967" hostname="DESKTOP-VJV2FMV" time="0.157">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\01-perfil\04-persistencia" time="0.078"/>
+    <testcase name="Validación: 04. Recargar perfil y comprobar persistencia" status="pass" classname="flujos-e2e\01-perfil\04-persistencia" time="0.078"/>
+  </testsuite>
+  <testsuite name="05. Rechazar Empresa vacía" file="flujos-e2e\01-perfil\05-empresa-obligatoria.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:26.967" hostname="DESKTOP-VJV2FMV" time="0.142">
+    <testcase name="Código HTTP esperado: 400" status="pass" classname="flujos-e2e\01-perfil\05-empresa-obligatoria" time="0.071"/>
+    <testcase name="Validación: 05. Rechazar Empresa vacía" status="pass" classname="flujos-e2e\01-perfil\05-empresa-obligatoria" time="0.071"/>
+  </testsuite>
+  <testsuite name="06. Conservar los datos tras el rechazo" file="flujos-e2e\01-perfil\06-conservacion.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:26.968" hostname="DESKTOP-VJV2FMV" time="0.165">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\01-perfil\06-conservacion" time="0.082"/>
+    <testcase name="Validación: 06. Conservar los datos tras el rechazo" status="pass" classname="flujos-e2e\01-perfil\06-conservacion" time="0.082"/>
+  </testsuite>
+  <testsuite name="07. Restaurar la biografía de la cuenta dedicada" file="flujos-e2e\01-perfil\07-restaurar-biografia.bru" errors="0" failures="0" skipped="0" tests="2" timestamp="2026-11-05T19:08:26.968" hostname="DESKTOP-VJV2FMV" time="0.221">
+    <testcase name="Código HTTP esperado: 200" status="pass" classname="flujos-e2e\01-perfil\07-restaurar-biografia" time="0.111"/>
+    <testcase name="Validación: 07. Restaurar la biografía de la cuenta dedicada" status="pass" classname="flujos-e2e\01-perfil\07-restaurar-biografia" time="0.111"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,329 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-23T18:40:13.977Z",
+  "scope": "Regresión local de Galería, perfiles, selector de eventos y notificaciones. Acciones UI/REST y archivos privados reales; datos y fotografías de prueba. Sin despliegue remoto ni análisis de seguridad externo.",
+  "package_sha256": "73bba9f9b6c27b0779b93956737614f6915fea7ba208c4ac1c3f77402a8a542d",
+  "checks": [
+    "Nombre de usuario disponible en el perfil propio y ausente en perfiles ajenos",
+    "Intereses compactos y usuario visible en Mi perfil: desktop-light",
+    "Abrir, flechas laterales, límites y comentario conservado: desktop-light",
+    "Publicado por defecto; búsqueda paginada y selección por teclado persisten: desktop-light",
+    "Nombres reales de fotos y PDF centrados con sus controles: desktop-light",
+    "Bandeja sin contador duplicado y pie con notificaciones: desktop-light",
+    "Intereses compactos y usuario visible en Mi perfil: mobile-light",
+    "Abrir, flechas laterales, límites y comentario conservado: mobile-light",
+    "Publicado por defecto; búsqueda paginada y selección por teclado persisten: mobile-light",
+    "Nombres reales de fotos y PDF centrados con sus controles: mobile-light",
+    "Bandeja sin contador duplicado y pie con notificaciones: mobile-light",
+    "Intereses compactos y usuario visible en Mi perfil: desktop-dark",
+    "Abrir, flechas laterales, límites y comentario conservado: desktop-dark",
+    "Publicado por defecto; búsqueda paginada y selección por teclado persisten: desktop-dark",
+    "Nombres reales de fotos y PDF centrados con sus controles: desktop-dark",
+    "Bandeja sin contador duplicado y pie con notificaciones: desktop-dark",
+    "Intereses compactos y usuario visible en Mi perfil: mobile-dark",
+    "Abrir, flechas laterales, límites y comentario conservado: mobile-dark",
+    "Publicado por defecto; búsqueda paginada y selección por teclado persisten: mobile-dark",
+    "Nombres reales de fotos y PDF centrados con sus controles: mobile-dark",
+    "Bandeja sin contador duplicado y pie con notificaciones: mobile-dark",
+    "Eliminar Galería retira la publicación y vuelve inaccesibles las fotos y el PDF (HTTP 404 incluso para administración)"
+  ],
+  "scans": [
+    {
+      "name": "mi-perfil-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "intereses-perfil-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "galeria-listado-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "flechas-fotografia-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "selector-eventos-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "adjuntos-alineados-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "notificaciones-desktop-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "mi-perfil-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "intereses-perfil-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "galeria-listado-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "flechas-fotografia-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "selector-eventos-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "adjuntos-alineados-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "notificaciones-mobile-light",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "mi-perfil-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "intereses-perfil-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "galeria-listado-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "flechas-fotografia-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "selector-eventos-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "adjuntos-alineados-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "notificaciones-desktop-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "mi-perfil-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "intereses-perfil-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "galeria-listado-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "flechas-fotografia-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "selector-eventos-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    },
+    {
+      "name": "adjuntos-alineados-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 1
+    },
+    {
+      "name": "notificaciones-mobile-dark",
+      "engine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "violations": [],
+      "incomplete": 0
+    }
+  ],
+  "errors": [],
+  "status": "passed_local_targeted_validation",
+  "package_manifest": "docs/evidence/release-1.11.0/package-gallery-profile.json",
+  "report": "test-results/gallery-profile1110/index.html",
+  "phpunit": {
+    "tests": 53,
+    "assertions": 410,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "phpunit_report": "docs/evidence/release-1.11.0/gallery-profile1110-junit.xml",
+  "source_hashes": {
+    "tests/gallery-profile1110.cjs": "57e8ff2d511ac6112d211368ae643a3e0aca6d17848bf7ce1729a9de805643c1",
+    "tests/php/GalleryProfile1110Test.php": "2f0b02d5188dbd4313e0e09af6bd7c713bf93302570d427f95f4056308792c08",
+    "tests/php/MediaTemporaryTest.php": "d46d76c44820e2e63a7b20b8821211d3b821f4e529818845f0a945ac26d6f73e",
+    "tests/php/ProfileLoadingTest.php": "9f3c3344541860282b3a1864e8728ab8a7ba3eb6dd352114af292e81da4ff5e4",
+    "tests/php/ProfileEditorial109Test.php": "c5db3654859c66b97470ae87cfac2df5f710eddd4c62694326b8f447daf103b9",
+    "tests/php/NotificationsTest.php": "0b593e8f106141d423478f1f9dd90b4be0774fff8300e3dcb50891ab4b5667fd",
+    "tests/php/EventReactivationTest.php": "fa366dc9c7b3fe749def1a795f76d5c23c26b999bef99753314ee6d2e9b190bf"
+  },
+  "base_commit": "2daf0d9e5b0da8eee8b21076f2dc3915c77a4e3f",
+  "working_tree": "uncommitted; ZIP verified against production source bytes",
+  "changes": [
+    "Intereses del perfil en bloques compactos: dos columnas en escritorio y una en móvil.",
+    "Barras de desplazamiento del panel lateral y superficies desplazables con pulgar fino, bordes redondeados y sin desplazamiento horizontal del panel.",
+    "Cabecera de notificaciones sin contador total redundante.",
+    "Pie de bandeja usa notificación/notificaciones.",
+    "Acción de Galería simplificada a Abrir.",
+    "Evento relacionado con búsqueda en servidor, ocho resultados por página, fecha, estado e identificador.",
+    "Flechas anterior/siguiente a los lados de la foto, conservando miniaturas, límites, teclado y comentarios.",
+    "Galería nueva selecciona Publicado para roles con permiso; al editar se conserva el estado existente.",
+    "Eliminar Galería retira fotos/PDF privados y maestros sin derivados restantes, con rollback ante fallo y rechazo a cuentas sin permiso.",
+    "Nombres reales de adjuntos alineados verticalmente con Quitar.",
+    "Usuario de acceso bajo el correo, solo para la propia cuenta."
+  ],
+  "visual_review": "Capturas revisadas en claro/oscuro, escritorio/móvil, con ocho grupos de intereses, visor de dos fotos y adjuntos PDF. No se afirma una auditoría manual WCAG exhaustiva; las reglas incompletas de axe se registran por vista.",
+  "prior_stage": "docs/evidence/release-1.11.0/event-reactivation1110.json; original package retained in package-event-reactivation.json",
+  "limitations": [
+    "Regresión local dirigida. No se ejecutaron nuevamente los seis flujos compartidos completos de Bruno/Playwright, ZAP, SonarQube ni despliegue QA/UAT.",
+    "Fotografías y perfiles de prueba locales. La eliminación de archivos se comprobó en base de datos con PHPUnit y por respuestas HTTP 404 en el navegador.",
+    "El log SMTP contiene un fallo inducido por las regresiones negativas; no representa una entrega externa de correo."
+  ],
+  "environment_recovery": "Docker Desktop failed on a stale sailor-ingest.sock. The stopped application was restarted after moving only that socket to a recoverable .ascla-backup-20261023 sibling with WSL. No reset of Docker data or configuration.",
+  "temporary_environment_cleanup": "completed; isolated containers, volumes, fixture users, photos/PDF and private access files removed"
+}

@@ -1,0 +1,39 @@
+meta {
+  name: 03. Crear un borrador sin descripción ni fechas
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/content/event
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAdministrador}}
+  X-WP-Nonce: {{nonceAdministrador}}
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:pre-request {
+  bru.setCollectionVar("tituloEventoPublicacion","QA Bruno publicación "+Date.now());req.setBody({title:bru.getCollectionVar("tituloEventoPublicacion"),status:"draft"});
+}
+
+script:post-response {
+  if(res.getStatus()===200)bru.setCollectionVar("eventoPublicacionId",Number(res.getBody().id));
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Validación: 03. Crear un borrador sin descripción ni fechas", function () { expect(res.getBody().status).to.equal("draft");expect(Number(res.getBody().id)).to.be.above(0); });
+}

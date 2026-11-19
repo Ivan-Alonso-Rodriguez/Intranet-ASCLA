@@ -1,0 +1,26 @@
+meta {
+  name: 17. Comprobar un único inscrito
+  type: http
+  seq: 17
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/events/{{eventoCupoId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionBruno}}
+  X-WP-Nonce: {{nonceBruno}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Validación: 17. Comprobar un único inscrito", function () { expect(res.getBody().registered).to.equal("accepted");expect(Number(res.getBody().attending)).to.equal(1); });
+}

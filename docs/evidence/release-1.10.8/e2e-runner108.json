@@ -1,0 +1,202 @@
+{
+  "recorded_at": "2026-10-15T18:18:16.688492+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "scope": "Local disposable WordPress. Frontend scripts verified in blocks after fixes; this is not a complete quality-ci execution, SonarQube result or remote QA acceptance.",
+  "baseline_commit": "5112f3e78799b90a79d03fbbe99fe5fd7f230e39",
+  "working_tree": "uncommitted fixes; source hashes recorded after verification, not an execution-time source snapshot",
+  "php": {
+    "command_filter": "FormWriteValidationTest|StatisticsTest",
+    "tests": 46,
+    "assertions": 323,
+    "passed": true,
+    "coverage_measured": false
+  },
+  "frontend": {
+    "scripts_in_quality_ci": 13,
+    "passed_in_blocks": true,
+    "check_groups_in_native_reports": 121,
+    "scanner_guard_cases_observed": 8,
+    "native_reports": [
+      {
+        "script": "tests/e2e.cjs",
+        "check_groups": 27,
+        "errors": 0,
+        "local_report": "test-results/browser-navigation108-20261015T180310Z-10857/e2e.json",
+        "report_sha256": "d0d7dfb33f2ea7c1a377964e299b87b7e2845f9d6f3174fa13ff5de8616da31d",
+        "current_script_sha256": "3e63464c6911399886545d5e651df2e751afc916f2776c0b81989695c0dfde29"
+      },
+      {
+        "script": "tests/statistics.cjs",
+        "check_groups": 13,
+        "errors": 0,
+        "local_report": "test-results/browser-navigation108-20261015T180310Z-10857/statistics.json",
+        "report_sha256": "9fed697719067c48ed58d39798e7a5143fcc5febf0fd15b186a3e951f662f690",
+        "current_script_sha256": "503aa9174bbff780c4a7f758d97dab7680d3907750c9208f1fb1c1e3425ec4e4"
+      },
+      {
+        "script": "tests/editorial107.cjs",
+        "check_groups": 9,
+        "errors": 0,
+        "local_report": "test-results/browser-navigation108-20261015T180310Z-10857/editorial107.json",
+        "report_sha256": "1faf452fc14eca15bb07a36733aa4f04b66e94fe5aa50497f31ef2daa1a9cc15",
+        "current_script_sha256": "ef3ad7ee559648bf4d1aa63a6d9117db0f6d69ec45fea02e733cad0cf4c25996"
+      },
+      {
+        "script": "tests/analysis-filters107.cjs",
+        "check_groups": 7,
+        "errors": 0,
+        "local_report": "test-results/browser-navigation108-20261015T180310Z-10857/analysis-filters107.json",
+        "report_sha256": "7a12ddf8ff6a5ec4d6742ad17b6f9c26fbc2a132e084d222c05ab73135eb8192",
+        "current_script_sha256": "a92fc6f2a5b0823d0fa36b826a180d8ab3e7e63bd5722374ba1cee46dd0e4b4d"
+      },
+      {
+        "script": "tests/governance107.cjs",
+        "check_groups": 10,
+        "errors": 0,
+        "local_report": "test-results/browser-navigation108-20261015T180310Z-10857/governance107.json",
+        "report_sha256": "76e86dda103ab500404d3d0d423d7829d117881de47e02667b1e1e1666280de6",
+        "current_script_sha256": "cd3829a460aefe1ad6f5bb5500e3788eb8822d61b90bf58c37303e1616810177"
+      },
+      {
+        "script": "tests/delivery107.cjs",
+        "check_groups": 6,
+        "errors": 0,
+        "local_report": "test-results/browser-navigation108-20261015T180310Z-10857/delivery107.json",
+        "report_sha256": "cd3af32e60474d384160eecf0506938fafabaa73714654f4f43b04ac6c427670",
+        "current_script_sha256": "b4dcca2a727449380f08d342f22261eb79526fd4e916a2812c22e3f6de9904d6"
+      },
+      {
+        "script": "tests/comment-history107.cjs",
+        "check_groups": 5,
+        "errors": 0,
+        "local_report": "test-results/browser-navigation108-20261015T180310Z-10857/comment-history107.json",
+        "report_sha256": "ab01f30dd326a7be3f3ae353e6c7c4d9ce9b1f65cad0b7a4361c8239644ab345",
+        "current_script_sha256": "d7dfbabbcf128b1e6d304cdffb576742f510db800b8f318dd5f8f87967eab204"
+      },
+      {
+        "script": "tests/accessibility107.cjs",
+        "check_groups": 10,
+        "errors": 0,
+        "local_report": "test-results/browser-navigation108-20261015T180310Z-10857/accessibility107.json",
+        "report_sha256": "1252c4c37c30295e12f1d6b9661096694d55dcb4ae712a24d1ba4e479b9b4dfb",
+        "current_script_sha256": "ee1c3f93b8115dac1ee7762407fe0e8b3350131bef685346ec5b8fa7a3728095"
+      },
+      {
+        "script": "tests/forms107.cjs",
+        "check_groups": 7,
+        "errors": 0,
+        "local_report": "test-results/browser-tail108-20261015T181358Z-11604/forms107.json",
+        "report_sha256": "71d33192a36ece30dbdd7468a3580fbefcc9eb082e3c472242f00beb7aa07b39",
+        "current_script_sha256": "4e72b64e89c6b3587c097bee5cee3866ab2d8775d494fd966ecf391f49b4acd3"
+      },
+      {
+        "script": "tests/forms108.cjs",
+        "check_groups": 7,
+        "errors": 0,
+        "local_report": "test-results/browser-tail108-20261015T181358Z-11604/forms108.json",
+        "report_sha256": "b492d739622920f3d6863ebaa2915809ddc894e1da7d649e45628419f50d3e75",
+        "current_script_sha256": "d10bbd0ca9cd5a970f835d38b1bdca6f3ad2e01ec59de7db44d2644906bb3562"
+      },
+      {
+        "script": "tests/events108.cjs",
+        "check_groups": 9,
+        "errors": 0,
+        "local_report": "test-results/browser-tail108-20261015T181358Z-11604/events108.json",
+        "report_sha256": "9b9225638f5eb30112aeb45bc554a2801141361cd48fb14aac0e99b8f9b19ab1",
+        "current_script_sha256": "40c7dccf380a02fdb7e5d923f77a6b6095c214f575b80c86af267998c0bc742f"
+      },
+      {
+        "script": "tests/privacy108.cjs",
+        "check_groups": 6,
+        "errors": 0,
+        "local_report": "test-results/browser-tail108-20261015T181358Z-11604/privacy108.json",
+        "report_sha256": "c79ee7531687dd27550c6a729c1875c22777f849cb5107825a18e176b7f5b92c",
+        "current_script_sha256": "38fc3805d37a51b6d4df1c874bdf0b7400e28a9dd459ce3bcbac2bca5bdf2892"
+      },
+      {
+        "script": "tests/dashboard-loading108.cjs",
+        "check_groups": 5,
+        "errors": 0,
+        "local_report": "test-results/browser-tail108-20261015T181358Z-11604/dashboard-loading108.json",
+        "report_sha256": "b9a8580a3ef976a254e53af91826086a8581ec98018b0a9e47a1828af4f0654e",
+        "current_script_sha256": "dc32b92f79f0f9e7a407c7496e87c3f1a34ec08e3ba90bbb1692ecd6bc54804b"
+      }
+    ]
+  },
+  "accessibility": {
+    "states": 140,
+    "automatic_violations": 0,
+    "overflow_states": 0,
+    "human_review_complete": false
+  },
+  "cleanup_retry": {
+    "controlled_cases": [
+      "429 retries once after the current minute bucket",
+      "200 succeeds without retry",
+      "500 is reported as failure"
+    ],
+    "network_requests_sent_by_controlled_cases": false
+  },
+  "package": {
+    "version": "1.10.8",
+    "bytes": 1352223,
+    "sha256": "2b60a41eb9723c3414498ed62a9608f317d8441d3ec1b0f924644c87cee9d25e",
+    "files": 184,
+    "source_bytes_match": true
+  },
+  "limitations": {
+    "earlier_main_attempt": "Stopped during events108 cleanup; previous failed artifacts retained. Current events108, privacy108 and dashboard-loading108 were verified in the final tail block.",
+    "full_quality_ci_pass": false,
+    "source_revision_marker_written": false,
+    "sonarqube": "not run",
+    "remote_deployment": "not performed",
+    "uat_acceptance": "not claimed"
+  },
+  "follow_up_native_chooser": {
+    "recorded_at": "2026-10-15T18:46:53.604Z",
+    "baseline_commit": "46fa338c6ed303114445cb003593eed45743d36c",
+    "scope": "Focused local verification with uncommitted test/script fixes. Earlier results above retain their own source hashes and scope.",
+    "observed_php_from_interrupted_quality_run": {
+      "tests": 677,
+      "assertions": 7558,
+      "errors": 0,
+      "failures": 0,
+      "line_coverage_percent": 85.69,
+      "junit_sha256": "998b1530d652ad2ea09c160cc10a2b078419f918703ffd281263d7e067d216d2",
+      "rerun_in_this_follow_up": false
+    },
+    "accessibility": {
+      "local_report": "test-results/accessibility-picker108-20261015T184409Z-13819/accessibility107.json",
+      "report_sha256": "9e86aca562a0186528a5de78641ef3a411c06064d7e3573ed4832f6e9e4e2bbf",
+      "test_sha256": "1b0faaeaf03e0f75815d822624d402b79a9907b00711e0d4955613e803403206",
+      "check_groups": 10,
+      "states": 140,
+      "automatic_violations": 0,
+      "overflow_states": 0,
+      "errors": 0,
+      "keyboard_upload_required_in_both_themes": true,
+      "human_review_complete": false
+    },
+    "isolated_chooser_regression": {
+      "local_script": "test-results/picker108-regression.cjs",
+      "actual_openings": 100,
+      "enter": 50,
+      "space": 50,
+      "passed": true,
+      "network_enabled": false,
+      "actual_accessibility_asset_sha256": "7e909f24d4b4dd9893ae4ab4622381aa3230e88caac3946c0c18290486154f54"
+    },
+    "scanner_guards": {
+      "script": "tests/manual-workflow.cjs",
+      "script_sha256": "37e4f566354312b2d7483357dedf11fc4382d0d5ff8400f1d56cbfcdefbb5c7d",
+      "cases": 9,
+      "passed": true,
+      "network_enabled": false
+    },
+    "full_quality_ci_pass": false,
+    "source_revision_marker_written": false,
+    "sonarqube": "not run",
+    "plugin_and_package_changed": false
+  }
+}

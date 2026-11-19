@@ -4,7 +4,7 @@ namespace ASCLA\Core\Domain;
 final class Catalog
 {
     public const TYPES = ['hub'=>'Hub ASCLA','forum'=>'Foros','topic'=>'Temas','event'=>'Eventos','resource'=>'Conocimiento','gallery'=>'Galerías','ally'=>'Aliados','contact'=>'Solicitudes'];
-    public const PAGES = ['intranet'=>'Inicio','perfil'=>'Perfil','eventos'=>'Eventos y Capacitaciones','hub'=>'Hub ASCLA','galeria'=>'Galería','foros'=>'Foros','directorio'=>'Directorio','centro-conocimiento'=>'Centro de Conocimiento','asistente'=>'Asistente IA','aliados'=>'Aliados','mensajeria'=>'Mensajería','contacto'=>'Contacto'];
+    public const PAGES = ['intranet'=>'Inicio','perfil'=>'Perfil','eventos'=>'Eventos y Capacitaciones','hub'=>'Hub ASCLA','galeria'=>'Galerías','foros'=>'Foros','directorio'=>'Directorio','centro-conocimiento'=>'Centro de Conocimiento','asistente'=>'Asistente IA','aliados'=>'Aliados','mensajeria'=>'Mensajería','contacto'=>'Contacto'];
     public const TAXONOMIES = ['interest'=>'Intereses','area'=>'Áreas de conocimiento','industry'=>'Industrias','goal'=>'Objetivos de networking','language'=>'Idiomas','category'=>'Categorías','tag'=>'Etiquetas'];
     public static function register(): void
     {

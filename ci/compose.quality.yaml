@@ -1,0 +1,14 @@
+# Test the complete plugin baked into the freshly built image. A native volume
+# also avoids incomplete PHP directory iteration on Windows bind mounts + musl.
+services:
+  wordpress:
+    volumes:
+      - quality_plugin:/var/www/html/wp-content/plugins/ascla-core
+  cli:
+    volumes:
+      - quality_plugin:/var/www/html/wp-content/plugins/ascla-core
+  cron:
+    volumes:
+      - quality_plugin:/var/www/html/wp-content/plugins/ascla-core
+volumes:
+  quality_plugin:

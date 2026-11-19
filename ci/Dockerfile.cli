@@ -1,0 +1,7 @@
+ARG BASE_IMAGE=wordpress:cli-php8.3@sha256:661db880e953da051abcac6c0a769767b995a82cd52101c003ca7438dd427d7d
+FROM ${BASE_IMAGE}
+USER root
+ARG SECURITY_REFRESH
+RUN test -n "$SECURITY_REFRESH" && apk upgrade --no-cache
+USER www-data
+COPY scripts/init-wordpress.sh scripts/install-local.php /opt/ascla-scripts/

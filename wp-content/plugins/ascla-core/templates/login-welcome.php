@@ -7,12 +7,12 @@ $admin = !empty($asclaAdminContext);
     <div class="ascla-welcome-brand"><img src="<?php echo esc_url(add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo.png')); ?>" alt="ASCLA" class="ascla-official-logo ascla-logo-normal"><img src="<?php echo esc_url(add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo-white.png')); ?>" alt="" aria-hidden="true" class="ascla-official-logo ascla-logo-inverse"></div>
     <div class="ascla-welcome-copy">
         <?php if($admin): ?>
-            <p class="ascla-welcome-eyebrow"><?php echo esc_html(Language::text('ADMINISTRACIÓN · SEGURIDAD · CONTROL','ADMINISTRATION · SECURITY · CONTROL')); ?></p>
+            <p class="ascla-welcome-eyebrow"><?php echo esc_html(Language::text('Administración de la plataforma','Platform administration')); ?></p>
             <h2><?php echo wp_kses_post(Language::text('Gestiona ASCLA<br>de forma segura.','Manage ASCLA<br>securely.')); ?></h2>
             <p><?php echo esc_html(Language::text('Acceso reservado para la administración técnica de WordPress y la configuración general de la plataforma.','Reserved access for WordPress technical administration and general platform configuration.')); ?></p>
             <div class="ascla-welcome-topics"><span><?php echo esc_html(Language::text('Usuarios','Users')); ?></span><span><?php echo esc_html(Language::text('Configuración','Settings')); ?></span><span><?php echo esc_html(Language::text('Operación','Operations')); ?></span></div>
         <?php else: ?>
-            <p class="ascla-welcome-eyebrow"><?php echo esc_html(Language::text('CONECTA · COMPARTE · CRECE','CONNECT · SHARE · GROW')); ?></p>
+            <p class="ascla-welcome-eyebrow"><?php echo esc_html(Language::text('Secretaría corporativa en América Latina','Corporate governance in Latin America')); ?></p>
             <h2><?php echo wp_kses_post(Language::text('El conocimiento<br>nos conecta.','Knowledge<br>connects us.')); ?></h2>
             <p><?php echo esc_html(Language::text('Un espacio para compartir experiencias, fortalecer vínculos y construir juntos el futuro de la secretaría corporativa.','A place to share experiences, build connections and shape the future of corporate governance together.')); ?></p>
             <div class="ascla-welcome-topics"><span><?php echo esc_html(Language::text('Comunidad','Community')); ?></span><span><?php echo esc_html(Language::text('Conocimiento','Knowledge')); ?></span><span>Networking</span></div>

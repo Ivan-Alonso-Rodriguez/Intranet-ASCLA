@@ -1,0 +1,313 @@
+{
+  "date": "2026-11-05T19:09:03.374Z",
+  "target": "http://127.0.0.1:18153",
+  "mode": "local-shared-test-users",
+  "deployment": {
+    "checked_at": "2026-11-05T19:08:10.500Z",
+    "target": "http://127.0.0.1:18153",
+    "version": "1.11.1",
+    "local_reference_package_sha256": "0bcea05b2c823ad811c542de90cf24e73339943f4b01692b8e7576dabd33d3d9",
+    "assets": [
+      {
+        "file": "assets/app.js",
+        "local_sha256": "a7c3d3f4899c27fa7f54f9ec7152d4afe026c0443e5e57aeb35100534685f058",
+        "deployed_sha256": "a7c3d3f4899c27fa7f54f9ec7152d4afe026c0443e5e57aeb35100534685f058",
+        "matches": true
+      },
+      {
+        "file": "assets/app.css",
+        "local_sha256": "417b04284668a44530e1741ba9a6b8538446baf65db7595adc14313275a20e47",
+        "deployed_sha256": "417b04284668a44530e1741ba9a6b8538446baf65db7595adc14313275a20e47",
+        "matches": true
+      }
+    ],
+    "scope": "Public JavaScript and CSS match the current local package. Private server-side PHP files were not downloaded; behavior is checked by the executed API/UI tests."
+  },
+  "flow_contract": {
+    "version": 1,
+    "integration": {
+      "id": "integracion",
+      "folder": "integracion",
+      "requests": 18,
+      "checks": 26
+    },
+    "flows": [
+      {
+        "id": "perfil",
+        "title": "Perfil del asociado",
+        "folder": "flujos-e2e/01-perfil",
+        "requests": 7,
+        "checks": 14,
+        "steps": [
+          "Iniciar sesión",
+          "Guardar biografía válida",
+          "Recargar y comprobar persistencia",
+          "Rechazar Empresa vacía",
+          "Conservar datos válidos",
+          "Restaurar biografía original"
+        ]
+      },
+      {
+        "id": "conexion-chat-bloqueo",
+        "title": "Conexión, chat y bloqueo",
+        "folder": "flujos-e2e/02-conexion-chat-bloqueo",
+        "requests": 12,
+        "checks": 24,
+        "steps": [
+          "Ana solicita conexión",
+          "Bruno acepta",
+          "Abrir chat",
+          "Enviar y leer el mensaje exacto",
+          "Bloquear e impedir escritura",
+          "Desbloquear sin restaurar la conexión"
+        ]
+      },
+      {
+        "id": "borrador-publicacion-inscripcion",
+        "title": "Borrador, publicación e inscripción",
+        "folder": "flujos-e2e/03-borrador-publicacion-inscripcion",
+        "requests": 12,
+        "checks": 22,
+        "steps": [
+          "Guardar borrador incompleto",
+          "Exigir campos para publicar",
+          "Publicar con fecha, hora y cupo",
+          "Reabrir y comprobar fechas",
+          "Inscribirse y comprobar persistencia",
+          "Cancelar evento propio"
+        ]
+      },
+      {
+        "id": "aforo-lista-espera-notificacion",
+        "title": "Aforo, lista de espera y notificación",
+        "folder": "flujos-e2e/04-aforo-espera-notificacion",
+        "requests": 19,
+        "checks": 37,
+        "steps": [
+          "Crear evento con un cupo",
+          "Ana confirma",
+          "Bruno entra en espera",
+          "Ana cancela y libera cupo",
+          "Comprobar oferta y abrir notificación",
+          "Comprobar aviso leído",
+          "Bruno confirma vacante sin sobrepasar aforo",
+          "Cancelar evento"
+        ]
+      },
+      {
+        "id": "suspension-reactivacion-acceso",
+        "title": "Suspensión y reactivación",
+        "folder": "flujos-e2e/05-suspension-reactivacion",
+        "requests": 9,
+        "checks": 18,
+        "steps": [
+          "Carla tiene acceso",
+          "Administrador suspende",
+          "Sesión revocada y acceso denegado",
+          "Administrador reactiva",
+          "Nuevo login permitido",
+          "Perfil conservado"
+        ]
+      },
+      {
+        "id": "asistente-ia",
+        "title": "Consulta al asistente IA",
+        "folder": "flujos-e2e/06-asistente-ia",
+        "requests": 4,
+        "checks": 8,
+        "steps": [
+          "Abrir conversación nueva",
+          "Enviar pregunta",
+          "Recibir trabajo pendiente con ID real",
+          "Esperar la respuesta del proveedor",
+          "Comprobar pregunta y respuesta",
+          "Recargar y conservar hilo"
+        ]
+      }
+    ]
+  },
+  "assistant_provider": "mock",
+  "scope": "Integración API adicional y los mismos seis flujos de negocio que Playwright.",
+  "commit": "174f74519b62d51f5826e936922f4d4575288db8",
+  "branch": "development",
+  "working_tree": "clean",
+  "results": [
+    {
+      "name": "integracion",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 18,
+        "passedRequests": 18,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 26,
+        "passedTests": 26,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    },
+    {
+      "name": "perfil",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 7,
+        "passedRequests": 7,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 14,
+        "passedTests": 14,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    },
+    {
+      "name": "conexion-chat-bloqueo",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 12,
+        "passedRequests": 12,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 24,
+        "passedTests": 24,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    },
+    {
+      "name": "borrador-publicacion-inscripcion",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 12,
+        "passedRequests": 12,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 22,
+        "passedTests": 22,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    },
+    {
+      "name": "aforo-lista-espera-notificacion",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 19,
+        "passedRequests": 19,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 37,
+        "passedTests": 37,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    },
+    {
+      "name": "suspension-reactivacion-acceso",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 9,
+        "passedRequests": 9,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 18,
+        "passedTests": 18,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    },
+    {
+      "name": "asistente-ia",
+      "status": "passed",
+      "summary": {
+        "totalRequests": 4,
+        "passedRequests": 4,
+        "failedRequests": 0,
+        "errorRequests": 0,
+        "skippedRequests": 0,
+        "skippedByBail": 0,
+        "totalAssertions": 0,
+        "passedAssertions": 0,
+        "failedAssertions": 0,
+        "totalTests": 8,
+        "passedTests": 8,
+        "failedTests": 0,
+        "totalPreRequestTests": 0,
+        "passedPreRequestTests": 0,
+        "failedPreRequestTests": 0,
+        "totalPostResponseTests": 0,
+        "passedPostResponseTests": 0,
+        "failedPostResponseTests": 0
+      }
+    }
+  ],
+  "cleanup": {
+    "status": "passed",
+    "reactivated": true,
+    "unblocked": true,
+    "events": [
+      18,
+      21
+    ]
+  }
+}

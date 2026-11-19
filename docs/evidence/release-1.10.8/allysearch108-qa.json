@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-15",
+  "recorded_at_utc": "2026-10-15T07:29:58.623798+00:00",
+  "target": "https://wordpress.ingsoftware.lat/",
+  "version": "1.10.8",
+  "package_sha256": "3715b8e9b20c7795694abbf2047dd472d0dac0198ebfd83f36f85c6d6eab1066",
+  "installation": "WordPress visibly confirmed successful update of the existing ASCLA Core plugin",
+  "scope": "Authenticated, read-only catalog and administrative search review of existing QA allies. State changes, permissions and bulk migration failures were tested locally; no new remote accounts, synthetic allies or full remote acceptance run.",
+  "observations": {
+    "all_catalog_allies_before_search": 4,
+    "query": "Socio estratégico",
+    "catalog_type_matches": 3,
+    "administrative_type_matches": 3,
+    "matching_names": [
+      "WCD - Women Corporate Directors",
+      "tomate®consultores",
+      "SECO - Cooperación Suiza"
+    ],
+    "other_type_excluded": "WIP PERÚ",
+    "type_absent_from_matching_names_and_descriptions": true,
+    "normal_viewport_horizontal_overflow": false,
+    "console_errors_observed": []
+  },
+  "public_assets": [
+    {
+      "asset": "app.js",
+      "sha256": "e512b7343d5300b08359f6771dc6062a606c3e763be83f5aa98b44251db6133b",
+      "bytes_match": true
+    },
+    {
+      "asset": "app.css",
+      "sha256": "30577a326eca75bd36e75217a5d8c7a0659acd5c0c52f8ee5c96beac2be18667",
+      "bytes_match": true
+    },
+    {
+      "asset": "allies-ui.js",
+      "sha256": "9bfb52af98df385bb26abb3e934386dfcf847941ee00280a65b4ea2cf0d0d82c",
+      "bytes_match": true
+    },
+    {
+      "asset": "admin-members.js",
+      "sha256": "66cc0118aab0aac73ae6dbf8a79d0b64ce59a89e8249dc2b68b6b0e41bd8d74c",
+      "bytes_match": true
+    },
+    {
+      "asset": "interest-learning.js",
+      "sha256": "76308aeeeda449c33807331382658d8ba874e1f7b3c97e0d5dad995f64d0a53c",
+      "bytes_match": true
+    },
+    {
+      "asset": "login.css",
+      "sha256": "e23f9205458515024d16d8ff1900b48fdbef92152028f3074e546e6346a0ce79",
+      "bytes_match": true
+    }
+  ],
+  "screenshots": [
+    "test-results/allysearch108-qa-catalog.jpg",
+    "test-results/allysearch108-qa-admin.jpg"
+  ]
+}

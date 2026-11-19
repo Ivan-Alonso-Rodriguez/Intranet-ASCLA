@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="31" assertions="345" errors="0" failures="0" skipped="0" time="9.612945">
+    <testsuite name="ContentLifecycleTest" file="/opt/ascla-tests/php/ContentLifecycleTest.php" tests="17" assertions="271" errors="0" failures="0" skipped="0" time="7.786917">
+      <testcase name="testEveryEditorialTypeCanBeTrashedByAnAdministrator" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="29" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="44" time="1.335893"/>
+      <testcase name="testDraftsArePrivateToTheirAuthorEvenForAdministrators" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="41" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="32" time="0.380212"/>
+      <testcase name="testAuthorCanDeleteOwnPendingContentAndModeratorCanReviewButOtherMembersCannot" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="64" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="6" time="0.334372"/>
+      <testcase name="testForumRemovalKeepsOtherAuthorsTopicsInGeneralList" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="72" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="2" time="0.368814"/>
+      <testcase name="testCommentsRequireAuthorOrModeratorAndPendingOwnCommentsAreVisible" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="78" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="5" time="0.350503"/>
+      <testcase name="testRemovedReactionsRemainRemovableLikesAndCannotBeSubmittedAgain" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="86" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="72" time="0.413439"/>
+      <testcase name="testFileDeletionRemovesPostAndProfileReferencesButPreservesOtherFiles" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="111" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="11" time="0.448938"/>
+      <testcase name="testCroppedImageKeepsHiddenMasterAndDeletesBothAsOneUnit" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="121" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="8" time="0.285427"/>
+      <testcase name="testOnlyAdminCreatesEventsAndNonDraftPublishesImmediately" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="139" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="12" time="0.408140"/>
+      <testcase name="testIncompleteEventCanBeSavedAsDraftButCannotBePublished" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="147" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="11" time="0.391981"/>
+      <testcase name="testIncompleteDraftStillRejectsInvalidDatesNumbersAndPublication" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="161" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="27" time="0.402904"/>
+      <testcase name="testMicroeventDraftAllowsMissingDeadlineWithoutWeakeningIntegerValidation" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="184" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="13" time="0.359205"/>
+      <testcase name="testEventCoverAcceptsOneImageAndRejectsMultipleFilesOrPdf" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="199" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="5" time="0.334385"/>
+      <testcase name="testLoginLocalePersistsPerUserRejectsMalformedInputAndDoesNotChangeSite" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="220" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="10" time="0.297909"/>
+      <testcase name="testFreshMultimediaDemoKeepsAdminContextAndMembersCannotSeed" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="228" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="8" time="1.091610"/>
+      <testcase name="testQueueWakeupDoesNotWaitForTheHourlySafetyEvent" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="241" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="3" time="0.290673"/>
+      <testcase name="testStoredAbstentionRemainsAnAbstention" file="/opt/ascla-tests/php/ContentLifecycleTest.php" line="252" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="2" time="0.292512"/>
+    </testsuite>
+    <testsuite name="GalleryProfile1110Test" file="/opt/ascla-tests/php/GalleryProfile1110Test.php" tests="5" assertions="24" errors="0" failures="0" skipped="0" time="1.375344">
+      <testcase name="testRemovingGalleryDeletesImagesPdfAndUnusedMasterButPreservesOtherFiles" file="/opt/ascla-tests/php/GalleryProfile1110Test.php" line="31" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="8" time="0.312775"/>
+      <testcase name="testSharedMasterSurvivesUntilItsLastGalleryDerivativeIsRemoved" file="/opt/ascla-tests/php/GalleryProfile1110Test.php" line="39" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="5" time="0.321222"/>
+      <testcase name="testUnauthorizedGalleryDeletionPreservesThePostAndItsBytes" file="/opt/ascla-tests/php/GalleryProfile1110Test.php" line="45" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="3" time="0.247170"/>
+      <testcase name="testDatabaseFailureRollsBackGalleryAndFileDeletionTogether" file="/opt/ascla-tests/php/GalleryProfile1110Test.php" line="52" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="4" time="0.268846"/>
+      <testcase name="testUsernameIsAvailableOnlyOnOwnProfile" file="/opt/ascla-tests/php/GalleryProfile1110Test.php" line="62" class="GalleryProfile1110Test" classname="GalleryProfile1110Test" assertions="4" time="0.225332"/>
+    </testsuite>
+    <testsuite name="MediaTemporaryTest" file="/opt/ascla-tests/php/MediaTemporaryTest.php" tests="5" assertions="21" errors="0" failures="0" skipped="0" time="0.450231">
+      <testcase name="testTemporaryUploadIsHiddenAndCanBeDiscardedWhenFormIsCancelled" file="/opt/ascla-tests/php/MediaTemporaryTest.php" line="46" class="MediaTemporaryTest" classname="MediaTemporaryTest" assertions="4" time="0.075046"/>
+      <testcase name="testCommittedUploadReturnsToLibraryAndCannotBeDiscardedAsTemporary" file="/opt/ascla-tests/php/MediaTemporaryTest.php" line="56" class="MediaTemporaryTest" classname="MediaTemporaryTest" assertions="4" time="0.074641"/>
+      <testcase name="testAnotherMemberCannotDiscardOrListTheOwnersTemporaryFile" file="/opt/ascla-tests/php/MediaTemporaryTest.php" line="65" class="MediaTemporaryTest" classname="MediaTemporaryTest" assertions="4" time="0.142605"/>
+      <testcase name="testAbandonedCleanupPreservesFreshCommittedAndProfileReferencedFiles" file="/opt/ascla-tests/php/MediaTemporaryTest.php" line="71" class="MediaTemporaryTest" classname="MediaTemporaryTest" assertions="5" time="0.083668"/>
+      <testcase name="testDiscardingACropRemovesItsUnusedTemporaryMaster" file="/opt/ascla-tests/php/MediaTemporaryTest.php" line="79" class="MediaTemporaryTest" classname="MediaTemporaryTest" assertions="4" time="0.074270"/>
+    </testsuite>
+    <testsuite name="SecurityHeadersTest" file="/opt/ascla-tests/php/SecurityHeadersTest.php" tests="4" assertions="29" errors="0" failures="0" skipped="0" time="0.000453">
+      <testcase name="testHtmlPolicyRejectsInlineHandlersAndBroadSourcesButAllowsRequiredIntegrations" file="/opt/ascla-tests/php/SecurityHeadersTest.php" line="7" class="SecurityHeadersTest" classname="SecurityHeadersTest" assertions="16" time="0.000175"/>
+      <testcase name="testLegacyStyleCompatibilityNeverAuthorizesRawScriptTags" file="/opt/ascla-tests/php/SecurityHeadersTest.php" line="20" class="SecurityHeadersTest" classname="SecurityHeadersTest" assertions="5" time="0.000155"/>
+      <testcase name="testRestErrorsReceiveRestrictiveHeadersWithoutChangingTheirStatusOrBody" file="/opt/ascla-tests/php/SecurityHeadersTest.php" line="30" class="SecurityHeadersTest" classname="SecurityHeadersTest" assertions="7" time="0.000078"/>
+      <testcase name="testOtherRestNamespacesAreNotReconfiguredByThePlugin" file="/opt/ascla-tests/php/SecurityHeadersTest.php" line="43" class="SecurityHeadersTest" classname="SecurityHeadersTest" assertions="1" time="0.000045"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

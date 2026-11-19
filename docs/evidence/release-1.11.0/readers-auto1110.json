@@ -1,0 +1,327 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-23T23:40:34.639Z",
+  "scope": "WordPress local desechable. Visores reales de PDF y Galería; publicación, REST, cola, WP-Cron, caché y notificaciones reales. Respuestas de Supadata e IA simuladas; sin credencial real, consumo ni despliegue remoto.",
+  "package_sha256": "66951f61780b726b8e33eee559834fba21bef5d0a9cf4c07b998a0247143a909",
+  "package_manifest": "docs/evidence/release-1.11.0/package-readers-auto.json",
+  "installer": {
+    "version": "1.11.0",
+    "artifact": "dist/ascla-core-instalable.zip",
+    "sha256": "006cb854638665eeaee93b8787a8c6b0c1a05ea24430a1534d64cf51f72c7168",
+    "bytes": 2027337,
+    "files": 212,
+    "upload_limit_bytes": 2097152,
+    "below_2MiB": true,
+    "crc_valid": true,
+    "all_retained_files_identical_to_complete_release": true,
+    "complete_release_sha256": "66951f61780b726b8e33eee559834fba21bef5d0a9cf4c07b998a0247143a909",
+    "complete_release_unchanged": true,
+    "omitted_translation_sources": [
+      "ascla-core/languages/ascla-core-en_US.po",
+      "ascla-core/languages/ascla-core-es_ES.po"
+    ],
+    "runtime_translation_catalogs_retained": true,
+    "scope": "Packaging-only variant; existing PHP, JavaScript, PDF.js, CSS and compiled translations remain byte-identical to the verified complete release. No server settings were changed and no new functional test run is claimed."
+  },
+  "phpunit": {
+    "tests": 163,
+    "assertions": 1488,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "phpunit_report": "docs/evidence/release-1.11.0/readers-auto1110-junit.xml",
+  "ui": {
+    "readers": {
+      "version": "1.11.0",
+      "date": "2026-10-23T23:40:34.639Z",
+      "scope": "WordPress local desechable. PDF real de dos páginas, renderizado con PDF.js local, sin visor externo. Pruebas UI, descargas y permisos HTTP reales. No acredita despliegue ni auditoría de seguridad completa.",
+      "package_sha256": "66951f61780b726b8e33eee559834fba21bef5d0a9cf4c07b998a0247143a909",
+      "checks": [
+        "El PDF de la comunidad requiere sesión y un archivo privado sin publicar sigue denegado a otros asociados",
+        "La descarga conserva bytes originales, cabeceras restrictivas y disposición attachment",
+        "Apertura automática sin panel de texto; primera página renderizada sin modificar el comentario: desktop-light",
+        "Páginas distintas, límites y zoom sin texto duplicado; el comentario se conserva: desktop-light",
+        "Cerrar libera el worker; reabrir vuelve a cargar sin infracciones CSP: desktop-light",
+        "Apertura automática sin panel de texto; primera página renderizada sin modificar el comentario: mobile-light",
+        "Páginas distintas, límites y zoom sin texto duplicado; el comentario se conserva: mobile-light",
+        "Cerrar libera el worker; reabrir vuelve a cargar sin infracciones CSP: mobile-light",
+        "Apertura automática sin panel de texto; primera página renderizada sin modificar el comentario: desktop-dark",
+        "Páginas distintas, límites y zoom sin texto duplicado; el comentario se conserva: desktop-dark",
+        "Cerrar libera el worker; reabrir vuelve a cargar sin infracciones CSP: desktop-dark",
+        "Apertura automática sin panel de texto; primera página renderizada sin modificar el comentario: mobile-dark",
+        "Páginas distintas, límites y zoom sin texto duplicado; el comentario se conserva: mobile-dark",
+        "Cerrar libera el worker; reabrir vuelve a cargar sin infracciones CSP: mobile-dark",
+        "El mismo lector funciona en los PDF adjuntos de Galería",
+        "Cerrar la publicación también libera el documento y su worker",
+        "Sin nombre de archivo; clic por encima/debajo de la flecha, miniaturas, teclado y comentario conservado: desktop-light",
+        "Sin nombre de archivo; clic por encima/debajo de la flecha, miniaturas, teclado y comentario conservado: mobile-light",
+        "Sin nombre de archivo; clic por encima/debajo de la flecha, miniaturas, teclado y comentario conservado: desktop-dark",
+        "Sin nombre de archivo; clic por encima/debajo de la flecha, miniaturas, teclado y comentario conservado: mobile-dark",
+        "Ocultar y volver a publicar conserva los permisos vigentes del archivo",
+        "Un documento no válido muestra un mensaje claro y conserva la descarga",
+        "Eliminar la Galería retira también el PDF usado por la vista previa"
+      ],
+      "scans": [
+        {
+          "name": "lector-pdf-desktop-light",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 0
+        },
+        {
+          "name": "texto-y-controles-desktop-light",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 0
+        },
+        {
+          "name": "lector-pdf-mobile-light",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 0
+        },
+        {
+          "name": "texto-y-controles-mobile-light",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 1
+        },
+        {
+          "name": "lector-pdf-desktop-dark",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 0
+        },
+        {
+          "name": "texto-y-controles-desktop-dark",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 0
+        },
+        {
+          "name": "lector-pdf-mobile-dark",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 0
+        },
+        {
+          "name": "texto-y-controles-mobile-dark",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 1
+        },
+        {
+          "name": "pdf-en-galeria-mobile-dark",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 0
+        },
+        {
+          "name": "galeria-desktop-light",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 1
+        },
+        {
+          "name": "galeria-mobile-light",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 1
+        },
+        {
+          "name": "galeria-desktop-dark",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 1
+        },
+        {
+          "name": "galeria-mobile-dark",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 1
+        },
+        {
+          "name": "pdf-no-valido",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 0
+        }
+      ],
+      "errors": []
+    },
+    "automatic_video": {
+      "version": "1.11.0",
+      "date": "2026-10-23T23:39:58.301Z",
+      "scope": "WordPress loopback desechable; publicación, cola, WP-Cron, REST, notificaciones y navegador reales. Supadata y la IA simulados, sin clave ni consumo reales. No acredita conexión con la cuenta del usuario ni despliegue.",
+      "package_sha256": "66951f61780b726b8e33eee559834fba21bef5d0a9cf4c07b998a0247143a909",
+      "checks": [
+        "Publicar encola el proceso sin botones manuales; el seguimiento continúa al volver de otra ventana",
+        "La cola real resuelve la espera asíncrona, conserva el final después de dos horas y actualiza el resumen sin perder el comentario",
+        "El resumen se adapta a móvil y ambos temas; completar el proceso no genera avisos redundantes",
+        "El asociado puede leer el resumen y no recibe transcripción editorial, estado interno ni credenciales",
+        "Un fallo queda visible en el recurso y llega a la bandeja con su motivo y enlace directo",
+        "Corregir y guardar la configuración reanuda automáticamente el proceso fallido y reutiliza la transcripción en caché"
+      ],
+      "scans": [
+        {
+          "name": "preparacion-automatica",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 1
+        },
+        {
+          "name": "resumen-automatico-desktop-light",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 2
+        },
+        {
+          "name": "resumen-automatico-mobile-light",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 2
+        },
+        {
+          "name": "resumen-automatico-desktop-dark",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 2
+        },
+        {
+          "name": "resumen-automatico-mobile-dark",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 2
+        },
+        {
+          "name": "error-visible",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 0
+        },
+        {
+          "name": "notificacion-de-error",
+          "engine": {
+            "name": "axe-core",
+            "version": "4.14.0"
+          },
+          "violations": [],
+          "incomplete": 0
+        }
+      ],
+      "errors": []
+    },
+    "total_checks": 29,
+    "axe_views": 21
+  },
+  "source_hashes": {
+    "tests/readers-auto1110.cjs": "8fdf4ec31f50d80833e93b0cf0648170225209e06ca41397ad05f440f44ac548",
+    "tests/video-auto1110.cjs": "4a3abb581b0b865e8076b319b2a0e5ffd5d8d71cfd3c721c2ef50be9c693d477",
+    "tests/supadata1110-fixture.php": "1c89d51392032354f9a0dc8cc091513642303e54aceaba18ef453ed9a4177bc9",
+    "tests/php/VideoPreparationTest.php": "57c97469aeeea37cc9d3900b936cf9aa3bb7ea5839ae2f595010511d32470549",
+    "tests/php/SupadataTranscriptTest.php": "a70598960f637ce691b1fc641115d445557749d81414e02c5d68d1d74823b3ab"
+  },
+  "production_files_changed_since_summary": [
+    "ascla-core/assets/app.css",
+    "ascla-core/assets/app.js",
+    "ascla-core/assets/content-ui.js",
+    "ascla-core/assets/pdf-preview.js",
+    "ascla-core/languages/ascla-core-en_US.mo",
+    "ascla-core/languages/ascla-core-en_US.po",
+    "ascla-core/languages/ascla-core-es_ES.mo",
+    "ascla-core/languages/ascla-core-es_ES.po",
+    "ascla-core/languages/en.json",
+    "ascla-core/readme.txt",
+    "ascla-core/src/Jobs/Queue.php",
+    "ascla-core/src/Plugin.php",
+    "ascla-core/src/Services/Content.php",
+    "ascla-core/src/Services/Knowledge.php",
+    "ascla-core/src/Services/NotificationTarget.php",
+    "ascla-core/src/Services/Settings.php",
+    "ascla-core/src/Services/VideoPreparation.php"
+  ],
+  "source_bytes_match_verified_zip": true,
+  "base_commit": "2daf0d9e5b0da8eee8b21076f2dc3915c77a4e3f",
+  "working_tree": "uncommitted; prior user changes preserved",
+  "privacy_and_dependency_files_unchanged": true,
+  "automatic_pipeline": "A published video starts one job per source signature. Drafts do not call providers. Existing transcripts and cache are reused; asynchronous waits continue without repeated error notifications. Completion refreshes the open item and preserves unsaved comments, including modal return. Configuration corrections retry eligible failures; ambiguous initial requests that may have consumed credits are excluded. No bulk backfill of existing videos.",
+  "visual_review": "PDF en escritorio oscuro y móvil claro, Galería en móvil oscuro y notificación de error revisados visualmente. Controles legibles, sin nombre visible de foto ni texto duplicado de PDF, zonas laterales ampliadas.",
+  "limitations": [
+    "El usuario configurará la clave de Supadata y la IA en WordPress. No se probó la cuenta real.",
+    "WP-Cron debe estar activo para continuar cuando el navegador está cerrado.",
+    "No se repitieron auditorías externas, carga, SonarQube, ZAP ni todos los flujos históricos. Axe no equivale a una auditoría WCAG manual completa."
+  ],
+  "native_report": "test-results/readers-auto1110/index.html",
+  "temporary_environment_cleanup": "completed; only isolated ascla_release1110 containers, volumes, test accounts, uploaded media, fixture and private environment/access files removed",
+  "simulated_provider_metrics": {
+    "simulated_provider": true,
+    "requests": [
+      "https://api.supadata.ai/v1/transcript?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DASCLA_SD001&lang=es&text=false&mode=native",
+      "https://api.supadata.ai/v1/transcript/job-fixture-long",
+      "https://api.supadata.ai/v1/transcript/job-fixture-long"
+    ],
+    "creates": 1,
+    "polls": 2
+  }
+}

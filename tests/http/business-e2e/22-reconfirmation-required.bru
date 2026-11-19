@@ -1,0 +1,24 @@
+meta {
+  name: reconfirmation-required
+  type: http
+  seq: 22
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/events/{{eventId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("Asociado consulta evento reprogramado", function () { expect(res.getStatus()).to.equal(200); });
+  test("Inscripción requiere reconfirmación", function () { expect(res.getBody().registered).to.equal("reconfirm"); });
+}

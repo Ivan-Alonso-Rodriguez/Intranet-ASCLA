@@ -1,0 +1,26 @@
+meta {
+  name: 04. El hilo conserva la pregunta y la respuesta
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/assistant/thread?thread={{hiloAsistente}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAna}}
+  X-WP-Nonce: {{nonceAna}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("El hilo contiene el trabajo completado de esta ejecución", function () { const item=res.getBody().find(j=>Number(j.id)===Number(bru.getCollectionVar("trabajoAsistenteId")));expect(item).to.be.an("object");expect(item.question).to.equal(bru.getCollectionVar("preguntaAsistente"));expect(item.status).to.equal("completed");expect(item.result.answer).to.equal(bru.getCollectionVar("respuestaAsistente")); });
+}

@@ -1,0 +1,30 @@
+meta {
+  name: register-event
+  type: http
+  seq: 20
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/events/{{eventId}}/register
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+  Content-Type: application/json
+}
+body:json {
+  {
+    "status": "accepted"
+  }
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+tests {
+  test("Asociado se inscribe", function () { expect(res.getStatus()).to.equal(200); });
+  test("Inscripción conservada", function () { expect(res.getBody().registered).to.equal("accepted"); });
+}

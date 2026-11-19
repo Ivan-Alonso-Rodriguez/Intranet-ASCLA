@@ -1,0 +1,32 @@
+meta {
+  name: send-message
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/conversations/{{conversationId}}/messages
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{aCookie}}
+  X-WP-Nonce: {{aNonce}}
+  Content-Type: application/json
+}
+body:json {
+  {
+    "body": "QA: mensaje que debe conservarse."
+  }
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+script:post-response {
+  if(res.getStatus()===200) bru.setVar("messageId",res.getBody().id);
+}
+tests {
+  test("Mensaje enviado", function () { expect(res.getStatus()).to.equal(200); });
+}

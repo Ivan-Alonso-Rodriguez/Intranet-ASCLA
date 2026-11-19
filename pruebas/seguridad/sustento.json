@@ -1,0 +1,120 @@
+{
+  "format": "ascla-security-defense-v1",
+  "prepared_at": "2026-11-05T19:21:12.553Z",
+  "version": "1.10.9",
+  "local": {
+    "date": "2026-11-05T16:28:54.082062+00:00",
+    "status": "PASS",
+    "source_sha256": "8726ea30d4cb94a1f71b2328594955b18a54cba410b6d51a255863c1a7e9fbe3",
+    "pages": 14,
+    "api_get_operations": 18,
+    "csp_passed": 20,
+    "csp_checks": 20,
+    "browser_checks": 8,
+    "browser_views": 24,
+    "scans": [
+      {
+        "kind": "frontend",
+        "status": "PASS",
+        "engine_version": "2.17.0",
+        "authenticated_before": true,
+        "authenticated_after": true,
+        "active_complete": true,
+        "active_strength": "LOW",
+        "completed_active_rules": 52,
+        "active_request_count": 12846,
+        "risk_counts": {
+          "0": 9,
+          "1": 0,
+          "2": 0,
+          "3": 0
+        }
+      },
+      {
+        "kind": "backend",
+        "status": "PASS",
+        "engine_version": "2.17.0",
+        "authenticated_before": true,
+        "authenticated_after": true,
+        "active_complete": true,
+        "active_strength": "LOW",
+        "completed_active_rules": 52,
+        "active_request_count": 3684,
+        "risk_counts": {
+          "0": 1,
+          "1": 0,
+          "2": 0,
+          "3": 0
+        }
+      }
+    ]
+  },
+  "published": {
+    "target": "https://wordpress.ingsoftware.lat",
+    "http_date": "2026-10-22T09:41:10.563Z",
+    "status": "FAIL",
+    "csp_passed": 19,
+    "csp_checks": 20,
+    "failed": [
+      {
+        "nombre": "Sin versión del servidor",
+        "cumple": false
+      }
+    ],
+    "browser_date": "2026-10-22T08:21:15.775Z",
+    "browser_status": "PASS",
+    "browser_checks": 6,
+    "browser_views": 42,
+    "exposure_date": "2026-10-22T09:45:43.256Z",
+    "exposure_status": "FAIL",
+    "exposure_routes": 5
+  },
+  "hosting_access": "Solo se dispone de administración WordPress; no se proporcionó acceso al servidor, SSH, panel de hosting o Jenkins.",
+  "remediation": {
+    "file": "config/security.conf",
+    "required_directives": [
+      "ServerTokens Prod",
+      "ServerSignature Off"
+    ],
+    "status": "pending-hosting-access",
+    "verification_required": "Repetir los 20 controles HTTP y revisar también estáticos, API y errores después de aplicar y recargar Apache."
+  },
+  "references": [
+    {
+      "file": "seguridad/resumen.json",
+      "sha256": "7bbd0b2e1097e0b297113c67b7bb39ce292a55cb0693a03a41ed400153b15bc2"
+    },
+    {
+      "file": "seguridad/frontend-zap.json",
+      "sha256": "a8cbdb69419c98a3b76826404c4e8ac27df78db8af54b0cca2dfc1d730c82444"
+    },
+    {
+      "file": "seguridad/backend-zap.json",
+      "sha256": "d9e8ac7db5ef0c129b50c22b241305e0a106876f315299ca039503ba196e6890"
+    },
+    {
+      "file": "seguridad/csp-validation.json",
+      "sha256": "8212451a85abcaecf766404b6d48fafed42b6ba91883479422d50ae7bb69ef34"
+    },
+    {
+      "file": "seguridad/browser-security.json",
+      "sha256": "6de631bdcd2c3d297e1d180e7d1b55a8e75fb815e5b2d4686021b48e66e3a3f1"
+    },
+    {
+      "file": "actualizacion/deployment.json",
+      "sha256": "643be25a643e94a34b97abd396e5d0516ce2f05eddc12e0ac9ada5c7e3efb287"
+    },
+    {
+      "file": "actualizacion/remote-csp-validation.json",
+      "sha256": "9ae2a3470270243e8212a181d01655982cbc118a058d7899fe88b207b9c6a1de"
+    },
+    {
+      "file": "actualizacion/remote-browser-security.json",
+      "sha256": "375c3083eea1c08c7bc2c5e0b5ca8f32830076e4cf3ba076b96f6445737e6ebb"
+    },
+    {
+      "file": "actualizacion/server-exposure.json",
+      "sha256": "83d7c8c73669f7cd63db8c85f91ced516f3367afcef4a5295353a8f13d447915"
+    }
+  ]
+}

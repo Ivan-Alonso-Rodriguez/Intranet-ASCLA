@@ -1,0 +1,314 @@
+{
+  "date": "2026-10-15T20:23:28.601476+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "scope": "Correction of the 137 exported SonarQube findings; disposable local static analysis and existing regression suites; no remote deployment or Quality Gate approval claim.",
+  "baseline_commit": "88bbad3bd9ec9a15ff5d381c6c490499c5f59635",
+  "static_analysis": {
+    "server": "SonarQube Community Build 26.9.0.129388",
+    "original_findings": 137,
+    "baseline_local_findings": 137,
+    "corrected_local_findings": 0,
+    "original_and_local_baseline_match_rule_file_line": true,
+    "rules": {
+      "javascript:S1121": 1,
+      "javascript:S1481": 1,
+      "javascript:S1854": 1,
+      "javascript:S2486": 1,
+      "javascript:S2681": 1,
+      "javascript:S3358": 24,
+      "javascript:S3776": 6,
+      "javascript:S4624": 41,
+      "javascript:S6582": 2,
+      "php:S112": 11,
+      "php:S1142": 15,
+      "php:S1155": 1,
+      "php:S116": 2,
+      "php:S1192": 6,
+      "php:S1766": 4,
+      "php:S3699": 2,
+      "php:S3776": 10,
+      "php:S5785": 7,
+      "php:S6035": 1
+    },
+    "local_baseline_analysis_id": "c1b95ba8-b4d1-4228-bd02-998a23a20ee2",
+    "local_corrected_analysis_id": "3396809a-1795-4103-b724-a06691198a9f",
+    "original_export": {
+      "path": "test-results/sonar/sonar-issues.json",
+      "sha256": "bd4db1191d1ab83d05d866e8871d4613b5783dc6eca85049364052bfc88b493d"
+    },
+    "local_baseline_report": {
+      "path": "test-results/sonar/local-baseline/issues.json",
+      "sha256": "be99c214e208b20adf0c028d31abfa104f3750885617c435bfe60b35dc7edbca"
+    },
+    "local_corrected_report": {
+      "path": "test-results/sonar/local-current-3/issues.json",
+      "sha256": "588bafd7aef47698e9299b1b534f5c9eff8ad99dd7bb428ed549f58013935ca1"
+    },
+    "local_scanner_log": {
+      "path": "test-results/sonar/local-current-3/scanner.log",
+      "sha256": "cc238e128ab88ca4b47df1e092b593329c2647bc6b505603c316e08338a094bd"
+    },
+    "coverage_imported": false,
+    "rules_suppressed": false,
+    "exclusions_changed": false,
+    "project_analysis_configuration_unchanged": true,
+    "quality_gate_thresholds_changed": false
+  },
+  "php": {
+    "tests": 677,
+    "assertions": 7565,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "coverage_collected": false,
+    "native_junit": {
+      "path": "test-results/sonar/regressions-20261015T200444Z-16936/junit.xml",
+      "sha256": "a737c4f092ac615a95a2159cf331169271db1ae846bff8336d57232a864f9296"
+    },
+    "php_sources_and_tests_match_final_snapshot": true
+  },
+  "portable_checks_passed": 49,
+  "browser": [
+    {
+      "script": "tests/editorial107.cjs",
+      "checks_passed": 9,
+      "errors": 0,
+      "axe_states": 0,
+      "axe_violations": 0,
+      "native_report": {
+        "path": "test-results/sonar/regressions-20261015T201431Z-17707/editorial107.json",
+        "sha256": "1faf452fc14eca15bb07a36733aa4f04b66e94fe5aa50497f31ef2daa1a9cc15"
+      }
+    },
+    {
+      "script": "tests/governance107.cjs",
+      "checks_passed": 10,
+      "errors": 0,
+      "axe_states": 0,
+      "axe_violations": 0,
+      "native_report": {
+        "path": "test-results/sonar/regressions-20261015T201431Z-17707/governance107.json",
+        "sha256": "76e86dda103ab500404d3d0d423d7829d117881de47e02667b1e1e1666280de6"
+      }
+    },
+    {
+      "script": "tests/forms107.cjs",
+      "checks_passed": 7,
+      "errors": 0,
+      "axe_states": 0,
+      "axe_violations": 0,
+      "native_report": {
+        "path": "test-results/sonar/regressions-20261015T201431Z-17707/forms107.json",
+        "sha256": "71d33192a36ece30dbdd7468a3580fbefcc9eb082e3c472242f00beb7aa07b39"
+      }
+    },
+    {
+      "script": "tests/forms108.cjs",
+      "checks_passed": 7,
+      "errors": 0,
+      "axe_states": 0,
+      "axe_violations": 0,
+      "native_report": {
+        "path": "test-results/sonar/regressions-20261015T201431Z-17707/forms108.json",
+        "sha256": "b492d739622920f3d6863ebaa2915809ddc894e1da7d649e45628419f50d3e75"
+      }
+    },
+    {
+      "script": "tests/events108.cjs",
+      "checks_passed": 9,
+      "errors": 0,
+      "axe_states": 2,
+      "axe_violations": 0,
+      "native_report": {
+        "path": "test-results/sonar/regressions-20261015T201431Z-17707/events108.json",
+        "sha256": "9b9225638f5eb30112aeb45bc554a2801141361cd48fb14aac0e99b8f9b19ab1"
+      }
+    },
+    {
+      "script": "tests/accessibility107.cjs",
+      "checks_passed": 10,
+      "errors": 0,
+      "axe_states": 140,
+      "axe_violations": 0,
+      "native_report": {
+        "path": "test-results/sonar/regressions-20261015T201431Z-17707/accessibility107.json",
+        "sha256": "75b0ed46a3c2744bf3a3605f8f1b9ef84cfec35a444e12bfe1d876ac50e25901"
+      }
+    },
+    {
+      "script": "tests/allies108.cjs",
+      "checks_passed": 7,
+      "errors": 0,
+      "axe_states": 0,
+      "axe_violations": 0,
+      "native_report": {
+        "path": "test-results/sonar/regressions-20261015T201903Z-18277/allies108.json",
+        "sha256": "9abe4e234d5ef2283ac59c5399f039e4c137c2b4a96c0f7075487cb64e44f842"
+      }
+    },
+    {
+      "script": "tests/admin-members108.cjs",
+      "checks_passed": 8,
+      "errors": 0,
+      "axe_states": 0,
+      "axe_violations": 0,
+      "native_report": {
+        "path": "test-results/sonar/regressions-20261015T201903Z-18277/admin-members108.json",
+        "sha256": "d1d1c34847568132babbd4dce67c30228a33a180ed3fe65bf33f81fcd75e615c"
+      }
+    },
+    {
+      "script": "tests/assistant-reset108.cjs",
+      "checks_passed": 11,
+      "errors": 0,
+      "axe_states": 0,
+      "axe_violations": 0,
+      "native_report": {
+        "path": "test-results/sonar/regressions-20261015T201903Z-18277/assistant-reset108.json",
+        "sha256": "15188555e8c91334da2f18be8f79c3c46170ba5bbbc87c112b84ce5edf1dca84"
+      }
+    },
+    {
+      "script": "tests/micro-flow108.cjs",
+      "checks_passed": 14,
+      "errors": 0,
+      "axe_states": 4,
+      "axe_violations": 0,
+      "native_report": {
+        "path": "test-results/sonar/regressions-20261015T202138Z-19052/micro-flow108.json",
+        "sha256": "68593aff92ba50a913f345faabb0171c19fcf2bd0da9af67dc01cd595aa65b37"
+      }
+    },
+    {
+      "script": "tests/micro-admin108.cjs",
+      "checks_passed": 9,
+      "errors": 0,
+      "axe_states": 2,
+      "axe_violations": 0,
+      "native_report": {
+        "path": "test-results/sonar/regressions-20261015T202138Z-19052/micro-admin108.json",
+        "sha256": "b4a5a971f525843ab36e155bbcd785eb2d674736b66e5aedd5ec0b4b13567d78"
+      }
+    },
+    {
+      "script": "tests/interest-learning108.cjs",
+      "checks_passed": 9,
+      "errors": 0,
+      "axe_states": 0,
+      "axe_violations": 0,
+      "native_report": {
+        "path": "test-results/sonar/regressions-20261015T202138Z-19052/automatic108-browser.json",
+        "sha256": "cf09d22c3b59cc391a9a5bc2b05c6d29203796aa9cfac9fd280a941380439cf9"
+      }
+    }
+  ],
+  "browser_total_checks_passed": 110,
+  "browser_total_axe_states": 148,
+  "new_test_cases_added": 0,
+  "existing_test_adjustments": [
+    "Use assertSame for existing strict equality assertions.",
+    "Match the current empty-profile message in the existing administration browser assertion."
+  ],
+  "browser_retry": {
+    "cause": "The first combined batch inherited an English account locale while the allies case expects Spanish. The catalog screenshot confirmed English UI.",
+    "resolution": "Retain the six successful suites and execute the six remaining suites in a fresh disposable environment with the site and administrator locale explicitly set to es_ES.",
+    "initial_report": {
+      "path": "test-results/sonar/regressions-20261015T201431Z-17707/allies108.json",
+      "sha256": "f3fd31947a0154036cd3fa5daea64172d68ffa142f14a48aaf7aa938b729fead"
+    }
+  },
+  "microevent_retry": {
+    "cause": "The extra cron runner refreshed the fixture candidates before the case exercised the synchronous review. The notice correctly reported that the two remaining candidates had already been checked.",
+    "resolution": "Retain the successful allies, members and assistant suites. Run the remaining three suites with controlled fixtures and drive the existing queue worker only when the admin case queues its job, matching the original manual fixture workflow.",
+    "initial_report": {
+      "path": "test-results/sonar/regressions-20261015T201903Z-18277/micro-flow108.json",
+      "sha256": "8473d1b4ce77e9251d92816341a1e5f89bd0f43d2c77c7dd8e9cd004b005b16f"
+    },
+    "worker_report": {
+      "path": "test-results/sonar/regressions-20261015T202138Z-19052/micro-admin108-worker.json",
+      "sha256": "81ab9d98a303259fe0c07cf2834e923e774447d8c8f805b4af40530ccb117370"
+    }
+  },
+  "coverage": {
+    "collected": false,
+    "original_artifacts_unchanged": true,
+    "original_source_revision": "88bbad3bd9ec9a15ff5d381c6c490499c5f59635",
+    "original_artifact_sha256": {
+      "clover.xml": "3a12a109a0130e5a8316f1580845eb9ec5ad19e0a4d92076519d0b8fa8e4b3cf",
+      "junit.xml": "b2d32739601e3003bca7e4b5ddce51ec24ff81d0b9fc53ea9bcbf75259e944a7",
+      "lcov.info": "804adc313e509aab74a373b4304deec007ddf2a3cfe3af9ced4a5bc5b4e5272e",
+      "source-revision": "2744c240460569186d9d4dd81f399fad1ca02f42961914d2c431e5764eaabbe9"
+    }
+  },
+  "verified_code_file_count": 386,
+  "native_source_manifest": {
+    "path": "test-results/sonar/current-3-source-hashes.json",
+    "sha256": "713258efe76c63050fb0e4a83e9c853779a90cc5eb38c005747e8c44e45a88c4"
+  },
+  "changed_source_hashes": {
+    "tests/admin-members108.cjs": "d445810a70a1c12a037c10b2cabd677ac1a320286b946e79d33033e8718fb6e3",
+    "tests/php/MailSettingsInput108Test.php": "020053d31c029b0737a5a1f7a2fa4e7f3da78b9c577d2395cd5a8c0ac3e62f36",
+    "wp-content/plugins/ascla-core/assets/accessibility.js": "8c9f855fde2562785eba704361f8067c9e4748b50f85875ca4b82dd1e52a3bd2",
+    "wp-content/plugins/ascla-core/assets/admin-members.js": "29909ef70dfa97d794433263cfd1012e778ab3de50222f47c6f1bb8e3fb362a8",
+    "wp-content/plugins/ascla-core/assets/allies-ui.js": "8874bf513c37515acd0b76eb773cab39df14281e35dff309ee5717c28088ecca",
+    "wp-content/plugins/ascla-core/assets/app.js": "9f1f8e7df790b6dea7866fc6e3a70db4dd994d27809f21a63ed2ea99acb3f5de",
+    "wp-content/plugins/ascla-core/src/Domain/MicroeventTitle.php": "ecb0516c7b370677975dfb170fd8853b1f53f3e3b6396de911ccdb126a472554",
+    "wp-content/plugins/ascla-core/src/Frontend/Translations.php": "36012e13561f70b0dcd8f88688659381ec3cba035598b99d6f227cd25326038f",
+    "wp-content/plugins/ascla-core/src/Integrations/GoogleOAuth.php": "619bd65f51458d83199c3ce2bd2db5afd5b45d8c5991a19a40b500c3a43f8b77",
+    "wp-content/plugins/ascla-core/src/Integrations/Mailer.php": "46c4ee41dcb16c95ac927ceca327cd4c1b90c8a13097d9cbbbda4f3aa87e7662",
+    "wp-content/plugins/ascla-core/src/Integrations/Secrets.php": "a865de72fd5a7776e7cb95ffddc613f96141b458d00b635a477d7f615af9548a",
+    "wp-content/plugins/ascla-core/src/Jobs/Deliveries.php": "0c471a51bddffe5cfd873f38f90f473e9b5aa218a6de18cafbaab8846b965749",
+    "wp-content/plugins/ascla-core/src/Jobs/DeliveryHandlers.php": "f8a5db54e075b76a4b9c91012ac3bd8d381586280dd9ac630da7e347c3c3d07d",
+    "wp-content/plugins/ascla-core/src/Jobs/DeliveryMail.php": "78b34d8efe453639aa562d1f202680f6cb4f806bb8e0e93633ad0931ae970826",
+    "wp-content/plugins/ascla-core/src/Jobs/DeliveryPayload.php": "9a564966e74e00c726e3166fc433cfc32fccae2377986b96a596623e7afbf2c6",
+    "wp-content/plugins/ascla-core/src/Repositories/AllySearch.php": "8df81bebb02435621edbc8335177d4f66bde0d7fb87d52746887a03fb0bbde94",
+    "wp-content/plugins/ascla-core/src/Repositories/CacheJournal.php": "819ebf29700dec44e05ad32798ff7b628464be0dbb49f307f696089c765dfa3a",
+    "wp-content/plugins/ascla-core/src/Repositories/CacheRecovery.php": "7d320adf984ec42903c389ec9781f0f91f2916dc3952ec25d22dca3b20461e54",
+    "wp-content/plugins/ascla-core/src/Repositories/ContentQuery.php": "01bb6958e76c77e200d67b8b41fc2e8418423a84fc074d4ed2e5650971016b8a",
+    "wp-content/plugins/ascla-core/src/Repositories/ContentVisibility.php": "7e9f4cbba818d37ca3e6b66f793e8fc283843368597ff945a6400b86987199d7",
+    "wp-content/plugins/ascla-core/src/Repositories/DatabaseCache.php": "6c8f8c1102286d4a98179d9a08f89369582af2c448a3315d68794bfb3d6105f0",
+    "wp-content/plugins/ascla-core/src/Repositories/InterestSignals.php": "904fe6e98a2d5ce9e0d9029042c8f0ad194268eeb9b8c59868f25cda26f54467",
+    "wp-content/plugins/ascla-core/src/Repositories/TransactionCache.php": "7a87e580c5d44f18967491cd552cccd9f899ad8932e765c47c998e1077ffdea4",
+    "wp-content/plugins/ascla-core/src/Rest/RequestValidation.php": "596a88d8f14d5f21c2f82433890913393717074ddd5b4fe9c2ea5a6c0b4c79c1",
+    "wp-content/plugins/ascla-core/src/Services/CommentHistory.php": "f5b37b7596014716d17cecdaee3af1a070249748c79e9affea82c6c495635443",
+    "wp-content/plugins/ascla-core/src/Services/Content.php": "f552a02725ebe7a4133cebefa9872a2a5fcf220ae440c5e9f5609d27dcdf738d",
+    "wp-content/plugins/ascla-core/src/Services/Events.php": "a839ed27301e761cefca0bc419b04c2d79494634f1d867d29cca3a8f52a598c7",
+    "wp-content/plugins/ascla-core/src/Services/FormRules.php": "80a976a3bbe2eca2c9512b92b44b7d7838e2df9e2a98df093c185ef52841b179",
+    "wp-content/plugins/ascla-core/src/Services/InterestImports.php": "3bc4dea0a7f2dc16f3d69cfe165b88bd310f8edd4af5adde4bad924e01d002f5",
+    "wp-content/plugins/ascla-core/src/Services/LearnedInterests.php": "2cc6ece1d4600598fb301fdc329e8590aee14c6bc94edf6c8afd3e68369bf2f2",
+    "wp-content/plugins/ascla-core/src/Services/MemberInsights.php": "90fb86c61866e765b202b03e5312eda22ffbf41cc9491e1940c6723cdcb04f8f",
+    "wp-content/plugins/ascla-core/src/Services/MicroLifecycle.php": "c52665e3edc477ef9a55607b12d3d95acc41d7813fbdd4f788de2ba7ad0cde0a",
+    "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php": "f6951370379297f0ad6769d6b67d1807d8f50c5f706e4677927f16fd137a7f85",
+    "wp-content/plugins/ascla-core/src/Services/RoleApprovals.php": "f72a09e834e026ff15a852dedd7050dc29190209b896a6fdeff979fdf625cc2a",
+    "wp-content/plugins/ascla-core/src/Integrations/GoogleCalendarTransport.php": "af17768607554ba79767993befc6d6e75c25cf5b13647659b6f6166a0a85a597",
+    "wp-content/plugins/ascla-core/src/Jobs/DeliveryException.php": "5c64a7075dd9d29ae30ff0fc050493c2b9a57bc7bcbd16ddbd9d5e65d4260ed8",
+    "wp-content/plugins/ascla-core/src/Repositories/CacheStatistics.php": "8a1aa7ce5549b981b4fb6fbb6d5ea300cb985d7386a23ac830a0637d3141e5e5",
+    "wp-content/plugins/ascla-core/src/Services/InterestImportAccounts.php": "82f15540ce0428bf567c158efb0053837f00e24253cc288a01f6a353e2bf543b"
+  },
+  "disposable_regression_environments_removed": true,
+  "package": {
+    "version": "1.10.8",
+    "bytes": 1355916,
+    "sha256": "435c1e6e8382604b1cf28e945164320f37c59f901b523f2fb40319fdb434c674",
+    "files": 188,
+    "crc_valid": true,
+    "source_bytes_match": true
+  },
+  "remote": {
+    "analysis_repeated": false,
+    "last_exported_gate": "ERROR",
+    "last_gate_export": {
+      "path": "test-results/sonar/sonar-gate.json",
+      "sha256": "72cd860fdfaf321d48a6ec4a01fbe7f2c02c9731c55355f3cb0483d8cb6e60e7"
+    },
+    "deployment_performed": false
+  },
+  "limitations": [
+    "The local analysis reproduces all exported findings and clears them locally; the published ASCLA-QA analysis must be repeated after committing the corrections.",
+    "Original coverage belongs to its original commit; it was not relabeled as coverage of these corrections.",
+    "Browser suites use disposable local WordPress with controlled provider responses where their existing cases specify interception; they do not certify real Google, SMTP or remote cron operation.",
+    "Automatic accessibility scans do not replace manual accessibility review or UAT.",
+    "Full native reports and screenshots remain ignored local artifacts; this summary contains hashes and relative paths only."
+  ]
+}

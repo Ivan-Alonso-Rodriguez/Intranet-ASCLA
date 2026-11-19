@@ -1,0 +1,180 @@
+{
+  "date": "2026-10-17T20:58:22.495153+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "baseline_commit": "877568c3fe16695ca3ede931ef5f1de911539ffa",
+  "scope": "Disposable local WordPress, synthetic data, provider HTTP intercepted. Original sources preserved. No billed AI calls, mass regeneration, new coverage, remote installation or UAT acceptance claim.",
+  "source_snapshot": "current-22",
+  "production_matches_tested_snapshot": true,
+  "privacy_policy": {
+    "id": "scoped-attribution-v2",
+    "public_references_preserved": [
+      "Authors cited as public references",
+      "Institutions",
+      "Standards",
+      "Technical concepts",
+      "Public document URLs"
+    ],
+    "protected_context_redacts": [
+      "Explicitly declared identities",
+      "Recognizable speaker attribution and associated organizations",
+      "Email and private profile/contact/credential links"
+    ],
+    "membership_alone_does_not_reserve_names_or_companies": true,
+    "legacy_and_provider_identity_labels_removed": true,
+    "shared_provider_output_cleanup": true,
+    "source_content_and_transcripts_not_overwritten": true,
+    "stored_answer_projection_revalidates_access": true,
+    "limitations": "Contextual heuristics and declared identities, not infallible entity classification or semantic fact verification. Editors must identify confidential participants. Missing names in old generated summaries require authorized regeneration; display cleanup does not reconstruct them."
+  },
+  "providers": {
+    "names": [
+      "Gemini",
+      "OpenAI",
+      "DeepSeek"
+    ],
+    "http_intercepted": true,
+    "rag_public_references_and_reserved_identity_exclusion_checked": true
+  },
+  "full_php_regression": {
+    "tests": 691,
+    "assertions": 7845,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "source_snapshot": "current-21",
+    "run": "test-results/ai-privacy108-20261017T205216Z-5829",
+    "coverage_collected": false
+  },
+  "final_php_regression": {
+    "tests": 59,
+    "assertions": 3084,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "source_snapshot": "current-22",
+    "run": "test-results/ai-privacy108-20261017T205639Z-6223",
+    "overlaps_full_suite": true,
+    "coverage_collected": false,
+    "final_production_delta": [
+      "wp-content/plugins/ascla-core/src/Integrations/AIProviderSupport.php"
+    ],
+    "delta_reason": "Shared decoded provider outputs also remove legacy identity labels. Final focused/provider suites verify this path."
+  },
+  "browser": {
+    "checks": [
+      "El historial real del Asistente retira la etiqueta antigua y conserva autores, instituciones, normas y conceptos públicos",
+      "La fuente y su resumen mantienen referencias públicas, ocultan las identidades declaradas y rechazan un borrador ajeno"
+    ],
+    "errors": [],
+    "views": [
+      "assistant-public-references.png",
+      "resource-public-references.png"
+    ],
+    "real_history_and_source_ui": true
+  },
+  "portable_checks": 49,
+  "coverage": {
+    "collected": false,
+    "previous_reports_unchanged": true,
+    "sha256": {
+      "clover.xml": "2008bce81b5693cc82662820d8ff8aa19004cdacc082295365e906b6b9d90709",
+      "junit.xml": "bea4733ddbfab15f29230c5b08f1c7aac5a9586fc4ad87c7ea4ad503c47440ae",
+      "lcov.info": "c68411ab949218a79986a9548e775a364d0535dfe58cb248f65389e8523adb10",
+      "source-revision": "5e9488a9dd2e9101025ac5963ac77c71771b7b8bc6d0ac170896e53374b6fa39"
+    }
+  },
+  "package": {
+    "files": 196,
+    "bytes": 1509898,
+    "sha256": "5690d1cd96722490d514f43f01e6d6a58c43721d202bd1edcc34cde98a000345",
+    "manifest": "docs/evidence/release-1.10.8/package.json"
+  },
+  "cleanup": {
+    "owned_temporary_projects_removed": true,
+    "environment_files_removed": true,
+    "final_fixture_accounts_and_content_removed": true
+  },
+  "artifacts": [
+    {
+      "path": "test-results/ai-privacy108-20261017T205639Z-6223/ai-privacy108.json",
+      "sha256": "697b800766a1e7c69a7d8890c7bb6544a4407aa0583edc670801a3b84b70759b"
+    },
+    {
+      "path": "test-results/ai-privacy108-20261017T205639Z-6223/browser.log",
+      "sha256": "3a4e6b29144dd2e6953906dcdba98879abf0591c5dcd3367bbd10c22cd6dccb0"
+    },
+    {
+      "path": "test-results/ai-privacy108-20261017T205639Z-6223/preflight.xml",
+      "sha256": "a822e5724efea1cc70b0e29c49195a80f51d392ea29b093ac3a41c01ceec4f7c"
+    },
+    {
+      "path": "test-results/ai-privacy108-20261017T205639Z-6223/preflight.log",
+      "sha256": "329e6a3a348bb377b21f3acc8a6369fab7d6da728a831e875b3151e489ba109d"
+    },
+    {
+      "path": "test-results/ai-privacy108-20261017T205639Z-6223/sanity.log",
+      "sha256": "8755860c11c8d3f9a1de749e02b68760d94f38c5cd87cadef867e4a455591434"
+    },
+    {
+      "path": "test-results/ai-privacy108-20261017T205639Z-6223/fixture-cleanup.log",
+      "sha256": "0fbaa14571bdf1794f6d3f104f10817bee1f8a7f45187c58bc802511fafce149"
+    },
+    {
+      "path": "test-results/ai-privacy108-20261017T205639Z-6223/cleanup.log",
+      "sha256": "4eaf00cba10180f8d6194ee8c15387a4c2144fadd77890f224834d0ca0301972"
+    },
+    {
+      "path": "test-results/ai-privacy108-20261017T205639Z-6223/assistant-public-references.png",
+      "sha256": "eafba35b6bb3fceb2bcede7e220159e811b19286a02aa764725235fc0b8a9418"
+    },
+    {
+      "path": "test-results/ai-privacy108-20261017T205639Z-6223/resource-public-references.png",
+      "sha256": "923eade381b4df199fc00c4fe5fa6647a321fb4d3ea591bc28651bd152f06f83"
+    },
+    {
+      "path": "test-results/ai-privacy108-20261017T205216Z-5829/junit.xml",
+      "sha256": "59f552eeaecf49fbc076538ca3210b7d6498102edcde4d60e378e5530e8401e1"
+    },
+    {
+      "path": "test-results/ai-privacy108-20261017T205216Z-5829/phpunit.log",
+      "sha256": "c773e2e43c592cca14701ddb4102e0e2670d057f1feddfb83bde088c7ffff0bd"
+    },
+    {
+      "path": "test-results/ai-privacy108-20261017T205216Z-5829/preflight.xml",
+      "sha256": "5edf1304c9f105bb75f0aafda2deaf0932053322167f6243aee78518ce7db2c5"
+    },
+    {
+      "path": "test-results/ai-privacy108-20261017T205216Z-5829/preflight.log",
+      "sha256": "8f7e0e3bde1c2771a51278ac4b981aa698abbb42d8c3de237c3b602f9154c849"
+    },
+    {
+      "path": "test-results/ai-privacy108-20261017T205216Z-5829/cleanup.log",
+      "sha256": "b1a45f398142c44b95c097e7a82c0b546d864d36ba15fc6c4a39b9b2589b3dbb"
+    },
+    {
+      "path": "test-results/ai-privacy108-run.sh",
+      "sha256": "cbad4c969d5c72241e476fef32f9fd89cdb627f991b4a876f94016ba430632c8"
+    },
+    {
+      "path": "test-results/ai-privacy108-final-run.sh",
+      "sha256": "e0a35a46b4a098a5ede98f11f2d400e541b9062948a263e63af1d9208492a4c1"
+    },
+    {
+      "path": "test-results/ai-privacy108-ui.cjs",
+      "sha256": "cddb4726b8ecebe5ef32373cc6094bf11abb4548801109ac021d96209233d2df"
+    },
+    {
+      "path": "test-results/ai-privacy108-fixture.php",
+      "sha256": "3f11502cd41d7cf86ebc1b4c3a95c614191c27d99f62c4217b670e6a4ec17936"
+    },
+    {
+      "path": "test-results/sonar/current-21-source-hashes.json",
+      "sha256": "a54fa5cca9f540f7688295fc5d07f615f339ab55d42768ae804b51b2fd6ba384"
+    },
+    {
+      "path": "test-results/sonar/current-22-source-hashes.json",
+      "sha256": "59593c0b66f41a8373a6de785dcf2e0dccd747712e04defbe7f8de23732edafa"
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "date": "2026-10-14",
+  "completed_at_utc": "2026-10-15T04:02:26.024Z",
+  "version": "1.10.8",
+  "schema": 15,
+  "target": "https://wordpress.ingsoftware.lat",
+  "mode": "remote",
+  "previous_version": "1.10.7",
+  "status": "passed",
+  "commit_of_tests": "d01e3d12b6c404ba5aaa9fc4648f5989565bf590",
+  "working_tree": "uncommitted",
+  "tools": {
+    "node": "v24.18.1",
+    "bruno": "4.2.1",
+    "playwright": "1.62.1"
+  },
+  "report": "test-results/acceptance-20261015T035954Z-6283/index.html",
+  "first_attempt": {
+    "report": "test-results/acceptance-20261015T034439Z-6098/index.html",
+    "http_requests": 33,
+    "http_checks": 53,
+    "ui_passed": 2,
+    "ui_failed": 1,
+    "finding": "Perfil timed out waiting for Home; Home awaited optional recommendation explanations.",
+    "cleanup": "passed"
+  },
+  "correction": "Render Home content independently of recommendations; ignore stale results after navigation and allow retry on failure.",
+  "local_regression": {
+    "report": "test-results/dashboard-loading108.json",
+    "checks": [
+      "Inicio, estadísticas y agenda disponibles mientras recomendaciones permanece sin responder",
+      "Navegar a Perfil cancela la consulta y una respuesta tardía no reemplaza la nueva vista",
+      "Un error de recomendaciones queda limitado a su bloque y permite reintentar",
+      "Aviso de error y reintento sin desbordamiento en móvil",
+      "Reintentar sustituye el aviso por la respuesta y conserva el contenido de Inicio"
+    ],
+    "errors": [],
+    "scope": "Injected delayed/error responses on disposable local WordPress; no provider performance claim"
+  },
+  "remote_results": [
+    {
+      "name": "integration",
+      "status": "passed",
+      "requests": 10,
+      "tests": 15,
+      "ms": 13527
+    },
+    {
+      "name": "business-e2e",
+      "status": "passed",
+      "requests": 23,
+      "tests": 38,
+      "ms": 31839
+    },
+    {
+      "name": "perfil",
+      "status": "passed",
+      "videos": [
+        "videos/perfil/page@1617607da096248332b83117c408e800.webm"
+      ],
+      "screenshots": [
+        "perfil-0-passed.png"
+      ],
+      "ms": 14916
+    },
+    {
+      "name": "conexion-chat-historial",
+      "status": "passed",
+      "videos": [
+        "videos/conexion-chat-historial/page@d096745dab9d0bec4a85f7f6e2600ec5.webm",
+        "videos/conexion-chat-historial/page@3ee38bcc95f52881262727bc092b7ba8.webm"
+      ],
+      "screenshots": [
+        "conexion-chat-historial-0-passed.png",
+        "conexion-chat-historial-1-passed.png"
+      ],
+      "ms": 41212
+    },
+    {
+      "name": "borrador-publicacion-inscripcion",
+      "status": "passed",
+      "videos": [
+        "videos/borrador-publicacion-inscripcion/page@4aaf759d00f7d310c76ef60864529879.webm",
+        "videos/borrador-publicacion-inscripcion/page@12b06eb2aff0c8478cecbb45dc11b9c5.webm"
+      ],
+      "screenshots": [
+        "borrador-publicacion-inscripcion-0-passed.png",
+        "borrador-publicacion-inscripcion-1-passed.png"
+      ],
+      "ms": 34485
+    }
+  ],
+  "http_requests": 33,
+  "http_checks": 53,
+  "frontend_journeys": 3,
+  "videos": 5,
+  "screenshots": 5,
+  "acceptance_source_files_unchanged_between_attempts": 35,
+  "both_batches_cleaned": true,
+  "helper_deactivated_and_removed": true,
+  "private_access_json_files_removed": true,
+  "uploaded_package": {
+    "version": "1.10.8",
+    "bytes": 1282813,
+    "sha256": "4fe8dd87f033585b53b294e7996e10ef6d50e38d0882306d1faa76218b04b79a",
+    "files": 172,
+    "crc_valid": true,
+    "source_bytes_match": true
+  },
+  "wordpress_ui_proof": "test-results/qa-final-1.10.8-helper-removed.jpg",
+  "php_rerun": false,
+  "new_coverage": false,
+  "sonarqube_run": false,
+  "uat_acceptance": false,
+  "limitations": "Only the enumerated HTTP/UI workflows; not all endpoints, browsers, external providers or PDF requirements. Tests and source changes remain uncommitted.",
+  "report_verification": {
+    "verified": [
+      {
+        "report": "acceptance-20261015T034439Z-6098",
+        "original_files_verified": 62
+      },
+      {
+        "report": "acceptance-20261015T035954Z-6283",
+        "original_files_verified": 62
+      }
+    ],
+    "views": [
+      {
+        "width": 1440,
+        "localLinks": 51,
+        "overflow": false,
+        "violations": []
+      },
+      {
+        "width": 390,
+        "localLinks": 51,
+        "overflow": false,
+        "violations": []
+      }
+    ]
+  }
+}

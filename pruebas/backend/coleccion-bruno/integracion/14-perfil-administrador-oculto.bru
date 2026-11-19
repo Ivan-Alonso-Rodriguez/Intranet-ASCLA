@@ -1,0 +1,26 @@
+meta {
+  name: 14. El asociado no consulta al administrador como contacto
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/profiles/{{idAdministrador}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAsociado}}
+  X-WP-Nonce: {{nonceAsociado}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 404", function () { expect(res.getStatus()).to.equal(404); });
+
+}

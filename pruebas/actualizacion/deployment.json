@@ -1,0 +1,21 @@
+{
+  "checked_at": "2026-10-22T08:20:00.150Z",
+  "target": "https://wordpress.ingsoftware.lat",
+  "version": "1.10.9",
+  "local_reference_package_sha256": "f3430e4f82f34ce29434e7e11ac4bfd3441e3bc64050c9a3f7df7c9e8b9d71a5",
+  "assets": [
+    {
+      "file": "assets/app.js",
+      "local_sha256": "9cfc43300a16588472437559ae60a2d43cbca83d38d539ef9098add8751fc1bf",
+      "deployed_sha256": "9cfc43300a16588472437559ae60a2d43cbca83d38d539ef9098add8751fc1bf",
+      "matches": true
+    },
+    {
+      "file": "assets/app.css",
+      "local_sha256": "619425e488b83a3042420de2b988f802aa661a2f574314603f9ed5b9053465c1",
+      "deployed_sha256": "619425e488b83a3042420de2b988f802aa661a2f574314603f9ed5b9053465c1",
+      "matches": true
+    }
+  ],
+  "scope": "Public JavaScript and CSS match the current local package. Private server-side PHP files were not downloaded; behavior is checked by the executed API/UI tests."
+}

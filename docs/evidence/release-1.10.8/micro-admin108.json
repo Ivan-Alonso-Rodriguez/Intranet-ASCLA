@@ -1,0 +1,84 @@
+{
+  "scope": "Disposable local WordPress; real eligibility diagnostics, archive/restore and completed generation job; no remote deployment",
+  "checks": [
+    "El panel muestra conteos y condiciones consultados realmente en el servidor",
+    "Archivar retira la propuesta cancelada del listado principal sin borrar su historial",
+    "Archivados permite abrir y recuperar la ficha sin reactivar la propuesta cancelada",
+    "Una propuesta pendiente debe cancelarse o denegarse antes de archivarse",
+    "El asociado no puede consultar el diagnóstico administrativo ni archivar propuestas",
+    "Un mínimo superior a los candidatos disponibles muestra la causa del resultado vacío",
+    "El trabajo real completado explica por qué generó cero propuestas y conserva los conteos",
+    "Los avisos se adaptan a escritorio y móvil en ambos temas sin infracciones automáticas en el área revisada",
+    "El diagnóstico y Archivados se traducen al inglés"
+  ],
+  "views": [
+    "micro-admin108-desktop-dark.png",
+    "micro-admin108-mobile-light.png"
+  ],
+  "scans": [
+    {
+      "name": "desktop-dark",
+      "violations": []
+    },
+    {
+      "name": "mobile-light",
+      "violations": []
+    }
+  ],
+  "errors": [],
+  "date": "2026-10-15T13:07:02.332190+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "requirements": [
+    "RN-015",
+    "RN-025",
+    "RF-098",
+    "RF-106"
+  ],
+  "php": {
+    "tests": 29,
+    "assertions": 230,
+    "errors": 0,
+    "failures": 0,
+    "junit": "micro-admin108-junit.xml"
+  },
+  "portable_checks_passed": 49,
+  "fixture_cleanup_confirmed": true,
+  "source_sha256": {
+    "wp-content/plugins/ascla-core/src/Services/MicroArchive.php": "1e48dc22026c9be9352cb2a3c84e0467a19a9897eae2ea9bcb2a17a84f4beece",
+    "wp-content/plugins/ascla-core/src/Services/MicroEvents.php": "1cc40d9f6981fc20469cfc75265b24ac65cbd66abaa61324c828bf6a9141ccae",
+    "wp-content/plugins/ascla-core/src/Services/MicroPlanning.php": "2346991f36de4852c4e7c0668af98a2fe1d9d7e795b63bf66ed185475f290cc4",
+    "wp-content/plugins/ascla-core/src/Services/Content.php": "8d8b794e983255eae0ed77d45edd1e3e6bf9729537d87813a7be590488ec71b2",
+    "wp-content/plugins/ascla-core/src/Domain/MicroeventTitle.php": "c93ba32e322301f5cd2e3cadf71e680c7f2a280f6f780c65d633a1921a72908f",
+    "wp-content/plugins/ascla-core/src/Rest/Router.php": "509f25fa59ce6a0e8303329958d334cf08d47064abed68a7beb2c0fca558bc75",
+    "wp-content/plugins/ascla-core/assets/app.js": "88d14c22a8aeeb5b92ab7ec1c1fbeadd41741616f8e8aab7039650a5e68feac7",
+    "wp-content/plugins/ascla-core/languages/en.json": "cdd97fdfacff428a1bb95198f30f7680a24d6ea5a24bd032dd7f35aaf5f03dc5",
+    "tests/php/MicroGeneration108Test.php": "3600d3c31dc24690f43f51f311c5b048e0bf544bea3e1672ddb08eb45f7f4720",
+    "tests/php/PrivacyLabels108Test.php": "8d2afae96a01dedfcf363360aa8f95a7ae6f7867cd3a46291e3eb5011e9904ab",
+    "tests/micro-admin108.cjs": "a2ba14f71bfb489107cefec07cde1b0a4fa1579758edb2a364106d4e65968e7a",
+    "tests/micro-flow108-fixture.php": "d699b84a844087608aef2a0ee7f9802c2617deb0d6ff6cbbe3dcf85930746392"
+  },
+  "screenshot_sha256": {
+    "micro-admin108-desktop-dark.png": "ffd4a6e37bd4b1504b4ef59f32f6543d0ac609e1b2eb0dfccee164b726b72cc3",
+    "micro-admin108-mobile-light.png": "6abb469a605ea9102b5f7ac87367baa6c2e6de9f22e25d25ac1fa4083bb8412c"
+  },
+  "initial_attempt": {
+    "issue": "The browser test tried to use the intranet API before navigating away from the native WordPress dashboard.",
+    "resolution": "Open the intranet administration page before calling its API; all nine checks passed."
+  },
+  "limitations": [
+    "Local disposable WordPress only; not deployed to public QA.",
+    "The exact cause affecting the four remote QA members was not inspected; no remote data or configuration changed.",
+    "The local queue worker was driven from the guarded fixture; this does not certify remote cron operation.",
+    "No new complete PHP suite, coverage measurement or remote quality gate.",
+    "Archiving affects the main administration list and retains the underlying record; it is not permanent deletion."
+  ],
+  "package": {
+    "version": "1.10.8",
+    "bytes": 1353451,
+    "sha256": "5d682ed38ce41c9076c50f16e7f41daadcd1c2f9b7c2eecda5a29e7469ee96d0",
+    "files": 184,
+    "crc_valid": true,
+    "source_bytes_match": true
+  }
+}

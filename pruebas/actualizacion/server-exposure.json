@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-22T09:45:43.256Z",
+  "target": "https://wordpress.ingsoftware.lat",
+  "mode": "public-read-only",
+  "status": "FAIL",
+  "results": [
+    {
+      "path": "/login/",
+      "status": 200,
+      "server": "Apache/2.4.68 (Debian)",
+      "version_hidden": false
+    },
+    {
+      "path": "/wp-login.php",
+      "status": 200,
+      "server": "Apache/2.4.68 (Debian)",
+      "version_hidden": false
+    },
+    {
+      "path": "/wp-content/plugins/ascla-core/assets/app.js",
+      "status": 200,
+      "server": "Apache/2.4.68 (Debian)",
+      "version_hidden": false
+    },
+    {
+      "path": "/wp-json/ascla/v1/profiles",
+      "status": 401,
+      "server": "Apache/2.4.68 (Debian)",
+      "version_hidden": false
+    },
+    {
+      "path": "/ascla-security-check-missing-20261022/",
+      "status": 404,
+      "server": "Apache/2.4.68 (Debian)",
+      "version_hidden": false
+    }
+  ]
+}

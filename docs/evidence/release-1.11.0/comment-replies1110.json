@@ -1,0 +1,101 @@
+{
+  "version": "1.11.0",
+  "date": "2026-10-24T21:09:03.400Z",
+  "scope": "Chrome real en Windows, WordPress local desechable; respuestas publicadas y notificaciones reales con usuarios sintéticos. Sin servicios externos ni cambios de esquema.",
+  "package_sha256": "c125a645b67e036ac921ab92cf6473f81e021ad52972eba231953deacc8d2f4c",
+  "package_manifest": "docs/evidence/release-1.11.0/package-comment-replies.json",
+  "previous_package_manifest": "docs/evidence/release-1.11.0/package-admin-insights.json",
+  "phpunit": {
+    "name": "CLI Arguments",
+    "tests": "84",
+    "assertions": "703",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "time": "18.848707"
+  },
+  "checks": [
+    "Hub, foros, galería, conocimiento y eventos comparten hilos plegados; al abrir se dibujan cinco respuestas sin cascada",
+    "Las trece respuestas antiguas y la pendiente propia se agrupan en un nivel, por tandas de cinco, sin duplicados",
+    "Ocultar retira las respuestas del DOM y Ver más comentarios amplía los principales sin recargar",
+    "El formulario abre vacío, identifica al destinatario y conserva el borrador al ampliar o cancelar el plegado",
+    "La respuesta aparece justo bajo su destinatario con Autor ▸ destinatario, sin arroba ni cambios en la notificación",
+    "Responder varios niveles conserva un único margen visual y coloca cada aporte debajo del destinatario",
+    "Volver a abrir conserva el orden por destinatario y muestra a los padres antes de sus respuestas",
+    "El prefijo antiguo que coincide con el destinatario deja de repetirse en pantalla y el mensaje original se conserva",
+    "Me gusta y quitar Me gusta siguen funcionando dentro de las respuestas",
+    "Eliminar respuestas conserva las demás y sincroniza la conversación",
+    "Responder al principal no añade una mención innecesaria y descartar confirma antes de cerrar el hilo",
+    "Diseño sin desbordamientos en móvil y escritorio, con revisión de accesibilidad en ambos temas",
+    "Los controles conservan singular, plural y traducción al inglés",
+    "El formulario vacío se cancela sin un aviso innecesario de borrador",
+    "Publicar un comentario principal muestra el nuevo aporte sin desplegar todos los comentarios ocultos",
+    "Un destinatario retirado se indica sin mostrar su nombre ni el contenido eliminado"
+  ],
+  "counter_regression": {
+    "checks": [
+      "Publicar y cerrar actualiza de cero a un comentario sin sustituir la tarjeta ni recargar",
+      "Una respuesta actualiza solo el tema correspondiente y usa el plural",
+      "Eliminar una respuesta disminuye el contador al cerrar por el fondo",
+      "Se conservan la búsqueda y el documento durante publicación, respuesta y eliminación",
+      "El total usa los 102 comentarios del servidor aunque el detalle solo cargue cien",
+      "El Hub comparte la actualización y los comentarios pendientes no aumentan el total publicado",
+      "Abrir el detalle sincroniza también un comentario aprobado por moderación",
+      "El contador conserva singular y plural en inglés"
+    ],
+    "errors": []
+  },
+  "accessibility_scans": [
+    {
+      "name": "destinatarios-detalle",
+      "violations": []
+    },
+    {
+      "name": "destinatarios-detalle-movil",
+      "violations": []
+    },
+    {
+      "name": "hilos-abiertos-claro",
+      "violations": []
+    },
+    {
+      "name": "respuesta-a-otra-respuesta",
+      "violations": []
+    },
+    {
+      "name": "destinatario-sin-arroba",
+      "violations": []
+    },
+    {
+      "name": "hilos-plegados-claro",
+      "violations": []
+    },
+    {
+      "name": "hilos-abiertos-oscuro",
+      "violations": []
+    },
+    {
+      "name": "hilos-movil-oscuro",
+      "violations": []
+    }
+  ],
+  "page_errors": [],
+  "behavior": {
+    "reply_header": "Author ▸ recipient, using authorized public names or privacy aliases",
+    "reply_order": "Parent before descendants; newest direct replies first; one visual indentation level",
+    "composer": "Empty, without an automatic @ prefix",
+    "legacy_prefix": "Hidden only when it matches the available recipient and leaves non-empty text; stored original unchanged",
+    "unavailable_recipient": "Neutral translated label; no new data fetch or disclosure",
+    "notifications": "Original parent retained, independent of message text",
+    "root_batch": 10,
+    "reply_batch": 5,
+    "schema": 15,
+    "existing_rest_query_limit": 100
+  },
+  "limits": [
+    "The change only groups and presents the authorized comments returned by the existing 100-entry REST query.",
+    "A historical prefix that cannot be matched to the current available recipient is preserved.",
+    "Disposable local WordPress only; no remote deployment or new coverage run is claimed."
+  ],
+  "local_report": "test-results/comment-replies1110/index.html"
+}

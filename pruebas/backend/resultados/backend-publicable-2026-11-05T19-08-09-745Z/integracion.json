@@ -1,0 +1,733 @@
+[
+  {
+    "iterationIndex": 0,
+    "results": [
+      {
+        "test": {
+          "filename": "integracion\\01-login-a.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-login.php",
+          "responseTime": 59,
+          "duration": 59,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Inicio de sesión a",
+            "status": "pass",
+            "uid": "JN2QEuPpox0VaEa-lIp5w"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.4994259,
+        "name": "01. Iniciar sesión como asociado",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\01-login-a",
+        "path": "integracion\\01-login-a",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\02-nonce-a.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/intranet/",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/intranet/",
+          "responseTime": 59,
+          "duration": 59,
+          "size": 51782
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Sesión autenticada a",
+            "status": "pass",
+            "uid": "SITapZ2VnAPhQZGHQB0fh"
+          },
+          {
+            "description": "Nonce REST disponible",
+            "status": "pass",
+            "uid": "eDW0Y8PbCdsC35Q1ZXd2i"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.3575393,
+        "name": "02. Obtener protección de la sesión",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\02-nonce-a",
+        "path": "integracion\\02-nonce-a",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\03-identity.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/bootstrap",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/bootstrap",
+          "responseTime": 30,
+          "duration": 30,
+          "size": 2685
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Identidad correcta",
+            "status": "pass",
+            "uid": "ZOHbd15FvPXdKikgPAxiU"
+          },
+          {
+            "description": "La sesión pertenece al asociado de prueba",
+            "status": "pass",
+            "uid": "C66A7ifZftzQIFfhhR2BD"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.219271,
+        "name": "03. Verificar identidad del asociado",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\03-identity",
+        "path": "integracion\\03-identity",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\04-anonymous-directory.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/profiles",
+          "headers": {}
+        },
+        "response": {
+          "status": 401,
+          "statusText": "Unauthorized",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/profiles",
+          "responseTime": 19,
+          "duration": 19,
+          "size": 106
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Directorio rechaza visitantes sin sesión",
+            "status": "pass",
+            "uid": "B8Pc6FzhLL7_J9VC2-p-s"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.2163316,
+        "name": "04. Rechazar acceso sin sesión",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\04-anonymous-directory",
+        "path": "integracion\\04-anonymous-directory",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\05-admin-denied.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/admin/users",
+          "headers": {}
+        },
+        "response": {
+          "status": 403,
+          "statusText": "Forbidden",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/admin/users",
+          "responseTime": 18,
+          "duration": 18,
+          "size": 106
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Asociado no accede a administración",
+            "status": "pass",
+            "uid": "lo3S_ZB4O4eZQLv46PwTk"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.2021688,
+        "name": "05. Rechazar administración sin permiso",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\05-admin-denied",
+        "path": "integracion\\05-admin-denied",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\06-profile-before.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/profiles/2",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/profiles/2",
+          "responseTime": 25,
+          "duration": 25,
+          "size": 1266
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Perfil disponible",
+            "status": "pass",
+            "uid": "KhkHzXQAJcPPoWE6k_mJy"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.3122134,
+        "name": "06. Consultar empresa actual",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\06-profile-before",
+        "path": "integracion\\06-profile-before",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\07-invalid-profile.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/profiles/me",
+          "headers": {}
+        },
+        "response": {
+          "status": 400,
+          "statusText": "Bad Request",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/profiles/me",
+          "responseTime": 24,
+          "duration": 24,
+          "size": 113
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "El error identifica Empresa",
+            "status": "pass",
+            "uid": "ovtXCkMu3qTHXNpzID-W8"
+          },
+          {
+            "description": "Empresa obligatoria se valida en servidor",
+            "status": "pass",
+            "uid": "YaG5XsKRmW5asxH4ThexB"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.2092141,
+        "name": "07. Rechazar empresa vacía",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\07-invalid-profile",
+        "path": "integracion\\07-invalid-profile",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\08-profile-preserved.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/profiles/2",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/profiles/2",
+          "responseTime": 22,
+          "duration": 22,
+          "size": 1266
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Perfil se vuelve a consultar",
+            "status": "pass",
+            "uid": "mqO3mw8vUpRc04yLQ6v6-"
+          },
+          {
+            "description": "El rechazo conserva la empresa",
+            "status": "pass",
+            "uid": "IzsTfqRMoBHjsd03xGGkR"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1770178,
+        "name": "08. Comprobar que la empresa se conserva",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\08-profile-preserved",
+        "path": "integracion\\08-profile-preserved",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\09-directory-page.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/profiles?page=1",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/profiles?page=1",
+          "responseTime": 28,
+          "duration": 28,
+          "size": 3130
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Directorio paginado",
+            "status": "pass",
+            "uid": "ni1wsugxymVbAWhCBCSwm"
+          },
+          {
+            "description": "El directorio muestra doce perfiles por página y calcula las páginas",
+            "status": "pass",
+            "uid": "VeI4iYFNqU01f-PdPu0ia"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1712644,
+        "name": "09. Consultar directorio por páginas",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\09-directory-page",
+        "path": "integracion\\09-directory-page",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\10-invalid-date-range.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/content/event?after=2099-12-31&before=2020-01-01",
+          "headers": {}
+        },
+        "response": {
+          "status": 400,
+          "statusText": "Bad Request",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/content/event?after=2099-12-31&before=2020-01-01",
+          "responseTime": 17,
+          "duration": 17,
+          "size": 114
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Rango de fechas invertido rechazado",
+            "status": "pass",
+            "uid": "CR6Wrr76nOPEuOJSkXPMM"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1577142,
+        "name": "10. Rechazar fechas invertidas",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\10-invalid-date-range",
+        "path": "integracion\\10-invalid-date-range",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\11-login-administrador.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-login.php",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-login.php",
+          "responseTime": 56,
+          "duration": 56,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "TR32jnjxsU2JxizieEHT5"
+          },
+          {
+            "description": "Sesión y nonce propios de Administrador",
+            "status": "pass",
+            "uid": "InlcW4ZbXCO2UZE-jXRSv"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.3730023,
+        "name": "11. Iniciar sesión como Administrador",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\11-login-administrador",
+        "path": "integracion\\11-login-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\12-inicio-administrador.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/intranet/",
+          "headers": {}
+        },
+        "response": {
+          "status": 302,
+          "statusText": "Found",
+          "headers": {},
+          "url": "http://127.0.0.1/intranet/",
+          "responseTime": 16,
+          "duration": 16,
+          "size": 0
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 302",
+            "status": "pass",
+            "uid": "FAJYGMBldqy_NwDCm0F2o"
+          },
+          {
+            "description": "El inicio redirige al panel administrativo",
+            "status": "pass",
+            "uid": "NcezC65e4-iyIPIKwzKWK"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.170309,
+        "name": "12. Inicio del administrador en su panel",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\12-inicio-administrador",
+        "path": "integracion\\12-inicio-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\13-directorio-sin-administrador.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/profiles?page=1",
+          "headers": {}
+        },
+        "response": {
+          "status": 200,
+          "statusText": "OK",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/profiles?page=1",
+          "responseTime": 30,
+          "duration": 30,
+          "size": 3130
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 200",
+            "status": "pass",
+            "uid": "tqa9dEbZ0lBOTUYGoYQrd"
+          },
+          {
+            "description": "El directorio incluye a Ana y excluye al administrador en todas las páginas",
+            "status": "pass",
+            "uid": "0hYUw_r-pdTqLvvUQTrPe"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.250803,
+        "name": "13. Directorio completo sin cuentas de administración",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\13-directorio-sin-administrador",
+        "path": "integracion\\13-directorio-sin-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\14-perfil-administrador-oculto.bru"
+        },
+        "request": {
+          "method": "GET",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/profiles/5",
+          "headers": {}
+        },
+        "response": {
+          "status": 404,
+          "statusText": "Not Found",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/profiles/5",
+          "responseTime": 23,
+          "duration": 23,
+          "size": 78
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 404",
+            "status": "pass",
+            "uid": "wUJBhqbP1FKhUSSSXaXBS"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.200522,
+        "name": "14. El asociado no consulta al administrador como contacto",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\14-perfil-administrador-oculto",
+        "path": "integracion\\14-perfil-administrador-oculto",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\15-conexion-hacia-administrador.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/relations",
+          "headers": {}
+        },
+        "response": {
+          "status": 400,
+          "statusText": "Bad Request",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/relations",
+          "responseTime": 21,
+          "duration": 21,
+          "size": 81
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 400",
+            "status": "pass",
+            "uid": "4uoNKiqfg1mluXel7aVUD"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1617133,
+        "name": "15. Rechazar conexión hacia administración",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\15-conexion-hacia-administrador",
+        "path": "integracion\\15-conexion-hacia-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\16-chat-hacia-administrador.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/conversation-requests",
+          "headers": {}
+        },
+        "response": {
+          "status": 400,
+          "statusText": "Bad Request",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/conversation-requests",
+          "responseTime": 23,
+          "duration": 23,
+          "size": 81
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 400",
+            "status": "pass",
+            "uid": "FHJ4uEwe4fdFh52bAaCjv"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1645818,
+        "name": "16. Rechazar solicitud de conversación hacia administración",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\16-chat-hacia-administrador",
+        "path": "integracion\\16-chat-hacia-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\17-conexion-desde-administrador.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/relations",
+          "headers": {}
+        },
+        "response": {
+          "status": 403,
+          "statusText": "Forbidden",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/relations",
+          "responseTime": 21,
+          "duration": 21,
+          "size": 78
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 403",
+            "status": "pass",
+            "uid": "CE-zLecFOexe4GW6PCSPE"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.187483,
+        "name": "17. Rechazar conexión desde administración",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\17-conexion-desde-administrador",
+        "path": "integracion\\17-conexion-desde-administrador",
+        "iterationIndex": 0
+      },
+      {
+        "test": {
+          "filename": "integracion\\18-chat-desde-administrador.bru"
+        },
+        "request": {
+          "method": "POST",
+          "url": "http://127.0.0.1:18153/wp-json/ascla/v1/conversation-requests",
+          "headers": {}
+        },
+        "response": {
+          "status": 403,
+          "statusText": "Forbidden",
+          "headers": {},
+          "url": "http://127.0.0.1/wp-json/ascla/v1/conversation-requests",
+          "responseTime": 23,
+          "duration": 23,
+          "size": 78
+        },
+        "error": null,
+        "status": "pass",
+        "assertionResults": [],
+        "testResults": [
+          {
+            "description": "Código HTTP esperado: 403",
+            "status": "pass",
+            "uid": "NhkRbVXDxZyMRs-_lm0lh"
+          }
+        ],
+        "preRequestTestResults": [],
+        "postResponseTestResults": [],
+        "shouldStopRunnerExecution": false,
+        "runDuration": 0.1852802,
+        "name": "18. Rechazar solicitud de conversación desde administración",
+        "suitename": "repositorio\\test-results\\backend-publicable-2026-11-05T19-08-09-745Z\\.coleccion-ejecucion\\integracion\\18-chat-desde-administrador",
+        "path": "integracion\\18-chat-desde-administrador",
+        "iterationIndex": 0
+      }
+    ],
+    "summary": {
+      "totalRequests": 18,
+      "passedRequests": 18,
+      "failedRequests": 0,
+      "errorRequests": 0,
+      "skippedRequests": 0,
+      "skippedByBail": 0,
+      "totalAssertions": 0,
+      "passedAssertions": 0,
+      "failedAssertions": 0,
+      "totalTests": 26,
+      "passedTests": 26,
+      "failedTests": 0,
+      "totalPreRequestTests": 0,
+      "passedPreRequestTests": 0,
+      "failedPreRequestTests": 0,
+      "totalPostResponseTests": 0,
+      "passedPostResponseTests": 0,
+      "failedPostResponseTests": 0
+    }
+  }
+]

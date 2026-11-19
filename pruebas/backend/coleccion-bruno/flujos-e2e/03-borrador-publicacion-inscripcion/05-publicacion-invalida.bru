@@ -1,0 +1,34 @@
+meta {
+  name: 05. Publicar incompleto exige los campos obligatorios
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base}}/wp-json/ascla/v1/content/event/{{eventoPublicacionId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionAdministrador}}
+  X-WP-Nonce: {{nonceAdministrador}}
+  Content-Type: application/json
+}
+
+body:json {
+  {"status": "publish"}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+script:pre-request {
+  req.setBody({title:bru.getCollectionVar("tituloEventoPublicacion"),status:"publish"});
+}
+
+tests {
+  test("Código HTTP esperado: 400", function () { expect(res.getStatus()).to.equal(400); });
+}

@@ -7,14 +7,9 @@ use ASCLA\Core\Integrations\Secrets;
 /** Adaptive Cloudflare Turnstile protection for public authentication/form flows. */
 final class Turnstile
 {
-    private const LOCK_TTL = 10 * MINUTE_IN_SECONDS;
-    private const LOGIN_CHALLENGE_AFTER = 3;
-    private const LOGIN_LOCK_AFTER = 5;
     private const RECOVERY_CHALLENGE_AFTER = 2;
     private const PUBLIC_CHALLENGE_AFTER = 3;
     private const IP_CHALLENGE_AFTER = 12;
-    private const IP_LOCK_AFTER = 20;
-    private const IP_LOCK_TTL = 15 * MINUTE_IN_SECONDS;
 
     public static function boot(): void
     {
@@ -22,7 +17,6 @@ final class Turnstile
         add_action('wp_login_failed', [self::class, 'loginFailed'], 10, 2);
         add_action('wp_login', [self::class, 'loginSucceeded'], 10, 2);
         add_action('lostpassword_post', [self::class, 'lostPasswordPost'], 10, 2);
-        add_action('retrieve_password', [self::class, 'recoveryAccepted'], 10, 1);
         add_action('after_password_reset', [self::class, 'passwordResetCompleted'], 10, 2);
         add_action('login_form', static fn() => self::render('login'));
         add_action('lostpassword_form', static fn() => self::render('recovery'));
@@ -74,11 +68,11 @@ final class Turnstile
         if (in_array((string)$error->get_error_code(), $ignore, true)) { return; }
         $state = TurnstileState::increment('login', $username);
         TurnstileState::incrementIp('login');
-        if (TurnstileState::ipCount('login') >= self::IP_LOCK_AFTER) {
-            TurnstileState::lockIp('login', self::IP_LOCK_TTL);
+        if (TurnstileState::ipCount('login') >= Settings::get()['login_ip_lock_after']) {
+            TurnstileState::lockIp('login', (Settings::get()['login_lock_minutes']*MINUTE_IN_SECONDS));
         }
-        if ((int)$state['count'] >= self::LOGIN_LOCK_AFTER) {
-            $state['lock_until'] = time() + self::LOCK_TTL;
+        if ((int)$state['count'] >= Settings::get()['login_lock_after']) {
+            $state['lock_until'] = time() + (Settings::get()['login_lock_minutes']*MINUTE_IN_SECONDS);
             TurnstileState::saveState('login', TurnstileState::stateKey('login', $username), $state);
             // A new burst of credential failures is suspicious enough to require a fresh challenge after the lock.
             TurnstileTrust::clearTrust();
@@ -98,9 +92,12 @@ final class Turnstile
     {
         if (!self::protects('recovery')) { return; }
         $identifier = TurnstileChallenge::recoveryIdentifier($userData);
-        if (!self::recoveryChallengeRequired($identifier)) { return; }
-        $result = self::verifyRequest('recovery', 'ascla_recovery');
-        if (is_wp_error($result)) { $errors->add($result->get_error_code(), $result->get_error_message()); }
+        if (self::recoveryChallengeRequired($identifier)) {
+            $result=self::verifyRequest('recovery','ascla_recovery');
+            if (is_wp_error($result)) { $errors->add($result->get_error_code(),$result->get_error_message());return; }
+        }
+        // Count nonexistent accounts too, avoiding a captcha-based account oracle.
+        if ($identifier!=='') { self::recoveryAccepted($identifier); }
     }
 
     public static function recoveryAccepted(string $userLogin): void
@@ -125,7 +122,7 @@ final class Turnstile
             $state=TurnstileState::state('login',$identifier);
             $required=(int)($state['lock_until']??0)>time()
                 || TurnstileState::ipLockUntil('login')>time()
-                || (int)($state['count']??0)>=self::LOGIN_CHALLENGE_AFTER
+                || (int)($state['count']??0)>=Settings::get()['login_challenge_after']
                 || TurnstileState::ipCount('login')>=self::IP_CHALLENGE_AFTER;
         }
         return $required;
@@ -515,7 +512,7 @@ final class TurnstileState
         if (!in_array($flow, ['login', 'recovery'], true)) { return; }
         $expiry = time() + self::ATTEMPT_TTL;
         $payload = $flow . '|' . $key . '|' . $expiry . '|' . TurnstileTrust::shortHash(TurnstileTrust::clientIp());
-        $value = $key . '.' . $expiry . '.' . TurnstileTrust::sign($payload);
+        $value = TurnstileCookie::seal(self::hintCookie($flow),$key . '.' . $expiry . '.' . TurnstileTrust::sign($payload));
         TurnstileTrust::cookie(self::hintCookie($flow), $value, $expiry);
         $_COOKIE[self::hintCookie($flow)] = $value;
     }
@@ -524,7 +521,7 @@ final class TurnstileState
     {
         $key='';
         if (in_array($flow,['login','recovery'],true)) {
-            $raw=(string)($_COOKIE[self::hintCookie($flow)]??'');
+            $raw=TurnstileCookie::open(self::hintCookie($flow),(string)($_COOKIE[self::hintCookie($flow)]??''));
             $parts=explode('.',$raw);
             if (count($parts)===3) {
                 [$candidate,$expiry,$signature]=$parts;
@@ -559,7 +556,7 @@ final class TurnstileTrust
 
     public static function trusted(): bool
     {
-        $raw=(string)($_COOKIE[self::TRUST_COOKIE]??'');
+        $raw=TurnstileCookie::open(self::TRUST_COOKIE,(string)($_COOKIE[self::TRUST_COOKIE]??''));
         $parts=$raw===''?[]:explode('.',$raw);
         $valid=count($parts)===4;
         if ($valid) {
@@ -584,7 +581,7 @@ final class TurnstileTrust
     {
         $expiry = time() + self::TRUST_TTL;
         $payload = $expiry . '.' . self::shortHash(self::clientIp()) . '.' . self::shortHash(self::userAgent());
-        $value = $payload . '.' . self::sign($payload);
+        $value = TurnstileCookie::seal(self::TRUST_COOKIE,$payload . '.' . self::sign($payload));
         self::cookie(self::TRUST_COOKIE, $value, $expiry);
         $_COOKIE[self::TRUST_COOKIE] = $value;
     }

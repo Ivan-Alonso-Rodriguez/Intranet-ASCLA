@@ -1,0 +1,38 @@
+meta {
+  name: login-a
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base}}/wp-login.php
+  body: formUrlEncoded
+  auth: none
+}
+
+headers {
+  Content-Type: application/x-www-form-urlencoded
+  Cookie: {{asclaAccessCookie}}
+}
+body:form-urlencoded {
+  log: {{aLogin}}
+  pwd: {{aPassword}}
+  testcookie: 1
+  _ascla_native_login_nonce: {{asclaAccessNonce}}
+  redirect_to: {{base}}/intranet/
+}
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+script:post-response {
+  if (res.getStatus() === 302) {
+    const cookies = res.getHeader("set-cookie") || [];
+    bru.setVar("aCookie", (Array.isArray(cookies) ? cookies : [cookies]).map(value => value.split(";")[0]).join("; "));
+  }
+}
+tests {
+  test("Inicio de sesi\u00f3n a", function () { expect(res.getStatus()).to.equal(302); });
+}
+
+

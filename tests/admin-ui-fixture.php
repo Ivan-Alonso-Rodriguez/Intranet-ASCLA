@@ -1,0 +1,30 @@
+<?php
+/** Synthetic data for the isolated administrative UI regression. */
+require '/var/www/html/wp-load.php';
+require_once __DIR__.'/profile-fixture.php';
+if(PHP_SAPI!=='cli' || wp_get_environment_type()!=='local' || parse_url(home_url(),PHP_URL_HOST)!=='ascla-adminui.test') {
+    throw new RuntimeException('Only the isolated administrative UI environment is accepted.');
+}
+update_option('WPLANG','es_ES');$prefix='adminui_'.bin2hex(random_bytes(4));$actors=[];$terms=[];
+foreach(['industry','interest','area'] as $taxonomy) {
+    foreach([1,2] as $number) {
+        $term=wp_insert_term($prefix.' '.$taxonomy.' '.$number,'ascla_'.$taxonomy);$terms[$taxonomy][]=(int)$term['term_id'];
+    }
+}
+foreach(['admin'=>'administrator','member'=>'ascla_member','executive'=>'ascla_executive','other'=>'ascla_member'] as $key=>$role) {
+    $login=$prefix.'_'.$key;$password=bin2hex(random_bytes(24));
+    $id=wp_insert_user(['user_login'=>$login,'user_email'=>$login.'@example.invalid','user_pass'=>$password,'role'=>$role]);
+    if(is_wp_error($id)) { throw new RuntimeException('Could not create synthetic actor.'); }
+    wp_set_current_user($id);
+    ASCLA\Core\Services\Profiles::save(ascla_test_profile([
+        'first_name'=>'Prueba','last_name'=>ucfirst($key),'country'=>$key==='other'?'Chile':'Perú','company'=>$prefix,
+        'industries'=>[$terms['industry'][$key==='executive'?1:0]],
+        'interests'=>$key==='member'?$terms['interest']:[$terms['interest'][$key==='executive'?1:0]],
+        'areas'=>[$terms['area'][$key==='other'?1:0]],
+    ]));
+    update_user_meta($id,'locale','es_ES');$actors[$key]=['id'=>$id,'login'=>$login,'password'=>$password];
+}
+wp_set_current_user($actors['admin']['id']);
+$ally=ASCLA\Core\Services\Content::save('ally',['title'=>$prefix.' Alianza QA','body'=>'Organización de prueba para acciones administrativas.','status'=>'publish','meta'=>['alliance_type'=>'Convenio']]);
+file_put_contents('/tmp/admin-ui-private-access.json',wp_json_encode(['base'=>home_url(),'prefix'=>$prefix,'actors'=>$actors,'terms'=>$terms,'ally'=>$ally['id']],JSON_UNESCAPED_SLASHES));
+echo 'Synthetic actors and ally ready.'.PHP_EOL;

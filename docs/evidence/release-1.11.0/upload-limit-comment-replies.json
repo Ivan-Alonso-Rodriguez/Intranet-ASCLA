@@ -1,0 +1,19 @@
+{
+  "version": "1.11.0",
+  "artifact": "dist/ascla-core-instalable.zip",
+  "sha256": "461e992abe127227dc8bc6d738d56fc785516108854b105d0c1274ecff3d4529",
+  "bytes": 1999198,
+  "files": 212,
+  "upload_limit_bytes": 2097152,
+  "below_2MiB": true,
+  "crc_valid": true,
+  "all_retained_files_identical_to_complete_release": true,
+  "complete_release_sha256": "c125a645b67e036ac921ab92cf6473f81e021ad52972eba231953deacc8d2f4c",
+  "complete_release_unchanged": true,
+  "omitted_translation_sources": [
+    "ascla-core/languages/ascla-core-en_US.po",
+    "ascla-core/languages/ascla-core-es_ES.po"
+  ],
+  "runtime_translation_catalogs_retained": true,
+  "scope": "Packaging-only variant; existing PHP, JavaScript, PDF.js, CSS and compiled translations remain byte-identical to the verified complete release. No server settings were changed and no new functional test run is claimed."
+}

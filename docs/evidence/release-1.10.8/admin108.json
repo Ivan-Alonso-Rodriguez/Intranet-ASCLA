@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-15",
+  "recorded_at": "2026-10-15T05:02:30.288420+00:00",
+  "version": "1.10.8",
+  "schema": 15,
+  "scope": "Local administration tests followed by narrow published QA review. No full quality-ci, coverage or repeat of the complete remote acceptance suite.",
+  "php": {
+    "tests": 44,
+    "assertions": 347,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "php_report": "test-results/admin108-junit.xml",
+  "browser": {
+    "scope": "Real disposable local WordPress data; no public QA deployment claim",
+    "checks": [
+      "Resumen por tareas, navegación agrupada y adaptación a móvil sin desbordamiento",
+      "Ficha por asociado muestra cifras reales y separa intereses declarados de temas con Me gusta",
+      "Filtro de Me gusta y paginación real conservan los 24 registros",
+      "Cambiar de período restablece la primera página",
+      "Volver conserva la búsqueda y un asociado sin actividad muestra estados vacíos claros",
+      "Un fallo de API ofrece reintento sin presentar cifras falsas",
+      "Panel sin infracciones automáticas WCAG A/AA en el alcance revisado",
+      "Cambio real de idioma traduce la ficha y conserva las cifras"
+    ],
+    "errors": []
+  },
+  "portable_checks": 49,
+  "translation_messages_per_locale": 1561,
+  "coverage_measured": false,
+  "fixtures_cleaned": true,
+  "remote_deployed_this_stage": true,
+  "requirements_states_changed": false,
+  "privacy_exclusions": [
+    "private messages and groups",
+    "Contact requests",
+    "draft/deleted/unpublished records",
+    "unapproved comments",
+    "microevents",
+    "Chatham House content and children"
+  ],
+  "screenshots": [
+    "test-results/admin108-overview-light.png",
+    "test-results/admin108-member-preview.png",
+    "test-results/admin108-member-dark.png",
+    "test-results/admin108-member-dark-mobile.png"
+  ],
+  "source_sha256": {
+    "wp-content/plugins/ascla-core/src/Services/MemberInsights.php": "0e9655f83c8bec34ffba75f3c79be95f05338d7cf7571fe8a40e8343683abab8",
+    "wp-content/plugins/ascla-core/src/Repositories/MemberActivity.php": "f3c0ae6f3deb0e9998e4e782efde363a711cafb8219ed2a6495ccbb7da2230c6",
+    "wp-content/plugins/ascla-core/assets/admin-members.js": "73f3f06e2d4c14bdd35c20ffdc174e5dbe0f1a206b327f5714f93f07f4f159fb",
+    "wp-content/plugins/ascla-core/assets/app.js": "ecd5671eb6ab366e828f5c5a1809ff583ceab29f402ca11300ed1908f939407c",
+    "wp-content/plugins/ascla-core/assets/app.css": "12191c9b0158c8d8447be6e026b571c130d391659422eb43a7bd2b236cb56826",
+    "tests/php/MemberInsightsTest.php": "5cd33d7fe8f6aa291430c51fa4b83a7b69614d385e8f1c0cdf6390d256e7c700",
+    "tests/admin-members108.cjs": "182486bbe98f5f4449570ce89eb69769df03074d2f2b2c3c1ac0ce83028f7911",
+    "tests/admin-members-fixture.php": "ad8c360aa548ecab54059560625d9e2f3db45e6cd618ec211e917adc012fa344"
+  },
+  "published_qa": {
+    "target": "https://wordpress.ingsoftware.lat",
+    "evidence": "docs/evidence/release-1.10.8/admin108-qa.json",
+    "status": "passed",
+    "package_sha256": "96337a02d6e78c2de9739ff2d0214dec5604ee87cf9719c44736e4b2e2efc307",
+    "read_only_review": true,
+    "new_test_data": false,
+    "complete_acceptance_rerun": false
+  }
+}

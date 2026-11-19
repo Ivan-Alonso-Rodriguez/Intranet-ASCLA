@@ -1,0 +1,26 @@
+meta {
+  name: 11. El cupo se ofrece a Bruno
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{base}}/wp-json/ascla/v1/events/{{eventoCupoId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sesionBruno}}
+  X-WP-Nonce: {{nonceBruno}}
+}
+
+settings {
+  followRedirects: false
+  timeout: 30000
+}
+
+tests {
+  test("Código HTTP esperado: 200", function () { expect(res.getStatus()).to.equal(200); });
+  test("Oferta vigente reservada para la lista de espera", function () { expect(res.getBody().registered).to.equal("offered");expect(Number(res.getBody().reserved)).to.equal(1);expect(res.getBody().offer_expires_at).to.be.a("string").and.not.empty; });
+}
