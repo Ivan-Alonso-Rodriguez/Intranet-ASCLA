@@ -116,10 +116,13 @@ namespace {
     $translations=json_decode($read('wp-content/plugins/ascla-core/languages/en.json'),true);
     $assert(is_array($translations) && !empty($translations),'English translation catalog is valid JSON');
     $missing=[];
+    $literalCall= <<<'JS'
+~\b(?:T|L|label)\(\s*("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')\s*\)~
+JS;
     foreach(['wp-content/plugins/ascla-core/assets/interest-imports.js','wp-content/plugins/ascla-core/assets/admin-statistics.js','wp-content/plugins/ascla-core/assets/app.js'] as $asset){
         $source=$read($asset);
-        if(preg_match_all('/\b(?:T|L|label)\(\s*([\'"])(.*?)\1\s*\)/s',$source,$matches)){
-            foreach($matches[2] as $key){if(!array_key_exists($key,$translations))$missing[$key]=true;}
+        if(preg_match_all($literalCall,$source,$matches)){
+            foreach($matches[1] as $literal){$key=stripcslashes(substr($literal,1,-1));if(!array_key_exists($key,$translations))$missing[$key]=true;}
         }
     }
     $assert($missing===[],'new UI direct translation keys are complete');
