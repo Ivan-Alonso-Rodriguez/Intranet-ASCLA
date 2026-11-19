@@ -956,6 +956,11 @@
     }
     return `<div class="conversation-request-actions">${btn(I('mail')+' '+T('Enviar mensaje'),'conversation-request',("data-id=\"" + (id) + "\" " + (r.can_request ? '' : 'disabled') + ""),'small')}</div>`;
   }
+  function connectedActions(c,id,suggested,compactConnected) {
+      let actions = compactConnected ? '' : '<span class="connection-state connected">' + I('check') + ' ' + E(T('Conectados')) + '</span>';
+      if (c.can_message) actions += btn(I('mail') + ' ' + T('Enviar mensaje'), 'message-start', `data-id="${id}"`, 'primary small') + (suggested && c.can_suggest_intro ? btn(T('Mensaje sugerido'), 'intro', `data-id="${id}"`, 'small') : '');
+      return actions + btn(T('Eliminar conexión'), 'connection-remove-request', `data-id="${id}" data-mode="disconnect"`, 'ghost danger small');
+  }
   function connectionPrimaryActions(c, id, suggested, compactConnected) {
     if (c.state === 'incoming_pending') {
       return btn('Aceptar conexión', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="accept" ${c.blocked ? 'disabled' : ''}`, 'primary small') + btn('Rechazar solicitud', 'connection-respond', `data-id="${id}" data-request="${c.request_id}" data-decision="reject"`, 'small');
@@ -964,9 +969,7 @@
       return '<div class="connection-pending"><span class="connection-sent">'+I('check')+E(T('Solicitud enviada'))+'</span>'+btn(T('Cancelar'),'connection-remove-request','data-id="'+id+'" data-mode="cancel" aria-label="'+E(T('Cancelar solicitud'))+'"','connection-cancel ghost small')+'</div>';
     }
     if (c.state === 'connected') {
-      let actions = compactConnected ? '' : '<span class="connection-state connected">' + I('check') + ' ' + E(T('Conectados')) + '</span>';
-      if (c.can_message) actions += btn(I('mail') + ' ' + T('Enviar mensaje'), 'message-start', `data-id="${id}"`, 'primary small') + (suggested && c.can_suggest_intro ? btn(T('Mensaje sugerido'), 'intro', `data-id="${id}"`, 'small') : '');
-      return actions + btn(T('Eliminar conexión'), 'connection-remove-request', `data-id="${id}" data-mode="disconnect"`, 'ghost danger small');
+      return connectedActions(c,id,suggested,compactConnected);
     }
     if (c.retry_at) return '<span class="connection-availability" title="'+E(connectionNote(c))+'">'+I('clock')+E(T('Disponible a partir del'))+' '+E(date(c.retry_at))+'</span>';
     return btn(compactConnected ? 'Conectar' : 'Enviar solicitud de conexión', 'connect', `data-id="${id}" ${c.networking_available ? '' : 'disabled'}`, 'small');
@@ -1253,7 +1256,8 @@
     const resourceIcon = p.meta.resource_type === "Video" ? "play" : "book";
     const fallback = `<span class="resource-cover v${i % 3}"><span class="cover-label">${E(T("ASCLA · CONOCIMIENTO"))}</span><strong>${E(p.title.split(":")[0])}</strong><span class="cover-icon">${I(resourceIcon)}</span></span>`;
     const thumbnail = resourceThumbnail(p.meta);
-    const cover = `<a href="${E(p.url)}" class="resource-video-cover" title="${E(p.title)}">${fallback}${thumbnail}${thumbnail ? `<span class="resource-video-duration">${I("play")} ${durationLabel}</span>` : ''}</a>`;
+    const durationBadge = thumbnail ? `<span class="resource-video-duration">${I("play")} ${durationLabel}</span>` : '';
+    const cover = `<a href="${E(p.url)}" class="resource-video-cover" title="${E(p.title)}">${fallback}${thumbnail}${durationBadge}</a>`;
     const editorialState = p.status === "publish" ? "" : status(p.status);
     return `<article class="card resource-card">${cover}<div class="resource-content"><div class="resource-card-badges"><span class="tag">${E(T(p.meta.resource_type || "Artículo"))}</span>${editorialState}</div>${resourceRecommendation(p.recommendation)}<h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E((p.meta.summary || p.body).slice(0, 115))}${(p.meta.summary || p.body).length > 115 ? "…" : ""}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Explorar " + I("arrow"), "item", ("data-id=\"" + (p.id) + "\""), "ghost")}</div></div></article>`;
   }
@@ -2026,6 +2030,14 @@
     if(type==='ally' && !S.filter.drafts){params.status='publish';params.mine=false;}
     return params;
   }
+  function listingHeadingActions(type,canWrite) {
+    let actions=listingCreateAction(type, canWrite);
+    if (canWrite && ['gallery','resource'].includes(type)) {
+      const target=C.adminUrl+(C.adminUrl.includes('?')?'&':'?')+'section=contenidos&type='+type;
+      actions='<div class="page-heading-actions"><a class="btn" data-native href="'+E(target)+'">'+E(T('Registro e historial'))+'</a>'+actions+'</div>';
+    }
+    return actions;
+  }
   async function listing() {
     const type = typeByPage[S.page];
     if (type==='topic' && S.filter.comments) { await ownComments();return; }
@@ -2053,11 +2065,7 @@
     const filtersHtml = searchForm({label:'Buscar contenido', placeholder:searchPlaceholder, id:'content-search', filter:S.filter,
       controls:filterControls, keys:['resource_type','category','tag','keyword','author','parent','modality','after','before']});
     const items = list.items;
-    let actions=listingCreateAction(type, canWrite);
-    if (canWrite && ['gallery','resource'].includes(type)) {
-      const target=C.adminUrl+(C.adminUrl.includes('?')?'&':'?')+'section=contenidos&type='+type;
-      actions='<div class="page-heading-actions"><a class="btn" data-native href="'+E(target)+'">'+E(T('Registro e historial'))+'</a>'+actions+'</div>';
-    }
+    const actions=listingHeadingActions(type,canWrite);
     const results = S.filter.drafts ? listingDrafts(items) : listingItems(type, items) + listingEmpty(items);
     const header = type === 'topic' && actions
       ? `<div class="forum-heading">${heading(...labels[type])}<div class="forum-heading-actions">${actions}</div></div>`
@@ -2116,7 +2124,8 @@
   function reactionButtons(data, id, comment = false, compact = false) {
     const count = reactionCount(data);
     const selected = data.reaction === 'like';
-    const countId = `reaction-count-${comment ? 'comment' : compact ? 'card' : 'detail'}-${Number(id)}`;
+    const surface = compact ? 'card' : 'detail';
+    const countId = `reaction-count-${comment ? 'comment' : surface}-${Number(id)}`;
     const label = (compact ? '' : ' ' + E(T('Me gusta'))) + ` <span id="${countId}" data-reaction-count>${count}</span>`;
     const attrs = `data-id="${Number(id)}" data-comment="${comment}" data-active="${!selected}" data-reaction="like" aria-pressed="${selected}" aria-label="${E(T('Me gusta'))} ${count}"`;
     const button = btn(I('heart') + label, 'content-reaction', attrs, 'ghost small');
@@ -2809,13 +2818,14 @@
     }
     return [["draft", "Borrador"], ["pending", "Enviar a revisión"]];
   }
+  function hubEditorStatus(id,p,directPublisher) {
+    if (id && !['pending', 'publish'].includes(p.status)) return p.status;
+    return directPublisher ? 'publish' : 'pending';
+  }
   function editorStatusValue(type, id, p, m, directResourcePublisher, directContentPublisher) {
     if (type==='event' && m.micro && p.status!=='publish') return 'pending';
     if(type==='ally')return allyEditorStatus(id,p,m);
-    if (type === 'hub') {
-      if (id && !['pending', 'publish'].includes(p.status)) return p.status;
-      return directContentPublisher ? 'publish' : 'pending';
-    }
+    if (type === 'hub') return hubEditorStatus(id,p,directContentPublisher);
     const directPublishType = ["topic", "forum"].includes(type) || (type === "event" && !m.micro && !m.generated);
     if (directPublishType) return id && p.status === "draft" ? "draft" : "publish";
     if ((!id && ["gallery","resource"].includes(type) && directContentPublisher) || (p.status === "publish" && directContentPublisher)) return "publish";
@@ -3325,7 +3335,8 @@
     const leaveData = groupData + ` data-owner="${Number(current.created_by) === me}"`;
     const leave = current.can_leave_group ? btn('Salir del grupo','group-leave-request',leaveData,'small') : '';
     const remove = current.can_delete_group ? btn('Eliminar grupo','group-delete-request',groupData,'danger small') : '';
-    const danger = leave || remove ? `<div class="group-info-danger"><div><strong>${E(T(remove ? 'Administrar grupo' : 'Tu participación'))}</strong></div><div class="group-info-danger-actions">${leave}${remove}</div></div>` : '';
+    const dangerTitle=remove?'Administrar grupo':'Tu participación';
+    const danger = leave || remove ? `<div class="group-info-danger"><div><strong>${E(T(dangerTitle))}</strong></div><div class="group-info-danger-actions">${leave}${remove}</div></div>` : '';
     modal(T('Información del grupo'), `<div class="group-info-head">${avatar(identity)}<div class="group-info-head-copy"><h3>${E(identity.name)}</h3><p>${Number(current.member_count || current.members?.length || 0)} ${E(T('integrantes'))}</p>${description}</div>${editAction ? ("<div class=\"group-info-head-action\">" + (editAction) + "</div>") : ''}</div><div class="group-info-section"><div class="group-info-section-title"><h4>${E(T('Integrantes'))}</h4><span>${Number(current.member_count || current.members?.length || 0)}</span>${addAction}</div><div class="group-info-members">${members}</div></div>${danger}`);
   }
 
@@ -3494,16 +3505,7 @@
     history.replaceState(history.state, '', url);
   }
 
-  async function messages() {
-    const previous = document.querySelector('.chat-compose');
-    if (previous) chatDrafts.set(Number(previous.dataset.id), previous.elements.body.value);
-    stopChat();
-    const chat = S.chat = { active: true, id: 0, current:null, pending: null, syncing: false, halted: false };
-    const conversations = await api('conversations?' + new URLSearchParams({q: S.filter.q || ''}));
-    if (!chatAlive(chat)) return;
-    S.conversations = conversations;
-    const urlSelected = Number(new URLSearchParams(location.search).get('conversation')) || 0;
-    let selected = S.conversation || urlSelected || 0;
+  async function selectedConversation(chat,conversations,selected) {
     let current = selected ? conversations.find(c => Number(c.id) === selected) : null;
     let unavailable = false;
     if (selected && !current) {
@@ -3514,6 +3516,19 @@
         unavailable = true;
       }
     }
+    return {current,unavailable};
+  }
+  async function messages() {
+    const previous = document.querySelector('.chat-compose');
+    if (previous) chatDrafts.set(Number(previous.dataset.id), previous.elements.body.value);
+    stopChat();
+    const chat = S.chat = { active: true, id: 0, current:null, pending: null, syncing: false, halted: false };
+    const conversations = await api('conversations?' + new URLSearchParams({q: S.filter.q || ''}));
+    if (!chatAlive(chat)) return;
+    S.conversations = conversations;
+    const urlSelected = Number(new URLSearchParams(location.search).get('conversation')) || 0;
+    let selected = S.conversation || urlSelected || 0;
+    let {current,unavailable}=await selectedConversation(chat,conversations,selected);
     if (current && isIncomingRequest(current)) S.messageTab = 'requests';
     else if (current && urlSelected) S.messageTab = 'chats';
     if (!current && !unavailable && !mobileMessaging()) {
@@ -3620,7 +3635,7 @@
     let r;
     const hide = () => root.querySelectorAll('[data-action="intro"][data-id="'+Number(id)+'"]').forEach(button => button.remove());
     try { r = await api("matching/" + id + "/intro", {}); }
-    catch (error) { if (error.status === 409) hide(); throw error; }
+    catch (error) { if (error.status === 409) { hide(); } throw error; }
     hide();
     modal(
       T("Mensaje sugerido"),

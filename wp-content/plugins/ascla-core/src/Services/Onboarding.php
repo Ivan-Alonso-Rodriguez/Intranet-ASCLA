@@ -2,7 +2,7 @@
 namespace ASCLA\Core\Services;
 
 use ASCLA\Core\Domain\OnboardingTours;
-use ASCLA\Core\Repositories\{Store,WordPressWrites};
+use ASCLA\Core\Repositories\{Store,WordPressWrites,RepositoryException};
 
 /** Per-account walkthrough claims and progress, shared across devices. */
 final class Onboarding
@@ -23,7 +23,7 @@ final class Onboarding
         if (is_array($rollout) && !empty($rollout['cohort'])) { return $rollout; }
         global $wpdb;
         $last=$wpdb->get_var("SELECT COALESCE(MAX(ID),0) FROM {$wpdb->users}");
-        if ($last===null || $wpdb->last_error!=='') { throw new \RuntimeException('No se pudo preparar la guía de ASCLA.'); }
+        if ($last===null || $wpdb->last_error!=='') { throw new RepositoryException('No se pudo preparar la guía de ASCLA.'); }
         add_option(self::ROLLOUT,['cohort'=>wp_generate_uuid4(),'last_user_id'=>(int)$last],'',false);
         return (array)get_option(self::ROLLOUT,[]);
     }
@@ -92,31 +92,41 @@ final class Onboarding
             wp_cache_delete($user,'user_meta');
             $state=self::progress($module,$user);
             if ($input['action']==='start') {
-                $automatic=FormRules::boolean($input['automatic']??false);
-                $restart=FormRules::boolean($input['restart']??false);
-                if ($automatic && (!self::eligible($user) || metadata_exists('user',$user,self::PREFIX.$module))) {
-                    return ['started'=>false,'progress'=>$state];
-                }
-                if ($restart || !$state || ($state['status']??'')!=='started') {
-                    $state=['step'=>$tour['steps'][0]['id'],'status'=>'started'];
-                }
-                $state['run']=wp_generate_uuid4();
-                $state['revision']=0;
+                $next=self::startState($module,$input,$tour,$user,$state);
+                if ($next===null) { return ['started'=>false,'progress'=>$state]; }
+                $state=$next;
             } else {
-                Access::require(($state['status']??'')==='started' && is_string($input['run']??null)
-                    && hash_equals($state['run']??'',$input['run'])
-                    && ($input['revision']??null)===($state['revision']??0),'El recorrido cambió en otra sesión. Ábrelo desde Ayuda para continuar.',409);
-                if ($input['action']==='move') {
-                    Access::require(in_array($input['step']??null,array_column($tour['steps'],'id'),true),'Paso de guía no válido.',400);
-                    $state['step']=$input['step'];
-                } else {
-                    $state['status']=$input['action']==='complete'?'completed':'skipped';
-                }
-                $state['revision']++;
+                $state=self::advanceState($input,$tour,$state);
             }
             $state['updated_at']=time();
             WordPressWrites::meta('user',$user,self::PREFIX.$module,$state);
             return ['started'=>true,'progress'=>$state];
         });
+    }
+    private static function startState(string $module,array $input,array $tour,int $user,array $state): ?array
+    {
+        $automatic=FormRules::boolean($input['automatic']??false);
+        $restart=FormRules::boolean($input['restart']??false);
+        if ($automatic && (!self::eligible($user) || metadata_exists('user',$user,self::PREFIX.$module))) { return null; }
+        if ($restart || !$state || ($state['status']??'')!=='started') {
+            $state=['step'=>$tour['steps'][0]['id'],'status'=>'started'];
+        }
+        $state['run']=wp_generate_uuid4();
+        $state['revision']=0;
+        return $state;
+    }
+    private static function advanceState(array $input,array $tour,array $state): array
+    {
+        Access::require(($state['status']??'')==='started' && is_string($input['run']??null)
+            && hash_equals($state['run']??'',$input['run'])
+            && ($input['revision']??null)===($state['revision']??0),'El recorrido cambió en otra sesión. Ábrelo desde Ayuda para continuar.',409);
+        if ($input['action']==='move') {
+            Access::require(in_array($input['step']??null,array_column($tour['steps'],'id'),true),'Paso de guía no válido.',400);
+            $state['step']=$input['step'];
+        } else {
+            $state['status']=$input['action']==='complete'?'completed':'skipped';
+        }
+        $state['revision']++;
+        return $state;
     }
 }

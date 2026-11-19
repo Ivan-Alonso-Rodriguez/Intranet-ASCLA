@@ -8,7 +8,7 @@ globalThis.ASCLAOnboarding = ({ root, api, T, toast }) => {
   let restoreFocus, resizeObserver;
   const isolated = new Map(), attempted = new Set(), opening = new Set();
   const blocked = () => !!root.querySelector('.modal-backdrop,.ascla-image-editor-backdrop,.ascla-sidebar.open,.account-menu[open]');
-  const visible = node => node && node.getClientRects().length && getComputedStyle(node).visibility !== "hidden";
+  const visible = node => node?.getClientRects().length && getComputedStyle(node).visibility !== "hidden";
   function target(step) {
     for (const selector of Array.isArray(step.target) ? step.target : [step.target]) {
       const found = [...root.querySelectorAll(selector)].find(visible);
@@ -200,6 +200,23 @@ globalThis.ASCLAOnboarding = ({ root, api, T, toast }) => {
     });
   }
 
+  function progressError(error,operation,active) {
+      if (session !== active || error.name === "AbortError") return;
+      if ([401, 403, 404, 409].includes(error.status)) {
+        dismiss();
+        toast(error.message);
+        return;
+      }
+      if (operation === "skip") {
+        dismiss();
+        toast("No se pudo guardar el cierre de la guía. Tu avance anterior está guardado.");
+      } else {
+        const message = layer.querySelector(".ascla-tour-error");
+        message.hidden = false;
+        message.textContent = T("No se pudo guardar el avance. Vuelve a pulsar el botón para reintentarlo.");
+      }
+  }
+
   async function operate(operation) {
     if (operation === "close") { dismiss(); return; }
     if (operation === "resume" || operation === "restart") {
@@ -222,20 +239,7 @@ globalThis.ASCLAOnboarding = ({ root, api, T, toast }) => {
       active.index = next;
       showStep();
     } catch (error) {
-      if (session !== active || error.name === "AbortError") return;
-      if ([401, 403, 404, 409].includes(error.status)) {
-        dismiss();
-        toast(error.message);
-        return;
-      }
-      if (operation === "skip") {
-        dismiss();
-        toast("No se pudo guardar el cierre de la guía. Tu avance anterior está guardado.");
-      } else {
-        const message = layer.querySelector(".ascla-tour-error");
-        message.hidden = false;
-        message.textContent = T("No se pudo guardar el avance. Vuelve a pulsar el botón para reintentarlo.");
-      }
+      progressError(error,operation,active);
     } finally {
       if (session === active) { active.busy = false; controlsBusy(false); }
     }
@@ -269,13 +273,7 @@ globalThis.ASCLAOnboarding = ({ root, api, T, toast }) => {
   globalThis.addEventListener("scroll", schedulePosition, { capture: true, passive: true });
   globalThis.addEventListener("resize", schedulePosition);
   globalThis.addEventListener("pagehide", stop);
-  document.addEventListener("keydown", event => {
-    if (!layer) return;
-    if (event.key === "Escape") {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      if (session?.busy) dismiss(); else void operate(session ? "skip" : "close");
-    } else if (event.key === "Tab") {
+  function trapFocus(event) {
       const controls = [...layer.querySelectorAll("button:not(:disabled)")];
       const first = controls[0], last = controls.at(-1);
       if (!controls.length) { event.preventDefault(); return; }
@@ -283,6 +281,15 @@ globalThis.ASCLAOnboarding = ({ root, api, T, toast }) => {
         event.preventDefault();
         (event.shiftKey ? last : first).focus();
       }
+  }
+  document.addEventListener("keydown", event => {
+    if (!layer) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (session?.busy) dismiss(); else void operate(session ? "skip" : "close");
+    } else if (event.key === "Tab") {
+      trapFocus(event);
     }
   }, true);
   return { enter, stop };

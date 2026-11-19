@@ -40,6 +40,10 @@ final class Translations
     {
         $translated=self::text($message);
         if ($translated!==$message) { return $translated; }
+        return self::formattedError($message)??self::completionError($message);
+    }
+    private static function formattedError(string $message): ?string
+    {
         $formats=[
             '/^El texto supera el límite de (\d+) caracteres\.$/u'=>'El texto supera el límite de %d caracteres.',
             '/^La fila (\d+) no coincide con las columnas de la cabecera\.$/u'=>'La fila %d no coincide con las columnas de la cabecera.',
@@ -51,7 +55,7 @@ final class Translations
         if (preg_match('/^No se pudo conectar con (.+)\. Revisa la conexión del servidor\.$/u',$message,$matches)) {
             return sprintf(self::text('No se pudo conectar con %s. Revisa la conexión del servidor.'),$matches[1]);
         }
-        return self::completionError($message);
+        return null;
     }
     private static function completionError(string $message): string
     {

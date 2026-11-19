@@ -61,11 +61,16 @@ final class RouterRoutes
         Router::route('/profiles/me','POST',static fn($r)=>Profiles::save($r->get_json_params()?:[]),'ascla_write');
     }
 
-    public static function community(): void
+    private static function onboarding(): void
     {
-        Router::route('/bootstrap','GET',[\ASCLA\Core\Services\Bootstrap::class,'get']);
         Router::route('/onboarding','GET',[\ASCLA\Core\Services\Onboarding::class,'get']);
         Router::route('/onboarding/(?P<module>[a-z][a-z0-9-]{0,63})','POST',static fn($r)=>\ASCLA\Core\Services\Onboarding::update((string)$r['module'],$r->get_json_params()?:[]));
+    }
+
+    public static function community(): void
+    {
+        self::onboarding();
+        Router::route('/bootstrap','GET',[\ASCLA\Core\Services\Bootstrap::class,'get']);
         Router::route('/resource-authors','GET',static fn()=>\ASCLA\Core\Repositories\ContentQuery::authors());
         self::profiles();
         Router::route('/interests/learned','GET',static fn()=>\ASCLA\Core\Services\LearnedInterests::get());

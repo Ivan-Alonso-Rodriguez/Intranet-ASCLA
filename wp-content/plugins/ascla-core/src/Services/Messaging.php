@@ -10,12 +10,10 @@ final class Messaging
 {
     private const PAIR_FILTER='pair_key=%s';
     private const SINGLE_ROW='LIMIT 1';
-    private const PARTICIPANT_FILTER='conversation_id=%d AND user_id=%d';
     private const CANNOT_MESSAGE='No puede enviar mensajes a este miembro.';
     public const CONVERSATION_FILTER='conversation_id=%d';
     public const GROUP_LIMIT=50;
     private const LATEST_ROW='ORDER BY id DESC LIMIT 1';
-    private const ORDER_BY_ID_ASC='ORDER BY id ASC';
     private const NOT_FOUND='Conversación no encontrada.';
 
     public static function blocked(int $a,int $b): bool
@@ -25,31 +23,7 @@ final class Messaging
         return Store::count('relations',"kind='block' AND ((user_id=%d AND target_id=%d) OR (user_id=%d AND target_id=%d))",[$a,$b,$b,$a])>0;
     }
 
-    private static function pairKey(int $a,int $b): string
-    {
-        $ids=[$a,$b]; sort($ids); return implode(':',$ids);
-    }
 
-    private static function ensureDirect(int $a,int $b,int $creator): array
-    {
-        $pair=self::pairKey($a,$b);
-        $existing=Store::rows('conversations',self::PAIR_FILTER,[$pair],self::SINGLE_ROW);
-        if ($existing) {
-            $conversation=$existing[0];
-            Access::require(($conversation['kind']??'direct')==='direct','No se puede reutilizar esta conversación.',409);
-        } else {
-            $id=Store::insert('conversations',[
-                'pair_key'=>$pair,'kind'=>'direct','title'=>'','created_by'=>$creator,'photo_id'=>0,'updated_at'=>current_time('mysql',true),
-            ]);
-            $conversation=Store::one('conversations',$id);
-        }
-        foreach ([$a,$b] as $uid) {
-            if (!Store::count('participants',self::PARTICIPANT_FILTER,[(int)$conversation['id'],$uid])) {
-                Store::insert('participants',['conversation_id'=>(int)$conversation['id'],'user_id'=>$uid,'last_read'=>0]);
-            }
-        }
-        return $conversation;
-    }
 
     public static function start(int $target): array
     {
@@ -60,7 +34,7 @@ final class Messaging
         return Connections::lockPair($me,$target,static function () use($me,$target) {
             ConversationRequests::requireAuthorized($me,$target);
             Access::require(!self::blocked($me,$target),self::CANNOT_MESSAGE,403);
-            $conversation=self::ensureDirect($me,$target,$me);
+            $conversation=DirectConversations::ensureDirect($me,$target,$me);
             ConversationVisibility::show((int)$conversation['id']);
             Audit::record('conversation_started',(int)$conversation['id'],'direct');
             return $conversation;
@@ -73,7 +47,7 @@ final class Messaging
         Access::require(get_current_user_id()===$requester && $requester>0 && $target>0 && $requester!==$target,'Solicitud no válida.',400);
         $body=trim(Access::text($body,5000));
         Access::require($body!=='','Escribe el mensaje que quieres enviar con la solicitud.',400);
-        $conversation=self::ensureDirect($requester,$target,$requester);
+        $conversation=DirectConversations::ensureDirect($requester,$target,$requester);
         $id=(int)$conversation['id'];
         $mid=Store::insert('messages',['conversation_id'=>$id,'sender_id'=>$requester,'body'=>$body,'created_at'=>current_time('mysql',true)]);
         Store::update('conversations',['updated_at'=>current_time('mysql',true)],['id'=>$id]);
@@ -82,7 +56,7 @@ final class Messaging
 
     public static function requestSummary(int $a,int $b): array
     {
-        $pair=self::pairKey($a,$b);
+        $pair=DirectConversations::pairKey($a,$b);
         $rows=Store::rows('conversations',self::PAIR_FILTER,[$pair],self::SINGLE_ROW);
         if (!$rows || ($rows[0]['kind']??'direct')!=='direct') { return ['conversation_id'=>0,'initial_message'=>'','message_created_at'=>'']; }
         $conversationId=(int)$rows[0]['id'];
@@ -106,7 +80,7 @@ final class Messaging
         Access::require(count($ids)>=2,'Selecciona al menos dos asociados para crear un grupo.',400);
         Access::require(count($ids)<self::GROUP_LIMIT,'Un grupo puede tener como máximo 50 participantes, incluido su creador.',400);
         if ($photoId>0) { Media::requireOwned($photoId,$me,true); }
-        self::requireGroupConnections($me,$ids);
+        GroupMembership::requireGroupConnections($me,$ids);
         $key='group:'.wp_generate_uuid4();
         return Store::atomic('group-create:'.$me.':'.hash('sha256',$key),static function () use($me,$ids,$title,$description,$key,$photoId) {
             $id=Store::insert('conversations',[
@@ -114,81 +88,40 @@ final class Messaging
             ]);
             foreach (array_merge([$me],$ids) as $uid) { Store::insert('participants',['conversation_id'=>$id,'user_id'=>$uid,'last_read'=>0]); }
             if ($photoId>0) { Media::commit($photoId,$me); }
-            self::notifyNewGroupMembers($id,$me,$title,$ids);
+            GroupMembership::notifyNewGroupMembers($id,$me,$title,$ids);
             Audit::record('group_conversation_created',$id,'members:'.(count($ids)+1));
             return self::conversation($id);
         });
     }
 
-    private static function requireGroupConnections(int $creator,array $ids): void
-    {
-        $states=Connections::statesFor($creator,$ids);
-        foreach ($ids as $id) {
-            Access::require(Access::member($id),'Uno de los participantes ya no está disponible.',400);
-            Access::require(!$states[$id]['blocked'],'No puedes añadir al grupo a un asociado bloqueado.',403);
-            Access::require($states[$id]['can_read_messages'],'Solo puedes añadir al grupo conexiones confirmadas.',403);
-        }
-    }
 
-    private static function notifyNewGroupMembers(int $conversation,int $creator,string $title,array $ids): void
-    {
-        $label=Profiles::publicName($creator).' te añadió al grupo '.$title.'.';
-        $url=Catalog::url('mensajeria',['conversation'=>$conversation]);
-        $context=['type'=>'conversation','id'=>$conversation,'actor'=>$creator];
-        foreach ($ids as $id) { Notifications::send($id,'conversation_group',$label,$url,$context); }
-    }
 
     public static function addGroupMembers(int $id,array $users): array
     {
         $creator=get_current_user_id();
         Access::require(Access::member($creator) && current_user_can('ascla_write'));
-        self::requireGroupCreator($id,$creator);
+        GroupMembership::requireGroupCreator($id,$creator);
         Access::limit('group_chat',10,300);
         $ids=array_values(array_diff(FormRules::ids($users),[$creator]));
         Access::require($ids && count($ids)<self::GROUP_LIMIT,'Selecciona entre 1 y 49 conexiones.',400);
         $locks=array_map(static fn($user)=>Connections::lockKey($creator,$user),$ids);
         $locks[]='conversation:'.$id;
-        return Store::locks($locks,static fn()=>Transaction::run(static fn()=>self::addGroupMembersLocked($id,$creator,$ids)));
+        return Store::locks($locks,static fn()=>Transaction::run(static fn()=>GroupMembership::addGroupMembersLocked($id,$creator,$ids)));
     }
 
-    private static function requireGroupCreator(int $id,int $creator): array
-    {
-        $participant=self::participant($id);
-        Access::require($participant['kind']==='group',self::NOT_FOUND,404);
-        Access::require((int)$participant['conversation']['created_by']===$creator,'Solo el responsable del grupo puede gestionarlo.',403);
-        return $participant;
-    }
 
-    private static function addGroupMembersLocked(int $id,int $creator,array $ids): array
-    {
-        $group=self::requireGroupCreator($id,$creator);
-        $members=array_map('intval',array_column($group['members'],'user_id'));
-        $new=array_values(array_diff($ids,$members));
-        if (!$new) { return self::conversation($id); }
-        Access::require(count($members)+count($new)<=self::GROUP_LIMIT,'Un grupo puede tener como máximo 50 participantes, incluido su creador.',409);
-        self::requireGroupConnections($creator,$new);
-        $last=Store::rows('messages',self::CONVERSATION_FILTER,[$id],self::LATEST_ROW)[0]??null;
-        $boundary=(int)($last['id']??0);
-        foreach ($new as $user) {
-            Store::insert('participants',['conversation_id'=>$id,'user_id'=>$user,'last_read'=>$boundary,'joined_after'=>$boundary]);
-        }
-        Store::update('conversations',['updated_at'=>current_time('mysql',true)],['id'=>$id]);
-        self::notifyNewGroupMembers($id,$creator,(string)$group['conversation']['title'],$new);
-        Audit::record('group_conversation_updated',$id,'members_added:'.count($new));
-        return self::conversation($id);
-    }
 
     public static function removeGroupMember(int $id,int $user): array
     {
         $creator=get_current_user_id();
         Access::require(Access::member($creator) && current_user_can('ascla_write'));
         return Store::atomic('conversation:'.$id,static function () use($id,$user,$creator) {
-            $group=self::requireGroupCreator($id,$creator);
+            $group=GroupMembership::requireGroupCreator($id,$creator);
             Access::require($user!==$creator,'No puedes expulsarte de tu propio grupo.',400);
             $members=array_map('intval',array_column($group['members'],'user_id'));
             if (in_array($user,$members,true)) {
                 Store::delete('participants',['conversation_id'=>$id,'user_id'=>$user]);
-                self::recordGroupActivity($id,'member_removed',$user);
+                GroupMembership::recordGroupActivity($id,'member_removed',$user);
                 Audit::record('group_conversation_updated',$id,'member_removed_'.$user);
             }
             return self::conversation($id);
@@ -200,38 +133,20 @@ final class Messaging
         $member=get_current_user_id();
         Access::require(Access::member($member));
         return Store::atomic('conversation:'.$id,static function () use($id,$member) {
-            $group=self::participant($id);
+            $group=ConversationRead::participant($id);
             Access::require($group['kind']==='group',self::NOT_FOUND,404);
             if ((int)$group['conversation']['created_by']===$member) {
-                self::transferGroup($id,$group['members'],$member);
+                GroupMembership::transferGroup($id,$group['members'],$member);
             }
             Store::delete('participants',['conversation_id'=>$id,'user_id'=>$member]);
             ConversationVisibility::show($id);
-            self::recordGroupActivity($id,'member_left',$member);
+            GroupMembership::recordGroupActivity($id,'member_left',$member);
             Audit::record('group_conversation_updated',$id,'member_left_'.$member);
             return ['id'=>$id,'left'=>true];
         });
     }
 
-    private static function transferGroup(int $id,array $participants,int $creator): void
-    {
-        $candidates=self::groupSuccessors($participants,$creator);
-        Access::require((bool)$candidates,'Se necesita otro integrante activo que pueda gestionar el grupo para que puedas salir.',409);
-        $successor=$candidates[random_int(0,count($candidates)-1)];
-        Store::update('conversations',['created_by'=>$successor],['id'=>$id]);
-        Notifications::send($successor,'conversation_group_owner','Ahora eres responsable de un grupo de Mensajería.',
-            Catalog::url('mensajeria',['conversation'=>$id]),['type'=>'conversation','id'=>$id,'actor'=>$creator]);
-        Audit::record('group_conversation_updated',$id,'owner_transferred_'.$successor);
-    }
 
-    private static function recordGroupActivity(int $id,string $kind,int $member): void
-    {
-        $time=current_time('mysql',true);
-        Store::insert('messages',[
-            'conversation_id'=>$id,'sender_id'=>$member,'kind'=>$kind,'body'=>'','created_at'=>$time,
-        ]);
-        Store::update('conversations',['updated_at'=>$time],['id'=>$id]);
-    }
 
     public static function messageText(array $message): string
     {
@@ -250,26 +165,6 @@ final class Messaging
         ));
     }
 
-    private static function participant(int $id): array
-    {
-        $conversation=Store::one('conversations',$id);
-        Access::require((bool)$conversation,self::NOT_FOUND,404);
-        $me=get_current_user_id();
-        $rows=Store::rows('participants',self::PARTICIPANT_FILTER,[$id,$me],self::SINGLE_ROW);
-        Access::require((bool)$rows,self::NOT_FOUND,404);
-        $members=Store::rows('participants',self::CONVERSATION_FILTER,[$id],self::ORDER_BY_ID_ASC);
-        $kind=(string)($conversation['kind']??'direct');
-        if ($kind==='group') {
-            return $rows[0]+['conversation'=>$conversation,'members'=>$members,'kind'=>'group'];
-        }
-        $others=array_values(array_filter($members,static fn($member)=>(int)$member['user_id']!==$me));
-        Access::require(count($others)===1,self::NOT_FOUND,404);
-        $other=(int)$others[0]['user_id'];
-        $permission=ConversationRequests::between($me,$other);
-        $connected=Connections::areConnected($me,$other);
-        Access::require(!self::blocked($me,$other) && ($connected || ConnectionPolicy::canReadHistory($me,$other) || in_array($permission['state'],['allowed','incoming_pending','outgoing_pending'],true)),self::NOT_FOUND,404);
-        return $rows[0]+['conversation'=>$conversation,'members'=>$members,'kind'=>'direct','other_id'=>$other,'permission'=>$permission];
-    }
 
     public static function conversations(string $query=''): array
     {
@@ -281,7 +176,7 @@ final class Messaging
         $out=[];
         foreach ($rows as $row) {
             if (ConversationVisibility::hidden((int)$row['id'],get_current_user_id())) { continue; }
-            $decorated=self::decorate($row);
+            $decorated=MessagingDecorator::decorate($row);
             if (!$decorated) { continue; }
             $haystack=$decorated['kind']==='group'
                 ? $decorated['title'].' '.($decorated['description']??'').' '.implode(' ',array_column($decorated['members'],'name')).' '.$decorated['preview']
@@ -291,56 +186,21 @@ final class Messaging
         return $out;
     }
 
-    private static function decorate(array $row): ?array
-    {
-        return MessagingDecorator::decorate($row);
-    }
 
     public static function conversation(int $id): array
     {
-        $participant=self::participant($id);
+        $participant=ConversationRead::participant($id);
         $row=$participant['conversation'];
-        $result=self::decorate($row+['last_read'=>$participant['last_read']]);
+        $result=MessagingDecorator::decorate($row+['last_read'=>$participant['last_read']]);
         Access::require((bool)$result,self::NOT_FOUND,404);
         return $result;
     }
 
-    private static function readState(int $id,int $me): array
-    {
-        $rows=Store::rows('participants','conversation_id=%d AND user_id<>%d',[$id,$me],self::ORDER_BY_ID_ASC);
-        $out=[];
-        foreach ($rows as $row) {
-            $uid=(int)$row['user_id'];
-            $card=Profiles::card($uid);
-            $out[]=['user_id'=>$uid,'name'=>$card['name'],'last_read'=>(int)$row['last_read'],'joined_after'=>(int)($row['joined_after']??0)];
-        }
-        return $out;
-    }
 
-    private static function decorateMessages(array $rows,array $readState,int $me): array
-    {
-        foreach ($rows as &$message) {
-            $message['sender_id']=(int)$message['sender_id'];
-            $message['can_delete']=false;
-            if ($message['kind']!=='message') {
-                $message['body']=self::messageText($message);
-                continue;
-            }
-            $message['sender']=Profiles::card($message['sender_id']);
-            if ($message['sender_id']===$me) {
-                $recipients=array_filter($readState,static fn($state)=>$state['joined_after']<(int)$message['id']);
-                $read=count(array_filter($recipients,static fn($state)=>$state['last_read']>=(int)$message['id']));
-                $message['read_count']=$read;
-                $message['read_total']=count($recipients);
-            }
-        }
-        unset($message);
-        return $rows;
-    }
 
     public static function messages(int $id,int $before=0,?int $after=null): array
     {
-        $participant=self::participant($id);
+        $participant=ConversationRead::participant($id);
         Access::require($before>=0 && ($after===null || $after>=0) && !($before && $after!==null),'Cursor no válido.',400);
         $boundary=(int)($participant['joined_after']??0);
         $args=[$id,$boundary]; $where=self::CONVERSATION_FILTER.' AND id>%d';
@@ -351,19 +211,19 @@ final class Messaging
         if ($after===null) { $rows=array_reverse($rows); }
         $last=$rows?(int)end($rows)['id']:($after??0);
         $me=get_current_user_id();
-        $readState=self::readState($id,$me);
-        $rows=self::decorateMessages($rows,$readState,$me);
+        $readState=ConversationRead::readState($id,$me);
+        $rows=ConversationRead::decorateMessages($rows,$readState,$me);
         return ['items'=>$rows,'before'=>$rows?(int)$rows[0]['id']:0,'after'=>max($last,$boundary),'has_more'=>$more,'read_state'=>$readState];
     }
 
     public static function send(int $id,string $body): array
     {
         Access::limit('message',20);
-        $participant=self::participant($id); $me=get_current_user_id();
+        $participant=ConversationRead::participant($id); $me=get_current_user_id();
         $body=trim(Access::text($body,5000)); Access::require(Access::hasText($body),'Escriba un mensaje.',400);
         if ($participant['kind']==='group') {
             return Store::atomic('conversation:'.$id,static function () use($id,$body,$me) {
-                $participant=self::participant($id);
+                $participant=ConversationRead::participant($id);
                 Access::require($participant['kind']==='group',self::NOT_FOUND,404);
                 $mid=Store::insert('messages',['conversation_id'=>$id,'sender_id'=>$me,'body'=>$body,'created_at'=>current_time('mysql',true)]);
                 Store::update('conversations',['updated_at'=>current_time('mysql',true)],['id'=>$id]);
@@ -388,7 +248,7 @@ final class Messaging
 
     public static function requireVisibleMessage(int $conversationId,int $messageId): void
     {
-        $participant=self::participant($conversationId);
+        $participant=ConversationRead::participant($conversationId);
         $message=Store::one('messages',$messageId);
         $boundary=(int)($participant['joined_after']??0);
         Access::require($message && $messageId>$boundary && (int)$message['conversation_id']===$conversationId,'Mensaje no encontrado.',404);
@@ -408,7 +268,7 @@ final class Messaging
         $description=trim(Access::text($description,240));
         Access::require(Access::hasText($title),'Escriba un nombre para el grupo.',400);
         return Store::atomic('conversation:'.$conversationId,static function () use($conversationId,$me,$title,$description,$photoId) {
-            $group=self::requireGroupCreator($conversationId,$me);
+            $group=GroupMembership::requireGroupCreator($conversationId,$me);
             $newPhoto=$photoId>0 && $photoId!==(int)$group['conversation']['photo_id'];
             if ($newPhoto) { Media::requireOwned($photoId,$me,true); }
             Store::update('conversations',[
@@ -428,7 +288,7 @@ final class Messaging
         $me=get_current_user_id();
         Access::require(Access::member($me) && current_user_can('ascla_write'));
         return Store::atomic('conversation:'.$conversationId,static function () use($conversationId,$me) {
-            self::requireGroupCreator($conversationId,$me);
+            GroupMembership::requireGroupCreator($conversationId,$me);
             Notifications::removeConversationNotices($conversationId);
             Store::delete('messages',['conversation_id'=>$conversationId]);
             Store::delete('participants',['conversation_id'=>$conversationId]);

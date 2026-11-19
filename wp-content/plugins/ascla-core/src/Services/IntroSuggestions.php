@@ -17,7 +17,7 @@ final class IntroSuggestions
             if (get_user_meta($me,self::LEGACY_IMPORTED,true)) { return; }
             $entries=get_user_meta($me,'_ascla_network_ai',true);
             foreach (is_array($entries)?$entries:[] as $key=>$entry) {
-                if (!preg_match('/^intro:([1-9][0-9]*)$/',(string)$key,$matches) || !is_array($entry)
+                if (!preg_match('/^intro:([1-9]\d*)$/',(string)$key,$matches) || !is_array($entry)
                     || !is_string($entry['result']['text']??null) || trim($entry['result']['text'])==='') { continue; }
                 $target=(int)$matches[1];
                 if ($target===$me || Store::count('relations','user_id=%d AND target_id=%d AND kind=%s',[$me,$target,self::USED])) { continue; }
@@ -63,5 +63,21 @@ final class IntroSuggestions
     public static function release(int $claim,int $me): void
     {
         Store::delete('relations',['id'=>$claim,'user_id'=>$me,'kind'=>self::USED]);
+    }
+    public static function draft(int $me,int $id,array $affinity): array
+    {
+        $context=NetworkingAI::context($me,$id,$affinity);
+        $result=NetworkingAI::generate('intro',$context,[$me,$id]);
+        $text=trim(Access::excerpt($result['text']??'',5000));
+        // A suggested private message must sound like the member, never like the AI service itself.
+        $claimsIdentity=(bool)preg_match('/\b(?:soy|somos)\s+(?:(?:el|la|un|una)\s+)?(?:asistente|chatbot|ASCLA)\b/iu',$text);
+        $claimsAssistantRole=(bool)preg_match('/\b(?:como|en calidad de)\s+(?:asistente|chatbot)\b/iu',$text);
+        if($text==='' || $claimsIdentity || $claimsAssistantRole){
+            $safe=(new \ASCLA\Core\Integrations\MockAIProvider())->generate('intro',$context);
+            $text=trim(Access::excerpt($safe['text']??'',5000));
+            $result['conversation_proposal']=$safe['conversation_proposal']??'';
+            $result['fallback']=true;
+        }
+        return ['text'=>$text,'conversation_proposal'=>Access::excerpt($result['conversation_proposal']??'',2000),'mode'=>$result['mode']??'IA','fallback'=>!empty($result['fallback']),'sent'=>false];
     }
 }

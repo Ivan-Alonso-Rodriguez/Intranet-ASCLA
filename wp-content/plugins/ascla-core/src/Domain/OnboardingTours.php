@@ -6,6 +6,7 @@ use ASCLA\Core\Frontend\Language;
 /** Add modules through ascla_onboarding_tours. Step IDs stay stable as copy changes. */
 final class OnboardingTours
 {
+    private const ADMIN_FORM='#admin-panel form';
     private static function step(string $id,string|array $target,string $es,string $en,string $bodyEs,string $bodyEn,string $cap='ascla_access'): array
     {
         return ['id'=>$id,'target'=>$target,'title'=>Language::text($es,$en),'body'=>Language::text($bodyEs,$bodyEn),'cap'=>$cap];
@@ -92,15 +93,15 @@ final class OnboardingTours
         $step=[self::class,'step'];$tours=[];
         $sections=[
             'resumen'=>['Resumen','Overview','ascla_manage','.admin-overview','Consulta la actividad y los accesos para atender las tareas del día.','View activity and shortcuts for your daily tasks.'],
-            'estadisticas'=>['Estadísticas','Statistics','ascla_publish','#admin-panel form','Ajusta el período y los filtros para consultar inscripciones, asistencias y participación.','Choose a period and filters to review registrations, attendance and participation.'],
+            'estadisticas'=>['Estadísticas','Statistics','ascla_publish',self::ADMIN_FORM,'Ajusta el período y los filtros para consultar inscripciones, asistencias y participación.','Choose a period and filters to review registrations, attendance and participation.'],
             'moderacion'=>['Revisar contenido','Review content','ascla_admin_area','.moderation-choices','Elige publicaciones, comentarios o reportes. Abre cada caso para revisar las acciones que permite tu rol.','Choose posts, comments or reports, then open a case to review actions available to your role.'],
             'solicitudes'=>['Consultas de Contacto','Contact requests','ascla_publish','.support-toolbar','Filtra las solicitudes y abre una consulta para responder o actualizar su estado.','Filter requests and open one to respond or update its status.'],
             'contenidos'=>['Galerías y recursos','Galleries and resources','ascla_publish','.editorial-registry-filters','Elige galerías o recursos y filtra por título o estado para gestionar el catálogo.','Choose galleries or resources and filter by title or status to manage the catalog.'],
             'importar'=>['Importar intereses','Import interests','ascla_manage','#interest-upload-title','Carga un archivo, analiza las columnas y revisa las propuestas antes de aplicarlas a perfiles.','Upload a file, analyze its columns and review proposals before applying them to profiles.'],
             'usuarios'=>['Usuarios e intereses','Members and interests','ascla_manage','.admin-filters','Busca cuentas y abre un perfil para consultar intereses y las opciones de gestión disponibles.','Find accounts and open a profile to view interests and available management options.'],
-            'aliados'=>['Aliados','Partners','ascla_manage','#admin-panel form','Filtra los convenios y utiliza las acciones de cada ficha para gestionar sus datos.','Filter agreements and use each entry’s actions to manage its details.'],
+            'aliados'=>['Aliados','Partners','ascla_manage',self::ADMIN_FORM,'Filtra los convenios y utiliza las acciones de cada ficha para gestionar sus datos.','Filter agreements and use each entry’s actions to manage its details.'],
             'microeventos'=>['Encuentros','Meetings','ascla_publish','.micro-planning','Genera propuestas, revisa candidatos y ajusta los datos antes de aprobar y publicar un encuentro.','Generate proposals, review candidates and adjust details before approving and publishing a meeting.'],
-            'logs'=>['Historial de cambios','Change history','ascla_manage','#admin-panel form','Usa los filtros para consultar las acciones registradas y su contexto.','Use filters to explore recorded actions and their context.'],
+            'logs'=>['Historial de cambios','Change history','ascla_manage',self::ADMIN_FORM,'Usa los filtros para consultar las acciones registradas y su contexto.','Use filters to explore recorded actions and their context.'],
             'configuracion'=>['Configuración','Settings','ascla_configure','.settings-group','Abre un apartado para revisar sus opciones y guarda los cambios cuando termines.','Open a section to review its options and save your changes when finished.'],
         ];
         foreach ($sections as $key=>[$title,$titleEn,$cap,$target,$body,$bodyEn]) {

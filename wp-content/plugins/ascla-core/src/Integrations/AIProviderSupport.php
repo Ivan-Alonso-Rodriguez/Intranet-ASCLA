@@ -8,12 +8,14 @@ use ASCLA\Core\Frontend\Language;
 /** Shared prompt/JSON handling for real AI transports. */
 final class AIProviderSupport
 {
+    private const SPANISH='Español';
     public static function outputLanguage(array $context): string
     {
         $locale=Language::valid($context['output_locale']??'');
-        if ($locale!=='') { return $locale==='en_US'?'English':'Español'; }
+        if ($locale!=='') { return $locale==='en_US'?'English':self::SPANISH; }
         $language=$context['live_context']['language']??$context['language']??null;
-        return in_array($language,['English','Español'],true)?$language:(Language::english()?'English':'Español');
+        if (in_array($language,['English',self::SPANISH],true)) { return $language; }
+        return Language::english()?'English':self::SPANISH;
     }
 
     public static function format(string $task): string

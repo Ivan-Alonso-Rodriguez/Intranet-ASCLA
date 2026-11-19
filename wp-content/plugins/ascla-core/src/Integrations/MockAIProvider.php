@@ -2,12 +2,13 @@
 namespace ASCLA\Core\Integrations;
 final class MockAIProvider implements AIProviderInterface
 {
-    public function mode(): string { return 'DEMO MODE'; }
+    public const MODE='DEMO MODE';
+    public function mode(): string { return self::MODE; }
     public function generate(string $task,array $context): array
     {
         return match($task) {
-            'form_interests'=>$this->formInterests($context),
-            'interest_classification'=>$this->interestClassification($context),
+            'form_interests'=>MockInterestClassifier::formInterests($context),
+            'interest_classification'=>MockInterestClassifier::interestClassification($context),
             'answer'=>$this->answer($context),
             'matching','intro'=>$this->matching($context),
             'microagenda'=>$this->microagenda($context),
@@ -17,53 +18,8 @@ final class MockAIProvider implements AIProviderInterface
         };
     }
 
-    private function formInterests(array $context): array
-    {
-        $terms=$context['catalog']??[];
-        $text=mb_strtolower(remove_accents($context['text']??''));
-        $ids=[];
-        foreach ($terms as $term) {
-            $name=mb_strtolower(remove_accents($term['name']));
-            $direct=str_contains($text,$name);
-            $aiTopic=(str_contains($name,'gobernanza de la ia')||str_contains($name,'inteligencia artificial'))
-                && preg_match('/\b(chatgpt|gemini|llm|ia generativa)\b/',$text);
-            $cyber=str_contains($name,'ciberseguridad') && preg_match('/hackeo|cyber|seguridad informatica/',$text);
-            if ($direct || $aiTopic || $cyber) { $ids[]=(int)$term['id']; }
-        }
-        return ['intereses'=>array_slice(array_values(array_unique($ids)),0,3),'confianza'=>$ids?'media':'baja'];
-    }
 
-    private function interestClassification(array $context): array
-    {
-        $aliases=[
-            'inteligencia artificial'=>'/\b(ia|ai|llm|chatgpt|gemini|inteligencia artificial|machine learning)\b/u',
-            'gestion de riesgos'=>'/\b(riesgo|riesgos|risk|coso)\b/u',
-            'gobierno corporativo'=>'/\b(gobierno corporativo|gobernanza|corporate governance)\b/u',
-            'juntas directivas'=>'/\b(juntas? directivas?|directorio|directorios|board)\b/u',
-            'sostenibilidad'=>'/\b(sostenibilidad|sustentabilidad|esg|asg)\b/u',
-            'transformacion digital'=>'/\b(digital|digitalizacion|transformacion digital)\b/u',
-        ];
-        $assignments=[];
-        foreach ($context['items']??[] as $item) {
-            $text=mb_strtolower(remove_accents($item['title']));
-            $topic=$this->classifiedTopic($text,$context['topics']??[],$aliases);
-            $assignments[]=['id'=>(int)$item['id'],'topic_id'=>$topic];
-        }
-        return ['assignments'=>$assignments,'mode'=>$this->mode()];
-    }
 
-    private function classifiedTopic(string $text,array $topics,array $aliases): int
-    {
-        $topic=0;
-        foreach ($topics as $term) {
-            $label=mb_strtolower(remove_accents($term['name']));
-            if (preg_match($aliases[$label]??('/'.preg_quote($label,'/').'/u'),$text)) {
-                $topic=(int)$term['id'];
-                break;
-            }
-        }
-        return $topic;
-    }
 
     private function galleryAnswer(array $sources,array $live,bool $english): array
     {
@@ -212,7 +168,8 @@ final class MockAIProvider implements AIProviderInterface
         $terms=['Gestión de riesgos'=>'Risk management','Gobierno corporativo'=>'Corporate governance','Inteligencia artificial'=>'Artificial intelligence','Juntas directivas'=>'Boards of directors','Sostenibilidad'=>'Sustainability','Transformación digital'=>'Digital transformation','Secretaría corporativa'=>'Corporate secretariat','Cumplimiento'=>'Compliance','Estrategia'=>'Strategy','Gobierno de IA'=>'AI governance','Servicios financieros'=>'Financial services','Energía'=>'Energy','Tecnología'=>'Technology','Industria'=>'Industry','Consultoría'=>'Consulting','Compartir experiencia'=>'Sharing experience','Aprender'=>'Learning','Colaborar'=>'Collaboration','Español'=>'Spanish','Inglés'=>'English','Portugués'=>'Portuguese'];
         $shared=implode(' and ',array_map(static fn($name)=>$terms[$name]??$name,array_slice($context['shared']??[],0,3)));
         $signals=(array)($context['signals']??[]);$details=[];
-        $topic=$shared!==''?$shared:(in_array('experience',$signals,true)?'related professional experience':'your networking goals');
+        $fallback=in_array('experience',$signals,true)?'related professional experience':'your networking goals';
+        $topic=$shared!==''?$shared:$fallback;
         if ($shared!=='') { $details[]='They share an interest in '.$shared.'.'; }
         if (in_array('experience',$signals,true)) { $details[]='They also have related professional experience.'; }
         if (in_array('participation',$signals,true)) { $details[]='Their public community activity shows topics in common.'; }

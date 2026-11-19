@@ -9,6 +9,7 @@ use ASCLA\Core\Repositories\Store;
 /** Resolve notification destinations against the recipient's current permissions. */
 final class NotificationTarget
 {
+    private const OPEN_GROUP='Abrir grupo';
     private const VIEW_PROFILE_ES='Ver perfil';
     private const VIEW_PROFILE_EN='View profile';
     private const NETWORK_LABEL='Tu red';
@@ -17,8 +18,8 @@ final class NotificationTarget
     private const VIEW_EVENTS='Ver eventos';
     private const TYPES = [
         'message'=>['Mensajes','mail','mensajeria','Abrir mensajería'],
-        'conversation_group'=>['Mensajes','mail','mensajeria','Abrir grupo'],
-        'conversation_group_owner'=>['Mensajes','mail','mensajeria','Abrir grupo'],
+        'conversation_group'=>['Mensajes','mail','mensajeria',self::OPEN_GROUP],
+        'conversation_group_owner'=>['Mensajes','mail','mensajeria',self::OPEN_GROUP],
         'conversation_request'=>[self::NETWORK_LABEL,'mail','directorio',self::REVIEW_REQUEST_LABEL],
         'conversation_accepted'=>[self::NETWORK_LABEL,'mail','directorio','Abrir conversación'],
         'comment'=>['Comunidad','hub','hub',self::HUB_ACTION],
@@ -162,7 +163,7 @@ final class NotificationTarget
             default=>Language::text($actor.' escribió en '.$title,$actor.' wrote in '.$title),
         };
         $view['description']=Language::text('Abre el chat grupal para ver la conversación.','Open the group chat to view the conversation.');
-        $view['action_label']=Language::text('Abrir grupo','Open group');
+        $view['action_label']=Language::text(self::OPEN_GROUP,'Open group');
         return $view;
     }
 
