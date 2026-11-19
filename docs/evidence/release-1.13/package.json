@@ -1,8 +1,8 @@
 {
-  "date": "2026-11-19T03:57:54.606890+00:00",
+  "date": "2026-11-19T04:25:13.927129+00:00",
   "version": "1.13",
-  "bytes": 2685473,
-  "sha256": "112c5175ee9ea67a1be0cc5abca31a221df904650e6a1801550abb7a1bb96cfe",
+  "bytes": 2685618,
+  "sha256": "01e6e4bf10f881ecc6f0e211a82b6e747a6dc0c7e92b233282240a63dd299ef7",
   "files": 244,
   "crc_valid": true,
   "source_bytes_match": true,
@@ -16,7 +16,7 @@
     "ascla-core/assets/admin-statistics.js": "ec5ff74d5c26a024e5bcfa10268396f8e89b3b31033ac0f6a6227a7b13b98966",
     "ascla-core/assets/allies-ui.js": "263b8d51740ef59b709b908d62e2796006a2f772a0e22101f84a4c8b80ecb95e",
     "ascla-core/assets/app.css": "53aa6aeb94de1b13ba80a0bf7b838d80f8a0d299bd9b45121d47d00840c9be5c",
-    "ascla-core/assets/app.js": "9bc9f918ef90c00b409197aaa4b58f3d3c41589c93a07f394856b6280f009b17",
+    "ascla-core/assets/app.js": "b93d6beccc71ebf3a5738380768f599b1504d4bc6628d4a0ce8d689dff8ab086",
     "ascla-core/assets/ascla-logo-white.png": "79bcce9cef8bb70852fbaf7437cb87e4ea273793b2463bad59dd318af43d3cc2",
     "ascla-core/assets/ascla-logo.png": "e6facb1b81990a71658f5655a556dab75efe822d3f5cefb583b1648e14e0ff25",
     "ascla-core/assets/banners/asistente.webp": "71a99730ae5980b54634c04bad6c064816598b6e1bda1cd631b21859e5463428",
@@ -252,7 +252,7 @@
     "ascla-core/templates/app.php": "df6cabdbc5ec193a29ed4ea332bbbf7686afc3b87da3cf8401f4c926cf1d6322",
     "ascla-core/templates/login-welcome.php": "4c2cd9b8c49834da7e308fc9549e8ec1ad7ff72deeddec628aad26f66acffbfc",
     "ascla-core/templates/login.php": "95a0cd53a436a02c8e53e7cfe7fa36e0978ab98936bcbe6100929dd68169c45b",
-    "ascla-core/templates/shell.php": "9e41b167d0111674de1be9a397a8e0eba86652502efd9036f0abf71b85c8f59a",
+    "ascla-core/templates/shell.php": "be3473a55931fd06e753713d6f368252401363ac575df6b97f209cd2ec25cdc6",
     "ascla-core/uninstall.php": "bd0f1258ebe9f30ec3b8143a10f966616c50ac6016ff72009cea7d1089a0bd21"
   }
 }

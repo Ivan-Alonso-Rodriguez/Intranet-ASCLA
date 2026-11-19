@@ -192,6 +192,7 @@
     try { const candidate = new URL(p.photo_url); if (['http:', 'https:'].includes(candidate.protocol)) url = candidate.href; } catch { /* Initials are the shared fallback. */ }
     return `<span class="avatar ${size}">${url ? ("<img src=\"" + (E(url)) + "\" alt=\"" + (E(p.name)) + "\">") : ''}<span class="avatar-initials">${E(initials(p.name))}</span></span>`;
   };
+  const accountLabel = p => `${T('Menú de cuenta')}: ${initials(p.name)} ${p.name} ${T((S.boot.admin_area && p.role_label) || p.member_type || 'Comunidad ASCLA')}`;
   root.addEventListener('error', event => {
     if (event.target.matches?.('.avatar img, .event-card-cover img')) event.target.remove();
   }, true);
@@ -922,7 +923,7 @@
             ${adminLanguageControl()}
             ${btn(themeIcons(), "theme-menu", ("aria-label=\"" + (E(T("Apariencia"))) + "\""), "icon-button theme-button")}
             ${btn(I("bell") + '<span class="notification-count" hidden></span>', "notifications", ("aria-label=\"" + (E(T("Notificaciones"))) + "\""), "icon-button")}
-            <details class="overflow-menu account-menu"><summary class="header-profile" aria-label="${E(T('Menú de cuenta'))}" aria-expanded="false">${avatar(p)}<span><strong>${E(p.name)}</strong><small class="muted">${E(T((S.boot.admin_area && p.role_label) || p.member_type || "Comunidad ASCLA"))}</small></span>${I("chevron")}</summary><nav class="account-menu-panel" aria-label="${E(T('Mi cuenta'))}"><a class="account-profile-link" href="${E(C.pages.perfil.url)}">${I('profile')}<span>${E(T('Mi perfil'))}</span></a><a data-native href="${E(C.logout)}">${I('logout')}<span>${E(T('Cerrar sesión'))}</span></a></nav></details>
+            <details class="overflow-menu account-menu"><summary class="header-profile" aria-label="${E(accountLabel(p))}" aria-expanded="false">${avatar(p)} <span><strong>${E(p.name)}</strong> <small class="muted">${E(T((S.boot.admin_area && p.role_label) || p.member_type || "Comunidad ASCLA"))}</small></span>${I("chevron")}</summary><nav class="account-menu-panel" aria-label="${E(T('Mi cuenta'))}"><a class="account-profile-link" href="${E(C.pages.perfil.url)}">${I('profile')}<span>${E(T('Mi perfil'))}</span></a><a data-native href="${E(C.logout)}">${I('logout')}<span>${E(T('Cerrar sesión'))}</span></a></nav></details>
           </div>
         </header>
         <main id="main" class="page-wrap" tabindex="-1">
@@ -1252,7 +1253,7 @@
     const resourceIcon = p.meta.resource_type === "Video" ? "play" : "book";
     const fallback = `<span class="resource-cover v${i % 3}"><span class="cover-label">${E(T("ASCLA · CONOCIMIENTO"))}</span><strong>${E(p.title.split(":")[0])}</strong><span class="cover-icon">${I(resourceIcon)}</span></span>`;
     const thumbnail = resourceThumbnail(p.meta);
-    const cover = `<a href="${E(p.url)}" class="resource-video-cover" aria-label="${E(p.title)}">${fallback}${thumbnail}${thumbnail ? `<span class="resource-video-duration">${I("play")} ${durationLabel}</span>` : ''}</a>`;
+    const cover = `<a href="${E(p.url)}" class="resource-video-cover" title="${E(p.title)}">${fallback}${thumbnail}${thumbnail ? `<span class="resource-video-duration">${I("play")} ${durationLabel}</span>` : ''}</a>`;
     const editorialState = p.status === "publish" ? "" : status(p.status);
     return `<article class="card resource-card">${cover}<div class="resource-content"><div class="resource-card-badges"><span class="tag">${E(T(p.meta.resource_type || "Artículo"))}</span>${editorialState}</div>${resourceRecommendation(p.recommendation)}<h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E((p.meta.summary || p.body).slice(0, 115))}${(p.meta.summary || p.body).length > 115 ? "…" : ""}</p><div class="resource-footer"><span>${date(p.date)}</span>${btn("Explorar " + I("arrow"), "item", ("data-id=\"" + (p.id) + "\""), "ghost")}</div></div></article>`;
   }
@@ -2117,7 +2118,7 @@
     const selected = data.reaction === 'like';
     const countId = `reaction-count-${comment ? 'comment' : compact ? 'card' : 'detail'}-${Number(id)}`;
     const label = (compact ? '' : ' ' + E(T('Me gusta'))) + ` <span id="${countId}" data-reaction-count>${count}</span>`;
-    const attrs = `data-id="${Number(id)}" data-comment="${comment}" data-active="${!selected}" data-reaction="like" aria-pressed="${selected}" aria-label="${E(T('Me gusta'))}" aria-describedby="${countId}"`;
+    const attrs = `data-id="${Number(id)}" data-comment="${comment}" data-active="${!selected}" data-reaction="like" aria-pressed="${selected}" aria-label="${E(T('Me gusta'))} ${count}"`;
     const button = btn(I('heart') + label, 'content-reaction', attrs, 'ghost small');
     return `<div class="reaction-picker">${button}</div>`;
   }
@@ -2129,6 +2130,7 @@
     root.querySelectorAll(`[data-action="content-reaction"][data-id="${id}"][data-comment="${comment}"]`).forEach(control => {
       control.dataset.active = String(!selected);
       control.setAttribute('aria-pressed', String(selected));
+      control.setAttribute('aria-label', `${T('Me gusta')} ${reactionCount(result)}`);
       control.querySelector('[data-reaction-count]').textContent = reactionCount(result);
     });
     animateReaction(button, selected && !wasSelected);
@@ -4766,7 +4768,7 @@
     if (a === "comment-like") {
       const wasSelected = b.getAttribute('aria-pressed') === 'true';
       const r = await api(`comments/${id}/reaction`, {active:b.dataset.active === 'true'});
-      b.dataset.active=String(!r.active); b.setAttribute('aria-pressed',String(!!r.active)); b.setAttribute('aria-label',T(r.active?'Quitar Me gusta':'Me gusta'));
+      b.dataset.active=String(!r.active); b.setAttribute('aria-pressed',String(!!r.active)); b.setAttribute('aria-label',`${T('Me gusta')} ${r.likes}`);
       b.classList.toggle('active',!!r.active); const count=b.querySelector('span'); if(count) count.textContent=String(r.likes);
       animateReaction(b, r.active && !wasSelected);
     }
@@ -5563,6 +5565,7 @@ root.addEventListener("click", async (event) => {
     if(headerAvatar) headerAvatar.outerHTML=avatar(S.boot.me);
     const label = root.querySelector(".header-profile strong");
     if (label) label.textContent = S.boot.me.name;
+    root.querySelector('.header-profile')?.setAttribute('aria-label', accountLabel(S.boot.me));
     toast("Perfil actualizado.");
     await profile();
   }
