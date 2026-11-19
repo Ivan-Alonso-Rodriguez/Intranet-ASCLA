@@ -15,7 +15,7 @@
   --state-border: var(--ascla-rule);
   --radius: 4px;
   --executive-sidebar: 238px;
-  --sidebar-surface: #063159;
+  --sidebar-surface: var(--ascla-brand-edge);
   --executive-shadow: none;
 }
 #ascla-root {
@@ -292,7 +292,6 @@ html[data-ascla-theme="dark"] {
   --state-bg: var(--ascla-accent-tint);
   --state-ink: var(--ascla-accent-text);
   --state-border: var(--ascla-rule);
-  --sidebar-surface: var(--ascla-paper);
   --executive-shadow: none;
 }
 html[data-ascla-theme="dark"] #ascla-root .ascla-sidebar { background: var(--sidebar-surface); border-color: var(--line); }
@@ -619,7 +618,7 @@ html[data-ascla-theme="dark"] #ascla-root .stat-grid .stat:hover { background: v
   #ascla-root .admin-settings .settings-savebar { flex-wrap: wrap; gap: 5px; }
 }
 
-/* Keep the dark navigation of GitHub UAT 1.11.1 with ASCLA guide colors. */
+/* Keep ASCLA's blue navigation and its contrast consistent in both themes. */
 html[data-ascla-theme] #ascla-root .ascla-sidebar { color: #fff; border-right-color: #063159; }
 html[data-ascla-theme] #ascla-root .ascla-sidebar .brand-logo-normal { display: none; }
 html[data-ascla-theme] #ascla-root .ascla-sidebar .brand-logo-inverse { display: block; }
@@ -629,8 +628,6 @@ html[data-ascla-theme] #ascla-root .ascla-sidebar .nav-link { color: #fff !impor
 html[data-ascla-theme] #ascla-root .ascla-sidebar .nav-link:hover { color: #063159 !important; background: #a2d4ff; }
 html[data-ascla-theme] #ascla-root .ascla-sidebar .nav-link.active { color: #063159 !important; background: #74beff; }
 html[data-ascla-theme] #ascla-root .ascla-sidebar a:focus-visible { outline-color: #74beff; }
-html[data-ascla-theme="dark"] #ascla-root .ascla-sidebar,
-html[data-ascla-theme="dark"] #ascla-root .ascla-sidebar :is(.brand-sub, .nav-bottom) { border-color: var(--line); }
 html[data-ascla-theme="dark"] #ascla-root .modal-backdrop,
 html[data-ascla-theme="dark"] #ascla-root .ascla-sidebar.open + .ascla-main::before { background: #000000b3; }
 html[data-ascla-theme="dark"] #ascla-root .hero { background: var(--surface); }

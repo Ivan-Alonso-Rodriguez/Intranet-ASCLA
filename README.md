@@ -1,6 +1,8 @@
 # ASCLA Core — Intranet ASCLA
 
-## Versión actual: 1.13.1 · esquema 17
+## Versión actual: 1.13.2 · esquema 17
+
+La versión 1.13.2 conserva la barra lateral azul en ambos temas y recupera los resaltados azules en modo oscuro, con el fondo general en gris carbón. Consulta la [comprobación visual](docs/evidence/release-1.13.2/theme.json) de esta corrección.
 
 La corrección 1.13.1 mejora la explicación institucional del asistente y evita arrastrar el tema de videos o galerías anteriores.
 
@@ -48,7 +50,7 @@ python3 scripts/build.py
 python3 scripts/verify-package.py
 ```
 
-Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto de 1.13.1](docs/evidence/release-1.13.1/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
+Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto de 1.13.2](docs/evidence/release-1.13.2/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
 
 ## Calidad y entrega
 

@@ -1,8 +1,14 @@
 # Historial de versiones — Intranet ASCLA
 
-**Versión actual:** `1.13.1` · **Esquema:** `17`.
+**Versión actual:** `1.13.2` · **Esquema:** `17`.
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
+
+<a id="release-1132"></a>
+
+## 1.13.2 — Resaltados y navegación en modo oscuro
+
+Corrección del 19 de noviembre de 2026. La barra lateral conserva el azul institucional en los temas claro y oscuro. Las pestañas seleccionadas, los avisos y los demás elementos que comparten el color de resaltado recuperan un azul tenue en modo oscuro. Los fondos generales mantienen el negro y el gris carbón; no cambian la navegación, los permisos ni el guardado de datos. Se mantiene el esquema 17. El [manifiesto](docs/evidence/release-1.13.2/package.json) identifica el ZIP; la [evidencia visual](docs/evidence/release-1.13.2/theme.json) conserva su alcance.
 
 <a id="release-1131"></a>
 

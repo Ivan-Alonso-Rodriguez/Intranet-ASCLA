@@ -1,6 +1,10 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 19 de noviembre de 2026. Plugin **1.13.1**, esquema **17**. El [historial](VERSION_HISTORY.md#release-1131) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+Revisión documental: 19 de noviembre de 2026. Plugin **1.13.2**, esquema **17**. El [historial](VERSION_HISTORY.md#release-1132) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+
+## Colores de los temas · 1.13.2
+
+La barra lateral conserva el azul institucional en los temas claro y oscuro. Las pestañas seleccionadas, los avisos y los demás elementos que comparten el color de resaltado recuperan un azul tenue en modo oscuro. Los fondos generales mantienen el negro y el gris carbón; no cambian la navegación, los permisos ni el guardado de datos. La [comprobación focalizada](docs/evidence/release-1.13.2/theme.json) corresponde a esta corrección visual. Los resultados completos de seguridad y QA/UAT anteriores conservan su versión y paquete original.
 
 ## Explicación institucional del asistente · 1.13.1
 

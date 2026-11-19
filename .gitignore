@@ -257,3 +257,8 @@ __pycache__/
 !/docs/evidence/release-1.13.1/package.json
 !/docs/evidence/release-1.13.1/assistant-about.json
 !/docs/evidence/release-1.13.1/assistant-about-junit.xml
+
+!/docs/evidence/release-1.13.2/
+/docs/evidence/release-1.13.2/*
+!/docs/evidence/release-1.13.2/package.json
+!/docs/evidence/release-1.13.2/theme.json

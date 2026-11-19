@@ -1,0 +1,102 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Light theme retains its original blue navigation and pale-blue selected tab",
+    "Dark selected tabs and notices use a shared blue tint; page and surfaces stay neutral",
+    "Mouse and keyboard tab changes preserve focus and form values",
+    "Reload preserves dark preference and the blue sidebar",
+    "Mobile navigation opens in blue, closes normally and introduces no horizontal overflow",
+    "Measured text contrast is at least 4.5:1 for navigation, selected labels, descriptions and notices"
+  ],
+  "samples": {
+    "light": {
+      "theme": "light",
+      "sidebar": "rgb(6, 49, 89)",
+      "sidebarText": "rgb(255, 255, 255)",
+      "selected": "rgb(234, 245, 255)",
+      "selectedText": "rgb(6, 49, 89)",
+      "secondary": "rgb(89, 99, 108)",
+      "notice": "rgb(234, 245, 255)",
+      "noticeText": "rgb(43, 43, 43)",
+      "page": "rgb(246, 246, 246)",
+      "surface": "rgb(255, 255, 255)"
+    },
+    "dark": {
+      "theme": "dark",
+      "sidebar": "rgb(6, 49, 89)",
+      "sidebarText": "rgb(255, 255, 255)",
+      "selected": "rgb(20, 50, 74)",
+      "selectedText": "rgb(116, 190, 255)",
+      "secondary": "rgb(184, 184, 184)",
+      "notice": "rgb(20, 50, 74)",
+      "noticeText": "rgb(246, 246, 246)",
+      "page": "rgb(16, 16, 16)",
+      "surface": "rgb(27, 27, 27)"
+    },
+    "reload": {
+      "theme": "dark",
+      "sidebar": "rgb(6, 49, 89)",
+      "sidebarText": "rgb(255, 255, 255)",
+      "selected": "rgb(20, 50, 74)",
+      "selectedText": "rgb(116, 190, 255)",
+      "secondary": "rgb(184, 184, 184)",
+      "notice": "rgb(20, 50, 74)",
+      "noticeText": "rgb(246, 246, 246)",
+      "page": "rgb(16, 16, 16)",
+      "surface": "rgb(27, 27, 27)"
+    },
+    "mobile": {
+      "theme": "dark",
+      "sidebar": "rgb(6, 49, 89)",
+      "sidebarText": "rgb(255, 255, 255)",
+      "selected": "rgb(20, 50, 74)",
+      "selectedText": "rgb(116, 190, 255)",
+      "secondary": "rgb(184, 184, 184)",
+      "notice": "rgb(20, 50, 74)",
+      "noticeText": "rgb(246, 246, 246)",
+      "page": "rgb(16, 16, 16)",
+      "surface": "rgb(27, 27, 27)"
+    }
+  },
+  "errors": [],
+  "target": "local WordPress /perfil/",
+  "screenshots": [
+    "profile-light.png",
+    "profile-dark.png",
+    "mobile-dark-navigation.png",
+    "mobile-dark-profile.png"
+  ],
+  "contrast": {
+    "light": {
+      "sidebar": 13.2,
+      "selected_label": 11.94,
+      "selected_description": 5.55,
+      "notice": 12.81
+    },
+    "dark": {
+      "sidebar": 13.2,
+      "selected_label": 6.66,
+      "selected_description": 6.68,
+      "notice": 12.26
+    },
+    "reload": {
+      "sidebar": 13.2,
+      "selected_label": 6.66,
+      "selected_description": 6.68,
+      "notice": 12.26
+    },
+    "mobile": {
+      "sidebar": 13.2,
+      "selected_label": 6.66,
+      "selected_description": 6.68,
+      "notice": 12.26
+    }
+  },
+  "version": "1.13.2",
+  "date": "2026-11-19T21:23:28.842257+00:00",
+  "package_sha256": "d1ecb501506e92100854aebf0d18155366f5bf00c55e135e3d8fbabbf289d805",
+  "installed_files": 249,
+  "release_sanity_checks": 49,
+  "base_commit": "6ffb5e8d8a6f9a1a7538bf2de809d5c6d150e4f5",
+  "scope": "Focused visual and interaction checks in a local WordPress lab. Prior full SonarQube, Trivy, ZAP, QA and UAT evidence retains its original version and package."
+}

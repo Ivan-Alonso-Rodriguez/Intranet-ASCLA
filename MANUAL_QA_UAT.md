@@ -1,6 +1,10 @@
 # Guía práctica de QA, SonarQube y UAT
 
-Versión documentada: **1.13.1**, esquema **17**. El [historial de 1.13.1](VERSION_HISTORY.md#release-1131) detalla el alcance de la entrega; los resultados históricos se indican por versión.
+Versión documentada: **1.13.2**, esquema **17**. El [historial de 1.13.2](VERSION_HISTORY.md#release-1132) detalla el alcance de la entrega; los resultados históricos se indican por versión.
+
+## Colores de los temas · 1.13.2
+
+En Perfil, alterna los temas claro y oscuro: la barra lateral debe mantener el azul institucional y el texto blanco. Comprueba el resaltado azul de la pestaña seleccionada y los avisos, cambia de pestaña con ratón y teclado y recarga. En móvil, abre y cierra la navegación. Los fondos generales del tema oscuro siguen en negro y gris carbón. La [evidencia focalizada](docs/evidence/release-1.13.2/theme.json) no sustituye una nueva ejecución integral de QA/UAT.
 
 ## Explicación institucional · 1.13.1
 
