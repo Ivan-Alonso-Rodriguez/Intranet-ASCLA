@@ -16,7 +16,7 @@ async function go(page,route){await page.goto(fixture.base+'/'+route);await page
 async function login(actor){const context=await browser.newContext({viewport:{width:1440,height:1000},timezoneId:'America/Lima'});contexts.push(context);const page=await context.newPage();await require('./helpers/browser.cjs').allowOnboardingSkip(page);page.on('pageerror',e=>errors.push(e.message));await page.goto(fixture.base+'/wp-login.php');await page.locator('#user_login').fill(fixture.actors[actor].login);await page.locator('#user_pass').fill(fixture.actors[actor].password);await Promise.all([page.waitForNavigation(),page.locator('#wp-submit').click()]);await go(page,'intranet/');return page;}
 async function capture(page,name){
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),name+': horizontal overflow');
- if(!await page.evaluate(()=>!!window.axe))await require('./helpers/browser.cjs').waitForMotion(page);await page.addScriptTag({path:process.env.ASCLA_AXE_PATH||require.resolve('axe-core/axe.min.js')});
+ await require('./helpers/browser.cjs').waitForMotion(page);if(!await page.evaluate(()=>!!window.axe))await page.addScriptTag({path:process.env.ASCLA_AXE_PATH||require.resolve('axe-core/axe.min.js')});
  const result=await page.evaluate(()=>axe.run(document.querySelector('#ascla-root'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}}));
  scans.push({name,violations:result.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>n.target)})),incomplete:result.incomplete.length});
  assert.deepEqual(scans.at(-1).violations,[],name+': axe accessibility');
