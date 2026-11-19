@@ -16,6 +16,7 @@ module.exports=async function({fixture,out}) {
     async function login(actor) {
       const context=await browser.newContext({viewport:{width:1280,height:900},timezoneId:'America/Lima',recordVideo:{dir:path.join(out,'videos',name),size:{width:1280,height:900}}});contexts.push(context);
       const page=await context.newPage();pages.push(page);page.on('pageerror',error=>errors.push(error.message));
+      await page.addLocatorHandler(page.locator('.ascla-tour-bubble [data-tour-op="skip"]'), skip => skip.click());
       await page.goto(fixture.base+'/login/');await page.locator('#user_login').fill(fixture.actors[actor].login);await page.locator('#user_pass').fill(fixture.actors[actor].password);
       await Promise.all([page.waitForNavigation({waitUntil:'domcontentloaded'}),page.locator('#wp-submit').click()]);
       if(fixture.sharedAccounts){
@@ -120,7 +121,7 @@ module.exports=async function({fixture,out}) {
       const day=new Date(Date.now()+5*86400000).toISOString().slice(0,10);for(const name of ['start','end'])await edit.locator('[name='+name+'_date]').fill(day);await edit.locator('[name=start_time]').fill('10:15');await edit.locator('[name=end_time]').fill('11:45');await edit.locator('[name=capacity]').fill('5');await edit.locator('[name=modality]').selectOption('Presencial');await edit.locator('[name=location]').fill('Sala QA');await edit.locator('[name=chatham]').uncheck();
       const [publish]=await Promise.all([admin.waitForResponse(r=>r.url().includes('/content/event/')&&r.request().method()==='POST'),edit.getByRole('button',{name:'Guardar evento',exact:true}).click()]);const published=await publish.json();assert.equal(published.status,'publish');assert.equal(Date.parse(published.meta.start),Date.parse(day+'T15:15:00Z'));assert.equal(Date.parse(published.meta.end),Date.parse(day+'T16:45:00Z'));
       await visit(admin,'eventos/?item='+draft.id);await admin.locator('.modal [data-action="editor"]').click();const reopened=admin.locator('[data-form="editor"]');assert.equal(await reopened.locator('[name=start_date]').inputValue(),day);assert.equal(await reopened.locator('[name=start_time]').inputValue(),'10:15');assert.equal(await reopened.locator('[name=end_time]').inputValue(),'11:45');await admin.keyboard.press('Escape');
-      await visit(member,'eventos/?q='+encodeURIComponent(title));await member.locator('[data-action="item"][data-id="'+draft.id+'"]').click();await member.getByRole('button',{name:'Registrarme',exact:true}).click();await member.getByRole('button',{name:'Cancelar inscripción',exact:true}).waitFor();
+      await visit(member,'eventos/?q='+encodeURIComponent(title));await member.locator('.btn[data-action="item"][data-id="'+draft.id+'"]').click();await member.getByRole('button',{name:'Registrarme',exact:true}).click();await member.getByRole('button',{name:'Cancelar inscripción',exact:true}).waitFor();
       // A new page load confirms that the inscription survived the original action.
       await member.goto(fixture.base+'/eventos/?item='+draft.id);await member.getByRole('button',{name:'Cancelar inscripción',exact:true}).waitFor();
       if(fixture.sharedAccounts){
