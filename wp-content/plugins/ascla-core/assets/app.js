@@ -1265,7 +1265,7 @@
     const visual = `<span class="knowledge-cover-empty resource-cover v${i%3}"><span class="cover-label">${E(T('ASCLA · CONOCIMIENTO'))}</span> <strong>${E(coverTitle)}</strong><span class="cover-icon">${I(video?'play':'book')}</span></span>`
       + resourceThumbnail(p.meta);
     const durationBadge = video?`<span class="knowledge-duration">${I('play')} ${E(duration)}</span>`:'';
-    const cover = `<button type="button" class="knowledge-cover" data-action="item" data-id="${Number(p.id)}" aria-label="${E(T('Explorar'))}: ${E(p.title)}${video?' '+E(duration):''}"><span class="knowledge-cover-visual" aria-hidden="true">${visual}${durationBadge}</span></button>`;
+    const cover = `<button type="button" class="knowledge-cover" data-action="item" data-id="${Number(p.id)}" title="${E(T('Explorar'))}: ${E(p.title)}"><span class="knowledge-cover-visual">${visual}${durationBadge}</span></button>`;
     const summary = p.meta.summary || p.body;
     return `<article class="card resource-card knowledge-card">${cover}<div class="resource-content"><div class="resource-card-badges"><span class="tag">${I(video?'play':'book')} ${E(T(type))}</span>${p.status==='publish'?'':status(p.status)}</div>${resourceRecommendation(p.recommendation)}<h3><a href="${E(p.url)}">${E(p.title)}</a></h3><p>${E(summary.slice(0,190))}${summary.length>190?'…':''}</p><div class="resource-footer"><span class="knowledge-date">${I('calendar')}<time datetime="${E(p.date)}">${date(p.date)}</time></span>${btn('Explorar '+I('arrow'),'item','data-id="'+Number(p.id)+'"','small primary')}</div></div></article>`;
   }

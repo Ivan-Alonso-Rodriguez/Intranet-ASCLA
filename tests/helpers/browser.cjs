@@ -1,4 +1,11 @@
 const guidedPages = new WeakSet();
+async function waitForMotion(page) {
+  await page.evaluate(async () => {
+    const animations = document.getAnimations().filter(animation =>
+      animation.playState !== 'idle' && Number.isFinite(animation.effect?.getComputedTiming().endTime));
+    await Promise.all(animations.map(animation => animation.finished.catch(() => {})));
+  });
+}
 async function allowOnboardingSkip(page) {
   if (guidedPages.has(page)) return;
   guidedPages.add(page);
@@ -43,4 +50,4 @@ async function waitForNativeLogin(page) {
     return navigation?.domContentLoadedEventEnd>0 && performance.now()-navigation.domContentLoadedEventEnd>=250;
   });
 }
-module.exports = {startCoverage, stopCoverage, waitForHome, waitForNativeLogin, allowOnboardingSkip};
+module.exports = {startCoverage, stopCoverage, waitForHome, waitForNativeLogin, allowOnboardingSkip, waitForMotion};

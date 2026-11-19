@@ -44,10 +44,10 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  await ok(reader.page,route,{kind:'like',active:false});assert.equal((await ok(reader.page,'items/'+topic.id)).reaction_total,1);
  pass('Solo Me gusta: API rechaza las reacciones retiradas; concurrencia sin duplicados y retiro');
  await goto(reader.page,'foros/?item='+topic.id);
- const topicButton=reader.page.locator('[data-action="content-reaction"][data-comment="false"][data-id="'+topic.id+'"][data-reaction="like"]');await topicButton.click();await reader.page.waitForFunction(id=>document.querySelector('[data-action="content-reaction"][data-comment="false"][data-id="'+id+'"][data-reaction="like"]')?.getAttribute('aria-pressed')==='true',topic.id);
- const commentButton=reader.page.locator('[data-action="content-reaction"][data-comment="true"][data-id="'+comment.id+'"][data-reaction="like"]');await commentButton.click();await reader.page.waitForFunction(id=>document.querySelector('[data-action="content-reaction"][data-comment="true"][data-id="'+id+'"][data-reaction="like"]')?.getAttribute('aria-pressed')==='true',comment.id);
+ const topicButton=reader.page.locator('.modal [data-action="content-reaction"][data-comment="false"][data-id="'+topic.id+'"][data-reaction="like"]');await topicButton.click();await reader.page.waitForFunction(id=>document.querySelector('.modal [data-action="content-reaction"][data-comment="false"][data-id="'+id+'"][data-reaction="like"]')?.getAttribute('aria-pressed')==='true',topic.id);
+ const commentButton=reader.page.locator('.modal [data-action="content-reaction"][data-comment="true"][data-id="'+comment.id+'"][data-reaction="like"]');await commentButton.click();await reader.page.waitForFunction(id=>document.querySelector('.modal [data-action="content-reaction"][data-comment="true"][data-id="'+id+'"][data-reaction="like"]')?.getAttribute('aria-pressed')==='true',comment.id);
  assert.equal((await ok(reader.page,'items/'+topic.id+'/comments')).find(c=>c.id===comment.id).reaction,'like');
- assert.deepEqual(await reader.page.locator('.reaction-picker').evaluateAll(groups=>groups.map(group=>[...group.querySelectorAll('button')].map(button=>button.dataset.reaction))),[['like'],['like']]);
+ assert.deepEqual(await reader.page.locator('.modal .reaction-picker').evaluateAll(groups=>groups.map(group=>[...group.querySelectorAll('button')].map(button=>button.dataset.reaction))),[['like'],['like']]);
  await reader.page.screenshot({path:root+'/test-results/editorial-reactions.png'});
  pass('Temas y comentarios muestran únicamente Me gusta, con estado accesible');
  const resource=await ok(admin,'content/resource',{title:'Recurso '+suffix,body:'Recurso publicado para comprobar Me gusta',status:'publish'});posts.push(resource.id);

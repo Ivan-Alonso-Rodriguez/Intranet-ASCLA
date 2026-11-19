@@ -15,7 +15,7 @@ async function capture(name,width,theme){
  assert.ok(actions.y>=reason.y+reason.height-1,'Buttons must be below the reason');
  const buttons=await admin.locator('.event-cancellation .form-actions .btn').evaluateAll(els=>els.map(e=>e.getBoundingClientRect().height));assert.ok(buttons.every(h=>h>=44&&h<=65));
  assert.equal(await admin.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
- await admin.addScriptTag({path:require.resolve('axe-core/axe.min.js')});const violations=await admin.evaluate(async()=>(await axe.run('.modal',{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})).violations.map(v=>({id:v.id,nodes:v.nodes.length})));assert.deepEqual(violations,[]);scans.push({name,violations});
+ await require('./helpers/browser.cjs').waitForMotion(admin);await admin.addScriptTag({path:require.resolve('axe-core/axe.min.js')});const violations=await admin.evaluate(async()=>(await axe.run('.modal',{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})).violations.map(v=>({id:v.id,nodes:v.nodes.length})));assert.deepEqual(violations,[]);scans.push({name,violations});
  const file='micro-flow108-'+name+'.png';await admin.locator('.modal').screenshot({path:root+'/test-results/'+file,animations:'disabled'});views.push(file);
 }
 async function cancel(id,reason){

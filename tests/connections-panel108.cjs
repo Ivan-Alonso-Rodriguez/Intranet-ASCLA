@@ -19,7 +19,7 @@ async function capture(name,width,theme){
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,name+' page overflow');
  const height=await panel().evaluate(el=>el.getBoundingClientRect().height);assert.ok(height<(width>1000?650:900),name+' compact height '+height);
  await panel().screenshot({path:root+'/test-results/'+name+'.png',animations:'disabled'});
- await page.addScriptTag({path:require.resolve('axe-core')});
+ await require('./helpers/browser.cjs').waitForMotion(page);await page.addScriptTag({path:require.resolve('axe-core')});
  const violations=await page.evaluate(async()=> (await axe.run(document.querySelector('#connections-panel'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa']}})).violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})));
  assert.deepEqual(violations,[],name+' WCAG checks');views.push({name,width,theme,height:Math.round(height),overflow:false,violations});
 }
