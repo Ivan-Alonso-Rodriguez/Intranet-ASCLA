@@ -40,7 +40,7 @@ final class TranslationsReviewTest extends TestCase
         $args=['page'=>'intranet','profile'=>Profiles::visible($this->user),'settings'=>Settings::get()];
         ob_start();include ASCLA_PATH.'templates/shell.php';$markup=ob_get_clean();
         self::assertStringContainsString('class="overflow-menu account-menu"',$markup);
-        self::assertStringContainsString('aria-label="Account menu"',$markup);
+        self::assertStringContainsString('aria-label="Account menu: ',$markup);
         self::assertStringContainsString('class="account-profile-link"',$markup);
         self::assertStringContainsString('My profile',$markup);
         self::assertStringContainsString('action=logout',$markup);
