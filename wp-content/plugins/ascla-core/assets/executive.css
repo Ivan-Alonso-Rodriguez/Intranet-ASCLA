@@ -292,7 +292,7 @@ html[data-ascla-theme="dark"] {
   --state-bg: var(--ascla-accent-tint);
   --state-ink: var(--ascla-accent-text);
   --state-border: var(--ascla-rule);
-  --sidebar-surface: #063159;
+  --sidebar-surface: var(--ascla-paper);
   --executive-shadow: none;
 }
 html[data-ascla-theme="dark"] #ascla-root .ascla-sidebar { background: var(--sidebar-surface); border-color: var(--line); }
@@ -629,9 +629,13 @@ html[data-ascla-theme] #ascla-root .ascla-sidebar .nav-link { color: #fff !impor
 html[data-ascla-theme] #ascla-root .ascla-sidebar .nav-link:hover { color: #063159 !important; background: #a2d4ff; }
 html[data-ascla-theme] #ascla-root .ascla-sidebar .nav-link.active { color: #063159 !important; background: #74beff; }
 html[data-ascla-theme] #ascla-root .ascla-sidebar a:focus-visible { outline-color: #74beff; }
+html[data-ascla-theme="dark"] #ascla-root .ascla-sidebar,
+html[data-ascla-theme="dark"] #ascla-root .ascla-sidebar :is(.brand-sub, .nav-bottom) { border-color: var(--line); }
+html[data-ascla-theme="dark"] #ascla-root .modal-backdrop,
+html[data-ascla-theme="dark"] #ascla-root .ascla-sidebar.open + .ascla-main::before { background: #000000b3; }
+html[data-ascla-theme="dark"] #ascla-root .hero { background: var(--surface); }
 #ascla-root :is(.avatar, .member-identity .avatar.xl, .directory .member-card-profile > .avatar) { border-radius: 4px; }
 #ascla-root :is(.card, .member-card, .stat, .admin-stat, .admin-user, .admin-filters, .audit-summary-card, .settings-group):hover { box-shadow: none; }
-#ascla-root .hero.hero-birthday::before, #ascla-root .hero.hero-birthday::after { display: none; }
 #ascla-root .completion-ring { border: 2px solid var(--blue); background: var(--surface); }
 #ascla-root .completion-ring::after { background: var(--surface); }
 html[data-ascla-theme] #ascla-root .btn.danger { color: var(--ascla-danger); background: var(--surface); border-color: var(--ascla-danger); }
@@ -639,3 +643,110 @@ html[data-ascla-theme] #ascla-root .btn.primary.danger { color: #fff; background
 #ascla-root .account-recovery-status { margin-top: 14px; padding: 12px 14px; border-inline-start: 3px solid var(--blue); background: var(--blue-soft); color: var(--ink); border-radius: 3px; }
 #ascla-root .account-recovery-status[hidden] { display: none; }
 html[data-ascla-theme="dark"] #ascla-root .btn.danger { color: #fff; background: var(--ascla-danger); border-color: var(--ascla-danger); }
+
+/* The section photo sits behind the existing heading and its controls. */
+html[data-ascla-theme] #ascla-root :is(.page-heading, .hero, .assistant-intro, .contact-heading, .ally-catalog-header):has(> .section-banner) {
+  position: relative;
+  isolation: isolate;
+  border-radius: 0;
+  background: #0a2744;
+  border: 0;
+  color: #fff;
+}
+#ascla-root :is(.page-heading, .assistant-intro, .contact-heading, .ally-catalog-header):has(> .section-banner) {
+  align-items: center;
+  min-height: 154px;
+  padding: clamp(20px, 3vw, 36px);
+}
+#ascla-root .section-banner,
+#ascla-root :has(> .section-banner)::before {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+#ascla-root .section-banner {
+  object-fit: cover;
+  object-position: center 45%;
+  z-index: -2;
+}
+#ascla-root :has(> .section-banner)::before {
+  content: "";
+  z-index: -1;
+  background: linear-gradient(100deg, #08233be8, #08233bbd 55%, #08233ba6);
+}
+#ascla-root .forum-section-banner {
+  object-position: center 82%;
+}
+#ascla-root .page-heading:has(> .forum-section-banner)::before {
+  background: linear-gradient(100deg, #08233bf0, #08233bba 55%, #08233b70);
+}
+@media (min-width: 761px) {
+  #ascla-root .forum-heading {
+    position: relative;
+    --forum-heading-inset: clamp(20px, 3vw, 36px);
+  }
+  #ascla-root .forum-heading > .page-heading { padding-inline-end: calc(11rem + var(--forum-heading-inset)); }
+  #ascla-root .forum-heading-actions {
+    position: absolute;
+    inset-inline-end: var(--forum-heading-inset);
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+#ascla-root .hero:has(> .section-banner) {
+  --ascla-welcome-ink: #fff;
+  --ascla-welcome-rule: #d3ebff80;
+}
+#ascla-root .hero:has(> .section-banner)::before {
+  display: block;
+  background: linear-gradient(100deg, #08233be6, #08233bb5 53%, #08233bea);
+}
+#ascla-root .hero:has(> .section-banner) .hero-agenda-label { color: #c6e7ff; }
+#ascla-root .assistant-intro:has(> .section-banner) {
+  max-width: none;
+  margin-top: 0;
+}
+#ascla-root .assistant-intro:has(> .section-banner)::before {
+  background: linear-gradient(90deg, #08233bbb, #08233bdb 50%, #08233bbb);
+}
+html[data-ascla-theme="dark"] #ascla-root :is(.page-heading, .hero, .assistant-intro, .contact-heading, .ally-catalog-header):has(> .section-banner) { background: var(--surface); }
+html[data-ascla-theme="dark"] #ascla-root :has(> .section-banner)::before {
+  background: linear-gradient(100deg, #101010eb, #101010b5 55%, #10101080);
+}
+#ascla-root .assistant-intro:has(> .section-banner) p {
+  max-width: 66ch;
+  margin-inline: auto;
+}
+#ascla-root .assistant-intro:has(> .section-banner) .assistant-mark { margin-bottom: 12px; }
+#ascla-root :is(.page-heading, .assistant-intro, .contact-heading, .ally-catalog-header):has(> .section-banner) :is(h1, p, .eyebrow) {
+  color: #fff;
+}
+#ascla-root :has(> .section-banner) :is(a, button):focus-visible { outline-color: #fff; }
+@media (max-width: 760px) {
+  #ascla-root :is(.page-heading, .assistant-intro, .contact-heading, .ally-catalog-header):has(> .section-banner) {
+    min-height: 0;
+    padding: 20px;
+  }
+  #ascla-root .page-heading:has(> .section-banner) { align-items: stretch; }
+  #ascla-root :is(.page-wrap:has(.directory-view) .page-heading, .page-heading:has(> .forum-section-banner)) { min-height: 120px; }
+  #ascla-root .forum-heading > .page-heading { margin-bottom: 12px; }
+  #ascla-root .forum-heading-actions { margin-bottom: 16px; }
+}
+
+/* Account actions share the header identity control. */
+#ascla-root .account-menu { position: relative; display: block; flex-shrink: 0; }
+#ascla-root .account-menu > summary { display: flex; width: auto; height: auto; border-radius: 0; list-style: none; cursor: pointer; min-height: 40px; color: var(--ink); }
+#ascla-root .account-menu > summary::-webkit-details-marker { display: none; }
+#ascla-root .account-menu > summary > svg { transition: transform .15s ease; }
+#ascla-root .account-menu[open] > summary > svg { transform: rotate(90deg); }
+#ascla-root .account-menu > summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+#ascla-root .account-menu-panel { position: absolute; inset-inline-end: 0; top: calc(100% + 12px); width: 224px; max-width: calc(100vw - 24px); padding: 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); box-shadow: 0 8px 24px #001c3026; z-index: 40; }
+#ascla-root .account-menu-panel a { display: flex; align-items: center; gap: 12px; padding: 12px; color: var(--ink); font-size: 13px; text-decoration: none; border-radius: 3px; }
+#ascla-root .account-menu-panel a:hover, #ascla-root .account-menu-panel a:focus-visible { background: var(--blue-soft); color: var(--blue); }
+#ascla-root .account-menu-panel a[data-native] { color: var(--ascla-danger, #c6302c); }
+html[data-ascla-theme="dark"] #ascla-root .account-menu-panel a[data-native] { color: #ffaaa6; }
+#ascla-root .account-menu-panel a + a { border-top: 1px solid var(--line); }
+#ascla-root .account-menu-panel svg { width: 18px; height: 18px; flex-shrink: 0; }
+@media(prefers-reduced-motion: reduce){ #ascla-root .account-menu > summary > svg { transition: none; } }

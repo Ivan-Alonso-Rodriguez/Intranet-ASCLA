@@ -1,8 +1,23 @@
 # Historial de versiones — Intranet ASCLA
 
-**Versión actual:** `1.12` · **Esquema:** `15`.
+**Versión actual:** `1.13` · **Esquema:** `17`.
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
+
+<a id="release-113"></a>
+
+## 1.13 — Recorridos, grupos y experiencia de la comunidad
+
+Entrega preparada el 18 de noviembre de 2026. Reúne todos los cambios del plugin posteriores a `ac6c56f` (último commit de 1.12). Los resultados de validación de esta revisión se registran por separado de las entregas históricas.
+
+- **Grupos de mensajería:** el creador puede agregar conexiones confirmadas y expulsar integrantes; cualquier miembro puede salir. Si sale el responsable, la gestión pasa a un integrante activo elegido al azar. El creador también puede eliminar el grupo y su historial previa confirmación. Los nuevos integrantes acceden solo al historial posterior a su incorporación y el chat registra salidas y expulsiones. Se conservan permisos, bloqueos y operaciones atómicas.
+- **Onboarding:** recorridos por módulo y sección administrativa, con pasos según permisos, Anterior, Siguiente, Omitir y ayuda para repetir. Solo las cuentas creadas después de activar esta función reciben la presentación automática. El progreso queda en WordPress por usuario y se coordina con ventanas, menú de cuenta, dispositivos y sesiones simultáneas.
+- **Cuenta e idiomas:** menú Mi perfil/Cerrar sesión, con la salida en rojo, y mensaje sugerido únicamente antes de conversar o usarlo por primera vez con esa persona. La revisión español/inglés incluye errores, administración y textos dinámicos. Las explicaciones y mensajes de IA utilizan el idioma de la cuenta y cachés separadas por idioma.
+- **Publicaciones:** asociados guardan borradores o envían a revisión; administradores y ejecutivos guardan borradores o publican. Administradores y moderadores editan únicamente contenido propio; pueden moderar o eliminar el ajeno según permisos.
+- **Banners y recursos:** imágenes institucionales por módulo, Directorio actualizado y Foros con encuadre inferior conservando su tamaño. Galerías usa el nombre plural; eventos con y sin portada mantienen una composición consistente. Las portadas de conocimiento abren el detalle sin recargar, YouTube utiliza miniaturas de mayor resolución con respaldo y se corrigen los títulos superpuestos. La reproducción integrada contempla Firefox.
+- **Interacciones y apariencia:** corazones rojos y estado persistente compartido en Hub, Foros y comentarios, con una animación breve al confirmar el guardado. Las ventanas aparecen suavemente y respetan movimiento reducido, foco y cambios sin guardar. El modo oscuro utiliza negro suave y gris carbón, con acentos ASCLA y el modo claro conservado. Se ajustan el cumpleaños y el contraste de las opciones de comentarios.
+
+El esquema **17** incorpora `participants.joined_after` (migración 16) y `messages.kind` (migración 17), conservando usuarios, contenidos e historial existente. El [manifiesto de 1.13](docs/evidence/release-1.13/package.json) identifica el ZIP y sus archivos. La promoción sigue el [manual QA/UAT](MANUAL_QA_UAT.md); aceptación humana y despliegue remoto se acreditan por separado.
 
 <a id="release-112"></a>
 

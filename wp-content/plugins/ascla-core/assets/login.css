@@ -109,23 +109,23 @@ body.ascla-login.interim-login { padding: 20px; }
 
 /* ASCLA login follows the same appearance preference as the intranet. */
 html[data-ascla-theme="dark"] body.login.ascla-login {
-  color: #e8eef5; background: #122334; --ascla-navy: #e8f2fb; --ascla-blue: var(--ascla-accent-text); --ascla-muted: #b1c7db;
+  color: var(--ascla-text); background: var(--ascla-paper); --ascla-navy: var(--ascla-text); --ascla-blue: var(--ascla-accent-text); --ascla-muted: var(--ascla-muted-text);
 }
-html[data-ascla-theme="dark"] .ascla-login #login { box-shadow: none; background: #1a2e43; border-color: #314b63; }
+html[data-ascla-theme="dark"] .ascla-login #login { box-shadow: none; background: var(--ascla-surface); border-color: var(--ascla-rule); }
 
 html[data-ascla-theme="dark"] .ascla-login #login label { color: #c6d2de; }
-html[data-ascla-theme="dark"] .ascla-login #login form .input { background: #122334; border-color: #829ab0; color: var(--ascla-navy); }
+html[data-ascla-theme="dark"] .ascla-login #login form .input { background: var(--ascla-paper); border-color: #829ab0; color: var(--ascla-navy); }
 html[data-ascla-theme="dark"] .ascla-login #login form .input:focus { border-color: var(--ascla-blue); box-shadow: 0 0 0 3px var(--ascla-accent-tint); }
 html[data-ascla-theme="dark"] .ascla-login #login .message,
 html[data-ascla-theme="dark"] .ascla-login #login .success,
-html[data-ascla-theme="dark"] .ascla-login #login .notice { background: #152733; color: #c4d2de; border-color: #294251; }
+html[data-ascla-theme="dark"] .ascla-login #login .notice { background: var(--ascla-surface); color: #c4d2de; border-color: #294251; }
 html[data-ascla-theme="dark"] .ascla-login #login #login_error { background: #321f24; color: #f0b6bb; border-color: #60343a; }
-html[data-ascla-theme="dark"] .ascla-login #language-switcher select { background: #101a23; color: #c3d0db; border-color: #3a4d5d; }
-html[data-ascla-theme="dark"] .ascla-login #language-switcher .button { background: #1b2935; color: #7cc7eb; border-color: #3a4d5d; }
-html[data-ascla-theme="dark"] .ascla-login #rememberme { background: #101a23; border-color: #536c80; }
+html[data-ascla-theme="dark"] .ascla-login #language-switcher select { background: var(--ascla-paper); color: #c3d0db; border-color: #3a4d5d; }
+html[data-ascla-theme="dark"] .ascla-login #language-switcher .button { background: var(--ascla-surface-raised); color: #7cc7eb; border-color: #3a4d5d; }
+html[data-ascla-theme="dark"] .ascla-login #rememberme { background: var(--ascla-paper); border-color: #536c80; }
 
 @media (prefers-color-scheme: dark) {
-  html:not([data-ascla-theme]) body.login.ascla-login { background: #0f171f; color: #e8eef5; }
+  html:not([data-ascla-theme]) body.login.ascla-login { background: var(--ascla-paper); color: #e8eef5; }
 }
 
 html[data-ascla-theme="dark"] .ascla-login #login h1 a::after {
@@ -240,6 +240,7 @@ html[data-ascla-theme] body.login.ascla-login {
 }
 .ascla-login :is(input, button, select, textarea) { font-family: var(--ascla-font); }
 html[data-ascla-theme] .ascla-login .ascla-welcome { background: #063159; border: 0; }
+html[data-ascla-theme="dark"] .ascla-login .ascla-welcome { background: var(--ascla-paper); border-color: var(--ascla-rule); }
 html[data-ascla-theme] .ascla-login .ascla-welcome .ascla-logo-normal { display: none; }
 html[data-ascla-theme] .ascla-login .ascla-welcome .ascla-logo-inverse { display: block; }
 html[data-ascla-theme] .ascla-login #login { background: var(--ascla-surface); border: 0; border-radius: 0; box-shadow: none; }

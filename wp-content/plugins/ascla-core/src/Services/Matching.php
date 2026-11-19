@@ -230,6 +230,14 @@ final class Matching
     public static function intro(int $id): array
     {
         $me=get_current_user_id();$affinity=self::between($me,$id,false);
+        Access::require(current_user_can('ascla_write'));
+        $claim=IntroSuggestions::claim($me,$id);
+        try { return self::introDraft($me,$id,$affinity); }
+        catch (\Throwable $error) { IntroSuggestions::release($claim,$me); throw $error; }
+    }
+
+    private static function introDraft(int $me,int $id,array $affinity): array
+    {
         $context=NetworkingAI::context($me,$id,$affinity);
         $result=NetworkingAI::generate('intro',$context,[$me,$id]);
         $text=trim(Access::excerpt($result['text']??'',5000));

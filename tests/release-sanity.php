@@ -82,11 +82,11 @@ namespace {
     $wpReadme=$read('wp-content/plugins/ascla-core/readme.txt');
     $installer=$read('wp-content/plugins/ascla-core/src/Database/Installer.php');
     $assert((bool)preg_match('/Version:\s*1\.12\h*$/m',$plugin),'plugin header version');
-    $assert(str_contains($plugin,"define('ASCLA_VERSION', '1.12');"),'ASCLA_VERSION constant');
+    $assert(str_contains($plugin,"define('ASCLA_VERSION', '1.13');"),'ASCLA_VERSION constant');
     $assert((bool)preg_match('/Stable tag:\s*1\.12\h*$/m',$wpReadme),'WordPress stable tag');
     $assert((bool)preg_match('/^sonar\.projectVersion=1\.12\h*$/m',$read('sonar-project.properties')),'Sonar version');
-    $assert((bool)preg_match('/SCHEMA_VERSION\s*=\s*15/',$installer),'schema version 15');
-    $assert(str_contains($read('README.md'),'Versión actual: 1.12 · esquema 15'),'README version/schema');
+    $assert((bool)preg_match('/SCHEMA_VERSION\s*=\s*17/',$installer),'schema version 17');
+    $assert(str_contains($read('README.md'),'Versión actual: 1.12 · esquema 17'),'README version/schema');
     $assert(str_contains($read('VERSION_HISTORY.md'),'**Versión actual:** `1.12`'),'history current version');
 
     // Point 1: both server and admin UI contain the hard three-interest guard.

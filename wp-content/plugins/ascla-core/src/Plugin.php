@@ -32,6 +32,7 @@ final class Plugin
         Services\ProfessionalChanges::boot();
         Services\AccountAudit::boot();
         Services\AccountPermissions::boot();
+        Services\Onboarding::boot();
         add_action('init',[Services\MicroPlanning::class,'schedule'],21);
         Services\SessionPolicy::boot();
         Repositories\StatisticsCache::boot();

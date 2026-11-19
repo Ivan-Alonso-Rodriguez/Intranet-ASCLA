@@ -1,6 +1,19 @@
 # Guía práctica de QA, SonarQube y UAT
 
-Versión documentada: **1.12**, esquema **15**. El [historial de 1.12](VERSION_HISTORY.md#release-112) detalla el alcance de la entrega; los resultados históricos se indican por versión.
+Versión documentada: **1.13**, esquema **17**. El [historial de 1.13](VERSION_HISTORY.md#release-113) detalla el alcance de la entrega; los resultados históricos se indican por versión.
+
+## Revisión de ASCLA 1.13
+
+Además de la regresión PHP, cobertura y los seis flujos de Bruno/Playwright, recorre las nuevas funciones de esta entrega en QA y nuevamente en UAT:
+
+1. Grupos: agregar una conexión, comprobar el límite de historial del nuevo integrante, expulsarlo y revisar el aviso; salir como miembro, salir como creador y comprobar el nuevo responsable; eliminar un grupo propio con confirmación. Rechazar las mismas operaciones sin permiso y conservar el historial ante errores.
+2. Onboarding: cuenta anterior sin inicio automático, cuenta nueva con recorrido en el primer ingreso a cada módulo, Anterior/Siguiente/Omitir, recarga y nueva sesión sin reinicio, repetición desde Ayuda y pasos por rol. El menú de cuenta y los diálogos no deben competir por el foco.
+3. Cuenta e idiomas: Mi perfil, Cerrar sesión en rojo, protección de cambios sin guardar y sugerencia de mensaje únicamente en el primer contacto. En español e inglés comprobar las explicaciones de afinidad y mensajes de IA, sin reutilizar el idioma de otra caché.
+4. Contenido: asociado con Borrador/Enviar a revisión, administrador y ejecutivo con Borrador/Publicar ahora; edición solo del contenido propio y moderación/eliminación del ajeno. Portadas del Centro de Conocimiento abren el diálogo sin recargar y el video funciona también en Firefox.
+5. Apariencia: banners y encuadre de Foros, Galerías en plural, cumpleaños sin superposición, tarjetas con/sin portada y títulos sin repetir sobre las imágenes. Probar los corazones rojos, persistencia y sincronización del like en tarjeta, detalle y comentario, también cuando el guardado falla.
+6. Animaciones y temas: ventanas suaves sin repetir la entrada al actualizar su contenido, teclado y foco conservados, movimiento reducido antes y durante la animación. Comprobar negro/gris carbón en escritorio y móvil, contraste de controles, onboarding, login y modo claro sin cambios.
+
+El esquema 17 migra automáticamente desde 15 al activar la versión 1.13; verificar conservación de cuentas y contenidos y ejecución repetida sin duplicados. Los informes de cada fase deben identificar su commit y paquete. Un resultado local no acredita despliegue remoto ni aceptación humana de UAT.
 
 ## Repetición completa del 5 de noviembre · 1.11.1
 

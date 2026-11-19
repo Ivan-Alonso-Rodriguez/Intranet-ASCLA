@@ -9,7 +9,11 @@ final class Connections
     public const REQUIRED='Debes tener una conexión confirmada con este asociado para poder enviarle mensajes.';
     public static function lockPair(int $a,int $b,callable $callback): mixed
     {
-        $ids=[$a,$b]; sort($ids); return Store::atomic('connection:'.implode(':',$ids),$callback);
+        return Store::atomic(self::lockKey($a,$b),$callback);
+    }
+    public static function lockKey(int $a,int $b): string
+    {
+        return 'connection:'.min($a,$b).':'.max($a,$b);
     }
     private static function rows(int $me,array $targets=[]): array
     {
@@ -98,13 +102,22 @@ final class Connections
     public static function profile(int $id): array
     {
         $me=get_current_user_id();
-        return Profiles::visible($id)+['connection'=>self::between($me,$id),'conversation'=>ConversationRequests::between($me,$id)];
+        $profile=Profiles::visible($id)+['connection'=>self::between($me,$id),'conversation'=>ConversationRequests::between($me,$id)];
+        return self::suggestions([$profile],$me)[0];
     }
     public static function attach(array $profiles): array
     {
         $me=get_current_user_id(); $ids=array_column($profiles,'id');
         $states=self::statesFor($me,$ids); $conversations=ConversationRequests::statesFor($me,$ids);
-        return array_map(static fn($p)=>$p+['connection'=>$states[$p['id']],'conversation'=>$conversations[$p['id']]],$profiles);
+        return self::suggestions(array_map(static fn($p)=>$p+['connection'=>$states[$p['id']],'conversation'=>$conversations[$p['id']]],$profiles),$me);
+    }
+    private static function suggestions(array $profiles,int $me): array
+    {
+        $targets=current_user_can('ascla_write')?array_column(array_filter($profiles,static fn($p)=>!empty($p['connection']['can_message'])),'id'):[];
+        $available=IntroSuggestions::availableFor($me,$targets);
+        return array_map(static function($profile) use($available) {
+            $profile['connection']['can_suggest_intro']=!empty($available[$profile['id']]);return $profile;
+        },$profiles);
     }
     public static function listing(): array
     {

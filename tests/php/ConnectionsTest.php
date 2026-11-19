@@ -220,7 +220,7 @@ final class ConnectionsTest extends TestCase
         wp_set_current_user($a);
         $photo=Store::insert('media',['user_id'=>$a,'post_id'=>0,'name'=>'group.png','mime'=>'image/png','bytes'=>'synthetic-group-image','created_at'=>current_time('mysql',true)]);
         $group=Messaging::createGroup('Comité de prueba',[$b,$c],$photo); $id=(int)$group['id']; $this->conversations[]=$id;
-        self::assertSame('group',$group['kind']); self::assertSame(3,(int)$group['member_count']); self::assertNotEmpty($group['photo_url']); self::assertFalse($group['can_delete_group']);
+        self::assertSame('group',$group['kind']); self::assertSame(3,(int)$group['member_count']); self::assertNotEmpty($group['photo_url']); self::assertTrue($group['can_delete_group']);
         $message=Messaging::send($id,'Mensaje grupal'); $mid=(int)$message['id'];
         $mine=Messaging::messages($id); self::assertSame(0,(int)$mine['items'][0]['read_count']); self::assertSame(2,(int)$mine['items'][0]['read_total']);
         wp_set_current_user($b); self::assertCount(1,Messaging::messages($id)['items']);
@@ -231,9 +231,9 @@ final class ConnectionsTest extends TestCase
         $state=array_column($poll['read_state'],'last_read','user_id');
         self::assertGreaterThanOrEqual($mid,(int)$state[$b]); self::assertSame(0,(int)$state[$c]);
         wp_set_current_user($b); self::assertSame(403,$this->api('DELETE','conversations/'.$id)->get_status());
-        wp_set_current_user($a); self::assertSame(403,$this->api('DELETE','conversations/'.$id)->get_status());
-        self::assertNotNull(Store::one('conversations',$id));
-        self::assertSame(2,Store::count('messages','conversation_id=%d',[$id]));
+        wp_set_current_user($a); self::assertSame(200,$this->api('DELETE','conversations/'.$id)->get_status());
+        self::assertNull(Store::one('conversations',$id));
+        self::assertSame(0,Store::count('messages','conversation_id=%d',[$id]));
     }
 
 }

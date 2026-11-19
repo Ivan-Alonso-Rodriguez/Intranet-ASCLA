@@ -18,11 +18,17 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
   users.push({...user,page:await login(username,password)});
  }
  const [writer,reader]=users;
- const hub=await ok(writer.page,'content/hub',{title:'Hub institucional '+suffix,body:'Publicación manual de aceptación '+suffix,status:'publish'});posts.push(hub.id);assert.equal(hub.status,'publish');assert.equal((await ok(reader.page,'items/'+hub.id)).title,hub.title);
+ const hub=await ok(writer.page,'content/hub',{title:'Hub institucional '+suffix,body:'Publicación manual de aceptación '+suffix,status:'pending'});
+ posts.push(hub.id);
+ assert.equal(hub.status,'pending');
+ assert.equal((await api(reader.page,'items/'+hub.id)).status,404);
+ const approved=await ok(admin,'items/'+hub.id+'/moderate',{decision:'approve',reason:'Publicación revisada'});
+ assert.equal(approved.status,'publish');
+ assert.equal((await ok(reader.page,'items/'+hub.id)).title,hub.title);
  const draft=await ok(writer.page,'content/hub',{title:'Borrador '+suffix,body:'Contenido aún privado',status:'draft'});posts.push(draft.id);assert.equal(draft.status,'draft');assert.equal((await api(reader.page,'items/'+draft.id)).status,404);
- await goto(writer.page,'hub/');await writer.page.locator('[data-action="editor"][data-type="hub"]').first().click();assert.equal(await writer.page.locator('[data-form="editor"] [name="status"]').inputValue(),'publish');await writer.page.keyboard.press('Escape');
+ await goto(writer.page,'hub/');await writer.page.locator('[data-action="editor"][data-type="hub"]').first().click();assert.equal(await writer.page.locator('[data-form="editor"] [name="status"]').inputValue(),'pending');await writer.page.keyboard.press('Escape');
  const mine=await ok(writer.page,'content/hub?mine=1&q='+suffix);assert.ok(mine.items.some(p=>p.id===hub.id));assert.ok(mine.items.some(p=>p.id===draft.id));
- pass('Hub: publicación explícita inmediata, borrador privado, editor e historial propio');
+ pass('Hub: envío a revisión, aprobación administrativa, borrador privado e historial propio');
  const topic=await ok(writer.page,'content/topic',{title:'Tema '+suffix,body:'Tema publicado para probar reacciones',status:'publish'});posts.push(topic.id);const comment=await ok(writer.page,'items/'+topic.id+'/comments',{body:'Comentario del foro'});
  const route='items/'+topic.id+'/reaction';
  const reaction=await ok(reader.page,route,{kind:'like',active:true});assert.equal(reaction.reaction,'like');assert.equal(reaction.reaction_total,1);

@@ -85,7 +85,7 @@ async function login(browser,u){
   });
   await test('Navegar durante la IA conserva la nueva sección',async()=>{
    mode='navigation';proseGate=deferred();started=deferred();await open(b.id);await started.promise;await close();
-   await p.locator('.header-profile').click();await p.locator('form[data-form="profile"]').waitFor();
+   await p.locator('.header-profile').click();await p.locator('.account-profile-link').click();await p.locator('form[data-form="profile"]').waitFor();
    proseGate.resolve();assert.equal(await p.locator('.modal').count(),0);assert.ok(await p.locator('form[data-form="profile"]').isVisible());
   });
   assert.deepEqual(errors,[]);console.log('PASS '+results.length+' progressive profile tests; no uncaught browser errors.');

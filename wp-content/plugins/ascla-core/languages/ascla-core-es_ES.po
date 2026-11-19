@@ -3,6 +3,15 @@
 msgid ""
 msgstr "Project-Id-Version: ASCLA Core 1.12\nLanguage: es_ES\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "%s salió del grupo."
+msgstr "%s salió del grupo."
+
+msgid ". En el login normal no aparece ningún desafío al inicio. Al alcanzar el umbral configurado, ASCLA muestra el widget oficial de Cloudflare y valida el token nuevamente en el servidor."
+msgstr ". En el login normal no aparece ningún desafío al inicio. Al alcanzar el umbral configurado, ASCLA muestra el widget oficial de Cloudflare y valida el token nuevamente en el servidor."
+
+msgid ". No llegan a una bandeja externa."
+msgstr ". No llegan a una bandeja externa."
+
 msgid "1. Añadir o corregir una persona"
 msgstr "1. Añadir o corregir una persona"
 
@@ -11,6 +20,9 @@ msgstr "2. Revisa participantes e inscritos"
 
 msgid "3. Finaliza la revisión"
 msgstr "3. Finaliza la revisión"
+
+msgid "AAAA-MM-DD / ISO 8601"
+msgstr "AAAA-MM-DD / ISO 8601"
 
 msgid "ACTIVIDAD E INTERESES"
 msgstr "ACTIVIDAD E INTERESES"
@@ -29,6 +41,9 @@ msgstr "ASCLA conserva una copia maestra sin recortar y optimizada, además de l
 
 msgid "ASCLA consultará Supadata para obtener subtítulos públicos. Los videos largos pueden continuar en segundo plano. También puedes añadir una transcripción manual."
 msgstr "ASCLA consultará Supadata para obtener subtítulos públicos. Los videos largos pueden continuar en segundo plano. También puedes añadir una transcripción manual."
+
+msgid "ASCLA genera una contraseña interna segura y no la muestra al administrador. El usuario recibe un enlace de WordPress para establecer su propia contraseña. Si el correo no llega, puede usar “¿Olvidaste tu contraseña?” desde"
+msgstr "ASCLA genera una contraseña interna segura y no la muestra al administrador. El usuario recibe un enlace de WordPress para establecer su propia contraseña. Si el correo no llega, puede usar “¿Olvidaste tu contraseña?” desde"
 
 msgid "ASCLA inicio"
 msgstr "ASCLA inicio"
@@ -81,6 +96,9 @@ msgstr "Abrir archivo"
 msgid "Abrir borrador"
 msgstr "Abrir borrador"
 
+msgid "Abrir buzón de pruebas"
+msgstr "Abrir buzón de pruebas"
+
 msgid "Abrir contenido"
 msgstr "Abrir contenido"
 
@@ -132,8 +150,20 @@ msgstr "Acceder a ASCLA"
 msgid "Acceder al área de administración"
 msgstr "Acceder al área de administración"
 
+msgid "Acceso"
+msgstr "Acceso"
+
 msgid "Acceso a la comunidad ASCLA"
 msgstr "Acceso a la comunidad ASCLA"
+
+msgid "Acceso actualizado."
+msgstr "Acceso actualizado."
+
+msgid "Acceso no autorizado."
+msgstr "Acceso no autorizado."
+
+msgid "Acceso reactivado"
+msgstr "Acceso reactivado"
 
 msgid "Acceso reservado para la administración técnica de ASCLA. Los asociados deben ingresar desde /login/."
 msgstr "Acceso reservado para la administración técnica de ASCLA. Los asociados deben ingresar desde /login/."
@@ -144,14 +174,29 @@ msgstr "Acceso reservado para la administración técnica de WordPress y la conf
 msgid "Acceso restringido por permisos"
 msgstr "Acceso restringido por permisos"
 
+msgid "Acceso seguro desde el inicio"
+msgstr "Acceso seguro desde el inicio"
+
+msgid "Acceso suspendido"
+msgstr "Acceso suspendido"
+
 msgid "Acceso y membresía"
 msgstr "Acceso y membresía"
 
 msgid "Acciones"
 msgstr "Acciones"
 
+msgid "Acciones registradas"
+msgstr "Acciones registradas"
+
+msgid "Acciones relevantes como cambios de configuración, moderación, accesos, reportes, archivos e integraciones."
+msgstr "Acciones relevantes como cambios de configuración, moderación, accesos, reportes, archivos e integraciones."
+
 msgid "Acción"
 msgstr "Acción"
+
+msgid "Acción de guía no válida."
+msgstr "Acción de guía no válida."
 
 msgid "Acepta la solicitud para continuar la conversación"
 msgstr "Acepta la solicitud para continuar la conversación"
@@ -222,6 +267,9 @@ msgstr "Active JavaScript para utilizar la intranet."
 msgid "Actividad"
 msgstr "Actividad"
 
+msgid "Actividad del sistema"
+msgstr "Actividad del sistema"
+
 msgid "Actividad e intereses"
 msgstr "Actividad e intereses"
 
@@ -230,6 +278,9 @@ msgstr "Actividad en temas similares"
 
 msgid "Actividad no válida."
 msgstr "Actividad no válida."
+
+msgid "Activo"
+msgstr "Activo"
 
 msgid "Activo aparece en el catálogo. Inactivo conserva el registro sin mostrarlo a los asociados. Borrador permite preparar la ficha."
 msgstr "Activo aparece en el catálogo. Inactivo conserva el registro sin mostrarlo a los asociados. Borrador permite preparar la ficha."
@@ -261,6 +312,9 @@ msgstr "Actualización semanal"
 msgid "Actualizada"
 msgstr "Actualizada"
 
+msgid "Actualizado."
+msgstr "Actualizado."
+
 msgid "Actualizando los textos de la propuesta con los cambios guardados…"
 msgstr "Actualizando los textos de la propuesta con los cambios guardados…"
 
@@ -275,6 +329,9 @@ msgstr "Actualizar candidatos"
 
 msgid "Actualizar conexiones"
 msgstr "Actualizar conexiones"
+
+msgid "Actualizar estados"
+msgstr "Actualizar estados"
 
 msgid "Actualizar mi perfil"
 msgstr "Actualizar mi perfil"
@@ -306,11 +363,20 @@ msgstr "Administración de la plataforma"
 msgid "Administración del grupo"
 msgstr "Administración del grupo"
 
+msgid "Administración técnica"
+msgstr "Administración técnica"
+
+msgid "Administrador"
+msgstr "Administrador"
+
 msgid "Administrar WordPress"
 msgstr "Administrar WordPress"
 
 msgid "Administrar archivos"
 msgstr "Administrar archivos"
+
+msgid "Administrar grupo"
+msgstr "Administrar grupo"
 
 msgid "Administrar mis archivos"
 msgstr "Administrar mis archivos"
@@ -336,8 +402,14 @@ msgstr "Agenda y conocimiento"
 msgid "Agregar"
 msgstr "Agregar"
 
+msgid "Agregar al grupo"
+msgstr "Agregar al grupo"
+
 msgid "Agregar candidatos"
 msgstr "Agregar candidatos"
+
+msgid "Agregar integrantes"
+msgstr "Agregar integrantes"
 
 msgid "Agrupa los eventos por temas similares"
 msgstr "Agrupa los eventos por temas similares"
@@ -347,6 +419,9 @@ msgstr "Agrupar eventos por su contenido"
 
 msgid "Ahora"
 msgstr "Ahora"
+
+msgid "Ahora eres responsable de un grupo de Mensajería."
+msgstr "Ahora eres responsable de un grupo de Mensajería."
 
 msgid "Ahora no"
 msgstr "Ahora no"
@@ -363,6 +438,9 @@ msgstr "Ajustar imagen"
 msgid "Ajustar portada del evento"
 msgstr "Ajustar portada del evento"
 
+msgid "Al alcanzar el máximo de fallos del mismo usuario/correo se aplica la espera configurada. Una ráfaga mayor de intentos desde la misma IP también puede bloquear el acceso temporalmente. Cuando Turnstile aparece, la marca “Success” confirma solo la comprobación anti-bot; ASCLA todavía valida usuario y contraseña."
+msgstr "Al alcanzar el máximo de fallos del mismo usuario/correo se aplica la espera configurada. Una ráfaga mayor de intentos desde la misma IP también puede bloquear el acceso temporalmente. Cuando Turnstile aparece, la marca “Success” confirma solo la comprobación anti-bot; ASCLA todavía valida usuario y contraseña."
+
 msgid "Al aprobar se publica el encuentro y se envían las invitaciones. Cada asociado debe confirmar su asistencia."
 msgstr "Al aprobar se publica el encuentro y se envían las invitaciones. Cada asociado debe confirmar su asistencia."
 
@@ -377,6 +455,9 @@ msgstr "Al publicar"
 
 msgid "Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."
 msgstr "Al publicar o programar, confirmas que revisaste fuentes, anonimización y derechos."
+
+msgid "Al salir, perderás el acceso a la conversación del grupo."
+msgstr "Al salir, perderás el acceso a la conversación del grupo."
 
 msgid "Alcanzaste el máximo de asistentes. Quita a una persona para elegir otra."
 msgstr "Alcanzaste el máximo de asistentes. Quita a una persona para elegir otra."
@@ -498,6 +579,9 @@ msgstr "Aprendizaje reiniciado."
 msgid "Aprobada"
 msgstr "Aprobada"
 
+msgid "Aprobar"
+msgstr "Aprobar"
+
 msgid "Aprobar hace visible el comentario. Mantener oculto lo conserva sin publicar."
 msgstr "Aprobar hace visible el comentario. Mantener oculto lo conserva sin publicar."
 
@@ -545,6 +629,12 @@ msgstr "Archivo cargado."
 
 msgid "Archivo de respuestas"
 msgstr "Archivo de respuestas"
+
+msgid "Archivo eliminado"
+msgstr "Archivo eliminado"
+
+msgid "Archivo no autorizado."
+msgstr "Archivo no autorizado."
 
 msgid "Archivos"
 msgstr "Archivos"
@@ -639,6 +729,12 @@ msgstr "Asociado bloqueado."
 msgid "Asociado desbloqueado."
 msgstr "Asociado desbloqueado."
 
+msgid "Asociado no disponible."
+msgstr "Asociado no disponible."
+
+msgid "Asociado no válido."
+msgstr "Asociado no válido."
+
 msgid "Asociados bloqueados"
 msgstr "Asociados bloqueados"
 
@@ -656,6 +752,9 @@ msgstr "Asociados en la comunidad"
 
 msgid "Asociados que comparten un interés visible."
 msgstr "Asociados que comparten un interés visible."
+
+msgid "Asunto"
+msgstr "Asunto"
 
 msgid "Atención actualizada."
 msgstr "Atención actualizada."
@@ -714,6 +813,9 @@ msgstr "Avisos de nuevos recursos"
 msgid "Ayer"
 msgstr "Ayer"
 
+msgid "Ayuda de este módulo"
+msgstr "Ayuda de este módulo"
+
 msgid "Añade al catálogo los temas base de Forms que todavía falten. Los temas existentes se conservan."
 msgstr "Añade al catálogo los temas base de Forms que todavía falten. Los temas existentes se conservan."
 
@@ -740,6 +842,9 @@ msgstr "Añadir tema"
 
 msgid "Añadir temas base de Forms"
 msgstr "Añadir temas base de Forms"
+
+msgid "Añadir usuario"
+msgstr "Añadir usuario"
 
 msgid "Aún no encontramos contenidos afines"
 msgstr "Aún no encontramos contenidos afines"
@@ -921,6 +1026,9 @@ msgstr "Buscar un evento en el selector"
 msgid "Buscar usuarios"
 msgstr "Buscar usuarios"
 
+msgid "Buzón local activo: los correos se consultan en"
+msgstr "Buzón local activo: los correos se consultan en"
+
 msgid "COMUNIDAD DE ASOCIADOS"
 msgstr "COMUNIDAD DE ASOCIADOS"
 
@@ -941,6 +1049,9 @@ msgstr "CSV hasta 512 KB. PDF con tablas, HTML o ZIP de una hoja hasta 5 MB. Má
 
 msgid "CSV no válido."
 msgstr "CSV no válido."
+
+msgid "CUENTA ASCLA"
+msgstr "CUENTA ASCLA"
 
 msgid "Cabecera CSV no válida."
 msgstr "Cabecera CSV no válida."
@@ -1044,6 +1155,9 @@ msgstr "Candidatos elegibles"
 msgid "Carga el CSV, revisa la vista previa y confirma la importación. Cargar el archivo todavía no guarda asistencias."
 msgstr "Carga el CSV, revisa la vista previa y confirma la importación. Cargar el archivo todavía no guarda asistencias."
 
+msgid "Cargando ASCLA…"
+msgstr "Cargando ASCLA…"
+
 msgid "Cargando PDF…"
 msgstr "Cargando PDF…"
 
@@ -1082,6 +1196,9 @@ msgstr "Cargando sección…"
 
 msgid "Cargando tu comunidad ASCLA…"
 msgstr "Cargando tu comunidad ASCLA…"
+
+msgid "Cargar anteriores"
+msgstr "Cargar anteriores"
 
 msgid "Cargar respuestas"
 msgstr "Cargar respuestas"
@@ -1179,6 +1296,9 @@ msgstr "Clasificar siguientes 30 eventos"
 msgid "Claves de la sesión"
 msgstr "Claves de la sesión"
 
+msgid "Client ID"
+msgstr "Client ID"
+
 msgid "Coincide con tus intereses"
 msgstr "Coincide con tus intereses"
 
@@ -1193,6 +1313,12 @@ msgstr "Columna no válida."
 
 msgid "Combina mayúsculas, minúsculas, números y símbolos. Evita secuencias y datos personales."
 msgstr "Combina mayúsculas, minúsculas, números y símbolos. Evita secuencias y datos personales."
+
+msgid "Comentario eliminado"
+msgstr "Comentario eliminado"
+
+msgid "Comentario moderado"
+msgstr "Comentario moderado"
 
 msgid "Comentario no disponible"
 msgstr "Comentario no disponible"
@@ -1239,6 +1365,9 @@ msgstr "Comparte una pregunta y construyamos respuestas juntos."
 msgid "Comparten"
 msgstr "Comparten"
 
+msgid "Comparten %s."
+msgstr "Comparten %s."
+
 msgid "Compartimos conocimiento con respeto, confidencialidad y bajo la Regla de Chatham House."
 msgstr "Compartimos conocimiento con respeto, confidencialidad y bajo la Regla de Chatham House."
 
@@ -1259,6 +1388,9 @@ msgstr "Completa la verificación de seguridad para continuar."
 
 msgid "Completa los campos obligatorios:"
 msgstr "Completa los campos obligatorios:"
+
+msgid "Completa los campos obligatorios: "
+msgstr "Completa los campos obligatorios: "
 
 msgid "Completa los criterios de tu perfil profesional. Puedes posponer este aviso y continuar navegando."
 msgstr "Completa los criterios de tu perfil profesional. Puedes posponer este aviso y continuar navegando."
@@ -1295,6 +1427,9 @@ msgstr "Complete la fecha y hora de inicio y fin."
 
 msgid "Complete nombre y descripción antes de activar el aliado."
 msgstr "Complete nombre y descripción antes de activar el aliado."
+
+msgid "Completen sus intereses y experiencia para descubrir más afinidades."
+msgstr "Completen sus intereses y experiencia para descubrir más afinidades."
 
 msgid "Completo"
 msgstr "Completo"
@@ -1368,6 +1503,9 @@ msgstr "Conexiones vigentes"
 msgid "Conexión ASCLA"
 msgstr "Conexión ASCLA"
 
+msgid "Conexión aceptada"
+msgstr "Conexión aceptada"
+
 msgid "Conexión confirmada el"
 msgstr "Conexión confirmada el"
 
@@ -1377,11 +1515,17 @@ msgstr "Conexión correcta. DeepSeek respondió con el modelo guardado."
 msgid "Conexión correcta. OpenAI respondió con el modelo guardado."
 msgstr "Conexión correcta. OpenAI respondió con el modelo guardado."
 
+msgid "Conexión eliminada"
+msgstr "Conexión eliminada"
+
 msgid "Conexión eliminada."
 msgstr "Conexión eliminada."
 
 msgid "Conexión eliminada: puedes consultar el historial, pero no enviar mensajes."
 msgstr "Conexión eliminada: puedes consultar el historial, pero no enviar mensajes."
+
+msgid "Conexión rechazada"
+msgstr "Conexión rechazada"
 
 msgid "Conexión recomendada"
 msgstr "Conexión recomendada"
@@ -1395,6 +1539,9 @@ msgstr "Confianza devuelta"
 msgid "Configura la API Key de Supadata en Ajustes para consultar subtítulos públicos."
 msgstr "Configura la API Key de Supadata en Ajustes para consultar subtítulos públicos."
 
+msgid "Configura la salida de correos, recuperación de contraseña y pruebas de entrega."
+msgstr "Configura la salida de correos, recuperación de contraseña y pruebas de entrega."
+
 msgid "Configura una DeepSeek API Key."
 msgstr "Configura una DeepSeek API Key."
 
@@ -1403,6 +1550,9 @@ msgstr "Configura una OpenAI API Key."
 
 msgid "Configuración"
 msgstr "Configuración"
+
+msgid "Configuración actualizada"
+msgstr "Configuración actualizada"
 
 msgid "Configuración guardada."
 msgstr "Configuración guardada."
@@ -1433,6 +1583,9 @@ msgstr "Confirma tu inscripción a un evento activo."
 
 msgid "Confirmados"
 msgstr "Confirmados"
+
+msgid "Confirmar"
+msgstr "Confirmar"
 
 msgid "Confirmar actualización de perfiles"
 msgstr "Confirmar actualización de perfiles"
@@ -1587,6 +1740,12 @@ msgstr "Contenido"
 msgid "Contenido alineado con tus intereses"
 msgstr "Contenido alineado con tus intereses"
 
+msgid "Contenido asistido por IA creado"
+msgstr "Contenido asistido por IA creado"
+
+msgid "Contenido eliminado"
+msgstr "Contenido eliminado"
+
 msgid "Contenido enviado a la papelera."
 msgstr "Contenido enviado a la papelera."
 
@@ -1596,6 +1755,9 @@ msgstr "Contenido explícito"
 msgid "Contenido generado"
 msgstr "Contenido generado"
 
+msgid "Contenido guardado"
+msgstr "Contenido guardado"
+
 msgid "Contenido pendiente de publicación"
 msgstr "Contenido pendiente de publicación"
 
@@ -1604,6 +1766,9 @@ msgstr "Contenido publicado"
 
 msgid "Contenido publicado y comentarios aprobados durante las fechas elegidas."
 msgstr "Contenido publicado y comentarios aprobados durante las fechas elegidas."
+
+msgid "Contenido reportado"
+msgstr "Contenido reportado"
 
 msgid "Contenido reportado por la comunidad"
 msgstr "Contenido reportado por la comunidad"
@@ -1632,14 +1797,32 @@ msgstr "Continuar conversación"
 msgid "Continuar mi sesión"
 msgstr "Continuar mi sesión"
 
+msgid "Continuar recorrido"
+msgstr "Continuar recorrido"
+
+msgid "Continúa donde te quedaste o vuelve a empezar."
+msgstr "Continúa donde te quedaste o vuelve a empezar."
+
 msgid "Continúa la conversación privada en Mensajería."
 msgstr "Continúa la conversación privada en Mensajería."
 
 msgid "Contraseña"
 msgstr "Contraseña"
 
+msgid "Contraseña SMTP"
+msgstr "Contraseña SMTP"
+
+msgid "Contraseña SMTP (guardada; vacío para conservar)"
+msgstr "Contraseña SMTP (guardada; vacío para conservar)"
+
 msgid "Contraseña actual"
 msgstr "Contraseña actual"
+
+msgid "Contraseña cambiada"
+msgstr "Contraseña cambiada"
+
+msgid "Contraseña para nuevas cuentas demo"
+msgstr "Contraseña para nuevas cuentas demo"
 
 msgid "Controles del PDF"
 msgstr "Controles del PDF"
@@ -1656,6 +1839,9 @@ msgstr "Conversa con el asistente sobre eventos, publicaciones, recursos, galer�
 msgid "Conversaciones"
 msgstr "Conversaciones"
 
+msgid "Conversaciones directas y grupales para colaborar dentro de ASCLA."
+msgstr "Conversaciones directas y grupales para colaborar dentro de ASCLA."
+
 msgid "Conversaciones que quieres iniciar"
 msgstr "Conversaciones que quieres iniciar"
 
@@ -1671,11 +1857,20 @@ msgstr "Conversaciones, encuentros y conocimiento en un solo lugar."
 msgid "Conversación"
 msgstr "Conversación"
 
+msgid "Conversación autorizada"
+msgstr "Conversación autorizada"
+
 msgid "Conversación con ASCLA"
 msgstr "Conversación con ASCLA"
 
 msgid "Conversación general"
 msgstr "Conversación general"
+
+msgid "Conversación iniciada"
+msgstr "Conversación iniciada"
+
+msgid "Conversación no disponible"
+msgstr "Conversación no disponible"
 
 msgid "Convocatoria del microevento"
 msgstr "Convocatoria del microevento"
@@ -1695,6 +1890,9 @@ msgstr "Correo de contacto no válido."
 msgid "Correo del usuario ASCLA"
 msgstr "Correo del usuario ASCLA"
 
+msgid "Correo electrónico"
+msgstr "Correo electrónico"
+
 msgid "Correo exacto"
 msgstr "Correo exacto"
 
@@ -1704,6 +1902,9 @@ msgstr "Correo no registrado"
 msgid "Correo para asignación manual"
 msgstr "Correo para asignación manual"
 
+msgid "Correo remitente autorizado"
+msgstr "Correo remitente autorizado"
+
 msgid "Correo sin cuenta ASCLA"
 msgstr "Correo sin cuenta ASCLA"
 
@@ -1712,6 +1913,9 @@ msgstr "Correo sin cuenta ASCLA y nombre no disponible"
 
 msgid "Correo y nombre ausentes o no válidos"
 msgstr "Correo y nombre ausentes o no válidos"
+
+msgid "Correo y recuperación"
+msgstr "Correo y recuperación"
 
 msgid "Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes."
 msgstr "Crea 18 perfiles y 9 empresas ficticias. Las siguientes ejecuciones conservan datos y contraseñas existentes."
@@ -1737,14 +1941,35 @@ msgstr "Crear chat grupal"
 msgid "Crear contenido y enviar mensajes"
 msgstr "Crear contenido y enviar mensajes"
 
+msgid "Crear evento"
+msgstr "Crear evento"
+
 msgid "Crear foro"
 msgstr "Crear foro"
+
+msgid "Crear galería"
+msgstr "Crear galería"
 
 msgid "Crear grupo"
 msgstr "Crear grupo"
 
 msgid "Crear previsualización"
 msgstr "Crear previsualización"
+
+msgid "Crear publicación"
+msgstr "Crear publicación"
+
+msgid "Crear recurso"
+msgstr "Crear recurso"
+
+msgid "Crear solicitud"
+msgstr "Crear solicitud"
+
+msgid "Crear tema"
+msgstr "Crear tema"
+
+msgid "Crear usuario de la comunidad"
+msgstr "Crear usuario de la comunidad"
 
 msgid "Criterios de completitud"
 msgstr "Criterios de completitud"
@@ -1812,6 +2037,9 @@ msgstr "Cupos por microevento"
 msgid "Custodia de credenciales"
 msgstr "Custodia de credenciales"
 
+msgid "Cuándo"
+msgstr "Cuándo"
+
 msgid "Cuéntanos qué necesitas y el equipo dará seguimiento a tu solicitud."
 msgstr "Cuéntanos qué necesitas y el equipo dará seguimiento a tu solicitud."
 
@@ -1845,6 +2073,9 @@ msgstr "Cómo se calcula el cambio"
 msgid "DATOS DEMO"
 msgstr "DATOS DEMO"
 
+msgid "DD/MM/AAAA"
+msgstr "DD/MM/AAAA"
+
 msgid "DESCUBRE TU PRÓXIMA CONEXIÓN"
 msgstr "DESCUBRE TU PRÓXIMA CONEXIÓN"
 
@@ -1853,6 +2084,9 @@ msgstr "Dato privado. Solo se usa para felicitarte y avisar a la administración
 
 msgid "Dato privado. Solo yo y administradores."
 msgstr "Dato privado. Solo yo y administradores."
+
+msgid "Datos de acceso"
+msgstr "Datos de acceso"
 
 msgid "Datos de la reunión"
 msgstr "Datos de la reunión"
@@ -1875,6 +2109,12 @@ msgstr "Datos profesionales actualizados"
 msgid "Debe reconfirmar"
 msgstr "Debe reconfirmar"
 
+msgid "Decisión"
+msgstr "Decisión"
+
+msgid "Decisión de moderación"
+msgstr "Decisión de moderación"
+
 msgid "Decisión no válida."
 msgstr "Decisión no válida."
 
@@ -1892,6 +2132,9 @@ msgstr "DeepSeek · API"
 
 msgid "Define el tamaño de cada grupo y el plazo de inscripción prioritaria."
 msgstr "Define el tamaño de cada grupo y el plazo de inscripción prioritaria."
+
+msgid "Define el umbral y la cantidad máxima del lote semanal de recomendaciones."
+msgstr "Define el umbral y la cantidad máxima del lote semanal de recomendaciones."
 
 msgid "Dejará de estar visible para los asociados. Su información y su historial se conservarán."
 msgstr "Dejará de estar visible para los asociados. Su información y su historial se conservarán."
@@ -1928,6 +2171,9 @@ msgstr "Desactivar aprendizaje"
 
 msgid "Desbloquear"
 msgstr "Desbloquear"
+
+msgid "Descargar"
+msgstr "Descargar"
 
 msgid "Descartar cambios"
 msgstr "Descartar cambios"
@@ -1982,6 +2228,12 @@ msgstr "Desliza la tabla para ver todas las columnas."
 
 msgid "Detalle"
 msgstr "Detalle"
+
+msgid "Detalle técnico"
+msgstr "Detalle técnico"
+
+msgid "Detalle:"
+msgstr "Detalle:"
 
 msgid "Detectar formato automáticamente"
 msgstr "Detectar formato automáticamente"
@@ -2067,6 +2319,15 @@ msgstr "Editar candidatos"
 msgid "Editar cuenta"
 msgstr "Editar cuenta"
 
+msgid "Editar evento"
+msgstr "Editar evento"
+
+msgid "Editar foro"
+msgstr "Editar foro"
+
+msgid "Editar galería"
+msgstr "Editar galería"
+
 msgid "Editar grupo"
 msgstr "Editar grupo"
 
@@ -2079,6 +2340,21 @@ msgstr "Editar mis intereses"
 msgid "Editar propuesta"
 msgstr "Editar propuesta"
 
+msgid "Editar publicación"
+msgstr "Editar publicación"
+
+msgid "Editar recurso"
+msgstr "Editar recurso"
+
+msgid "Editar solicitud"
+msgstr "Editar solicitud"
+
+msgid "Editar tema"
+msgstr "Editar tema"
+
+msgid "Editar usuario"
+msgstr "Editar usuario"
+
 msgid "Editar y publicar"
 msgstr "Editar y publicar"
 
@@ -2087,6 +2363,9 @@ msgstr "Ej. Comité de Innovación"
 
 msgid "Ej. Coordinación del comité y próximos acuerdos"
 msgstr "Ej. Coordinación del comité y próximos acuerdos"
+
+msgid "Ejecutivo ASCLA"
+msgstr "Ejecutivo ASCLA"
 
 msgid "El CSV admite hasta 5000 filas de participantes."
 msgstr "El CSV admite hasta 5000 filas de participantes."
@@ -2154,11 +2433,20 @@ msgstr "El asociado puede desactivar o reiniciar este aprendizaje desde Perfil �
 msgid "El asociado y el equipo autorizado de ASCLA pueden ver la consulta. Cualquier integrante del equipo puede responder y resolverla."
 msgstr "El asociado y el equipo autorizado de ASCLA pueden ver la consulta. Cualquier integrante del equipo puede responder y resolverla."
 
+msgid "El borrador requiere revisión adicional de identidades."
+msgstr "El borrador requiere revisión adicional de identidades."
+
 msgid "El borrador se moverá a la papelera."
 msgstr "El borrador se moverá a la papelera."
 
 msgid "El botón analiza hasta 30 eventos pendientes. La propuesta no cambia los temas publicados."
 msgstr "El botón analiza hasta 30 eventos pendientes. La propuesta no cambia los temas publicados."
+
+msgid "El captcha debe activarse antes del bloqueo."
+msgstr "El captcha debe activarse antes del bloqueo."
+
+msgid "El comentario al que intentas responder ya no está disponible."
+msgstr "El comentario al que intentas responder ya no está disponible."
 
 msgid "El comentario dejará de mostrarse en la conversación."
 msgstr "El comentario dejará de mostrarse en la conversación."
@@ -2171,6 +2459,9 @@ msgstr "El conocimiento, a una pregunta"
 
 msgid "El conocimiento<br>nos conecta."
 msgstr "El conocimiento<br>nos conecta."
+
+msgid "El contenido aún no está publicado."
+msgstr "El contenido aún no está publicado."
 
 msgid "El contenido creado con ayuda de IA debe revisarse antes de publicarlo."
 msgstr "El contenido creado con ayuda de IA debe revisarse antes de publicarlo."
@@ -2187,6 +2478,9 @@ msgstr "El contenido dejará de estar disponible en la comunidad."
 msgid "El contenido del ZIP está incompleto."
 msgstr "El contenido del ZIP está incompleto."
 
+msgid "El contenido necesita revisión humana."
+msgstr "El contenido necesita revisión humana."
+
 msgid "El contenido volverá a estar disponible en el catálogo de la comunidad."
 msgstr "El contenido volverá a estar disponible en el catálogo de la comunidad."
 
@@ -2198,6 +2492,9 @@ msgstr "El correo no admite saltos de línea ni caracteres de control."
 
 msgid "El correo pertenece a una cuenta sin acceso ASCLA"
 msgstr "El correo pertenece a una cuenta sin acceso ASCLA"
+
+msgid "El correo remitente no es válido."
+msgstr "El correo remitente no es válido."
 
 msgid "El editor de imágenes no está disponible. Recarga la página e inténtalo de nuevo."
 msgstr "El editor de imágenes no está disponible. Recarga la página e inténtalo de nuevo."
@@ -2211,8 +2508,20 @@ msgstr "El encuentro finalizó. Puedes consultar su historial."
 msgid "El encuentro fue cancelado. Su historial se conserva."
 msgstr "El encuentro fue cancelado. Su historial se conserva."
 
+msgid "El evento admite una sola imagen de portada."
+msgstr "El evento admite una sola imagen de portada."
+
 msgid "El evento cambió de fecha, horario o modalidad. Revisa los cambios y confirma nuevamente tu asistencia."
 msgstr "El evento cambió de fecha, horario o modalidad. Revisa los cambios y confirma nuevamente tu asistencia."
+
+msgid "El evento fue cancelado o su fecha de inicio ya pasó."
+msgstr "El evento fue cancelado o su fecha de inicio ya pasó."
+
+msgid "El evento fue cancelado y ya no admite inscripciones."
+msgstr "El evento fue cancelado y ya no admite inscripciones."
+
+msgid "El evento fue cancelado."
+msgstr "El evento fue cancelado."
 
 msgid "El evento no está disponible en este período."
 msgstr "El evento no está disponible en este período."
@@ -2229,11 +2538,20 @@ msgstr "El evento se guardará y podrás seleccionar a los asociados que quieres
 msgid "El evento ya está activo."
 msgstr "El evento ya está activo."
 
+msgid "El evento ya finalizó."
+msgstr "El evento ya finalizó."
+
+msgid "El evento ya fue cancelado."
+msgstr "El evento ya fue cancelado."
+
 msgid "El grupo contiene un bloqueo entre asociados. Revisa los candidatos de la propuesta."
 msgstr "El grupo contiene un bloqueo entre asociados. Revisa los candidatos de la propuesta."
 
 msgid "El historial identifica al administrador, al usuario y los campos modificados. Las preferencias de privacidad y participación las conserva el asociado."
 msgstr "El historial identifica al administrador, al usuario y los campos modificados. Las preferencias de privacidad y participación las conserva el asociado."
+
+msgid "El identificador demo pertenece a otra cuenta. No se modificó."
+msgstr "El identificador demo pertenece a otra cuenta. No se modificó."
 
 msgid "El intervalo predeterminado es de 7 días. Puedes elegir entre 1 y 90."
 msgstr "El intervalo predeterminado es de 7 días. Puedes elegir entre 1 y 90."
@@ -2241,8 +2559,20 @@ msgstr "El intervalo predeterminado es de 7 días. Puedes elegir entre 1 y 90."
 msgid "El lector PDF debe cargarse desde ASCLA."
 msgstr "El lector PDF debe cargarse desde ASCLA."
 
+msgid "El mensaje de presentación admite hasta 1000 caracteres."
+msgstr "El mensaje de presentación admite hasta 1000 caracteres."
+
 msgid "El mensaje se eliminará de esta conversación para ambos participantes."
 msgstr "El mensaje se eliminará de esta conversación para ambos participantes."
+
+msgid "El mensaje sugerido solo está disponible antes de la primera conversación y una vez por persona."
+msgstr "El mensaje sugerido solo está disponible antes de la primera conversación y una vez por persona."
+
+msgid "El microevento necesita aprobación administrativa."
+msgstr "El microevento necesita aprobación administrativa."
+
+msgid "El mínimo no puede superar los cupos."
+msgstr "El mínimo no puede superar los cupos."
 
 msgid "El nombre de usuario se utilizará para iniciar sesión. La administración puede cambiarlo al editar la cuenta."
 msgstr "El nombre de usuario se utilizará para iniciar sesión. La administración puede cambiarlo al editar la cuenta."
@@ -2262,8 +2592,20 @@ msgstr "El perfil podrá volver a aparecer en próximas recomendaciones."
 msgid "El período actual incluye hoy y todavía puede cambiar."
 msgstr "El período actual incluye hoy y todavía puede cambiar."
 
+msgid "El período debe terminar hoy o antes y comenzar antes de su fin."
+msgstr "El período debe terminar hoy o antes y comenzar antes de su fin."
+
 msgid "El plan de Supadata no permite esta solicitud. Revisa el plan y los créditos."
 msgstr "El plan de Supadata no permite esta solicitud. Revisa el plan y los créditos."
+
+msgid "El plazo de inscripción debe terminar antes del inicio."
+msgstr "El plazo de inscripción debe terminar antes del inicio."
+
+msgid "El plazo de inscripción del microevento ha finalizado."
+msgstr "El plazo de inscripción del microevento ha finalizado."
+
+msgid "El plazo de inscripción ha finalizado."
+msgstr "El plazo de inscripción ha finalizado."
 
 msgid "El porcentaje mínimo de permanencia decide si una conexión de Zoom cuenta como asistencia completa o parcial. Las correcciones manuales se conservan."
 msgstr "El porcentaje mínimo de permanencia decide si una conexión de Zoom cuenta como asistencia completa o parcial. Las correcciones manuales se conservan."
@@ -2276,6 +2618,9 @@ msgstr "El proveedor de IA respondió, pero no clasificó la muestra sintética 
 
 msgid "El proveedor respondió con el formato de Forms, confianza válida e IDs existentes del catálogo."
 msgstr "El proveedor respondió con el formato de Forms, confianza válida e IDs existentes del catálogo."
+
+msgid "El recorrido cambió en otra sesión. Ábrelo desde Ayuda para continuar."
+msgstr "El recorrido cambió en otra sesión. Ábrelo desde Ayuda para continuar."
 
 msgid "El recurso no tiene video de YouTube ni transcripción autorizada."
 msgstr "El recurso no tiene video de YouTube ni transcripción autorizada."
@@ -2316,8 +2661,14 @@ msgstr "El tema se quitará de los eventos y de los intereses de los perfiles qu
 msgid "El tema ya existe en el catálogo."
 msgstr "El tema ya existe en el catálogo."
 
+msgid "El texto supera el límite de "
+msgstr "El texto supera el límite de "
+
 msgid "El texto supera el límite de %d caracteres."
 msgstr "El texto supera el límite de %d caracteres."
+
+msgid "El trabajo continúa en segundo plano. Recibirás una notificación cuando esté listo."
+msgstr "El trabajo continúa en segundo plano. Recibirás una notificación cuando esté listo."
 
 msgid "El trabajo de Supadata ya no está disponible. No se iniciará otro automáticamente."
 msgstr "El trabajo de Supadata ya no está disponible. No se iniciará otro automáticamente."
@@ -2340,6 +2691,9 @@ msgstr "El video no está disponible para Supadata."
 msgid "El video no tiene subtítulos disponibles. Puedes autorizar la generación en Ajustes o añadir una transcripción manual."
 msgstr "El video no tiene subtítulos disponibles. Puedes autorizar la generación en Ajustes o añadir una transcripción manual."
 
+msgid "El widget debe crearse en Cloudflare con modo"
+msgstr "El widget debe crearse en Cloudflare con modo"
+
 msgid "El índice de perfiles históricos se está actualizando. Los conteos declarados todavía son parciales."
 msgstr "El índice de perfiles históricos se está actualizando. Los conteos declarados todavía son parciales."
 
@@ -2358,6 +2712,9 @@ msgstr "Elegir foto"
 msgid "Elegir imagen"
 msgstr "Elegir imagen"
 
+msgid "Elemento"
+msgstr "Elemento"
+
 msgid "Elige a las personas antes de aprobar. Se comprueban la membresía, el consentimiento, el perfil y los bloqueos al guardar."
 msgstr "Elige a las personas antes de aprobar. Se comprueban la membresía, el consentimiento, el perfil y los bloqueos al guardar."
 
@@ -2375,6 +2732,9 @@ msgstr "Elige qué quieres revisar. Cada sección muestra las acciones disponibl
 
 msgid "Elige si quieres añadir los intereses aprobados o sustituir los existentes. Podrás revisar cada fila antes de aplicar los cambios."
 msgstr "Elige si quieres añadir los intereses aprobados o sustituir los existentes. Podrás revisar cada fila antes de aplicar los cambios."
+
+msgid "Elige un único proveedor activo. ASCLA utilizará solo ese proveedor para redactar respuestas y sugerencias."
+msgstr "Elige un único proveedor activo. ASCLA utilizará solo ese proveedor para redactar respuestas y sugerencias."
 
 msgid "Elige una columna de correo, código o nombre. Si hay correo o código, se usan primero."
 msgstr "Elige una columna de correo, código o nombre. Si hay correo o código, se usan primero."
@@ -2397,11 +2757,17 @@ msgstr "Eliminar"
 msgid "Eliminar DeepSeek API Key guardada"
 msgstr "Eliminar DeepSeek API Key guardada"
 
+msgid "Eliminar Gemini API Key guardada"
+msgstr "Eliminar Gemini API Key guardada"
+
 msgid "Eliminar OpenAI API Key guardada"
 msgstr "Eliminar OpenAI API Key guardada"
 
 msgid "Eliminar Supadata API Key guardada"
 msgstr "Eliminar Supadata API Key guardada"
+
+msgid "Eliminar Turnstile Secret Key guardada"
+msgstr "Eliminar Turnstile Secret Key guardada"
 
 msgid "Eliminar aliado"
 msgstr "Eliminar aliado"
@@ -2417,6 +2783,9 @@ msgstr "Eliminar comentario"
 
 msgid "Eliminar conexión"
 msgstr "Eliminar conexión"
+
+msgid "Eliminar contraseña SMTP guardada"
+msgstr "Eliminar contraseña SMTP guardada"
 
 msgid "Eliminar grupo"
 msgstr "Eliminar grupo"
@@ -2442,11 +2811,17 @@ msgstr "Eliminar todas"
 msgid "Eliminar todas las notificaciones"
 msgstr "Eliminar todas las notificaciones"
 
+msgid "Eliminar usuario"
+msgstr "Eliminar usuario"
+
 msgid "Empieza por una tarea o explora la actividad de tu comunidad."
 msgstr "Empieza por una tarea o explora la actividad de tu comunidad."
 
 msgid "Empresa"
 msgstr "Empresa"
+
+msgid "Empresa / organización"
+msgstr "Empresa / organización"
 
 msgid "Empresa / organización: este campo es obligatorio."
 msgstr "Empresa / organización: este campo es obligatorio."
@@ -2538,6 +2913,9 @@ msgstr "Enviar"
 msgid "Enviar a revisión"
 msgstr "Enviar a revisión"
 
+msgid "Enviar correo de prueba a mi cuenta"
+msgstr "Enviar correo de prueba a mi cuenta"
+
 msgid "Enviar enlace de recuperación"
 msgstr "Enviar enlace de recuperación"
 
@@ -2562,11 +2940,23 @@ msgstr "Enviar solicitud"
 msgid "Enviar solicitud de conexión"
 msgstr "Enviar solicitud de conexión"
 
+msgid "Enviar solicitud de conversación"
+msgstr "Enviar solicitud de conversación"
+
+msgid "Enviar un correo para que el usuario configure su contraseña"
+msgstr "Enviar un correo para que el usuario configure su contraseña"
+
 msgid "Envíanos tu consulta"
 msgstr "Envíanos tu consulta"
 
+msgid "Envío de correos"
+msgstr "Envío de correos"
+
 msgid "Error"
 msgstr "Error"
+
+msgid "Error de verificación de seguridad"
+msgstr "Error de verificación de seguridad"
 
 msgid "Error técnico"
 msgstr "Error técnico"
@@ -2598,6 +2988,9 @@ msgstr "Escribe una respuesta…"
 msgid "Esperando el siguiente turno de Supadata."
 msgstr "Esperando el siguiente turno de Supadata."
 
+msgid "Esta acción es permanente"
+msgstr "Esta acción es permanente"
+
 msgid "Esta contraseña es muy común. Elige otra menos predecible."
 msgstr "Esta contraseña es muy común. Elige otra menos predecible."
 
@@ -2622,11 +3015,17 @@ msgstr "Esta fila no tiene respuesta abierta."
 msgid "Esta fila ya fue aplicada."
 msgstr "Esta fila ya fue aplicada."
 
+msgid "Esta imagen es la copia maestra de una versión recortada. Elimina primero la imagen visible."
+msgstr "Esta imagen es la copia maestra de una versión recortada. Elimina primero la imagen visible."
+
 msgid "Esta lista ya está verificada"
 msgstr "Esta lista ya está verificada"
 
 msgid "Esta notificación se eliminará de tu bandeja de actividad."
 msgstr "Esta notificación se eliminará de tu bandeja de actividad."
+
+msgid "Esta persona perderá acceso a la conversación del grupo."
+msgstr "Esta persona perderá acceso a la conversación del grupo."
 
 msgid "Esta propuesta conserva su historial y ya no está pendiente de aprobación."
 msgstr "Esta propuesta conserva su historial y ya no está pendiente de aprobación."
@@ -2634,8 +3033,14 @@ msgstr "Esta propuesta conserva su historial y ya no está pendiente de aprobaci
 msgid "Esta propuesta no tiene personas seleccionadas."
 msgstr "Esta propuesta no tiene personas seleccionadas."
 
+msgid "Esta solicitud ya fue resuelta."
+msgstr "Esta solicitud ya fue resuelta."
+
 msgid "Estado"
 msgstr "Estado"
+
+msgid "Estado OAuth inválido."
+msgstr "Estado OAuth inválido."
 
 msgid "Estado actual"
 msgstr "Estado actual"
@@ -2646,11 +3051,20 @@ msgstr "Estado de aliado no válido."
 msgid "Estado de asistencia no válido."
 msgstr "Estado de asistencia no válido."
 
+msgid "Estado de conectores sociales y restricciones de integración externa."
+msgstr "Estado de conectores sociales y restricciones de integración externa."
+
+msgid "Estado de galería o recurso actualizado"
+msgstr "Estado de galería o recurso actualizado"
+
 msgid "Estado de la lista"
 msgstr "Estado de la lista"
 
 msgid "Estado de membresía"
 msgstr "Estado de membresía"
+
+msgid "Estado de membresía no válido."
+msgstr "Estado de membresía no válido."
 
 msgid "Estado del aliado"
 msgstr "Estado del aliado"
@@ -2663,6 +3077,9 @@ msgstr "Estado editorial no válido."
 
 msgid "Estado no disponible"
 msgstr "Estado no disponible"
+
+msgid "Estado no válido."
+msgstr "Estado no válido."
 
 msgid "Estadísticas"
 msgstr "Estadísticas"
@@ -2703,6 +3120,12 @@ msgstr "Este contenido ya no está disponible"
 msgid "Este encuentro ya no admite inscripciones ni confirmaciones de cupo."
 msgstr "Este encuentro ya no admite inscripciones ni confirmaciones de cupo."
 
+msgid "Este es el calendario organizador del evento. Para retirarlo de Google, cancela el evento desde ASCLA."
+msgstr "Este es el calendario organizador del evento. Para retirarlo de Google, cancela el evento desde ASCLA."
+
+msgid "Este evento no utiliza lista de espera porque no tiene límite de cupos."
+msgstr "Este evento no utiliza lista de espera porque no tiene límite de cupos."
+
 msgid "Este miembro aún no ha añadido su biografía."
 msgstr "Este miembro aún no ha añadido su biografía."
 
@@ -2714,6 +3137,9 @@ msgstr "Este paso prepara las propuestas para revisión."
 
 msgid "Este primer mensaje llegará como una solicitud. Podrá leerlo y decidir si acepta la conversación."
 msgstr "Este primer mensaje llegará como una solicitud. Podrá leerlo y decidir si acepta la conversación."
+
+msgid "Este registro ayuda a entender qué cambios importantes ocurrieron en ASCLA, quién los realizó y sobre qué elemento actuaron."
+msgstr "Este registro ayuda a entender qué cambios importantes ocurrieron en ASCLA, quién los realizó y sobre qué elemento actuaron."
 
 msgid "Estos controles se guardan al instante, sin guardar el perfil."
 msgstr "Estos controles se guardan al instante, sin guardar el perfil."
@@ -2742,14 +3168,35 @@ msgstr "Etiquetas (separadas por comas)"
 msgid "Evento"
 msgstr "Evento"
 
+msgid "Evento añadido a Google Calendar"
+msgstr "Evento añadido a Google Calendar"
+
 msgid "Evento cancelado"
 msgstr "Evento cancelado"
+
+msgid "Evento cancelado. Las personas relacionadas fueron notificadas."
+msgstr "Evento cancelado. Las personas relacionadas fueron notificadas."
 
 msgid "Evento finalizado"
 msgstr "Evento finalizado"
 
+msgid "Evento guardado en Google Calendar"
+msgstr "Evento guardado en Google Calendar"
+
 msgid "Evento no disponible."
 msgstr "Evento no disponible."
+
+msgid "Evento no encontrado."
+msgstr "Evento no encontrado."
+
+msgid "Evento no válido."
+msgstr "Evento no válido."
+
+msgid "Evento organizador actualizado en Google Calendar"
+msgstr "Evento organizador actualizado en Google Calendar"
+
+msgid "Evento organizador creado en Google Calendar"
+msgstr "Evento organizador creado en Google Calendar"
 
 msgid "Evento reactivado"
 msgstr "Evento reactivado"
@@ -2759,6 +3206,12 @@ msgstr "Evento reactivado. Las personas relacionadas fueron notificadas."
 
 msgid "Evento relacionado"
 msgstr "Evento relacionado"
+
+msgid "Evento retirado de Google Calendar"
+msgstr "Evento retirado de Google Calendar"
+
+msgid "Evento retirado o cancelado en Google Calendar"
+msgstr "Evento retirado o cancelado en Google Calendar"
 
 msgid "Eventos"
 msgstr "Eventos"
@@ -2847,6 +3300,15 @@ msgstr "Explotación infantil"
 msgid "Exporta el archivo como CSV UTF-8."
 msgstr "Exporta el archivo como CSV UTF-8."
 
+msgid "Expulsar"
+msgstr "Expulsar"
+
+msgid "Expulsar a {name}"
+msgstr "Expulsar a {name}"
+
+msgid "Expulsar del grupo"
+msgstr "Expulsar del grupo"
+
 msgid "Fallos antes de bloquear la IP"
 msgstr "Fallos antes de bloquear la IP"
 
@@ -2928,6 +3390,9 @@ msgstr "Finalizada"
 msgid "Finalizado"
 msgstr "Finalizado"
 
+msgid "Finalizar"
+msgstr "Finalizar"
+
 msgid "Formato de fecha del CSV"
 msgstr "Formato de fecha del CSV"
 
@@ -2939,6 +3404,9 @@ msgstr "Formato de solicitud no válido."
 
 msgid "Forms"
 msgstr "Forms"
+
+msgid "Formularios protegidos"
+msgstr "Formularios protegidos"
 
 msgid "Foro"
 msgstr "Foro"
@@ -2991,6 +3459,9 @@ msgstr "Galerías"
 msgid "Galerías y recursos"
 msgstr "Galerías y recursos"
 
+msgid "Gemini API Key (guardada; vacío para conservar)"
+msgstr "Gemini API Key (guardada; vacío para conservar)"
+
 msgid "Gemini respondió con el formato de Forms, confianza válida e IDs existentes del catálogo."
 msgstr "Gemini respondió con el formato de Forms, confianza válida e IDs existentes del catálogo."
 
@@ -3030,11 +3501,29 @@ msgstr "Gestión de esta alianza"
 msgid "Gestión diaria"
 msgstr "Gestión diaria"
 
+msgid "Google Calendar actualizado."
+msgstr "Google Calendar actualizado."
+
 msgid "Grupo"
 msgstr "Grupo"
 
 msgid "Grupo ASCLA"
 msgstr "Grupo ASCLA"
+
+msgid "Grupo creado."
+msgstr "Grupo creado."
+
+msgid "Grupo de mensajería actualizado"
+msgstr "Grupo de mensajería actualizado"
+
+msgid "Grupo de mensajería creado"
+msgstr "Grupo de mensajería creado"
+
+msgid "Grupo de mensajería eliminado"
+msgstr "Grupo de mensajería eliminado"
+
+msgid "Grupo eliminado."
+msgstr "Grupo eliminado."
 
 msgid "Grupos con intereses comunes y cupos configurables, con una agenda para conversar."
 msgstr "Grupos con intereses comunes y cupos configurables, con una agenda para conversar."
@@ -3099,6 +3588,12 @@ msgstr "Guardar en Google conectado"
 msgid "Guardar evento"
 msgstr "Guardar evento"
 
+msgid "Guardar foro"
+msgstr "Guardar foro"
+
+msgid "Guardar galería"
+msgstr "Guardar galería"
+
 msgid "Guardar la selección requiere una nueva aprobación. Todavía no se envían invitaciones."
 msgstr "Guardar la selección requiere una nueva aprobación. Todavía no se envían invitaciones."
 
@@ -3108,11 +3603,26 @@ msgstr "Guardar límites"
 msgid "Guardar perfil"
 msgstr "Guardar perfil"
 
+msgid "Guardar publicación"
+msgstr "Guardar publicación"
+
+msgid "Guardar recurso"
+msgstr "Guardar recurso"
+
+msgid "Guardar solicitud"
+msgstr "Guardar solicitud"
+
 msgid "Guardar tema"
 msgstr "Guardar tema"
 
 msgid "Guardar umbral"
 msgstr "Guardar umbral"
+
+msgid "Guía del módulo"
+msgstr "Guía del módulo"
+
+msgid "Guía no disponible para esta cuenta."
+msgstr "Guía no disponible para esta cuenta."
 
 msgid "HOY CELEBRAMOS CONTIGO"
 msgstr "HOY CELEBRAMOS CONTIGO"
@@ -3158,6 +3668,9 @@ msgstr "Hay listas por revisar. Los totales registrados pueden crecer al complet
 
 msgid "Hay páginas sin tabla de respuestas. Revisa el total de filas antes de continuar."
 msgstr "Hay páginas sin tabla de respuestas. Revisa el total de filas antes de continuar."
+
+msgid "Hay referencias de archivos fuera del rango admitido. No se modificaron los datos."
+msgstr "Hay referencias de archivos fuera del rango admitido. No se modificaron los datos."
 
 msgid "Hay varios asociados con ese nombre. Verifica su correo."
 msgstr "Hay varios asociados con ese nombre. Verifica su correo."
@@ -3246,6 +3759,9 @@ msgstr "Hub ASCLA"
 msgid "Híbrido"
 msgstr "Híbrido"
 
+msgid "IA"
+msgstr "IA"
+
 msgid "IA y tendencias"
 msgstr "IA y tendencias"
 
@@ -3254,6 +3770,9 @@ msgstr "IA y trabajos"
 
 msgid "ID del modelo DeepSeek"
 msgstr "ID del modelo DeepSeek"
+
+msgid "ID del modelo Gemini"
+msgstr "ID del modelo Gemini"
 
 msgid "ID del modelo OpenAI"
 msgstr "ID del modelo OpenAI"
@@ -3269,6 +3788,9 @@ msgstr "INVITACIÓN AL EVENTO"
 
 msgid "Ideas, experiencias y conversaciones que nos acercan."
 msgstr "Ideas, experiencias y conversaciones que nos acercan."
+
+msgid "Identidades y afiliaciones que deben anonimizarse (una por línea)"
+msgstr "Identidades y afiliaciones que deben anonimizarse (una por línea)"
 
 msgid "Identificación de la cuenta"
 msgstr "Identificación de la cuenta"
@@ -3357,11 +3879,23 @@ msgstr "Incluye +, código de país y número; por ejemplo +51 987 654 321"
 msgid "Independiente"
 msgstr "Independiente"
 
+msgid "Indica al menos un nombre o apellido."
+msgstr "Indica al menos un nombre o apellido."
+
 msgid "Indica dónde están los nombres y las respuestas."
 msgstr "Indica dónde están los nombres y las respuestas."
 
+msgid "Indica el motivo de cancelación."
+msgstr "Indica el motivo de cancelación."
+
+msgid "Indica el motivo de la reprogramación del microevento."
+msgstr "Indica el motivo de la reprogramación del microevento."
+
 msgid "Indica el motivo del cambio de candidatos."
 msgstr "Indica el motivo del cambio de candidatos."
+
+msgid "Indica entre uno y cinco recordatorios."
+msgstr "Indica entre uno y cinco recordatorios."
 
 msgid "Indicador"
 msgstr "Indicador"
@@ -3390,8 +3924,14 @@ msgstr "Información adicional (opcional)"
 msgid "Información de un video"
 msgstr "Información de un video"
 
+msgid "Información del asociado"
+msgstr "Información del asociado"
+
 msgid "Información del grupo"
 msgstr "Información del grupo"
+
+msgid "Información del grupo actualizada."
+msgstr "Información del grupo actualizada."
 
 msgid "Información falsa"
 msgstr "Información falsa"
@@ -3408,8 +3948,14 @@ msgstr "Ingresa con tu cuenta para acceder a la comunidad."
 msgid "Ingresa un enlace válido para asistir al evento."
 msgstr "Ingresa un enlace válido para asistir al evento."
 
+msgid "Inicia una conversación"
+msgstr "Inicia una conversación"
+
 msgid "Iniciativas"
 msgstr "Iniciativas"
+
+msgid "Iniciativas y recursos"
+msgstr "Iniciativas y recursos"
 
 msgid "Inicio"
 msgstr "Inicio"
@@ -3444,6 +3990,9 @@ msgstr "Inscripciones y lista de espera (gestión de eventos)"
 msgid "Inscripción"
 msgstr "Inscripción"
 
+msgid "Inscripción a evento"
+msgstr "Inscripción a evento"
+
 msgid "Inscripción cancelada"
 msgstr "Inscripción cancelada"
 
@@ -3462,14 +4011,23 @@ msgstr "Inscríbete antes de guardar este evento en tu calendario."
 msgid "Insertar emoji"
 msgstr "Insertar emoji"
 
+msgid "Integraciones"
+msgstr "Integraciones"
+
 msgid "Integración Google Calendar no configurada para tu cuenta. Puedes conectarlo para guardar próximos eventos."
 msgstr "Integración Google Calendar no configurada para tu cuenta. Puedes conectarlo para guardar próximos eventos."
 
 msgid "Integrante"
 msgstr "Integrante"
 
+msgid "Integrante expulsado."
+msgstr "Integrante expulsado."
+
 msgid "Integrantes"
 msgstr "Integrantes"
+
+msgid "Integrantes agregados."
+msgstr "Integrantes agregados."
 
 msgid "Intentos"
 msgstr "Intentos"
@@ -3519,6 +4077,9 @@ msgstr "Interés declarado · usuarios"
 msgid "Introduce un ID de modelo DeepSeek válido, por ejemplo deepseek-flash."
 msgstr "Introduce un ID de modelo DeepSeek válido, por ejemplo deepseek-flash."
 
+msgid "Introduce un ID de modelo Gemini válido, por ejemplo gemini-2.5-flash."
+msgstr "Introduce un ID de modelo Gemini válido, por ejemplo gemini-2.5-flash."
+
 msgid "Introduce un ID de modelo OpenAI válido, por ejemplo gpt-5.6-luna."
 msgstr "Introduce un ID de modelo OpenAI válido, por ejemplo gpt-5.6-luna."
 
@@ -3539,6 +4100,9 @@ msgstr "Introduce una fecha y hora de publicación válidas."
 
 msgid "Introduce una fecha y hora válidas para el cierre de inscripciones."
 msgstr "Introduce una fecha y hora válidas para el cierre de inscripciones."
+
+msgid "Invitaciones a evento"
+msgstr "Invitaciones a evento"
 
 msgid "Invitaciones a eventos y círculos de conversación."
 msgstr "Invitaciones a eventos y círculos de conversación."
@@ -3588,6 +4152,15 @@ msgstr "JPG, PNG o WebP. Se ajustará en formato cuadrado."
 msgid "La API Key de Supadata no es válida. Revísala en Ajustes."
 msgstr "La API Key de Supadata no es válida. Revísala en Ajustes."
 
+msgid "La IA devolvió una clasificación incompleta. No se guardaron cambios."
+msgstr "La IA devolvió una clasificación incompleta. No se guardaron cambios."
+
+msgid "La IA devolvió una clasificación no válida. No se guardaron cambios."
+msgstr "La IA devolvió una clasificación no válida. No se guardaron cambios."
+
+msgid "La IA no devolvió resumen y nota técnica válidos."
+msgstr "La IA no devolvió resumen y nota técnica válidos."
+
 msgid "La IA propone grupos de eventos; las cifras siguen viniendo de registros reales."
 msgstr "La IA propone grupos de eventos; las cifras siguen viniendo de registros reales."
 
@@ -3602,6 +4175,9 @@ msgstr "La IA recibe solo la respuesta o el tema del evento depurado y el catál
 
 msgid "La asistencia se registra en eventos finalizados y no cancelados."
 msgstr "La asistencia se registra en eventos finalizados y no cancelados."
+
+msgid "La autorización de Google Calendar expiró. Desconecta y vuelve a conectar tu cuenta."
+msgstr "La autorización de Google Calendar expiró. Desconecta y vuelve a conectar tu cuenta."
 
 msgid "La cabecera CSV contiene columnas repetidas para el mismo dato."
 msgstr "La cabecera CSV contiene columnas repetidas para el mismo dato."
@@ -3624,6 +4200,12 @@ msgstr "La comunidad en cifras"
 msgid "La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta."
 msgstr "La consulta sigue procesándose. Puedes volver al asistente más tarde para ver la respuesta."
 
+msgid "La contraseña actual no es correcta."
+msgstr "La contraseña actual no es correcta."
+
+msgid "La contraseña demo necesita al menos 12 caracteres."
+msgstr "La contraseña demo necesita al menos 12 caracteres."
+
 msgid "La contraseña no debe contener caracteres de control."
 msgstr "La contraseña no debe contener caracteres de control."
 
@@ -3633,11 +4215,41 @@ msgstr "La conversación en nuestra comunidad"
 msgid "La conversación privada no está disponible para este integrante."
 msgstr "La conversación privada no está disponible para este integrante."
 
+msgid "La conversación ya no está disponible."
+msgstr "La conversación ya no está disponible."
+
 msgid "La convocatoria se comprobó con la membresía, el consentimiento, el perfil y los bloqueos actuales."
 msgstr "La convocatoria se comprobó con la membresía, el consentimiento, el perfil y los bloqueos actuales."
 
+msgid "La copia maestra sólo puede asociarse a una imagen."
+msgstr "La copia maestra sólo puede asociarse a una imagen."
+
 msgid "La cuenta de administración gestiona la comunidad y no participa en el directorio, las conexiones ni los microeventos."
 msgstr "La cuenta de administración gestiona la comunidad y no participa en el directorio, las conexiones ni los microeventos."
+
+msgid "La cuenta debe iniciar Activa o Suspendida."
+msgstr "La cuenta debe iniciar Activa o Suspendida."
+
+msgid "La cuenta existente tiene otro rol. No se modificó."
+msgstr "La cuenta existente tiene otro rol. No se modificó."
+
+msgid "La cuenta no pertenece a la comunidad ASCLA."
+msgstr "La cuenta no pertenece a la comunidad ASCLA."
+
+msgid "La cuenta que programó la publicación ya no tiene permisos."
+msgstr "La cuenta que programó la publicación ya no tiene permisos."
+
+msgid "La cuenta se crea directamente en ASCLA, sin abrir el panel de WordPress."
+msgstr "La cuenta se crea directamente en ASCLA, sin abrir el panel de WordPress."
+
+msgid "La cuenta tendrá acceso según el rol elegido. Asociado, Ejecutivo y Moderador se gestionan desde ASCLA; los administradores técnicos continúan fuera de este formulario."
+msgstr "La cuenta tendrá acceso según el rol elegido. Asociado, Ejecutivo y Moderador se gestionan desde ASCLA; los administradores técnicos continúan fuera de este formulario."
+
+msgid "La cuenta y su contenido se conservan."
+msgstr "La cuenta y su contenido se conservan."
+
+msgid "La cuenta ya no tiene acceso."
+msgstr "La cuenta ya no tiene acceso."
 
 msgid "La cuota de Supadata se agotó. Revisa el plan o los créditos en Supadata."
 msgstr "La cuota de Supadata se agotó. Revisa el plan o los créditos en Supadata."
@@ -3672,6 +4284,9 @@ msgstr "La fecha de inicio debe tener un año de cuatro dígitos."
 msgid "La fecha de inicio no puede superar la final. Elige hasta 366 días."
 msgstr "La fecha de inicio no puede superar la final. Elige hasta 366 días."
 
+msgid "La fecha de nacimiento debe ser una fecha real y no puede estar en el futuro."
+msgstr "La fecha de nacimiento debe ser una fecha real y no puede estar en el futuro."
+
 msgid "La fecha inicial no puede ser posterior a la fecha final."
 msgstr "La fecha inicial no puede ser posterior a la fecha final."
 
@@ -3683,6 +4298,9 @@ msgstr "La ficha se enviará a la papelera y dejará de aparecer en el catálogo
 
 msgid "La ficha volverá a estar visible para los asociados en el catálogo de aliados."
 msgstr "La ficha volverá a estar visible para los asociados en el catálogo de aliados."
+
+msgid "La fila "
+msgstr "La fila "
 
 msgid "La fila %d no coincide con las columnas de la cabecera."
 msgstr "La fila %d no coincide con las columnas de la cabecera."
@@ -3711,6 +4329,9 @@ msgstr "La importación no está confirmada."
 msgid "La importación ya fue analizada."
 msgstr "La importación ya fue analizada."
 
+msgid "La inscripción está reservada temporalmente a los miembros recomendados."
+msgstr "La inscripción está reservada temporalmente a los miembros recomendados."
+
 msgid "La invitación no reserva un cupo. Cada asociado confirma su asistencia según la disponibilidad."
 msgstr "La invitación no reserva un cupo. Cada asociado confirma su asistencia según la disponibilidad."
 
@@ -3720,6 +4341,9 @@ msgstr "La mensajería está bloqueada entre estas cuentas."
 msgid "La mensajería se habilita al aceptar la conexión."
 msgstr "La mensajería se habilita al aceptar la conexión."
 
+msgid "La nueva contraseña debe ser diferente de la actual."
+msgstr "La nueva contraseña debe ser diferente de la actual."
+
 msgid "La nueva contraseña debe tener al menos %d caracteres y como máximo %d bytes."
 msgstr "La nueva contraseña debe tener al menos %d caracteres y como máximo %d bytes."
 
@@ -3728,6 +4352,9 @@ msgstr "La otra persona ya recibió tu mensaje. Podrás seguir escribiendo cuand
 
 msgid "La participación está desactivada. Puedes habilitarla desde Privacidad y participación."
 msgstr "La participación está desactivada. Puedes habilitarla desde Privacidad y participación."
+
+msgid "La portada del evento debe ser una imagen JPG, PNG o WebP."
+msgstr "La portada del evento debe ser una imagen JPG, PNG o WebP."
 
 msgid "La propuesta está aprobada. Revisa la fecha y publica cuando esté lista."
 msgstr "La propuesta está aprobada. Revisa la fecha y publica cuando esté lista."
@@ -3744,6 +4371,12 @@ msgstr "La prueba usa texto sintético y el catálogo actual; no envía respuest
 msgid "La publicación abre el proceso de invitaciones e inscripción."
 msgstr "La publicación abre el proceso de invitaciones e inscripción."
 
+msgid "La publicación de aliados requiere administración."
+msgstr "La publicación de aliados requiere administración."
+
+msgid "La publicación debe programarse para una fecha futura."
+msgstr "La publicación debe programarse para una fecha futura."
+
 msgid "La publicación está programada para la fecha indicada."
 msgstr "La publicación está programada para la fecha indicada."
 
@@ -3753,14 +4386,29 @@ msgstr "La publicación programada necesita revisión."
 msgid "La recomendación se descartó de forma privada."
 msgstr "La recomendación se descartó de forma privada."
 
+msgid "La recomendación ya no está vigente."
+msgstr "La recomendación ya no está vigente."
+
+msgid "La recuperación requiere una transacción confirmada."
+msgstr "La recuperación requiere una transacción confirmada."
+
 msgid "La respuesta contiene más de tres opciones."
 msgstr "La respuesta contiene más de tres opciones."
+
+msgid "La respuesta requiere revisión de anonimización."
+msgstr "La respuesta requiere revisión de anonimización."
+
+msgid "La revisión del microevento requiere administración."
+msgstr "La revisión del microevento requiere administración."
 
 msgid "La selección supera el máximo de asistentes del evento."
 msgstr "La selección supera el máximo de asistentes del evento."
 
 msgid "La sesión del formulario expiró. Recarga la página e inténtalo nuevamente."
 msgstr "La sesión del formulario expiró. Recarga la página e inténtalo nuevamente."
+
+msgid "La sesión expiró. Inicia sesión nuevamente."
+msgstr "La sesión expiró. Inicia sesión nuevamente."
 
 msgid "La sesión se cierra tras 30 minutos sin actividad. Puedes extenderla para continuar."
 msgstr "La sesión se cierra tras 30 minutos sin actividad. Puedes extenderla para continuar."
@@ -3770,6 +4418,9 @@ msgstr "La solicitud cerrada se ocultará de la bandeja activa. El asociado cons
 
 msgid "La solicitud debe pertenecer al asociado, estar activa y no haber sido utilizada."
 msgstr "La solicitud debe pertenecer al asociado, estar activa y no haber sido utilizada."
+
+msgid "La solicitud está cerrada."
+msgstr "La solicitud está cerrada."
 
 msgid "La solicitud no puede volver a un estado anterior."
 msgstr "La solicitud no puede volver a un estado anterior."
@@ -3834,6 +4485,9 @@ msgstr "Las acciones de cuenta y moderación mantienen sus permisos, confirmacio
 msgid "Las cifras se calculan con registros guardados. La IA no inventa asistencias ni porcentajes."
 msgstr "Las cifras se calculan con registros guardados. La IA no inventa asistencias ni porcentajes."
 
+msgid "Las claves permanecen protegidas en el servidor. Guarda la configuración antes de probar la conexión. Los datos internos autorizados de ASCLA se preparan antes de consultar al proveedor activo."
+msgstr "Las claves permanecen protegidas en el servidor. Guarda la configuración antes de probar la conexión. Los datos internos autorizados de ASCLA se preparan antes de consultar al proveedor activo."
+
 msgid "Las conexiones vigentes son el total actual. Los demás indicadores usan las fechas elegidas y no cambian al filtrar por evento, tema o categoría."
 msgstr "Las conexiones vigentes son el total actual. Los demás indicadores usan las fechas elegidas y no cambian al filtrar por evento, tema o categoría."
 
@@ -3843,6 +4497,9 @@ msgstr "Las conferencias completas permanecen en YouTube. La duración se consul
 msgid "Las credenciales siguen la política del servidor. Consulta el origen de cada clave en la tabla."
 msgstr "Las credenciales siguen la política del servidor. Consulta el origen de cada clave en la tabla."
 
+msgid "Las cuentas de administración no participan en networking."
+msgstr "Las cuentas de administración no participan en networking."
+
 msgid "Las entregas se reintentan automáticamente. Si requieren revisión, verifica primero la conexión del servicio."
 msgstr "Las entregas se reintentan automáticamente. Si requieren revisión, verifica primero la conexión del servicio."
 
@@ -3851,6 +4508,9 @@ msgstr "Las filas sin asociar no crean cuentas ni asistencias. Puedes registrarl
 
 msgid "Las filas sin asociar no crean cuentas ni asistencias. Puedes registrarlas manualmente cuando verifiques la identidad. Se unen intervalos solapados dentro del evento. Las reconexiones sin horarios requieren revisión manual."
 msgstr "Las filas sin asociar no crean cuentas ni asistencias. Puedes registrarlas manualmente cuando verifiques la identidad. Se unen intervalos solapados dentro del evento. Las reconexiones sin horarios requieren revisión manual."
+
+msgid "Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar al Asistente ASCLA."
+msgstr "Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar al Asistente ASCLA."
 
 msgid "Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."
 msgstr "Las imágenes se previsualizan, recortan y optimizan antes de guardarse; PDF hasta 5 MB. Sólo acceso autenticado."
@@ -3870,8 +4530,14 @@ msgstr "Las notificaciones internas de ASCLA seguirán disponibles aunque desact
 msgid "Las nuevas contraseñas no coinciden."
 msgstr "Las nuevas contraseñas no coinciden."
 
+msgid "Las operaciones críticas requieren tablas InnoDB. Contacta al administrador."
+msgstr "Las operaciones críticas requieren tablas InnoDB. Contacta al administrador."
+
 msgid "Las propuestas descartadas pasan a Archivadas. También puedes archivar los encuentros cancelados o finalizados."
 msgstr "Las propuestas descartadas pasan a Archivadas. También puedes archivar los encuentros cancelados o finalizados."
+
+msgid "Las publicaciones y recursos ya creados se conservarán bajo administración de ASCLA. El historial técnico necesario para auditoría no se elimina."
+msgstr "Las publicaciones y recursos ya creados se conservarán bajo administración de ASCLA. El historial técnico necesario para auditoría no se elimina."
 
 msgid "Las tasas solo se calculan con listas verificadas. Las demás cifras pueden incluir registros parciales."
 msgstr "Las tasas solo se calculan con listas verificadas. Las demás cifras pueden incluir registros parciales."
@@ -3909,6 +4575,12 @@ msgstr "Leído por"
 msgid "Limpiar filtros"
 msgstr "Limpiar filtros"
 
+msgid "LinkedIn"
+msgstr "LinkedIn"
+
+msgid "LinkedIn y X permanecen en DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; ASCLA no realiza scraping ni envía respuestas externas."
+msgstr "LinkedIn y X permanecen en DEMO MODE. Los adaptadores requieren aprobación, permisos y planes oficiales; ASCLA no realiza scraping ni envía respuestas externas."
+
 msgid "Lista generada"
 msgstr "Lista generada"
 
@@ -3942,8 +4614,17 @@ msgstr "Logotipo actual"
 msgid "Logotipo y estado"
 msgstr "Logotipo y estado"
 
+msgid "Logs"
+msgstr "Logs"
+
 msgid "Longitud mínima de contraseña"
 msgstr "Longitud mínima de contraseña"
+
+msgid "Los administradores técnicos se gestionan desde WordPress."
+msgstr "Los administradores técnicos se gestionan desde WordPress."
+
+msgid "Los bloques no suman la duración."
+msgstr "Los bloques no suman la duración."
 
 msgid "Los cambios de Información, Intereses y Privacidad se guardan juntos."
 msgstr "Los cambios de Información, Intereses y Privacidad se guardan juntos."
@@ -3978,6 +4659,9 @@ msgstr "Los datos internos actuales tienen prioridad sobre el historial de la co
 msgid "Los datos personales del asociado se editan desde ASCLA."
 msgstr "Los datos personales del asociado se editan desde ASCLA."
 
+msgid "Los eventos más recientes aparecen primero. “Elemento” identifica el registro afectado cuando corresponde."
+msgstr "Los eventos más recientes aparecen primero. “Elemento” identifica el registro afectado cuando corresponde."
+
 msgid "Los eventos y los perfiles comparten estos temas."
 msgstr "Los eventos y los perfiles comparten estos temas."
 
@@ -3996,6 +4680,9 @@ msgstr "Los intereses del perfil son actuales y no cambian al filtrar el períod
 msgid "Los mensajes de personas aún no autorizadas aparecen aquí."
 msgstr "Los mensajes de personas aún no autorizadas aparecen aquí."
 
+msgid "Los mensajes enviados no se pueden editar ni eliminar."
+msgstr "Los mensajes enviados no se pueden editar ni eliminar."
+
 msgid "Los momentos que construyen nuestra comunidad."
 msgstr "Los momentos que construyen nuestra comunidad."
 
@@ -4010,6 +4697,12 @@ msgstr "Los perfiles se actualizan al confirmar."
 
 msgid "Los permisos no pueden superar los del rol asignado."
 msgstr "Los permisos no pueden superar los del rol asignado."
+
+msgid "Los pesos deben sumar más de cero."
+msgstr "Los pesos deben sumar más de cero."
+
+msgid "Los recordatorios deben quedar fijados antes de publicar."
+msgstr "Los recordatorios deben quedar fijados antes de publicar."
 
 msgid "Los reportes de la comunidad aparecerán aquí para que puedas revisarlos."
 msgstr "Los reportes de la comunidad aparecerán aquí para que puedas revisarlos."
@@ -4035,8 +4728,14 @@ msgstr "Lugar o sala"
 msgid "Límites de grupo guardados."
 msgstr "Límites de grupo guardados."
 
+msgid "MM/DD/AAAA"
+msgstr "MM/DD/AAAA"
+
 msgid "Mantener conexión"
 msgstr "Mantener conexión"
+
+msgid "Mantener oculto"
+msgstr "Mantener oculto"
 
 msgid "Mantener solicitud"
 msgstr "Mantener solicitud"
@@ -4101,6 +4800,9 @@ msgstr "Membresía vencida"
 msgid "Mensaje"
 msgstr "Mensaje"
 
+msgid "Mensaje de IA no válido."
+msgstr "Mensaje de IA no válido."
+
 msgid "Mensaje de presentación"
 msgstr "Mensaje de presentación"
 
@@ -4110,11 +4812,23 @@ msgstr "Mensaje de presentación (opcional)"
 msgid "Mensaje del asociado"
 msgstr "Mensaje del asociado"
 
+msgid "Mensaje eliminado"
+msgstr "Mensaje eliminado"
+
+msgid "Mensaje enviado como solicitud de conversación."
+msgstr "Mensaje enviado como solicitud de conversación."
+
 msgid "Mensaje enviado · Esperando aceptación"
 msgstr "Mensaje enviado · Esperando aceptación"
 
+msgid "Mensaje enviado."
+msgstr "Mensaje enviado."
+
 msgid "Mensaje no deseado (spam)"
 msgstr "Mensaje no deseado (spam)"
+
+msgid "Mensaje no encontrado."
+msgstr "Mensaje no encontrado."
 
 msgid "Mensaje privado"
 msgstr "Mensaje privado"
@@ -4131,6 +4845,9 @@ msgstr "Mensajes"
 msgid "Mensajes privados, solicitudes de conversación e invitaciones a grupos."
 msgstr "Mensajes privados, solicitudes de conversación e invitaciones a grupos."
 
+msgid "Menú de cuenta"
+msgstr "Menú de cuenta"
+
 msgid "Mes anterior"
 msgstr "Mes anterior"
 
@@ -4140,6 +4857,9 @@ msgstr "Mes siguiente"
 msgid "Mi calendario"
 msgstr "Mi calendario"
 
+msgid "Mi cuenta"
+msgstr "Mi cuenta"
+
 msgid "Mi espacio"
 msgstr "Mi espacio"
 
@@ -4148,6 +4868,9 @@ msgstr "Mi información sigue vigente"
 
 msgid "Mi perfil"
 msgstr "Mi perfil"
+
+msgid "Microevento"
+msgstr "Microevento"
 
 msgid "Microevento actualizado"
 msgstr "Microevento actualizado"
@@ -4227,6 +4950,9 @@ msgstr "Modelo:"
 msgid "Moderación"
 msgstr "Moderación"
 
+msgid "Moderador ASCLA"
+msgstr "Moderador ASCLA"
+
 msgid "Moderar"
 msgstr "Moderar"
 
@@ -4236,8 +4962,14 @@ msgstr "Moderar contenido e interacciones"
 msgid "Modo de actualización"
 msgstr "Modo de actualización"
 
+msgid "Modo de demostración: ASCLA usa respuestas simuladas y no envía información a un proveedor externo."
+msgstr "Modo de demostración: ASCLA usa respuestas simuladas y no envía información a un proveedor externo."
+
 msgid "Modo de importación no válido."
 msgstr "Modo de importación no válido."
+
+msgid "Modo demo (datos e integraciones identificados)"
+msgstr "Modo demo (datos e integraciones identificados)"
 
 msgid "Modo demostración: clasificación local por palabras clave."
 msgstr "Modo demostración: clasificación local por palabras clave."
@@ -4260,6 +4992,9 @@ msgstr "Motivo"
 msgid "Motivo de cancelación"
 msgstr "Motivo de cancelación"
 
+msgid "Motivo de la decisión"
+msgstr "Motivo de la decisión"
+
 msgid "Motivo de la decisión (opcional)"
 msgstr "Motivo de la decisión (opcional)"
 
@@ -4274,6 +5009,9 @@ msgstr "Motivo del cambio"
 
 msgid "Motivo del cambio de candidatos"
 msgstr "Motivo del cambio de candidatos"
+
+msgid "Motivo:"
+msgstr "Motivo:"
 
 msgid "Muestra del archivo"
 msgstr "Muestra del archivo"
@@ -4320,6 +5058,9 @@ msgstr "Mínimo por grupo"
 msgid "Mínimo requerido"
 msgstr "Mínimo requerido"
 
+msgid "NUEVA CUENTA ASCLA"
+msgstr "NUEVA CUENTA ASCLA"
+
 msgid "Navegación principal"
 msgstr "Navegación principal"
 
@@ -4334,6 +5075,9 @@ msgstr "Necesitas al menos dos conexiones confirmadas"
 
 msgid "Ningún interés visible reúne el mínimo de asociados requerido."
 msgstr "Ningún interés visible reúne el mínimo de asociados requerido."
+
+msgid "No almacena contraseñas ni el contenido de mensajes privados. Solo registra metadatos de la acción."
+msgstr "No almacena contraseñas ni el contenido de mensajes privados. Solo registra metadatos de la acción."
 
 msgid "No asistió"
 msgstr "No asistió"
@@ -4365,8 +5109,20 @@ msgstr "No es obligatorio combinar mayúsculas, números y símbolos. Evita cont
 msgid "No es posible enviar la solicitud en este momento."
 msgstr "No es posible enviar la solicitud en este momento."
 
+msgid "No existe suficiente información en ASCLA para responder esta consulta. Prueba con una pregunta sobre eventos, publicaciones o recursos de la comunidad."
+msgstr "No existe suficiente información en ASCLA para responder esta consulta. Prueba con una pregunta sobre eventos, publicaciones o recursos de la comunidad."
+
+msgid "No existe suficiente información verificable en las fuentes actuales. Puedes volver a consultar al Asistente ASCLA."
+msgstr "No existe suficiente información verificable en las fuentes actuales. Puedes volver a consultar al Asistente ASCLA."
+
+msgid "No fue posible cifrar la credencial."
+msgstr "No fue posible cifrar la credencial."
+
 msgid "No has descartado recomendaciones."
 msgstr "No has descartado recomendaciones."
+
+msgid "No hay acciones registradas todavía."
+msgstr "No hay acciones registradas todavía."
 
 msgid "No hay actividad publicada para estos filtros."
 msgstr "No hay actividad publicada para estos filtros."
@@ -4388,6 +5144,9 @@ msgstr "No hay comentarios por aprobar."
 
 msgid "No hay conexiones que coincidan con ese nombre."
 msgstr "No hay conexiones que coincidan con ese nombre."
+
+msgid "No hay contenido en esta vista"
+msgstr "No hay contenido en esta vista"
 
 msgid "No hay conversaciones para mostrar. Puedes iniciar una desde el directorio o crear un grupo."
 msgstr "No hay conversaciones para mostrar. Puedes iniciar una desde el directorio o crear un grupo."
@@ -4425,11 +5184,20 @@ msgstr "No hay reportes registrados."
 msgid "No hay solicitudes de conversación enviadas."
 msgstr "No hay solicitudes de conversación enviadas."
 
+msgid "No hay solicitudes en esta vista"
+msgstr "No hay solicitudes en esta vista"
+
 msgid "No hay solicitudes enviadas pendientes."
 msgstr "No hay solicitudes enviadas pendientes."
 
 msgid "No hay suficientes asociados elegibles para alcanzar el mínimo."
 msgstr "No hay suficientes asociados elegibles para alcanzar el mínimo."
+
+msgid "No hay una solicitud de conversación enviada que puedas cancelar."
+msgstr "No hay una solicitud de conversación enviada que puedas cancelar."
+
+msgid "No hay una solicitud enviada ni una conexión que puedas eliminar."
+msgstr "No hay una solicitud enviada ni una conexión que puedas eliminar."
 
 msgid "No hay una transcripción disponible. Revisa Supadata en Ajustes o añade una transcripción autorizada."
 msgstr "No hay una transcripción disponible. Revisa Supadata en Ajustes o añade una transcripción autorizada."
@@ -4443,14 +5211,50 @@ msgstr "No hay una transcripción verificable. Activa Supadata en Ajustes o aña
 msgid "No me interesa"
 msgstr "No me interesa"
 
+msgid "No pude preparar una respuesta verificable con la información disponible en ASCLA. Intenta reformular la pregunta."
+msgstr "No pude preparar una respuesta verificable con la información disponible en ASCLA. Intenta reformular la pregunta."
+
 msgid "No pude preparar una respuesta."
 msgstr "No pude preparar una respuesta."
+
+msgid "No puede crear contenido en esta sección."
+msgstr "No puede crear contenido en esta sección."
 
 msgid "No puede editar este contenido."
 msgstr "No puede editar este contenido."
 
+msgid "No puede sincronizar este evento como organizador."
+msgstr "No puede sincronizar este evento como organizador."
+
+msgid "No puedes añadir al grupo a un asociado bloqueado."
+msgstr "No puedes añadir al grupo a un asociado bloqueado."
+
+msgid "No puedes crear cuentas."
+msgstr "No puedes crear cuentas."
+
+msgid "No puedes editar esta cuenta."
+msgstr "No puedes editar esta cuenta."
+
+msgid "No puedes eliminar esta cuenta."
+msgstr "No puedes eliminar esta cuenta."
+
+msgid "No puedes expulsarte de tu propio grupo."
+msgstr "No puedes expulsarte de tu propio grupo."
+
 msgid "No puedes iniciar una conversación privada con este integrante."
 msgstr "No puedes iniciar una conversación privada con este integrante."
+
+msgid "No puedes programar este contenido."
+msgstr "No puedes programar este contenido."
+
+msgid "No puedes reportar tu propia publicación."
+msgstr "No puedes reportar tu propia publicación."
+
+msgid "No puedes reportar tu propio comentario."
+msgstr "No puedes reportar tu propio comentario."
+
+msgid "No quedan cupos disponibles. Puedes unirte a la lista de espera."
+msgstr "No quedan cupos disponibles. Puedes unirte a la lista de espera."
 
 msgid "No se confirmó la respuesta de Supadata. Revisa el consumo antes de volver a solicitar la transcripción."
 msgstr "No se confirmó la respuesta de Supadata. Revisa el consumo antes de volver a solicitar la transcripción."
@@ -4460,6 +5264,9 @@ msgstr "No se encontraron eventos."
 
 msgid "No se encontró la columna de correo del participante en el CSV."
 msgstr "No se encontró la columna de correo del participante en el CSV."
+
+msgid "No se encontró la referencia de archivos."
+msgstr "No se encontró la referencia de archivos."
 
 msgid "No se encontró un grupo compatible con los bloqueos actuales."
 msgstr "No se encontró un grupo compatible con los bloqueos actuales."
@@ -4509,8 +5316,14 @@ msgstr "No se pudieron consultar las notificaciones."
 msgid "No se pudieron consultar las reacciones."
 msgstr "No se pudieron consultar las reacciones."
 
+msgid "No se pudieron consultar los datos de YouTube. Revise permisos y conexión."
+msgstr "No se pudieron consultar los datos de YouTube. Revise permisos y conexión."
+
 msgid "No se pudieron consultar los intereses. Reintente la operación."
 msgstr "No se pudieron consultar los intereses. Reintente la operación."
+
+msgid "No se pudieron eliminar las notificaciones del grupo."
+msgstr "No se pudieron eliminar las notificaciones del grupo."
 
 msgid "No se pudieron eliminar las notificaciones."
 msgstr "No se pudieron eliminar las notificaciones."
@@ -4524,6 +5337,9 @@ msgstr "No se pudieron guardar todos los cambios. Reinténtalo."
 msgid "No se pudieron separar las columnas del PDF. Exporta esta hoja como CSV."
 msgstr "No se pudieron separar las columnas del PDF. Exporta esta hoja como CSV."
 
+msgid "No se pudo actualizar el caché confirmado."
+msgstr "No se pudo actualizar el caché confirmado."
+
 msgid "No se pudo actualizar el perfil."
 msgstr "No se pudo actualizar el perfil."
 
@@ -4532,6 +5348,15 @@ msgstr "No se pudo actualizar el índice de aliados."
 
 msgid "No se pudo actualizar el índice de eventos."
 msgstr "No se pudo actualizar el índice de eventos."
+
+msgid "No se pudo actualizar la asistencia."
+msgstr "No se pudo actualizar la asistencia."
+
+msgid "No se pudo actualizar."
+msgstr "No se pudo actualizar."
+
+msgid "No se pudo ampliar el historial de auditoría."
+msgstr "No se pudo ampliar el historial de auditoría."
 
 msgid "No se pudo cambiar el estado del aliado."
 msgstr "No se pudo cambiar el estado del aliado."
@@ -4545,17 +5370,59 @@ msgstr "No se pudo cargar el lector PDF. Recarga la página o actualiza tu naveg
 msgid "No se pudo cargar la actividad"
 msgstr "No se pudo cargar la actividad"
 
+msgid "No se pudo cargar la guía. Vuelve a intentarlo desde Ayuda."
+msgstr "No se pudo cargar la guía. Vuelve a intentarlo desde Ayuda."
+
+msgid "No se pudo completar la búsqueda."
+msgstr "No se pudo completar la búsqueda."
+
 msgid "No se pudo completar la consulta."
 msgstr "No se pudo completar la consulta."
 
 msgid "No se pudo completar la solicitud."
 msgstr "No se pudo completar la solicitud."
 
+msgid "No se pudo comprobar el bloqueo."
+msgstr "No se pudo comprobar el bloqueo."
+
+msgid "No se pudo comprobar el caché pendiente."
+msgstr "No se pudo comprobar el caché pendiente."
+
+msgid "No se pudo comprobar el historial de conversación."
+msgstr "No se pudo comprobar el historial de conversación."
+
 msgid "No se pudo comprobar la verificación de seguridad. Inténtalo de nuevo."
 msgstr "No se pudo comprobar la verificación de seguridad. Inténtalo de nuevo."
 
+msgid "No se pudo conectar con "
+msgstr "No se pudo conectar con "
+
+msgid "No se pudo conectar con %s. Revisa la conexión del servidor."
+msgstr "No se pudo conectar con %s. Revisa la conexión del servidor."
+
+msgid "No se pudo conectar con Google Calendar. Inténtalo nuevamente."
+msgstr "No se pudo conectar con Google Calendar. Inténtalo nuevamente."
+
+msgid "No se pudo conectar con Google Gemini. Revisa la conexión del servidor."
+msgstr "No se pudo conectar con Google Gemini. Revisa la conexión del servidor."
+
 msgid "No se pudo confirmar el lote."
 msgstr "No se pudo confirmar el lote."
+
+msgid "No se pudo confirmar la operación. Reinténtalo."
+msgstr "No se pudo confirmar la operación. Reinténtalo."
+
+msgid "No se pudo conservar el adjunto del correo."
+msgstr "No se pudo conservar el adjunto del correo."
+
+msgid "No se pudo conservar el estado de entrega."
+msgstr "No se pudo conservar el estado de entrega."
+
+msgid "No se pudo consultar el estado de entregas."
+msgstr "No se pudo consultar el estado de entregas."
+
+msgid "No se pudo consultar el historial."
+msgstr "No se pudo consultar el historial."
 
 msgid "No se pudo consultar el registro de aliados."
 msgstr "No se pudo consultar el registro de aliados."
@@ -4566,11 +5433,74 @@ msgstr "No se pudo consultar el trabajo de Supadata. Se volverá a intentar."
 msgid "No se pudo consultar la actividad. Reintente la operación."
 msgstr "No se pudo consultar la actividad. Reintente la operación."
 
+msgid "No se pudo consultar la cola de entregas."
+msgstr "No se pudo consultar la cola de entregas."
+
+msgid "No se pudo crear el esquema ASCLA. Revise permisos de base de datos."
+msgstr "No se pudo crear el esquema ASCLA. Revise permisos de base de datos."
+
+msgid "No se pudo crear el microevento."
+msgstr "No se pudo crear el microevento."
+
+msgid "No se pudo crear el registro de asistencia."
+msgstr "No se pudo crear el registro de asistencia."
+
+msgid "No se pudo crear el registro de importaciones."
+msgstr "No se pudo crear el registro de importaciones."
+
+msgid "No se pudo crear el tema."
+msgstr "No se pudo crear el tema."
+
+msgid "No se pudo crear el usuario demo."
+msgstr "No se pudo crear el usuario demo."
+
+msgid "No se pudo crear la cola de entregas."
+msgstr "No se pudo crear la cola de entregas."
+
+msgid "No se pudo crear la cuenta."
+msgstr "No se pudo crear la cuenta."
+
+msgid "No se pudo crear la página "
+msgstr "No se pudo crear la página "
+
+msgid "No se pudo crear un usuario demo."
+msgstr "No se pudo crear un usuario demo."
+
 msgid "No se pudo descargar el PDF. Comprueba tu conexión e inténtalo nuevamente."
 msgstr "No se pudo descargar el PDF. Comprueba tu conexión e inténtalo nuevamente."
 
+msgid "No se pudo eliminar el comentario."
+msgstr "No se pudo eliminar el comentario."
+
+msgid "No se pudo eliminar el contenido."
+msgstr "No se pudo eliminar el contenido."
+
+msgid "No se pudo eliminar el registro."
+msgstr "No se pudo eliminar el registro."
+
+msgid "No se pudo eliminar el reporte."
+msgstr "No se pudo eliminar el reporte."
+
 msgid "No se pudo eliminar el tema."
 msgstr "No se pudo eliminar el tema."
+
+msgid "No se pudo eliminar la cuenta."
+msgstr "No se pudo eliminar la cuenta."
+
+msgid "No se pudo enviar el enlace de recuperación. Revisa la configuración de correo o inténtalo nuevamente."
+msgstr "No se pudo enviar el enlace de recuperación. Revisa la configuración de correo o inténtalo nuevamente."
+
+msgid "No se pudo enviar. Revise los datos SMTP, el remitente autorizado y la conexión del servidor."
+msgstr "No se pudo enviar. Revise los datos SMTP, el remitente autorizado y la conexión del servidor."
+
+msgid "No se pudo guardar el avance. Vuelve a pulsar el botón para reintentarlo."
+msgstr "No se pudo guardar el avance. Vuelve a pulsar el botón para reintentarlo."
+
+msgid "No se pudo guardar el cierre de la guía. Tu avance anterior está guardado."
+msgstr "No se pudo guardar el cierre de la guía. Tu avance anterior está guardado."
+
+msgid "No se pudo guardar el comentario."
+msgstr "No se pudo guardar el comentario."
 
 msgid "No se pudo guardar el rol de la cuenta."
 msgstr "No se pudo guardar el rol de la cuenta."
@@ -4581,11 +5511,35 @@ msgstr "No se pudo guardar la decisión."
 msgid "No se pudo guardar la fuente de intereses."
 msgstr "No se pudo guardar la fuente de intereses."
 
+msgid "No se pudo guardar la importación."
+msgstr "No se pudo guardar la importación."
+
 msgid "No se pudo guardar la nueva contraseña. Reinténtalo."
 msgstr "No se pudo guardar la nueva contraseña. Reinténtalo."
 
+msgid "No se pudo guardar. Reintente la operación."
+msgstr "No se pudo guardar. Reintente la operación."
+
+msgid "No se pudo habilitar el almacenamiento temporal de archivos."
+msgstr "No se pudo habilitar el almacenamiento temporal de archivos."
+
+msgid "No se pudo iniciar la entrega."
+msgstr "No se pudo iniciar la entrega."
+
+msgid "No se pudo invalidar el caché confirmado."
+msgstr "No se pudo invalidar el caché confirmado."
+
+msgid "No se pudo leer el adjunto del correo."
+msgstr "No se pudo leer el adjunto del correo."
+
+msgid "No se pudo leer la entrega protegida."
+msgstr "No se pudo leer la entrega protegida."
+
 msgid "No se pudo leer la imagen seleccionada."
 msgstr "No se pudo leer la imagen seleccionada."
+
+msgid "No se pudo limpiar el caché confirmado."
+msgstr "No se pudo limpiar el caché confirmado."
 
 msgid "No se pudo mostrar esta página. Puedes descargar el PDF."
 msgstr "No se pudo mostrar esta página. Puedes descargar el PDF."
@@ -4596,6 +5550,21 @@ msgstr "No se pudo obtener una transcripción verificable. Conecta YouTube OAuth
 msgid "No se pudo preparar el resumen del video"
 msgstr "No se pudo preparar el resumen del video"
 
+msgid "No se pudo preparar la búsqueda de videos."
+msgstr "No se pudo preparar la búsqueda de videos."
+
+msgid "No se pudo preparar la entrega."
+msgstr "No se pudo preparar la entrega."
+
+msgid "No se pudo preparar la guía de ASCLA."
+msgstr "No se pudo preparar la guía de ASCLA."
+
+msgid "No se pudo preparar la propuesta para revisión."
+msgstr "No se pudo preparar la propuesta para revisión."
+
+msgid "No se pudo preparar un tema demo."
+msgstr "No se pudo preparar un tema demo."
+
 msgid "No se pudo previsualizar este PDF. El archivo está dañado o no es un PDF válido. Puedes descargarlo para revisarlo."
 msgstr "No se pudo previsualizar este PDF. El archivo está dañado o no es un PDF válido. Puedes descargarlo para revisarlo."
 
@@ -4605,8 +5574,20 @@ msgstr "No se pudo previsualizar este PDF. Puedes descargarlo para abrirlo con t
 msgid "No se pudo procesar la solicitud. Inténtalo nuevamente."
 msgstr "No se pudo procesar la solicitud. Inténtalo nuevamente."
 
+msgid "No se pudo proteger la entrega."
+msgstr "No se pudo proteger la entrega."
+
+msgid "No se pudo publicar el contenido programado."
+msgstr "No se pudo publicar el contenido programado."
+
 msgid "No se pudo publicar el contenido programado. Vuelve a guardar la fecha."
 msgstr "No se pudo publicar el contenido programado. Vuelve a guardar la fecha."
+
+msgid "No se pudo recuperar la entrega."
+msgstr "No se pudo recuperar la entrega."
+
+msgid "No se pudo restaurar el adjunto."
+msgstr "No se pudo restaurar el adjunto."
 
 msgid "No se pudo sincronizar con Google Calendar. Puedes reintentar."
 msgstr "No se pudo sincronizar con Google Calendar. Puedes reintentar."
@@ -4617,8 +5598,29 @@ msgstr "No se pudo verificar la duración directamente desde YouTube. Abre el re
 msgid "No se pudo verificar la duración directamente desde YouTube. Conecta YouTube OAuth y vuelve a intentar; ASCLA no estimará la duración usando la transcripción."
 msgstr "No se pudo verificar la duración directamente desde YouTube. Conecta YouTube OAuth y vuelve a intentar; ASCLA no estimará la duración usando la transcripción."
 
+msgid "No se puede autorizar esta conversación."
+msgstr "No se puede autorizar esta conversación."
+
 msgid "No se puede cancelar durante la aplicación."
 msgstr "No se puede cancelar durante la aplicación."
+
+msgid "No se puede confirmar esta conexión."
+msgstr "No se puede confirmar esta conexión."
+
+msgid "No se puede iniciar esta conversación."
+msgstr "No se puede iniciar esta conversación."
+
+msgid "No se puede programar un evento cancelado."
+msgstr "No se puede programar un evento cancelado."
+
+msgid "No se puede reutilizar esta conversación."
+msgstr "No se puede reutilizar esta conversación."
+
+msgid "No se puede solicitar esta conexión."
+msgstr "No se puede solicitar esta conexión."
+
+msgid "No se puede solicitar esta conversación."
+msgstr "No se puede solicitar esta conversación."
 
 msgid "No tienes avisos pendientes"
 msgstr "No tienes avisos pendientes"
@@ -4629,6 +5631,9 @@ msgstr "No tienes borradores guardados"
 msgid "No tienes conexiones confirmadas."
 msgstr "No tienes conexiones confirmadas."
 
+msgid "No tienes conexiones disponibles para agregar."
+msgstr "No tienes conexiones disponibles para agregar."
+
 msgid "No tienes notificaciones pendientes"
 msgstr "No tienes notificaciones pendientes"
 
@@ -4637,6 +5642,15 @@ msgstr "No tienes permiso para archivar esta solicitud."
 
 msgid "No tienes permiso para atender esta solicitud."
 msgstr "No tienes permiso para atender esta solicitud."
+
+msgid "No tienes permisos para eliminar este comentario."
+msgstr "No tienes permisos para eliminar este comentario."
+
+msgid "No tienes permisos para eliminar este contenido."
+msgstr "No tienes permisos para eliminar este contenido."
+
+msgid "No tienes permisos para moderar este contenido."
+msgstr "No tienes permisos para moderar este contenido."
 
 msgid "No tienes permisos para revisar reportes."
 msgstr "No tienes permisos para revisar reportes."
@@ -4668,6 +5682,12 @@ msgstr "Nombre del aliado"
 msgid "Nombre del contacto"
 msgstr "Nombre del contacto"
 
+msgid "Nombre del grupo"
+msgstr "Nombre del grupo"
+
+msgid "Nombre del remitente"
+msgstr "Nombre del remitente"
+
 msgid "Nombre del tema"
 msgstr "Nombre del tema"
 
@@ -4698,6 +5718,9 @@ msgstr "Nombre, tipo de convenio o descripción…"
 msgid "Nombre, usuario, correo, cargo, empresa o experiencia…"
 msgstr "Nombre, usuario, correo, cargo, empresa o experiencia…"
 
+msgid "Nombres"
+msgstr "Nombres"
+
 msgid "Nombres y apellidos"
 msgstr "Nombres y apellidos"
 
@@ -4709,6 +5732,9 @@ msgstr "Normalización determinista"
 
 msgid "Normas de la comunidad"
 msgstr "Normas de la comunidad"
+
+msgid "Normas de nuestra comunidad"
+msgstr "Normas de nuestra comunidad"
 
 msgid "Normativas mencionadas"
 msgstr "Normativas mencionadas"
@@ -4815,6 +5841,9 @@ msgstr "Oculto / programado"
 msgid "Oferta vencida"
 msgstr "Oferta vencida"
 
+msgid "Omitir"
+msgstr "Omitir"
+
 msgid "Omitir filas sin una cuenta ASCLA identificada"
 msgstr "Omitir filas sin una cuenta ASCLA identificada"
 
@@ -4878,11 +5907,17 @@ msgstr "Otro"
 msgid "Otro motivo"
 msgstr "Otro motivo"
 
+msgid "Otros formularios públicos ASCLA · activar solo ante señales sospechosas o demasiados envíos"
+msgstr "Otros formularios públicos ASCLA · activar solo ante señales sospechosas o demasiados envíos"
+
 msgid "PARTICIPACIÓN E INTERESES"
 msgstr "PARTICIPACIÓN E INTERESES"
 
 msgid "PERSONAS"
 msgstr "PERSONAS"
+
+msgid "PERSONAS Y ACCESOS"
+msgstr "PERSONAS Y ACCESOS"
 
 msgid "Paginación de contenidos"
 msgstr "Paginación de contenidos"
@@ -4938,6 +5973,12 @@ msgstr "Participación ocasional"
 msgid "Participación real · personas"
 msgstr "Participación real · personas"
 
+msgid "Participación y revisión"
+msgstr "Participación y revisión"
+
+msgid "Participan en temas similares dentro de la comunidad."
+msgstr "Participan en temas similares dentro de la comunidad."
+
 msgid "Participante"
 msgstr "Participante"
 
@@ -4958,6 +5999,9 @@ msgstr "Participantes y lista de espera (gestión de eventos)"
 
 msgid "Participar en microeventos"
 msgstr "Participar en microeventos"
+
+msgid "Paso de guía no válido."
+msgstr "Paso de guía no válido."
 
 msgid "País"
 msgstr "País"
@@ -4983,8 +6027,17 @@ msgstr "Pendiente de reconfirmación"
 msgid "Pendiente de revisión"
 msgstr "Pendiente de revisión"
 
+msgid "Pendiente · Estamos preparando la respuesta…"
+msgstr "Pendiente · Estamos preparando la respuesta…"
+
 msgid "Perfil"
 msgstr "Perfil"
+
+msgid "Perfil actualizado."
+msgstr "Perfil actualizado."
+
+msgid "Perfil descartado no válido."
+msgstr "Perfil descartado no válido."
 
 msgid "Perfil incompleto"
 msgstr "Perfil incompleto"
@@ -4995,6 +6048,15 @@ msgstr "Perfil no disponible"
 msgid "Perfil no disponible actualmente."
 msgstr "Perfil no disponible actualmente."
 
+msgid "Perfil no disponible."
+msgstr "Perfil no disponible."
+
+msgid "Perfil no encontrado."
+msgstr "Perfil no encontrado."
+
+msgid "Perfil recomendado no válido."
+msgstr "Perfil recomendado no válido."
+
 msgid "Perfil y Forms cuentan personas por fuente; una misma persona puede estar en ambas. El total de intereses guardados elimina duplicados. El contenido publicado usa las fechas, pero no el filtro de evento o categoría."
 msgstr "Perfil y Forms cuentan personas por fuente; una misma persona puede estar en ambas. El total de intereses guardados elimina duplicados. El contenido publicado usa las fechas, pero no el filtro de evento o categoría."
 
@@ -5003,6 +6065,9 @@ msgstr "Perfiles anteriores"
 
 msgid "Perfiles descartados"
 msgstr "Perfiles descartados"
+
+msgid "Perfiles por lote semanal"
+msgstr "Perfiles por lote semanal"
 
 msgid "Perfiles por página"
 msgstr "Perfiles por página"
@@ -5040,6 +6105,9 @@ msgstr "Permisos de cuenta no válidos."
 msgid "Permite que otros asociados encuentren tu perfil."
 msgstr "Permite que otros asociados encuentren tu perfil."
 
+msgid "Permite revisar el historial cuando necesitas saber quién hizo un cambio o investigar un problema."
+msgstr "Permite revisar el historial cuando necesitas saber quién hizo un cambio o investigar un problema."
+
 msgid "Persona"
 msgstr "Persona"
 
@@ -5069,6 +6137,9 @@ msgstr "Personas con interés guardado"
 
 msgid "Personas distintas que asistieron"
 msgstr "Personas distintas que asistieron"
+
+msgid "Personas identificadas"
+msgstr "Personas identificadas"
 
 msgid "Personas inscritas o con asistencia registrada, ordenadas por cantidad de asistencias."
 msgstr "Personas inscritas o con asistencia registrada, ordenadas por cantidad de asistencias."
@@ -5205,6 +6276,9 @@ msgstr "Preparar los encuentros de la semana"
 msgid "Preparar los próximos encuentros"
 msgstr "Preparar los próximos encuentros"
 
+msgid "Preparar microeventos automáticamente"
+msgstr "Preparar microeventos automáticamente"
+
 msgid "Preparar microeventos semanalmente con WP-Cron"
 msgstr "Preparar microeventos semanalmente con WP-Cron"
 
@@ -5246,6 +6320,9 @@ msgstr "Probar Gemini para Forms"
 
 msgid "Probar IA para Forms"
 msgstr "Probar IA para Forms"
+
+msgid "Probar conexión"
+msgstr "Probar conexión"
 
 msgid "Probar conexión de IA"
 msgstr "Probar conexión de IA"
@@ -5337,6 +6414,9 @@ msgstr "Propuestas de encuentros"
 msgid "Propuestas preparadas para revisión."
 msgstr "Propuestas preparadas para revisión."
 
+msgid "Protección adaptativa del acceso con Cloudflare y validación real en el servidor."
+msgstr "Protección adaptativa del acceso con Cloudflare y validación real en el servidor."
+
 msgid "Proveedor"
 msgstr "Proveedor"
 
@@ -5345,6 +6425,12 @@ msgstr "Prueba con otro nombre, país o interés."
 
 msgid "Prueba otras fechas o quita los filtros para encontrar eventos finalizados."
 msgstr "Prueba otras fechas o quita los filtros para encontrar eventos finalizados."
+
+msgid "Prueba otro estado o modifica la búsqueda."
+msgstr "Prueba otro estado o modifica la búsqueda."
+
+msgid "Prueba otro nombre o cambia los filtros."
+msgstr "Prueba otro nombre o cambia los filtros."
 
 msgid "Prueba otro nombre o tipo de convenio, o limpia la búsqueda."
 msgstr "Prueba otro nombre o tipo de convenio, o limpia la búsqueda."
@@ -5436,6 +6522,12 @@ msgstr "Puedes abrir su perfil y enviarle un saludo desde ASCLA."
 msgid "Puedes aceptar la solicitud sin crear una conexión profesional."
 msgstr "Puedes aceptar la solicitud sin crear una conexión profesional."
 
+msgid "Puedes agregar conexiones confirmadas. Verán los mensajes enviados desde que se incorporen."
+msgstr "Puedes agregar conexiones confirmadas. Verán los mensajes enviados desde que se incorporen."
+
+msgid "Puedes conversar con una conexión, aceptar una solicitud de conversación o crear un grupo."
+msgstr "Puedes conversar con una conexión, aceptar una solicitud de conversación o crear un grupo."
+
 msgid "Puedes corregir el estado y los minutos de cada persona. Guarda cada fila que modifiques."
 msgstr "Puedes corregir el estado y los minutos de cada persona. Guarda cada fila que modifiques."
 
@@ -5520,6 +6612,9 @@ msgstr "Quitar foto"
 msgid "Quitar portada"
 msgstr "Quitar portada"
 
+msgid "Quién"
+msgstr "Quién"
+
 msgid "Quiénes asisten a los eventos"
 msgstr "Quiénes asisten a los eventos"
 
@@ -5531,6 +6626,9 @@ msgstr "Qué incluye esta vista"
 
 msgid "Qué información utiliza la IA"
 msgstr "Qué información utiliza la IA"
+
+msgid "Qué ocurrió"
+msgstr "Qué ocurrió"
 
 msgid "Qué quieres revisar"
 msgstr "Qué quieres revisar"
@@ -5558,6 +6656,12 @@ msgstr "Reactivar acceso"
 
 msgid "Reactivar evento"
 msgstr "Reactivar evento"
+
+msgid "Recarga la página para renovar tu sesión."
+msgstr "Recarga la página para renovar tu sesión."
+
+msgid "Recargar esta página"
+msgstr "Recargar esta página"
 
 msgid "Rechazado"
 msgstr "Rechazado"
@@ -5612,6 +6716,12 @@ msgstr "Recordatorios: horas antes del inicio"
 
 msgid "Recortar"
 msgstr "Recortar"
+
+msgid "Recuperación de contraseña · exigir después de 2 solicitudes seguidas"
+msgstr "Recuperación de contraseña · exigir después de 2 solicitudes seguidas"
+
+msgid "Recuperación solicitada"
+msgstr "Recuperación solicitada"
 
 msgid "Recuperar contraseña"
 msgstr "Recuperar contraseña"
@@ -5697,6 +6807,9 @@ msgstr "Registro no válido."
 msgid "Registro por completar"
 msgstr "Registro por completar"
 
+msgid "Registro protegido"
+msgstr "Registro protegido"
+
 msgid "Registros completos: actual / anterior"
 msgstr "Registros completos: actual / anterior"
 
@@ -5742,6 +6855,9 @@ msgstr "Relacionar columnas"
 msgid "Relacionar las respuestas"
 msgstr "Relacionar las respuestas"
 
+msgid "Repetir desde el inicio"
+msgstr "Repetir desde el inicio"
+
 msgid "Reportar"
 msgstr "Reportar"
 
@@ -5753,6 +6869,9 @@ msgstr "Reporte marcado como revisado."
 
 msgid "Reporte no encontrado."
 msgstr "Reporte no encontrado."
+
+msgid "Reporte revisado"
+msgstr "Reporte revisado"
 
 msgid "Reportes por revisar"
 msgstr "Reportes por revisar"
@@ -5775,6 +6894,9 @@ msgstr "Reservas aceptadas en los eventos del período."
 msgid "Reservas aceptadas; una inscripción no confirma que la persona asistió."
 msgstr "Reservas aceptadas; una inscripción no confirma que la persona asistió."
 
+msgid "Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa."
+msgstr "Respeta la confidencialidad, la propiedad intelectual y la diversidad. No se admite spam ni promoción comercial directa."
+
 msgid "Responde consultas y gestiona las solicitudes recibidas en Contacto."
 msgstr "Responde consultas y gestiona las solicitudes recibidas en Contacto."
 
@@ -5792,6 +6914,9 @@ msgstr "Responsable"
 
 msgid "Responsable actualizado"
 msgstr "Responsable actualizado"
+
+msgid "Responsable del grupo"
+msgstr "Responsable del grupo"
 
 msgid "Respuesta abierta / Otros"
 msgstr "Respuesta abierta / Otros"
@@ -5979,6 +7104,9 @@ msgstr "Revisión manual"
 msgid "Revisión pendiente"
 msgstr "Revisión pendiente"
 
+msgid "Revisé fuentes, identidades, afiliaciones y derechos de propiedad intelectual."
+msgstr "Revisé fuentes, identidades, afiliaciones y derechos de propiedad intelectual."
+
 msgid "Roles asignados"
 msgstr "Roles asignados"
 
@@ -5994,8 +7122,14 @@ msgstr "Roles y permisos individuales"
 msgid "Salir de la lista de espera"
 msgstr "Salir de la lista de espera"
 
+msgid "Salir del grupo"
+msgstr "Salir del grupo"
+
 msgid "Salir sin guardar"
 msgstr "Salir sin guardar"
+
+msgid "Saliste del grupo."
+msgstr "Saliste del grupo."
 
 msgid "Se añadirán los intereses aceptados conservando los actuales."
 msgstr "Se añadirán los intereses aceptados conservando los actuales."
@@ -6021,6 +7155,9 @@ msgstr "Se eliminará el reporte revisado. El contenido reportado se conservará
 msgid "Se eliminará la conexión y se ocultará la conversación para ambos. Desbloquear no restablece la conexión."
 msgstr "Se eliminará la conexión y se ocultará la conversación para ambos. Desbloquear no restablece la conexión."
 
+msgid "Se eliminará la cuenta de"
+msgstr "Se eliminará la cuenta de"
+
 msgid "Se eliminarán todas tus notificaciones actuales, incluidas las que están en otras páginas. Las nuevas notificaciones seguirán llegando."
 msgstr "Se eliminarán todas tus notificaciones actuales, incluidas las que están en otras páginas. Las nuevas notificaciones seguirán llegando."
 
@@ -6029,6 +7166,9 @@ msgstr "Se eliminó un tema de la fila aprobada. Revisa la selección."
 
 msgid "Se envían únicamente títulos depurados y el catálogo de temas al proveedor configurado. Se excluyen microeventos privados y sesiones Chatham House. No se envían correos, perfiles ni listas de asistencia."
 msgstr "Se envían únicamente títulos depurados y el catálogo de temas al proveedor configurado. Se excluyen microeventos privados y sesiones Chatham House. No se envían correos, perfiles ni listas de asistencia."
+
+msgid "Se expulsó a %s del grupo."
+msgstr "Se expulsó a %s del grupo."
 
 msgid "Se identifica por correo o nombre. Revisa las coincidencias por nombre antes de confirmar. Se agrupan reconexiones y se conservan las correcciones manuales."
 msgstr "Se identifica por correo o nombre. Revisa las coincidencias por nombre antes de confirmar. Se agrupan reconexiones y se conservan las correcciones manuales."
@@ -6053,6 +7193,9 @@ msgstr "Se muestran miembros activos que han elegido aparecer en el directorio."
 
 msgid "Se muestran totales de actividad comunitaria; los mensajes privados no forman parte de estos indicadores."
 msgstr "Se muestran totales de actividad comunitaria; los mensajes privados no forman parte de estos indicadores."
+
+msgid "Se necesita otro integrante activo que pueda gestionar el grupo para que puedas salir."
+msgstr "Se necesita otro integrante activo que pueda gestionar el grupo para que puedas salir."
 
 msgid "Se prioriza código o correo; sin ellos, nombres únicos o coincidencias muy claras que requieren revisión. El tema del evento es solo una propuesta. No se deducen intereses de empresa, cargo, membresía ni asistencia."
 msgstr "Se prioriza código o correo; sin ellos, nombres únicos o coincidencias muy claras que requieren revisión. El tema del evento es solo una propuesta. No se deducen intereses de empresa, cargo, membresía ni asistencia."
@@ -6129,6 +7272,9 @@ msgstr "Selecciona Independiente o Empresa asociada."
 msgid "Selecciona Individual o Empresa asociada."
 msgstr "Selecciona Individual o Empresa asociada."
 
+msgid "Selecciona al menos dos asociados para crear un grupo."
+msgstr "Selecciona al menos dos asociados para crear un grupo."
+
 msgid "Selecciona al menos dos conexiones confirmadas. El grupo admite hasta 50 asociados contando tu cuenta."
 msgstr "Selecciona al menos dos conexiones confirmadas. El grupo admite hasta 50 asociados contando tu cuenta."
 
@@ -6144,6 +7290,9 @@ msgstr "Selecciona al menos una opción."
 msgid "Selecciona asociados de la lista. Tu selección se conserva al buscar o cambiar de página."
 msgstr "Selecciona asociados de la lista. Tu selección se conserva al buscar o cambiar de página."
 
+msgid "Selecciona como máximo 20 intereses."
+msgstr "Selecciona como máximo 20 intereses."
+
 msgid "Selecciona como máximo 3 intereses provenientes del formulario."
 msgstr "Selecciona como máximo 3 intereses provenientes del formulario."
 
@@ -6152,6 +7301,9 @@ msgstr "Selecciona el motivo de la denuncia"
 
 msgid "Selecciona el tipo"
 msgstr "Selecciona el tipo"
+
+msgid "Selecciona entre 1 y 49 conexiones."
+msgstr "Selecciona entre 1 y 49 conexiones."
 
 msgid "Selecciona identidad y respuestas o un tema de evento para revisión."
 msgstr "Selecciona identidad y respuestas o un tema de evento para revisión."
@@ -6186,8 +7338,14 @@ msgstr "Selecciona un microevento para completar la reunión."
 msgid "Selecciona un microevento."
 msgstr "Selecciona un microevento."
 
+msgid "Selecciona un motivo de reporte válido."
+msgstr "Selecciona un motivo de reporte válido."
+
 msgid "Selecciona un país de la lista de sugerencias."
 msgstr "Selecciona un país de la lista de sugerencias."
+
+msgid "Selecciona un período de hasta 366 días."
+msgstr "Selecciona un período de hasta 366 días."
 
 msgid "Selecciona un proveedor de IA real y guarda su API Key antes de probar Forms."
 msgstr "Selecciona un proveedor de IA real y guarda su API Key antes de probar Forms."
@@ -6197,6 +7355,9 @@ msgstr "Selecciona un recurso publicado."
 
 msgid "Selecciona un usuario ASCLA válido."
 msgstr "Selecciona un usuario ASCLA válido."
+
+msgid "Selecciona una categoría de Contacto vigente."
+msgstr "Selecciona una categoría de Contacto vigente."
 
 msgid "Selecciona una cifra para filtrar el historial."
 msgstr "Selecciona una cifra para filtrar el historial."
@@ -6231,8 +7392,17 @@ msgstr "Seleccione una propuesta de microevento."
 msgid "Selecciones actuales de los perfiles y Forms revisados. No dependen de las fechas elegidas."
 msgstr "Selecciones actuales de los perfiles y Forms revisados. No dependen de las fechas elegidas."
 
+msgid "Servicio Google conectado"
+msgstr "Servicio Google conectado"
+
+msgid "Servicio Google desconectado"
+msgstr "Servicio Google desconectado"
+
 msgid "Servicios e integraciones"
 msgstr "Servicios e integraciones"
+
+msgid "Servidor SMTP"
+msgstr "Servidor SMTP"
 
 msgid "Si YouTube no la expone públicamente, abre el reproductor para verificarla."
 msgstr "Si YouTube no la expone públicamente, abre el reproductor para verificarla."
@@ -6260,6 +7430,9 @@ msgstr "Si una persona asiste a varios eventos, aparece una vez en personas y un
 
 msgid "Siguiente"
 msgstr "Siguiente"
+
+msgid "Sin actividad"
+msgstr "Sin actividad"
 
 msgid "Sin actividad publicada"
 msgstr "Sin actividad publicada"
@@ -6360,6 +7533,9 @@ msgstr "Sistema"
 msgid "Sitio personal"
 msgstr "Sitio personal"
 
+msgid "Sitio web"
+msgstr "Sitio web"
+
 msgid "Sobre esta organización"
 msgstr "Sobre esta organización"
 
@@ -6372,11 +7548,23 @@ msgstr "Socio estratégico"
 msgid "Solicitud"
 msgstr "Solicitud"
 
+msgid "Solicitud actualizada"
+msgstr "Solicitud actualizada"
+
 msgid "Solicitud archivada"
 msgstr "Solicitud archivada"
 
+msgid "Solicitud con error"
+msgstr "Solicitud con error"
+
 msgid "Solicitud de Contacto"
 msgstr "Solicitud de Contacto"
+
+msgid "Solicitud de conexión"
+msgstr "Solicitud de conexión"
+
+msgid "Solicitud de conexión cancelada"
+msgstr "Solicitud de conexión cancelada"
 
 msgid "Solicitud de conexión cancelada."
 msgstr "Solicitud de conexión cancelada."
@@ -6390,17 +7578,38 @@ msgstr "Solicitud de conexión enviada."
 msgid "Solicitud de conversación"
 msgstr "Solicitud de conversación"
 
+msgid "Solicitud de conversación cancelada"
+msgstr "Solicitud de conversación cancelada"
+
+msgid "Solicitud de conversación cancelada."
+msgstr "Solicitud de conversación cancelada."
+
 msgid "Solicitud de conversación cerrada"
 msgstr "Solicitud de conversación cerrada"
 
+msgid "Solicitud de conversación pendiente no encontrada."
+msgstr "Solicitud de conversación pendiente no encontrada."
+
+msgid "Solicitud de conversación rechazada"
+msgstr "Solicitud de conversación rechazada"
+
 msgid "Solicitud de conversación recibida"
 msgstr "Solicitud de conversación recibida"
+
+msgid "Solicitud demasiado grande."
+msgstr "Solicitud demasiado grande."
 
 msgid "Solicitud enviada"
 msgstr "Solicitud enviada"
 
 msgid "Solicitud enviada · Pendiente"
 msgstr "Solicitud enviada · Pendiente"
+
+msgid "Solicitud no válida."
+msgstr "Solicitud no válida."
+
+msgid "Solicitud pendiente no encontrada."
+msgstr "Solicitud pendiente no encontrada."
 
 msgid "Solicitud privada"
 msgstr "Solicitud privada"
@@ -6410,6 +7619,9 @@ msgstr "Solicitud que autoriza el cambio de datos"
 
 msgid "Solicitud que autoriza el cambio profesional"
 msgstr "Solicitud que autoriza el cambio profesional"
+
+msgid "Solicitud recibida."
+msgstr "Solicitud recibida."
 
 msgid "Solicitudes"
 msgstr "Solicitudes"
@@ -6429,14 +7641,35 @@ msgstr "Solicitudes recibidas"
 msgid "Solo administración puede archivar microeventos."
 msgstr "Solo administración puede archivar microeventos."
 
+msgid "Solo administración puede cancelar microeventos."
+msgstr "Solo administración puede cancelar microeventos."
+
+msgid "Solo administración puede configurar los recordatorios."
+msgstr "Solo administración puede configurar los recordatorios."
+
 msgid "Solo administración puede establecer el tipo de asociado."
 msgstr "Solo administración puede establecer el tipo de asociado."
 
 msgid "Solo administración puede reactivar microeventos."
 msgstr "Solo administración puede reactivar microeventos."
 
+msgid "Solo administradores pueden crear la demo multimedia."
+msgstr "Solo administradores pueden crear la demo multimedia."
+
+msgid "Solo administradores pueden crear la demo."
+msgstr "Solo administradores pueden crear la demo."
+
 msgid "Solo el asociado y su responsable pueden ver el mensaje. La búsqueda incluye tus consultas asignadas."
 msgstr "Solo el asociado y su responsable pueden ver el mensaje. La búsqueda incluye tus consultas asignadas."
+
+msgid "Solo el propietario o un administrador puede eliminar este archivo."
+msgstr "Solo el propietario o un administrador puede eliminar este archivo."
+
+msgid "Solo el responsable del grupo puede gestionarlo."
+msgstr "Solo el responsable del grupo puede gestionarlo."
+
+msgid "Solo puedes añadir al grupo conexiones confirmadas."
+msgstr "Solo puedes añadir al grupo conexiones confirmadas."
 
 msgid "Solo puedes cambiar candidatos antes de publicar las invitaciones."
 msgstr "Solo puedes cambiar candidatos antes de publicar las invitaciones."
@@ -6459,11 +7692,35 @@ msgstr "Solo tú y la persona asignada de administración o del equipo ejecutivo
 msgid "Solo tú y la persona asignada pueden leer esta solicitud."
 msgstr "Solo tú y la persona asignada pueden leer esta solicitud."
 
+msgid "Solo un Ejecutivo o un administrador puede cancelar eventos."
+msgstr "Solo un Ejecutivo o un administrador puede cancelar eventos."
+
+msgid "Solo un Ejecutivo o un administrador puede invitar asociados a eventos."
+msgstr "Solo un Ejecutivo o un administrador puede invitar asociados a eventos."
+
 msgid "Solo un Ejecutivo o un administrador puede reactivar eventos."
 msgstr "Solo un Ejecutivo o un administrador puede reactivar eventos."
 
+msgid "Solo un Ejecutivo o un administrador pueden actualizar datos del video."
+msgstr "Solo un Ejecutivo o un administrador pueden actualizar datos del video."
+
+msgid "Solo un Ejecutivo o un administrador pueden conectar YouTube."
+msgstr "Solo un Ejecutivo o un administrador pueden conectar YouTube."
+
 msgid "Solo un Ejecutivo o un administrador pueden consultar transcripciones."
 msgstr "Solo un Ejecutivo o un administrador pueden consultar transcripciones."
+
+msgid "Solo un Ejecutivo o un administrador pueden crear o editar eventos, Galería y Centro de Conocimiento."
+msgstr "Solo un Ejecutivo o un administrador pueden crear o editar eventos, Galería y Centro de Conocimiento."
+
+msgid "Solo un Ejecutivo o un administrador pueden generar recursos."
+msgstr "Solo un Ejecutivo o un administrador pueden generar recursos."
+
+msgid "Solo un Ejecutivo o un administrador pueden gestionar estas publicaciones."
+msgstr "Solo un Ejecutivo o un administrador pueden gestionar estas publicaciones."
+
+msgid "Solo un Ejecutivo o un administrador pueden gestionar recursos."
+msgstr "Solo un Ejecutivo o un administrador pueden gestionar recursos."
 
 msgid "Solo visible para administración."
 msgstr "Solo visible para administración."
@@ -6546,6 +7803,9 @@ msgstr "Sustituir intereses tras revisión"
 msgid "Sé la primera persona en compartir una idea."
 msgstr "Sé la primera persona en compartir una idea."
 
+msgid "Sí, eliminar usuario"
+msgstr "Sí, eliminar usuario"
+
 msgid "TU COMUNIDAD, AL DÍA"
 msgstr "TU COMUNIDAD, AL DÍA"
 
@@ -6624,6 +7884,9 @@ msgstr "Tema preparado."
 msgid "Tema sugerido"
 msgstr "Tema sugerido"
 
+msgid "Temas"
+msgstr "Temas"
+
 msgid "Temas con IA"
 msgstr "Temas con IA"
 
@@ -6666,6 +7929,9 @@ msgstr "Tendencias"
 msgid "Termina el análisis o espera a que finalice la aplicación."
 msgstr "Termina el análisis o espera a que finalice la aplicación."
 
+msgid "Texto institucional mostrado en las áreas correspondientes de la intranet."
+msgstr "Texto institucional mostrado en las áreas correspondientes de la intranet."
+
 msgid "Texto libre original"
 msgstr "Texto libre original"
 
@@ -6677,6 +7943,9 @@ msgstr "Texto no válido."
 
 msgid "Textos de propuesta"
 msgstr "Textos de propuesta"
+
+msgid "Tienen experiencia profesional relacionada."
+msgstr "Tienen experiencia profesional relacionada."
 
 msgid "Tienes una nueva respuesta a tu comentario."
 msgstr "Tienes una nueva respuesta a tu comentario."
@@ -6741,14 +8010,29 @@ msgstr "Todos los tipos"
 msgid "Todos los usuarios"
 msgstr "Todos los usuarios"
 
+msgid "Trabajo en segundo plano completado"
+msgstr "Trabajo en segundo plano completado"
+
+msgid "Trabajo en segundo plano con error"
+msgstr "Trabajo en segundo plano con error"
+
+msgid "Trabajo nuevamente en cola."
+msgstr "Trabajo nuevamente en cola."
+
 msgid "Trabajos activos"
 msgstr "Trabajos activos"
+
+msgid "Transcripción autorizada (opcional)"
+msgstr "Transcripción autorizada (opcional)"
 
 msgid "Transcripción manual"
 msgstr "Transcripción manual"
 
 msgid "Transcripción manual autorizada"
 msgstr "Transcripción manual autorizada"
+
+msgid "Transporte de WordPress / otro plugin"
+msgstr "Transporte de WordPress / otro plugin"
 
 msgid "Tu agenda ASCLA"
 msgstr "Tu agenda ASCLA"
@@ -6783,6 +8067,9 @@ msgstr "Tu lote se genera automáticamente con los datos que autorizaste. Desliz
 msgid "Tu lugar en la comunidad"
 msgstr "Tu lugar en la comunidad"
 
+msgid "Tu participación"
+msgstr "Tu participación"
+
 msgid "Tu perfil profesional"
 msgstr "Tu perfil profesional"
 
@@ -6816,6 +8103,12 @@ msgstr "Tu sesión está por vencer"
 msgid "Tu tarea se ha completado"
 msgstr "Tu tarea se ha completado"
 
+msgid "Turnstile Secret Key (guardada; vacío para conservar)"
+msgstr "Turnstile Secret Key (guardada; vacío para conservar)"
+
+msgid "Turnstile Site Key"
+msgstr "Turnstile Site Key"
+
 msgid "Tus conexiones aparecerán aquí cuando acepten la solicitud."
 msgstr "Tus conexiones aparecerán aquí cuando acepten la solicitud."
 
@@ -6839,6 +8132,15 @@ msgstr "Tú"
 
 msgid "Tú eliges cómo participar y qué información compartir con la comunidad."
 msgstr "Tú eliges cómo participar y qué información compartir con la comunidad."
+
+msgid "URI de redirección"
+msgstr "URI de redirección"
+
+msgid "URL de YouTube"
+msgstr "URL de YouTube"
+
+msgid "URL del recurso externo"
+msgstr "URL del recurso externo"
 
 msgid "Ubicación"
 msgstr "Ubicación"
@@ -6875,6 +8177,9 @@ msgstr "Un evento vuelve a estar activo"
 
 msgid "Un grupo puede tener como máximo 50 asociados."
 msgstr "Un grupo puede tener como máximo 50 asociados."
+
+msgid "Un integrante activo elegido al azar pasará a gestionar el grupo. Perderás el acceso a la conversación."
+msgstr "Un integrante activo elegido al azar pasará a gestionar el grupo. Perderás el acceso a la conversación."
 
 msgid "Una alianza con ASCLA"
 msgstr "Una alianza con ASCLA"
@@ -6924,6 +8229,9 @@ msgstr "Usa el correo de su cuenta ASCLA. Si ya está en la lista, se actualizar
 msgid "Usa el modo claro u oscuro configurado en tu dispositivo."
 msgstr "Usa el modo claro u oscuro configurado en tu dispositivo."
 
+msgid "Usa el servicio de correo de tu hosting o un proveedor SMTP. Si otro plugin ya gestiona los envíos, conserva “Transporte de WordPress”. Guarda los cambios antes de enviar una prueba a tu correo de administrador."
+msgstr "Usa el servicio de correo de tu hosting o un proveedor SMTP. Si otro plugin ya gestiona los envíos, conserva “Transporte de WordPress”. Guarda los cambios antes de enviar una prueba a tu correo de administrador."
+
 msgid "Usa la hora local de tu dispositivo. El contenido permanecerá oculto hasta esta fecha."
 msgstr "Usa la hora local de tu dispositivo. El contenido permanecerá oculto hasta esta fecha."
 
@@ -6938,6 +8246,18 @@ msgstr "Usar imagen completa"
 
 msgid "Usuario"
 msgstr "Usuario"
+
+msgid "Usuario SMTP"
+msgstr "Usuario SMTP"
+
+msgid "Usuario actualizado"
+msgstr "Usuario actualizado"
+
+msgid "Usuario creado"
+msgstr "Usuario creado"
+
+msgid "Usuario eliminado"
+msgstr "Usuario eliminado"
 
 msgid "Usuario no encontrado o sin permiso de edición."
 msgstr "Usuario no encontrado o sin permiso de edición."
@@ -7068,6 +8388,9 @@ msgstr "Ver intranet"
 msgid "Ver las %s respuestas"
 msgstr "Ver las %s respuestas"
 
+msgid "Ver mensaje"
+msgstr "Ver mensaje"
+
 msgid "Ver mis consultas"
 msgstr "Ver mis consultas"
 
@@ -7115,6 +8438,12 @@ msgstr "Verifica la cuenta y los temas de cada fila."
 
 msgid "Verifica la lista al terminar."
 msgstr "Verifica la lista al terminar."
+
+msgid "Verificación de seguridad fallida"
+msgstr "Verificación de seguridad fallida"
+
+msgid "Verificación de seguridad superada"
+msgstr "Verificación de seguridad superada"
 
 msgid "Verificar la lista"
 msgstr "Verificar la lista"
@@ -7167,6 +8496,9 @@ msgstr "Volver a generar textos"
 msgid "Volver a la ficha"
 msgstr "Volver a la ficha"
 
+msgid "Volver a la lista de chats"
+msgstr "Volver a la lista de chats"
+
 msgid "Volver a las ventanas"
 msgstr "Volver a las ventanas"
 
@@ -7191,11 +8523,20 @@ msgstr "Vínculos aceptados que continúan registrados. Cada pareja cuenta una s
 msgid "X / Twitter"
 msgstr "X / Twitter"
 
+msgid "Ya existe una solicitud o autorización de conversación entre estos asociados."
+msgstr "Ya existe una solicitud o autorización de conversación entre estos asociados."
+
+msgid "Ya existe una solicitud o conexión entre estos asociados."
+msgstr "Ya existe una solicitud o conexión entre estos asociados."
+
 msgid "Ya puedes continuar la conversación en Mensajería."
 msgstr "Ya puedes continuar la conversación en Mensajería."
 
 msgid "Ya revisaste todos tus avisos. Las nuevas novedades aparecerán aquí."
 msgstr "Ya revisaste todos tus avisos. Las nuevas novedades aparecerán aquí."
+
+msgid "Ya tienes un cupo disponible o confirmado."
+msgstr "Ya tienes un cupo disponible o confirmado."
 
 msgid "YouTube permite descargar subtítulos por API solo cuando la cuenta conectada tiene permisos suficientes sobre el video. Para otros videos, pega una transcripción autorizada manualmente."
 msgstr "YouTube permite descargar subtítulos por API solo cuando la cuenta conectada tiene permisos suficientes sobre el video. Para otros videos, pega una transcripción autorizada manualmente."
@@ -7211,6 +8552,9 @@ msgstr "Zona horaria no válida."
 
 msgid "Zoom"
 msgstr "Zoom"
+
+msgid "a la comunidad?"
+msgstr "a la comunidad?"
 
 msgid "actualizadas"
 msgstr "actualizadas"
@@ -7290,8 +8634,14 @@ msgstr "contenidos relacionados"
 msgid "cuentas identificadas"
 msgstr "cuentas identificadas"
 
+msgid "cupo disponible"
+msgstr "cupo disponible"
+
 msgid "cupos"
 msgstr "cupos"
+
+msgid "cupos disponibles"
+msgstr "cupos disponibles"
 
 msgid "de"
 msgstr "de"
@@ -7461,6 +8811,9 @@ msgstr "recurso"
 msgid "registrados"
 msgstr "registrados"
 
+msgid "registro"
+msgstr "registro"
+
 msgid "registros"
 msgstr "registros"
 
@@ -7545,8 +8898,14 @@ msgstr "¿No recuerdas tu contraseña actual?"
 msgid "¿Olvidaste tu contraseña?"
 msgstr "¿Olvidaste tu contraseña?"
 
+msgid "¿Para qué sirve?"
+msgstr "¿Para qué sirve?"
+
 msgid "¿Por qué aparece Sin datos?"
 msgstr "¿Por qué aparece Sin datos?"
+
+msgid "¿Quieres expulsar a {name}?"
+msgstr "¿Quieres expulsar a {name}?"
 
 msgid "¿Quieres guardar los cambios antes de cerrar esta ventana?"
 msgstr "¿Quieres guardar los cambios antes de cerrar esta ventana?"
@@ -7563,6 +8922,9 @@ msgstr "¿Qué cambió entre períodos?"
 msgid "¿Qué es ASCLA y qué contiene su intranet?"
 msgstr "¿Qué es ASCLA y qué contiene su intranet?"
 
+msgid "¿Qué no guarda?"
+msgstr "¿Qué no guarda?"
+
 msgid "¿Qué período quieres consultar?"
 msgstr "¿Qué período quieres consultar?"
 
@@ -7571,6 +8933,9 @@ msgstr "¿Qué quieres gestionar hoy?"
 
 msgid "¿Qué recursos tenemos sobre gobierno corporativo?"
 msgstr "¿Qué recursos tenemos sobre gobierno corporativo?"
+
+msgid "¿Qué registra?"
+msgstr "¿Qué registra?"
 
 msgid "¿Qué se publicó recientemente?"
 msgstr "¿Qué se publicó recientemente?"
@@ -7587,11 +8952,17 @@ msgstr "¿Qué temas reúnen a la comunidad?"
 msgid "¿Qué videos puedo consultar?"
 msgstr "¿Qué videos puedo consultar?"
 
+msgid "¿Reactivar el acceso de"
+msgstr "¿Reactivar el acceso de"
+
 msgid "¿Seguro que deseas cancelar este evento?"
 msgstr "¿Seguro que deseas cancelar este evento?"
 
 msgid "¿Seguro que deseas eliminar este grupo? Se eliminarán sus mensajes para todos los participantes."
 msgstr "¿Seguro que deseas eliminar este grupo? Se eliminarán sus mensajes para todos los participantes."
+
+msgid "¿Suspender el acceso de"
+msgstr "¿Suspender el acceso de"
 
 msgid "Área de conocimiento"
 msgstr "Área de conocimiento"
@@ -7607,6 +8978,9 @@ msgstr "Áreas en las que puedo ayudar"
 
 msgid "Áreas que quiero aprender"
 msgstr "Áreas que quiero aprender"
+
+msgid "Última actividad"
+msgstr "Última actividad"
 
 msgid "Última actividad en este período"
 msgstr "Última actividad en este período"
@@ -7628,3 +9002,6 @@ msgstr "Últimos cambios de estado"
 
 msgid "“No me interesa” es privado. Puedes restituir aquí la elegibilidad de cualquier perfil."
 msgstr "“No me interesa” es privado. Puedes restituir aquí la elegibilidad de cualquier perfil."
+
+msgid "← Chats"
+msgstr "← Chats"

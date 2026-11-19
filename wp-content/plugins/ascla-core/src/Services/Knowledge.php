@@ -42,18 +42,18 @@ final class Knowledge
         $originalIds=array_values(array_unique(array_filter(array_map('intval',$result['grounding']['context_source_ids']??array_column($result['sources']??[],'id')),static fn($id)=>$id>0)));
         if (!$originalIds) {
             $grounding=$result['grounding']??[];$usable=!empty($grounding['live_context_used']) || !empty($grounding['conversation_only']) || !empty($grounding['no_evidence']);
-            return $usable?['answer'=>Access::text($result['answer']??'',20000),'sources'=>[],'mode'=>$result['mode']??'ASCLA','grounding'=>$grounding]:['answer'=>self::ABSTENTION,'sources'=>[],'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL];
+            return $usable?['answer'=>Access::text($result['answer']??'',20000),'sources'=>[],'mode'=>$result['mode']??'ASCLA','grounding'=>$grounding]:['answer'=>\ASCLA\Core\Frontend\Language::label(self::ABSTENTION),'sources'=>[],'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL];
         }
         [$sources,$identities,$protected]=self::storedSources($originalIds,$result['grounding']['video_digests']??[],$result['grounding']['event_digests']??[],$result['grounding']['gallery_digests']??[]);
         if (count($sources)!==count($originalIds)) {
             $message=!empty($result['grounding']['event_digests'])
                 ? \ASCLA\Core\Frontend\Language::text('Los datos de los eventos cambiaron. Vuelve a consultar para conocer la información y los cupos actuales.','Event details have changed. Ask again for current information and available seats.')
-                : 'Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar al Asistente ASCLA.';
+                : \ASCLA\Core\Frontend\Language::label('Las fuentes de esta respuesta ya no están disponibles. Vuelve a consultar al Asistente ASCLA.');
             return ['answer'=>$message,'sources'=>[],'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL];
         }
         $candidate=['answer'=>$result['answer']??'','source_ids'=>array_column($result['sources']??[],'id')];
         if ($protected) { $candidate=EntityRedactor::tree($candidate,$identities,array_column($sources,'title')); }
-        $verified=Grounding::answer($candidate,$sources);$answer=$verified['answer']?:'No existe suficiente información verificable en las fuentes actuales. Puedes volver a consultar al Asistente ASCLA.';
+        $verified=Grounding::answer($candidate,$sources);$answer=$verified['answer']?:\ASCLA\Core\Frontend\Language::label('No existe suficiente información verificable en las fuentes actuales. Puedes volver a consultar al Asistente ASCLA.');
         $verified['grounding']=array_merge($result['grounding']??[],$verified['grounding']);
         return ['answer'=>$answer,'sources'=>array_map(static fn($source)=>['id'=>$source['id'],'title'=>$source['title'],'url'=>$source['url']],$verified['sources']),'mode'=>$result['mode']??self::UPDATED_SOURCES_LABEL,'grounding'=>$verified['grounding']];
     }
@@ -376,7 +376,7 @@ final class KnowledgeAnswer
 
     private static function noEvidence(bool $videos): array
     {
-            $empty=$videos?\ASCLA\Core\Frontend\Language::text('No encontré un video publicado al que tengas acceso con esos datos. Prueba con su título o con un tema del video.','I could not find a published video you can access with those details. Try its title or a topic from the video.'):self::ABSTENTION;
+            $empty=$videos?\ASCLA\Core\Frontend\Language::text('No encontré un video publicado al que tengas acceso con esos datos. Prueba con su título o con un tema del video.','I could not find a published video you can access with those details. Try its title or a topic from the video.'):\ASCLA\Core\Frontend\Language::label(self::ABSTENTION);
             return ['answer'=>$empty,'sources'=>[],'mode'=>Knowledge::provider()->mode(),'grounding'=>['policy'=>Grounding::POLICY,'context_source_ids'=>[],'valid_references'=>0,'ignored_references'=>0,'live_context_used'=>false,'conversation_only'=>false,'no_evidence'=>true]];
     }
 
@@ -529,7 +529,7 @@ final class KnowledgeAnswer
         $verified['grounding']['conversation_only']=$conversation&&!$sources&&!$context['answerable'];
         $verified['grounding']['snapshot_at']=current_datetime()->format(DATE_ATOM);
         if (!$verified['answer']) {
-            return ['answer'=>'No pude preparar una respuesta verificable con la información disponible en ASCLA. Intenta reformular la pregunta.','sources'=>[],'mode'=>Knowledge::provider()->mode(),'grounding'=>$verified['grounding']];
+            return ['answer'=>\ASCLA\Core\Frontend\Language::label('No pude preparar una respuesta verificable con la información disponible en ASCLA. Intenta reformular la pregunta.'),'sources'=>[],'mode'=>Knowledge::provider()->mode(),'grounding'=>$verified['grounding']];
         }
         $answer=$protected?EntityRedactor::redact($verified['answer'],$identities,$references):$verified['answer'];
         if ($protected) { Access::require(EntityRedactor::validateRedaction($answer,$identities,$references)['valid'],'La respuesta requiere revisión de anonimización.',502); }

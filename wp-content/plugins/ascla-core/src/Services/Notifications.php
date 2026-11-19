@@ -12,6 +12,7 @@ final class Notifications
         'connection_accepted',
         'conversation_request',
         'conversation_accepted',
+        'conversation_group_owner',
         'event',
         'event_updated',
         'event_cancelled',
@@ -181,14 +182,14 @@ final class Notifications
 
     public static function removeConversationNotices(int $conversationId): int
     {
-        $conversationId=absint($conversationId); if (!$conversationId) { return 0; }
-        $removed=0;
-        foreach (Store::rows('notifications',"kind IN ('message','conversation_group','conversation_request','conversation_accepted')",[],'') as $row) {
-            $context=json_decode($row['context']??'null',true);
-            if (is_array($context) && ($context['type']??'')==='conversation' && absint($context['id']??0)===$conversationId) {
-                Store::delete('notifications',['id'=>(int)$row['id']]); $removed++;
-            }
-        }
+        global $wpdb;
+        $table=Store::table('notifications');
+        $json="CASE WHEN JSON_VALID(context) THEN context ELSE '{}' END";
+        $removed=$wpdb->query($wpdb->prepare("DELETE FROM $table
+            WHERE kind IN ('message','conversation_group','conversation_group_owner','conversation_request','conversation_accepted')
+              AND JSON_UNQUOTE(JSON_EXTRACT($json,'$.type'))='conversation'
+              AND JSON_UNQUOTE(JSON_EXTRACT($json,'$.id'))=%s",(string)$conversationId));
+        if ($removed===false) { throw new \ASCLA\Core\Repositories\RepositoryException('No se pudieron eliminar las notificaciones del grupo.'); }
         return $removed;
     }
 

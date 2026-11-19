@@ -243,3 +243,9 @@ __pycache__/
 
 !/docs/evidence/release-1.12/
 !/docs/evidence/release-1.12/package.json
+
+# Reviewed release 1.13 manifests and compact evidence.
+!/docs/evidence/release-1.13/
+/docs/evidence/release-1.13/*
+!/docs/evidence/release-1.13/package.json
+!/docs/evidence/release-1.13/validation.json

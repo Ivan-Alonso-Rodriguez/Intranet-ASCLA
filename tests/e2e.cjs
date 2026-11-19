@@ -200,8 +200,19 @@ async function goto(page, route) {
     });
     let post;
     await test("Hub author can request review and moderator publishes with reason", async () => {
+      await goto(a, "hub");
+      await a.getByRole("button", { name: "Nueva publicación" }).click();
+      const adminStatus = a.locator('.modal [name="status"]');
+      await adminStatus.waitFor();
+      assert.deepEqual(await adminStatus.locator("option").allTextContents(), ["Borrador", "Publicar ahora"]);
+      assert.equal(await adminStatus.inputValue(), "publish");
+      await a.keyboard.press("Escape");
       await goto(p, "hub");
       await p.getByRole("button", { name: "Nueva publicación" }).click();
+      const memberStatus = p.locator('.modal [name="status"]');
+      await memberStatus.waitFor();
+      assert.deepEqual(await memberStatus.locator("option").allTextContents(), ["Borrador", "Enviar a revisión"]);
+      assert.equal(await memberStatus.inputValue(), "pending");
       await p
         .locator(".modal [name=title]")
         .fill("E2E Publicación de gobernanza");
@@ -210,7 +221,6 @@ async function goto(page, route) {
         .fill(
           "E2E Conversación constructiva sobre responsabilidades del directorio.",
         );
-      await p.locator('.modal [name="status"]').selectOption('pending');
       const saved = p.waitForResponse(
         (r) =>
           r.url().includes("/content/hub") && r.request().method() === "POST",
@@ -348,9 +358,18 @@ async function goto(page, route) {
       }
       conversation = (await request(p, "conversations", { target: target.id }))
         .body;
-      await test("Suggested introduction is editable and never auto-sends", async () => {
+      await test("First-contact suggestion is offered once, is editable and never auto-sends", async () => {
         const before = (await request(p, "conversations/" + conversation.id + "/messages")).body;
+        const profile = (await request(p, "profiles/" + target.id)).body;
         await p.goto(base + "/perfil/?member=" + target.id);
+        await p.locator('.modal [data-member-connection]').waitFor();
+        if (!profile.connection.can_suggest_intro) {
+          assert.equal(await p.locator('.modal [data-action=intro]').count(), 0);
+          assert.equal((await request(p, 'matching/' + target.id + '/intro', {})).status, 409);
+          await p.locator('.modal [data-action=close]').first().click();
+          return;
+        }
+        assert.equal(before.items.length, 0, 'Existing private messages prevent a first-contact suggestion.');
         await p.locator(".modal [data-action=intro]").click();
         await p.locator(".modal [name=body]").waitFor();
         assert.ok((await p.locator(".modal [name=body]").inputValue()).length > 30);
@@ -359,6 +378,7 @@ async function goto(page, route) {
         await p.locator(".modal").waitFor({state: "detached"});
         const after = (await request(p, "conversations/" + conversation.id + "/messages")).body;
         assert.deepEqual(after, before);
+        assert.equal((await request(p, 'profiles/' + target.id)).body.connection.can_suggest_intro, false);
       });
       const messageBody = "E2E Mensaje privado " + Date.now() + ".";
       await p.goto(base + "/mensajeria/?conversation=" + conversation.id);

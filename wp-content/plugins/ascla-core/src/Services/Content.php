@@ -42,8 +42,8 @@ final class Content
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
         if (!empty($meta['micro']) && (!empty($meta['cancelled']) || ($post->post_status==='publish' && !current_user_can('ascla_manage')))) { return false; }
         return self::canRead($post) && self::canCreate($type)
-            && (current_user_can('ascla_manage') || (int)$post->post_author===get_current_user_id()
-                || (current_user_can('ascla_moderate') && !in_array($type,self::EDITORIAL_TYPES,true)));
+            && ((int)$post->post_author===get_current_user_id()
+                || (current_user_can('ascla_manage') && !in_array($type,self::COMMUNITY_TYPES,true)));
     }
     public static function canModerate(\WP_Post $post): bool
     {
@@ -623,11 +623,9 @@ final class ContentSaveState
         if ($type==='contact') { $status='private'; }
         elseif (in_array($type,['gallery','resource'],true) && $requested==='ascla_hidden' && $publisher) { $status='ascla_hidden'; }
         elseif ($requested==='draft') { $status='draft'; }
-        elseif ($type==='hub' && $requested==='publish' && empty($meta['generated'])) { $status='publish'; }
         elseif ($type==='event' && !empty($meta['micro']) && (empty($meta['micro_approved']) || !current_user_can('ascla_manage'))) { $status='pending'; }
         elseif ($autoEvent || in_array($type,['topic','forum'],true)) { $status='publish'; }
         elseif (self::canPublishRequested($type,$requested,$meta,$editor,$publisher,$direct)) { $status='publish'; }
-        elseif (!$editor && !Settings::get()['moderation_required'] && $type==='hub') { $status='publish'; }
         return $status;
     }
 

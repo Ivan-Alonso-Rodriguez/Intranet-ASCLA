@@ -148,6 +148,8 @@ final class App
         wp_enqueue_script('ascla-live-toasts',ASCLA_URL.'assets/live-toasts.js',[],self::assetVersion('assets/live-toasts.js'),true);
         wp_enqueue_script('ascla-navigation',ASCLA_URL.'assets/navigation.js',[],self::assetVersion('assets/navigation.js'),true);
         wp_enqueue_script('ascla-accessibility',ASCLA_URL.'assets/accessibility.js',[],self::assetVersion('assets/accessibility.js'),true);
+        wp_enqueue_style('ascla-onboarding',ASCLA_URL.'assets/onboarding.css',['ascla-executive'],self::assetVersion('assets/onboarding.css'));
+        wp_enqueue_script('ascla-onboarding',ASCLA_URL.'assets/onboarding.js',[],self::assetVersion('assets/onboarding.js'),true);
         $administrative=[];
         if (current_user_can('ascla_manage')) {
             foreach (['ascla-import-reader'=>'interest-file-reader.js','ascla-imports'=>'interest-imports.js','ascla-statistics'=>'admin-statistics.js','ascla-members'=>'admin-members.js'] as $handle=>$file) {
@@ -156,12 +158,26 @@ final class App
         }
         wp_enqueue_script('ascla-allies',ASCLA_URL.'assets/allies-ui.js',[],self::assetVersion('assets/allies-ui.js'),true);
         wp_enqueue_script('ascla-learning',ASCLA_URL.'assets/interest-learning.js',[],self::assetVersion('assets/interest-learning.js'),true);
-        wp_enqueue_script('ascla-app',ASCLA_URL.'assets/app.js',array_merge($administrative,['ascla-allies','ascla-learning','ascla-image-editor','ascla-content','ascla-pdf-preview','ascla-notifications','ascla-live-toasts','ascla-navigation','ascla-accessibility']),self::assetVersion('assets/app.js'),true);
+        wp_enqueue_script('ascla-app',ASCLA_URL.'assets/app.js',array_merge($administrative,['ascla-allies','ascla-learning','ascla-image-editor','ascla-content','ascla-pdf-preview','ascla-notifications','ascla-live-toasts','ascla-navigation','ascla-accessibility','ascla-onboarding']),self::assetVersion('assets/app.js'),true);
         wp_enqueue_script('ascla-session',ASCLA_URL.'assets/session.js',['ascla-app'],self::assetVersion('assets/session.js'),true);
-        $pages=[]; foreach (Catalog::PAGES as $slug=>$label) { $pages[$slug]=['label'=>Language::label($label),'url'=>Catalog::url($slug)]; }
+        $pages=self::navigationPages();
         wp_add_inline_script('ascla-app','globalThis.ASCLA_FORM_LIMITS='.wp_json_encode(['integers'=>\ASCLA\Core\Services\FormRules::INTEGERS,'text'=>array_merge(\ASCLA\Core\Services\FormRules::TEXT,\ASCLA\Core\Services\FormRules::MAIL_TEXT)]).';','before');
         $logo=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo.png');
         $logoWhite=add_query_arg('ver',ASCLA_VERSION,ASCLA_URL.'assets/ascla-logo-white.png');
         wp_localize_script('ascla-app','ASCLA',['locale'=>str_replace('_','-',Language::current()),'userLocale'=>Language::current(),'language'=>Language::english()?'en':'es','translations'=>Language::english()?Language::labels():[],'languageOptions'=>Language::SUPPORTED,'languageNonce'=>wp_create_nonce('ascla_change_language'),'api'=>esc_url_raw(rest_url('ascla/v1/')),'nonce'=>wp_create_nonce('wp_rest'),'page'=>$page,'pages'=>$pages,'icons'=>Icons::PATHS,'logo'=>$logo,'logoWhite'=>$logoWhite,'login'=>Login::url(),'logout'=>wp_logout_url(Login::url()),'adminUrl'=>self::adminUrl(),'wpAdminUrl'=>current_user_can('manage_options')?admin_url():'','mediaUrl'=>admin_url('admin-post.php?action=ascla_media&id='),'bootstrap'=>self::$initialBootstrap,'pdfModule'=>ASCLA_URL.'assets/pdfjs/pdf.min.js?ver='.self::assetVersion('assets/pdfjs/pdf.min.js'),'pdfWorker'=>ASCLA_URL.'assets/pdfjs/pdf.worker.min.js?ver='.self::assetVersion('assets/pdfjs/pdf.worker.min.js'),'phoneModule'=>ASCLA_URL.'assets/phone-input.js?ver='.self::assetVersion('assets/phone-input.js')]);
+    }
+
+    private static function navigationPages(): array
+    {
+        $bannerPages=['intranet','eventos','hub','galeria','foros','directorio','centro-conocimiento','asistente','contacto','aliados'];
+        $pages=[];
+        foreach (Catalog::PAGES as $slug=>$label) {
+            $pages[$slug]=['label'=>Language::label($label),'url'=>Catalog::url($slug)];
+            if (in_array($slug,$bannerPages,true)) {
+                $file='assets/banners/'.($slug==='aliados'?'intranet':$slug).'.webp';
+                $pages[$slug]['banner']=add_query_arg('ver',self::assetVersion($file),ASCLA_URL.$file);
+            }
+        }
+        return $pages;
     }
 }

@@ -151,9 +151,9 @@ final class ReleaseCompletionTest extends TestCase
         self::assertStringContainsString("define('ASCLA_VERSION', '1.12');", $plugin);
         self::assertMatchesRegularExpression('/Stable tag:\s*1\.12\h*$/m', $readme);
         self::assertMatchesRegularExpression('/^sonar\.projectVersion=1\.12\h*$/m', $sonar);
-        self::assertStringContainsString('Versión actual: 1.12 · esquema 15', $docs);
+        self::assertStringContainsString('Versión actual: 1.12 · esquema 17', $docs);
         self::assertStringContainsString('**Versión actual:** `1.12`', $history);
-        self::assertSame(15, \ASCLA\Core\Database\Installer::SCHEMA_VERSION);
+        self::assertSame(17, \ASCLA\Core\Database\Installer::SCHEMA_VERSION);
     }
     public function testSqlRankingAndRosterReturnPagesWithoutLosingTotals():void
     {

@@ -15,11 +15,11 @@
     function card(p){
       return `<article class="card ally-card"><div class="ally-card-brand">${logoMarkup(p)}</div><div class="ally-card-copy"><span class="eyebrow">${text(p.meta.alliance_type||'Alianza institucional')}</span><h3>${E(p.title)}</h3><p>${E(p.body.slice(0,220))}${p.body.length>220?'…':''}</p>${p.meta.benefits?("<div class=\"ally-card-benefit\">" + (I('check')) + "<span>" + (excerpt(p.meta.benefits,160)) + "" + "" + "</span></div>"):''}</div>${btn(text('Conocer la alianza')+' '+I('arrow'),'item',("data-id=\"" + (p.id) + "\""),'ally-card-action')}</article>`;
     }
-    function catalog(list,filter,admin,{tabs='',drafts=null}={}){
+    function catalog(list,filter,admin,{banner='',tabs='',drafts=null}={}){
       const registryUrl=C.adminUrl+(C.adminUrl.includes('?')?'&':'?')+'section=aliados';
       const controls=admin?`<div class="form-actions"><a class="btn" data-native href="${E(registryUrl)}">${I('settings')}${text('Registro de aliados')}</a>${btn(I('plus')+' '+text('Crear aliado'),'editor','data-type="ally"','primary')}</div>`:'';
       const catalogContent=drafts !== null ? drafts : `<p class="private-note">${list.total} ${text('alianzas en el catálogo')}</p><div class="ally-cards">${list.items.map(card).join('')}</div>`;
-      return `<header class="ally-catalog-header"><div><span class="eyebrow">${text('ALIANZAS INSTITUCIONALES')}</span><h1>${text('Nuestros aliados')}</h1><p>${text('Conoce las organizaciones que colaboran con ASCLA y los beneficios para nuestra comunidad.')}</p></div>${controls}</header>${searchForm({label:'Buscar aliados',placeholder:'Nombre, tipo de convenio o descripción…',id:'ally-search',filter,css:'ally-catalog-search'})}${tabs}${catalogContent}${drafts === null && !list.items.length?("<div class=\"card ally-empty\"><h2>" + (text('No encontramos aliados')) + "</h2><p>" + (text('Prueba otro nombre o tipo de convenio, o limpia la búsqueda.')) + "</p></div>"):''}`;
+      return `<header class="ally-catalog-header">${banner}<div><span class="eyebrow">${text('ALIANZAS INSTITUCIONALES')}</span><h1>${text('Nuestros aliados')}</h1><p>${text('Conoce las organizaciones que colaboran con ASCLA y los beneficios para nuestra comunidad.')}</p></div>${controls}</header>${searchForm({label:'Buscar aliados',placeholder:'Nombre, tipo de convenio o descripción…',id:'ally-search',filter,css:'ally-catalog-search'})}${tabs}${catalogContent}${drafts === null && !list.items.length?("<div class=\"card ally-empty\"><h2>" + (text('No encontramos aliados')) + "</h2><p>" + (text('Prueba otro nombre o tipo de convenio, o limpia la búsqueda.')) + "</p></div>"):''}`;
     }
     const excerpt=(value,limit)=>E(value.slice(0,limit))+(value.length>limit?'…':'');
     function contactDetails(m){
