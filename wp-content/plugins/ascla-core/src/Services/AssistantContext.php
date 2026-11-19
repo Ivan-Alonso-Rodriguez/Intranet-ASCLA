@@ -62,18 +62,19 @@ final class AssistantContext
     /** An explicit platform overview starts a topic; requests about a source or live data do not. */
     public static function organizationQuestion(string $question): bool
     {
-        $plain=mb_strtolower(remove_accents($question));
+        $plain=mb_strtolower(remove_accents(trim($question)));
+        $plain=preg_replace('/\s+/u',' ',$plain)??$plain;
         if (preg_match('/\b(?:el|ese|este|un|la|esa|esta|una|the|that|this|a)\s+(?:video|grabacion|galeria|documento|articulo|recurso|publicacion|recording|gallery|document|article|resource|post)\b/u',$plain)
             || preg_match('/\b(?:segun|en|del|according to|in|from)\s+(?:video|grabacion|galeria|documento|articulo|recording|gallery|document|article)\b/u',$plain)) { return false; }
         if (preg_match('/\b(?:cuantos?|cuantas?|cupos?|aforo|proxim[oa]s?|recientes?|semanas?|mes(?:es)?|muestrame|recomiend\w*|sin leer|how many|seats?|capacity|upcoming|latest|weeks?|months?|show me|recommend\w*|unread)\b/u',$plain)) { return false; }
         if (preg_match('/\b(?:que|what)\s+(?:eventos|encuentros|videos|galerias|publicaciones|recursos|notificaciones|asociados|events|meetings|galleries|posts|resources|notifications|members)\s+(?:hay|tenemos|estan|are|can)\b/u',$plain)) { return false; }
         return self::matchesAny($plain,[
             '/\b(?:cuentame|explicame|dime) (?:un poco |mas )?(?:sobre|acerca de|de) ascla\b/u',
-            '/\b(?:que (?:es|significa|hace|ofrece|contiene|incluye)|que puedo (?:hacer|encontrar) en|para que sirve|a que se dedica|de que (?:trata|se trata)|hablame (?:de|sobre)) (?:la |esta |nuestra )?(?:ascla|asociacion|intranet|plataforma|comunidad)\b/u',
-            '/\b(?:que (?:hay|encuentro) en|que (?:secciones|modulos|servicios|herramientas) (?:hay|tiene|ofrece)) (?:la |esta |nuestra )?(?:ascla|intranet|comunidad|plataforma)\b/u',
-            '/\b(?:explicame|describeme) (?:la |esta |nuestra )?(?:intranet|plataforma|ascla)\b/u',
+            '/\b(?:que (?:es|significa|hace|ofrece|contiene|incluye)|que puedo (?:hacer|encontrar) en|para que sirve|a que se dedica|de que (?:trata|se trata)|hablame (?:de|sobre)) (?:el |la |este |esta |nuestro |nuestra )?(?:ascla|asociacion|intranet|plataforma|comunidad)\b/u',
+            '/\b(?:que (?:hay|encuentro) en|que (?:secciones|modulos|servicios|herramientas) (?:hay|tiene|ofrece)) (?:el |la |este |esta |nuestro |nuestra )?(?:ascla|intranet|comunidad|plataforma)\b/u',
+            '/\b(?:explicame|describeme) (?:el |la |este |esta |nuestro |nuestra )?(?:intranet|plataforma|ascla)\b/u',
             '/\b(?:what is|what does|tell me about|what can i (?:do|find) (?:in|on)|(?:explain|describe)(?: to me)?(?: what)?) (?:the |this |our )?(?:ascla|intranet|platform|association|community)\b/u',
-            '/\b(?:ascla|intranet|plataforma|platform)(?: de ascla)?\s*[,;:—–-]?\s*[¿]?\s*(?:que es|para que sirve|what is it)\s*[?!.]*$/u',
+            '/\b(?:ascla|intranet|plataforma|platform)(?: (?:de )?ascla)?\s*[,;:—–-]?\s*[¿]?\s*(?:que es|para que sirve|what is it)\s*[?!.]*$/u',
             '/^\W*ascla\W*$/u',
         ]);
     }

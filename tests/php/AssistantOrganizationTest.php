@@ -30,6 +30,14 @@ final class AssistantOrganizationTest extends TestCase
     {
         return [
             ['es_ES','¿Qué es la intranet de ASCLA?'],
+            ['es_ES','que es el intranet ascla?'],
+            ['es_ES','¿Qué es el intranet de ASCLA?'],
+            ['es_ES','¿Qué es este intranet ASCLA?'],
+            ['es_ES','¿Para qué sirve nuestro intranet?'],
+            ['es_ES','Explícame el intranet de ASCLA'],
+            ['es_ES','El intranet ASCLA, ¿qué es?'],
+            ['es_ES',"  QUE   ES\tEL  INTRANET  ASCLA ?  "],
+            ['es_ES','¿Y qué es el intranet ASCLA?'],
             ['es_ES','¿Qué es esta intranet de ASCLA?'],
             ['es_ES','¿Y qué es la intranet de ASCLA?'],
             ['es_ES','La intranet de ASCLA, ¿qué es?'],
@@ -63,7 +71,7 @@ final class AssistantOrganizationTest extends TestCase
     public function testSourceSpecificQuestionsStillRequireAuthorizedEvidence(): void
     {
         update_option('ascla_settings',array_merge(Settings::get(),['ai_provider'=>'mock']),false);
-        foreach (['¿Qué explica el video sobre qué es ASCLA?','¿Qué es ASCLA según el video?','What does the video say about what is ASCLA?'] as $question) {
+        foreach (['¿Qué explica el video sobre qué es ASCLA?','¿Qué es ASCLA según el video?','¿Qué dice el video acerca de qué es el intranet ASCLA?','What does the video say about what is ASCLA?'] as $question) {
             $result=Knowledge::answer($question);
             self::assertTrue($result['grounding']['no_evidence']??false,$question);
             self::assertStringNotContainsString('Asociación de Secretarios Corporativos de América Latina',$result['answer']);
@@ -76,7 +84,7 @@ final class AssistantOrganizationTest extends TestCase
     }
     public function testExplicitLiveRequestsKeepTheirDataIntent(): void
     {
-        foreach (['¿Qué es ASCLA y cuáles son mis próximos eventos?','¿Qué es ASCLA y qué eventos hay?','¿Qué hay en ASCLA esta semana?','What can I find in ASCLA this week?'] as $question) {
+        foreach (['¿Qué es ASCLA y cuáles son mis próximos eventos?','¿Qué es ASCLA y qué eventos hay?','¿Qué es el intranet ASCLA y qué eventos hay?','¿Qué hay en ASCLA esta semana?','What can I find in ASCLA this week?'] as $question) {
             self::assertFalse(AssistantContext::organizationQuestion($question));
             self::assertTrue(AssistantContext::build($question)['live']['intents']['events']);
         }
@@ -87,6 +95,19 @@ final class AssistantOrganizationTest extends TestCase
         self::assertStringContainsString('plataforma privada',$answer);
         self::assertStringContainsString('cuenta autorizada',$answer);
         self::assertStringContainsString('permisos',$answer);
+        self::assertSame(0,$this->requests);
+    }
+    public function testScreenshotQuestionUsesOfficialContextWithDeepSeekConfigured(): void
+    {
+        update_option('ascla_settings',array_merge(Settings::get(),['ai_provider'=>'deepseek']),false);
+        foreach (['que es el intranet ascla?','¿Y para qué sirve el intranet ASCLA?'] as $question) {
+            $history=[['question'=>'¿Qué videos hay disponibles?','answer'=>'Tema anterior.','source_ids'=>[]]];
+            $result=Knowledge::answer($question,$history);
+            self::assertSame('ASCLA',$result['mode']);
+            self::assertTrue($result['grounding']['live_context_used']);
+            self::assertStringContainsString('plataforma privada',$result['answer']);
+            self::assertEmpty($result['sources']);
+        }
         self::assertSame(0,$this->requests);
     }
     public function testFollowUpsStayOnTheNewInstitutionalTopic(): void

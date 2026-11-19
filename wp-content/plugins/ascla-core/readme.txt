@@ -1,7 +1,7 @@
 === ASCLA Core ===
 Requires at least: 6.6
 Requires PHP: 8.2
-Stable tag: 1.13.2
+Stable tag: 1.13
 License: GPLv2 or later
 
 Intranet privada para la comunidad ASCLA. Instalar este ZIP desde Plugins.
@@ -10,13 +10,12 @@ ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 
 == Changelog ==
 
-= 1.13.2 =
+= 1.13 =
+* Reconoce «que es el intranet ascla?» y variantes con el/la, este/esta, nuestro/nuestra, espacios repetidos y preguntas invertidas. La definición utiliza el contexto institucional autorizado, incluso después de preguntar por videos o galerías, sin una solicitud al proveedor de IA. Se conservan las mejoras de colores, los permisos y los controles de evidencia para consultas específicas. Versión mantenida en 1.13.
 * La barra lateral conserva el azul institucional en los temas claro y oscuro. Las pestañas seleccionadas, los avisos y los demás elementos que comparten el color de resaltado recuperan un azul tenue en modo oscuro. Los fondos generales mantienen el negro y el gris carbón; no cambian la navegación, los permisos ni el guardado de datos.
 
-= 1.13.1 =
 * El asistente explica qué es la intranet de ASCLA y para qué sirve, en español e inglés, con contexto institucional. Una pregunta explícita sobre la plataforma cambia de tema aunque antes se consultaran videos o galerías. Funciona sin una llamada a una IA externa y conserva los permisos y la evidencia para consultas sobre fuentes concretas.
 
-= 1.13 =
 * Grupos: agregar conexiones, expulsar integrantes, salir, transferir la gestión y eliminar el grupo con confirmación. Avisos de salida y expulsión; historial limitado a la incorporación. Esquema 17.
 * Onboarding por módulo y rol, automático solo en cuentas nuevas, con progreso por usuario en WordPress y ayuda para repetir.
 * Menú de cuenta con Mi perfil y Cerrar sesión; sugerencia de primer mensaje una vez por persona e idiomas de interfaz/IA coherentes con la cuenta.

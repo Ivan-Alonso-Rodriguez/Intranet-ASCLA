@@ -1,16 +1,18 @@
 # ASCLA Core — Intranet ASCLA
 
-## Versión actual: 1.13.2 · esquema 17
+## Versión actual: 1.13 · esquema 17
 
-La versión 1.13.2 conserva la barra lateral azul en ambos temas y recupera los resaltados azules en modo oscuro, con el fondo general en gris carbón. Consulta la [comprobación visual](docs/evidence/release-1.13.2/theme.json) de esta corrección.
+La versión instalable se mantiene en **1.13**, por indicación del proyecto. La [revisión actual del asistente](docs/evidence/release-1.13/assistant-language-20261119/validation.json) reconoce «que es el intranet ascla?» y variantes de artículo, acentos y espacios. Incluye las mejoras anteriores; las evidencias históricas conservan su propio paquete y alcance.
 
-La corrección 1.13.1 mejora la explicación institucional del asistente y evita arrastrar el tema de videos o galerías anteriores.
+El diseño conserva la barra lateral azul en ambos temas y recupera los resaltados azules en modo oscuro, con el fondo general en gris carbón. Consulta la [comprobación visual](docs/evidence/release-1.13.2/theme.json) de esta corrección.
 
-Su [regresión focalizada](docs/evidence/release-1.13.1/assistant-about.json) aprobó 93 pruebas PHP, 932 aserciones, 49 controles de versión y el chat real en español e inglés, incluida la persistencia tras recargar.
+El asistente describe la intranet con información institucional y distingue estas preguntas de las consultas previas sobre videos o galerías.
+
+La [regresión anterior](docs/evidence/release-1.13.1/assistant-about.json) aprobó 93 pruebas PHP, 932 aserciones, 49 controles de versión y el chat real en español e inglés, incluida la persistencia tras recargar; conserva su propio paquete y alcance.
 
 La versión 1.13 reúne las mejoras de grupos, los recorridos interactivos por usuario, el menú de cuenta, los idiomas de IA, los banners, las reacciones animadas y el modo oscuro en gris carbón. Consulta el [historial de 1.13](VERSION_HISTORY.md#release-113) para ver el alcance desde el último commit de 1.12.
 
-La [validación técnica de 1.13](docs/evidence/release-1.13/validation.json) registra las ejecuciones independientes de QA y UAT del 19 de noviembre: regresión PHP/E2E, Bruno, Playwright, manual, onboarding, SonarQube, Trivy, ZAP/CSP, Jenkins y carga. Conserva los commits analizados, el SHA-256 del ZIP y la única omisión histórica de comparación de catálogos; no sustituye la aceptación humana UAT.
+La [validación técnica inicial de 1.13](docs/evidence/release-1.13/validation.json) registra las ejecuciones independientes de QA y UAT del 19 de noviembre: regresión PHP/E2E, Bruno, Playwright, manual, onboarding, SonarQube, Trivy, ZAP/CSP, Jenkins y carga. Conserva los commits analizados, el SHA-256 del ZIP y la única omisión histórica de comparación de catálogos; no sustituye la aceptación humana UAT.
 
 La [versión 1.11.1](VERSION_HISTORY.md#release-1111) incorporó la importación revisada de intereses desde CSV, PDF tabular, HTML y ZIP de una hoja, además de mejoras en estadísticas y asistencia de Zoom.
 
@@ -47,10 +49,10 @@ Desde la raíz del repositorio:
 
 ```bash
 python3 scripts/build.py
-python3 scripts/verify-package.py
+python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/assistant-language-20261119/package.json
 ```
 
-Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto de 1.13.2](docs/evidence/release-1.13.2/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
+Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto de la revisión actual de 1.13](docs/evidence/release-1.13/assistant-language-20261119/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
 
 ## Calidad y entrega
 

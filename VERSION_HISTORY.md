@@ -1,8 +1,14 @@
 # Historial de versiones — Intranet ASCLA
 
-**Versión actual:** `1.13.2` · **Esquema:** `17`.
+**Versión actual:** `1.13` · **Esquema:** `17`.
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
+
+<a id="release-113-revision-20261119"></a>
+
+## 1.13 — Revisión del reconocimiento de preguntas
+
+Revisión del 19 de noviembre de 2026. La versión instalable se mantiene en 1.13 y el esquema en 17, por indicación del proyecto. Reconoce «que es el intranet ascla?» y variantes con el/la, este/esta, nuestro/nuestra, espacios repetidos y preguntas invertidas. La definición utiliza el contexto institucional autorizado, incluso después de preguntar por videos o galerías, sin una solicitud al proveedor de IA. Se conservan las mejoras de colores, los permisos y los controles de evidencia para consultas específicas. El [manifiesto actual](docs/evidence/release-1.13/assistant-language-20261119/package.json) y la [validación focalizada](docs/evidence/release-1.13/assistant-language-20261119/validation.json) identifican este ZIP. Las entregas auxiliares anteriores y la validación integral inicial se conservan como registros históricos; sus resultados corresponden a sus propios hashes.
 
 <a id="release-1132"></a>
 

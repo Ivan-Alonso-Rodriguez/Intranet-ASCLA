@@ -1,6 +1,10 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 19 de noviembre de 2026. Plugin **1.13.2**, esquema **17**. El [historial](VERSION_HISTORY.md#release-1132) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+Revisión documental: 19 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113-revision-20261119) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+
+## Revisión actual del asistente · 1.13
+
+Reconoce «que es el intranet ascla?» y variantes con el/la, este/esta, nuestro/nuestra, espacios repetidos y preguntas invertidas. La definición utiliza el contexto institucional autorizado, incluso después de preguntar por videos o galerías, sin una solicitud al proveedor de IA. Se conservan las mejoras de colores, los permisos y los controles de evidencia para consultas específicas. La [evidencia focalizada](docs/evidence/release-1.13/assistant-language-20261119/validation.json) registra la reproducción exacta y las pruebas de esta revisión. Se mantiene la versión 1.13; los informes completos anteriores conservan sus hashes y no se presentan como una nueva certificación integral de este ZIP.
 
 ## Colores de los temas · 1.13.2
 

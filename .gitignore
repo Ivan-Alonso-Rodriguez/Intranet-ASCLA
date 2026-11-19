@@ -262,3 +262,9 @@ __pycache__/
 /docs/evidence/release-1.13.2/*
 !/docs/evidence/release-1.13.2/package.json
 !/docs/evidence/release-1.13.2/theme.json
+
+!/docs/evidence/release-1.13/assistant-language-20261119/
+/docs/evidence/release-1.13/assistant-language-20261119/*
+!/docs/evidence/release-1.13/assistant-language-20261119/package.json
+!/docs/evidence/release-1.13/assistant-language-20261119/validation.json
+!/docs/evidence/release-1.13/assistant-language-20261119/junit.xml
