@@ -6,7 +6,7 @@ const env=Object.fromEntries(fs.readFileSync(process.env.ASCLA_ENV_FILE||root+'/
 const checks=[],errors=[],users=[],posts=[];let browser,admin;
 async function api(page,route,body,method){return page.evaluate(async({route,body,method})=>{const url=route.startsWith('native:')?ASCLA.api.replace(/ascla\/v1\/?$/,'wp/v2/')+route.slice(7):ASCLA.api+route;const r=await fetch(url,{method:method||(body?'POST':'GET'),headers:{'X-WP-Nonce':ASCLA.nonce,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});return{status:r.status,body:await r.json()};},{route,body,method});}
 async function ok(page,route,body,method){const r=await api(page,route,body,method);assert.ok(r.status>=200&&r.status<300,route+': '+r.status+' '+r.body.message);return r.body;}
-async function login(name,password){const context=await browser.newContext({viewport:{width:1440,height:1000}}),p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(base+'/wp-login.php');await p.locator('#user_login').fill(name);await p.locator('#user_pass').fill(password);await Promise.all([p.waitForNavigation({waitUntil:'domcontentloaded'}),p.locator('#wp-submit').click()]);await p.goto(base+'/intranet/');await require('./helpers/browser.cjs').waitForHome(p);await p.keyboard.press('Escape');return p;}
+async function login(name,password){const context=await browser.newContext({viewport:{width:1440,height:1000}}),p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(base+'/wp-login.php');await require('./helpers/browser.cjs').waitForNativeLogin(p);await p.locator('#user_login').fill(name);await p.locator('#user_pass').fill(password);await Promise.all([p.waitForNavigation({waitUntil:'domcontentloaded'}),p.locator('#wp-submit').click()]);await p.goto(base+'/intranet/');await require('./helpers/browser.cjs').waitForHome(p);await p.keyboard.press('Escape');return p;}
 async function goto(p,route){await p.bringToFront();await p.goto(base+'/'+route);await p.locator('#page-content h1').waitFor();if(!new URL(p.url()).searchParams.has('item'))await p.keyboard.press('Escape');}
 function pass(name){checks.push(name);console.log('PASS '+name);}
 (async()=>{try{
@@ -53,9 +53,9 @@ function pass(name){checks.push(name);console.log('PASS '+name);}
  const resource=await ok(admin,'content/resource',{title:'Recurso '+suffix,body:'Recurso publicado para comprobar Me gusta',status:'publish'});posts.push(resource.id);
  for(const [item,section] of [[hub,'hub'],[resource,'centro-conocimiento']]){
   await goto(reader.page,section+'/?item='+item.id);
-  const buttons=reader.page.locator('.reaction-picker [data-comment="false"][data-id="'+item.id+'"]');await buttons.first().waitFor();
+  const buttons=reader.page.locator('.modal .reaction-picker [data-comment="false"][data-id="'+item.id+'"]');await buttons.waitFor();
   assert.deepEqual(await buttons.evaluateAll(nodes=>nodes.map(node=>node.dataset.reaction)),['like']);
-  await buttons.click();await reader.page.waitForFunction(id=>document.querySelector('.reaction-picker [data-comment="false"][data-id="'+id+'"]')?.getAttribute('aria-pressed')==='true',item.id);
+  await buttons.click();await reader.page.waitForFunction(id=>document.querySelector('.modal .reaction-picker [data-comment="false"][data-id="'+id+'"]')?.getAttribute('aria-pressed')==='true',item.id);
  }
  pass('Hub y Centro de Conocimiento también conservan únicamente Me gusta');
  const moderation='admin/comments/'+comment.id;
