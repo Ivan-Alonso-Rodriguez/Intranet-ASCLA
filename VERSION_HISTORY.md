@@ -19,6 +19,8 @@ Entrega preparada el 18 de noviembre de 2026. Reúne todos los cambios del plugi
 
 El esquema **17** incorpora `participants.joined_after` (migración 16) y `messages.kind` (migración 17), conservando usuarios, contenidos e historial existente. El [manifiesto de 1.13](docs/evidence/release-1.13/package.json) identifica el ZIP y sus archivos. La promoción sigue el [manual QA/UAT](MANUAL_QA_UAT.md); aceptación humana y despliegue remoto se acreditan por separado.
 
+La [validación del 19 de noviembre](docs/evidence/release-1.13/validation.json) aprobó QA y UAT independientes: 924 casos PHP y 9737 aserciones por entorno, 14 suites de calidad, Bruno 81 peticiones/149 comprobaciones, seis flujos Playwright con videos y capturas, diez bloques del manual, onboarding, grupos, animaciones y ambos temas. SonarQube aprobó con cero incidencias, cobertura global 92,1 % y nueva 95,8 %. Trivy aprobó cuatro imágenes sin vulnerabilidades; ZAP frontend/backend y CSP aprobaron. Jenkins verificó artefactos y retención; la carga final aprobó 7264 lecturas y hasta 32 sesiones. Se conserva una omisión histórica PHP y se declara el alcance local y simulado de cada herramienta.
+
 <a id="release-112"></a>
 
 ## 1.12 — Rediseño y mejoras de la comunidad

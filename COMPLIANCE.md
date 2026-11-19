@@ -1,6 +1,14 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 18 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+Revisión documental: 19 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+
+## Validación técnica 1.13 del 19 de noviembre de 2026
+
+La [evidencia de 1.13](docs/evidence/release-1.13/validation.json) registra QA y UAT independientes sobre el mismo ZIP de 249 archivos. Cada entorno aprobó 924 pruebas PHP/9737 aserciones, las 14 suites de calidad, Bruno 81/149, seis flujos Playwright, los diez bloques del manual, onboarding y cinco comprobaciones adicionales. La omisión histórica del catálogo PHP permanece explícita; las comprobaciones actuales de traducción y los recorridos ES/EN aprobaron. UAT también repitió el cumpleaños, el contraste de comentarios y la edición solo de contenido propio para administrador, ejecutivo y moderador.
+
+Ambos Quality Gates del curso aprobaron con cero incidencias, cobertura 92,1 % y cobertura nueva 95,8 %. Las cuatro imágenes aprobaron Trivy sin exclusiones ni vulnerabilidades. ZAP de páginas y API, CSP y navegador aprobaron. Jenkins local verificó el escaneo real, artefactos HTML/JSON y retención de la última ejecución, incluida la transición éxito → fallo. La carga final aprobó 7264 lecturas, hasta 32 sesiones, guardados concurrentes y cupos sin sobreventa. Las fuentes, alcances y versiones analizadas se conservan por herramienta; los ajustes posteriores de pruebas no alteraron el plugin ni las políticas de seguridad.
+
+Los laboratorios, cuentas sintéticas y servicios simulados no acreditan credenciales ni entregas de proveedores externos, capacidad del hosting o despliegue remoto. La aceptación humana UAT y el PR a `main` siguen el procedimiento del manual.
 
 ## Perfil, recuperación e importación del 5 de noviembre de 2026
 

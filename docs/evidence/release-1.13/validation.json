@@ -1,0 +1,1815 @@
+{
+  "version": "1.13",
+  "schema": 17,
+  "date": "2026-11-19T07:08:37.331747+00:00",
+  "package": {
+    "sha256": "f59a94d1c2e1d1ff3256fde480e4bea26e008888e01416303251f40d34f716b2",
+    "bytes": 2689439,
+    "files": 249,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true
+  },
+  "phases": {
+    "qa": {
+      "source_commit": "e8fb2a8dc73c9a00f4c7ad1da95df63066ab9d9a",
+      "package_sha256": "f59a94d1c2e1d1ff3256fde480e4bea26e008888e01416303251f40d34f716b2",
+      "php": {
+        "tests": 924,
+        "assertions": 9737,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 1
+      },
+      "quality_suites": 14,
+      "sonarqube": {
+        "project": "ASCLA-QA",
+        "commit": "e8fb2a8dc73c9a00f4c7ad1da95df63066ab9d9a",
+        "analysis": "5013cd73-c106-4e6b-8ae9-27ea3dd064de",
+        "task": "b9387035-0f4d-4d79-afaa-2a71cd08beb5",
+        "date": "2026-11-19T06:34:33.122342+00:00",
+        "status": "OK",
+        "conditions": [
+          {
+            "status": "OK",
+            "metricKey": "new_coverage",
+            "comparator": "LT",
+            "errorThreshold": "80",
+            "actualValue": "95.8"
+          },
+          {
+            "status": "OK",
+            "metricKey": "coverage",
+            "comparator": "LT",
+            "errorThreshold": "80",
+            "actualValue": "92.1"
+          },
+          {
+            "status": "OK",
+            "metricKey": "new_duplicated_lines_density",
+            "comparator": "GT",
+            "errorThreshold": "2",
+            "actualValue": "0.56273"
+          },
+          {
+            "status": "OK",
+            "metricKey": "duplicated_lines_density",
+            "comparator": "GT",
+            "errorThreshold": "2",
+            "actualValue": "0.1"
+          },
+          {
+            "status": "OK",
+            "metricKey": "new_software_quality_maintainability_rating",
+            "comparator": "GT",
+            "errorThreshold": "1",
+            "actualValue": "1"
+          },
+          {
+            "status": "OK",
+            "metricKey": "new_violations",
+            "comparator": "GT",
+            "errorThreshold": "0",
+            "actualValue": "0"
+          },
+          {
+            "status": "OK",
+            "metricKey": "software_quality_maintainability_rating",
+            "comparator": "GT",
+            "errorThreshold": "1",
+            "actualValue": "1"
+          },
+          {
+            "status": "OK",
+            "metricKey": "test_success_density",
+            "comparator": "LT",
+            "errorThreshold": "100",
+            "actualValue": "100.0"
+          },
+          {
+            "status": "OK",
+            "metricKey": "violations",
+            "comparator": "GT",
+            "errorThreshold": "0",
+            "actualValue": "0"
+          }
+        ],
+        "measures": [
+          {
+            "metric": "coverage",
+            "value": "92.1",
+            "bestValue": false
+          },
+          {
+            "metric": "bugs",
+            "value": "0",
+            "bestValue": true
+          },
+          {
+            "metric": "duplicated_lines_density",
+            "value": "0.1",
+            "bestValue": false
+          },
+          {
+            "metric": "code_smells",
+            "value": "0",
+            "bestValue": true
+          },
+          {
+            "metric": "new_coverage",
+            "period": {
+              "index": 1,
+              "value": "95.8",
+              "bestValue": false
+            }
+          },
+          {
+            "metric": "violations",
+            "value": "0",
+            "bestValue": true
+          },
+          {
+            "metric": "vulnerabilities",
+            "value": "0",
+            "bestValue": true
+          },
+          {
+            "metric": "security_hotspots",
+            "value": "0",
+            "bestValue": true
+          },
+          {
+            "metric": "new_duplicated_lines_density",
+            "period": {
+              "index": 1,
+              "value": "0.56273",
+              "bestValue": false
+            }
+          }
+        ],
+        "open_issues": 0,
+        "issues": [],
+        "scanner_exit": 0,
+        "scope": "Full analysis with matching revision coverage"
+      },
+      "bruno": {
+        "requests": 81,
+        "checks": 149,
+        "status": "PASS"
+      },
+      "playwright": {
+        "flows": 6,
+        "videos": 12,
+        "status": "PASS"
+      },
+      "manual_modes": [
+        {
+          "mode": "summary",
+          "exit": 0,
+          "seconds": 24.86
+        },
+        {
+          "mode": "moderation",
+          "exit": 0,
+          "seconds": 26.27
+        },
+        {
+          "mode": "comments",
+          "exit": 0,
+          "seconds": 63.47
+        },
+        {
+          "mode": "video",
+          "exit": 0,
+          "seconds": 249.62
+        },
+        {
+          "mode": "media",
+          "exit": 0,
+          "seconds": 118.97
+        },
+        {
+          "mode": "profile",
+          "exit": 0,
+          "seconds": 16.91
+        },
+        {
+          "mode": "workflow",
+          "exit": 0,
+          "seconds": 18.47
+        },
+        {
+          "mode": "insights",
+          "exit": 0,
+          "seconds": 24.99
+        },
+        {
+          "mode": "interest",
+          "exit": 0,
+          "seconds": 13.06
+        },
+        {
+          "mode": "translations",
+          "exit": 0,
+          "seconds": 139.92
+        }
+      ],
+      "onboarding": {
+        "checks": [
+          "member light 1440: 12 tours, manual help and persisted completion",
+          "admin light 1440: 11 tours, manual help and persisted completion",
+          "member dark 390: 12 tours, manual help and persisted completion",
+          "admin dark 390: 11 tours, manual help and persisted completion",
+          "Interrupted automatic Home tour does not return after logout/login",
+          "New account auto-starts on first module visit; Next, Previous and reload persist state",
+          "Different browser/device resumes via Help; keyboard focus, Escape and Skip save across sessions",
+          "Failed progress write leaves the current step visible and allows retry without losing data",
+          "Concurrent browser claims: exactly one automatic start",
+          "New administrator has separate first-visit tours for each management section",
+          "moderator: guide catalog and endpoints respect role permissions",
+          "executive: guide catalog and endpoints respect role permissions",
+          "No browser JavaScript errors"
+        ],
+        "coverage": [
+          {
+            "module": "intranet",
+            "theme": "light",
+            "width": 1440,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "perfil",
+            "theme": "light",
+            "width": 1440,
+            "steps": 5,
+            "missing": []
+          },
+          {
+            "module": "directorio",
+            "theme": "light",
+            "width": 1440,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "mensajeria",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": [
+              "write"
+            ]
+          },
+          {
+            "module": "asistente",
+            "theme": "light",
+            "width": 1440,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "contacto",
+            "theme": "light",
+            "width": 1440,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "aliados",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": [
+              "detail"
+            ]
+          },
+          {
+            "module": "eventos",
+            "theme": "light",
+            "width": 1440,
+            "steps": 4,
+            "missing": []
+          },
+          {
+            "module": "hub",
+            "theme": "light",
+            "width": 1440,
+            "steps": 5,
+            "missing": []
+          },
+          {
+            "module": "galeria",
+            "theme": "light",
+            "width": 1440,
+            "steps": 4,
+            "missing": []
+          },
+          {
+            "module": "foros",
+            "theme": "light",
+            "width": 1440,
+            "steps": 5,
+            "missing": []
+          },
+          {
+            "module": "centro-conocimiento",
+            "theme": "light",
+            "width": 1440,
+            "steps": 4,
+            "missing": []
+          },
+          {
+            "module": "admin-resumen",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-estadisticas",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-moderacion",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-solicitudes",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-contenidos",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-importar",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-usuarios",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-aliados",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-microeventos",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-logs",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-configuracion",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "intranet",
+            "theme": "dark",
+            "width": 390,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "perfil",
+            "theme": "dark",
+            "width": 390,
+            "steps": 5,
+            "missing": []
+          },
+          {
+            "module": "directorio",
+            "theme": "dark",
+            "width": 390,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "mensajeria",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": [
+              "write"
+            ]
+          },
+          {
+            "module": "asistente",
+            "theme": "dark",
+            "width": 390,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "contacto",
+            "theme": "dark",
+            "width": 390,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "aliados",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": [
+              "detail"
+            ]
+          },
+          {
+            "module": "eventos",
+            "theme": "dark",
+            "width": 390,
+            "steps": 4,
+            "missing": []
+          },
+          {
+            "module": "hub",
+            "theme": "dark",
+            "width": 390,
+            "steps": 5,
+            "missing": []
+          },
+          {
+            "module": "galeria",
+            "theme": "dark",
+            "width": 390,
+            "steps": 4,
+            "missing": []
+          },
+          {
+            "module": "foros",
+            "theme": "dark",
+            "width": 390,
+            "steps": 5,
+            "missing": []
+          },
+          {
+            "module": "centro-conocimiento",
+            "theme": "dark",
+            "width": 390,
+            "steps": 4,
+            "missing": []
+          },
+          {
+            "module": "admin-resumen",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-estadisticas",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-moderacion",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-solicitudes",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-contenidos",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-importar",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-usuarios",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-aliados",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-microeventos",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-logs",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-configuracion",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          }
+        ],
+        "errors": []
+      },
+      "additional_checks": [
+        {
+          "suite": "motion",
+          "exit": 0
+        },
+        {
+          "suite": "dark",
+          "exit": 0
+        },
+        {
+          "suite": "group-activity",
+          "exit": 0
+        },
+        {
+          "suite": "group-owner",
+          "exit": 0
+        },
+        {
+          "suite": "group-removal",
+          "exit": 0
+        }
+      ],
+      "security_source_commit": "ca42f48dc25863973666b34f339b9846fecdb20e",
+      "production_and_security_policy_identical_to_quality_commit": true,
+      "trivy": {
+        "date": "2026-11-19T06:07:34.498659+00:00",
+        "status": "PASS",
+        "images": [
+          {
+            "role": "app",
+            "reference": "ascla-ci-app:release113-qa-ca42f48dc2",
+            "id": "sha256:8c3634d55d854da75b68fc0b50e378a22f98a70082c73efc244a3fd5678d5bdc",
+            "built": true,
+            "status": "PASS",
+            "config_id": "sha256:baa1c143502d007c41b318c24fa3edd50ed6f45367205e710e39863713fb56d1",
+            "counts": {
+              "UNKNOWN": 0,
+              "LOW": 0,
+              "MEDIUM": 0,
+              "HIGH": 0,
+              "CRITICAL": 0
+            },
+            "blocking": 0,
+            "report_sha256": "76d964f00c058a44577c63f05e0b294b466dc5692057d665859fc2afdf9a0ad4"
+          },
+          {
+            "role": "cli",
+            "reference": "ascla-ci-cli:release113-qa-ca42f48dc2",
+            "id": "sha256:6fec08a4d199e747b7dab814ea1eca2007dc0ebd8e5460ea0e74eb2a405da71e",
+            "built": true,
+            "status": "PASS",
+            "config_id": "sha256:891e83f6385a4a89e9a3f46192d79e948eaccc5087110faa274764546b0994ea",
+            "counts": {
+              "UNKNOWN": 0,
+              "LOW": 0,
+              "MEDIUM": 0,
+              "HIGH": 0,
+              "CRITICAL": 0
+            },
+            "blocking": 0,
+            "report_sha256": "269803bb306a879eba0357af9871383f8e42f3e7fad823c3ed1d086171af049f"
+          },
+          {
+            "role": "db",
+            "reference": "ascla-ci-db:release113-qa-ca42f48dc2",
+            "id": "sha256:0874e9e3c88dcc9e46910732cbd824dd97eb5677660cbc14e3228a58cb5504cc",
+            "built": true,
+            "status": "PASS",
+            "config_id": "sha256:05c333dcc9dee107c56d7e03267d3ea162584a7c4636dedd26accdaa6f476564",
+            "counts": {
+              "UNKNOWN": 0,
+              "LOW": 0,
+              "MEDIUM": 0,
+              "HIGH": 0,
+              "CRITICAL": 0
+            },
+            "blocking": 0,
+            "report_sha256": "a2495821f6d382fec75d295fa6d8954a6fe685be862c7e10d566332570020d5e"
+          },
+          {
+            "role": "mailpit",
+            "reference": "ascla-ci-mailpit:release113-qa-ca42f48dc2",
+            "id": "sha256:8f0b441e9514c51dfb81b6d2169aef019016d29133cb9831c659001e699aac39",
+            "built": true,
+            "status": "PASS",
+            "config_id": "sha256:b24eac1e88ae4ba3ba17e47e86ff3467fef619be5b9bac924dc6ec5ac585f2e3",
+            "counts": {
+              "UNKNOWN": 0,
+              "LOW": 0,
+              "MEDIUM": 0,
+              "HIGH": 0,
+              "CRITICAL": 0
+            },
+            "blocking": 0,
+            "report_sha256": "bb1aedaa4e29663a5813e54cc76e15ac8a70842ea43feb1613d8cb89e3feeb1d"
+          }
+        ],
+        "commit": "ca42f48dc25863973666b34f339b9846fecdb20e",
+        "source_sha256": "699d7bb7bfce52a403d350099b59b0f8f6df0ebe3a10a9523407aad868cadb07",
+        "scanner": "aquasec/trivy:0.76.1@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c",
+        "run": "release113-qa-ca42f48dc2"
+      },
+      "zap_csp": {
+        "date": "2026-11-19T06:18:08.961538+00:00",
+        "status": "PASS",
+        "scope_note": "ASCLA-owned HTML routes and 18 documented GET REST operations in disposable local QA. Excludes native WordPress admin, arbitrary CMS/theme/plugin routes, destructive writes and live external integrations. No universal absence-of-vulnerabilities claim.",
+        "phases": [
+          {
+            "phase": "frontend",
+            "status": "PASS",
+            "risk_counts": {
+              "0": 9,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            }
+          },
+          {
+            "phase": "backend",
+            "status": "PASS",
+            "risk_counts": {
+              "0": 1,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            }
+          },
+          {
+            "phase": "CSP",
+            "status": "PASS"
+          },
+          {
+            "phase": "Browser",
+            "status": "PASS"
+          },
+          {
+            "phase": "Source consistency",
+            "status": "PASS"
+          }
+        ]
+      }
+    },
+    "uat": {
+      "source_commit": "dd74f2faaccb5a84808db5d1fbfb1ae9458a5a8f",
+      "package_sha256": "f59a94d1c2e1d1ff3256fde480e4bea26e008888e01416303251f40d34f716b2",
+      "php": {
+        "tests": 924,
+        "assertions": 9737,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 1
+      },
+      "quality_suites": 14,
+      "sonarqube": {
+        "project": "ASCLA-UAT",
+        "commit": "dd74f2faaccb5a84808db5d1fbfb1ae9458a5a8f",
+        "analysis": "54f84d0b-d11b-48a9-84ae-16b6cab06d21",
+        "task": "8ca19388-98a3-4b5d-b215-13728fc1d0c7",
+        "date": "2026-11-19T06:49:42.309377+00:00",
+        "status": "OK",
+        "conditions": [
+          {
+            "status": "OK",
+            "metricKey": "new_coverage",
+            "comparator": "LT",
+            "errorThreshold": "80",
+            "actualValue": "95.8"
+          },
+          {
+            "status": "OK",
+            "metricKey": "coverage",
+            "comparator": "LT",
+            "errorThreshold": "80",
+            "actualValue": "92.1"
+          },
+          {
+            "status": "OK",
+            "metricKey": "new_duplicated_lines_density",
+            "comparator": "GT",
+            "errorThreshold": "2",
+            "actualValue": "0.56273"
+          },
+          {
+            "status": "OK",
+            "metricKey": "duplicated_lines_density",
+            "comparator": "GT",
+            "errorThreshold": "2",
+            "actualValue": "0.1"
+          },
+          {
+            "status": "OK",
+            "metricKey": "new_software_quality_maintainability_rating",
+            "comparator": "GT",
+            "errorThreshold": "1",
+            "actualValue": "1"
+          },
+          {
+            "status": "OK",
+            "metricKey": "new_violations",
+            "comparator": "GT",
+            "errorThreshold": "0",
+            "actualValue": "0"
+          },
+          {
+            "status": "OK",
+            "metricKey": "software_quality_maintainability_rating",
+            "comparator": "GT",
+            "errorThreshold": "1",
+            "actualValue": "1"
+          },
+          {
+            "status": "OK",
+            "metricKey": "test_success_density",
+            "comparator": "LT",
+            "errorThreshold": "100",
+            "actualValue": "100.0"
+          },
+          {
+            "status": "OK",
+            "metricKey": "violations",
+            "comparator": "GT",
+            "errorThreshold": "0",
+            "actualValue": "0"
+          }
+        ],
+        "measures": [
+          {
+            "metric": "coverage",
+            "value": "92.1",
+            "bestValue": false
+          },
+          {
+            "metric": "bugs",
+            "value": "0",
+            "bestValue": true
+          },
+          {
+            "metric": "duplicated_lines_density",
+            "value": "0.1",
+            "bestValue": false
+          },
+          {
+            "metric": "code_smells",
+            "value": "0",
+            "bestValue": true
+          },
+          {
+            "metric": "new_coverage",
+            "period": {
+              "index": 1,
+              "value": "95.8",
+              "bestValue": false
+            }
+          },
+          {
+            "metric": "violations",
+            "value": "0",
+            "bestValue": true
+          },
+          {
+            "metric": "vulnerabilities",
+            "value": "0",
+            "bestValue": true
+          },
+          {
+            "metric": "security_hotspots",
+            "value": "0",
+            "bestValue": true
+          },
+          {
+            "metric": "new_duplicated_lines_density",
+            "period": {
+              "index": 1,
+              "value": "0.56273",
+              "bestValue": false
+            }
+          }
+        ],
+        "open_issues": 0,
+        "issues": [],
+        "scanner_exit": 0,
+        "scope": "Full analysis with matching revision coverage"
+      },
+      "bruno": {
+        "requests": 81,
+        "checks": 149,
+        "status": "PASS"
+      },
+      "playwright": {
+        "flows": 6,
+        "videos": 12,
+        "status": "PASS"
+      },
+      "manual_modes": [
+        {
+          "mode": "summary",
+          "exit": 0,
+          "seconds": 17.88
+        },
+        {
+          "mode": "moderation",
+          "exit": 0,
+          "seconds": 21.88
+        },
+        {
+          "mode": "comments",
+          "exit": 0,
+          "seconds": 48.59
+        },
+        {
+          "mode": "video",
+          "exit": 0,
+          "seconds": 251.25
+        },
+        {
+          "mode": "media",
+          "exit": 0,
+          "seconds": 90.62
+        },
+        {
+          "mode": "profile",
+          "exit": 0,
+          "seconds": 15.99
+        },
+        {
+          "mode": "workflow",
+          "exit": 0,
+          "seconds": 16.85
+        },
+        {
+          "mode": "insights",
+          "exit": 0,
+          "seconds": 20.83
+        },
+        {
+          "mode": "interest",
+          "exit": 0,
+          "seconds": 11.84
+        },
+        {
+          "mode": "translations",
+          "exit": 0,
+          "seconds": 142.35
+        }
+      ],
+      "onboarding": {
+        "checks": [
+          "member light 1440: 12 tours, manual help and persisted completion",
+          "admin light 1440: 11 tours, manual help and persisted completion",
+          "member dark 390: 12 tours, manual help and persisted completion",
+          "admin dark 390: 11 tours, manual help and persisted completion",
+          "Interrupted automatic Home tour does not return after logout/login",
+          "New account auto-starts on first module visit; Next, Previous and reload persist state",
+          "Different browser/device resumes via Help; keyboard focus, Escape and Skip save across sessions",
+          "Failed progress write leaves the current step visible and allows retry without losing data",
+          "Concurrent browser claims: exactly one automatic start",
+          "New administrator has separate first-visit tours for each management section",
+          "moderator: guide catalog and endpoints respect role permissions",
+          "executive: guide catalog and endpoints respect role permissions",
+          "No browser JavaScript errors"
+        ],
+        "coverage": [
+          {
+            "module": "intranet",
+            "theme": "light",
+            "width": 1440,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "perfil",
+            "theme": "light",
+            "width": 1440,
+            "steps": 5,
+            "missing": []
+          },
+          {
+            "module": "directorio",
+            "theme": "light",
+            "width": 1440,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "mensajeria",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": [
+              "write"
+            ]
+          },
+          {
+            "module": "asistente",
+            "theme": "light",
+            "width": 1440,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "contacto",
+            "theme": "light",
+            "width": 1440,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "aliados",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": [
+              "detail"
+            ]
+          },
+          {
+            "module": "eventos",
+            "theme": "light",
+            "width": 1440,
+            "steps": 4,
+            "missing": []
+          },
+          {
+            "module": "hub",
+            "theme": "light",
+            "width": 1440,
+            "steps": 5,
+            "missing": []
+          },
+          {
+            "module": "galeria",
+            "theme": "light",
+            "width": 1440,
+            "steps": 4,
+            "missing": []
+          },
+          {
+            "module": "foros",
+            "theme": "light",
+            "width": 1440,
+            "steps": 5,
+            "missing": []
+          },
+          {
+            "module": "centro-conocimiento",
+            "theme": "light",
+            "width": 1440,
+            "steps": 4,
+            "missing": []
+          },
+          {
+            "module": "admin-resumen",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-estadisticas",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-moderacion",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-solicitudes",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-contenidos",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-importar",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-usuarios",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-aliados",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-microeventos",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-logs",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-configuracion",
+            "theme": "light",
+            "width": 1440,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "intranet",
+            "theme": "dark",
+            "width": 390,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "perfil",
+            "theme": "dark",
+            "width": 390,
+            "steps": 5,
+            "missing": []
+          },
+          {
+            "module": "directorio",
+            "theme": "dark",
+            "width": 390,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "mensajeria",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": [
+              "write"
+            ]
+          },
+          {
+            "module": "asistente",
+            "theme": "dark",
+            "width": 390,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "contacto",
+            "theme": "dark",
+            "width": 390,
+            "steps": 3,
+            "missing": []
+          },
+          {
+            "module": "aliados",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": [
+              "detail"
+            ]
+          },
+          {
+            "module": "eventos",
+            "theme": "dark",
+            "width": 390,
+            "steps": 4,
+            "missing": []
+          },
+          {
+            "module": "hub",
+            "theme": "dark",
+            "width": 390,
+            "steps": 5,
+            "missing": []
+          },
+          {
+            "module": "galeria",
+            "theme": "dark",
+            "width": 390,
+            "steps": 4,
+            "missing": []
+          },
+          {
+            "module": "foros",
+            "theme": "dark",
+            "width": 390,
+            "steps": 5,
+            "missing": []
+          },
+          {
+            "module": "centro-conocimiento",
+            "theme": "dark",
+            "width": 390,
+            "steps": 4,
+            "missing": []
+          },
+          {
+            "module": "admin-resumen",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-estadisticas",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-moderacion",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-solicitudes",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-contenidos",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-importar",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-usuarios",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-aliados",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-microeventos",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-logs",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          },
+          {
+            "module": "admin-configuracion",
+            "theme": "dark",
+            "width": 390,
+            "steps": 2,
+            "missing": []
+          }
+        ],
+        "errors": []
+      },
+      "additional_checks": [
+        {
+          "suite": "motion",
+          "exit": 0
+        },
+        {
+          "suite": "dark",
+          "exit": 0
+        },
+        {
+          "suite": "group-activity",
+          "exit": 0
+        },
+        {
+          "suite": "group-owner",
+          "exit": 0
+        },
+        {
+          "suite": "group-removal",
+          "exit": 0
+        }
+      ],
+      "security_source_commit": "dd74f2faaccb5a84808db5d1fbfb1ae9458a5a8f",
+      "production_and_security_policy_identical_to_quality_commit": true,
+      "trivy": {
+        "date": "2026-11-19T06:37:01.542262+00:00",
+        "status": "PASS",
+        "images": [
+          {
+            "role": "app",
+            "reference": "ascla-ci-app:release113-uat-dd74f2faac",
+            "id": "sha256:02e50c41a08c2cd235fbd02fa30fa2b8119f159188da8afe55d2ea3873c54139",
+            "built": true,
+            "status": "PASS",
+            "config_id": "sha256:95fe8534c0591365dddbed6d98a0a1ae219a918ffb636bc3e59200ba4d892207",
+            "counts": {
+              "UNKNOWN": 0,
+              "LOW": 0,
+              "MEDIUM": 0,
+              "HIGH": 0,
+              "CRITICAL": 0
+            },
+            "blocking": 0,
+            "report_sha256": "11cccebc6f742529fa73c15d0265450ad1d3896f2cadd796620861cc71612750"
+          },
+          {
+            "role": "cli",
+            "reference": "ascla-ci-cli:release113-uat-dd74f2faac",
+            "id": "sha256:be1799ac2c99ebccf412d93187cc8ba1a8f9107f40901dc3560b7542df7aafd0",
+            "built": true,
+            "status": "PASS",
+            "config_id": "sha256:b2f164872c4f7a225331820db6eb49fc75a2174bbca67fab310381764d5a0160",
+            "counts": {
+              "UNKNOWN": 0,
+              "LOW": 0,
+              "MEDIUM": 0,
+              "HIGH": 0,
+              "CRITICAL": 0
+            },
+            "blocking": 0,
+            "report_sha256": "9627f90d6928539db0d2510f87e18fbdbead63723cc3435950ee610b0564e10f"
+          },
+          {
+            "role": "db",
+            "reference": "ascla-ci-db:release113-uat-dd74f2faac",
+            "id": "sha256:1025d531b49f15eeac9167fb2097c661a8626472a2729f5711cba74d35e5bf2b",
+            "built": true,
+            "status": "PASS",
+            "config_id": "sha256:585951a40b2e5c2190852774ca4ea68e52092f96a10348528911a7808af02c08",
+            "counts": {
+              "UNKNOWN": 0,
+              "LOW": 0,
+              "MEDIUM": 0,
+              "HIGH": 0,
+              "CRITICAL": 0
+            },
+            "blocking": 0,
+            "report_sha256": "3f6bd7f0c6aee6e18bdfd7e767a0bbc4840c636b683704bb12b65144d107a9c9"
+          },
+          {
+            "role": "mailpit",
+            "reference": "ascla-ci-mailpit:release113-uat-dd74f2faac",
+            "id": "sha256:5d376498a03e6a78c78966208bd1ae5a4aa5625c989221f6951353da077b1120",
+            "built": true,
+            "status": "PASS",
+            "config_id": "sha256:9fbd1b2d61c482fe1be14de1e35d4aff36856aaa1c9b90fe71126d244b20e962",
+            "counts": {
+              "UNKNOWN": 0,
+              "LOW": 0,
+              "MEDIUM": 0,
+              "HIGH": 0,
+              "CRITICAL": 0
+            },
+            "blocking": 0,
+            "report_sha256": "5716349781c0efece10b79649c073c242f5f4d5870f6fae43a3e2f0b07133e6b"
+          }
+        ],
+        "commit": "dd74f2faaccb5a84808db5d1fbfb1ae9458a5a8f",
+        "source_sha256": "699d7bb7bfce52a403d350099b59b0f8f6df0ebe3a10a9523407aad868cadb07",
+        "scanner": "aquasec/trivy:0.76.1@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c",
+        "run": "release113-uat-dd74f2faac"
+      },
+      "zap_csp": {
+        "date": "2026-11-19T06:44:47.019202+00:00",
+        "status": "PASS",
+        "scope_note": "ASCLA-owned HTML routes and 18 documented GET REST operations in disposable local QA. Excludes native WordPress admin, arbitrary CMS/theme/plugin routes, destructive writes and live external integrations. No universal absence-of-vulnerabilities claim.",
+        "phases": [
+          {
+            "phase": "frontend",
+            "status": "PASS",
+            "risk_counts": {
+              "0": 9,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            }
+          },
+          {
+            "phase": "backend",
+            "status": "PASS",
+            "risk_counts": {
+              "0": 1,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            }
+          },
+          {
+            "phase": "CSP",
+            "status": "PASS"
+          },
+          {
+            "phase": "Browser",
+            "status": "PASS"
+          },
+          {
+            "phase": "Source consistency",
+            "status": "PASS"
+          }
+        ]
+      }
+    }
+  },
+  "jenkins": {
+    "_class": "org.jenkinsci.plugins.workflow.job.WorkflowRun",
+    "building": false,
+    "number": 1,
+    "result": "SUCCESS",
+    "source_commit": "ca42f48dc25863973666b34f339b9846fecdb20e"
+  },
+  "policy_tests": {
+    "image_gate_retention_and_archive": 19,
+    "qa_delivery": 4,
+    "status": "PASS"
+  },
+  "load": {
+    "phase": "optimized",
+    "scope": "Loopback HTTP, native plugin volume, 32 independent sessions, same fixture; 7 routes per worker, 14 measured requests per worker after equal warm-up; 60-second soak at twelve sessions and optional four independent admin sessions alternating three contexts. Concurrency is closed-loop, not a production capacity guarantee.",
+    "profiles": [
+      {
+        "name": "load-1",
+        "concurrency": 1,
+        "requests": 14,
+        "seconds": 0.674,
+        "requests_per_second": 20.761,
+        "errors": 0,
+        "p50_ms": 33.254,
+        "p95_ms": 124.807,
+        "max_ms": 132.923,
+        "routes": {
+          "profiles": {
+            "p50_ms": 126.68,
+            "p95_ms": 132.299,
+            "max_ms": 132.923
+          },
+          "content/resource": {
+            "p50_ms": 23.008,
+            "p95_ms": 23.424,
+            "max_ms": 23.47
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 52.737,
+            "p95_ms": 52.894,
+            "max_ms": 52.911
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 16.017,
+            "p95_ms": 16.245,
+            "max_ms": 16.27
+          },
+          "matching": {
+            "p50_ms": 33.254,
+            "p95_ms": 33.547,
+            "max_ms": 33.58
+          },
+          "bootstrap": {
+            "p50_ms": 22.801,
+            "p95_ms": 23.003,
+            "max_ms": 23.025
+          },
+          "@page": {
+            "p50_ms": 46.927,
+            "p95_ms": 46.982,
+            "max_ms": 46.988
+          }
+        }
+      },
+      {
+        "name": "load-4",
+        "concurrency": 4,
+        "requests": 56,
+        "seconds": 0.846,
+        "requests_per_second": 66.184,
+        "errors": 0,
+        "p50_ms": 36.443,
+        "p95_ms": 145.191,
+        "max_ms": 291.159,
+        "routes": {
+          "profiles": {
+            "p50_ms": 139.674,
+            "p95_ms": 243.263,
+            "max_ms": 291.159
+          },
+          "content/resource": {
+            "p50_ms": 25.03,
+            "p95_ms": 40.669,
+            "max_ms": 41.05
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 60.1,
+            "p95_ms": 115.879,
+            "max_ms": 124.249
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 21.803,
+            "p95_ms": 35.686,
+            "max_ms": 36.328
+          },
+          "matching": {
+            "p50_ms": 33.206,
+            "p95_ms": 37.539,
+            "max_ms": 38.068
+          },
+          "bootstrap": {
+            "p50_ms": 23.253,
+            "p95_ms": 26.075,
+            "max_ms": 26.458
+          },
+          "@page": {
+            "p50_ms": 46.581,
+            "p95_ms": 62.955,
+            "max_ms": 69.183
+          }
+        }
+      },
+      {
+        "name": "load-12",
+        "concurrency": 12,
+        "requests": 168,
+        "seconds": 1.592,
+        "requests_per_second": 105.513,
+        "errors": 0,
+        "p50_ms": 80.889,
+        "p95_ms": 272.463,
+        "max_ms": 407.616,
+        "routes": {
+          "profiles": {
+            "p50_ms": 245.691,
+            "p95_ms": 401.806,
+            "max_ms": 407.616
+          },
+          "content/resource": {
+            "p50_ms": 132.615,
+            "p95_ms": 279.363,
+            "max_ms": 293.828
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 133.85,
+            "p95_ms": 182.8,
+            "max_ms": 194.027
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 54.812,
+            "p95_ms": 83.371,
+            "max_ms": 90.076
+          },
+          "matching": {
+            "p50_ms": 60.794,
+            "p95_ms": 81.769,
+            "max_ms": 98.079
+          },
+          "bootstrap": {
+            "p50_ms": 53.199,
+            "p95_ms": 72.742,
+            "max_ms": 82.61
+          },
+          "@page": {
+            "p50_ms": 79.137,
+            "p95_ms": 100.018,
+            "max_ms": 101.209
+          }
+        }
+      },
+      {
+        "name": "load-24",
+        "concurrency": 24,
+        "requests": 336,
+        "seconds": 2.354,
+        "requests_per_second": 142.729,
+        "errors": 0,
+        "p50_ms": 119.977,
+        "p95_ms": 349.98,
+        "max_ms": 513.657,
+        "routes": {
+          "profiles": {
+            "p50_ms": 331.269,
+            "p95_ms": 490.65,
+            "max_ms": 513.657
+          },
+          "content/resource": {
+            "p50_ms": 186.729,
+            "p95_ms": 327.247,
+            "max_ms": 340.507
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 212.763,
+            "p95_ms": 318.117,
+            "max_ms": 338.819
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 88.067,
+            "p95_ms": 160.322,
+            "max_ms": 172.355
+          },
+          "matching": {
+            "p50_ms": 96.405,
+            "p95_ms": 122.643,
+            "max_ms": 141.727
+          },
+          "bootstrap": {
+            "p50_ms": 84.076,
+            "p95_ms": 106.052,
+            "max_ms": 110.046
+          },
+          "@page": {
+            "p50_ms": 119.977,
+            "p95_ms": 152.233,
+            "max_ms": 225.476
+          }
+        }
+      },
+      {
+        "name": "load-32",
+        "concurrency": 32,
+        "requests": 448,
+        "seconds": 2.963,
+        "requests_per_second": 151.218,
+        "errors": 0,
+        "p50_ms": 159.478,
+        "p95_ms": 439.431,
+        "max_ms": 634.785,
+        "routes": {
+          "profiles": {
+            "p50_ms": 358.608,
+            "p95_ms": 543.64,
+            "max_ms": 634.785
+          },
+          "content/resource": {
+            "p50_ms": 237.267,
+            "p95_ms": 374.132,
+            "max_ms": 384.69
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 261.301,
+            "p95_ms": 338.894,
+            "max_ms": 356.571
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 135.653,
+            "p95_ms": 232.697,
+            "max_ms": 243.333
+          },
+          "matching": {
+            "p50_ms": 127.725,
+            "p95_ms": 161.753,
+            "max_ms": 177.428
+          },
+          "bootstrap": {
+            "p50_ms": 117.863,
+            "p95_ms": 143.334,
+            "max_ms": 168.659
+          },
+          "@page": {
+            "p50_ms": 152.235,
+            "p95_ms": 193.545,
+            "max_ms": 424.528
+          }
+        }
+      },
+      {
+        "name": "duration",
+        "concurrency": 12,
+        "requests": 6180,
+        "seconds": 60.112,
+        "think_seconds": 0.05,
+        "errors": 0,
+        "requests_per_second": 102.808,
+        "p50_ms": 51.177,
+        "p95_ms": 174.076,
+        "max_ms": 427.525
+      },
+      {
+        "name": "recovery",
+        "concurrency": 1,
+        "requests": 14,
+        "seconds": 0.769,
+        "requests_per_second": 18.217,
+        "errors": 0,
+        "p50_ms": 45.532,
+        "p95_ms": 135.888,
+        "max_ms": 141.213,
+        "routes": {
+          "profiles": {
+            "p50_ms": 137.117,
+            "p95_ms": 140.803,
+            "max_ms": 141.213
+          },
+          "content/resource": {
+            "p50_ms": 27.345,
+            "p95_ms": 27.897,
+            "max_ms": 27.958
+          },
+          "content/resource?q=OPT_RARE_KNOWLEDGE_7319": {
+            "p50_ms": 65.041,
+            "p95_ms": 71.3,
+            "max_ms": 71.995
+          },
+          "notifications/toasts?after=0": {
+            "p50_ms": 20.143,
+            "p95_ms": 20.15,
+            "max_ms": 20.151
+          },
+          "matching": {
+            "p50_ms": 39.979,
+            "p95_ms": 40.271,
+            "max_ms": 40.303
+          },
+          "bootstrap": {
+            "p50_ms": 39.539,
+            "p95_ms": 49.64,
+            "max_ms": 50.762
+          },
+          "@page": {
+            "p50_ms": 54.037,
+            "p95_ms": 54.055,
+            "max_ms": 54.057
+          }
+        }
+      },
+      {
+        "name": "admin-filter-churn",
+        "concurrency": 4,
+        "requests": 48,
+        "seconds": 0.321,
+        "errors": 0,
+        "requests_per_second": 149.681,
+        "p50_ms": 23.504,
+        "p95_ms": 39.925,
+        "max_ms": 45.775
+      }
+    ],
+    "write_and_security_checks": [
+      {
+        "name": "Eight concurrent profile writes, correct owner and restored data",
+        "status": "PASS",
+        "p50_ms": 513.072,
+        "p95_ms": 867.361,
+        "max_ms": 872.655
+      },
+      {
+        "name": "Sixteen simultaneous RSVPs: exactly two accepted, fourteen capacity conflicts, fourteen waitlisted",
+        "status": "PASS",
+        "accepted": 2,
+        "expected_conflicts": 14,
+        "waitlisted": 14
+      },
+      {
+        "name": "Anonymous access, staff-only statistics and missing nonce rejected; private responses stay no-store",
+        "status": "PASS"
+      }
+    ],
+    "total_measured_reads": 7264,
+    "warmup_requests": 224,
+    "status": "PASS",
+    "tested_package_sha256": "f59a94d1c2e1d1ff3256fde480e4bea26e008888e01416303251f40d34f716b2",
+    "source_commit": "dd74f2faaccb5a84808db5d1fbfb1ae9458a5a8f",
+    "date": "2026-11-19T06:55:17.917406+00:00",
+    "after_qa_uat_gates": true
+  },
+  "supplemental_birthday_comments_ownership": {
+    "run": {
+      "commit": "dd74f2faaccb5a84808db5d1fbfb1ae9458a5a8f",
+      "exit": 0,
+      "finished": "2026-11-19T06:52:48.479484+00:00"
+    },
+    "checks": {
+      "status": "PASS",
+      "checks": [
+        "Birthday is in flow, dialog text fits and dismisses once at 1440 px (light)",
+        "Birthday is in flow, dialog text fits and dismisses once at 390 px (dark)",
+        "Comment menu and both actions meet text contrast at 1440 px (light)",
+        "admin can moderate/delete another member's publication and cannot edit it",
+        "executive can moderate/delete another member's publication and cannot edit it",
+        "Comment menu and both actions meet text contrast at 390 px (dark)",
+        "moderator can moderate/delete another member's publication and cannot edit it"
+      ]
+    }
+  },
+  "firefox": {
+    "status": "PASS",
+    "browser": "Firefox 153.0",
+    "commit": "dd74f2faaccb5a84808db5d1fbfb1ae9458a5a8f",
+    "package_sha256": "f59a94d1c2e1d1ff3256fde480e4bea26e008888e01416303251f40d34f716b2",
+    "checks": [
+      "Firefox login and real WordPress home",
+      "Hub, forums, galleries, messaging and knowledge navigation",
+      "Knowledge cover opens a dialog without a document reload",
+      "Firefox plays controlled cross-origin iframe video under actual ASCLA CSP and permissions headers",
+      "Mobile dialog stays inside viewport"
+    ],
+    "errors": [],
+    "scope": "Actual Firefox on local WordPress. The third-party player and media response are controlled fixtures; this does not certify YouTube service availability."
+  },
+  "scope": {
+    "environment": "Independent disposable loopback WordPress QA and UAT; remote course SonarQube projects. No remote WordPress deployment.",
+    "external_services": "Email captured locally and AI/Supadata/OAuth scenarios simulated where declared by each suite; no certification of live provider credentials or deliveries.",
+    "human_acceptance": "Technical UAT passed; human acceptance and production PR remain separate.",
+    "historical_skip": "One PHP catalog comparison per phase requires an unavailable historical before/after snapshot; preserved as skipped, with current translation checks and ES/EN browser flows passing.",
+    "load": "Bounded local load with 32 sessions; not a hosting capacity guarantee."
+  },
+  "fixes_verified": [
+    "Hono and @hono/node-server mail runtime updates: all four Trivy images clean.",
+    "26 SonarQube findings corrected by refactoring without exclusions or threshold changes.",
+    "Accessible account/cover/reaction names corrected.",
+    "Test synchronization corrected for native WordPress focus, modal reaction selectors and completed animations.",
+    "Historical group UI expectations aligned with ordinary-member leave, removal notices and shared banner sizing."
+  ],
+  "source_heads_at_validation": {
+    "development": "e8fb2a8dc73c9a00f4c7ad1da95df63066ab9d9a",
+    "qa": "e8fb2a8dc73c9a00f4c7ad1da95df63066ab9d9a",
+    "uat": "dd74f2faaccb5a84808db5d1fbfb1ae9458a5a8f",
+    "main": "1049022357eec962d6884fa811dbd1587f241a2a"
+  }
+}
