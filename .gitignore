@@ -249,3 +249,5 @@ __pycache__/
 /docs/evidence/release-1.13/*
 !/docs/evidence/release-1.13/package.json
 !/docs/evidence/release-1.13/validation.json
+!/docs/evidence/release-1.13/qa-junit.xml
+!/docs/evidence/release-1.13/uat-junit.xml

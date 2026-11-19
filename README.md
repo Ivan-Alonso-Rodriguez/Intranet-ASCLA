@@ -4,6 +4,8 @@
 
 La versión 1.13 reúne las mejoras de grupos, los recorridos interactivos por usuario, el menú de cuenta, los idiomas de IA, los banners, las reacciones animadas y el modo oscuro en gris carbón. Consulta el [historial de 1.13](VERSION_HISTORY.md#release-113) para ver el alcance desde el último commit de 1.12.
 
+La [validación técnica de 1.13](docs/evidence/release-1.13/validation.json) registra las ejecuciones independientes de QA y UAT del 19 de noviembre: regresión PHP/E2E, Bruno, Playwright, manual, onboarding, SonarQube, Trivy, ZAP/CSP, Jenkins y carga. Conserva los commits analizados, el SHA-256 del ZIP y la única omisión histórica de comparación de catálogos; no sustituye la aceptación humana UAT.
+
 La [versión 1.11.1](VERSION_HISTORY.md#release-1111) incorporó la importación revisada de intereses desde CSV, PDF tabular, HTML y ZIP de una hoja, además de mejoras en estadísticas y asistencia de Zoom.
 
 Plugin WordPress para una comunidad profesional privada: perfiles, Directorio, conexiones, mensajería, Hub, foros, eventos, microeventos, Centro de Conocimiento, Galería, Aliados, Contacto y administración. Elementor es opcional; no se modifica WordPress Core.
