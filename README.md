@@ -2,7 +2,9 @@
 
 ## Versión actual: 1.13 · esquema 17
 
-La versión instalable se mantiene en **1.13**, por indicación del proyecto. La [revisión actual del asistente](docs/evidence/release-1.13/assistant-language-20261119/validation.json) reconoce «que es el intranet ascla?» y variantes de artículo, acentos y espacios. Incluye las mejoras anteriores; las evidencias históricas conservan su propio paquete y alcance.
+La versión instalable se mantiene en **1.13**, por indicación del proyecto. La [revisión del acceso](docs/evidence/release-1.13/login-theme-20261120/validation.json) conserva el panel izquierdo azul y permite cambiar de tema en el login normal y administrativo.
+
+La [revisión del asistente](docs/evidence/release-1.13/assistant-language-20261119/validation.json) reconoce «que es el intranet ascla?» y variantes de artículo, acentos y espacios. Incluye las mejoras anteriores; las evidencias históricas conservan su propio paquete y alcance.
 
 El diseño conserva la barra lateral azul en ambos temas y recupera los resaltados azules en modo oscuro, con el fondo general en gris carbón. Consulta la [comprobación visual](docs/evidence/release-1.13.2/theme.json) de esta corrección.
 
@@ -49,10 +51,10 @@ Desde la raíz del repositorio:
 
 ```bash
 python3 scripts/build.py
-python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/assistant-language-20261119/package.json
+python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/login-theme-20261120/package.json
 ```
 
-Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto de la revisión actual de 1.13](docs/evidence/release-1.13/assistant-language-20261119/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
+Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto de la revisión actual de 1.13](docs/evidence/release-1.13/login-theme-20261120/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
 
 ## Calidad y entrega
 

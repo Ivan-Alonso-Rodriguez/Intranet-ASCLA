@@ -11,6 +11,7 @@ ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 == Changelog ==
 
 = 1.13 =
+* El panel izquierdo del acceso conserva el azul institucional en los temas claro y oscuro. El acceso de la comunidad y el administrativo incluyen el selector de apariencia Automático, Claro y Oscuro, sin recargar ni alterar los datos del formulario. La preferencia se comparte con la intranet y se conserva en el navegador; Automático sigue los cambios del sistema. Se mantiene la versión 1.13.
 * Reconoce «que es el intranet ascla?» y variantes con el/la, este/esta, nuestro/nuestra, espacios repetidos y preguntas invertidas. La definición utiliza el contexto institucional autorizado, incluso después de preguntar por videos o galerías, sin una solicitud al proveedor de IA. Se conservan las mejoras de colores, los permisos y los controles de evidencia para consultas específicas. Versión mantenida en 1.13.
 * La barra lateral conserva el azul institucional en los temas claro y oscuro. Las pestañas seleccionadas, los avisos y los demás elementos que comparten el color de resaltado recuperan un azul tenue en modo oscuro. Los fondos generales mantienen el negro y el gris carbón; no cambian la navegación, los permisos ni el guardado de datos.
 

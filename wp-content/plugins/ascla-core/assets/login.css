@@ -240,7 +240,6 @@ html[data-ascla-theme] body.login.ascla-login {
 }
 .ascla-login :is(input, button, select, textarea) { font-family: var(--ascla-font); }
 html[data-ascla-theme] .ascla-login .ascla-welcome { background: #063159; border: 0; }
-html[data-ascla-theme="dark"] .ascla-login .ascla-welcome { background: var(--ascla-paper); border-color: var(--ascla-rule); }
 html[data-ascla-theme] .ascla-login .ascla-welcome .ascla-logo-normal { display: none; }
 html[data-ascla-theme] .ascla-login .ascla-welcome .ascla-logo-inverse { display: block; }
 html[data-ascla-theme] .ascla-login #login { background: var(--ascla-surface); border: 0; border-radius: 0; box-shadow: none; }
@@ -248,6 +247,11 @@ html[data-ascla-theme] .ascla-login #login label { color: var(--ascla-text); fon
 html[data-ascla-theme] .ascla-login #login form .input { background: var(--ascla-surface); border-color: var(--ascla-control); border-radius: 3px; color: var(--ascla-text); }
 html[data-ascla-theme] .ascla-login #login form .input:focus { border-color: var(--ascla-accent-text); box-shadow: 0 0 0 2px var(--ascla-accent-tint); }
 html[data-ascla-theme] .ascla-login #login .button-primary { border-radius: 3px; }
+
+.ascla-login .ascla-appearance-switcher { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; width: min(390px, 100%); margin: 20px auto 0; color: var(--ascla-text); font-size: 12px; }
+.ascla-login .ascla-appearance-switcher[hidden] { display: none; }
+.ascla-login .ascla-appearance-switcher select { appearance: auto; font: inherit; min-height: 40px; min-width: 150px; max-width: 100%; padding: 6px 10px; border: 1px solid var(--ascla-control); border-radius: 4px; background-color: var(--ascla-surface); background-image: none; color: var(--ascla-text); }
+.ascla-login .ascla-appearance-switcher select:focus-visible { outline: 2px solid var(--ascla-accent-text); outline-offset: 3px; }
 html[data-ascla-theme] .ascla-login :is(#login .message, #login .success, #login .notice, .ascla-turnstile-lock) { background: var(--ascla-accent-tint); color: var(--ascla-accent-text); border-color: var(--ascla-accent-text); }
 html[data-ascla-theme] .ascla-login #login #login_error { background: var(--ascla-surface); color: var(--ascla-text); border-left-color: var(--ascla-danger); }
 .ascla-login .ascla-recovery-confirmation strong { display: block; margin-bottom: 8px; font-size: 16px; font-weight: 600; }

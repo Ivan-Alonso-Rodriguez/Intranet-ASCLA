@@ -39,4 +39,18 @@ JS;
     {
         wp_print_inline_script_tag(self::script(),['id'=>'ascla-theme-bootstrap']);
     }
+
+    public static function enqueueLoginControl(): void
+    {
+        wp_enqueue_script('ascla-login-theme',ASCLA_URL.'assets/login-theme.js',[],App::assetVersion('assets/login-theme.js'),true);
+    }
+
+    public static function loginSelector(): void
+    {
+        echo '<div class="ascla-appearance-switcher" hidden><label for="ascla-login-theme">'.esc_html(Language::label('Apariencia')).'</label><select id="ascla-login-theme">';
+        foreach (['system'=>'Automático (sistema)','light'=>'Claro','dark'=>'Oscuro'] as $mode=>$label) {
+            echo '<option value="'.esc_attr($mode).'">'.esc_html(Language::label($label)).'</option>';
+        }
+        echo '</select></div>';
+    }
 }

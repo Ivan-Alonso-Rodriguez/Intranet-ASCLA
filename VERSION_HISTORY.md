@@ -4,6 +4,12 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+<a id="release-113-login-20261120"></a>
+
+## 1.13 — Apariencia de los accesos
+
+Revisión del 20 de noviembre de 2026. El panel izquierdo del acceso conserva el azul institucional en los temas claro y oscuro. El acceso de la comunidad y el administrativo incluyen el selector de apariencia Automático, Claro y Oscuro, sin recargar ni alterar los datos del formulario. La preferencia se comparte con la intranet y se conserva en el navegador; Automático sigue los cambios del sistema. Se mantiene el esquema 17 y se incluyen las correcciones anteriores del asistente y del diseño. El [manifiesto actual](docs/evidence/release-1.13/login-theme-20261120/package.json) y la [validación focalizada](docs/evidence/release-1.13/login-theme-20261120/validation.json) identifican esta revisión sin sustituir los paquetes históricos.
+
 <a id="release-113-revision-20261119"></a>
 
 ## 1.13 — Revisión del reconocimiento de preguntas

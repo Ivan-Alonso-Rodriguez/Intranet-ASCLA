@@ -39,6 +39,7 @@ final class Login
         add_filter('login_title',static fn($title,$screen)=>esc_html($screen.(self::nativeAdminContext()?' · Administración ASCLA':' · ASCLA')),10,2);
         add_action('login_header',[LoginHooks::class,'headerWelcome']);
         add_filter('login_message',[self::class,'welcome']);
+        add_action('login_footer',[Theme::class,'loginSelector'],9);
         add_action('login_footer',[LoginHooks::class,'footerHelp']);
         add_filter('login_redirect',[self::class,'redirect'],10,3);
         add_action('wp_logout',[self::class,'markLoggedOut']);
@@ -93,6 +94,7 @@ final class Login
         Theme::registerBrandStyle();
         wp_enqueue_style('ascla-login-layout',ASCLA_URL.'assets/login-layout.css',['dashicons','buttons','forms','l10n'],App::assetVersion('assets/login-layout.css'));
         wp_enqueue_style('ascla-login', ASCLA_URL . 'assets/login.css', ['ascla-login-layout','ascla-brand'], App::assetVersion('assets/login.css'));
+        Theme::enqueueLoginControl();
         // Turnstile normally enqueues itself on wp-login.php. The dedicated ASCLA login
         // calls the same policy so adaptive protection is preserved instead of duplicated.
         Turnstile::enqueue();

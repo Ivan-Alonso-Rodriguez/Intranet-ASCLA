@@ -22,6 +22,7 @@ final class LoginHooks
     {
         Theme::registerBrandStyle();
         wp_enqueue_style('ascla-login',ASCLA_URL.'assets/login.css',['login','ascla-brand'],App::assetVersion('assets/login.css'));
+        Theme::enqueueLoginControl();
     }
 
     public static function bodyClasses(array $classes): array

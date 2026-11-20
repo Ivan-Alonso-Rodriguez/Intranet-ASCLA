@@ -1,6 +1,10 @@
 # Guía práctica de QA, SonarQube y UAT
 
-Versión documentada: **1.13**, esquema **17**. El [historial de la revisión actual](VERSION_HISTORY.md#release-113-revision-20261119) detalla el alcance de la entrega; los resultados históricos se indican por versión.
+Versión documentada: **1.13**, esquema **17**. El [historial de la revisión actual](VERSION_HISTORY.md#release-113-login-20261120) detalla el alcance de la entrega; los resultados históricos se indican por versión.
+
+## Apariencia del acceso · revisión de 1.13
+
+En `/login/` y `/wp-login.php`, cambia el selector Apariencia entre Claro, Oscuro y Automático. El panel izquierdo debe permanecer azul; los formularios cambian sin recarga y conservan sus valores. Recarga y cambia entre ambos accesos: la preferencia debe mantenerse. En Automático, verifica el tema del sistema; repite en móvil y en inglés. Comprueba el acceso con una cuenta sintética y que la recuperación de contraseña conserve su contexto. La [evidencia focalizada](docs/evidence/release-1.13/login-theme-20261120/validation.json) identifica este paquete, sin sustituir la validación integral histórica.
 
 ## Reconocimiento de preguntas · revisión de 1.13
 
@@ -162,7 +166,7 @@ Para la revisión del visor y Centro de Conocimiento, ejecuta `node tests/media-
 | Probar PHP e interfaz y generar cobertura | `BRANCH_NAME=qa bash scripts/quality-ci.sh` | WordPress Docker desechable | Pruebas, JUnit, Clover y LCOV en `coverage/`. |
 | Analizar código con SonarQube | `bash scripts/sonar-manual.sh qa` | Fuentes y reportes anteriores | Análisis de ASCLA-QA y su Quality Gate. |
 | Probar integración y E2E con Bruno/Playwright | [Ejecutores de la entrega vigente](pruebas/README.md#ejecutar-y-actualizar) | QA con cuentas dedicadas o fixture local explícita | 81 peticiones, 149 comprobaciones y seis flujos UI con evidencias. |
-| Preparar el plugin | `python3 scripts/build.py` y `python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/assistant-language-20261119/package.json` | Fuentes del plugin | ZIP, SHA-256 y manifiesto de la revisión actual. |
+| Preparar el plugin | `python3 scripts/build.py` y `python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/login-theme-20261120/package.json` | Fuentes del plugin | ZIP, SHA-256 y manifiesto de la revisión actual. |
 | Comprobar seguridad con ZAP | [Procedimiento ZAP](#zap) | WordPress local HTTPS desechable | Informes separados de páginas y API, CSP y límites del análisis. |
 
 Sigue **2 → 3 → 4 → 5** para validar una revisión de QA. Usa la sección **6** para probar el sitio instalado. La aceptación UAT requiere después revisión humana y evidencia del entorno.
@@ -188,7 +192,7 @@ Si la entrega incluye cambios del plugin, prepara primero su paquete:
 
 ```bash
 python3 scripts/build.py
-python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/assistant-language-20261119/package.json
+python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/login-theme-20261120/package.json
 python3 scripts/check-docs.py
 ```
 
@@ -452,7 +456,7 @@ El código se confirma en `development` y luego se promueve a `qa` y `uat`. Los 
 
 Este recorrido corresponde al entorno de pruebas [wordpress.ingsoftware.lat](https://wordpress.ingsoftware.lat/). Requiere permiso para instalar plugins en WordPress y Docker en el equipo que ejecuta las pruebas; **no requiere SSH ni WP-CLI en el servidor**. Administración ASCLA y administración técnica de WordPress tienen permisos distintos.
 
-1. Ejecuta `python3 scripts/build.py` y `python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/assistant-language-20261119/package.json`. Conserva el SHA-256 del ZIP que vas a evaluar. El manifiesto separado identifica esta revisión sin sobrescribir el de la validación integral inicial de 1.13.
+1. Ejecuta `python3 scripts/build.py` y `python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/login-theme-20261120/package.json`. Conserva el SHA-256 del ZIP que vas a evaluar. El manifiesto separado identifica esta revisión sin sobrescribir el de la validación integral inicial de 1.13.
 2. En WordPress, abre **Plugins → Añadir plugin → Subir plugin**. Selecciona `dist/ascla-core.zip` y reemplaza la versión instalada. Comprueba que ASCLA Core **1.11.0** está activo; el mismo número de versión puede contener correcciones distintas, por eso debes registrar también el paquete.
 3. Ejecuta `python3 scripts/build-qa-tools.py`. Instala y activa `dist/ascla-qa-tools.zip` desde Plugins. Es un auxiliar independiente del core y restringido a entornos permitidos de pruebas.
 4. Abre **Herramientas → ASCLA QA**, confirma el entorno y pulsa **Crear lote y descargar acceso**. Se crean cinco cuentas sintéticas y se descarga `ascla-qa-access.json`.

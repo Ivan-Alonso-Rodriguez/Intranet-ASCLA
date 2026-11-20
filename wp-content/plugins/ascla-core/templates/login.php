@@ -77,6 +77,8 @@ $asclaAdminContext=false;
 
 <p class="ascla-login-help"><?php echo esc_html(Language::text('¿Aún no tienes una cuenta? Solicita tu acceso a la administración de ASCLA.','Need an account? Request access from ASCLA administration.')); ?></p>
 
+<?php Theme::loginSelector(); ?>
+
 <div class="language-switcher">
     <form id="language-switcher" method="post" action="<?php echo esc_url(Login::url()); ?>">
         <label for="ascla-login-language"><?php echo esc_html(Language::text('Idioma','Language')); ?></label>
