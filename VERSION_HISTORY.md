@@ -4,6 +4,12 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+<a id="release-113-login-footer-20261120"></a>
+
+## 1.13 — Preferencias debajo del acceso
+
+Por indicación del usuario, Apariencia e Idioma vuelven debajo del formulario y de la ayuda, juntos en una fila compacta. Se conservan la separación reducida, ambos temas, el panel azul y los ajustes de portátil y móvil. Se mantiene la versión 1.13 y el esquema 17. El [manifiesto](docs/evidence/release-1.13/login-footer-20261120/package.json) y la [validación focalizada](docs/evidence/release-1.13/login-footer-20261120/validation.json) corresponden a esta revisión.
+
 <a id="release-113-login-layout-20261120"></a>
 
 ## 1.13 — Proporciones del acceso

@@ -272,7 +272,7 @@ html[data-ascla-theme] .ascla-login #pass-strength-result { color: var(--ascla-a
 .ascla-login #nav { margin-top: 16px; }
 .ascla-login #backtoblog { margin-top: 10px; }
 .ascla-login .ascla-login-help { width: min(400px, 100%); margin-top: 14px; }
-.ascla-login .ascla-login-preferences { order: -1; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; width: min(400px, 100%); margin: 0 auto 26px; }
+.ascla-login .ascla-login-preferences { order: 1; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; width: min(400px, 100%); margin: 16px auto 0; }
 .ascla-login .ascla-login-preferences .ascla-appearance-switcher { display: grid; gap: 4px; width: auto; margin: 0; }
 .ascla-login .ascla-login-preferences .ascla-appearance-switcher[hidden] { display: none; }
 .ascla-login .ascla-login-preferences label { margin: 0; font-size: 11px; line-height: 1.5; color: var(--ascla-muted); }
