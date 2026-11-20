@@ -34,8 +34,10 @@ final class LoginHooks
 
     public static function siteHtmlLink(): string
     {
-        $label=Login::nativeAdminContext()?Language::text('Acceso a la comunidad ASCLA','ASCLA community access'):Language::label('Volver a ASCLA');
-        return '<a href="'.esc_url(Login::url()).'">&larr; '.esc_html($label).'</a>';
+        $admin=Login::nativeAdminContext();
+        $label=$admin?Language::text('Acceso a la comunidad ASCLA','ASCLA community access'):Language::label('Volver a ASCLA');
+        $target=$admin?Login::url():home_url('/');
+        return '<a href="'.esc_url($target).'">&larr; '.esc_html($label).'</a>';
     }
 
     public static function headerWelcome(): void

@@ -1,6 +1,10 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 20 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113-login-language-auto-20261120) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+Revisión documental: 20 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113-recovery-home-20261120) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+
+## Ruta base desde recuperación · 1.13
+
+En recuperación de contraseña, Volver a ASCLA lleva a la ruta base configurada en WordPress. El enlace independiente Volver al inicio de sesión conserva el acceso comunitario. El acceso administrativo mantiene su enlace de Acceso a la comunidad ASCLA. La [validación focalizada](docs/evidence/release-1.13/recovery-home-20261120/validation.json) comprueba los destinos y su navegación real. Los informes integrales anteriores conservan sus propios hashes.
 
 ## Idioma automático en los accesos · 1.13
 

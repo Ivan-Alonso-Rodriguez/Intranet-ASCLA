@@ -4,6 +4,12 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+<a id="release-113-recovery-home-20261120"></a>
+
+## 1.13 — Regreso a la ruta base desde recuperación
+
+En recuperación de contraseña, Volver a ASCLA lleva a la ruta base configurada en WordPress. El enlace independiente Volver al inicio de sesión conserva el acceso comunitario. El acceso administrativo mantiene su enlace de Acceso a la comunidad ASCLA. Se mantienen 1.13 y el esquema 17. El [manifiesto](docs/evidence/release-1.13/recovery-home-20261120/package.json) y la [validación focalizada](docs/evidence/release-1.13/recovery-home-20261120/validation.json) identifican este ZIP.
+
 <a id="release-113-login-language-auto-20261120"></a>
 
 ## 1.13 — Idioma automático en los accesos
