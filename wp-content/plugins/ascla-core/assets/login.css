@@ -261,3 +261,28 @@ html[data-ascla-theme] .ascla-login #login #login_error { background: var(--ascl
 .ascla-login .pw-weak[hidden] { display: none !important; }
 html[data-ascla-theme] .ascla-login #pass-strength-result { color: var(--ascla-accent-text); background: var(--ascla-accent-tint); border-color: var(--ascla-control); border-radius: 3px; }
 #resetpassform .wp-generate-pw { display: none !important; }
+
+/* Keep appearance settings separate from the compact authentication block. */
+.ascla-login #login { width: min(400px, 100%); padding: 0; }
+.ascla-login #login h1 a { height: 76px; margin-bottom: 18px; }
+.ascla-login .ascla-login-intro { margin-bottom: 22px; }
+.ascla-login .ascla-login-intro h2 { margin-bottom: 8px; }
+.ascla-login #login form .input { margin-bottom: 16px; }
+.ascla-login #login form .forgetmenot { margin-bottom: 18px; }
+.ascla-login #nav { margin-top: 16px; }
+.ascla-login #backtoblog { margin-top: 10px; }
+.ascla-login .ascla-login-help { width: min(400px, 100%); margin-top: 14px; }
+.ascla-login .ascla-login-preferences { order: -1; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; width: min(400px, 100%); margin: 0 auto 26px; }
+.ascla-login .ascla-login-preferences .ascla-appearance-switcher { display: grid; gap: 4px; width: auto; margin: 0; }
+.ascla-login .ascla-login-preferences .ascla-appearance-switcher[hidden] { display: none; }
+.ascla-login .ascla-login-preferences label { margin: 0; font-size: 11px; line-height: 1.5; color: var(--ascla-muted); }
+.ascla-login .ascla-login-preferences .language-switcher { margin: 0; padding: 0; }
+.ascla-login .ascla-login-preferences #language-switcher { display: grid; grid-template-columns: minmax(88px, 1fr) auto; align-items: end; gap: 4px 8px; margin: 0; }
+.ascla-login .ascla-login-preferences #language-switcher label { grid-column: 1 / -1; }
+.ascla-login .ascla-login-preferences select,
+.ascla-login .ascla-login-preferences .button { margin: 0; min-height: 40px; font-size: 12px; line-height: 1.5; }
+.ascla-login .ascla-login-preferences #language-switcher .button { padding: 6px 12px; }
+.ascla-login.interim-login .ascla-login-preferences { margin-top: 16px; }
+@media (min-width: 901px) and (max-height: 800px) {
+  body.login.ascla-login { padding-top: 24px; padding-bottom: 24px; }
+}

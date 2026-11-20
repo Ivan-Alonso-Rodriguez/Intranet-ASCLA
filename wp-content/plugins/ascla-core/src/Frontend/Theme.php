@@ -53,4 +53,14 @@ JS;
         }
         echo '</select></div>';
     }
+
+    public static function openLoginPreferences(): void
+    {
+        echo '<div class="ascla-login-preferences">';
+    }
+
+    public static function closeLoginPreferences(): void
+    {
+        echo '</div>';
+    }
 }

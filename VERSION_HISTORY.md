@@ -4,6 +4,12 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+<a id="release-113-login-layout-20261120"></a>
+
+## 1.13 — Proporciones del acceso
+
+Revisión del 20 de noviembre de 2026. El bloque de acceso queda más compacto: reduce el espacio entre Volver a ASCLA y la ayuda de acceso, ajusta el ancho y los márgenes del formulario y agrupa Apariencia e Idioma en una franja superior. En móvil, la franja se integra encima del formulario y puede ajustarse a dos filas. Ambos accesos conservan el panel azul, la preferencia de tema y los campos de autenticación. El [manifiesto actual](docs/evidence/release-1.13/login-layout-20261120/package.json) y la [validación focalizada](docs/evidence/release-1.13/login-layout-20261120/validation.json) identifican este paquete. La versión se mantiene en 1.13 y el esquema en 17.
+
 <a id="release-113-login-20261120"></a>
 
 ## 1.13 — Apariencia de los accesos

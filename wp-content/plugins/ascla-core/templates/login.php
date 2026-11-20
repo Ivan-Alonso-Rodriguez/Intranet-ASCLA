@@ -77,7 +77,7 @@ $asclaAdminContext=false;
 
 <p class="ascla-login-help"><?php echo esc_html(Language::text('¿Aún no tienes una cuenta? Solicita tu acceso a la administración de ASCLA.','Need an account? Request access from ASCLA administration.')); ?></p>
 
-<?php Theme::loginSelector(); ?>
+<?php Theme::openLoginPreferences(); Theme::loginSelector(); ?>
 
 <div class="language-switcher">
     <form id="language-switcher" method="post" action="<?php echo esc_url(Login::url()); ?>">
@@ -92,6 +92,8 @@ $asclaAdminContext=false;
         <button type="submit" class="button"><?php echo esc_html(Language::text('Cambiar','Change')); ?></button>
     </form>
 </div>
+
+<?php Theme::closeLoginPreferences(); ?>
 
 <script nonce="<?php echo esc_attr(\ASCLA\Core\Frontend\SecurityHeaders::nonce()); ?>">
 (function(){

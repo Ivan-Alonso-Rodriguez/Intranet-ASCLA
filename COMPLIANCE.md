@@ -1,6 +1,10 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 19 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113-login-20261120) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+Revisión documental: 20 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113-login-layout-20261120) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+
+## Proporciones del acceso · 1.13
+
+El bloque de acceso queda más compacto: reduce el espacio entre Volver a ASCLA y la ayuda de acceso, ajusta el ancho y los márgenes del formulario y agrupa Apariencia e Idioma en una franja superior. En móvil, la franja se integra encima del formulario y puede ajustarse a dos filas. Ambos accesos conservan el panel azul, la preferencia de tema y los campos de autenticación. La [validación focalizada](docs/evidence/release-1.13/login-layout-20261120/validation.json) registra la revisión de los dos accesos y conserva el alcance de los informes históricos.
 
 ## Apariencia del acceso · 1.13
 

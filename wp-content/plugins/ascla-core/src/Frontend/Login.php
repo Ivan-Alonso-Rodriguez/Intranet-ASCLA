@@ -39,8 +39,10 @@ final class Login
         add_filter('login_title',static fn($title,$screen)=>esc_html($screen.(self::nativeAdminContext()?' · Administración ASCLA':' · ASCLA')),10,2);
         add_action('login_header',[LoginHooks::class,'headerWelcome']);
         add_filter('login_message',[self::class,'welcome']);
+        add_action('login_footer',[Theme::class,'openLoginPreferences'],8);
         add_action('login_footer',[Theme::class,'loginSelector'],9);
-        add_action('login_footer',[LoginHooks::class,'footerHelp']);
+        add_action('login_footer',[Theme::class,'closeLoginPreferences'],11);
+        add_action('login_footer',[LoginHooks::class,'footerHelp'],15);
         add_filter('login_redirect',[self::class,'redirect'],10,3);
         add_action('wp_logout',[self::class,'markLoggedOut']);
     }
