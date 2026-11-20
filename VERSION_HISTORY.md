@@ -4,6 +4,12 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+<a id="release-113-login-icon-20261120"></a>
+
+## 1.13 — Botón de apariencia y pie centrado
+
+El acceso comunitario y el administrativo usan el mismo icono de sol/luna del inicio, en lugar del desplegable de apariencia. El botón abre las opciones Automático, Claro y Oscuro. El botón y el idioma quedan juntos y centrados debajo del formulario y de la ayuda; se conservan los márgenes compactos, el panel azul y la preferencia del navegador. Se mantiene la versión 1.13 y el esquema 17. El [manifiesto](docs/evidence/release-1.13/login-icon-20261120/package.json) y la [validación focalizada](docs/evidence/release-1.13/login-icon-20261120/validation.json) corresponden a esta revisión.
+
 <a id="release-113-login-footer-20261120"></a>
 
 ## 1.13 — Preferencias debajo del acceso
