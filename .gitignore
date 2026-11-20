@@ -292,3 +292,9 @@ __pycache__/
 !/docs/evidence/release-1.13/login-icon-20261120/package.json
 !/docs/evidence/release-1.13/login-icon-20261120/validation.json
 !/docs/evidence/release-1.13/login-icon-20261120/junit.xml
+
+!/docs/evidence/release-1.13/login-language-auto-20261120/
+/docs/evidence/release-1.13/login-language-auto-20261120/*
+!/docs/evidence/release-1.13/login-language-auto-20261120/package.json
+!/docs/evidence/release-1.13/login-language-auto-20261120/validation.json
+!/docs/evidence/release-1.13/login-language-auto-20261120/junit.xml

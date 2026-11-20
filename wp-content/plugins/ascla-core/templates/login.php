@@ -89,7 +89,7 @@ $asclaAdminContext=false;
         </select>
         <input type="hidden" name="_ascla_login_language" value="1">
         <?php wp_nonce_field('ascla_login_language','_ascla_language_nonce'); ?>
-        <button type="submit" class="button"><?php echo esc_html(Language::text('Cambiar','Change')); ?></button>
+        <noscript><button type="submit" class="button"><?php echo esc_html(Language::text('Cambiar','Change')); ?></button></noscript>
     </form>
 </div>
 

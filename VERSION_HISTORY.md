@@ -4,6 +4,12 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+<a id="release-113-login-language-auto-20261120"></a>
+
+## 1.13 — Idioma automático en los accesos
+
+El idioma del acceso se aplica y recarga la página automáticamente al elegir una opción, igual que en la intranet. El botón Cambiar deja de aparecer con JavaScript activo. Se conserva un envío manual solo como alternativa sin JavaScript. El botón de sol/luna y el idioma siguen juntos y centrados debajo del formulario. Se mantienen 1.13 y el esquema 17. El [manifiesto](docs/evidence/release-1.13/login-language-auto-20261120/package.json) y la [validación focalizada](docs/evidence/release-1.13/login-language-auto-20261120/validation.json) identifican este ZIP.
+
 <a id="release-113-login-icon-20261120"></a>
 
 ## 1.13 — Botón de apariencia y pie centrado

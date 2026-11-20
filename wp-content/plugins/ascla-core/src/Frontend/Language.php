@@ -58,7 +58,7 @@ final class Language
             $value=$_GET[$key]??($_POST[$key]??'');
             if(is_string($value) && $value!=='') {echo '<input type="hidden" name="'.esc_attr($key).'" value="'.esc_attr($value).'">'; }
         }
-        echo '<button type="submit" class="button">'.esc_html(self::text('Cambiar','Change')).'</button></form></div>';
+        echo '<noscript><button type="submit" class="button">'.esc_html(self::text('Cambiar','Change')).'</button></noscript></form></div>';
     }
     public static function change(): void
     {

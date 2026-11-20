@@ -1,6 +1,8 @@
 /* Share the intranet appearance preference without reloading or touching login fields. */
 (() => {
   "use strict";
+  const language = document.getElementById("ascla-login-language");
+  language?.addEventListener("change", () => language.form?.requestSubmit());
   const button = document.getElementById("ascla-login-theme");
   const dialog = document.getElementById("ascla-login-appearance");
   if (!button || !dialog || typeof dialog.showModal !== "function") return;

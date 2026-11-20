@@ -1,6 +1,10 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 20 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113-login-icon-20261120) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+Revisión documental: 20 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113-login-language-auto-20261120) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+
+## Idioma automático en los accesos · 1.13
+
+El idioma del acceso se aplica y recarga la página automáticamente al elegir una opción, igual que en la intranet. El botón Cambiar deja de aparecer con JavaScript activo. Se conserva un envío manual solo como alternativa sin JavaScript. El botón de sol/luna y el idioma siguen juntos y centrados debajo del formulario. La [evidencia focalizada](docs/evidence/release-1.13/login-language-auto-20261120/validation.json) verifica ambos accesos y conserva el alcance de las revisiones históricas.
 
 ## Botón de apariencia y pie centrado · 1.13
 

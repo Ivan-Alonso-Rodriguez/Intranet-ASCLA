@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="CLI Arguments" tests="31" assertions="182" errors="0" failures="0" skipped="0" time="2.529733">
+    <testsuite name="AdminUserFiltersTest" file="/tmp/ascla-login-tests/php/AdminUserFiltersTest.php" tests="1" assertions="9" errors="0" failures="0" skipped="0" time="0.368030">
+      <testcase name="testSearchIncludesProfessionalFieldsLoginEmailAndRespectsRole" file="/tmp/ascla-login-tests/php/AdminUserFiltersTest.php" line="54" class="AdminUserFiltersTest" classname="AdminUserFiltersTest" assertions="9" time="0.368030"/>
+    </testsuite>
+    <testsuite name="CommentThreadsTest" file="/tmp/ascla-login-tests/php/CommentThreadsTest.php" tests="1" assertions="5" errors="0" failures="0" skipped="0" time="0.345357">
+      <testcase name="testPrivateNamesStayAliasedWithoutExposingLoginOrEmail" file="/tmp/ascla-login-tests/php/CommentThreadsTest.php" line="53" class="CommentThreadsTest" classname="CommentThreadsTest" assertions="5" time="0.345357"/>
+    </testsuite>
+    <testsuite name="ContentLifecycleTest" file="/tmp/ascla-login-tests/php/ContentLifecycleTest.php" tests="1" assertions="10" errors="0" failures="0" skipped="0" time="0.334627">
+      <testcase name="testLoginLocalePersistsPerUserRejectsMalformedInputAndDoesNotChangeSite" file="/tmp/ascla-login-tests/php/ContentLifecycleTest.php" line="284" class="ContentLifecycleTest" classname="ContentLifecycleTest" assertions="10" time="0.334627"/>
+    </testsuite>
+    <testsuite name="LoginAssetsTest" file="/tmp/ascla-login-tests/php/LoginAssetsTest.php" tests="4" assertions="23" errors="0" failures="0" skipped="0" time="0.005672">
+      <testcase name="testCommunityLoginOnlyLoadsItsLayoutAndReusableFormPrimitives" file="/tmp/ascla-login-tests/php/LoginAssetsTest.php" line="28" class="LoginAssetsTest" classname="LoginAssetsTest" assertions="10" time="0.003865"/>
+      <testcase name="testNativeLoginRetainsTheOriginalWordPressDependencyGraph" file="/tmp/ascla-login-tests/php/LoginAssetsTest.php" line="40" class="LoginAssetsTest" classname="LoginAssetsTest" assertions="9" time="0.000465"/>
+      <testcase name="testOtherFrontendPagesDoNotEnqueueLoginAssets" file="/tmp/ascla-login-tests/php/LoginAssetsTest.php" line="50" class="LoginAssetsTest" classname="LoginAssetsTest" assertions="1" time="0.000844"/>
+      <testcase name="testCommunityAssetsPreserveStylesEnqueuedByAnotherIntegration" file="/tmp/ascla-login-tests/php/LoginAssetsTest.php" line="57" class="LoginAssetsTest" classname="LoginAssetsTest" assertions="3" time="0.000497"/>
+    </testsuite>
+    <testsuite name="LoginBehaviorTest" file="/tmp/ascla-login-tests/php/LoginBehaviorTest.php" tests="9" assertions="58" errors="0" failures="0" skipped="0" time="0.001450">
+      <testcase name="testSignedReturnCookieRejectsTamperingAndMalformedValues" file="/tmp/ascla-login-tests/php/LoginBehaviorTest.php" line="22" class="LoginBehaviorTest" classname="LoginBehaviorTest" assertions="8" time="0.000149"/>
+      <testcase name="testFrontendRequestDetectionAndNativeAdminContext" file="/tmp/ascla-login-tests/php/LoginBehaviorTest.php" line="42" class="LoginBehaviorTest" classname="LoginBehaviorTest" assertions="7" time="0.000105"/>
+      <testsuite name="LoginBehaviorTest::testWelcomePreservesExistingMessageAndUsesSelectedLanguage" tests="4" assertions="16" errors="0" failures="0" skipped="0" time="0.000410">
+        <testcase name="testWelcomePreservesExistingMessageAndUsesSelectedLanguage with data set #0" file="/tmp/ascla-login-tests/php/LoginBehaviorTest.php" line="66" class="LoginBehaviorTest" classname="LoginBehaviorTest" assertions="4" time="0.000123"/>
+        <testcase name="testWelcomePreservesExistingMessageAndUsesSelectedLanguage with data set #1" file="/tmp/ascla-login-tests/php/LoginBehaviorTest.php" line="66" class="LoginBehaviorTest" classname="LoginBehaviorTest" assertions="4" time="0.000103"/>
+        <testcase name="testWelcomePreservesExistingMessageAndUsesSelectedLanguage with data set #2" file="/tmp/ascla-login-tests/php/LoginBehaviorTest.php" line="66" class="LoginBehaviorTest" classname="LoginBehaviorTest" assertions="4" time="0.000102"/>
+        <testcase name="testWelcomePreservesExistingMessageAndUsesSelectedLanguage with data set #3" file="/tmp/ascla-login-tests/php/LoginBehaviorTest.php" line="66" class="LoginBehaviorTest" classname="LoginBehaviorTest" assertions="4" time="0.000082"/>
+      </testsuite>
+      <testcase name="testRecoverySuccessHasADistinctHeading" file="/tmp/ascla-login-tests/php/LoginBehaviorTest.php" line="76" class="LoginBehaviorTest" classname="LoginBehaviorTest" assertions="2" time="0.000079"/>
+      <testcase name="testTranslationIsScopedAndSelectorEscapesRedirectInput" file="/tmp/ascla-login-tests/php/LoginBehaviorTest.php" line="84" class="LoginBehaviorTest" classname="LoginBehaviorTest" assertions="7" time="0.000139"/>
+      <testcase name="testBootRegistersAuthenticationPrivacyAndBrandingHooks" file="/tmp/ascla-login-tests/php/LoginBehaviorTest.php" line="99" class="LoginBehaviorTest" classname="LoginBehaviorTest" assertions="18" time="0.000567"/>
+    </testsuite>
+    <testsuite name="LoginCsrfTest" file="/tmp/ascla-login-tests/php/LoginCsrfTest.php" tests="4" assertions="11" errors="0" failures="0" skipped="0" time="0.000828">
+      <testcase name="testLoginNonceFromAnotherAnonymousBrowserCannotBeReused" file="/tmp/ascla-login-tests/php/LoginCsrfTest.php" line="19" class="LoginCsrfTest" classname="LoginCsrfTest" assertions="3" time="0.000153"/>
+      <testcase name="testOtherWordPressGuestNonceActionsKeepTheirDefaultIdentity" file="/tmp/ascla-login-tests/php/LoginCsrfTest.php" line="27" class="LoginCsrfTest" classname="LoginCsrfTest" assertions="2" time="0.000359"/>
+      <testcase name="testNativeLoginRejectsMissingOrForeignNonceBeforeIssuingAuthentication" file="/tmp/ascla-login-tests/php/LoginCsrfTest.php" line="32" class="LoginCsrfTest" classname="LoginCsrfTest" assertions="5" time="0.000253"/>
+      <testcase name="testInternalAndRestAuthenticationAreNotTreatedAsNativeLoginForms" file="/tmp/ascla-login-tests/php/LoginCsrfTest.php" line="41" class="LoginCsrfTest" classname="LoginCsrfTest" assertions="1" time="0.000064"/>
+    </testsuite>
+    <testsuite name="LoginTest" file="/tmp/ascla-login-tests/php/LoginTest.php" tests="3" assertions="13" errors="0" failures="0" skipped="0" time="0.007109">
+      <testcase name="testDedicatedLoginPageIsSeparateFromIntranet" file="/tmp/ascla-login-tests/php/LoginTest.php" line="10" class="LoginTest" classname="LoginTest" assertions="3" time="0.000184"/>
+      <testcase name="testMemberReturnsOnlyToAnAsclaPage" file="/tmp/ascla-login-tests/php/LoginTest.php" line="17" class="LoginTest" classname="LoginTest" assertions="7" time="0.006067"/>
+      <testcase name="testAdministratorStartsInAsclaAndExplicitTechnicalAccessRemainsAvailable" file="/tmp/ascla-login-tests/php/LoginTest.php" line="31" class="LoginTest" classname="LoginTest" assertions="3" time="0.000859"/>
+    </testsuite>
+    <testsuite name="ProfileAttendance1110Test" file="/tmp/ascla-login-tests/php/ProfileAttendance1110Test.php" tests="2" assertions="17" errors="0" failures="0" skipped="0" time="0.706801">
+      <testcase name="testRenamingKeepsIdentityHistoryAndPasswordAndInvalidatesTheOldLoginCache" file="/tmp/ascla-login-tests/php/ProfileAttendance1110Test.php" line="68" class="ProfileAttendance1110Test" classname="ProfileAttendance1110Test" assertions="8" time="0.404929"/>
+      <testcase name="testRecoveryReturnTracksCommunityOriginWhileTechnicalLoginKeepsItsDestination" file="/tmp/ascla-login-tests/php/ProfileAttendance1110Test.php" line="113" class="ProfileAttendance1110Test" classname="ProfileAttendance1110Test" assertions="9" time="0.301873"/>
+    </testsuite>
+    <testsuite name="Release103RegressionTest" file="/tmp/ascla-login-tests/php/Release103RegressionTest.php" tests="1" assertions="3" errors="0" failures="0" skipped="0" time="0.730397">
+      <testcase name="testSuccessfulLoginBeforeTheThresholdClearsFailures" file="/tmp/ascla-login-tests/php/Release103RegressionTest.php" line="97" class="Release103RegressionTest" classname="Release103RegressionTest" assertions="3" time="0.730397"/>
+    </testsuite>
+    <testsuite name="SecurityHeadersTest" file="/tmp/ascla-login-tests/php/SecurityHeadersTest.php" tests="4" assertions="29" errors="0" failures="0" skipped="0" time="0.000472">
+      <testcase name="testHtmlPolicyRejectsInlineHandlersAndBroadSourcesButAllowsRequiredIntegrations" file="/tmp/ascla-login-tests/php/SecurityHeadersTest.php" line="7" class="SecurityHeadersTest" classname="SecurityHeadersTest" assertions="16" time="0.000177"/>
+      <testcase name="testLegacyStyleCompatibilityNeverAuthorizesRawScriptTags" file="/tmp/ascla-login-tests/php/SecurityHeadersTest.php" line="20" class="SecurityHeadersTest" classname="SecurityHeadersTest" assertions="5" time="0.000178"/>
+      <testcase name="testRestErrorsReceiveRestrictiveHeadersWithoutChangingTheirStatusOrBody" file="/tmp/ascla-login-tests/php/SecurityHeadersTest.php" line="30" class="SecurityHeadersTest" classname="SecurityHeadersTest" assertions="7" time="0.000073"/>
+      <testcase name="testOtherRestNamespacesAreNotReconfiguredByThePlugin" file="/tmp/ascla-login-tests/php/SecurityHeadersTest.php" line="43" class="SecurityHeadersTest" classname="SecurityHeadersTest" assertions="1" time="0.000044"/>
+    </testsuite>
+    <testsuite name="TurnstileTest" file="/tmp/ascla-login-tests/php/TurnstileTest.php" tests="1" assertions="4" errors="0" failures="0" skipped="0" time="0.028990">
+      <testcase name="testLoginBecomesChallengedAfterThreeCredentialFailuresAndLocksAtFive" file="/tmp/ascla-login-tests/php/TurnstileTest.php" line="55" class="TurnstileTest" classname="TurnstileTest" assertions="4" time="0.028990"/>
+    </testsuite>
+  </testsuite>
+</testsuites>
