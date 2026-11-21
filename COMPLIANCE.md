@@ -1,6 +1,10 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 20 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113-recovery-home-20261120) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+Revisión documental: 21 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113-chat-layout-20261121) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+
+## Mensajería e indicador de idioma · 1.13
+
+Las vistas previas largas de mensajería quedan dentro de su fila con puntos suspensivos, los nombres se ajustan sin comprimir los avatares y el selector de idioma conserva su flecha nativa en ambos temas y accesos. No cambia el envío de mensajes ni el cambio automático de idioma. La [validación focalizada](docs/evidence/release-1.13/chat-layout-20261121/validation.json) conserva la reproducción anterior y las comprobaciones de esta revisión. Las validaciones integrales y de seguridad anteriores conservan sus propios hashes y alcances.
 
 ## Ruta base desde recuperación · 1.13
 

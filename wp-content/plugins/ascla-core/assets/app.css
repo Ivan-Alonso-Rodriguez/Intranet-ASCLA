@@ -1656,11 +1656,13 @@ html[data-ascla-theme="dark"] #ascla-root .event-datetime-error { color: #f0a9b0
   overflow: hidden;
 }
 .chat-sidebar {
+  min-width: 0;
   border-right: 1px solid var(--line);
   padding: 12px;
 }
 .chat-person {
   width: 100%;
+  min-width: 0;
   display: flex;
   gap: 10px;
   padding: 15px 9px;
@@ -1673,14 +1675,22 @@ html[data-ascla-theme="dark"] #ascla-root .event-datetime-error { color: #f0a9b0
 .chat-person.active {
   background: #edf5fb;
 }
+.chat-person > span:not(.avatar) {
+  flex: 1;
+  min-width: 0;
+}
 .chat-person strong {
   font-size: 12px;
   display: block;
+  overflow-wrap: anywhere;
 }
 .chat-person small {
   font-size: 10px;
   color: var(--muted);
   display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .chat-conversation {
   display: flex;

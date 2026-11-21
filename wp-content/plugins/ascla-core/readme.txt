@@ -11,6 +11,7 @@ ASCLA > Configuración permite preparar demo e integraciones sin editar PHP.
 == Changelog ==
 
 = 1.13 =
+* Las vistas previas largas de mensajería permanecen dentro de cada fila y muestran puntos suspensivos. El selector de idioma conserva su flecha nativa en ambos temas y accesos. Se mantiene la versión 1.13.
 * En recuperación de contraseña, Volver a ASCLA lleva a la ruta base configurada en WordPress. El enlace independiente Volver al inicio de sesión conserva el acceso comunitario. El acceso administrativo mantiene su enlace de Acceso a la comunidad ASCLA. Se mantiene la versión 1.13.
 * El idioma del acceso se aplica y recarga la página automáticamente al elegir una opción, igual que en la intranet. El botón Cambiar deja de aparecer con JavaScript activo. Se conserva un envío manual solo como alternativa sin JavaScript. El botón de sol/luna y el idioma siguen juntos y centrados debajo del formulario. Se mantiene la versión 1.13.
 * El acceso comunitario y el administrativo usan el mismo icono de sol/luna del inicio, en lugar del desplegable de apariencia. El botón abre las opciones Automático, Claro y Oscuro. El botón y el idioma quedan juntos y centrados debajo del formulario y de la ayuda; se conservan los márgenes compactos, el panel azul y la preferencia del navegador. Se mantiene la versión 1.13.

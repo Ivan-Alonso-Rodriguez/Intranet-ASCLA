@@ -4,6 +4,12 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+<a id="release-113-chat-layout-20261121"></a>
+
+## 1.13 — Mensajería e indicador de idioma
+
+Las filas de mensajería permiten contraer el texto sin comprimir el avatar: las vistas previas quedan en una línea con puntos suspensivos y los nombres largos se ajustan al ancho disponible. Los accesos comunitario y administrativo conservan la flecha nativa del selector de idioma en los temas claro y oscuro. No cambia el envío de mensajes, el cambio automático de idioma, la versión 1.13 ni el esquema 17. El [manifiesto](docs/evidence/release-1.13/chat-layout-20261121/package.json) y la [validación focalizada](docs/evidence/release-1.13/chat-layout-20261121/validation.json) identifican esta revisión.
+
 <a id="release-113-recovery-home-20261120"></a>
 
 ## 1.13 — Regreso a la ruta base desde recuperación

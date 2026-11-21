@@ -1,0 +1,905 @@
+{
+  "date": "2026-11-21T21:47:59.505053+00:00",
+  "version": "1.13",
+  "schema": 17,
+  "status": "PASS",
+  "package": {
+    "sha256": "006f9b6b970ca9b119c8d2c8c6bb189e13f19da527da84663e73dfb04849ce74",
+    "bytes": 2693902,
+    "files": 250,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true
+  },
+  "installed_production_hashes_matched": 250,
+  "scope": "Local disposable WordPress on loopback with synthetic users; current ZIP installed; focused visual and functional regression",
+  "before": {
+    "version": "1.13",
+    "phase": "before",
+    "language": {
+      "appearance": "none",
+      "background_image": "none",
+      "theme": "dark"
+    },
+    "messaging": [
+      {
+        "preview_width": 702.15625,
+        "row_width": 255,
+        "preview_exceeds_row": true,
+        "preview_scroll_width": 702,
+        "preview_client_width": 702
+      },
+      {
+        "preview_width": 724.15625,
+        "row_width": 255,
+        "preview_exceeds_row": true,
+        "preview_scroll_width": 724,
+        "preview_client_width": 724
+      }
+    ]
+  },
+  "after": {
+    "chrome": {
+      "version": "1.13",
+      "phase": "after",
+      "scope": "Local WordPress, original authenticated flows, synthetic accounts",
+      "checks": [
+        "community: native arrow visible in both themes, four widths, ES/EN and automatic language reload; credentials excluded",
+        "admin: native arrow visible in both themes, four widths, ES/EN and automatic language reload; credentials excluded",
+        "Real authenticated message send succeeds and survives reload; incoming unbroken messages remain readable",
+        "Direct and group chat previews, long names, URLs and unbroken text fit desktop/mobile in both themes; avatars retain their size"
+      ],
+      "views": [
+        {
+          "page": "community",
+          "width": 1440,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "community",
+          "width": 1440,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "community",
+          "width": 1024,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "community",
+          "width": 1024,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "community",
+          "width": 390,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "community",
+          "width": 390,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "community",
+          "width": 320,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "community",
+          "width": 320,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "admin",
+          "width": 1440,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "admin",
+          "width": 1440,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "admin",
+          "width": 1024,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "admin",
+          "width": 1024,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "admin",
+          "width": 390,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "admin",
+          "width": 390,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "admin",
+          "width": 320,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "admin",
+          "width": 320,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "messages",
+          "width": 1440,
+          "theme": "light",
+          "rows": [
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 1440,
+          "theme": "dark",
+          "rows": [
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 1024,
+          "theme": "light",
+          "rows": [
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 1024,
+          "theme": "dark",
+          "rows": [
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 390,
+          "theme": "light",
+          "rows": [
+            {
+              "row_width": 332,
+              "preview_width": 263,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 332,
+              "preview_width": 263,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 390,
+          "theme": "dark",
+          "rows": [
+            {
+              "row_width": 332,
+              "preview_width": 263,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 332,
+              "preview_width": 263,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 320,
+          "theme": "light",
+          "rows": [
+            {
+              "row_width": 262,
+              "preview_width": 193,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 262,
+              "preview_width": 193,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 320,
+          "theme": "dark",
+          "rows": [
+            {
+              "row_width": 262,
+              "preview_width": 193,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 262,
+              "preview_width": 193,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        }
+      ],
+      "language_requests": [
+        {
+          "method": "POST",
+          "credentials_sent": false
+        },
+        {
+          "method": "POST",
+          "credentials_sent": false
+        },
+        {
+          "method": "GET",
+          "credentials_sent": false
+        },
+        {
+          "method": "GET",
+          "credentials_sent": false
+        }
+      ],
+      "browser_errors": []
+    },
+    "firefox": {
+      "version": "1.13",
+      "phase": "after",
+      "scope": "Local WordPress, original authenticated flows, synthetic accounts",
+      "checks": [
+        "community: native arrow visible in both themes, four widths, ES/EN and automatic language reload; credentials excluded",
+        "admin: native arrow visible in both themes, four widths, ES/EN and automatic language reload; credentials excluded",
+        "Real authenticated message send succeeds and survives reload; incoming unbroken messages remain readable",
+        "Direct and group chat previews, long names, URLs and unbroken text fit desktop/mobile in both themes; avatars retain their size"
+      ],
+      "views": [
+        {
+          "page": "community",
+          "width": 1440,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "community",
+          "width": 1440,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "community",
+          "width": 1024,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "community",
+          "width": 1024,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "community",
+          "width": 390,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "community",
+          "width": 390,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "community",
+          "width": 320,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "community",
+          "width": 320,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "admin",
+          "width": 1440,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "admin",
+          "width": 1440,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "admin",
+          "width": 1024,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "admin",
+          "width": 1024,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "admin",
+          "width": 390,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "admin",
+          "width": 390,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "admin",
+          "width": 320,
+          "theme": "light",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(89, 99, 108)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        {
+          "page": "admin",
+          "width": 320,
+          "theme": "dark",
+          "appearance": "auto",
+          "background_image": "none",
+          "right_padding": 30,
+          "overflow": false,
+          "group_inside": true,
+          "foreground": "rgb(195, 208, 219)",
+          "background": "rgb(16, 16, 16)"
+        },
+        {
+          "page": "messages",
+          "width": 1440,
+          "theme": "light",
+          "rows": [
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 1440,
+          "theme": "dark",
+          "rows": [
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 1024,
+          "theme": "light",
+          "rows": [
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 1024,
+          "theme": "dark",
+          "rows": [
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 255,
+              "preview_width": 186,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 390,
+          "theme": "light",
+          "rows": [
+            {
+              "row_width": 332,
+              "preview_width": 263,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 332,
+              "preview_width": 263,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 390,
+          "theme": "dark",
+          "rows": [
+            {
+              "row_width": 332,
+              "preview_width": 263,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 332,
+              "preview_width": 263,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 320,
+          "theme": "light",
+          "rows": [
+            {
+              "row_width": 262,
+              "preview_width": 193,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 262,
+              "preview_width": 193,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        },
+        {
+          "page": "messages",
+          "width": 320,
+          "theme": "dark",
+          "rows": [
+            {
+              "row_width": 262,
+              "preview_width": 193,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            },
+            {
+              "row_width": 262,
+              "preview_width": 193,
+              "preview_exceeds_row": false,
+              "row_overflows": false,
+              "preview_clipped": true,
+              "ellipsis": "ellipsis",
+              "avatar_width": 41
+            }
+          ]
+        }
+      ],
+      "language_requests": [
+        {
+          "method": "POST",
+          "credentials_sent": false
+        },
+        {
+          "method": "POST",
+          "credentials_sent": false
+        },
+        {
+          "method": "GET",
+          "credentials_sent": false
+        },
+        {
+          "method": "GET",
+          "credentials_sent": false
+        }
+      ],
+      "browser_errors": [],
+      "browser": "firefox"
+    }
+  },
+  "release_sanity": {
+    "status": "PASS",
+    "checks": 49
+  },
+  "security_scope": {
+    "login_csp_header": "strict-dynamic retained; no unsafe-inline or unsafe-eval",
+    "external_assets_added": false,
+    "authentication_or_authorization_changes": false,
+    "full_security_scans_repeated": false
+  },
+  "screenshots": "output/playwright/ascla-chat-layout-20261121",
+  "full_validation_reference": "docs/evidence/release-1.13/validation.json",
+  "full_validation_note": "Historical full QA/UAT scans certify their own earlier package hashes, not this CSS revision."
+}

@@ -11,6 +11,7 @@ bloc.txt
 /coverage/
 /test-results/
 /playwright-report/
+/.playwright-cli/
 .phpunit.result.cache
 .phpunit.cache/
 *.log
@@ -304,3 +305,8 @@ __pycache__/
 !/docs/evidence/release-1.13/recovery-home-20261120/package.json
 !/docs/evidence/release-1.13/recovery-home-20261120/validation.json
 !/docs/evidence/release-1.13/recovery-home-20261120/junit.xml
+
+!/docs/evidence/release-1.13/chat-layout-20261121/
+/docs/evidence/release-1.13/chat-layout-20261121/*
+!/docs/evidence/release-1.13/chat-layout-20261121/package.json
+!/docs/evidence/release-1.13/chat-layout-20261121/validation.json
