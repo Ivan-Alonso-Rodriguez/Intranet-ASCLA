@@ -1,7 +1,7 @@
 # ASCLA Core UI catalog. Source language: es_ES.
 
 msgid ""
-msgstr "Project-Id-Version: ASCLA Core 1.12\nLanguage: en_US\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
+msgstr "Project-Id-Version: ASCLA Core 1.13\nLanguage: en_US\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "%s salió del grupo."
 msgstr "%s left the group."
@@ -113,9 +113,6 @@ msgstr "Open link ↗"
 
 msgid "Abrir fuente ↗"
 msgstr "Open source ↗"
-
-msgid "Abrir grupo"
-msgstr "Open group"
 
 msgid "Abrir historial"
 msgstr "Open history"
@@ -4329,6 +4326,9 @@ msgstr "The import has not been confirmed."
 msgid "La importación ya fue analizada."
 msgstr "The import has already been analyzed."
 
+msgid "La inscripción está reservada a las personas invitadas."
+msgstr "Registration is reserved for invited members."
+
 msgid "La inscripción está reservada temporalmente a los miembros recomendados."
 msgstr "Registration is temporarily reserved for recommended members."
 
@@ -7667,6 +7667,9 @@ msgstr "Only the owner or an administrator can delete this file."
 
 msgid "Solo el responsable del grupo puede gestionarlo."
 msgstr "Only the group owner can manage it."
+
+msgid "Solo por invitación"
+msgstr "Invitation only"
 
 msgid "Solo puedes añadir al grupo conexiones confirmadas."
 msgstr "You can only add confirmed connections to the group."

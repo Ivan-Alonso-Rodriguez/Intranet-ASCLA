@@ -4,6 +4,12 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+<a id="release-113-micro-visibility-20261126"></a>
+
+## 1.13 — Microeventos reservados a sus invitados
+
+Los asociados no invitados dejan de ver los microeventos de IA, incluso cuando un registro antiguo contiene una fecha de apertura pública vencida. El servidor devuelve 404 en los accesos directos y los excluye antes de contar y paginar búsquedas y calendarios. Inicio, agenda, notificaciones y asistente utilizan los mismos permisos. Los invitados conservan sus opciones de inscripción; la administración y los autores con permiso editorial conservan la gestión correspondiente. La ficha indica Solo por invitación y ya no anuncia apertura a toda la comunidad. Los eventos normales no cambian. Se mantienen 1.13 y esquema 17. El [manifiesto](docs/evidence/release-1.13/micro-visibility-20261126/package.json) y la [validación focalizada](docs/evidence/release-1.13/micro-visibility-20261126/validation.json) identifican esta revisión, que sustituye la antigua política de apertura pública de microeventos.
+
 <a id="release-113-filter-design-20261126"></a>
 
 ## 1.13 — Filtros de selección compactos

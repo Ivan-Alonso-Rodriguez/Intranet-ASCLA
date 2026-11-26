@@ -71,6 +71,10 @@ final class Content
         if (!$valid) { return false; }
         $author=(int)$post->post_author;
         $me=get_current_user_id();
+        if ($type==='event' && !current_user_can('ascla_manage') && !($author===$me && Access::canPublish())) {
+            $meta=(array)get_post_meta($post->ID,'_ascla',true);
+            if (!empty($meta['micro']) && ($post->post_status!=='publish' || !MicroLifecycle::canRegister($meta,$me))) { return false; }
+        }
         return match (true) {
             $type==='contact'=>SupportRequests::canRead($post),
             $type==='ally'=>current_user_can('ascla_manage') || $post->post_status==='publish',
@@ -96,7 +100,7 @@ final class Content
         if (current_user_can('ascla_manage') || $author===$me || (current_user_can('ascla_moderate') && !in_array($type,self::EDITORIAL_TYPES,true))) { return true; }
         if ($post->post_type==='ascla_contact' || $post->post_status!=='publish') { return false; }
         $meta=(array)get_post_meta($post->ID,'_ascla',true);
-        return empty($meta['micro']) || MicroLifecycle::publicAccess($meta) || in_array($me,array_map('intval',$meta['invitees']??[]),true);
+        return empty($meta['micro']) || MicroLifecycle::canRegister($meta,$me);
     }
     public static function get(int $id): \WP_Post
     {

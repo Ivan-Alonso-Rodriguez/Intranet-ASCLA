@@ -1,6 +1,10 @@
 # Guía práctica de QA, SonarQube y UAT
 
-Versión documentada: **1.13**, esquema **17**. El [historial de la revisión actual](VERSION_HISTORY.md#release-113-filter-design-20261126) detalla el alcance de la entrega; los resultados históricos se indican por versión.
+Versión documentada: **1.13**, esquema **17**. El [historial de la revisión actual](VERSION_HISTORY.md#release-113-micro-visibility-20261126) detalla el alcance de la entrega; los resultados históricos se indican por versión.
+
+## Microeventos solo para invitados · revisión de 1.13
+
+Publica un microevento con dos personas invitadas y abre otra sesión con un asociado no invitado. Este último no debe recibir la ficha, comentarios ni acceso de inscripción, tampoco mediante un enlace directo: las rutas de detalle deben devolver 404. No debe verlo en eventos, búsqueda, Inicio, agenda, calendario o fuentes del asistente. Repite con un microevento antiguo cuya fecha `public_at` ya pasó. Comprueba que los totales y páginas tampoco lo cuenten. Los invitados deben poder consultar, aceptar y cancelar su inscripción; administración debe conservar la gestión y los eventos normales deben seguir visibles. La ficha debe indicar Solo por invitación, sin prometer apertura pública. La [evidencia focalizada](docs/evidence/release-1.13/micro-visibility-20261126/validation.json) documenta esta revisión; sustituye la antigua expectativa de apertura comunitaria, sin eliminar su historial.
 
 ## Filtros de selección · revisión de 1.13
 
@@ -190,7 +194,7 @@ Para la revisión del visor y Centro de Conocimiento, ejecuta `node tests/media-
 | Probar PHP e interfaz y generar cobertura | `BRANCH_NAME=qa bash scripts/quality-ci.sh` | WordPress Docker desechable | Pruebas, JUnit, Clover y LCOV en `coverage/`. |
 | Analizar código con SonarQube | `bash scripts/sonar-manual.sh qa` | Fuentes y reportes anteriores | Análisis de ASCLA-QA y su Quality Gate. |
 | Probar integración y E2E con Bruno/Playwright | [Ejecutores de la entrega vigente](pruebas/README.md#ejecutar-y-actualizar) | QA con cuentas dedicadas o fixture local explícita | 81 peticiones, 149 comprobaciones y seis flujos UI con evidencias. |
-| Preparar el plugin | `python3 scripts/build.py` y `python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/filter-design-20261126/package.json` | Fuentes del plugin | ZIP, SHA-256 y manifiesto de la revisión actual. |
+| Preparar el plugin | `python3 scripts/build.py` y `python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/micro-visibility-20261126/package.json` | Fuentes del plugin | ZIP, SHA-256 y manifiesto de la revisión actual. |
 | Comprobar seguridad con ZAP | [Procedimiento ZAP](#zap) | WordPress local HTTPS desechable | Informes separados de páginas y API, CSP y límites del análisis. |
 
 Sigue **2 → 3 → 4 → 5** para validar una revisión de QA. Usa la sección **6** para probar el sitio instalado. La aceptación UAT requiere después revisión humana y evidencia del entorno.
@@ -216,7 +220,7 @@ Si la entrega incluye cambios del plugin, prepara primero su paquete:
 
 ```bash
 python3 scripts/build.py
-python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/filter-design-20261126/package.json
+python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/micro-visibility-20261126/package.json
 python3 scripts/check-docs.py
 ```
 
@@ -480,7 +484,7 @@ El código se confirma en `development` y luego se promueve a `qa` y `uat`. Los 
 
 Este recorrido corresponde al entorno de pruebas [wordpress.ingsoftware.lat](https://wordpress.ingsoftware.lat/). Requiere permiso para instalar plugins en WordPress y Docker en el equipo que ejecuta las pruebas; **no requiere SSH ni WP-CLI en el servidor**. Administración ASCLA y administración técnica de WordPress tienen permisos distintos.
 
-1. Ejecuta `python3 scripts/build.py` y `python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/filter-design-20261126/package.json`. Conserva el SHA-256 del ZIP que vas a evaluar. El manifiesto separado identifica esta revisión sin sobrescribir el de la validación integral inicial de 1.13.
+1. Ejecuta `python3 scripts/build.py` y `python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/micro-visibility-20261126/package.json`. Conserva el SHA-256 del ZIP que vas a evaluar. El manifiesto separado identifica esta revisión sin sobrescribir el de la validación integral inicial de 1.13.
 2. En WordPress, abre **Plugins → Añadir plugin → Subir plugin**. Selecciona `dist/ascla-core.zip` y reemplaza la versión instalada. Comprueba que ASCLA Core **1.11.0** está activo; el mismo número de versión puede contener correcciones distintas, por eso debes registrar también el paquete.
 3. Ejecuta `python3 scripts/build-qa-tools.py`. Instala y activa `dist/ascla-qa-tools.zip` desde Plugins. Es un auxiliar independiente del core y restringido a entornos permitidos de pruebas.
 4. Abre **Herramientas → ASCLA QA**, confirma el entorno y pulsa **Crear lote y descargar acceso**. Se crean cinco cuentas sintéticas y se descarga `ascla-qa-access.json`.

@@ -217,7 +217,7 @@ final class AssistantContext
             'waitlist_count'=>$detail['waitlist_count'],'registration'=>$detail['registered'],
             'registration_closed'=>$detail['registration_closed'],'is_past'=>$detail['is_past'],
             'cancelled'=>$detail['cancelled'],'cancellation_reason'=>$meta['cancellation_reason']??'',
-            'registration_deadline'=>$meta['registration_deadline']??'','priority_until'=>!empty($meta['public_at'])?gmdate('c',(int)$meta['public_at']):'',
+            'registration_deadline'=>$meta['registration_deadline']??'',
             'micro'=>!empty($meta['micro']),'chatham'=>!empty($meta['chatham']),'url'=>$detail['url'],
         ];
         $facts=[

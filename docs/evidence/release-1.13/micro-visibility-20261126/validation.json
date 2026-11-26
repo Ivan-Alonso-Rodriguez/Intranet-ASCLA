@@ -1,0 +1,207 @@
+{
+  "date": "2026-11-26T18:34:19.962495+00:00",
+  "version": "1.13",
+  "schema": 17,
+  "status": "PASS",
+  "package": {
+    "sha256": "023443a4c34610671f98bd3ff97f0c951ce6a73f199f5ebd330610536040d8e1",
+    "bytes": 2694693,
+    "files": 250,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true
+  },
+  "installed_production_hashes_matched": 250,
+  "scope": "Disposable loopback WordPress, synthetic invited and non-invited members and administrator; actual AI proposal generation uses the local mock provider, followed by real approval/publication/invitations",
+  "policy": {
+    "member_access": "Published microevent and user included in invitees",
+    "management_access": "Existing administration and editorial owner permissions retained",
+    "legacy_public_at_grants_access": false,
+    "ordinary_events_changed": false,
+    "sql_before_totals_and_pagination": true,
+    "version_bumped": false
+  },
+  "before": {
+    "package_sha256": "6cc03c3194d3ea21b237c4afec41a07be97f46c2d64822daa6f0d8ab70827ad3",
+    "outsider_can_read": true,
+    "outsider_listing_includes": true,
+    "legacy_public_at_expired": true
+  },
+  "php": {
+    "status": "PASS",
+    "tests": 101,
+    "assertions": 1069,
+    "suite": "MicroVisibility, MicroEvents, EventPagination108, EventFilters108, EventParticipation, EventReactivation, EventReminders, AssistantEventContext, Release107Priority, PrivacyLabels108, ContentLifecycle",
+    "junit": "junit.xml"
+  },
+  "browser": {
+    "chrome": {
+      "version": "1.13",
+      "checks": [
+        "Non-invited member: no card, search, calendar query, comments, details or RSVP; direct URL returns unavailable",
+        "Home and old notification views do not disclose the restricted event",
+        "Invited member: card and direct details visible, RSVP/cancel preserved, invitation-only copy shown",
+        "Invitation-only wording translated correctly in ES/EN",
+        "Administration retains event management visibility",
+        "Mobile and dark mode use the same server-side visibility"
+      ],
+      "requests": [
+        {
+          "route": "items/18",
+          "status": 404
+        },
+        {
+          "route": "events/18",
+          "status": 404
+        },
+        {
+          "route": "items/18/comments",
+          "status": 404
+        },
+        {
+          "route": "events/18/register",
+          "status": 404
+        },
+        {
+          "route": "content/event",
+          "status": 200
+        },
+        {
+          "route": "content/event?q=C%C3%ADrculo%20ASCLA%20%C2%B7%20Gesti%C3%B3n%20de%20riesgos",
+          "status": 200
+        },
+        {
+          "route": "content/event?micro=1",
+          "status": 200
+        },
+        {
+          "route": "content/event?month=2026-12",
+          "status": 200
+        },
+        {
+          "route": "content/event?past=0&per_page=1",
+          "status": 200
+        },
+        {
+          "route": "items/20",
+          "status": 200
+        },
+        {
+          "route": "notifications/feed",
+          "status": 200
+        },
+        {
+          "route": "items/18",
+          "status": 200
+        },
+        {
+          "route": "content/event?q=C%C3%ADrculo%20ASCLA%20%C2%B7%20Gesti%C3%B3n%20de%20riesgos",
+          "status": 200
+        },
+        {
+          "route": "events/18/register",
+          "status": 200
+        },
+        {
+          "route": "events/18/register",
+          "status": 200
+        },
+        {
+          "route": "events/18",
+          "status": 200
+        }
+      ],
+      "errors": [],
+      "browser": "chrome"
+    },
+    "firefox": {
+      "version": "1.13",
+      "checks": [
+        "Non-invited member: no card, search, calendar query, comments, details or RSVP; direct URL returns unavailable",
+        "Home and old notification views do not disclose the restricted event",
+        "Invited member: card and direct details visible, RSVP/cancel preserved, invitation-only copy shown",
+        "Invitation-only wording translated correctly in ES/EN",
+        "Administration retains event management visibility",
+        "Mobile and dark mode use the same server-side visibility"
+      ],
+      "requests": [
+        {
+          "route": "items/18",
+          "status": 404
+        },
+        {
+          "route": "events/18",
+          "status": 404
+        },
+        {
+          "route": "items/18/comments",
+          "status": 404
+        },
+        {
+          "route": "events/18/register",
+          "status": 404
+        },
+        {
+          "route": "content/event",
+          "status": 200
+        },
+        {
+          "route": "content/event?q=C%C3%ADrculo%20ASCLA%20%C2%B7%20Gesti%C3%B3n%20de%20riesgos",
+          "status": 200
+        },
+        {
+          "route": "content/event?micro=1",
+          "status": 200
+        },
+        {
+          "route": "content/event?month=2026-12",
+          "status": 200
+        },
+        {
+          "route": "content/event?past=0&per_page=1",
+          "status": 200
+        },
+        {
+          "route": "items/20",
+          "status": 200
+        },
+        {
+          "route": "notifications/feed",
+          "status": 200
+        },
+        {
+          "route": "items/18",
+          "status": 200
+        },
+        {
+          "route": "content/event?q=C%C3%ADrculo%20ASCLA%20%C2%B7%20Gesti%C3%B3n%20de%20riesgos",
+          "status": 200
+        },
+        {
+          "route": "events/18/register",
+          "status": 200
+        },
+        {
+          "route": "events/18/register",
+          "status": 200
+        },
+        {
+          "route": "events/18",
+          "status": 200
+        }
+      ],
+      "errors": [],
+      "browser": "firefox"
+    }
+  },
+  "release_sanity": {
+    "status": "PASS",
+    "checks": 49
+  },
+  "security_scope": {
+    "permission_regressions_executed": true,
+    "full_sonar_trivy_zap_rerun": false,
+    "historical_security_reports_retain_own_hashes": true
+  },
+  "screenshots": "output/playwright/ascla-micro-visibility-20261126"
+}

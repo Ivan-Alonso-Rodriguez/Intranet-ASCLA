@@ -91,7 +91,7 @@ final class AssistantEventContextTest extends TestCase
     public function testRestrictedMicroeventIsExcludedFromTheAssistant(): void
     {
         $id=$this->event('Taller Reservado');
-        $meta=get_post_meta($id,'_ascla',true);$meta['micro']=true;$meta['invitees']=[$this->users[1]];$meta['public_at']=time()+DAY_IN_SECONDS;
+        $meta=get_post_meta($id,'_ascla',true);$meta['micro']=true;$meta['invitees']=[$this->users[1]];$meta['public_at']=time()-DAY_IN_SECONDS;
         update_post_meta($id,'_ascla',$meta);
         wp_set_current_user($this->users[2]);
         self::assertNotContains($id,array_column(AssistantContext::build('Detalles del evento Taller Reservado')['sources'],'id'));

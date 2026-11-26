@@ -45,11 +45,12 @@ final class EventPagination108Test extends TestCase
     }
     public function testMicroeventVisibilityAndOwnDraftsAreAppliedBeforeCounting(): void
     {
-        for($i=0;$i<25;$i++)$this->event('Reserved '.$i,'publish',['micro'=>true,'invitees'=>[],'public_at'=>time()+DAY_IN_SECONDS]);
+        for($i=0;$i<25;$i++)$this->event('Reserved '.$i,'publish',['micro'=>true,'invitees'=>[],'public_at'=>time()-DAY_IN_SECONDS]);
         $public=$this->event('Public');$invited=$this->event('Invited','publish',['micro'=>true,'invitees'=>[$this->users[3]],'public_at'=>time()+DAY_IN_SECONDS]);
         $own=$this->event('Own private','publish',['micro'=>true,'invitees'=>[],'public_at'=>time()+DAY_IN_SECONDS],$this->users[2]);
         $draft=$this->event('Own draft','draft',[],$this->users[2]);
-        wp_set_current_user($this->users[2]);$list=$this->page();self::assertSame(3,$list['total']);self::assertCount(3,$list['items']);self::assertEqualsCanonicalizing([$public,$own,$draft],array_column($list['items'],'id'));
+        wp_set_current_user($this->users[2]);$list=$this->page();self::assertSame(2,$list['total']);self::assertCount(2,$list['items']);self::assertEqualsCanonicalizing([$public,$draft],array_column($list['items'],'id'));
+        self::assertFalse(Content::canRead(get_post($own)),'A legacy author who is not invited cannot read the microevent.');
         wp_set_current_user($this->users[3]);$list=$this->page();self::assertSame(2,$list['total']);self::assertEqualsCanonicalizing([$public,$invited],array_column($list['items'],'id'));
         wp_set_current_user($this->users[0]);self::assertSame(28,$this->page()['total'],'Administration retains its management visibility; foreign drafts stay private.');
         wp_set_current_user($this->users[1]);self::assertSame(28,$this->page()['total'],'Executive shares administrative visibility.');

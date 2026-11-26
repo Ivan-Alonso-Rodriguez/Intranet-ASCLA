@@ -2532,10 +2532,8 @@
   }
   function eventMicroSchedule(d, p) {
     if (!p.meta.micro) return "";
-    let publicAt=E(T("Al publicar"));
-    if (d.meta.public_at) publicAt=date(Number(d.meta.public_at)*1000) + " " + time(Number(d.meta.public_at)*1000);
     return '<p>' + E(T("Cierre de inscripciones")) + ': ' + date(d.meta.registration_deadline) + ' ' + time(d.meta.registration_deadline)
-      + ' · ' + E(T("Apertura a la comunidad")) + ': ' + publicAt + '</p>';
+      + ' · ' + E(T("Solo por invitación")) + '</p>';
   }
   async function eventItemExtra(p, id) {
     const d = await api("events/" + id);

@@ -15,7 +15,7 @@ final class PrivacyLabels108Test extends TestCase
         wp_set_current_user($this->users[0]);add_filter('pre_wp_mail','__return_true');
         $suffix=bin2hex(random_bytes(5));$this->legacy='participante · gobierno corporativo '.$suffix;$this->visible='Círculo ASCLA · gobierno corporativo '.$suffix;
         $this->post=wp_insert_post(['post_type'=>'ascla_event','post_status'=>'publish','post_author'=>$this->users[0],'post_title'=>$this->legacy,'post_content'=>'Juan Pérez compartió sus acuerdos.']);
-        update_post_meta($this->post,'_ascla',['micro'=>true,'chatham'=>true,'public_at'=>time()-10,'start'=>gmdate('c',time()+DAY_IN_SECONDS),'end'=>gmdate('c',time()+DAY_IN_SECONDS+3600),'location'=>'Sala Juan Pérez','identities'=>'Juan Pérez','agenda_ai'=>['title'=>$this->legacy,'objective'=>'Juan Pérez explicó una idea.']]);
+        update_post_meta($this->post,'_ascla',['micro'=>true,'chatham'=>true,'invitees'=>[$this->users[2],$this->users[3]],'public_at'=>time()-10,'start'=>gmdate('c',time()+DAY_IN_SECONDS),'end'=>gmdate('c',time()+DAY_IN_SECONDS+3600),'location'=>'Sala Juan Pérez','identities'=>'Juan Pérez','agenda_ai'=>['title'=>$this->legacy,'objective'=>'Juan Pérez explicó una idea.']]);
     }
     protected function tearDown(): void
     {

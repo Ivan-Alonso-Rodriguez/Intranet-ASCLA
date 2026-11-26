@@ -122,14 +122,16 @@ final class MicroEventsTest extends TestCase
         self::assertSame($before,get_post_meta($id,'_ascla',true));self::assertSame('pending',get_post_status($id));
         self::assertSame(0,Store::count('audit',"object_id=%d AND action='microevent_candidates_updated'",[$id]));
     }
-    public function testPriorityWindowOpensToMembersWhoOptedOutAndCannotBeBypassedByAuthor(): void
+    public function testLegacyPublicDateNeverOpensMicroeventsToUninvitedMembers(): void
     {
         $id=$this->proposal();Content::moderate($id,'approve','Revisado');$this->publish($id);$meta=get_post_meta($id,'_ascla',true);
-        $outsider=array_values(array_diff($this->users,$meta['invitees']))[0];
+        $outsider=$this->replacementMember();
         update_user_meta($outsider,'_ascla_profile',ascla_test_profile(['microevents'=>false,'directory'=>false]));
         wp_set_current_user($outsider);$this->reject(fn()=>Events::register($id,'accepted'),user_can($outsider,'ascla_manage')?403:404);
         $meta['public_at']=time()-1;update_post_meta($id,'_ascla',$meta);
-        self::assertTrue(Content::canRead(get_post($id)));self::assertContains($id,array_column(Content::listing('event',['author'=>(int)get_post($id)->post_author])['items'],'id'));
+        self::assertFalse(Content::canRead(get_post($id)));self::assertNotContains($id,array_column(Content::listing('event',['author'=>(int)get_post($id)->post_author])['items'],'id'));
+        $this->reject(fn()=>Events::register($id,'accepted'),404);
+        wp_set_current_user($meta['invitees'][0]);
         self::assertSame('accepted',Events::register($id,'accepted')['registered']);
         self::assertSame('cancelled',Events::register($id,'cancelled')['registered']);
     }
@@ -417,7 +419,9 @@ final class MicroEventsTest extends TestCase
         $meta['public_at']=time()-1;update_post_meta($id,'_ascla',$meta);
         wp_set_current_user($this->users[1]);self::assertArrayHasKey('micro_invitations',Events::detail($id));
         foreach (array_slice($this->users,2) as $uid) {
-            wp_set_current_user($uid);self::assertArrayNotHasKey('micro_invitations',Events::detail($id));
+            wp_set_current_user($uid);
+            if (in_array($uid,$meta['invitees'],true)) { self::assertArrayNotHasKey('micro_invitations',Events::detail($id)); }
+            else { $this->reject(fn()=>Events::detail($id),404); }
         }
         wp_set_current_user($this->users[0]);
         $deleted=$meta['invitees'][2];wp_delete_user($deleted);

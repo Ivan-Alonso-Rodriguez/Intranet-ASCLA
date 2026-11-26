@@ -3,7 +3,7 @@ namespace ASCLA\Core\Services;
 use ASCLA\Core\Repositories\Store;
 use ASCLA\Core\Repositories\WordPressWrites;
 
-/** Review, priority registration and a retained state history for microevents. */
+/** Review, invitation-only registration and a retained state history for microevents. */
 final class MicroLifecycle
 {
     public static function defaults(array $meta): array
@@ -44,19 +44,16 @@ final class MicroLifecycle
             Access::require(strtotime($meta['registration_deadline'])<=strtotime($meta['start']),'El plazo de inscripción debe terminar antes del inicio.',400);
         }
     }
-    public static function publicAccess(array $meta): bool
-    {
-        return !empty($meta['public_at']) && (int)$meta['public_at']<=time();
-    }
     public static function canRegister(array $meta,int $user): bool
     {
-        return self::publicAccess($meta) || in_array($user,array_map('intval',$meta['invitees']??[]),true);
+        // Legacy public_at dates never grant access outside the selected audience.
+        return $user>0 && in_array($user,array_map('intval',$meta['invitees']??[]),true);
     }
     public static function registration(int $id,array $meta,int $user,string $status): void
     {
         unset($id); // Kept for the event lifecycle callback contract.
         if (empty($meta['micro']) || in_array($status,['declined','cancelled'],true)) { return; }
-        Access::require(self::canRegister($meta,$user),'La inscripción está reservada temporalmente a los miembros recomendados.',403);
+        Access::require(self::canRegister($meta,$user),'La inscripción está reservada a las personas invitadas.',403);
         $deadline=strtotime($meta['registration_deadline']??$meta['start']);
         Access::require($deadline>time(),'El plazo de inscripción ha finalizado.',409);
     }
@@ -86,7 +83,7 @@ final class MicroLifecycle
     public static function publish(int $id): void
     {
         $meta=self::defaults((array)get_post_meta($id,'_ascla',true));
-        if (empty($meta['invited'])) { $meta['public_at']=min(strtotime($meta['registration_deadline']),time()+(int)$meta['priority_hours']*HOUR_IN_SECONDS); }
+        unset($meta['public_at']);
         WordPressWrites::meta('post',$id,'_ascla',$meta);
         self::history($id,'published');self::schedule($id,$meta);
     }

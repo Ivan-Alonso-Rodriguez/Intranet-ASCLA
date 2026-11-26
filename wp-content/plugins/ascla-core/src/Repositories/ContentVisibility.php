@@ -30,14 +30,17 @@ final class ContentVisibility
         global $wpdb;
         if ($type==='contact' || (in_array($type,['hub','forum','topic'],true) && current_user_can('ascla_moderate'))) { return '1=1'; }
         if ($type==='ally') { return "{$wpdb->posts}.post_status='publish'"; }
-        return $wpdb->prepare("({$wpdb->posts}.post_author=%d OR ({$wpdb->posts}.post_status='publish' AND ",get_current_user_id()).self::microevent().'))';
+        $readable=$wpdb->prepare("({$wpdb->posts}.post_author=%d OR {$wpdb->posts}.post_status='publish')",get_current_user_id());
+        if ($type!=='event') { return $readable; }
+        $audience=self::microevent();
+        if (Access::canPublish()) { $audience='('.$audience.$wpdb->prepare(" OR {$wpdb->posts}.post_author=%d",get_current_user_id()).')'; }
+        return '('.$readable.' AND '.$audience.')';
     }
 
     private static function microevent(): string
     {
         global $wpdb;
         return $wpdb->prepare("(NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} vm WHERE vm.post_id={$wpdb->posts}.ID AND vm.meta_key='_ascla_micro' AND vm.meta_value='1')
-            OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} vp WHERE vp.post_id={$wpdb->posts}.ID AND vp.meta_key='_ascla_micro_public_at' AND CAST(vp.meta_value AS SIGNED)>0 AND CAST(vp.meta_value AS SIGNED)<=%d)
-            OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} vi WHERE vi.post_id={$wpdb->posts}.ID AND vi.meta_key='_ascla_invitee' AND vi.meta_value=%s))",time(),(string)get_current_user_id());
+            OR ({$wpdb->posts}.post_status='publish' AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} vi WHERE vi.post_id={$wpdb->posts}.ID AND vi.meta_key='_ascla_invitee' AND vi.meta_value=%s)))",(string)get_current_user_id());
     }
 }

@@ -51,8 +51,8 @@ async function until(check, timeout=45000){const end=Date.now()+timeout;while(Da
  scheduled=await ok(admin,'items/'+eventId+'/moderate',{decision:'approve',reason:'Revisión humana de prueba',reviewed:true});
  assert.equal(scheduled.status,'ascla_hidden');assert.equal(scheduled.meta.micro_approved,true);assert.equal(scheduled.meta.invited,false);assert.equal(scheduled.meta.public_at,undefined);
  await until(async()=>{const response=await api(member,'items/'+eventId);return response.status===200&&response.body.status==='publish';});
- const published=await ok(admin,'items/'+eventId);assert.equal(published.meta.invited,true);assert.ok(published.meta.public_at>Date.now()/1000+3600);
- pass('Ejecutivo programa; administración aprueba; cron publica e inicia la prioridad al divulgar');
+ const published=await ok(admin,'items/'+eventId);assert.equal(published.meta.invited,true);assert.equal(published.meta.public_at,undefined);
+ pass('Ejecutivo programa; administración aprueba; cron publica solo para las personas invitadas');
  const own=(await ok(member,'bootstrap')).me;await ok(member,'profiles/me',{...own,microevents:false});
  await until(async()=>Boolean((await ok(admin,'items/'+fixture.events[1])).meta.cancelled));
  const cancelled=await ok(admin,'items/'+fixture.events[1]);assert.equal(cancelled.status,'ascla_hidden');assert.equal(cancelled.meta.micro_approved,false);assert.ok(cancelled.meta.micro_history.some(row=>row.state==='cancelled'&&row.reason));
