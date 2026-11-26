@@ -1,6 +1,10 @@
 # Cumplimiento y correcciones ASCLA
 
-Revisión documental: 21 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113-chat-layout-20261121) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+Revisión documental: 26 de noviembre de 2026. Plugin **1.13**, esquema **17**. El [historial](VERSION_HISTORY.md#release-113-filter-design-20261126) describe los cambios de la entrega. La [matriz](requirements/ascla-analysis.md) y su [JSON](requirements/ascla-analysis.json) conservan los textos originales del Documento de Análisis y Diseño; el PDF fuente se proporciona por separado. La evidencia por etapa conserva su versión original.
+
+## Filtros de selección · 1.13
+
+Las casillas de búsqueda usan controles nativos de 18 px y filas compactas con selección azul y foco visible. El estilo compartido cubre Directorio, Usuarios y Consultas de Contacto y se aplica a los futuros filtros con casilla dentro del mismo componente. El resto de módulos conserva sus filtros de selección simple y los interruptores de Perfil no cambian. La [validación focalizada](docs/evidence/release-1.13/filter-design-20261126/validation.json) registra reproducción, revisión visual, búsquedas y navegación con teclado. Los informes integrales de seguridad anteriores mantienen su propio alcance y paquete.
 
 ## Mensajería e indicador de idioma · 1.13
 

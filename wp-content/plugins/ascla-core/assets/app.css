@@ -1200,7 +1200,7 @@
 @media(max-width:760px){#ascla-root .admin-panel .admin-user{grid-template-columns:minmax(0,1fr)}#ascla-root .admin-panel .admin-user-actions{grid-column:auto}}
 #ascla-root .completion-choice input {width:18px;min-height:18px;flex-shrink:0}
 @media(max-width:600px){.content-date-range label{flex:1;min-width:0}#ascla-root .content-date-range input{width:100%}.completion-choices{grid-template-columns:1fr}}
-.filters input {
+.filters input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {
   flex: 1;
   min-width: 220px;
 }
@@ -1218,7 +1218,7 @@
 .field input,
 .field select,
 .field textarea,
-.filters input,
+.filters input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 .filters select {
   width: 100%;
   background: #fff;

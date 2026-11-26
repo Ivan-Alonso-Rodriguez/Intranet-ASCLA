@@ -2,7 +2,7 @@
 
 ## Versión actual: 1.13 · esquema 17
 
-La [revisión actual](docs/evidence/release-1.13/chat-layout-20261121/validation.json) corrige el desbordamiento de las vistas previas de mensajería y la flecha del idioma en el acceso oscuro. Mantiene las funcionalidades y correcciones anteriores.
+La [revisión actual](docs/evidence/release-1.13/filter-design-20261126/validation.json) unifica los filtros con casillas de Directorio, Usuarios y Contacto: opciones compactas, selección visible y navegación con teclado, en móvil y ambos temas. Mantiene las funcionalidades y correcciones anteriores.
 
 La versión instalable se mantiene en **1.13**, por indicación del proyecto. La [revisión del acceso](docs/evidence/release-1.13/recovery-home-20261120/validation.json) compacta el formulario, acerca la ayuda al enlace de regreso y centra el botón de sol/luna y el idioma en la parte inferior, conservando el panel izquierdo azul y ambos temas. El idioma se aplica automáticamente al seleccionarlo, sin botón Cambiar. En recuperación, «Volver a ASCLA» lleva a la ruta base y «Volver al inicio de sesión» al login.
 
@@ -53,10 +53,10 @@ Desde la raíz del repositorio:
 
 ```bash
 python3 scripts/build.py
-python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/chat-layout-20261121/package.json
+python3 scripts/verify-package.py --manifest docs/evidence/release-1.13/filter-design-20261126/package.json
 ```
 
-Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto de la revisión actual de 1.13](docs/evidence/release-1.13/chat-layout-20261121/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
+Se generan `dist/ascla-core.zip` y `dist/ascla-core.sha256`, ignorados por Git. El [manifiesto de la revisión actual de 1.13](docs/evidence/release-1.13/filter-design-20261126/package.json) registra versión, tamaño, SHA-256 y coincidencia con las fuentes. Para instalar manualmente: WordPress → Plugins → Añadir plugin → Subir plugin → seleccionar el ZIP → reemplazar la versión instalada. Registra la huella del paquete, pues una versión puede recibir varias correcciones.
 
 ## Calidad y entrega
 

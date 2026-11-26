@@ -391,11 +391,103 @@ html[data-ascla-theme="dark"] #ascla-root .stat-grid .stat:hover { background: v
 #ascla-root .search-filter-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,165px),1fr)); align-items: start; gap: 14px; margin-top: 14px; padding: 15px 3px 3px; border-top: 1px solid var(--line); }
 #ascla-root .search-filter-grid :is(.filter-control,.field,.content-date-range label) { display: grid; grid-template-columns: minmax(0,1fr); gap: 5px; margin: 0; min-width: 0; font-size: 12px; color: var(--muted); }
 #ascla-root .search-filter-grid :is(input:not([type="checkbox"]), select) { width: 100%; min-width: 0; max-width: 100%; }
-#ascla-root .search-filter-grid > .check { display: inline-flex; align-items: center; justify-self: start; gap: 10px; width: fit-content; min-height: 36px; margin: 0; color: var(--ink); cursor: pointer; }
-#ascla-root .search-filter-grid .check input[type="checkbox"] { flex: 0 0 16px; width: 16px; min-width: 16px; max-width: 16px; height: 16px; min-height: 16px; margin: 0; padding: 0; accent-color: var(--ascla-brand-blue); cursor: pointer; }
+#ascla-root .search-filter-grid > .check { justify-self: start; }
 #ascla-root .search-filter-grid .directory-facets { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; margin: 0; padding: 0; border: 0; }
 #ascla-root .search-filter-grid .directory-facet { max-width: 100%; min-width: 0; }
 #ascla-root .search-filter-grid .directory-facet-options { min-width: 0; }
+
+/* Shared checkbox filters: keep the native control beside its label, never stretched. */
+#ascla-root .search-filter-grid label:has(> input[type="checkbox"]) {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  justify-content: start;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  margin: 0;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+#ascla-root .search-filter-grid label > input[type="checkbox"] {
+  appearance: auto;
+  flex: 0 0 18px;
+  width: 18px;
+  min-width: 18px;
+  max-width: 18px;
+  height: 18px;
+  min-height: 18px;
+  max-height: 18px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+#ascla-root .search-filter-grid label:has(> input[type="checkbox"]) > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#ascla-root .search-filter-grid > label.check:has(> input[type="checkbox"]) {
+  grid-column: 1 / -1;
+  width: fit-content;
+  max-width: 100%;
+}
+#ascla-root .search-filter-grid label:has(> input[type="checkbox"]:not(:checked):not(:disabled)):hover {
+  background: var(--bg);
+  border-color: var(--line);
+}
+#ascla-root .search-filter-grid label:has(> input[type="checkbox"]:checked) {
+  background: var(--blue-soft);
+  border-color: color-mix(in srgb, var(--blue) 32%, var(--line));
+  color: var(--blue);
+  font-weight: 550;
+}
+#ascla-root .search-filter-grid label:has(> input[type="checkbox"]:focus-visible) {
+  outline: 2px solid var(--blue);
+  outline-offset: -2px;
+}
+#ascla-root .search-filter-grid label:has(> input[type="checkbox"]:disabled) {
+  opacity: .6;
+  cursor: not-allowed;
+}
+#ascla-root .search-filter-grid .directory-facet-options {
+  display: grid;
+  gap: 3px;
+  padding: 6px;
+  max-height: 232px;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) transparent;
+}
+#ascla-root .search-filter-grid .directory-facet > summary {
+  min-height: 44px;
+  color: var(--ink);
+}
+#ascla-root .search-filter-grid .directory-facet-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+#ascla-root .search-filter-grid .directory-facet:has(input:checked) > summary {
+  border-color: color-mix(in srgb, var(--blue) 32%, var(--line));
+}
+#ascla-root .search-filter-grid .directory-facet:has(input:checked) .directory-facet-count {
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-weight: 650;
+}
 #ascla-root .search-filter-grid .content-date-range { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2,minmax(0,180px)); gap: 10px; }
 #ascla-root .content-date-range legend { color: var(--ink); font-size: 12px; font-weight: 600; margin-bottom: 5px; }
 #ascla-root .ascla-search-form .search-clear { display: inline-flex; width: auto; margin: 8px 0 -3px; }

@@ -1,0 +1,990 @@
+{
+  "date": "2026-11-26T18:13:14.860790+00:00",
+  "version": "1.13",
+  "schema": 17,
+  "status": "PASS",
+  "package": {
+    "sha256": "6cc03c3194d3ea21b237c4afec41a07be97f46c2d64822daa6f0d8ab70827ad3",
+    "bytes": 2694530,
+    "files": 250,
+    "crc_valid": true,
+    "source_bytes_match": true,
+    "known_local_secrets_absent": true
+  },
+  "installed_production_hashes_matched": 250,
+  "scope": "Current ZIP on disposable loopback WordPress with synthetic member and administrator accounts; focused design and search regression",
+  "before": {
+    "version": "1.13",
+    "scope": "Original pre-fix package installed on local WordPress",
+    "baseline": {
+      "checkbox_width": 302.421875,
+      "checkbox_height": 41,
+      "row_height": 65,
+      "text_gap": 13,
+      "input_min_width": "220px",
+      "input_flex": "1 0 0%"
+    },
+    "browser": "chrome"
+  },
+  "after": {
+    "chrome": {
+      "version": "1.13",
+      "scope": "Current ZIP on isolated WordPress, member and administrator accounts",
+      "checks": [
+        "directory: label clicks, Space, focus ring, selection counters, multiple server criteria, positive search results, preserved selections, scrollable choices and clear filters PASS",
+        "All member modules audited; existing dropdown filters and profile interest chips retain their own controls",
+        "admin-users: label clicks, Space, focus ring, selection counters, multiple server criteria, positive search results, preserved selections, scrollable choices and clear filters PASS",
+        "Contact archived checkbox uses the same design; real search, persisted selection and reset PASS",
+        "English filter interface and automatic locale reload PASS"
+      ],
+      "views": [
+        {
+          "module": "directory",
+          "width": 1600,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 1600,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 1024,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 1024,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 390,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 390,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 320,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 320,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 1600,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 1600,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 1024,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 1024,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 390,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 390,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 320,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 320,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 1600,
+          "theme": "light",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 1600,
+          "theme": "dark",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 1024,
+          "theme": "light",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 1024,
+          "theme": "dark",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 390,
+          "theme": "light",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 390,
+          "theme": "dark",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 320,
+          "theme": "light",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 320,
+          "theme": "dark",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact-en",
+          "width": 390,
+          "theme": "dark",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 0,
+          "selected_background": null,
+          "no_horizontal_overflow": true
+        }
+      ],
+      "audit": [
+        {
+          "module": "Inicio",
+          "path": "/intranet/",
+          "filter_forms": []
+        },
+        {
+          "module": "Perfil",
+          "path": "/perfil/",
+          "filter_forms": []
+        },
+        {
+          "module": "MensajerÃ­a",
+          "path": "/mensajeria/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 0,
+              "text_fields": 1
+            }
+          ]
+        },
+        {
+          "module": "Hub ASCLA",
+          "path": "/hub/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 1,
+              "text_fields": 3
+            }
+          ]
+        },
+        {
+          "module": "Foros",
+          "path": "/foros/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 2,
+              "text_fields": 3
+            }
+          ]
+        },
+        {
+          "module": "Aliados",
+          "path": "/aliados/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 0,
+              "text_fields": 1
+            }
+          ]
+        },
+        {
+          "module": "Eventos y Capacitaciones",
+          "path": "/eventos/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 2,
+              "text_fields": 3
+            }
+          ]
+        },
+        {
+          "module": "Centro de Conocimiento",
+          "path": "/centro-conocimiento/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 5,
+              "text_fields": 3
+            }
+          ]
+        },
+        {
+          "module": "GalerÃ­as",
+          "path": "/galeria/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 1,
+              "text_fields": 3
+            }
+          ]
+        },
+        {
+          "module": "Asistente IA",
+          "path": "/asistente/",
+          "filter_forms": []
+        },
+        {
+          "module": "Contacto",
+          "path": "/contacto/",
+          "filter_forms": []
+        },
+        {
+          "module": "Contact EN",
+          "native_checkbox_name": "archived",
+          "style_shared": true
+        }
+      ],
+      "requests": [
+        {
+          "endpoint": "/profiles?",
+          "query": {
+            "q": "",
+            "country": "",
+            "industries[]": [
+              "16",
+              "13"
+            ],
+            "interests[]": [
+              "7"
+            ],
+            "page": "1"
+          },
+          "status": 200
+        },
+        {
+          "endpoint": "/admin/users?",
+          "query": {
+            "q": "",
+            "country": "",
+            "role": "",
+            "state": "",
+            "industries[]": [
+              "16",
+              "13"
+            ],
+            "interests[]": [
+              "7"
+            ],
+            "page": "1"
+          },
+          "status": 200
+        },
+        {
+          "endpoint": "/admin/contacts?",
+          "query": {
+            "q": "",
+            "archived": "on",
+            "state": "",
+            "page": "1"
+          },
+          "status": 200
+        }
+      ],
+      "browser_errors": [],
+      "browser": "chrome"
+    },
+    "firefox": {
+      "version": "1.13",
+      "scope": "Current ZIP on isolated WordPress, member and administrator accounts",
+      "checks": [
+        "directory: label clicks, Space, focus ring, selection counters, multiple server criteria, positive search results, preserved selections, scrollable choices and clear filters PASS",
+        "All member modules audited; existing dropdown filters and profile interest chips retain their own controls",
+        "admin-users: label clicks, Space, focus ring, selection counters, multiple server criteria, positive search results, preserved selections, scrollable choices and clear filters PASS",
+        "Contact archived checkbox uses the same design; real search, persisted selection and reset PASS",
+        "English filter interface and automatic locale reload PASS"
+      ],
+      "views": [
+        {
+          "module": "directory",
+          "width": 1600,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 1600,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 1024,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 1024,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 390,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 390,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 320,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "directory",
+          "width": 320,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 1600,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 1600,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 1024,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 1024,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 390,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 390,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 320,
+          "theme": "light",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-users",
+          "width": 320,
+          "theme": "dark",
+          "rows": 15,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 3,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 1600,
+          "theme": "light",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 1600,
+          "theme": "dark",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 1024,
+          "theme": "light",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 1024,
+          "theme": "dark",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 390,
+          "theme": "light",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 390,
+          "theme": "dark",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 320,
+          "theme": "light",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(234, 245, 255)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact",
+          "width": 320,
+          "theme": "dark",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 1,
+          "selected_background": "rgb(20, 50, 74)",
+          "no_horizontal_overflow": true
+        },
+        {
+          "module": "admin-contact-en",
+          "width": 390,
+          "theme": "dark",
+          "rows": 1,
+          "checkbox_px": 18,
+          "minimum_row_height": 40,
+          "text_gap": 10,
+          "selected_rows": 0,
+          "selected_background": null,
+          "no_horizontal_overflow": true
+        }
+      ],
+      "audit": [
+        {
+          "module": "Inicio",
+          "path": "/intranet/",
+          "filter_forms": []
+        },
+        {
+          "module": "Perfil",
+          "path": "/perfil/",
+          "filter_forms": []
+        },
+        {
+          "module": "MensajerÃ­a",
+          "path": "/mensajeria/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 0,
+              "text_fields": 1
+            }
+          ]
+        },
+        {
+          "module": "Hub ASCLA",
+          "path": "/hub/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 1,
+              "text_fields": 3
+            }
+          ]
+        },
+        {
+          "module": "Foros",
+          "path": "/foros/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 2,
+              "text_fields": 3
+            }
+          ]
+        },
+        {
+          "module": "Aliados",
+          "path": "/aliados/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 0,
+              "text_fields": 1
+            }
+          ]
+        },
+        {
+          "module": "Eventos y Capacitaciones",
+          "path": "/eventos/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 2,
+              "text_fields": 3
+            }
+          ]
+        },
+        {
+          "module": "Centro de Conocimiento",
+          "path": "/centro-conocimiento/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 5,
+              "text_fields": 3
+            }
+          ]
+        },
+        {
+          "module": "GalerÃ­as",
+          "path": "/galeria/",
+          "filter_forms": [
+            {
+              "checkboxes": 0,
+              "selects": 1,
+              "text_fields": 3
+            }
+          ]
+        },
+        {
+          "module": "Asistente IA",
+          "path": "/asistente/",
+          "filter_forms": []
+        },
+        {
+          "module": "Contacto",
+          "path": "/contacto/",
+          "filter_forms": []
+        },
+        {
+          "module": "Contact EN",
+          "native_checkbox_name": "archived",
+          "style_shared": true
+        }
+      ],
+      "requests": [
+        {
+          "endpoint": "/profiles?",
+          "query": {
+            "q": "",
+            "country": "",
+            "industries[]": [
+              "16",
+              "13"
+            ],
+            "interests[]": [
+              "7"
+            ],
+            "page": "1"
+          },
+          "status": 200
+        },
+        {
+          "endpoint": "/admin/users?",
+          "query": {
+            "q": "",
+            "country": "",
+            "role": "",
+            "state": "",
+            "industries[]": [
+              "16",
+              "13"
+            ],
+            "interests[]": [
+              "7"
+            ],
+            "page": "1"
+          },
+          "status": 200
+        },
+        {
+          "endpoint": "/admin/contacts?",
+          "query": {
+            "q": "",
+            "archived": "on",
+            "state": "",
+            "page": "1"
+          },
+          "status": 200
+        }
+      ],
+      "browser_errors": [],
+      "browser": "firefox"
+    }
+  },
+  "filter_audit": {
+    "updated_checkbox_filters": [
+      "Directorio: Industria, Interés y Área de conocimiento",
+      "Administración / Usuarios: Industria, Interés y Área de conocimiento",
+      "Administración / Consultas de Contacto: Incluir archivadas"
+    ],
+    "shared_implementation": "Native checkbox labels inside the shared search-filter-grid; no new JavaScript or external assets",
+    "other_modules": "All member navigation modules inspected in each browser; dropdown filters remain unchanged. Profile interest controls retain their own presentation.",
+    "out_of_scope_controls": "Privacy switches, edit forms, import confirmation and event attendance confirmation are not search filters and retain their existing presentation."
+  },
+  "release_sanity": {
+    "status": "PASS",
+    "checks": 49
+  },
+  "performance": {
+    "new_scripts": 0,
+    "new_libraries": 0,
+    "new_external_assets": 0,
+    "native_controls_retained": true
+  },
+  "security_scope": {
+    "authentication_changes": false,
+    "authorization_changes": false,
+    "backend_changes": false,
+    "full_security_scans_repeated": false
+  },
+  "screenshots": "output/playwright/ascla-filter-design-20261126",
+  "historical_full_validation": "docs/evidence/release-1.13/validation.json",
+  "historical_note": "The full QA/UAT and security results identify their own earlier package hashes; these focused browser checks validate this visual revision."
+}

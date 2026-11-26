@@ -310,3 +310,8 @@ __pycache__/
 /docs/evidence/release-1.13/chat-layout-20261121/*
 !/docs/evidence/release-1.13/chat-layout-20261121/package.json
 !/docs/evidence/release-1.13/chat-layout-20261121/validation.json
+
+!/docs/evidence/release-1.13/filter-design-20261126/
+/docs/evidence/release-1.13/filter-design-20261126/*
+!/docs/evidence/release-1.13/filter-design-20261126/package.json
+!/docs/evidence/release-1.13/filter-design-20261126/validation.json

@@ -4,6 +4,12 @@
 
 El estado vigente está en [COMPLIANCE.md](COMPLIANCE.md); instalación y pruebas, en [MANUAL_QA_UAT.md](MANUAL_QA_UAT.md). Las cifras siguientes corresponden a sus propias entregas y no certifican un ZIP posterior.
 
+<a id="release-113-filter-design-20261126"></a>
+
+## 1.13 — Filtros de selección compactos
+
+Los filtros con casillas de Directorio, Usuarios de administración y Consultas de Contacto comparten filas compactas, casillas nativas de 18 px, etiquetas alineadas y resaltados de selección y foco. Los campos de búsqueda excluyen casillas, radios y controles ocultos de sus reglas de tamaño. Se conservan la selección múltiple, los contadores y el envío de filtros, sin cambiar los interruptores de privacidad o los permisos. El diseño se adapta a móvil y ambos temas. Se mantienen 1.13 y el esquema 17. El [manifiesto](docs/evidence/release-1.13/filter-design-20261126/package.json) y la [validación focalizada](docs/evidence/release-1.13/filter-design-20261126/validation.json) identifican esta revisión.
+
 <a id="release-113-chat-layout-20261121"></a>
 
 ## 1.13 — Mensajería e indicador de idioma
